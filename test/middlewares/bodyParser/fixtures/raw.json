@@ -1,0 +1,53 @@
+{
+  "_id": "mk2testmodule",
+  "name": "mk2testmodule",
+  "description": "",
+  "dist-tags": {
+    "latest": "0.0.1"
+  },
+  "versions": {
+    "0.0.1": {
+      "name": "mk2testmodule",
+      "version": "0.0.1",
+      "description": "",
+      "main": "index.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "author": "",
+      "license": "ISC",
+      "readme": "ERROR: No README data found!",
+      "_id": "mk2testmodule@0.0.1",
+      "dist": {
+        "shasum": "fa475605f88bab9b1127833633ca3ae0a477224c",
+        "tarball": "http://127.0.0.1:7001/mk2testmodule/-/mk2testmodule-0.0.1.tgz"
+      },
+      "_from": ".",
+      "_npmVersion": "1.4.3",
+      "_npmUser": {
+        "name": "fengmk2",
+        "email": "fengmk2@gmail.com"
+      },
+      "maintainers": [
+        {
+          "name": "fengmk2",
+          "email": "fengmk2@gmail.com"
+        }
+      ]
+    }
+  },
+  "readme": "ERROR: No README data found!",
+  "maintainers": [
+    {
+      "name": "fengmk2",
+      "email": "fengmk2@gmail.com"
+    }
+  ],
+  "_attachments": {
+    "mk2testmodule-0.0.1.tgz": {
+      "content_type": "application/octet-stream",
+      "data": "H4sIAAAAAAAAA+2SsWrDMBCGPfspDg2ZinOyEgeylg6Zu2YR8rVRHEtGkkOg5N0jWaFdujVQAv6W4/7/dHcSGqTq5Ccthxyro7emeDCI2KxWkOKmaaaIdc4TouZQ8FqgwI3AdVMgF8ijho9e5DdGH6SLq/y1T74LfMcn4asEYEb2xLbA+q4O5ENv2/FE7CVZZ3JeW5NcrLDiWW3JK6eHcHey2Es9Zdq0dIkfKau50EcjjYpCmpDKSB0s7Nmbc9ZtwVhIBviBlP7Q1O4ZLBZAFx2As3jyOnWTYzhY9zPzpBUZPy2/e39l5bX87wedmZmZeRJuheTX2wAIAAA=",
+      "length": 251
+    }
+  }
+}
