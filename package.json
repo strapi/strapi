@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build powerful back-end with no effort",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -82,10 +82,10 @@
     "socket.io": "^1.3.7",
     "socket.io-client": "^1.3.7",
     "strapi-generate": "^1.0.0",
-    "strapi-generate-admin": "^1.0.0",
+    "strapi-generate-admin": "^1.0.1",
     "strapi-generate-api": "^1.0.0",
     "strapi-generate-new": "^1.0.0",
-    "strapi-generate-users": "^1.0.0",
+    "strapi-generate-users": "^1.0.1",
     "unzip": "^0.1.11",
     "waterline": "^0.10.26",
     "winston": "^1.0.2"
