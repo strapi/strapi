@@ -1,4 +1,8 @@
-# Strapi - [Website](http://strapi.io/) [Getting Started](http://strapi.io/documentation) [Documentation](http://strapi.io/documentation)
+# Strapi
+- [Website](http://strapi.io/)
+- [Getting Started](#user-content-getting-started-in-a-minute)
+- [Documentation](http://strapi.io/documentation)
+- [Support](http://strapi.io/support)
 
 Strapi is a open-source Node.js rich framework for building applications and services.
 
@@ -34,6 +38,8 @@ Easily generate a complete API with controllers, models and routes using:
 ```bash
 $ strapi generate api <apiName>
 ```
+
+What's next ? Visit the [documentation](http://strapi.io/documentation) and give us your feedback on [Twitter](https://twitter.com/strapijs).
 
 ## Admin panel
 
