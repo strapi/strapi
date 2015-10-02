@@ -37,6 +37,8 @@ $ strapi generate api <apiName>
 
 ## Admin panel
 
+Strapi comes out of the box with an auto-generated admin panel, based on the models of your application.
+
 [![Strapi Admin Panel](http://strapi.io/assets/images/strapi-admin.jpg "Strapi Admin Panel")](http://strapi.io/documentation/admin)
 
 
