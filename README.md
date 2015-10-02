@@ -39,6 +39,8 @@ Easily generate a complete API with controllers, models and routes using:
 $ strapi generate api <apiName>
 ```
 
+What's next ? Visit the [documentation](http://strapi.io/documentation) and give us your feedback on [Twitter](https://twitter.com/strapijs).
+
 ## Admin panel
 
 Strapi comes out of the box with an auto-generated admin panel, based on the models of your application.
