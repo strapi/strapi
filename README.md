@@ -35,6 +35,11 @@ Easily generate a complete API with controllers, models and routes using:
 $ strapi generate api <apiName>
 ```
 
+## Admin panel
+
+[![Strapi Admin Panel](http://strapi.io/assets/images/strapi-admin.jpg "Strapi Admin Panel")](http://strapi.io/documentation/admin)
+
+
 ## Resources
 
 - [Roadmap](ROADMAP.md)
