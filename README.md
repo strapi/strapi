@@ -1,4 +1,4 @@
-# Strapi
+# Strapi - [Website](http://strapi.io/) [Getting Started](http://strapi.io/documentation) [Documentation](http://strapi.io/documentation)
 
 Strapi is a open-source Node.js rich framework for building applications and services.
 
