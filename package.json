@@ -32,9 +32,7 @@
     "lib": "./lib"
   },
   "main": "./lib",
-  "bin": {
-    "strapi": "./bin/strapi.js"
-  },
+  "bin": "./bin/_spawn.js",
   "dependencies": {
     "anchor": "^0.10.5",
     "async": "^1.4.2",
