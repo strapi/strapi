@@ -83,7 +83,7 @@
     "strapi-generate-admin": "^1.0.4",
     "strapi-generate-api": "^1.0.0",
     "strapi-generate-new": "^1.0.1",
-    "strapi-generate-users": "^1.0.1",
+    "strapi-generate-users": "^1.0.2",
     "unzip": "^0.1.11",
     "waterline": "^0.10.26",
     "winston": "^1.0.2"
