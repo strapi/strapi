@@ -117,6 +117,7 @@
       "_"
     ],
     "ignores": [
+      "bin/_spawn.js",
       "node_modules/**",
       "bower_components/**",
       "coverage/**",
@@ -132,6 +133,7 @@
         1,
         6
       ],
+      "new-cap": 0,
       "no-else-return": 0,
       "no-extra-parens": 0,
       "no-implicit-coercion": 0,
