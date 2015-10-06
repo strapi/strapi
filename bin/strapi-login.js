@@ -30,7 +30,7 @@ const logger = new (winston.Logger)({
 /**
  * `$ strapi login`
  *
- * Connect your account to the Strapi dashboard.
+ * Connect your account to the Strapi Studio.
  */
 
 module.exports = function () {
@@ -74,14 +74,14 @@ module.exports = function () {
         return err;
       }
 
-      // Make the request to the dashboard with the email and password
+      // Make the request to the Studio with the email and password
       // from the prompt.
       request({
         method: 'POST',
         preambleCRLF: true,
         postambleCRLF: true,
         json: true,
-        uri: 'http://dashboard.strapi.io/auth/local',
+        uri: 'http://studio.strapi.io/auth/local',
         body: {
           identifier: result.email,
           password: result.password
@@ -94,7 +94,7 @@ module.exports = function () {
 
         // Stop if there is an error.
         if (err && err.code === 'ECONNREFUSED') {
-          logger.error('Impossible to establish a connection with the Strapi dashboard.');
+          logger.error('Impossible to establish a connection with the Strapi Studio.');
           logger.error('Please try again in a few minutes...');
           process.exit(1);
         } else if (res.statusCode === 400) {

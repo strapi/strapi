@@ -27,18 +27,18 @@ const logger = new (winston.Logger)({
 /**
  * `$ strapi logout`
  *
- * Logout your account from the Strapi dashboard.
+ * Logout your account from the Strapi Studio.
  */
 
 module.exports = function () {
 
-  // Make the logout request to the dashboard.
+  // Make the logout request to the Studio.
   request({
     method: 'POST',
     preambleCRLF: true,
     postambleCRLF: true,
     json: true,
-    uri: 'http://dashboard.strapi.io/logout'
+    uri: 'http://studio.strapi.io/logout'
   },
 
   // Callback.
@@ -62,7 +62,7 @@ module.exports = function () {
         delete config.token;
 
         fs.writeFileSync(path.resolve(HOME, '.strapirc'), JSON.stringify(config), 'utf8');
-        logger.info('Your machine is not linked to the Strapi dashboard anymore.');
+        logger.info('Your machine is not linked to the Strapi Studio anymore.');
         process.exit(0);
       }
     });

@@ -77,7 +77,7 @@ module.exports = function () {
       dns.resolve('google.com', function (noInternetAccess) {
         if (noInternetAccess) {
           logger.warn('No internet access...');
-          logger.warn('Your application can not be linked to the Strapi dashboard.');
+          logger.warn('Your application can not be linked to the Strapi Studio.');
           process.exit(1);
         }
 
@@ -85,7 +85,7 @@ module.exports = function () {
         fs.readFile(path.resolve(HOME, '.strapirc'), 'utf8', function (noRcFile, config) {
           if (noRcFile) {
             logger.warn('You do not have a `.strapirc` file at `' + HOME + '`.');
-            logger.warn('First, you need to create an account on http://dashboard.strapi.io/');
+            logger.warn('First, you need to create an account on http://studio.strapi.io/');
             logger.warn('Then, execute `$ strapi login` to start the experience.');
             process.exit(1);
           }
@@ -93,13 +93,13 @@ module.exports = function () {
           // Parse the config file.
           config = JSON.parse(config);
 
-          // Create a new application on the Strapi dashboard.
+          // Create a new application on the Strapi Studio.
           request({
             method: 'POST',
             preambleCRLF: true,
             postambleCRLF: true,
             json: true,
-            uri: 'http://dashboard.strapi.io/app',
+            uri: 'http://studio.strapi.io/app',
             body: {
               name: cliArguments[0],
               token: config.token
@@ -111,14 +111,14 @@ module.exports = function () {
 
             // Log and exit if no internet access.
             if (err) {
-              logger.warn('Impossible to access the Strapi dashboard.');
-              logger.warn('Your application is not linked to the Strapi dashboard.');
+              logger.warn('Impossible to access the Strapi Studio.');
+              logger.warn('Your application is not linked to the Strapi Studio.');
               process.exit(1);
             }
 
             // Parse the RC file.
             const currentJSON = JSON.parse(fs.readFileSync(path.resolve('config', 'global.json'), 'utf8'));
-            const newJSON = JSON.stringify(_.merge(currentJSON, {saas: {appId: res.body.appId}}), null, '  ');
+            const newJSON = JSON.stringify(_.merge(currentJSON, {studio: {appId: res.body.appId}}), null, '  ');
 
             // Write the new `./config/global.json` with credentials.
             fs.writeFile(path.resolve('config', 'global.json'), newJSON, 'utf8', function (err) {

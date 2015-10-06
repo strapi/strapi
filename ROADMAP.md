@@ -1,7 +1,7 @@
 # Roadmap
 
 **v1.1.0**:
-- Improve API management, wording and application structure with the dashboard.
+- Improve API management, wording and application structure with the Strapi Studio.
 
 **v1.2.0**:
 - Improve the UX and UI of the admin panel.

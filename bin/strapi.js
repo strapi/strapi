@@ -78,13 +78,13 @@ cmd.action(require('./strapi-update'));
 // `$ strapi login`
 cmd = program.command('login');
 cmd.unknownOption = NOOP;
-cmd.description('connect your account to the Strapi dashboard');
+cmd.description('connect your account to the Strapi Studio');
 cmd.action(require('./strapi-login'));
 
 // `$ strapi logout`
 cmd = program.command('logout');
 cmd.unknownOption = NOOP;
-cmd.description('logout your account from the Strapi dashboard');
+cmd.description('logout your account from the Strapi Studio');
 cmd.action(require('./strapi-logout'));
 
 /**
