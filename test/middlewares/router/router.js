@@ -12,6 +12,43 @@ const expect = require('expect.js');
 const strapi = require('../../..');
 
 describe('router', function () {
+  it('does not register middleware more than once', function (done) {
+    const app = strapi.server();
+    const parentRouter = strapi.middlewares.router();
+    const nestedRouter = strapi.middlewares.router();
+
+    nestedRouter
+      .get('/first-nested-route', function * (next) {
+          this.body = {
+            n: this.n
+          };
+      })
+      .get('/second-nested-route', function * (next) {
+          yield next;
+      })
+      .get('/third-nested-route', function * (next) {
+          yield next;
+      });
+
+    parentRouter.use('/parent-route', function * (next) {
+      this.n = this.n ? (this.n + 1) : 1;
+      yield next;
+    }, nestedRouter.routes());
+
+    app.use(parentRouter.routes());
+
+    request(http.createServer(app.callback()))
+      .get('/parent-route/first-nested-route')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('n', 1);
+        done();
+      });
+  });
+
   it('exposes middleware factory', function (done) {
     const app = strapi.server();
     const router = strapi.middlewares.router();
@@ -26,25 +63,80 @@ describe('router', function () {
     done();
   });
 
+  it('supports promises for async/await', function (done) {
+    const app = strapi.server();
+
+    app.experimental = true;
+
+    const router = strapi.middlewares.router();
+
+    router.get('/async', function (next) {
+      const ctx = this;
+      return new Promise(function (resolve, reject) {
+        ctx.body = {
+          msg: 'promises!'
+        };
+        resolve();
+      });
+    });
+
+    app.use(router.routes()).use(router.allowedMethods());
+
+    request(http.createServer(app.callback()))
+      .get('/async')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('msg', 'promises!');
+        done();
+      });
+  });
+
+  it('matches middleware only if route was matched', function (done) {
+    const app = strapi.server();
+    const router = strapi.middlewares.router();
+
+    const otherRouter = strapi.middlewares.router();
+
+    router.use(function * (next) {
+      this.body = { bar: 'baz' };
+      yield next;
+    });
+
+    otherRouter.get('/bar', function * (next) {
+      this.body = this.body || { foo: 'bar' };
+    });
+
+    app.use(router.routes()).use(otherRouter.routes());
+
+    request(http.createServer(app.callback()))
+      .get('/bar')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('foo', 'bar');
+        expect(res.body).to.not.have.property('bar');
+        done();
+      })
+  });
+
   it('matches first to last', function (done) {
     const app = strapi.server();
     const router = strapi.middlewares.router();
 
     router
       .get('user_page', '/user/(.*).jsx', function * (next) {
-        this.body = {
-          order: 1
-        };
+        this.body = { order: 1 };
       })
       .all('app', '/app/(.*).jsx', function * (next) {
-        this.body = {
-          order: 2
-        };
+        this.body = { order: 2 };
       })
       .all('view', '(.*).jsx', function * (next) {
-        this.body = {
-          order: 3
-        };
+        this.body = { order: 3 };
       });
 
     request(http.createServer(app.use(router.routes()).callback()))
@@ -59,15 +151,91 @@ describe('router', function () {
       })
   });
 
-  it('nests routers', function (done) {
+  it('does not run subsequent middleware without yield next', function (done) {
     const app = strapi.server();
-    const router = strapi.middlewares.router;
+    const router = strapi.middlewares.router();
 
-    const forums = router({
+    router
+      .get('user_page', '/user/(.*).jsx', function * (next) {
+      }, function * (next) {
+        this.body = { order: 1 };
+      });
+
+    request(http.createServer(app.use(router.routes()).callback()))
+      .get('/user/account.jsx')
+      .expect(404)
+      .end(done)
+  });
+
+  it('nests routers with prefixes at root', function (done) {
+    const app = strapi.server();
+    const api = strapi.middlewares.router();
+
+    const forums = strapi.middlewares.router({
+      prefix: '/forums'
+    });
+
+    const posts = strapi.middlewares.router({
+      prefix: '/:fid/posts'
+    });
+
+    let server;
+
+    posts
+      .get('/', function * (next) {
+        this.status = 204;
+        yield next;
+      })
+      .get('/:pid', function * (next) {
+        this.body = this.params;
+        yield next;
+      });
+
+    forums.use(posts.routes());
+
+    server = http.createServer(app.use(forums.routes()).callback());
+
+    request(server)
+      .get('/forums/1/posts')
+      .expect(204)
+      .end(function (err) {
+        if (err) {
+          return done(err);
+        }
+
+        request(server)
+          .get('/forums/1')
+          .expect(404)
+          .end(function (err) {
+            if (err) {
+              return done(err);
+            }
+
+            request(server)
+              .get('/forums/1/posts/2')
+              .expect(200)
+              .end(function (err, res) {
+                if (err) {
+                  return done(err);
+                }
+
+                expect(res.body).to.have.property('fid', '1');
+                expect(res.body).to.have.property('pid', '2');
+                done();
+              });
+          });
+      });
+  });
+
+  it('nests routers with prefixes at path', function (done) {
+    const app = strapi.server();
+    const api = strapi.middlewares.router();
+
+    const forums = strapi.middlewares.router({
       prefix: '/api'
     });
 
-    const posts = router({
+    const posts = strapi.middlewares.router({
       prefix: '/posts'
     });
 
@@ -119,6 +287,62 @@ describe('router', function () {
       });
   });
 
+  it('runs subrouter middleware after parent', function (done) {
+    const app = strapi.server();
+    const subrouter = strapi.middlewares.router()
+      .use(function * (next) {
+        this.msg = 'subrouter';
+        yield next;
+      })
+      .get('/', function * () {
+        this.body = { msg: this.msg };
+      });
+
+    const router = strapi.middlewares.router()
+      .use(function * (next) {
+        this.msg = 'router';
+        yield next;
+      })
+      .use(subrouter.routes());
+
+    request(http.createServer(app.use(router.routes()).callback()))
+      .get('/')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('msg', 'subrouter');
+        done();
+      });
+  });
+
+  it('runs parent middleware for subrouter routes', function (done) {
+    const app = strapi.server();
+    const subrouter = strapi.middlewares.router()
+      .get('/sub', function * () {
+        this.body = { msg: this.msg };
+      });
+
+    const router = strapi.middlewares.router()
+      .use(function * (next) {
+        this.msg = 'router';
+        yield next;
+      })
+      .use('/parent', subrouter.routes());
+
+    request(http.createServer(app.use(router.routes()).callback()))
+      .get('/parent/sub')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('msg', 'router');
+        done();
+      });
+  });
+
   it('matches corresponding requests', function (done) {
     const app = strapi.server();
     const router = strapi.middlewares.router();
@@ -139,11 +363,11 @@ describe('router', function () {
     });
 
     router.put('/:category/not-a-title', function * (next) {
-      this.should.have.property('params');
-      this.params.should.have.property('category', 'programming');
-      this.params.should.not.have.property('title');
-      this.status = 204;
-    });
+		  this.should.have.property('params');
+		  this.params.should.have.property('category', 'programming');
+		  this.params.should.not.have.property('title');
+		  this.status = 204;
+	  });
 
     const server = http.createServer(app.callback());
 
@@ -164,11 +388,11 @@ describe('router', function () {
             }
 
             request(server)
-              .put('/programming/not-a-title')
-              .expect(204)
-              .end(function (err, res) {
-                done(err);
-              });
+    		      .put('/programming/not-a-title')
+    		      .expect(204)
+    		      .end(function (err, res) {
+    			      done(err);
+    		      });
           });
       });
   });
@@ -179,7 +403,17 @@ describe('router', function () {
 
     app.use(router.routes());
 
+    router.use(function * (next) {
+      this.bar = 'baz';
+      yield next;
+    });
+
     router.get('/:category/:title', function * (next) {
+      this.foo = 'bar';
+      yield next;
+    }, function * (next) {
+      this.should.have.property('bar', 'baz');
+      this.should.have.property('foo', 'bar');
       this.should.have.property('app');
       this.should.have.property('req');
       this.should.have.property('res');
@@ -197,37 +431,6 @@ describe('router', function () {
       });
   });
 
-  it('does not match after ctx.throw()', function (done) {
-    const app = strapi.server();
-    const router = strapi.middlewares.router();
-
-    let counter = 0;
-
-    app.use(router.routes());
-
-    router.get('/', function * (next) {
-      counter++;
-      this.throw(403);
-    });
-
-    router.get('/', function * (next) {
-      counter++;
-    });
-
-    const server = http.createServer(app.callback());
-
-    request(server)
-      .get('/')
-      .expect(403)
-      .end(function (err, res) {
-        if (err) {
-          return done(err);
-        }
-        counter.should.equal(1);
-        done();
-      });
-  });
-
   it('supports generators for route middleware', function (done) {
     const app = strapi.server();
     const router = strapi.middlewares.router();
@@ -238,9 +441,7 @@ describe('router', function () {
       return function (fn) {
         const packagePath = path.join(__dirname, '..', '..', '..', 'package.json');
         fs.readFile(packagePath, 'utf8', function (err, data) {
-          if (err) {
-            return fn(err);
-          }
+          if (err) return fn(err);
           fn(null, JSON.parse(data).version);
         });
       };
@@ -270,6 +471,7 @@ describe('router', function () {
 
     router.get('/users', function * () {});
     router.put('/users', function * () {});
+
     request(http.createServer(app.callback()))
       .options('/users')
       .expect(204)
@@ -277,7 +479,8 @@ describe('router', function () {
         if (err) {
           return done(err);
         }
-        res.header.should.have.property('allow', 'PUT, HEAD, GET');
+
+        res.header.should.have.property('allow', 'HEAD, GET, PUT');
         done();
       });
   });
@@ -300,7 +503,8 @@ describe('router', function () {
         if (err) {
           return done(err);
         }
-        res.header.should.have.property('allow', 'PUT, HEAD, GET');
+
+        res.header.should.have.property('allow', 'HEAD, GET, PUT');
         done();
       });
   });
@@ -394,6 +598,46 @@ describe('router', function () {
         router[method]('/', function * () {}).should.equal(router);
       });
     });
+
+    it('registers routes without params before routes with params', function (done) {
+      const app = strapi.server();
+      const router = strapi.middlewares.router();
+
+      router.get('/:parameter', function * (next) {
+        this.body = {
+          test: 'foo'
+        };
+      });
+
+      router.get('/notparameter', function * (next) {
+        this.body = {
+          test: 'bar'
+        };
+      });
+
+      app.use(router.routes());
+
+      request(http.createServer(app.callback()))
+        .get('/testparameter')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('test', 'foo');
+
+          request(http.createServer(app.callback()))
+            .get('/notparameter')
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body).to.have.property('test', 'bar');
+              done();
+            });
+        });
+    });
   });
 
   describe('router#use()', function (done) {
@@ -426,7 +670,6 @@ describe('router', function () {
           if (err) {
             return done(err);
           }
-
           expect(res.body).to.have.property('foobar', 'foobar');
           done();
         });
@@ -436,15 +679,15 @@ describe('router', function () {
       const app = strapi.server();
       const router = strapi.middlewares.router();
 
+      router.use('/foo/bar', function * (next) {
+        this.foo = 'foo';
+        yield next;
+      });
+
       router.get('/foo/bar', function * (next) {
         this.body = {
           foobar: this.foo + 'bar'
         };
-      });
-
-      router.use('/foo', function * (next) {
-        this.foo = 'foo';
-        yield next;
       });
 
       app.use(router.routes());
@@ -459,6 +702,91 @@ describe('router', function () {
 
           expect(res.body).to.have.property('foobar', 'foobar');
           done();
+        });
+    });
+
+    it('runs router middleware before subrouter middleware', function (done) {
+      const app = strapi.server();
+      const router = strapi.middlewares.router();
+
+      const subrouter = strapi.middlewares.router();
+
+      router.use(function * (next) {
+        this.foo = 'boo';
+        yield next;
+      });
+
+      subrouter
+        .use(function * (next) {
+          this.foo = 'foo';
+          yield next;
+        })
+        .get('/bar', function * (next) {
+          this.body = {
+            foobar: this.foo + 'bar'
+          };
+        });
+
+      router.use('/foo', subrouter.routes());
+
+      app.use(router.routes());
+
+      request(http.createServer(app.callback()))
+        .get('/foo/bar')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('foobar', 'foobar');
+          done();
+        });
+    });
+
+    it('assigns middleware to array of paths', function (done) {
+      const app = strapi.server();
+      const router = strapi.middlewares.router();
+
+      router.use(['/foo', '/bar'], function * (next) {
+        this.foo = 'foo';
+        this.bar = 'bar';
+        yield next;
+      });
+
+      router.get('/foo', function * (next) {
+        this.body = {
+          foobar: this.foo + 'bar'
+        };
+      });
+
+      router.get('/bar', function * (next) {
+        this.body = {
+          foobar: 'foo' + this.bar
+        };
+      });
+
+      app.use(router.routes());
+
+      request(http.createServer(app.callback()))
+        .get('/foo')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body).to.have.property('foobar', 'foobar');
+
+          request(http.createServer(app.callback()))
+            .get('/bar')
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body).to.have.property('foobar', 'foobar');
+              done();
+            });
         });
     });
   });
@@ -486,10 +814,13 @@ describe('router', function () {
     it('redirects using route names', function (done) {
       const app = strapi.server();
       const router = strapi.middlewares.router();
+
       app.use(router.routes());
+
       router.get('home', '/', function * () {});
       router.get('sign-up-form', '/sign-up-form', function * () {});
       router.redirect('home', 'sign-up-form');
+
       request(http.createServer(app.callback()))
         .post('/')
         .expect(301)
@@ -500,6 +831,19 @@ describe('router', function () {
           res.header.should.have.property('location', '/sign-up-form');
           done();
         });
+    });
+  });
+
+  describe('router#route()', function () {
+    it('inherits routes from nested router', function () {
+      const app = strapi.server();
+      const subrouter = strapi.middlewares.router().get('child', '/hello', function * (next) {
+        this.body = { hello: 'world' };
+      });
+
+      const router = strapi.middlewares.router().use(subrouter.routes());
+
+      expect(router.route('child')).to.have.property('name', 'child');
     });
   });
 
@@ -514,11 +858,7 @@ describe('router', function () {
         this.status = 204;
       });
 
-      let url = router.url('books', {
-        category: 'programming',
-        title: 'how to node'
-      });
-
+      let url = router.url('books', { category: 'programming', title: 'how to node' });
       url.should.equal('/programming/how%20to%20node');
       url = router.url('books', 'programming', 'how to node');
       url.should.equal('/programming/how%20to%20node');
@@ -532,12 +872,13 @@ describe('router', function () {
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
+
       router
         .param('user', function * (id, next) {
-          this.user = {
-            name: 'alex'
-          };
-          if (!id) return this.status = 404;
+          this.user = { name: 'alex' };
+          if (!id) {
+            return this.status = 404;
+          }
           yield next;
         })
         .get('/users/:user', function * (next) {
@@ -551,6 +892,7 @@ describe('router', function () {
           if (err) {
             return done(err);
           }
+
           res.should.have.property('body');
           res.body.should.have.property('name', 'alex');
           done();
@@ -563,13 +905,13 @@ describe('router', function () {
 
       router
         .param('user', function * (id, next) {
-          this.user = {
-            name: 'alex'
-          };
+          this.user = { name: 'alex' };
           if (this.ranFirst) {
             this.user.ordered = 'parameters';
           }
-          if (!id) return this.status = 404;
+          if (!id) {
+            return this.status = 404;
+          }
           yield next;
         })
         .param('first', function * (id, next) {
@@ -577,7 +919,9 @@ describe('router', function () {
           if (this.user) {
             this.ranFirst = false;
           }
-          if (!id) return this.status = 404;
+          if (!id) {
+            return this.status = 404;
+          }
           yield next;
         })
         .get('/:first/users/:user', function * (next) {
@@ -594,12 +938,47 @@ describe('router', function () {
           if (err) {
             return done(err);
           }
-
           res.should.have.property('body');
           res.body.should.have.property('name', 'alex');
           res.body.should.have.property('ordered', 'parameters');
           done();
         });
+    });
+
+    it('runs parent parameter middleware for subrouter', function (done) {
+      const app = strapi.server();
+      const router = strapi.middlewares.router();
+
+      const subrouter = strapi.middlewares.router();
+      subrouter.get('/:cid', function * (next) {
+        this.body = {
+          id: this.params.id,
+          cid: this.params.cid
+        };
+      });
+
+      router
+        .param('id', function * (id, next) {
+          this.params.id = 'ran';
+          if (!id) {
+            return this.status = 404;
+          }
+          yield next;
+        })
+        .use('/:id/children', subrouter.routes());
+
+      request(http.createServer(app.use(router.routes()).callback()))
+        .get('/did-not-run/children/2')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          res.should.have.property('body');
+          res.body.should.have.property('id', 'ran');
+          res.body.should.have.property('cid', '2');
+          done();
+      });
     });
   });
 
@@ -747,6 +1126,7 @@ describe('router', function () {
       };
 
       router.use(middlewareA, middlewareB);
+
       router.get('/users/:id', function * () {
         should.exist(this.params.id);
         this.body = {
@@ -776,7 +1156,7 @@ describe('router', function () {
     });
   });
 
-  describe('If no HEAD method, default to GET', function () {
+  describe('if no `HEAD` method, default to `GET`', function () {
     it('should default to GET', function (done) {
       const app = strapi.server();
       const router = strapi.middlewares.router();
@@ -811,7 +1191,7 @@ describe('router', function () {
       });
 
       request(http.createServer(
-          app
+        app
           .use(router.routes())
           .callback()))
         .head('/users/1')
@@ -851,9 +1231,91 @@ describe('router', function () {
       expect(route.paramNames[0]).to.have.property('name', 'thing_id');
       expect(route.paramNames[1]).to.have.property('name', 'id');
     });
-  })
 
-  describe('static router#url()', function () {
+    describe('with trailing slash', testPrefix('/admin/'));
+    describe('without trailing slash', testPrefix('/admin'));
+
+    function testPrefix (prefix) {
+      return function () {
+        let server;
+        let middlewareCount = 0;
+
+        before(function () {
+          const app = strapi.server();
+          const router = strapi.middlewares.router();
+
+          router.get('/', function * () {
+            middlewareCount++;
+            this.body = { name: this.thing };
+          });
+
+          router.use(function * (next) {
+            middlewareCount++;
+            this.thing = 'worked';
+            yield next;
+          });
+
+          router.prefix(prefix);
+          server = http.createServer(app.use(router.routes()).callback());
+        });
+
+        after(function () {
+          server.close();
+        });
+
+        beforeEach(function () {
+          middlewareCount = 0;
+        });
+
+        it('should support root level router middleware', function (done) {
+          request(server)
+            .get(prefix)
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(middlewareCount).to.equal(2);
+              expect(res.body).to.be.an('object');
+              expect(res.body).to.have.property('name', 'worked');
+              done();
+          });
+        });
+
+        it('should support requests with a trailing path slash', function (done) {
+          request(server)
+            .get('/admin/')
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(middlewareCount).to.equal(2);
+              expect(res.body).to.be.an('object');
+              expect(res.body).to.have.property('name', 'worked');
+              done();
+          });
+        });
+
+        it('should support requests without a trailing path slash', function (done) {
+          request(server)
+            .get('/admin')
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(middlewareCount).to.equal(2);
+              expect(res.body).to.be.an('object');
+              expect(res.body).to.have.property('name', 'worked');
+              done();
+          });
+        });
+      }
+    }
+  });
+
+  describe('router#url()', function () {
     it('generates route URL', function () {
       const router = strapi.middlewares.router;
 
@@ -865,7 +1327,7 @@ describe('router', function () {
       url.should.equal('/programming/how-to-node');
     });
 
-    it('escapes using encodeURIComponent()', function () {
+    it('escapes using `encodeURIComponent()`', function () {
       const router = strapi.middlewares.router;
 
       const url = router.url('/:category/:title', {
