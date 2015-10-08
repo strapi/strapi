@@ -99,7 +99,7 @@ module.exports = function () {
             preambleCRLF: true,
             postambleCRLF: true,
             json: true,
-            uri: 'http://localhost:1338/app',
+            uri: 'http://studio.strapi.io/app',
             body: {
               name: cliArguments[0],
               token: config.token

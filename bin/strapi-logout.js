@@ -38,7 +38,7 @@ module.exports = function () {
     preambleCRLF: true,
     postambleCRLF: true,
     json: true,
-    uri: 'http://localhost:1338/logout'
+    uri: 'http://studio.strapi.io/logout'
   },
 
   // Callback.

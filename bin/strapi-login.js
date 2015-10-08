@@ -81,7 +81,7 @@ module.exports = function () {
         preambleCRLF: true,
         postambleCRLF: true,
         json: true,
-        uri: 'http://localhost:1338/auth/local',
+        uri: 'http://studio.strapi.io/auth/local',
         body: {
           identifier: result.email,
           password: result.password
