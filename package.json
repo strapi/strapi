@@ -40,6 +40,7 @@
     "commander": "^2.8.1",
     "consolidate": "^0.13.1",
     "fs-extra": "^0.24.0",
+    "graphql": "^0.4.7",
     "include-all": "^0.1.6",
     "json-stringify-safe": "^5.0.1",
     "jsonwebtoken": "^5.4.0",
@@ -48,6 +49,7 @@
     "koa-compose": "^2.3.0",
     "koa-cors": "^0.0.16",
     "koa-favicon": "^1.2.0",
+    "koa-graphql": "^0.2.0",
     "koa-gzip": "^0.1.0",
     "koa-i18n": "^1.1.0",
     "koa-ip": "^0.1.0",
@@ -87,6 +89,7 @@
     "strapi-generate-users": "^1.1.0",
     "unzip2": "^0.2.5",
     "waterline": "^0.10.26",
+    "waterline-to-graphql": "0.0.2",
     "winston": "^1.0.2"
   },
   "devDependencies": {
