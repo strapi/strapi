@@ -74,6 +74,7 @@
     "strapi-generate-api": "^1.1.0",
     "strapi-generate-email": "^1.1.0",
     "strapi-generate-new": "^1.1.0",
+    "strapi-generate-upload": "^1.1.0",
     "strapi-generate-users": "^1.1.0",
     "unzip2": "^0.2.5",
     "waterline": "^0.10.26",
