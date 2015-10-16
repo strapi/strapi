@@ -53,16 +53,6 @@ $ strapi start
 
 The default home page is accessible at [http://localhost:1337/](http://localhost:1337/).
 
-Strapi comes out of the box with an auto-generated admin panel, based on the models of your
-application. This dashboard offers the opportunity to easily manage your data. You don't
-need developer skills to use it.
-
-The local admin dashboard is available at [http://localhost:1337/admin/](http://localhost:1337/admin/).
-
-[![Strapi Admin Panel](http://strapi.io/assets/images/strapi-admin.jpg "Strapi Admin Panel")](http://strapi.io/documentation/admin)
-
-Note: On the first login, you'll be asked to create the first admin profile.
-
 ### Create your first API
 
 The Strapi ecosystem offers you two possibilities to create a complete RESTful API.
