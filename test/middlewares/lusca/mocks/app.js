@@ -2,8 +2,10 @@
 
 const strapi = require('../../../..');
 
+const Koa = strapi.server;
+
 module.exports = function (config, disableSession) {
-  const app = strapi.server();
+  const app = new Koa();
   const router = strapi.middlewares.router();
 
   app.keys = ['key1', 'key2'];

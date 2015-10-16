@@ -2,10 +2,11 @@
 
 const assert = require('assert');
 const request = require('supertest');
-
-const strapi = require('../..');
+const statuses = require('statuses');
 
 const response = require('../helpers/context').response;
+
+const Koa = require('../..').server;
 
 describe('res.status=', function () {
   describe('when a status code', function () {
@@ -31,23 +32,23 @@ describe('res.status=', function () {
       });
     });
 
-    // describe('and custom status', function () {
-    //   before(function () {
-    //     statuses['700'] = 'custom status';
-    //   });
-    //
-    //   it('should set the status', function () {
-    //     const res = response();
-    //     res.status = 700;
-    //     res.status.should.equal(700);
-    //   });
-    //
-    //   it('should not throw', function() {
-    //     assert.doesNotThrow(function() {
-    //       response().status = 700;
-    //     });
-    //   });
-    // });
+    describe('and custom status', function () {
+      before(function () {
+        statuses['700'] = 'custom status';
+      });
+
+      it('should set the status', function () {
+        const res = response();
+        res.status = 700;
+        res.status.should.equal(700);
+      });
+
+      it('should not throw', function () {
+        assert.doesNotThrow(function () {
+          response().status = 700;
+        });
+      });
+    });
   });
 
   describe('when a status string', function () {
@@ -58,9 +59,9 @@ describe('res.status=', function () {
     });
   });
 
-  function strip(status) {
+  function strip (status) {
     it('should strip content related header fields', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       app.use(function * () {
         this.body = {
@@ -88,7 +89,7 @@ describe('res.status=', function () {
     });
 
     it('should strip content releated header fields after status set', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       app.use(function * () {
         this.status = status;

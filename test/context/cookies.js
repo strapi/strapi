@@ -2,18 +2,20 @@
 
 const request = require('supertest');
 
-const strapi = require('../..');
+const Koa = require('../..').server;
 
 describe('ctx.cookies.set()', function () {
   it('should set an unsigned cookie', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(function * () {
       this.cookies.set('name', 'jon');
       this.status = 204;
     });
 
-    request(app.listen())
+    const server = app.listen();
+
+    request(server)
       .get('/')
       .expect(204)
       .end(function (err, res) {
@@ -32,7 +34,7 @@ describe('ctx.cookies.set()', function () {
   describe('with .signed', function () {
     describe('when no .keys are set', function () {
       it('should error', function (done) {
-        const app = strapi.server();
+        const app = new Koa();
 
         app.use(function * () {
           try {
@@ -51,7 +53,7 @@ describe('ctx.cookies.set()', function () {
     });
 
     it('should send a signed cookie', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       app.keys = ['a', 'b'];
 
@@ -62,7 +64,9 @@ describe('ctx.cookies.set()', function () {
         this.status = 204;
       });
 
-      request(app.listen())
+      const server = app.listen();
+
+      request(server)
         .get('/')
         .expect(204)
         .end(function (err, res) {

@@ -6,10 +6,11 @@ const should = require('should');
 const request = require('supertest');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('layer', function () {
   it('composes multiple callbacks/middleware', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -38,7 +39,7 @@ describe('layer', function () {
 
   describe('layer#match()', function () {
     it('captures URL path parameters', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -63,7 +64,7 @@ describe('layer', function () {
     });
 
     it('return orginal path parameters when decodeURIComponent throw error', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -83,7 +84,7 @@ describe('layer', function () {
     });
 
     it('populates ctx.captures with regexp captures', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -112,7 +113,7 @@ describe('layer', function () {
     });
 
     it('return orginal ctx.captures when decodeURIComponent throw error', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -141,7 +142,7 @@ describe('layer', function () {
     });
 
     it('populates ctx.captures with regexp captures include undefiend', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -170,7 +171,7 @@ describe('layer', function () {
     });
 
     it('should throw friendly error message when handle not exists', function () {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -193,7 +194,7 @@ describe('layer', function () {
 
   describe('layer#param()', function () {
     it('composes middleware for param fn', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const route = router.register('/users/:user', ['GET'], [function * (next) {
@@ -229,7 +230,7 @@ describe('layer', function () {
     });
 
     it('ignores params which are not matched', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const route = router.register('/users/:user', ['GET'], [function * (next) {
@@ -279,7 +280,7 @@ describe('layer', function () {
 
   describe('layer#url()', function () {
     it('generates route URL', function () {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const route = router.register('/:category/:title', ['get'], [function * () {}], 'books');
@@ -294,7 +295,7 @@ describe('layer', function () {
     });
 
     it('escapes using encodeURIComponent()', function () {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const route = router.register('/:category/:title', ['get'], [function * () {}], 'books');

@@ -6,12 +6,13 @@ const join = require('path').join;
 const request = require('supertest');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('favicon', function () {
   const path = join(__dirname, 'fixtures', 'favicon.ico');
 
-  it('should only respond on `/favicon.ico`', function (done) {
-    const app = strapi.server();
+  it('should only respond on /favicon.ico', function (done) {
+    const app = new Koa();
 
     app.use(strapi.middlewares.favicon(path));
 
@@ -26,8 +27,8 @@ describe('favicon', function () {
       .expect('hello', done);
   });
 
-  it('favicon should 404 if `path` is missing', function (done) {
-    const app = strapi.server();
+  it('favicon should 404 if path is missing', function (done) {
+    const app = new Koa();
     app.use(strapi.middlewares.favicon());
 
     request(app.listen())
@@ -36,7 +37,7 @@ describe('favicon', function () {
   });
 
   it('should not accept POST requests', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     app.use(strapi.middlewares.favicon(path));
 
     request(app.listen())
@@ -48,7 +49,7 @@ describe('favicon', function () {
   it('should send the favicon', function (done) {
     const body = fs.readFileSync(path);
 
-    const app = strapi.server();
+    const app = new Koa();
     app.use(strapi.middlewares.favicon(path));
 
     request(app.listen())
@@ -59,7 +60,7 @@ describe('favicon', function () {
   });
 
   it('should set cache-control headers', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     app.use(strapi.middlewares.favicon(path));
 
     request(app.listen())
@@ -70,7 +71,7 @@ describe('favicon', function () {
 
   describe('options.maxAge', function () {
     it('should set max-age', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: 5000
       }));
@@ -82,7 +83,7 @@ describe('favicon', function () {
     });
 
     it('should accept 0', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: 0
       }));
@@ -94,7 +95,7 @@ describe('favicon', function () {
     });
 
     it('should be valid delta-seconds', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: 1234
       }));
@@ -106,7 +107,7 @@ describe('favicon', function () {
     });
 
     it('should floor at 0', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: -4000
       }));
@@ -118,7 +119,7 @@ describe('favicon', function () {
     });
 
     it('should ceil at 31556926', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: 900000000000
       }));
@@ -130,7 +131,7 @@ describe('favicon', function () {
     });
 
     it('should accept Infinity', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       app.use(strapi.middlewares.favicon(path, {
         maxAge: Infinity
       }));

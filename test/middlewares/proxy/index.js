@@ -6,12 +6,13 @@ const http = require('http');
 const request = require('supertest');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('proxy', function () {
   let server;
 
   before(function () {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(function * (next) {
       if (this.path === '/error') {
@@ -44,7 +45,7 @@ describe('proxy', function () {
   });
 
   it('should have option url', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     router.get('/index.js', strapi.middlewares.proxy({
@@ -68,7 +69,7 @@ describe('proxy', function () {
   });
 
   it('should have option url and host', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(strapi.middlewares.proxy({
@@ -98,7 +99,7 @@ describe('proxy', function () {
   });
 
   it('should have option host', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       host: 'http://localhost:1234'
@@ -118,7 +119,7 @@ describe('proxy', function () {
   });
 
   it('should have option host and map', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       host: 'http://localhost:1234',
@@ -141,7 +142,7 @@ describe('proxy', function () {
   });
 
   it('should have option host and match', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       host: 'http://localhost:1234',
@@ -166,7 +167,7 @@ describe('proxy', function () {
   });
 
   it('url not match for url', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       url: 'class.js'
@@ -190,7 +191,7 @@ describe('proxy', function () {
   });
 
   it('url not match for map', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       map: {
@@ -222,7 +223,7 @@ describe('proxy', function () {
   });
 
   it('encoding', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       url: 'http://localhost:1234/index.html',
@@ -243,7 +244,7 @@ describe('proxy', function () {
   });
 
   it('pass query', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       url: 'http://localhost:1234/class.js',
@@ -264,7 +265,7 @@ describe('proxy', function () {
   });
 
   it('pass request body', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       host: 'http://localhost:1234'
@@ -286,7 +287,7 @@ describe('proxy', function () {
   });
 
   it('pass parsed request body', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.bodyparser());
 
@@ -310,7 +311,7 @@ describe('proxy', function () {
   });
 
   it('statusCode', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.use(strapi.middlewares.proxy({
       host: 'http://localhost:1234'

@@ -45,11 +45,11 @@ describe('xframe', function () {
   });
 
   it('header (sameorigin) with options.enable true', function (done) {
+    const router = strapi.middlewares.router();
     const enable = function (url) {
       return url.indexOf('/show') >= 0;
     };
 
-    const router = strapi.middlewares.router();
     const config = {
       xframe: {
         value: 'SAMEORIGIN',
@@ -59,7 +59,7 @@ describe('xframe', function () {
 
     const app = mock(config);
 
-    router.get('/show', function* () {
+    router.get('/show', function * () {
       this.body = 'show';
     });
 

@@ -5,11 +5,12 @@ const path = require('path');
 const request = require('supertest');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('i18n', function () {
   describe('detect the query string', function () {
     it('should be "en" locale', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       strapi.middlewares.locale(app);
 
@@ -31,7 +32,7 @@ describe('i18n', function () {
   });
 
   describe('detect the subdomain', function () {
-    const app = strapi.server();
+    const app = new Koa();
 
     strapi.middlewares.locale(app);
 
@@ -97,7 +98,7 @@ describe('i18n', function () {
 
   describe('detect the header', function () {
     it('should be "zh-tw" locale', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       strapi.middlewares.locale(app);
 
@@ -121,7 +122,7 @@ describe('i18n', function () {
 
   describe('detect the cookie', function () {
     it('should be "zh-cn" locale', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       strapi.middlewares.locale(app);
 

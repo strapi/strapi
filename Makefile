@@ -1,26 +1,26 @@
 SRC = lib/*.js
 
-include node_modules/make-lint/index.mk
-
-BIN = node
-
 REQUIRED = --require should --require should-http
 
 TESTS = test/application/* \
 	test/context/* \
 	test/request/* \
 	test/response/* \
-	test/middlewares/*
+	test/middlewares/* \
+	test/experimental/index.js
+
+lint:
+	@./node_modules/.bin/eslint lib test
 
 test:
-	@NODE_ENV=test $(BIN) \
+	@NODE_ENV=test node \
 		./node_modules/.bin/_mocha \
 		$(REQUIRED) \
 		$(TESTS) \
 		--bail
 
-test-travis:
-	@NODE_ENV=test $(BIN) \
+test-travis: lint
+	@NODE_ENV=test node \
 		./node_modules/.bin/istanbul cover \
 		./node_modules/.bin/_mocha \
 		--report lcovonly \
@@ -32,4 +32,4 @@ test-travis:
 bench:
 	@$(MAKE) -C benchmarks
 
-.PHONY: test bench
+.PHONY: lint test bench

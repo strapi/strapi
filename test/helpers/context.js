@@ -2,9 +2,9 @@
 
 const Stream = require('stream');
 
-const strapi = require('../..');
+const Koa = require('../..').server;
 
-exports = module.exports = function (req, res) {
+module.exports = function (req, res) {
   const socket = new Stream.Duplex();
 
   req = req || {
@@ -31,13 +31,13 @@ exports = module.exports = function (req, res) {
     delete res._headers[k.toLowerCase()];
   };
 
-  return strapi.server().createContext(req, res);
+  return (new Koa()).createContext(req, res);
 };
 
-exports.request = function (req, res) {
-  return exports(req, res).request;
+module.exports.request = function (req, res) {
+  return module.exports(req, res).request;
 };
 
-exports.response = function (req, res) {
-  return exports(req, res).response;
+module.exports.response = function (req, res) {
+  return module.exports(req, res).response;
 };

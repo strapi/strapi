@@ -1,10 +1,6 @@
 language: node_js
 
 node_js:
-  - "0.12"
-  - "1"
-  - "2"
-  - "3"
   - "4"
 
 sudo: false

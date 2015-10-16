@@ -23,7 +23,7 @@ describe('req.hostname', function () {
       it('should be ignored', function () {
         const req = request();
         req.header['x-forwarded-host'] = 'bar.com';
-        req.header['host'] = 'foo.com';
+        req.header.host = 'foo.com';
         req.hostname.should.equal('foo.com');
       });
     });
@@ -33,7 +33,7 @@ describe('req.hostname', function () {
         const req = request();
         req.app.proxy = true;
         req.header['x-forwarded-host'] = 'bar.com, baz.com';
-        req.header['host'] = 'foo.com';
+        req.header.host = 'foo.com';
         req.hostname.should.equal('bar.com');
       });
     });

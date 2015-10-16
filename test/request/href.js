@@ -1,11 +1,10 @@
 'use strict';
 
 const http = require('http');
+const context = require('../helpers/context');
 const Stream = require('stream');
 
-const strapi = require('../..');
-
-const context = require('../helpers/context');
+const Koa = require('../..').server;
 
 describe('ctx.href', function () {
   it('should return the full request url', function () {
@@ -18,6 +17,7 @@ describe('ctx.href', function () {
       socket: socket,
       __proto__: Stream.Readable.prototype
     };
+
     const ctx = context(req);
     ctx.href.should.equal('http://localhost/users/1?next=/dashboard');
     ctx.url = '/foo/users/1?next=/dashboard';
@@ -25,10 +25,12 @@ describe('ctx.href', function () {
   });
 
   it('should work with `GET http://example.com/foo`', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
+
     app.use(function * () {
       this.body = this.href;
     });
+
     app.listen(function () {
       const address = this.address();
       http.get({

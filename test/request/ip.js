@@ -14,10 +14,18 @@ describe('req.ip', function () {
   });
 
   describe('with no req.ips present', function () {
-    it('should return req.socket.removeAddress', function () {
+    it('should return req.socket.remoteAddress', function () {
       const req = request();
       req.socket.remoteAddress = '127.0.0.2';
       req.ip.should.equal('127.0.0.2');
+    });
+
+    describe('with req.socket.remoteAddress not present', function () {
+      it('should return an empty string', function () {
+        const req = request();
+        req.socket.remoteAddress = null;
+        req.ip.should.equal('');
+      });
     });
   });
 });

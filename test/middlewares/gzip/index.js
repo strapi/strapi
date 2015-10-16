@@ -6,6 +6,7 @@ const should = require('should');
 const request = require('supertest');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('gzip', function () {
   const options = {};
