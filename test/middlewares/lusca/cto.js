@@ -29,12 +29,12 @@ describe('x-content-type-options', function () {
 
     const app = mock(config);
 
-    app.use(router.routes());
-    app.use(router.allowedMethods());
-
     router.get('/', function * () {
       this.body = 'hello';
     });
+
+    app.use(router.routes());
+    app.use(router.allowedMethods());
 
     request(app.listen())
       .get('/')

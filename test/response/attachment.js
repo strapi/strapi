@@ -2,9 +2,9 @@
 
 const request = require('supertest');
 
-const strapi = require('../..');
-
 const context = require('../helpers/context');
+
+const Koa = require('../..').server;
 
 describe('ctx.attachment([filename])', function () {
   describe('when given a filename', function () {
@@ -33,7 +33,7 @@ describe('ctx.attachment([filename])', function () {
     });
 
     it('should work with http client', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
 
       app.use(function * () {
         this.attachment('path/to/include-no-ascii-char-中文名-ok.json');

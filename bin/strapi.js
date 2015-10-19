@@ -63,6 +63,12 @@ cmd.unknownOption = NOOP;
 cmd.description('open the Strapi framework console');
 cmd.action(require('./strapi-console'));
 
+// `$ strapi link`
+cmd = program.command('link');
+cmd.unknownOption = NOOP;
+cmd.description('link an existing application to the Strapi Studio');
+cmd.action(require('./strapi-link'));
+
 // `$ strapi config`
 cmd = program.command('config');
 cmd.unknownOption = NOOP;

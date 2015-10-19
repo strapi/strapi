@@ -13,7 +13,7 @@ describe('ctx.throw(msg)', function () {
     } catch (err) {
       assert(err.status === 500);
       assert(!err.expose);
-      return done();
+      done();
     }
   });
 });
@@ -29,7 +29,7 @@ describe('ctx.throw(err)', function () {
       assert(err.status === 500);
       assert(err.message === 'test');
       assert(!err.expose);
-      return done();
+      done();
     }
   });
 });
@@ -45,7 +45,7 @@ describe('ctx.throw(err, status)', function () {
       assert(err.status === 422);
       assert(err.message === 'test');
       assert(err.expose === true);
-      return done();
+      done();
     }
   });
 });
@@ -61,7 +61,7 @@ describe('ctx.throw(status, err)', function () {
       assert(err.status === 422);
       assert(err.message === 'test');
       assert(err.expose === true);
-      return done();
+      done();
     }
   });
 });
@@ -76,7 +76,7 @@ describe('ctx.throw(msg, status)', function () {
       assert(err.message === 'name required');
       assert(err.status === 400);
       assert(err.expose === true);
-      return done();
+      done();
     }
   });
 });
@@ -91,7 +91,7 @@ describe('ctx.throw(status, msg)', function () {
       assert(err.message === 'name required');
       assert(err.status === 400);
       assert(err.expose === true);
-      return done();
+      done();
     }
   });
 });
@@ -106,7 +106,7 @@ describe('ctx.throw(status)', function () {
       assert(err.message === 'Bad Request');
       assert(err.status === 400);
       assert(err.expose === true);
-      return done();
+      done();
     }
   });
 
@@ -121,7 +121,7 @@ describe('ctx.throw(status)', function () {
       } catch (err) {
         assert(err.message === 'some error');
         assert(!err.expose);
-        return done();
+        done();
       }
     });
   });
@@ -140,7 +140,7 @@ describe('ctx.throw(status, msg, props)', function () {
       assert(err.status === 400);
       assert(err.expose === true);
       assert(err.prop === true);
-      return done();
+      done();
     }
   });
 
@@ -158,7 +158,7 @@ describe('ctx.throw(status, msg, props)', function () {
         assert(err.status === 400);
         assert(err.expose === true);
         assert(err.prop === true);
-        return done();
+        done();
       }
     });
   });
@@ -177,7 +177,7 @@ describe('ctx.throw(msg, props)', function () {
       assert(err.status === 500);
       assert(err.expose === false);
       assert(err.prop === true);
-      return done();
+      done();
     }
   });
 });
@@ -195,7 +195,7 @@ describe('ctx.throw(status, props)', function () {
       assert(err.status === 400);
       assert(err.expose === true);
       assert(err.prop === true);
-      return done();
+      done();
     }
   });
 });
@@ -213,7 +213,7 @@ describe('ctx.throw(err, props)', function () {
       assert(err.status === 500);
       assert(err.expose === false);
       assert(err.prop === true);
-      return done();
+      done();
     }
   });
 });

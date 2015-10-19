@@ -10,10 +10,11 @@ const should = require('should');
 const expect = require('expect.js');
 
 const strapi = require('../../..');
+const Koa = strapi.server;
 
 describe('router', function () {
   it('does not register middleware more than once', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const parentRouter = strapi.middlewares.router();
     const nestedRouter = strapi.middlewares.router();
 
@@ -50,7 +51,7 @@ describe('router', function () {
   });
 
   it('exposes middleware factory', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     router.should.have.property('routes');
@@ -64,7 +65,7 @@ describe('router', function () {
   });
 
   it('supports promises for async/await', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
 
     app.experimental = true;
 
@@ -95,7 +96,7 @@ describe('router', function () {
   });
 
   it('matches middleware only if route was matched', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     const otherRouter = strapi.middlewares.router();
@@ -125,7 +126,7 @@ describe('router', function () {
   });
 
   it('matches first to last', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     router
@@ -152,7 +153,7 @@ describe('router', function () {
   });
 
   it('does not run subsequent middleware without yield next', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     router
@@ -168,7 +169,7 @@ describe('router', function () {
   });
 
   it('nests routers with prefixes at root', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const api = strapi.middlewares.router();
 
     const forums = strapi.middlewares.router({
@@ -228,7 +229,7 @@ describe('router', function () {
   });
 
   it('nests routers with prefixes at path', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const api = strapi.middlewares.router();
 
     const forums = strapi.middlewares.router({
@@ -288,7 +289,7 @@ describe('router', function () {
   });
 
   it('runs subrouter middleware after parent', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const subrouter = strapi.middlewares.router()
       .use(function * (next) {
         this.msg = 'subrouter';
@@ -318,7 +319,7 @@ describe('router', function () {
   });
 
   it('runs parent middleware for subrouter routes', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const subrouter = strapi.middlewares.router()
       .get('/sub', function * () {
         this.body = { msg: this.msg };
@@ -344,7 +345,7 @@ describe('router', function () {
   });
 
   it('matches corresponding requests', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -397,8 +398,8 @@ describe('router', function () {
       });
   });
 
-  it('executes route middleware using `app.context`', function (done) {
-    const app = strapi.server();
+  it('executes route middleware using app.context', function (done) {
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -432,7 +433,7 @@ describe('router', function () {
   });
 
   it('supports generators for route middleware', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -463,7 +464,7 @@ describe('router', function () {
   });
 
   it('responds to OPTIONS requests', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -486,7 +487,7 @@ describe('router', function () {
   });
 
   it('responds with 405 Method Not Allowed', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -510,7 +511,7 @@ describe('router', function () {
   });
 
   it('responds with 501 Not Implemented', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -531,7 +532,7 @@ describe('router', function () {
   });
 
   it('does not send 405 if route matched but status is 404', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(router.routes());
@@ -553,7 +554,7 @@ describe('router', function () {
   });
 
   it('supports custom routing detect path: ctx.routerPath', function (done) {
-    const app = strapi.server();
+    const app = new Koa();
     const router = strapi.middlewares.router();
 
     app.use(function * (next) {
@@ -577,7 +578,7 @@ describe('router', function () {
 
   describe('router#[verb]()', function () {
     it('registers route specific to HTTP verb', function () {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -600,7 +601,7 @@ describe('router', function () {
     });
 
     it('registers routes without params before routes with params', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.get('/:parameter', function * (next) {
@@ -642,7 +643,7 @@ describe('router', function () {
 
   describe('router#use()', function (done) {
     it('uses router middleware without path', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.get('/foo/bar', function * (next) {
@@ -676,7 +677,7 @@ describe('router', function () {
     });
 
     it('uses router middleware at given path', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.use('/foo/bar', function * (next) {
@@ -706,7 +707,7 @@ describe('router', function () {
     });
 
     it('runs router middleware before subrouter middleware', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const subrouter = strapi.middlewares.router();
@@ -744,7 +745,7 @@ describe('router', function () {
     });
 
     it('assigns middleware to array of paths', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.use(['/foo', '/bar'], function * (next) {
@@ -793,7 +794,7 @@ describe('router', function () {
 
   describe('router#register()', function () {
     it('registers new routes', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.should.have.property('register');
@@ -812,7 +813,7 @@ describe('router', function () {
 
   describe('router#redirect()', function () {
     it('redirects using route names', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -836,7 +837,7 @@ describe('router', function () {
 
   describe('router#route()', function () {
     it('inherits routes from nested router', function () {
-      const app = strapi.server();
+      const app = new Koa();
       const subrouter = strapi.middlewares.router().get('child', '/hello', function * (next) {
         this.body = { hello: 'world' };
       });
@@ -849,7 +850,7 @@ describe('router', function () {
 
   describe('router#url()', function () {
     it('generates URL for given route', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -868,7 +869,7 @@ describe('router', function () {
 
   describe('router#param()', function () {
     it('runs parameter middleware', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       app.use(router.routes());
@@ -900,7 +901,7 @@ describe('router', function () {
     });
 
     it('runs parameter middleware in order of URL appearance', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router
@@ -946,7 +947,7 @@ describe('router', function () {
     });
 
     it('runs parent parameter middleware for subrouter', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       const subrouter = strapi.middlewares.router();
@@ -984,7 +985,7 @@ describe('router', function () {
 
   describe('router#opts', function () {
     it('responds with 200', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router({
         strict: true
       });
@@ -1009,7 +1010,7 @@ describe('router', function () {
     });
 
     it('should allow setting a prefix', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const routes = strapi.middlewares.router({
         prefix: '/things/:thing_id'
       });
@@ -1033,7 +1034,7 @@ describe('router', function () {
     });
 
     it('responds with 404 when has a trailing slash', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router({
         strict: true
       });
@@ -1059,7 +1060,7 @@ describe('router', function () {
 
   describe('use middleware with opts', function () {
     it('responds with 200', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router({
         strict: true
       });
@@ -1084,7 +1085,7 @@ describe('router', function () {
     });
 
     it('responds with 404 when has a trailing slash', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router({
         strict: true
       });
@@ -1110,7 +1111,7 @@ describe('router', function () {
 
   describe('router.routes()', function () {
     it('should return composed middleware', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       let middlewareCount = 0;
@@ -1156,9 +1157,9 @@ describe('router', function () {
     });
   });
 
-  describe('if no `HEAD` method, default to `GET`', function () {
+  describe('if no HEAD method, default to GET', function () {
     it('should default to GET', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.get('/users/:id', function * () {
@@ -1182,7 +1183,7 @@ describe('router', function () {
     });
 
     it('should work with middleware', function (done) {
-      const app = strapi.server();
+      const app = new Koa();
       const router = strapi.middlewares.router();
 
       router.get('/users/:id', function * () {
@@ -1241,7 +1242,7 @@ describe('router', function () {
         let middlewareCount = 0;
 
         before(function () {
-          const app = strapi.server();
+          const app = new Koa();
           const router = strapi.middlewares.router();
 
           router.get('/', function * () {
@@ -1327,7 +1328,7 @@ describe('router', function () {
       url.should.equal('/programming/how-to-node');
     });
 
-    it('escapes using `encodeURIComponent()`', function () {
+    it('escapes using encodeURIComponent()', function () {
       const router = strapi.middlewares.router;
 
       const url = router.url('/:category/:title', {
