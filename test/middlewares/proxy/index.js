@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const http = require('http');
 
 const request = require('supertest');
 
