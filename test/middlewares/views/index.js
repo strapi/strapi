@@ -23,25 +23,25 @@ describe('views', function () {
       .expect(404, done);
   });
 
-  // it('default to html', function (done) {
-  //   const app = new Koa();
-  //   const router = strapi.middlewares.router();
-  //
-  //   app.use(strapi.middlewares.views(path.resolve(__dirname, 'fixtures')));
-  //
-  //   router.get('/', function * () {
-  //     yield this.render('basic');
-  //   });
-  //
-  //   app.use(router.routes());
-  //   app.use(router.allowedMethods());
-  //
-  //   request(app.listen())
-  //     .get('/')
-  //     .expect('Content-Type', /html/)
-  //     .expect(/basic:html/)
-  //     .expect(200, done);
-  // });
+  it('default to html', function (done) {
+    const app = new Koa();
+    const router = strapi.middlewares.router();
+
+    app.use(strapi.middlewares.views(path.resolve(__dirname, 'fixtures')));
+
+    router.get('/', function * () {
+      yield this.render('basic');
+    });
+
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+
+    request(app.listen())
+      .get('/')
+      .expect('Content-Type', /html/)
+      .expect(/basic:html/)
+      .expect(200, done);
+  });
 
   it('default to ext if a default engine is set', function (done) {
     const app = new Koa();
