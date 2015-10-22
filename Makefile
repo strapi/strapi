@@ -9,9 +9,6 @@ TESTS = test/application/* \
 	test/middlewares/* \
 	test/experimental/index.js
 
-lint:
-	@./node_modules/.bin/eslint lib test
-
 test:
 	@NODE_ENV=test node \
 		./node_modules/.bin/_mocha \
@@ -19,7 +16,7 @@ test:
 		$(TESTS) \
 		--bail
 
-test-travis: lint
+test-travis:
 	@NODE_ENV=test node \
 		./node_modules/.bin/istanbul cover \
 		./node_modules/.bin/_mocha \
@@ -32,4 +29,4 @@ test-travis: lint
 bench:
 	@$(MAKE) -C benchmarks
 
-.PHONY: lint test bench
+.PHONY: test bench
