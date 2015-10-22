@@ -1,16 +1,9 @@
 # Roadmap
 
-**v1.2.0**:
-- Remove the open-source admin panel (this will be available again soon).
-- GraphQL support for the router and the ORM.
-- Add an email API.
-- Add a file upload API.
-- Improve generated APIs with blueprints.
-- Add a `$ strapi link` command.
-- Improve dependencies-negotiation between the framework and the generators.
-
 **v1.3.0**:
 - Auto restart the server on changes from the Studio.
+- Add remote admin panel.
+- JSON API support ([http://jsonapi.org/](http://jsonapi.org/)).
 
 **v1.4.0**:
 - Add resourceful Pub / Sub for models and routes via WebSockets.
