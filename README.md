@@ -1,4 +1,4 @@
-# Strapi
+# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
 
 [Website](http://strapi.io/) - [Getting Started](#user-content-getting-started-in-a-minute) - [Documentation](http://strapi.io/documentation) - [Support](http://strapi.io/support)
 

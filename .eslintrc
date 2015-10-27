@@ -1,9 +1,0 @@
-parser: babel-eslint
-
-extends: standard
-
-rules:
-  eqeqeq: 0
-  semi: [2, always]
-  space-before-function-paren: [2, never]
-  yoda: 0

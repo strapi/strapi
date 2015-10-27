@@ -179,7 +179,7 @@ describe('send', function () {
 
         app.use(function * () {
           const opts = {
-            root: 'test/fixtures'
+            root: 'test/middlewares/send/fixtures'
           };
 
           yield strapi.middlewares.send(this, '../../../../test/middlewares/send/fixtures/world/index.html', opts);
@@ -280,7 +280,8 @@ describe('send', function () {
       app.use(function * () {
         const opts = {
           root: 'test',
-          index: 'index.html'
+          index: 'index.html',
+          format: false
         };
 
         yield strapi.middlewares.send(this, 'middlewares/send/fixtures/world', opts);
@@ -327,6 +328,22 @@ describe('send', function () {
       request(app.listen())
         .get('/')
         .expect(200, done);
+    });
+
+    it('should 404 if no index', function (done) {
+      const app = new Koa();
+
+      app.use(function * () {
+        const opts = {
+          root: 'test'
+        };
+
+        yield strapi.middlewares.send(this, 'middlewares/send/fixtures/world', opts);
+      });
+
+      request(app.listen())
+        .get('/')
+        .expect(404, done);
     });
   });
 
@@ -386,7 +403,7 @@ describe('send', function () {
         request(app.listen())
           .get('/')
           .set('Accept-Encoding', 'gzip, deflate, identity')
-          .expect('Content-Length', 48)
+          .expect('Content-Length', 18)
           .expect('{ "name": "tobi" }')
           .expect(200, done);
       });
@@ -403,7 +420,7 @@ describe('send', function () {
         request(app.listen())
           .get('/')
           .set('Accept-Encoding', 'gzip, deflate, identity')
-          .expect('Content-Length', 48)
+          .expect('Content-Length', 18)
           .expect('{ "name": "tobi" }')
           .expect(200, done);
       });
