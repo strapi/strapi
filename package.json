@@ -92,7 +92,7 @@
     "statuses": "^1.2.1",
     "supertest": "^1.1.0",
     "test-console": "^1.0.0",
-    "xo": "^0.9.0"
+    "xo": "^0.10.0"
   },
   "xo": {
     "space": true,
@@ -129,6 +129,7 @@
       "no-extra-parens": 0,
       "no-implicit-coercion": 0,
       "no-invalid-this": 0,
+      "no-negated-condition": 0,
       "no-throw-literal": 0,
       "no-unused-expressions": 0,
       "padded-blocks": 0,
