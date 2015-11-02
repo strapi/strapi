@@ -117,11 +117,11 @@ module.exports = function () {
             }
 
             // Parse the RC file.
-            const currentJSON = JSON.parse(fs.readFileSync(path.resolve('config', 'global.json'), 'utf8'));
+            const currentJSON = JSON.parse(fs.readFileSync(path.resolve('config', 'studio.json'), 'utf8'));
             const newJSON = JSON.stringify(_.merge(currentJSON, {studio: {appId: res.body.appId}}), null, '  ');
 
-            // Write the new `./config/global.json` with credentials.
-            fs.writeFile(path.resolve('config', 'global.json'), newJSON, 'utf8', function (err) {
+            // Write the new `./config/studio.json` with credentials.
+            fs.writeFile(path.resolve('config', 'studio.json'), newJSON, 'utf8', function (err) {
               if (err) {
                 logger.error('Impossible to write the `appId`.');
                 process.exit(1);
