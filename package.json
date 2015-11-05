@@ -37,6 +37,7 @@
     "consolidate": "^0.13.1",
     "fs-extra": "^0.24.0",
     "graphql": "^0.4.9",
+    "herd": "^1.0.0",
     "include-all": "^0.1.6",
     "json-stringify-safe": "^5.0.1",
     "koa": "^1.1.0",

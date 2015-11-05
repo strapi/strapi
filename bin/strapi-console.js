@@ -8,6 +8,7 @@
 
 // Node.js core.
 const REPL = require('repl');
+const cluster = require('cluster');
 
 // Public node modules.
 const winston = require('winston');
@@ -36,7 +37,12 @@ module.exports = function () {
 
   // Now load up the Strapi framework for real.
   const strapi = server();
-  strapi.log.info('Starting the application in interactive mode...');
+
+  // Only log if the process is a master.
+  if (cluster.isMaster) {
+    strapi.log.info('Starting the application in interactive mode...');
+  }
+
   strapi.start({}, function (err) {
 
     // Log and exit the REPL in case there is an error
