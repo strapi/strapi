@@ -9,6 +9,7 @@ describe('app.toJSON()', function () {
 
     obj.should.eql({
       subdomainOffset: 2,
+      proxy: false,
       env: 'test'
     });
   });
