@@ -129,6 +129,7 @@
       "no-else-return": 0,
       "no-extra-parens": 0,
       "no-implicit-coercion": 0,
+      "no-inner-declarations": 0,
       "no-invalid-this": 0,
       "no-negated-condition": 0,
       "no-throw-literal": 0,
