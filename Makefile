@@ -6,8 +6,7 @@ TESTS = test/application/* \
 	test/context/* \
 	test/request/* \
 	test/response/* \
-	test/middlewares/* \
-	test/experimental/index.js
+	test/middlewares/*
 
 test:
 	@NODE_ENV=test node \
