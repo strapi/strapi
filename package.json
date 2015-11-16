@@ -78,7 +78,7 @@
     "strapi-generate-users": "^1.4.0",
     "unzip2": "^0.2.5",
     "waterline": "^0.10.26",
-    "waterline-graphql": "^1.0.1",
+    "waterline-graphql": "^1.1.0",
     "winston": "^2.1.0"
   },
   "devDependencies": {
