@@ -35,7 +35,9 @@ const logger = new (winston.Logger)({
 module.exports = function () {
   const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
   const pathToPackageJSON = path.resolve(process.cwd(), 'package.json');
+  const pathToStudioJSON = path.resolve(process.cwd(), 'config', 'studio.json');
   const appPkg = JSON.parse(fs.readFileSync(pathToPackageJSON));
+  const studioConfig = JSON.parse(fs.readFileSync(pathToStudioJSON));
   let invalidPackageJSON;
 
   // First, check if we are in a Strapi project.
@@ -86,7 +88,8 @@ module.exports = function () {
         uri: 'http://studio.strapi.io/app',
         body: {
           name: appPkg.name,
-          token: config.token
+          token: config.token,
+          appToDelete: studioConfig.studio.appId
         }
       },
 
