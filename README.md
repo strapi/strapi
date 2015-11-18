@@ -78,6 +78,9 @@ thanks to a powerful User Interface.
 Log into the Strapi Studio with your user account ([http://studio.strapi.io](http://studio.strapi.io))
 and follow the instructions to start the experience.
 
+![Strapi Studio](http://strapi.io/assets/screenshots/studio.png "Strapi Studio")
+*Simply manage your APIs and relations thanks to the Strapi Studio*
+
 ## Resources
 
 - [Roadmap](ROADMAP.md)
