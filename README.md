@@ -79,7 +79,17 @@ Log into the Strapi Studio with your user account ([http://studio.strapi.io](htt
 and follow the instructions to start the experience.
 
 ![Strapi Studio](http://strapi.io/assets/screenshots/studio.png "Strapi Studio")
-*Simply manage your APIs and relations thanks to the Strapi Studio*
+*Simply manage your APIs and relations thanks to the Strapi Studio.*
+
+## Manage your data
+
+Strapi comes with a simple but yet powerful dashboard.
+
+![Strapi Dashboard](http://strapi.io/assets/screenshots/create.png "Strapi Dashboard")
+*Create, read, update and delete your data.*
+
+![Strapi Dashboard](http://strapi.io/assets/screenshots/permissions.png "Strapi Dashboard")
+*Manage user settings, login, registration, groups and permissions on the fly.*
 
 ## Resources
 
