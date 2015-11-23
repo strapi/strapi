@@ -1,4 +1,4 @@
-# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
+# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) [![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 [Website](http://strapi.io/) - [Getting Started](#user-content-getting-started-in-a-minute) - [Documentation](http://strapi.io/documentation/introduction) - [Support](http://strapi.io/support)
 
