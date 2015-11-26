@@ -71,6 +71,7 @@
     "socket.io": "^1.3.7",
     "socket.io-client": "^1.3.7",
     "strapi-generate": "^1.4.0",
+    "strapi-generate-admin": "^1.4.0",
     "strapi-generate-api": "^1.4.0",
     "strapi-generate-email": "^1.4.0",
     "strapi-generate-new": "^1.4.0",
