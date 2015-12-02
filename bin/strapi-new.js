@@ -52,6 +52,13 @@ module.exports = function () {
     strapiPackageJSON: packageJSON
   };
 
+  // Save the `dry` option inside the scope.
+  if (scope.args[1] && scope.args[1].dry) {
+    scope.dry = true;
+  } else {
+    scope.dry = false;
+  }
+
   // Pass the original CLI arguments down to the generator
   // (but first, remove commander's extra argument)
   cliArguments.pop();
