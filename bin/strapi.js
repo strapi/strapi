@@ -44,6 +44,7 @@ cmd = program.command('new');
 cmd.unknownOption = NOOP;
 cmd.description('create a new application ');
 cmd.action(require('./strapi-new'));
+cmd.option('-d, --dry', 'naked Strapi application');
 
 // `$ strapi start`
 cmd = program.command('start');
