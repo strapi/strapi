@@ -24,7 +24,7 @@ $ npm install strapi -g
 ### Link to the Strapi Studio
 
 > We advise you to use our Studio to build APIs. To do so, you need to create a Strapi account.
-[Go to the Strapi Studio to signup](http://studio.strapi.io).
+[Go to the Strapi Studio to signup](http://localhost:1338).
 Studio is dedicated to developers to build applications without writing
 any single line of code thanks to its powerful set of tools.
 
@@ -91,7 +91,7 @@ $ strapi generate api car name:string year:integer license:string
 The Strapi Studio allows you to easily build and manage your application environment
 thanks to a powerful User Interface.
 
-Log into the Strapi Studio with your user account ([http://studio.strapi.io](http://studio.strapi.io))
+Log into the Strapi Studio with your user account ([http://localhost:1338](http://localhost:1338))
 and follow the instructions to start the experience.
 
 ![Strapi Studio](http://strapi.io/assets/screenshots/studio.png "Strapi Studio")
