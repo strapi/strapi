@@ -92,7 +92,7 @@ module.exports = function () {
         fs.readFile(path.resolve(HOME, '.strapirc'), 'utf8', function (noRcFile, config) {
           if (noRcFile) {
             logger.warn('You do not have a `.strapirc` file at `' + HOME + '`.');
-            logger.warn('First, you need to create an account on http://localhost:1338/');
+            logger.warn('First, you need to create an account on http://studio.strapi.io/');
             logger.warn('Then, execute `$ strapi login` to start the experience.');
             process.exit(1);
           }
@@ -106,7 +106,7 @@ module.exports = function () {
             preambleCRLF: true,
             postambleCRLF: true,
             json: true,
-            uri: 'http://localhost:1338/app',
+            uri: 'http://studio.strapi.io/app',
             body: {
               name: cliArguments[0],
               token: config.token
