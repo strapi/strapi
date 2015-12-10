@@ -1,9 +1,10 @@
 # Roadmap
 
-**v1.6.0**:
+**v2.0.0**:
+- Change ORM: from `waterline` to `sequelize`.
 - Content-negotiation on the request and respond either a JSON or a view.
+- Add JSON API support.
 - Add GraphQL mutations on blueprints.
 - Let the developers use custom global variables.
-
-**v1.7.0**:
-- Migration to Koa v2.0.0.
+- Migration from `koa@1.x.x` to `koa@2.x.x`.
+- Improve the UI of the admin panel.
