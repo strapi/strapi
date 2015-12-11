@@ -132,6 +132,7 @@
       "no-implicit-coercion": 0,
       "no-inner-declarations": 0,
       "no-invalid-this": 0,
+      "no-lonely-if": 0,
       "no-negated-condition": 0,
       "no-throw-literal": 0,
       "no-unused-expressions": 0,
