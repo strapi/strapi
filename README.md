@@ -55,7 +55,6 @@ This will generate a Strapi application without:
 - the built-in `user`, `email` and `upload` APIs,
 - the `grant` hook,
 - the open-source admin panel,
-- the Waterline ORM (`waterline` and `blueprints` hooks disabled),
 - the Strapi Studio connection (`studio` hook disabled).
 
 This feature allows you to only use Strapi for your HTTP server structure if you want to.

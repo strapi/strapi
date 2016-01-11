@@ -22,7 +22,6 @@
     "security",
     "socket.io",
     "sockets",
-    "waterline",
     "websockets"
   ],
   "directories": {
@@ -67,7 +66,6 @@
     "node-schedule": "~0.6.0",
     "prompt": "~0.2.14",
     "request": "~2.67.0",
-    "sails-disk": "~0.10.8",
     "socket.io": "~1.3.7",
     "socket.io-client": "~1.3.7",
     "strapi-generate": "~1.5.0",
@@ -78,8 +76,6 @@
     "strapi-generate-upload": "~1.5.0",
     "strapi-generate-users": "~1.5.0",
     "unzip2": "~0.2.5",
-    "waterline": "~0.10.28",
-    "waterline-graphql": "~1.1.0",
     "winston": "~2.1.1"
   },
   "devDependencies": {
