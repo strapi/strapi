@@ -1,4 +1,10 @@
-# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) [![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+# Strapi
+
+[![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi)
+[![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
+[![npm dependencies](https://david-dm.org/wistityhq/strapi.svg)](https://david-dm.org/wistityhq/strapi)
+[![Build status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
+[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 [Website](http://strapi.io/) - [Getting Started](#user-content-getting-started-in-a-minute) - [Documentation](http://strapi.io/documentation/introduction) - [Support](http://strapi.io/support)
 
