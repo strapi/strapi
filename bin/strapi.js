@@ -39,6 +39,10 @@ cmd = program.command('version');
 cmd.description('output your version of Strapi');
 cmd.action(program.versionInformation);
 
+/**
+ * Basic commands
+ */
+
 // `$ strapi new <name>`
 cmd = program.command('new');
 cmd.unknownOption = NOOP;
@@ -64,23 +68,15 @@ cmd.unknownOption = NOOP;
 cmd.description('open the Strapi framework console');
 cmd.action(require('./strapi-console'));
 
+/**
+ * Commands for the Strapi Studio
+ */
+
 // `$ strapi link`
 cmd = program.command('link');
 cmd.unknownOption = NOOP;
 cmd.description('link an existing application to the Strapi Studio');
 cmd.action(require('./strapi-link'));
-
-// `$ strapi config`
-cmd = program.command('config');
-cmd.unknownOption = NOOP;
-cmd.description('extend the Strapi framework with custom generators');
-cmd.action(require('./strapi-config'));
-
-// `$ strapi update`
-cmd = program.command('update');
-cmd.unknownOption = NOOP;
-cmd.description('pull the latest updates of your custom generators');
-cmd.action(require('./strapi-update'));
 
 // `$ strapi login`
 cmd = program.command('login');
@@ -93,6 +89,22 @@ cmd = program.command('logout');
 cmd.unknownOption = NOOP;
 cmd.description('logout your account from the Strapi Studio');
 cmd.action(require('./strapi-logout'));
+
+/**
+ * Customization commands
+ */
+
+// `$ strapi config`
+cmd = program.command('config');
+cmd.unknownOption = NOOP;
+cmd.description('extend the Strapi framework with custom generators');
+cmd.action(require('./strapi-config'));
+
+// `$ strapi update`
+cmd = program.command('update');
+cmd.unknownOption = NOOP;
+cmd.description('pull the latest updates of your custom generators');
+cmd.action(require('./strapi-update'));
 
 /**
  * Normalize help argument
