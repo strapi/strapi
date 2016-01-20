@@ -61,7 +61,6 @@
     "request": "~2.67.0",
     "socket.io": "~1.3.7",
     "socket.io-client": "~1.3.7",
-    "strapi-bookshelf": "~1.5.0",
     "unzip2": "~0.2.5",
     "winston": "~2.1.1"
   },
