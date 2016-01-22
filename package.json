@@ -41,6 +41,7 @@
     "herd": "~1.0.0",
     "include-all": "~0.1.6",
     "json-stringify-safe": "~5.0.1",
+    "jsonapi-serializer": "^2.0.4",
     "koa": "~1.1.2",
     "koa-bodyparser": "~2.0.1",
     "koa-compose": "~2.3.0",
