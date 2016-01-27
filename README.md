@@ -50,21 +50,6 @@ You now are able to use the Strapi CLI. Simply create your first application and
 $ strapi new <appName>
 ```
 
-Note that you can generate a dry application using the `dry` option:
-
-```bash
-$ strapi new <appName> --dry
-```
-
-This will generate a Strapi application without:
-
-- the built-in `user`, `email` and `upload` APIs,
-- the `grant` hook,
-- the open-source admin panel,
-- the Strapi Studio connection (`studio` hook disabled).
-
-This feature allows you to only use Strapi for your HTTP server structure if you want to.
-
 ### Start your application
 
 ```bash
