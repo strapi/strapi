@@ -1,4 +1,10 @@
-# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) [![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+# Strapi
+
+[![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi)
+[![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
+[![npm dependencies](https://david-dm.org/wistityhq/strapi.svg)](https://david-dm.org/wistityhq/strapi)
+[![Build status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
+[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 [Website](http://strapi.io/) - [Getting Started](#user-content-getting-started-in-a-minute) - [Documentation](http://strapi.io/documentation/introduction) - [Support](http://strapi.io/support)
 
@@ -43,22 +49,6 @@ You now are able to use the Strapi CLI. Simply create your first application and
 ```bash
 $ strapi new <appName>
 ```
-
-Note that you can generate a dry application using the `dry` option:
-
-```bash
-$ strapi new <appName> --dry
-```
-
-This will generate a Strapi application without:
-
-- the built-in `user`, `email` and `upload` APIs,
-- the `grant` hook,
-- the open-source admin panel,
-- the Waterline ORM (`waterline` and `blueprints` hooks disabled),
-- the Strapi Studio connection (`studio` hook disabled).
-
-This feature allows you to only use Strapi for your HTTP server structure if you want to.
 
 ### Start your application
 
