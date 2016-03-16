@@ -32,6 +32,7 @@
     "async": "~1.5.0",
     "consolidate": "~0.13.1",
     "grant-koa": "~3.5.3",
+    "graphql": "^0.4.18",
     "herd": "~1.0.0",
     "include-all": "~0.1.6",
     "jsonapi-serializer": "seyz/jsonapi-serializer",
