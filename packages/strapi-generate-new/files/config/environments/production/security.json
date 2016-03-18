@@ -1,0 +1,46 @@
+{
+  "session": {
+    "key": "myApp",
+    "secretKeys": [
+      "mySecretKey1"
+    ],
+    "maxAge": 86400000
+  },
+  "csrf": false,
+  "csp": false,
+  "p3p": false,
+  "hsts": {
+    "maxAge": 31536000,
+    "includeSubDomains": true
+  },
+  "xframe": "SAMEORIGIN",
+  "xssProtection": false,
+  "cors": {
+    "origin": true,
+    "expose": [
+      "WWW-Authenticate",
+      "Server-Authorization"
+    ],
+    "maxAge": 31536000,
+    "credentials": true,
+    "methods": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+      "HEAD"
+    ],
+    "headers": [
+      "Content-Type",
+      "Authorization"
+    ]
+  },
+  "ssl": false,
+  "ip": {
+    "whiteList": [],
+    "blackList": []
+  },
+  "proxy": false
+}

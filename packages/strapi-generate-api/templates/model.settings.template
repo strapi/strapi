@@ -1,0 +1,10 @@
+{
+  "connection": "<%= connection %>",
+  "tableName": "<%= id %>",
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "comment": ""
+  },
+  "attributes": {}
+}

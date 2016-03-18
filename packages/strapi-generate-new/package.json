@@ -1,0 +1,58 @@
+{
+  "name": "strapi-generate-new",
+  "version": "2.0.0",
+  "description": "Generate a new Strapi application.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "strapi"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "fs-extra": "~0.26.7",
+    "lodash": "~4.6.1",
+    "strapi-utils": "~2.0.0"
+  },
+  "devDependencies": {
+    "pre-commit": "~1.1.2",
+    "xo": "~0.13.0"
+  },
+  "author": {
+    "email": "hack@wistity.co",
+    "name": "Wistity team",
+    "url": "http://wistity.co"
+  },
+  "xo": {
+    "space": true,
+    "envs": [
+      "node"
+    ],
+    "rules": {
+      "quote-props": 0,
+      "strict": 0
+    }
+  },
+  "scripts": {
+    "test": "xo",
+    "prepublish": "npm prune"
+  },
+  "maintainers": [
+    {
+      "name": "Wistity team",
+      "email": "hack@wistity.co",
+      "url": "http://wistity.co"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wistityhq/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wistityhq/strapi/issues"
+  },
+  "license": "MIT"
+}

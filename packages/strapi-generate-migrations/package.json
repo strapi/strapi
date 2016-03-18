@@ -1,0 +1,72 @@
+{
+  "name": "strapi-generate-migrations",
+  "version": "2.0.0",
+  "description": "Generate migration files for a Strapi application.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "knex",
+    "migrations",
+    "sql",
+    "strapi",
+    "transactions"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "glob": "~7.0.3",
+    "js-beautify": "~1.6.2",
+    "knex": "~0.10.0",
+    "lodash": "~4.6.1",
+    "pluralize": "~1.2.1",
+    "strapi-bookshelf": "~2.0.0",
+    "strapi-utils": "~2.0.0"
+  },
+  "devDependencies": {
+    "pre-commit": "~1.1.2",
+    "xo": "~0.13.0"
+  },
+  "xo": {
+    "space": true,
+    "envs": [
+      "node"
+    ],
+    "rules": {
+      "brace-style": 0,
+      "camelcase": 0,
+      "consistent-return": 0,
+      "no-else-return": 0,
+      "no-negated-condition": 0,
+      "no-warning-comments": 0,
+      "padded-blocks": 0,
+      "strict": 0
+    }
+  },
+  "scripts": {
+    "test": "xo",
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hack@wistity.co",
+    "name": "Wistity team",
+    "url": "http://wistity.co"
+  },
+  "maintainers": [
+    {
+      "name": "Wistity team",
+      "email": "hack@wistity.co",
+      "url": "http://wistity.co"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wistityhq/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wistityhq/strapi/issues"
+  },
+  "license": "MIT"
+}

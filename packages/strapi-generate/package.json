@@ -1,0 +1,66 @@
+{
+  "name": "strapi-generate",
+  "version": "2.0.0",
+  "description": "Master of ceremonies for the Strapi generators.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "strapi"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "async": "~1.5.2",
+    "fs-extra": "~0.26.7",
+    "lodash": "~4.6.1",
+    "reportback": "~0.1.9",
+    "strapi-utils": "~2.0.0"
+  },
+  "devDependencies": {
+    "pre-commit": "~1.1.2",
+    "xo": "~0.13.0"
+  },
+  "xo": {
+    "space": true,
+    "envs": [
+      "node"
+    ],
+    "rules": {
+      "consistent-return": 0,
+      "no-else-return": 0,
+      "no-implicit-coercion": 0,
+      "no-negated-condition": 0,
+      "no-unused-vars": 0,
+      "padded-blocks": 0,
+      "space-infix-ops": 0,
+      "strict": 0
+    }
+  },
+  "scripts": {
+    "test": "xo",
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "name": "Wistity team",
+    "email": "hack@wistity.co",
+    "url": "http://wistity.co"
+  },
+  "maintainers": [
+    {
+      "name": "Wistity team",
+      "email": "hack@wistity.co",
+      "url": "http://wistity.co"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wistityhq/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wistityhq/strapi/issues"
+  },
+  "license": "MIT"
+}

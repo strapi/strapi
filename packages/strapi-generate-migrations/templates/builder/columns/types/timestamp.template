@@ -1,0 +1,5 @@
+
+// "timestamp" column named `<%= attribute %>`.
+// Defaults to `timestamptz` in PostgreSQL, unless `true` is passed as the
+// second argument.
+table.timestamp('<%= attribute %>')

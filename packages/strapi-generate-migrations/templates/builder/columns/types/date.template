@@ -1,0 +1,3 @@
+
+// "date" column named `<%= attribute %>`.
+table.date('<%= attribute %>')

@@ -1,0 +1,12 @@
+
+/**
+ * Select the `<%= tableName %>` table.
+ */
+
+connection.schema.table('<%= tableName %>', function (table) {
+  <% if (!_.isEmpty(attributes)) { _.forEach(attributes, function(details, attribute) { %><%= models[tableName].attributes[attribute].delete %>;
+  <% }); } %>
+}).catch(function (err) {
+  console.log('Impossible to select the `<%= tableName %>` table.');
+  console.log(err);
+}),
