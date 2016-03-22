@@ -266,7 +266,7 @@ module.exports = {
             // Array
             toSerialize[relation.alias] = {
               ref: PK,
-              included: strapi.config.jsonapi.included || false,
+              included: strapi.config.jsonapi.includedRelationshipData || true,
               ignoreRelationshipData: strapi.config.jsonapi.ignoreRelationshipData || false,
               typeForAttribute: relation.collection,
               attributes: ctx.state.filter.fields[relation.collection] || _.keys(_.omit(strapi.models[type].attributes, _.isFunction)),
