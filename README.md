@@ -21,13 +21,15 @@
 - **GraphQL implementation** for describing data requirements and interactions.
 - **JSON API specification** to increase productivity by following shared conventions.
 - **Smooth WebSockets** to handle realtime connections and events.
-- **Flexible SQL dialect** full schema builder for migrations, query builder, transactions, and a lot more.
+- **Flexible SQL dialect** with schema building for migrations, query building, transactions, and a lot more.
 - **Elegant SQL ORM** featuring relations, lifecycle events, etc.
 - **NoSQL support** if you need to plug specific data layers.
 
-Convinced? [Get started!](http://strapi.io/start/)
+Convinced? [Get started!](./docs/)
 
-## Community support
+## Support
+
+### Community support
 
 For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io/docs/). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
 
@@ -36,6 +38,10 @@ The community discussions take place [on Slack](http://slack.strapi.io).
 When opening [new issues](https://github.com/wistityhq/strapi/issues/new) or commenting on [existing issues](https://github.com/wistityhq/strapi/issues) on [GitHub](https://github.com/wistityhq/strapi), please make sure discussions are related to concrete technical issues of the Strapi framework.
 
 Also, you can follow and ping the Strapi team on [Twitter](https://twitter.com/strapijs) and [Facebook](https://www.facebook.com/Strapi-616063331867161).
+
+### Professional support
+
+[Wistity](http://wistity.co), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, certifications, customization, etc. [Drop us an email](mailto:support@wistity.co) or [schedule a meeting](https://calendly.com/wistityhq/) to see how we can help you.
 
 ## Badge board
 
@@ -50,6 +56,11 @@ Also, you can follow and ping the Strapi team on [Twitter](https://twitter.com/s
 | [strapi-generate-new](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-new) | [![npm version](https://img.shields.io/npm/v/strapi-generate-new.svg)](https://www.npmjs.org/package/strapi-generate-new) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-new.svg)](https://david-dm.org/wistityhq/strapi-generate-new) | [![Build status](https://travis-ci.org/wistityhq/strapi-generate-new.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-generate-new) |
 | [strapi-knex](https://github.com/wistityhq/strapi/tree/master/packages/strapi-knex) | [![npm version](https://img.shields.io/npm/v/strapi-knex.svg)](https://www.npmjs.org/package/strapi-knex) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-knex.svg)](https://david-dm.org/wistityhq/strapi-knex) | [![Build status](https://travis-ci.org/wistityhq/strapi-knex.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-knex) |
 | [strapi-utils](https://github.com/wistityhq/strapi/tree/master/packages/strapi-utils) | [![npm version](https://img.shields.io/npm/v/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-utils.svg)](https://david-dm.org/wistityhq/strapi-utils) | [![Build status](https://travis-ci.org/wistityhq/strapi-utils.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-utils) |
+
+## Resources
+
+- [Documentation](./docs)
+- [Legal info](./info)
 
 ## Links
 
