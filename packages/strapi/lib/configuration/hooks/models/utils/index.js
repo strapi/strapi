@@ -190,7 +190,7 @@ module.exports = {
         collection: association.collection,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: _.get(association, 'autoPopulate') === true
+        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true
       });
     } else if (association.hasOwnProperty('model')) {
       definition.associations.push({
@@ -199,7 +199,7 @@ module.exports = {
         model: association.model,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: _.get(association, 'autoPopulate') === true
+        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true
       });
     }
   }
