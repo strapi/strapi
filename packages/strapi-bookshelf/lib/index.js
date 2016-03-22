@@ -151,7 +151,14 @@ module.exports = function (strapi) {
           // Add every relationships to the loaded model for Bookshelf.
           // Basic attributes don't need this-- only relations.
           _.forEach(definition.attributes, function (details, name) {
-            switch (utilsModels.defineAssociations(globalName, definition, details, name)) {
+            const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
+
+            // Build associations key
+            if (!_.isEmpty(verbose)) {
+              utilsModels.defineAssociations(globalName, definition, details, name)
+            }
+
+            switch (verbose) {
               case 'hasOne':
                 // Looking for foreign key on one-to-one relation
                 const FK = _.findKey(strapi.models[details.model].attributes, function(details) {

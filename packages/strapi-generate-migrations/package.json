@@ -22,6 +22,7 @@
     "knex": "~0.10.0",
     "lodash": "~4.6.1",
     "pluralize": "~1.2.1",
+    "strapi": "~2.0.0",
     "strapi-bookshelf": "~2.0.0",
     "strapi-utils": "~2.0.0"
   },

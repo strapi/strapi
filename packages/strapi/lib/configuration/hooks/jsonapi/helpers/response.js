@@ -43,7 +43,7 @@ module.exports = {
     // Fetch and format value
     const value = this.fetchValue(ctx, object);
 
-    if (!_.isNull(value)) {
+    if (!_.isNull(value) && !_.isUndefined(value)) {
       ctx.response.body = yield this.serialize(ctx, type, object, value, matchedRoute);
     }
   },
@@ -328,11 +328,11 @@ module.exports = {
       case 'related':
       case 'relationships':
         if (_.isObject(data) || _.isArray(data) && data.hasOwnProperty(ctx.params.relation)) {
-          if (_.isArray(data[ctx.params.relation]) && _.size(data[ctx.params.relation]) > 1) {
-            return data[ctx.params.relation];
+          if (_.isArray(_.get(data, ctx.params.relation)) && _.size(_.get(data, ctx.params.relation)) > 1) {
+            return _.get(data, ctx.params.relation);
           }
 
-          return data[ctx.params.relation] || _.first(data[ctx.params.relation]);
+          return _.get(data, ctx.params.relation) || _.first(_.get(data, ctx.params.relation));
         }
 
         return null;

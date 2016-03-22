@@ -13,6 +13,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 // Bookshelf utils.
+const utilsModels = require('strapi/lib/configuration/hooks/models/utils/');
 const utilsBookShelf = require('strapi-bookshelf/lib/utils/');
 
 /**
@@ -23,7 +24,7 @@ module.exports = function (models, modelName, details, attribute) {
   let tplRelationUp;
   let tplRelationDown;
 
-  const infos = utilsBookShelf.getNature(details, attribute, models);
+  const infos = utilsModels.getNature(details, attribute, models);
 
   // If it's a "one-to-one" relationship.
   if (infos.verbose === 'hasOne') {
@@ -32,7 +33,7 @@ module.exports = function (models, modelName, details, attribute) {
     details.attribute = pluralize.singular(details.model);
 
     // Define PK column
-    details.column = utilsBookShelf.getPK(modelName, models);
+    details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
     // Template: create a new column thanks to the attribute's relation.
     // Simply make a `create` template for this attribute wich will be added
@@ -61,7 +62,7 @@ module.exports = function (models, modelName, details, attribute) {
     details.attribute = pluralize.singular(details.model);
 
     // Define PK column
-    details.column = utilsBookShelf.getPK(modelName, models);
+    details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
     if (infos.nature === 'oneToMany' || infos.nature === 'oneWay') {
       // Template: create a new column thanks to the attribute's relation.
@@ -124,8 +125,8 @@ module.exports = function (models, modelName, details, attribute) {
     details.attribute = pluralize.singular(details.collection);
 
     // Define PK column
-    details.column = utilsBookShelf.getPK(modelName, models);
-    relationship.column = utilsBookShelf.getPK(details.collection, models);
+    details.column = utilsBookShelf.getPK(modelName, undefined, models);
+    relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
 
     if (!models.hasOwnProperty(relationTable)) {
       // Save the relation table as a new model in the scope

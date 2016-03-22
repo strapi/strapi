@@ -94,6 +94,21 @@ module.exports = {
   },
 
   /**
+   * Update relation to a specific <%= id %>.
+   *
+   * @return {Object}
+   */
+
+  updateRelation: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.editRelation(this.params, this.request.body);
+    } catch (err) {
+      this.status = 400;
+      this.body = err;
+    }
+  },
+
+  /**
    * Destroy relation to a specific <%= id %>.
    *
    * @return {Object}

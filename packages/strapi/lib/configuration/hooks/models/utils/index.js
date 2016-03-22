@@ -7,6 +7,9 @@
 // Public node modules.
 const _ = require('lodash');
 
+// Node.js core
+const path = require('path');
+
 /*
  * Set of utils for models
  */
@@ -20,10 +23,14 @@ module.exports = {
   getPK: function (collectionIdentity, collection, models) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
-      const GraphQLFunctions = require('strapi-' + ORM + '/lib/utils/');
+      try {
+        const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
 
-      if (!_.isUndefined(GraphQLFunctions)) {
-        return GraphQLFunctions.getPK(collectionIdentity, collection, models || strapi.models);
+        if (!_.isUndefined(GraphQLFunctions)) {
+          return GraphQLFunctions.getPK(collectionIdentity, collection, models || strapi.models);
+        }
+      } catch (err) {
+        return undefined;
       }
     }
 
@@ -37,10 +44,16 @@ module.exports = {
   getCount: function (collectionIdentity) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
-      const ORMFunctions = require('strapi-' + ORM + '/lib/utils/');
+      try {
+        const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
 
-      if (!_.isUndefined(ORMFunctions)) {
-        return ORMFunctions.getCount(collectionIdentity);
+        const ORMFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
+
+        if (!_.isUndefined(ORMFunctions)) {
+          return ORMFunctions.getCount(collectionIdentity);
+        }
+      } catch (err) {
+        return undefined;
       }
     }
 

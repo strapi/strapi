@@ -18,7 +18,6 @@ module.exports = {
    */
 
   getPK: function (collectionIdentity, collection, models) {
-
     // This is not a Bookshelf collection, only the name.
     if (_.isString(collectionIdentity) && !_.isUndefined(models)) {
       const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), function(o) {
@@ -30,14 +29,20 @@ module.exports = {
       }
     }
 
-    // Collection undefined try to get the collection based on collectionIdentity
-    if (_.isUndefined(collection)) {
-      collection = _.get(strapi.bookshelf.collections, collectionIdentity);
-    }
+    try {
+      if (_.isObject(collection)) {
+        return collection.forge().idAttribute || 'id';
+      }
+    } catch (e) {
+      // Collection undefined try to get the collection based on collectionIdentity
+      if (typeof strapi !== 'undefined') {
+        collection = _.get(strapi.bookshelf.collections, collectionIdentity);
+      }
 
-    // Impossible to match collectionIdentity before, try to use idAttribute
-    if (_.isObject(collection)) {
-      return collection.forge().idAttribute || 'id';
+      // Impossible to match collectionIdentity before, try to use idAttribute
+      if (_.isObject(collection)) {
+        return collection.forge().idAttribute || 'id';
+      }
     }
 
     return 'id';

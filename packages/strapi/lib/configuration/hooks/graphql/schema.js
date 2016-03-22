@@ -68,14 +68,14 @@ module.exports = {
 
     _.forEach(this.defaults.collections, function (collection, rootKey) {
       // Identify queries related to this collection
-      const queries = _.pick(self.defaults.queryFields, function (query, key) {
+      const queries = _.pickBy(self.defaults.queryFields, function (query, key) {
         if (key.indexOf(rootKey) !== -1 || key.indexOf(_.capitalize(rootKey)) !== -1) {
           return true;
         }
       });
 
       // Identify mutations related to this collection
-      const mutations = _.pick(self.defaults.mutations, function (query, key) {
+      const mutations = _.pickBy(self.defaults.mutations, function (query, key) {
         if (key.indexOf(rootKey) !== -1 || key.indexOf(_.capitalize(rootKey)) !== -1) {
           return true;
         }
@@ -83,31 +83,25 @@ module.exports = {
 
       // Initialize query and mutations to empty array
       const value = {
-        queries: _.mapValues(queries, function () {
-          return [];
-        }),
-        mutations: _.mapValues(mutations, function () {
-          return [];
-        })
+        graphql: {
+          queries: _.mapValues(queries, function () {
+            return [];
+          }),
+          mutations: _.mapValues(mutations, function () {
+            return [];
+          })
+        }
       };
 
-      fs.readJson(path.join(strapi.config.appPath, 'api', rootKey, 'config', 'graphql.json'), function (err, rootValue) {
+      const rootValue = {
+        graphql: _.get(strapi.api, rootKey + '.config.graphql') || {}
+      }
 
-        // File doesn't exist
-        if (err && err.code === 'ENOENT' && err.syscall === 'open') {
-          rootValue = {};
-        } else if (err) {
+      // Override or write file
+      fs.writeJson(path.join(strapi.config.appPath, 'api', rootKey, 'config', 'graphql.json'), _.merge(value, rootValue), function (err) {
+        if (err) {
           console.log(err);
-
-          return;
         }
-
-        // Override or write file
-        fs.writeJson(path.join(strapi.config.appPath, 'api', rootKey, 'config', 'graphql.json'), _.merge(value, rootValue), function (err) {
-          if (err) {
-            console.log(err);
-          }
-        });
       });
     });
   },
@@ -184,7 +178,7 @@ module.exports = {
     const ORM = modelsUtils.getORM(key);
 
     if (!_.isUndefined(ORM) && _.isUndefined(_.get(this.defaults.functions, ORM))) {
-      _.set(this.defaults.functions, ORM, require('strapi-' + ORM + '/lib/utils/graphql'));
+      _.set(this.defaults.functions, ORM, require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils', 'graphql')));
     }
   },
 

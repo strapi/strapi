@@ -71,12 +71,6 @@ module.exports = function dataForRoutesJSON(scope) {
       policies: []
     };
 
-    newRoutes.routes['PATCH /' + scope.id + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'edit',
-      policies: []
-    };
-
     newRoutes.routes['DELETE /' + scope.id + '/:id'] = {
       controller: scope.globalID,
       action: 'destroy',
@@ -86,6 +80,12 @@ module.exports = function dataForRoutesJSON(scope) {
     newRoutes.routes['POST /' + scope.id + '/:id/relationships/:relation'] = {
       controller: scope.globalID,
       action: 'createRelation',
+      policies: []
+    };
+
+    newRoutes.routes['PATCH /' + scope.id + '/:id/relationships/:relation'] = {
+      controller: scope.globalID,
+      action: 'updateRelation',
       policies: []
     };
 

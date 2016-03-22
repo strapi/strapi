@@ -32,7 +32,7 @@ module.exports = {
     }
 
     if (type.toLowerCase() === 'queries' || type.toLowerCase() === 'mutations') {
-      const policies = _.get(strapi.api, model.toLowerCase() + '.config.' + type.toLowerCase() + '.' + _.camelCase(action));
+      const policies = _.get(strapi.api, model.toLowerCase() + '.config.graphql.' + type.toLowerCase() + '.' + _.camelCase(action));
 
       // Invalid model or action.
       if (_.isUndefined(policies)) {
