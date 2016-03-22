@@ -11,6 +11,7 @@
     "enabled": false,
     "keyForAttribute": "dash-case",
     "ignoreRelationshipData": true,
+    "includedRelationshipData": true,
     "paginate": 10,
     "showVersion": false
   },

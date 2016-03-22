@@ -206,7 +206,7 @@ module.exports = function (strapi) {
                 }
 
                 loadedModel[name] = function () {
-                  return this.belongsToMany(global[_.capitalize(details.collection)], tableName, details.attribute + '_' + details.column, relationship.attribute + '_' + relationship.column);
+                  return this.belongsToMany(global[_.capitalize(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                 };
                 break;
 
