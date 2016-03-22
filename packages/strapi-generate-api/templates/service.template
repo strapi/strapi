@@ -2,6 +2,7 @@
 
 // Public dependencies
 const _ = require('lodash');
+const utils = require('strapi-bookshelf/lib/utils/');
 
 /**
  * A set of functions called "actions" for `<%= globalID %>`
