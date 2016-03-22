@@ -31,7 +31,7 @@ Convinced? [Get started!](./docs/)
 
 ### Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io/docs/). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
+For general help using Strapi, please refer to [the official Strapi documentation](./docs/). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
 
 The community discussions take place [on Slack](http://slack.strapi.io).
 
