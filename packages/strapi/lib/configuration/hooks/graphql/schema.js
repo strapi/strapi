@@ -38,7 +38,7 @@ module.exports = {
 
   getGraphQLSchema: function (params, cb) {
     if (_.isEmpty(params.collections)) {
-      return 'Error: Empty object collections';
+      return cb('GraphQL server has not been started because there are no models', null);
     }
 
     // Set defaults properties
@@ -53,7 +53,7 @@ module.exports = {
     }, _.isNull));
 
     // Return schema
-    cb(Schema);
+    cb(null, Schema);
 
     // Build policies
     this.buildPolicies();

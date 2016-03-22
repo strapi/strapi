@@ -42,8 +42,14 @@ module.exports = function (strapi) {
       // Define GraphQL route to GraphQL schema
       if (this.defaults.graphql.enabled === true) {
         require('./schema').getGraphQLSchema(_.assign({
-          collections: strapi.bookshelf.collections
-        }, strapi.config.graphql), function (schemas) {
+          collections: strapi.bookshelf.collections || {}
+        }, strapi.config.graphql), function (err, schemas) {
+          if (err) {
+            strapi.log.warn(err);
+            console.log();
+
+            return cb();
+          }
 
           // Mount GraphQL server
           strapi.app.use(strapi.middlewares.mount(self.defaults.graphql.route, strapi.middlewares.graphql((request, context) => ({
