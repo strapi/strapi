@@ -41,7 +41,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
   }
 
   // Create when it's not an onlyDrop action
-  if (_.isUndefined(onlyDrop) || onlyDrop === false) {
+  if (_.isUndefined(onlyDrop)) {
     models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplTypeCreate)({
       tableName: modelName,
       attribute: attribute,
@@ -84,7 +84,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     }
 
     // Create when it's not an onlyDrop action
-    if (_.isUndefined(onlyDrop) || onlyDrop === false) {
+    if (_.isUndefined(onlyDrop)) {
       // Template: delete a specific column.
       models[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplTypeDelete)({
         tableName: modelName,

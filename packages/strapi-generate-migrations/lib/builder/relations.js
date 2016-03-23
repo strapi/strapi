@@ -26,13 +26,15 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
 
   const infos = utilsModels.getNature(details, attribute, models);
 
+  _.set(models[modelName].attributes, attribute + '.create', {});
+  _.set(models[modelName].attributes, attribute + '.delete', {});
+
   // If it's a "one-to-one" relationship.
   if (infos.verbose === 'hasOne') {
-
-    // Force singular foreign key
+    // Force singular foreign key.
     details.attribute = pluralize.singular(details.model);
 
-    // Define PK column
+    // Define PK column.
     details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
     // Template: create a new column thanks to the attribute's relation.
@@ -40,7 +42,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     // to the table template-- either `./builder/tables/selectTable` or
     // `./builder/tables/createTableIfNotExists`.
     tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
-    models[modelName].attributes[attribute].create = _.unescape(_.template(tplRelationUp)({
+    models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
       tableName: modelName,
       attribute: attribute,
       details: details
@@ -50,18 +52,16 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     // Simply make a `delete` template for this attribute wich drop the column
     // with the `./builder/columns/dropColumn` template.
     tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
-    models[modelName].attributes[attribute].delete = _.unescape(_.template(tplRelationDown)({
+    models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
       tableName: modelName,
       attribute: attribute,
       details: details
     }));
-  }
-
-  else if (infos.verbose === 'belongsTo') {
-    // Force singular foreign key
+  } else if (infos.verbose === 'belongsTo') {
+    // Force singular foreign key.
     details.attribute = pluralize.singular(details.model);
 
-    // Define PK column
+    // Define PK column.
     details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
     if (infos.nature === 'oneToMany' || infos.nature === 'oneWay') {
@@ -70,7 +70,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
       // to the table template-- either `./builder/tables/selectTable` or
       // `./builder/tables/createTableIfNotExists`.
       tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
-      models[modelName].attributes[attribute].create = _.unescape(_.template(tplRelationUp)({
+      models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
         tableName: modelName,
         attribute: attribute,
         details: details,
@@ -81,7 +81,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
       // Simply make a `delete` template for this attribute wich drop the column
       // with the `./builder/columns/dropColumn` template.
       tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
-      models[modelName].attributes[attribute].delete = _.unescape(_.template(tplRelationDown)({
+      models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
         tableName: modelName,
         attribute: attribute,
         details: details
@@ -92,7 +92,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
       // to the table template-- either `./builder/tables/selectTable` or
       // `./builder/tables/createTableIfNotExists`.
       tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo-unique.template'), 'utf8');
-      models[modelName].attributes[attribute].create = _.unescape(_.template(tplRelationUp)({
+      models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
         tableName: modelName,
         attribute: attribute,
         details: details
@@ -102,32 +102,32 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
       // Simply make a `delete` template for this attribute wich drop the column
       // with the `./builder/columns/dropColumn` template.
       tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
-      models[modelName].attributes[attribute].delete = _.unescape(_.template(tplRelationDown)({
+      models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
         tableName: modelName,
         attribute: attribute,
         details: details
       }));
     }
-  }
+  } else if (infos.verbose === 'belongsToMany') {
+    // Otherwise if it's a "many-to-many" relationship.
 
-  // Otherwise if it's a "many-to-many" relationship.
-  else if (infos.verbose === 'belongsToMany') {
     // Save the relationship.
     const relationship = models[details.collection].attributes[details.via];
 
-    // Construct relation table name
+    // Construct relation table name.
     const relationTable = _.map(_.sortBy([relationship, details], 'collection'), function (table) {
       return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
     }).join('__');
 
-    // Force singular foreign key
+    // Force singular foreign key.
     relationship.attribute = pluralize.singular(relationship.collection);
     details.attribute = pluralize.singular(details.collection);
 
-    // Define PK column
+    // Define PK column.
     details.column = utilsBookShelf.getPK(modelName, undefined, models);
     relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
 
+    // Avoid to create table both times.
     if (!models.hasOwnProperty(relationTable)) {
       // Save the relation table as a new model in the scope
       // aiming to benefit of templates for the table such as

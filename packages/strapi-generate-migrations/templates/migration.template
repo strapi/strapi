@@ -11,7 +11,7 @@ exports.up = function(connection, Promise) {
   <% var dropped = false;
 
     _.forEach(models, function (definition, model) {
-      if (!_.isUndefined(_.get(models[model], 'up.drop'))) {
+      if (!_.isEmpty(_.get(models[model], 'up.drop'))) {
         dropped = true;
       }
     });
@@ -41,7 +41,7 @@ exports.down = function(connection, Promise) {
   <% var dropped = false;
 
     _.forEach(models, function (definition, model) {
-      if (!_.isUndefined(_.get(models[model], 'down.drop'))) {
+      if (!_.isEmpty(_.get(models[model], 'down.drop'))) {
         dropped = true;
       }
     });
