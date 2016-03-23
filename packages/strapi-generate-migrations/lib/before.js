@@ -130,8 +130,30 @@ module.exports = function (scope, cb) {
             // Set new attributes object
             _.set(scope.models[modelName], 'newAttributes', {});
 
-            // Parse every attribute.
-            _.forEach(scope.models[modelName].attributes, function (details, attribute) {
+            // Identity added, updated and removed attributes
+            const attributesRemoved = _.difference(_.keys(scope.models[modelName].oldAttributes), _.keys(scope.models[modelName].attributes));
+            const attributesAddedOrUpdated = _.difference(_.keys(scope.models[modelName].attributes), attributesRemoved);
+
+            // Parse every attribute which has been removed.
+            _.forEach(attributesRemoved, function (attribute) {
+              const details = scope.models[modelName].oldAttributes[attribute];
+
+              // Save the attribute as a new attribute.
+              scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
+
+              // Builder: create template for each attribute-- either with a column type
+              // or with a relationship.
+              if (details.type && _.isString(details.type)) {
+                builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true);
+              } else if (_.isString(details.collection) || _.isString(details.model)) {
+                builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true);
+              }
+            });
+
+            // Parse every attribute which has been added or updated.
+            _.forEach(attributesAddedOrUpdated, function (attribute) {
+              const details = scope.models[modelName].attributes[attribute];
+
               // If it's a new attribute.
               if (!scope.models[modelName].oldAttributes.hasOwnProperty(attribute)) {
                 // Save the attribute as a new attribute.

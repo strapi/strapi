@@ -20,7 +20,7 @@ const utilsBookShelf = require('strapi-bookshelf/lib/utils/');
  * Relationship templates
  */
 
-module.exports = function (models, modelName, details, attribute) {
+module.exports = function (models, modelName, details, attribute, toDrop, onlyDrop) {
   let tplRelationUp;
   let tplRelationDown;
 

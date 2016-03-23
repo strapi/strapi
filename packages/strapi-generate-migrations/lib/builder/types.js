@@ -15,7 +15,7 @@ const _ = require('lodash');
  * Template types
  */
 
-module.exports = function (models, modelName, details, attribute, toDrop) {
+module.exports = function (models, modelName, details, attribute, toDrop, onlyDrop) {
 
   // Template: create a new column thanks to the attribute's type.
   // Firt, make sure we know the attribute type. If not, just do it
@@ -30,7 +30,7 @@ module.exports = function (models, modelName, details, attribute, toDrop) {
   const tplTypeDelete = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
 
   // UP
-  models[modelName].attributes[attribute].create = {};
+  _.set(models[modelName].attributes, attribute + '.create', {});
 
   if (!_.isUndefined(toDrop) && toDrop) {
     // Template: delete a specific column.
@@ -40,11 +40,14 @@ module.exports = function (models, modelName, details, attribute, toDrop) {
     }));
   }
 
-  models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplTypeCreate)({
-    tableName: modelName,
-    attribute: attribute,
-    details: details
-  }));
+  // Create when it's not an onlyDrop action
+  if (_.isUndefined(onlyDrop) || onlyDrop === false) {
+    models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplTypeCreate)({
+      tableName: modelName,
+      attribute: attribute,
+      details: details
+    }));
+  }
 
   // Template: make the column chainable with the `defaultTo` template
   // if a default value is needed.
@@ -70,7 +73,7 @@ module.exports = function (models, modelName, details, attribute, toDrop) {
   }
 
   // DOWN
-  models[modelName].attributes[attribute].delete = {};
+  _.set(models[modelName].attributes, attribute + '.delete', {});
 
   if (!_.isUndefined(toDrop) && toDrop) {
     let tplTypeDeleteCreate;
@@ -80,11 +83,14 @@ module.exports = function (models, modelName, details, attribute, toDrop) {
       tplTypeDeleteCreate = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'types', 'specificType.template'), 'utf8');
     }
 
-    // Template: delete a specific column.
-    models[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplTypeDelete)({
-      tableName: modelName,
-      attribute: attribute
-    }));
+    // Create when it's not an onlyDrop action
+    if (_.isUndefined(onlyDrop) || onlyDrop === false) {
+      // Template: delete a specific column.
+      models[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplTypeDelete)({
+        tableName: modelName,
+        attribute: attribute
+      }));
+    }
 
     models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplTypeDeleteCreate)({
       tableName: modelName,
