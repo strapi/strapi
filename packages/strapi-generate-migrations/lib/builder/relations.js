@@ -12,7 +12,7 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-// Bookshelf utils.
+// Collections utils.
 const utilsModels = require('strapi/lib/configuration/hooks/models/utils/');
 const utilsBookShelf = require('strapi-bookshelf/lib/utils/');
 
