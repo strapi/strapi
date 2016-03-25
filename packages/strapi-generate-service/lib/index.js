@@ -15,8 +15,8 @@ module.exports = {
   templatesDirectory: path.resolve(__dirname, '..', 'templates'),
   before: require('./before'),
   targets: {
-    'api/:api/policies/:filename': {
-      template: 'policy.template'
+    'api/:api/services/:filename': {
+      template: 'service.template'
     }
   }
 };

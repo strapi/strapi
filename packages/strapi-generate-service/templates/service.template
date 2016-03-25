@@ -1,0 +1,9 @@
+'use strict';
+
+/**
+ * `<%= id %>` service.
+ */
+
+exports.<%= id %> = function () {
+  
+};
