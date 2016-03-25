@@ -11,13 +11,13 @@ Generators are designed to make it easier to customize the `$ strapi new` and `$
 Strapi comes with a generator for generator. Simply run:
 
 ```bash
-$ strapi generate generator <myGenerator>
+$ strapi generate:generator <myGenerator>
 ```
 
 For example you can have:
 
 ```bash
-$ strapi generate generator blog
+$ strapi generate:generator blog
 ```
 
 This will generate a `strapi-generate-blog` directory with the default files for a generator.
@@ -38,6 +38,7 @@ At this time, you don't have any custom generators on your machine.
 
 In your `.strapirc` file, a custom generator is an object with three keys:
 
+- `description`: the description of your generator.
 - `repository`: the Git repository to clone.
 - `remote`: the current remote to pull updates from.
 - `branch`: the branch you want to pull updates from.
@@ -48,6 +49,7 @@ For example, to add a custom `blog` generator, follow this:
 {
   "generators": {
     "blog": {
+      "description": "generate a blog inside a Strapi application",
       "repository": "git@github.com:username/strapi-generate-blog.git",
       "remote": "origin",
       "branch": "master"
@@ -67,5 +69,5 @@ This command will clone every new repository written in your configuration file 
 Following the previous example, you can generate your `blog` files inside a project with:
 
 ```bash
-$ strapi generate blog
+$ strapi generate:blog
 ```

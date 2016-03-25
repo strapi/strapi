@@ -12,9 +12,6 @@ const path = require('path');
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
-// Local Strapi dependencies.
-const packageJSON = require('../package.json');
-
 // Logger.
 const logger = require('strapi-utils').logger;
 
@@ -28,7 +25,6 @@ module.exports = function () {
 
   // Pass the original CLI arguments down to the generator
   // (but first, remove commander's extra argument).
-  // Also peel off the `generatorType` arg.
   const cliArguments = Array.prototype.slice.call(arguments);
   cliArguments.pop();
 
@@ -36,14 +32,18 @@ module.exports = function () {
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
-    generatorType: cliArguments.shift(),
-    generatorName: process.argv[2],
-    args: cliArguments,
-    strapiPackageJSON: packageJSON
+    args: cliArguments
   };
 
+  // Register the generator type.
+  // It can be a controller, model, service, etc.
+  scope.generatorType = process.argv[2].split(':')[1];
+
+  // Register the name.
+  scope.generatorName = cliArguments[1]
+
   // Check that we're in a valid Strapi project.
-  if (scope.generatorType !== 'new') {
+  if (scope.generatorType !== 'new' || scope.generatorType !== 'generator' || scope.generatorType !== 'hook') {
     const pathToPackageJSON = path.resolve(scope.rootPath, 'package.json');
     let invalidPackageJSON;
 
@@ -54,13 +54,13 @@ module.exports = function () {
     }
 
     if (invalidPackageJSON) {
-      return logger.error('This command can only be used inside an Strapi project.');
+      return logger.error('This command can only be used inside a Strapi project.');
     }
   }
 
   // Show usage if no generator type is defined.
   if (!scope.generatorType) {
-    return logger.error('Write `$ strapi generate [something]` instead.');
+    return logger.error('Write `$ strapi generate:something` instead.');
   }
 
   // Return the scope and the response (`error` or `success`).

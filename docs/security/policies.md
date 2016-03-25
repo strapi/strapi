@@ -32,7 +32,7 @@ Each policy file should contain a single function. When it comes down to it, pol
 For example you can generate a policy named `isAuthenticated` for the `user` API using the CLI:
 
 ```bash
-$ strapi generate policy isAuthenticated --user
+$ strapi generate:policy isAuthenticated user
 ```
 
 Do not forget to yield `next` when you need to move on.

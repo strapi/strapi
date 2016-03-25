@@ -7,5 +7,5 @@ Services can be thought of as libraries which contain functions that you might w
 For example you can generate a service named `sendEmail` for the `email` API using the CLI:
 
 ```bash
-$ strapi generate service sendEmail --email
+$ strapi generate:service sendEmail email
 ```

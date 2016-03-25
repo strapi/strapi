@@ -9,7 +9,7 @@ Before you start: make sure you've installed the Strapi node module-- it should 
 First, we need to create a directory to hold your application:
 
 ```bash
-$ strapi new <appName>
+$ strapi new appName
 ```
 
 ## Start your application
@@ -17,7 +17,7 @@ $ strapi new <appName>
 To run the server, make that your working directory and simply start your application:
 
 ```bash
-$ cd <appName>
+$ cd appName
 $ strapi start
 ```
 

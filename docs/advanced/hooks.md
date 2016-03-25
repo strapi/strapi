@@ -14,7 +14,7 @@ There are two types of hooks available in Strapi:
 You can easily generate an installable hooks using:
 
 ```bash
-$ strapi generate hook <hookName>
+$ strapi generate:hook hookName
 ```
 
 A generated hook comes with every function written to be fully compatible with the models, GraphQL and JSON API specifications.

@@ -28,3 +28,9 @@ $ strapi -v
 If the command doesn't print a version but an error, the installation failed.
 
 If you don't encounter any error you now are able to start using Strapi.
+
+You can print out all `strapi` commands with:
+
+```bash
+$ strapi
+```

@@ -7,13 +7,13 @@ title: Your first API
 It's pretty simple to generate an API with the Strapi CLI:
 
 ```bash
-$ strapi generate api <apiName>
+$ strapi generate:api apiName
 ```
 
-For example, you can create a `car` API with a name (`name`), year (`year`) and the license plate (`license`):
+For example, you can create a `car` API with:
 
 ```bash
-$ strapi generate api car name:string year:integer license:string
+$ strapi generate:api car
 ```
 
 ## Update your database
@@ -25,7 +25,7 @@ Migrations allow you to define sets of schema changes so upgrading a database is
 To generate a migration file run:
 
 ```bash
-$ strapi migrate:make <connection_name> <migration_name>
+$ strapi migrate:make connection_name migration_name
 ```
 
 For example, if you want to create a migration file named `new_car_model` for the `car` API we just generated using the `default` connection the command looks like:
@@ -41,7 +41,7 @@ Be careful, migrations are automatically generated based on your current databas
 Once you have finished writing the migrations, you can update the database by running:
 
 ```bash
-$ strapi migrate:run <connection_name>
+$ strapi migrate:run connection_name
 ```
 
 So if you want to run the previous migration generated for the `default` connection you need to run:
