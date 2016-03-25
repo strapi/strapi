@@ -6,7 +6,13 @@
 [![Build status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
-[Strapi](http://strapi.io/) is an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
+## Why Strapi ?
+
+At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development.
+
+The way we challenge the status quo of web development is by making our products simple to use, user friendly and production-ready.
+
+To reach our goals, we needed to create [Strapi](http://strapi.io/), an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
 
 [Strapi](http://strapi.io/) enables developers to focus on writing reusable application logic instead of spending time building infrastructure. It is designed for building practical, production-ready Node.js applications in a matter of hours instead of weeks.
 
