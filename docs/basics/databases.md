@@ -19,7 +19,7 @@ The following SQL databases are supported:
 - SQLite (client: `sqlite3`)
 - MySQL (clients: `mysql` or `mysql2`)
 - MariaDB (client: `mariasql`)
-- PostgreSQL (client: `postgresql`)
+- PostgreSQL (client: `pg`)
 - Oracle (clients: `oracle` or `strong-oracle`)
 - Microsoft SQL Server (client: `mssql`)
 - WebSQL (client: `websql`)
@@ -30,7 +30,7 @@ Example:
 {
   "connections": {
     "default": {
-      "client": "postgresql"
+      "client": "pg"
     }
   }
 }
@@ -46,7 +46,7 @@ Example:
 {
   "connections": {
     "default": {
-      "client": "postgresql",
+      "client": "pg",
       "connection": {
         "host": "127.0.0.1",
         "user": "username",
@@ -72,7 +72,7 @@ Example:
 ```js
 {
   "connections": {
-    "client": "postgresql",
+    "client": "pg",
     "connection": {
       "host": "127.0.0.1",
       "user": "username",
@@ -100,7 +100,7 @@ Example:
 {
   "connections": {
     "default": {
-      "client": "postgresql",
+      "client": "pg",
       "connection": {
         "host": "127.0.0.1",
         "user": "username",
@@ -135,7 +135,7 @@ Example:
 {
   "connections": {
     "default": {
-      "client": "postgresql",
+      "client": "pg",
       "connection": {
         "host": "127.0.0.1",
         "user": "username",
@@ -167,7 +167,7 @@ Example:
 {
   "connections": {
     "default": {
-      "client": "postgresql",
+      "client": "pg",
       "connection": {
         "host": "127.0.0.1",
         "user": "username",
