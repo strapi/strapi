@@ -90,6 +90,7 @@ Options (for each provider):
 - `scope` (array): Array of OAuth scopes to request
 - `callback` (string): Specific callback to use for this provider.
 - `custom_params` (object): Some providers may employ custom authorization parameters outside of the ones specified in the configuration section. You can pass those custom parameters using the `custom_params` option:
+  
   ```js
   {
     "authentication": {
