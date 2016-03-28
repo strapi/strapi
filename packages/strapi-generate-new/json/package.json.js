@@ -33,14 +33,12 @@ module.exports = function dataForPackageJSON(scope) {
     'dependencies': {
       'async': getDependencyVersion(frameworkPkg, 'async'),
       'lodash': getDependencyVersion(frameworkPkg, 'lodash'),
+      'knex': getDependencyVersion(knexPkg, 'knex'),
       'socket.io': getDependencyVersion(frameworkPkg, 'socket.io'),
       'sqlite3': getDependencyVersion(knexPkg, 'sqlite3'),
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-bookshelf': getDependencyVersion(cliPkg, 'strapi-bookshelf'),
       'strapi-knex': getDependencyVersion(cliPkg, 'strapi-knex')
-    },
-    'devDependencies': {
-      'knex': getDependencyVersion(knexPkg, 'knex')
     },
     'main': './server.js',
     'scripts': {
