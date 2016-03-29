@@ -6,6 +6,9 @@
   "keywords": [
     "dictionary",
     "knex",
+    "strapi",
+    "utilities",
+    "utils",
     "winston"
   ],
   "directories": {
@@ -19,23 +22,7 @@
     "lodash": "~4.6.1",
     "winston": "~2.2.0"
   },
-  "devDependencies": {
-    "xo": "~0.13.0"
-  },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "globals": [
-      "strapi"
-    ],
-    "rules": {
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {

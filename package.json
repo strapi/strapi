@@ -1,0 +1,58 @@
+{
+  "private": true,
+  "version": "2.0.0",
+  "devDependencies": {
+    "expect.js": "~0.3.1",
+    "istanbul": "^0.4.2",
+    "mocha": "~2.4.5",
+    "pre-commit": "~1.1.2",
+    "request": "~2.69.0",
+    "should": "~8.3.0",
+    "xo": "~0.13.0"
+  },
+  "xo": {
+    "space": true,
+    "envs": [
+      "node"
+    ],
+    "globals": [
+      "strapi"
+    ],
+    "ignore": [
+      "packages/**/test/**"
+    ],
+    "rules": {
+      "no-unused-expressions": 0,
+      "padded-blocks": 0,
+      "prefer-template": 0,
+      "strict": 0
+    }
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "author": {
+    "email": "hack@wistity.co",
+    "name": "Wistity team",
+    "url": "http://wistity.co"
+  },
+  "maintainers": [
+    {
+      "name": "Wistity team",
+      "email": "hack@wistity.co",
+      "url": "http://wistity.co"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wistityhq/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wistityhq/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

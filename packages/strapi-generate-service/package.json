@@ -16,22 +16,7 @@
   "dependencies": {
     "lodash": "~4.6.1"
   },
-  "devDependencies": {
-    "pre-commit": "~1.1.2",
-    "xo": "~0.13.0"
-  },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "rules": {
-      "consistent-return": 0,
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {

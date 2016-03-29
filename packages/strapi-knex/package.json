@@ -20,26 +20,10 @@
     "lodash": "~4.6.1",
     "sqlite3": "~3.1.1"
   },
-  "devDependencies": {
-    "xo": "~0.13.0"
-  },
   "strapi": {
     "isHook": true
   },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "globals": [
-      "strapi"
-    ],
-    "rules": {
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {
