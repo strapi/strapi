@@ -7,13 +7,11 @@
 
 ## Why Strapi ?
 
-At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development.
+> At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
 
-The way we challenge the status quo of web development is by making our products simple to use, user friendly and production-ready.
+Web and mobile applications needed a powerful, simple to use and production-ready API-driven framework. That's why we created Strapi, an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
 
-To reach our goals, we needed to create [Strapi](http://strapi.io/), an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
-
-[Strapi](http://strapi.io/) enables developers to focus on writing reusable application logic instead of spending time building infrastructure. It is designed for building practical, production-ready Node.js applications in a matter of hours instead of weeks.
+Strapi enables developers to focus on writing reusable application logic instead of spending time building infrastructure. It is designed for building practical, production-ready Node.js applications in a matter of hours instead of weeks.
 
 ## Features
 
@@ -30,7 +28,7 @@ To reach our goals, we needed to create [Strapi](http://strapi.io/), an open-sou
 - **Elegant SQL ORM** featuring relations, lifecycle events, etc.
 - **NoSQL support** if you need to plug specific data layers.
 
-Convinced? [Get started!](./docs/)
+Convinced? [Get started!](http://strapi.io/)
 
 ## Support
 
@@ -46,32 +44,27 @@ Also, you can follow and ping the Strapi team on [Twitter](https://twitter.com/s
 
 ### Professional support
 
-[Wistity](http://wistity.co), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, certifications, customization, etc. [Drop us an email](mailto:support@wistity.co) or [schedule a meeting](https://calendly.com/wistityhq/) to see how we can help you.
+[Wistity](http://wistity.co), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, certifications, customization, etc. [Drop us an email](mailto:support@wistity.co) to see how we can help you.
 
 ## Badge board
 
 | Package | Version | Dependencies |
 |---------|---------|--------------|
-| [strapi](https://github.com/wistityhq/strapi/tree/master/packages/strapi) | [![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi) | [![npm dependencies](https://david-dm.org/wistityhq/strapi.svg)](https://david-dm.org/wistityhq/strapi) |
-| [strapi-bookshelf](https://github.com/wistityhq/strapi/tree/master/packages/strapi-bookshelf) | [![npm version](https://img.shields.io/npm/v/strapi-bookshelf.svg)](https://www.npmjs.org/package/strapi-bookshelf) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-bookshelf.svg)](https://david-dm.org/wistityhq/strapi-bookshelf) |
-| [strapi-cli](https://github.com/wistityhq/strapi/tree/master/packages/strapi-cli) | [![npm version](https://img.shields.io/npm/v/strapi-cli.svg)](https://www.npmjs.org/package/strapi-cli) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-cli.svg)](https://david-dm.org/wistityhq/strapi-cli) |
-| [strapi-generate](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate) | [![npm version](https://img.shields.io/npm/v/strapi-generate.svg)](https://www.npmjs.org/package/strapi-generate) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate.svg)](https://david-dm.org/wistityhq/strapi-generate) |
-| [strapi-generate-api](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-api) | [![npm version](https://img.shields.io/npm/v/strapi-generate-api.svg)](https://www.npmjs.org/package/strapi-generate-api) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-api.svg)](https://david-dm.org/wistityhq/strapi-generate-api) |
-| [strapi-generate-controller](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-controller) | [![npm version](https://img.shields.io/npm/v/strapi-generate-controller.svg)](https://www.npmjs.org/package/strapi-generate-controller) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-controller.svg)](https://david-dm.org/wistityhq/strapi-generate-controller) |
-| [strapi-generate-generator](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-generator) | [![npm version](https://img.shields.io/npm/v/strapi-generate-generator.svg)](https://www.npmjs.org/package/strapi-generate-generator) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-generator.svg)](https://david-dm.org/wistityhq/strapi-generate-generator) |
-| [strapi-generate-hook](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-hook) | [![npm version](https://img.shields.io/npm/v/strapi-generate-hook.svg)](https://www.npmjs.org/package/strapi-generate-hook) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-hook.svg)](https://david-dm.org/wistityhq/strapi-generate-hook) |
-| [strapi-generate-migrations](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-migrations) | [![npm version](https://img.shields.io/npm/v/strapi-generate-migrations.svg)](https://www.npmjs.org/package/strapi-generate-migrations) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-migrations.svg)](https://david-dm.org/wistityhq/strapi-generate-migrations) |
-| [strapi-generate-model](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-model) | [![npm version](https://img.shields.io/npm/v/strapi-generate-model.svg)](https://www.npmjs.org/package/strapi-generate-model) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-model.svg)](https://david-dm.org/wistityhq/strapi-generate-model) |
-| [strapi-generate-new](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-new) | [![npm version](https://img.shields.io/npm/v/strapi-generate-new.svg)](https://www.npmjs.org/package/strapi-generate-new) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-new.svg)](https://david-dm.org/wistityhq/strapi-generate-new) |
-| [strapi-generate-policy](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-policy) | [![npm version](https://img.shields.io/npm/v/strapi-generate-policy.svg)](https://www.npmjs.org/package/strapi-generate-policy) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-policy.svg)](https://david-dm.org/wistityhq/strapi-generate-policy) |
-| [strapi-generate-service](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-service) | [![npm version](https://img.shields.io/npm/v/strapi-generate-service.svg)](https://www.npmjs.org/package/strapi-generate-service) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-service.svg)](https://david-dm.org/wistityhq/strapi-generate-service) |
-| [strapi-knex](https://github.com/wistityhq/strapi/tree/master/packages/strapi-knex) | [![npm version](https://img.shields.io/npm/v/strapi-knex.svg)](https://www.npmjs.org/package/strapi-knex) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-knex.svg)](https://david-dm.org/wistityhq/strapi-knex) |
-| [strapi-utils](https://github.com/wistityhq/strapi/tree/master/packages/strapi-utils) | [![npm version](https://img.shields.io/npm/v/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-utils.svg)](https://david-dm.org/wistityhq/strapi-utils) |
-
-## Resources
-
-- [Documentation](./docs)
-- [Legal info](./info)
+| [strapi](./packages/strapi) | [![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi) | [![npm dependencies](https://david-dm.org/wistityhq/strapi.svg)](https://david-dm.org/wistityhq/strapi) |
+| [strapi-bookshelf](./packages/strapi-bookshelf) | [![npm version](https://img.shields.io/npm/v/strapi-bookshelf.svg)](https://www.npmjs.org/package/strapi-bookshelf) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-bookshelf.svg)](https://david-dm.org/wistityhq/strapi-bookshelf) |
+| [strapi-cli](./packages/strapi-cli) | [![npm version](https://img.shields.io/npm/v/strapi-cli.svg)](https://www.npmjs.org/package/strapi-cli) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-cli.svg)](https://david-dm.org/wistityhq/strapi-cli) |
+| [strapi-generate](./packages/strapi-generate) | [![npm version](https://img.shields.io/npm/v/strapi-generate.svg)](https://www.npmjs.org/package/strapi-generate) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate.svg)](https://david-dm.org/wistityhq/strapi-generate) |
+| [strapi-generate-api](./packages/strapi-generate-api) | [![npm version](https://img.shields.io/npm/v/strapi-generate-api.svg)](https://www.npmjs.org/package/strapi-generate-api) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-api.svg)](https://david-dm.org/wistityhq/strapi-generate-api) |
+| [strapi-generate-controller](./packages/strapi-generate-controller) | [![npm version](https://img.shields.io/npm/v/strapi-generate-controller.svg)](https://www.npmjs.org/package/strapi-generate-controller) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-controller.svg)](https://david-dm.org/wistityhq/strapi-generate-controller) |
+| [strapi-generate-generator](./packages/strapi-generate-generator) | [![npm version](https://img.shields.io/npm/v/strapi-generate-generator.svg)](https://www.npmjs.org/package/strapi-generate-generator) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-generator.svg)](https://david-dm.org/wistityhq/strapi-generate-generator) |
+| [strapi-generate-hook](./packages/strapi-generate-hook) | [![npm version](https://img.shields.io/npm/v/strapi-generate-hook.svg)](https://www.npmjs.org/package/strapi-generate-hook) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-hook.svg)](https://david-dm.org/wistityhq/strapi-generate-hook) |
+| [strapi-generate-migrations](./packages/strapi-generate-migrations) | [![npm version](https://img.shields.io/npm/v/strapi-generate-migrations.svg)](https://www.npmjs.org/package/strapi-generate-migrations) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-migrations.svg)](https://david-dm.org/wistityhq/strapi-generate-migrations) |
+| [strapi-generate-model](./packages/strapi-generate-model) | [![npm version](https://img.shields.io/npm/v/strapi-generate-model.svg)](https://www.npmjs.org/package/strapi-generate-model) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-model.svg)](https://david-dm.org/wistityhq/strapi-generate-model) |
+| [strapi-generate-new](./packages/strapi-generate-new) | [![npm version](https://img.shields.io/npm/v/strapi-generate-new.svg)](https://www.npmjs.org/package/strapi-generate-new) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-new.svg)](https://david-dm.org/wistityhq/strapi-generate-new) |
+| [strapi-generate-policy](./packages/strapi-generate-policy) | [![npm version](https://img.shields.io/npm/v/strapi-generate-policy.svg)](https://www.npmjs.org/package/strapi-generate-policy) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-policy.svg)](https://david-dm.org/wistityhq/strapi-generate-policy) |
+| [strapi-generate-service](./packages/strapi-generate-service) | [![npm version](https://img.shields.io/npm/v/strapi-generate-service.svg)](https://www.npmjs.org/package/strapi-generate-service) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-service.svg)](https://david-dm.org/wistityhq/strapi-generate-service) |
+| [strapi-knex](./packages/strapi-knex) | [![npm version](https://img.shields.io/npm/v/strapi-knex.svg)](https://www.npmjs.org/package/strapi-knex) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-knex.svg)](https://david-dm.org/wistityhq/strapi-knex) |
+| [strapi-utils](./packages/strapi-utils) | [![npm version](https://img.shields.io/npm/v/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils) | [![npm dependencies](https://david-dm.org/wistityhq/strapi-utils.svg)](https://david-dm.org/wistityhq/strapi-utils) |
 
 ## Links
 

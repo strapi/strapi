@@ -9,3 +9,6 @@ lint:
 
 test: lint
 	./scripts/test.sh
+
+docs:
+	mkdocs build --clean
