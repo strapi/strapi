@@ -36,7 +36,6 @@ module.exports = function (strapi) {
 
     initialize: function (cb) {
       let globalName;
-      let attributes = [];
 
       // Make sure the Knex hook is present since Knex needs it.
       if (!strapi.hooks.knex) {
@@ -101,7 +100,7 @@ module.exports = function (strapi) {
           const done = _.after(_.size(definition.attributes), function () {
             try {
               // Initialize lifecycle callbacks.
-              loadedModel.initialize = function() {
+              loadedModel.initialize = function () {
                 const self = this;
                 const lifecycle = {
                   creating: 'beforeCreate',
@@ -116,7 +115,7 @@ module.exports = function (strapi) {
                   saved: 'afterSave'
                 };
 
-                _.forEach(lifecycle, function(fn, key) {
+                _.forEach(lifecycle, function (fn, key) {
                   if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
                     self.on(key, strapi.models[model.toLowerCase()][fn]);
                   }
@@ -155,13 +154,12 @@ module.exports = function (strapi) {
 
             // Build associations key
             if (!_.isEmpty(verbose)) {
-              utilsModels.defineAssociations(globalName, definition, details, name)
+              utilsModels.defineAssociations(globalName, definition, details, name);
             }
 
             switch (verbose) {
               case 'hasOne':
-                // Looking for foreign key on one-to-one relation
-                const FK = _.findKey(strapi.models[details.model].attributes, function(details) {
+                const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
                   if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
                     return details;
                   }

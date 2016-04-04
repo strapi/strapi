@@ -95,7 +95,7 @@ module.exports = {
 
       const rootValue = {
         graphql: _.get(strapi.api, rootKey + '.config.graphql') || {}
-      }
+      };
 
       // Override or write file
       fs.writeJson(path.join(strapi.config.appPath, 'api', rootKey, 'config', 'graphql.json'), _.merge(value, rootValue), function (err) {

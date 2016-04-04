@@ -24,10 +24,23 @@
       "website/**"
     ],
     "rules": {
+      "array-callback-return": 0,
+      "brace-style": 0,
+      "camelcase": 0,
+      "default-case": 0,
+      "dot-notation": 0,
+      "no-case-declarations": 0,
+      "no-else-return": 0,
       "no-implicit-coercion": 0,
+      "no-lonely-if": 0,
+      "no-negated-condition": 0,
+      "no-throw-literal": 0,
       "no-unused-expressions": 0,
+      "no-unused-vars": 0,
       "padded-blocks": 0,
       "prefer-template": 0,
+      "quote-props": 0,
+      "space-infix-ops": 0,
       "strict": 0
     }
   },

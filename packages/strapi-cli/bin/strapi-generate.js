@@ -40,7 +40,7 @@ module.exports = function () {
   scope.generatorType = process.argv[2].split(':')[1];
 
   // Register the name.
-  scope.generatorName = cliArguments[1]
+  scope.generatorName = cliArguments[1];
 
   // Check that we're in a valid Strapi project.
   if (scope.generatorType !== 'new' || scope.generatorType !== 'generator' || scope.generatorType !== 'hook') {

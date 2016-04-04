@@ -60,25 +60,25 @@ module.exports = function (strapi) {
       _.forEach(strapi.config.connections, function (connection, name) {
 
         // Make sure we use the client even if the typo is not the exact one.
-        switch(connection.client) {
+        switch (connection.client) {
           case 'postgre':
           case 'postgres':
           case 'postgresql':
-              connection.client = 'pg'
-              break;
+            connection.client = 'pg';
+            break;
           case 'sqlite':
-              connection.client = 'sqlite3'
-              break;
+            connection.client = 'sqlite3';
+            break;
           case 'maria':
           case 'mariadb':
-              connection.client = 'mariasql'
-              break;
+            connection.client = 'mariasql';
+            break;
           case 'ms':
-              connection.client = 'mssql'
-              break;
+            connection.client = 'mssql';
+            break;
           case 'web':
-              connection.client = 'websql'
-              break;
+            connection.client = 'websql';
+            break;
         }
 
         // Make sure the client is supported.
