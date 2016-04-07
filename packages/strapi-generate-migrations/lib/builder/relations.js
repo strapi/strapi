@@ -132,23 +132,44 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
       // Save the relation table as a new model in the scope
       // aiming to benefit of templates for the table such as
       // `createTableIfNotExists` and `dropTable`.
-      models[relationTable] = {};
 
       // Template: create the table for the `up` export if it doesn't exist.
       // This adds a `up` logic for the relation table.
       const tplTableUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsToMany.template'), 'utf8');
-      models[relationTable].up = _.unescape(_.template(tplTableUp)({
+      _.set(models, relationTable + '.up.others', _.unescape(_.template(tplTableUp)({
         models: models,
         tableName: relationTable,
         details: details,
         relationship: relationship
-      }));
+      })));
 
       // Template: drop the table for the `down` export.
       // This adds a `down` logic for the relation table.
       const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
-      models[relationTable].down = _.unescape(_.template(tplTableDown)({
+      _.set(models, relationTable + '.down.others', _.unescape(_.template(tplTableDown)({
         tableName: relationTable
+      })));
+
+      const tplFKDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
+      const tplSelectTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'select', 'down.template'), 'utf8');
+
+      _.set(models, relationTable + '.attributes', {
+        fk: {
+          delete: {
+            drop: _.unescape(_.template(tplFKDown)({
+              attribute: details.attribute + '_' + details.column
+            })) + _.unescape(_.template(tplFKDown)({
+              attribute: relationship.attribute + '_' + relationship.column
+            }))
+          }
+        }
+      });
+
+      models[relationTable].down.drop = _.unescape(_.template(tplSelectTableDown)({
+        models: models,
+        tableName: relationTable,
+        attributes: models[relationTable].attributes,
+        toDrop: true
       }));
     }
   }

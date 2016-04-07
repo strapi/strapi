@@ -1,3 +1,3 @@
 
-// Delete the `<%= attribute %>` column.
+// Delete the `<%= attribute %>` column with unique constraint.
 table.dropUnique('<%= attribute %>').dropColumn('<%= attribute %>')
