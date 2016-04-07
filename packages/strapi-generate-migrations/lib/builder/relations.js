@@ -51,7 +51,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     // Template: drop the column.
     // Simply make a `delete` template for this attribute wich drop the column
     // with the `./builder/columns/dropColumn` template.
-    tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
+    tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
     models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
       tableName: modelName,
       attribute: attribute,
@@ -76,6 +76,16 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
         details: details,
         nature: infos.nature
       }));
+
+      // Template: drop the column.
+      // Simply make a `delete` template for this attribute wich drop the column
+      // with the `./builder/columns/dropColumn` template.
+      tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
+      models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
+        tableName: modelName,
+        attribute: attribute,
+        details: details
+      }));
     } else {
       // Template: create a new column thanks to the attribute's relation.
       // Simply make a `create` template for this attribute wich will be added
@@ -87,17 +97,17 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
         attribute: attribute,
         details: details
       }));
-    }
 
-    // Template: drop the column.
-    // Simply make a `delete` template for this attribute wich drop the column
-    // with the `./builder/columns/dropColumn` template.
-    tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
-    models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
-      tableName: modelName,
-      attribute: attribute,
-      details: details
-    }));
+      // Template: drop the column.
+      // Simply make a `delete` template for this attribute wich drop the column
+      // with the `./builder/columns/dropColumn` template.
+      tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
+      models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
+        tableName: modelName,
+        attribute: attribute,
+        details: details
+      }));
+    }
   } else if (infos.verbose === 'belongsToMany') {
     // Otherwise if it's a "many-to-many" relationship.
 
