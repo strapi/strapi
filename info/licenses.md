@@ -6,9 +6,8 @@ layout: no-sidebar
 The Strapi ecosystem is composed by many components offered by [Wistity](http://wistity.co) under the terms of open-source licenses, including:
 
 - [strapi](https://github.com/wistityhq/strapi/tree/master/packages/strapi) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi/LICENSE.md))
-- [strapi-cli](https://github.com/wistityhq/strapi/tree/master/packages/strapi-cli) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-cli/LICENSE.md))
-- [strapi-knex](https://github.com/wistityhq/strapi/tree/master/packages/strapi-knex) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-knex/LICENSE.md))
 - [strapi-bookshelf](https://github.com/wistityhq/strapi/tree/master/packages/strapi-bookshelf) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-bookshelf/LICENSE.md))
+- [strapi-cli](https://github.com/wistityhq/strapi/tree/master/packages/strapi-cli) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-cli/LICENSE.md))
 - [strapi-generate](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate/LICENSE.md))
 - [strapi-generate-api](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-api) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate-api/LICENSE.md))
 - [strapi-generate-controller](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-controller) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate-controller/LICENSE.md))
@@ -19,3 +18,5 @@ The Strapi ecosystem is composed by many components offered by [Wistity](http://
 - [strapi-generate-new](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-new) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate-new/LICENSE.md))
 - [strapi-generate-policy](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-policy) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate-policy/LICENSE.md))
 - [strapi-generate-service](https://github.com/wistityhq/strapi/tree/master/packages/strapi-generate-service) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-generate-service/LICENSE.md))
+- [strapi-knex](https://github.com/wistityhq/strapi/tree/master/packages/strapi-knex) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-knex/LICENSE.md))
+- [strapi-utils](https://github.com/wistityhq/strapi/tree/master/packages/strapi-utils) ([MIT license](https://github.com/wistityhq/strapi/blob/master/packages/strapi-utils/LICENSE.md))

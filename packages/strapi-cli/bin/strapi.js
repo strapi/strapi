@@ -6,14 +6,22 @@
  * Module dependencies
  */
 
+// Node.js core.
+const fs = require('fs');
+const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 
 // Local Strapi dependencies.
-const program = require('strapi-utils').commander;
 const packageJSON = require('../package.json');
 
+// Strapi utilities.
+const program = require('strapi-utils').commander;
+const logger = require('strapi-utils').logger;
+
 // Needed.
+const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 const NOOP = function () {};
 let cmd;
 
@@ -39,7 +47,7 @@ cmd = program.command('version');
 cmd.description('output your version of Strapi');
 cmd.action(program.versionInformation);
 
-// `$ strapi new <name>`
+// `$ strapi new`
 cmd = program.command('new');
 cmd.unknownOption = NOOP;
 cmd.description('create a new application ');
@@ -51,29 +59,64 @@ cmd.unknownOption = NOOP;
 cmd.description('start your Strapi application');
 cmd.action(require('./strapi-start'));
 
-// `$ strapi generate <generatorName>`
-cmd = program.command('generate');
-cmd.unknownOption = NOOP;
-cmd.description('generate templates from a generator');
-cmd.action(require('./strapi-generate'));
-
 // `$ strapi console`
 cmd = program.command('console');
 cmd.unknownOption = NOOP;
 cmd.description('open the Strapi framework console');
 cmd.action(require('./strapi-console'));
 
-// `$ strapi config`
-cmd = program.command('config');
+// `$ strapi generate:api`
+cmd = program.command('generate:api');
 cmd.unknownOption = NOOP;
-cmd.description('extend the Strapi framework with custom generators');
-cmd.action(require('./strapi-config'));
+cmd.description('generate a basic API');
+cmd.action(require('./strapi-generate'));
 
-// `$ strapi update`
-cmd = program.command('update');
+// `$ strapi generate:controller`
+cmd = program.command('generate:controller');
 cmd.unknownOption = NOOP;
-cmd.description('pull the latest updates of your custom generators');
-cmd.action(require('./strapi-update'));
+cmd.description('generate a controller for an API');
+cmd.action(require('./strapi-generate'));
+
+// `$ strapi generate:model`
+cmd = program.command('generate:model');
+cmd.unknownOption = NOOP;
+cmd.description('generate a model for an API');
+cmd.action(require('./strapi-generate'));
+
+// `$ strapi generate:policy`
+cmd = program.command('generate:policy');
+cmd.unknownOption = NOOP;
+cmd.description('generate a policy for an API');
+cmd.action(require('./strapi-generate'));
+
+// `$ strapi generate:service`
+cmd = program.command('generate:service');
+cmd.unknownOption = NOOP;
+cmd.description('generate a service for an API');
+cmd.action(require('./strapi-generate'));
+
+// `$ strapi generate:hook`
+cmd = program.command('generate:hook');
+cmd.unknownOption = NOOP;
+cmd.description('generate an installable hook');
+cmd.action(require('./strapi-generate'));
+
+// `$ strapi generate:generator`
+cmd = program.command('generate:generator');
+cmd.unknownOption = NOOP;
+cmd.description('generate a custom generator');
+cmd.action(require('./strapi-generate'));
+
+// Custom generators from `.strapirc`.
+try {
+  const config = JSON.parse(fs.readFileSync(path.resolve(HOME, '.strapirc')));
+  _.forEach(config.generators, function (info, name) {
+    cmd = program.command('generate:' + name);
+    cmd.unknownOption = NOOP;
+    cmd.description(info.description);
+    cmd.action(require('./strapi-generate'));
+  });
+} catch (err) {}
 
 // `$ strapi migrate:make`
 cmd = program.command('migrate:make');
@@ -92,6 +135,18 @@ cmd = program.command('migrate:rollback');
 cmd.unknownOption = NOOP;
 cmd.description('rollback the latest batch of migrations for a connection');
 cmd.action(require('./strapi-migrate-rollback'));
+
+// `$ strapi config`
+cmd = program.command('config');
+cmd.unknownOption = NOOP;
+cmd.description('extend the Strapi framework with custom generators');
+cmd.action(require('./strapi-config'));
+
+// `$ strapi update`
+cmd = program.command('update');
+cmd.unknownOption = NOOP;
+cmd.description('pull the latest updates of your custom generators');
+cmd.action(require('./strapi-update'));
 
 /**
  * Normalize help argument

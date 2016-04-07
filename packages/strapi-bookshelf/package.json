@@ -21,30 +21,10 @@
     "pluralize": "~1.2.1",
     "strapi": "~2.0.0"
   },
-  "devDependencies": {
-    "pre-commit": "~1.1.2",
-    "xo": "~0.13.0"
-  },
   "strapi": {
     "isHook": true
   },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "globals": [
-      "strapi"
-    ],
-    "rules": {
-      "no-case-declarations": 0,
-      "no-unused-vars": 0,
-      "padded-blocks": 0,
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {

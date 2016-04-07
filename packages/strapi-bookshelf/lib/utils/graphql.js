@@ -32,7 +32,7 @@ module.exports = {
    * @return {Object}
    */
 
-  fetch: function(collectionIdentity, collection, criteria) {
+  fetch: function (collectionIdentity, collection, criteria) {
     return collection.forge(criteria)
       .fetch({withRelated: helpers.getAssociationsByIdentity(collectionIdentity)})
       .then(function (data) {
@@ -46,7 +46,7 @@ module.exports = {
    * @return {Array}
    */
 
-  fetchAll: function(collectionIdentity, collection, criteria) {
+  fetchAll: function (collectionIdentity, collection, criteria) {
     const filters = _.omit(helpers.handleFilters(criteria), function (value) {
       return _.isUndefined(value) || _.isNumber(value) ? _.isNull(value) : _.isEmpty(value);
     });
@@ -119,7 +119,7 @@ module.exports = {
     return strapi.services[collectionIdentity.toLowerCase()]
       .add(rootValue.context.request.body)
       .then(function (data) {
-        return  _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
+        return _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
       });
   },
 
@@ -145,14 +145,14 @@ module.exports = {
    * @return {Object}
    */
 
-  delete : function (collectionIdentity, rootValue, args) {
+  delete: function (collectionIdentity, rootValue, args) {
     _.merge(args, rootValue.context.request.body);
 
     return strapi.services[collectionIdentity.toLowerCase()]
       .remove(args)
       .then(function (data) {
         return _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
-      })
+      });
   },
 
   /**

@@ -2,7 +2,7 @@
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "client": "postgresql",
+      "client": "pg",
       "debug": false,
       "acquireConnectionTimeout": 60000,
       "connection": {

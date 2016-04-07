@@ -11,7 +11,7 @@ Master of ceremonies for generators in the Strapi CLI.
 Usage:
 
 ```bash
-$ strapi generate <something>
+$ strapi generate:something
 ```
 
 ## Resources

@@ -26,21 +26,19 @@ const logger = require('strapi-utils').logger;
 
 module.exports = function () {
 
-  // Pass the original CLI arguments down to the generator.
+  // Pass the original CLI arguments down to the generator
+  // (but first, remove commander's extra argument).
   const cliArguments = Array.prototype.slice.call(arguments);
+  cliArguments.pop();
 
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
     generatorType: 'new',
-    args: cliArguments,
+    name: cliArguments[0],
     strapiPackageJSON: packageJSON
   };
-
-  // Pass the original CLI arguments down to the generator
-  // (but first, remove commander's extra argument)
-  cliArguments.pop();
 
   // Return the scope and the response (`error` or `success`).
   return generate(scope, {

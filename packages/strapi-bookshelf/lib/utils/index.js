@@ -20,7 +20,7 @@ module.exports = {
   getPK: function (collectionIdentity, collection, models) {
     // This is not a Bookshelf collection, only the name.
     if (_.isString(collectionIdentity) && !_.isUndefined(models)) {
-      const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), function(o) {
+      const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), function (o) {
         return o.hasOwnProperty('primary');
       });
 
@@ -57,4 +57,4 @@ module.exports = {
       return count;
     });
   }
-}
+};

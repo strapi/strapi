@@ -23,9 +23,9 @@ module.exports = {
   getPK: function (collectionIdentity, collection, models) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
+      let GraphQLFunctions;
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
-
         if (!_.isUndefined(GraphQLFunctions)) {
           return GraphQLFunctions.getPK(collectionIdentity, collection, models || strapi.models);
         }
@@ -46,9 +46,7 @@ module.exports = {
       const ORM = this.getORM(collectionIdentity);
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
-
         const ORMFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
-
         if (!_.isUndefined(ORMFunctions)) {
           return ORMFunctions.getCount(collectionIdentity);
         }

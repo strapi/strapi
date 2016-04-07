@@ -11,7 +11,7 @@ This Strapi generator contains all the default files for a new API.
 This generator can be called with:
 
 ```bash
-$ strapi generate api <myApiName>
+$ strapi generate:api apiName
 ```
 
 ## Resources

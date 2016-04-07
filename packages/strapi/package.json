@@ -66,34 +66,7 @@
     "socket.io": "~1.4.5",
     "strapi-utils": "~2.0.0"
   },
-  "devDependencies": {
-    "expect.js": "~0.3.1",
-    "istanbul": "~0.4.2",
-    "jade": "~1.11.0",
-    "methods": "~1.1.2",
-    "mocha": "~2.4.5",
-    "pre-commit": "~1.1.2",
-    "should": "~8.2.2",
-    "should-http": "~0.0.4",
-    "statuses": "~1.2.1",
-    "supertest": "~1.2.0",
-    "test-console": "~1.0.0",
-    "xo": "~0.13.0"
-  },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "globals": [
-      "strapi"
-    ],
-    "rules": {
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {

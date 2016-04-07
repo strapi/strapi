@@ -1,8 +1,5 @@
 'use strict';
 
-// Public dependencies
-const _ = require('lodash');
-
 /**
  * A set of functions called "actions" for `<%= globalID %>`
  */

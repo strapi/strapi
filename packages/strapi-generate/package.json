@@ -19,28 +19,7 @@
     "reportback": "~0.1.9",
     "strapi-utils": "~2.0.0"
   },
-  "devDependencies": {
-    "pre-commit": "~1.1.2",
-    "xo": "~0.13.0"
-  },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "rules": {
-      "consistent-return": 0,
-      "no-else-return": 0,
-      "no-implicit-coercion": 0,
-      "no-negated-condition": 0,
-      "no-unused-vars": 0,
-      "padded-blocks": 0,
-      "space-infix-ops": 0,
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {

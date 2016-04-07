@@ -26,28 +26,7 @@
     "strapi-bookshelf": "~2.0.0",
     "strapi-utils": "~2.0.0"
   },
-  "devDependencies": {
-    "pre-commit": "~1.1.2",
-    "xo": "~0.13.0"
-  },
-  "xo": {
-    "space": true,
-    "envs": [
-      "node"
-    ],
-    "rules": {
-      "brace-style": 0,
-      "camelcase": 0,
-      "consistent-return": 0,
-      "no-else-return": 0,
-      "no-negated-condition": 0,
-      "no-warning-comments": 0,
-      "padded-blocks": 0,
-      "strict": 0
-    }
-  },
   "scripts": {
-    "test": "xo",
     "prepublish": "npm prune"
   },
   "author": {
