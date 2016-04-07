@@ -71,12 +71,12 @@ module.exports = function (models, modelName) {
   emptyArrayForDrop = [];
   emptyArrayForOthers = [];
 
-  _.forEach(models[modelName].newAttributes, function (attribute) {
-    if (!_.isEmpty(_.get(models[modelName].attributes, attribute + '.delete.drop'))) {
+  _.forEach(models[modelName].newAttributes, function (attribute, key) {
+    if (!_.isEmpty(_.get(models[modelName].attributes, key + '.delete.drop'))) {
       emptyArrayForDrop.push(true);
     }
 
-    if (!_.isEmpty(_.get(models[modelName].attributes, attribute + '.delete.others'))) {
+    if (!_.isEmpty(_.get(models[modelName].attributes, key + '.delete.others'))) {
       emptyArrayForOthers.push(true);
     }
   });
