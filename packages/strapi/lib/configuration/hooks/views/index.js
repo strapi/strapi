@@ -6,7 +6,6 @@
 
 // Node.js core.
 const path = require('path');
-const spawn = require('child_process').spawn;
 
 // Public node modules.
 const _ = require('lodash');
@@ -57,52 +56,6 @@ module.exports = function (strapi) {
       }
 
       cb();
-    },
-
-    /**
-     * Installation template engines
-     */
-
-    installation: function () {
-      const done = _.after(_.size(strapi.config.views.map), function () {
-        strapi.emit('hook:views:installed');
-      });
-
-      _.forEach(strapi.config.views.map, function (engine) {
-        try {
-          require(path.resolve(strapi.config.appPath, 'node_modules', engine));
-
-          done();
-        } catch (err) {
-          if (strapi.config.environment === 'development') {
-            strapi.log.warn('Installing the `' + engine + '` template engine, please wait...');
-            console.log();
-
-            const process = spawn('npm', ['install', engine, '--save']);
-
-            process.on('error', function (error) {
-              strapi.log.error('The template engine `' + engine + '` has not been installed.');
-              strapi.log.error(error);
-              process.exit(1);
-            });
-
-            process.on('close', function (code) {
-              if (code !== 0) {
-                strapi.log.error('The template engine `' + engine + '` has not been installed.');
-                strapi.log.error('Code: ' + code);
-                process.exit(1);
-              }
-
-              strapi.log.info('`' + engine + '` successfully installed');
-              done();
-            });
-          } else {
-            strapi.log.error('The template engine `' + engine + '` is not installed.');
-            strapi.log.error('Execute `$ npm install ' + engine + ' --save` to install it.');
-            process.exit(1);
-          }
-        }
-      });
     }
   };
 
