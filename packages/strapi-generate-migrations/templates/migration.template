@@ -46,6 +46,9 @@ exports.down = function(connection, Promise) {
       }
     });
 
+    console.log(models);
+    console.log("DROPPPED " + dropped);
+
     if (dropped) { %>
     return Promise.all([
       <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.drop') %><% }); %>

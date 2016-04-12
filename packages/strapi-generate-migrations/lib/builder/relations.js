@@ -128,49 +128,104 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
 
     // Avoid to create table both times.
-    if (!models.hasOwnProperty(relationTable)) {
-      // Save the relation table as a new model in the scope
-      // aiming to benefit of templates for the table such as
-      // `createTableIfNotExists` and `dropTable`.
+    if (!models.hasOwnProperty(relationTable) || !_.isUndefined(_.get(models, relationTable + '.up.drop'))) {
+      // Set objects
+      if (_.isUndefined(_.get(models, relationTable + '.up.others'))) {
+        _.set(models, relationTable + '.up.others', '');
+      }
 
-      // Template: create the table for the `up` export if it doesn't exist.
-      // This adds a `up` logic for the relation table.
-      const tplTableUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsToMany.template'), 'utf8');
-      _.set(models, relationTable + '.up.others', _.unescape(_.template(tplTableUp)({
-        models: models,
-        tableName: relationTable,
-        details: details,
-        relationship: relationship
-      })));
+      if (_.isUndefined(_.get(models, relationTable + '.up.drop'))) {
+        _.set(models, relationTable + '.up.drop', '');
+      }
 
-      // Template: drop the table for the `down` export.
-      // This adds a `down` logic for the relation table.
-      const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
-      _.set(models, relationTable + '.down.others', _.unescape(_.template(tplTableDown)({
-        tableName: relationTable
-      })));
+      if (_.isUndefined(_.get(models, relationTable + '.down.others'))) {
+        _.set(models, relationTable + '.down.others', '');
+      }
 
-      const tplFKDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
-      const tplSelectTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'select', 'down.template'), 'utf8');
+      if (_.isUndefined(_.get(models, relationTable + '.down.drop'))) {
+        _.set(models, relationTable + '.down.drop', '');
+      }
 
-      _.set(models, relationTable + '.attributes', {
-        fk: {
-          delete: {
-            drop: _.unescape(_.template(tplFKDown)({
-              attribute: details.attribute + '_' + details.column
-            })) + _.unescape(_.template(tplFKDown)({
-              attribute: relationship.attribute + '_' + relationship.column
-            }))
-          }
+      if (_.isUndefined(_.get(models, relationTable + '.attributes'))) {
+        _.set(models, relationTable + '.attributes', {});
+      }
+
+      if (!toDrop) {
+        // Load templates.
+        const tplTableUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsToMany.template'), 'utf8');
+        const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
+
+        // Create relationships table for many-to-many.
+        models[relationTable].up.others += _.unescape(_.template(tplTableUp)({
+          models: models,
+          tableName: relationTable,
+          details: details,
+          relationship: relationship
+        }));
+
+        if (_.isUndefined(_.get(models, relationTable + '.attributes.fk'))) {
+          // Load templates.
+          const tplFKDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
+          const tplSelectTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'select', 'down.template'), 'utf8');
+
+          // Drop current relationships table on migration rollback.
+          models[relationTable].down.others += _.unescape(_.template(tplTableDown)({
+            tableName: relationTable
+          }));
+
+          // Remove foreign key current relationships table before drop the table on migration rollback.
+          models[relationTable].attributes.fk = {
+            delete: {
+              drop: _.unescape(_.template(tplFKDown)({
+                attribute: details.attribute + '_' + details.column
+              })) + _.unescape(_.template(tplFKDown)({
+                attribute: relationship.attribute + '_' + relationship.column
+              }))
+            }
+          };
+
+          models[relationTable].down.drop += _.unescape(_.template(tplSelectTableDown)({
+            models: models,
+            tableName: relationTable,
+            attributes: models[relationTable].attributes,
+            toDrop: true
+          }));
         }
-      });
 
-      models[relationTable].down.drop = _.unescape(_.template(tplSelectTableDown)({
-        models: models,
-        tableName: relationTable,
-        attributes: models[relationTable].attributes,
-        toDrop: true
-      }));
+        // Drop current relationships table on migration rollback.
+        models[relationTable].down.drop += _.unescape(_.template(tplTableDown)({
+          tableName: relationTable
+        }));
+      } else if (onlyDrop) {
+        // Load templates.
+        const tplTableUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsToMany.template'), 'utf8');
+        const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
+
+        // Drop current relationships table on migration run.
+        models[relationTable].up.drop += _.unescape(_.template(tplTableDown)({
+          tableName: relationTable
+        }));
+
+        // Drop current relationships table on migration rollback.
+        // This allows us to identify, if this is an update on already existing many-to-many relationship or if this is a basic addition.
+        if (_.isUndefined(_.get(models, relationTable + '.attributes.fk'))) {
+          models[relationTable].attributes.fk = {
+            delete: {
+              drop: _.unescape(_.template(tplTableDown)({
+                tableName: relationTable
+              }))
+            }
+          };
+        }
+
+        // Create previous relationships table on migration rollback.
+        models[relationTable].down.others += _.unescape(_.template(tplTableUp)({
+          models: models,
+          tableName: relationTable,
+          details: details,
+          relationship: relationship
+        }));
+      }
     }
   }
 };
