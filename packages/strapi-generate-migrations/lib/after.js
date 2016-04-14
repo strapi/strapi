@@ -76,10 +76,14 @@ module.exports = function afterGenerate(scope, cb) {
         return _.omitBy(model, _.isFunction);
       });
 
+      const modelsKeyLowercased = _.mapKeys(models, function (model, key) {
+        return key.toLowerCase();
+      });
+
       const historyFile = path.resolve(scope.rootPath, 'data', 'migrations', '.history');
 
       // And rewrite it with the beautify node module.
-      fs.writeFile(historyFile, beautify(JSON.stringify(models), {
+      fs.writeFile(historyFile, beautify(JSON.stringify(modelsKeyLowercased), {
         indent_size: 2,
         keep_function_indentation: true,
         space_before_conditional: true,

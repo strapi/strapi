@@ -96,8 +96,8 @@ module.exports = function (scope, cb) {
         const modelName = _.get(file, 'tableName');
         scope.models[modelName] = file;
 
-        if (!_.isEmpty(history) && history.hasOwnProperty(_.capitalize(modelName))) {
-          _.set(scope.models, modelName + '.oldAttributes', _.get(history, _.capitalize(modelName) + '.attributes'));
+        if (!_.isEmpty(history) && history.hasOwnProperty(modelName)) {
+          _.set(scope.models, modelName + '.oldAttributes', _.get(history, modelName + '.attributes'));
         } else {
           _.set(scope.models, modelName + '.oldAttributes', {});
         }

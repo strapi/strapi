@@ -24,7 +24,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
   let tplRelationUp;
   let tplRelationDown;
 
-  const infos = utilsModels.getNature(details, attribute, models);
+  const infos = toDrop ? utilsModels.getNature(details, attribute, history) : utilsModels.getNature(details, attribute, models);
 
   _.set(models[modelName].attributes, attribute + '.create', {});
   _.set(models[modelName].attributes, attribute + '.delete', {});
@@ -111,21 +111,26 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
   } else if (infos.verbose === 'belongsToMany') {
     // Otherwise if it's a "many-to-many" relationship.
 
-    // Save the relationship.
-    const relationship = models[details.collection].attributes[details.via];
+    let relationship;
+    let relationTable;
 
-    // Construct relation table name.
-    const relationTable = _.map(_.sortBy([relationship, details], 'collection'), function (table) {
-      return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
-    }).join('__');
+    if (!onlyDrop) {
+      // Save the relationship.
+      relationship = models[details.collection].attributes[details.via];
 
-    // Force singular foreign key.
-    relationship.attribute = pluralize.singular(relationship.collection);
-    details.attribute = pluralize.singular(details.collection);
+      // Construct relation table name.
+      relationTable = _.map(_.sortBy([relationship, details], 'collection'), function (table) {
+        return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
+      }).join('__');
 
-    // Define PK column.
-    details.column = utilsBookShelf.getPK(modelName, undefined, models);
-    relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
+      // Force singular foreign key.
+      relationship.attribute = pluralize.singular(relationship.collection);
+      details.attribute = pluralize.singular(details.collection);
+
+      // Define PK column.
+      details.column = utilsBookShelf.getPK(modelName, undefined, models);
+      relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
+    }
 
     // Avoid to create table both times.
     if (!models.hasOwnProperty(relationTable) || !_.isEmpty(_.get(models, relationTable + '.up.drop'))) {
@@ -191,7 +196,6 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
             toDrop: true
           }));
         } else {
-          console.log("test", attribute, modelName);
           // Drop current relationships table on migration rollback.
           models[relationTable].down.drop += _.unescape(_.template(tplTableDown)({
             tableName: relationTable
@@ -203,7 +207,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
         const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
 
         // Save the old relationship.
-        const oldRelationship = history[_.capitalize(details.collection)].attributes[details.via];
+        const oldRelationship = history[details.collection].attributes[details.via];
 
         // Construct old relation table name.
         const oldRelationTable = _.map(_.sortBy([oldRelationship, details], 'collection'), function (table) {
@@ -212,14 +216,23 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
 
         // Force singular foreign key.
         oldRelationship.attribute = pluralize.singular(oldRelationship.collection);
+        details.attribute = pluralize.singular(details.collection);
 
         // Define PK column.
         oldRelationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
+        details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
-        // Drop current relationships table on migration run.
-        models[relationTable].up.drop += _.unescape(_.template(tplTableDown)({
+
+        const dropMigrationTable = _.unescape(_.template(tplTableDown)({
           tableName: oldRelationTable || relationTable
         }));
+
+        if (models[relationTable].up.drop.indexOf(dropMigrationTable) === -1) {
+          // Drop current relationships table on migration run.
+          models[relationTable].up.drop += _.unescape(_.template(tplTableDown)({
+            tableName: oldRelationTable || relationTable
+          }));
+        }
 
         // Drop current relationships table on migration rollback.
         // This allows us to identify, if this is an update on already existing many-to-many relationship or if this is a basic addition.
@@ -231,15 +244,15 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
               }))
             }
           };
+        } else {
+          // Create previous relationships table on migration rollback.
+          models[relationTable].down.others += _.unescape(_.template(tplTableUp)({
+            models: models,
+            tableName: oldRelationTable || relationTable,
+            details: details,
+            relationship: oldRelationship || relationship
+          }));
         }
-
-        // Create previous relationships table on migration rollback.
-        models[relationTable].down.others += _.unescape(_.template(tplTableUp)({
-          models: models,
-          tableName: oldRelationTable || relationTable,
-          details: details,
-          relationship: oldRelationship || relationship
-        }));
       }
     }
   }
