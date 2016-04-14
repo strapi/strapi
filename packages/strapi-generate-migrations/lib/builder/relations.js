@@ -195,11 +195,16 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
             attributes: models[relationTable].attributes,
             toDrop: true
           }));
-        } else {
+        }
+
+        const dropMigrationTable = _.unescape(_.template(tplTableDown)({
+          tableName: relationTable
+        }));
+
+        // Eliminate duplicate
+        if (models[relationTable].down.drop.indexOf(dropMigrationTable) === -1) {
           // Drop current relationships table on migration rollback.
-          models[relationTable].down.drop += _.unescape(_.template(tplTableDown)({
-            tableName: relationTable
-          }));
+          models[relationTable].down.drop += dropMigrationTable;
         }
       } else if (onlyDrop) {
         // Load templates.
@@ -227,6 +232,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
           tableName: oldRelationTable || relationTable
         }));
 
+        // Eliminate duplicate
         if (models[relationTable].up.drop.indexOf(dropMigrationTable) === -1) {
           // Drop current relationships table on migration run.
           models[relationTable].up.drop += _.unescape(_.template(tplTableDown)({
