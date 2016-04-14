@@ -46,7 +46,6 @@ exports.down = function(connection, Promise) {
       }
     });
 
-    console.log(models);
     console.log("DROPPPED " + dropped);
 
     if (dropped) { %>

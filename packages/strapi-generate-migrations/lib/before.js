@@ -138,8 +138,6 @@ module.exports = function (scope, cb) {
             _.forEach(attributesRemoved, function (attribute) {
               const details = scope.models[modelName].oldAttributes[attribute];
 
-              console.log(attribute + ' has been removed!');
-
               // Save the attribute as a new attribute.
               scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
 
@@ -148,7 +146,7 @@ module.exports = function (scope, cb) {
               if (details.type && _.isString(details.type)) {
                 builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true);
               } else if (_.isString(details.collection) || _.isString(details.model)) {
-                builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true);
+                builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true, history);
               }
             });
 
@@ -158,7 +156,6 @@ module.exports = function (scope, cb) {
 
               // If it's a new attribute.
               if (!scope.models[modelName].oldAttributes.hasOwnProperty(attribute)) {
-                console.log(attribute + ' is new!');
                 // Save the attribute as a new attribute.
                 scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
 
@@ -196,8 +193,6 @@ module.exports = function (scope, cb) {
                   }
                 }();
 
-                console.log(toDrop ? attribute + ' is old attribute updated!' : attribute + ' is the same');
-                
                 // The attribute has been updated.
                 // We will drop it then create it again with the new options.
                 if (toDrop) {

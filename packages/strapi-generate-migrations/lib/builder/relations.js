@@ -20,7 +20,7 @@ const utilsBookShelf = require('strapi-bookshelf/lib/utils/');
  * Relationship templates
  */
 
-module.exports = function (models, modelName, details, attribute, toDrop, onlyDrop) {
+module.exports = function (models, modelName, details, attribute, toDrop, onlyDrop, history) {
   let tplRelationUp;
   let tplRelationDown;
 
@@ -128,7 +128,7 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
     relationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
 
     // Avoid to create table both times.
-    if (!models.hasOwnProperty(relationTable) || !_.isUndefined(_.get(models, relationTable + '.up.drop'))) {
+    if (!models.hasOwnProperty(relationTable) || !_.isEmpty(_.get(models, relationTable + '.up.drop'))) {
       // Set objects
       if (_.isUndefined(_.get(models, relationTable + '.up.others'))) {
         _.set(models, relationTable + '.up.others', '');
@@ -190,20 +190,35 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
             attributes: models[relationTable].attributes,
             toDrop: true
           }));
+        } else {
+          console.log("test", attribute, modelName);
+          // Drop current relationships table on migration rollback.
+          models[relationTable].down.drop += _.unescape(_.template(tplTableDown)({
+            tableName: relationTable
+          }));
         }
-
-        // Drop current relationships table on migration rollback.
-        models[relationTable].down.drop += _.unescape(_.template(tplTableDown)({
-          tableName: relationTable
-        }));
       } else if (onlyDrop) {
         // Load templates.
         const tplTableUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsToMany.template'), 'utf8');
         const tplTableDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'dropTable.template'), 'utf8');
 
+        // Save the old relationship.
+        const oldRelationship = history[_.capitalize(details.collection)].attributes[details.via];
+
+        // Construct old relation table name.
+        const oldRelationTable = _.map(_.sortBy([oldRelationship, details], 'collection'), function (table) {
+          return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
+        }).join('__');
+
+        // Force singular foreign key.
+        oldRelationship.attribute = pluralize.singular(oldRelationship.collection);
+
+        // Define PK column.
+        oldRelationship.column = utilsBookShelf.getPK(details.collection, undefined, models);
+
         // Drop current relationships table on migration run.
         models[relationTable].up.drop += _.unescape(_.template(tplTableDown)({
-          tableName: relationTable
+          tableName: oldRelationTable || relationTable
         }));
 
         // Drop current relationships table on migration rollback.
@@ -221,9 +236,9 @@ module.exports = function (models, modelName, details, attribute, toDrop, onlyDr
         // Create previous relationships table on migration rollback.
         models[relationTable].down.others += _.unescape(_.template(tplTableUp)({
           models: models,
-          tableName: relationTable,
+          tableName: oldRelationTable || relationTable,
           details: details,
-          relationship: relationship
+          relationship: oldRelationship || relationship
         }));
       }
     }
