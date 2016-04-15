@@ -137,6 +137,7 @@ module.exports = function (scope, cb) {
             // Parse every attribute which has been removed.
             _.forEach(attributesRemoved, function (attribute) {
               const details = scope.models[modelName].oldAttributes[attribute];
+              details.isRemoved = true;
 
               // Save the attribute as a new attribute.
               scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
@@ -180,6 +181,12 @@ module.exports = function (scope, cb) {
                   } else if (details.hasOwnProperty('model') &&
                     (_.get(scope.models[modelName].oldAttributes[attribute], 'model') !== details.model)) {
                     return true;
+                  } else if (details.hasOwnProperty('model') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('model')) {
+                    return true;
+                  } else if (details.hasOwnProperty('collection') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('collection')) {
+                    return true;
+                  } else if (details.hasOwnProperty('via') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('via')) {
+                    return true;
                   } else if (!_.isUndefined(details.type) && _.get(scope.models[modelName].oldAttributes[attribute], 'type') !== _.get(details, 'type')) {
                     return true;
                   } else if (!_.isUndefined(details.defaultValue) && _.get(scope.models[modelName].oldAttributes[attribute], 'defaultValue') === _.get(details, 'defaultValue')) {
@@ -202,9 +209,9 @@ module.exports = function (scope, cb) {
                   // Builder: create template for each attribute-- either with a column type
                   // or with a relationship.
                   if (details.type && _.isString(details.type)) {
-                    builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, toDrop);
+                    builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true);
                   } else if (_.isString(details.collection) || _.isString(details.model)) {
-                    builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, toDrop);
+                    builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, false, history);
                   }
                 }
               }

@@ -68,7 +68,7 @@ module.exports = {
       current: '',
       other: ''
     };
-
+    
     if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
       const relatedAttribute = models[association.collection].attributes[association.via];
 
