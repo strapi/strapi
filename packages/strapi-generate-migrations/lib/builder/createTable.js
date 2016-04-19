@@ -24,7 +24,6 @@ module.exports = function (models, modelName) {
   // `./builder/tables/createTableIfNotExists` template.
   const tplTableCreate = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'createTableIfNotExists.template'), 'utf8');
   if (_.isEmpty(_.get(models[modelName], 'up.others'))) {
-    console.log(models[modelName]);
     _.set(models[modelName], 'up.others', _.unescape(_.template(tplTableCreate)({
       models: models,
       tableName: modelName,
