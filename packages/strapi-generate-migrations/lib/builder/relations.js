@@ -29,12 +29,11 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
   let infos = {};
   let oldInfos = {};
 
-
   if (!onlyDrop && toDrop) {
     infos = utilsModels.getNature(details, attribute, rootModels);
     oldInfos = utilsModels.getNature(_.get(rootModels[modelName].oldAttributes, attribute), attribute, history);
 
-    const isDifferentVerbose = oldInfos.hasOwnProperty('nature') && oldInfos.nature === infos.nature ? false : true;
+    const isDifferentVerbose = !(oldInfos.hasOwnProperty('nature') && oldInfos.nature === infos.nature);
 
     if (isDifferentVerbose) {
       handleRelation(oldInfos, history, modelName, _.get(rootModels[modelName].oldAttributes, attribute), attribute, true, true);
@@ -52,8 +51,7 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
     handleRelation(infos, rootModels, modelName, details, attribute);
   }
 
-  function handleRelation (infos, models, modelName, details, attribute, toDrop, onlyDrop) {
-
+  function handleRelation(infos, models, modelName, details, attribute, toDrop, onlyDrop) {
     if (_.isEmpty(_.get(rootModels[modelName].attributes, attribute + '.create'))) {
       _.set(rootModels[modelName].attributes, attribute + '.create', {
         drop: '',
@@ -133,7 +131,7 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
           rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
             attribute: attribute,
-            details: details,
+            details: details
           }));
 
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
@@ -164,7 +162,7 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
           rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
             attribute: attribute,
-            details: details,
+            details: details
           }));
 
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
@@ -182,7 +180,7 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
         rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
           tableName: modelName,
           attribute: attribute,
-          details: details,
+          details: details
         }));
 
         tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');

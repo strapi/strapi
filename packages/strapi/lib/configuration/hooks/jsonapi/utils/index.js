@@ -34,8 +34,6 @@ module.exports = {
    */
 
   getObject: function (matchedRoute) {
-    // TODO:
-    // - Improve way to detect collection/ressource/relationships/related
     switch (_.size(matchedRoute.regexp.keys)) {
       case 0:
         return 'collection';

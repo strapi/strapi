@@ -40,7 +40,6 @@ module.exports = function (models, modelName) {
     }));
   }
 
-
   // Template: drop the table for the `down` export.
   // This adds a `down` logic for the current model.
   // Then, every `down` logic of every model call the

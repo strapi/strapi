@@ -68,7 +68,11 @@ module.exports = {
       current: '',
       other: ''
     };
-    
+
+    if (_.isUndefined(models)) {
+      models = global['strapi'].models;
+    }
+
     if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
       const relatedAttribute = models[association.collection].attributes[association.via];
 

@@ -76,14 +76,14 @@ module.exports = function (scope, cb) {
     }
   });
 
-  const history = () => {
+  const history = (function () {
     try {
       return JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'data', 'migrations', '.history'), 'utf8'));
     } catch (err) {
       // File not existing
       return {};
     }
-  }();
+  })();
 
   // Register every model.
   const migrations = glob.sync(path.resolve(scope.rootPath, 'api', '**', 'models', '*.json')).map((filepath) => {
@@ -171,7 +171,7 @@ module.exports = function (scope, cb) {
                 // If it's an existing attribute.
 
                 // Try to identify attribute updates
-                const toDrop = () => {
+                const toDrop = (function () {
                   if (details.hasOwnProperty('collection') && details.hasOwnProperty('via') &&
                     (_.get(scope.models[modelName].oldAttributes[attribute], 'collection') !== details.collection || _.get(scope.models[modelName].oldAttributes[attribute], 'via') !== details.via)) {
                     return true;
@@ -198,7 +198,7 @@ module.exports = function (scope, cb) {
                   } else {
                     return false;
                   }
-                }();
+                })();
 
                 // The attribute has been updated.
                 // We will drop it then create it again with the new options.
