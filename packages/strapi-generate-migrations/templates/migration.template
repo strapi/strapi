@@ -58,8 +58,6 @@ exports.down = function(connection, Promise) {
       }
     });
 
-    console.log("MIGRATION: " + dropped, onlyDrop);
-
     if (dropped === true && onlyDrop === false) { %>
     return Promise.all([
       <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.drop') %><% }); %>

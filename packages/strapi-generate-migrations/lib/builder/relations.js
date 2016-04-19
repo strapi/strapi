@@ -31,11 +31,10 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
 
 
   if (!onlyDrop && toDrop) {
-    console.log("#1 : " + modelName);
     infos = utilsModels.getNature(details, attribute, rootModels);
     oldInfos = utilsModels.getNature(_.get(rootModels[modelName].oldAttributes, attribute), attribute, history);
 
-    const isDifferentVerbose = oldInfos.hasOwnProperty('verbose') && oldInfos.verbose === infos.verbose ? false : true;
+    const isDifferentVerbose = oldInfos.hasOwnProperty('nature') && oldInfos.nature === infos.nature ? false : true;
 
     if (isDifferentVerbose) {
       handleRelation(oldInfos, history, modelName, _.get(rootModels[modelName].oldAttributes, attribute), attribute, true, true);
@@ -43,13 +42,11 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
     } else {
       handleRelation(infos, rootModels, modelName, details, attribute, true, true);
     }
-  } else if (onlyDrop && toDrop) {
-    console.log("#2 : " + modelName);
+  } else if (onlyDrop || toDrop) {
     oldInfos = utilsModels.getNature(_.get(rootModels[modelName].oldAttributes, attribute), attribute, history);
 
     handleRelation(oldInfos, history, modelName, _.get(rootModels[modelName].oldAttributes, attribute), attribute, true, true);
   } else {
-    console.log("#3 : " + modelName);
     infos = utilsModels.getNature(details, attribute, rootModels);
 
     handleRelation(infos, rootModels, modelName, details, attribute);
@@ -57,8 +54,19 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
 
   function handleRelation (infos, models, modelName, details, attribute, toDrop, onlyDrop) {
 
-    _.set(rootModels[modelName].attributes, attribute + '.create', {});
-    _.set(rootModels[modelName].attributes, attribute + '.delete', {});
+    if (_.isEmpty(_.get(rootModels[modelName].attributes, attribute + '.create'))) {
+      _.set(rootModels[modelName].attributes, attribute + '.create', {
+        drop: '',
+        others: ''
+      });
+    }
+
+    if (_.isEmpty(_.get(rootModels[modelName].attributes, attribute + '.delete'))) {
+      _.set(rootModels[modelName].attributes, attribute + '.delete', {
+        drop: '',
+        others: ''
+      });
+    }
 
     // If it's a "one-to-one" relationship.
     if (infos.verbose === 'hasOne') {
@@ -68,26 +76,35 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
       // Define PK column.
       details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
-      // Template: create a new column thanks to the attribute's relation.
-      // Simply make a `create` template for this attribute wich will be added
-      // to the table template-- either `./builder/tables/selectTable` or
-      // `./builder/tables/createTableIfNotExists`.
-      tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
-      models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
-        tableName: modelName,
-        attribute: attribute,
-        details: details
-      }));
+      if (!toDrop) {
+        tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
+        models[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
+          tableName: modelName,
+          attribute: attribute,
+          details: details
+        }));
 
-      // Template: drop the column.
-      // Simply make a `delete` template for this attribute wich drop the column
-      // with the `./builder/columns/dropColumn` template.
-      tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
-      models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplRelationDown)({
-        tableName: modelName,
-        attribute: attribute,
-        details: details
-      }));
+        tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
+        models[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationDown)({
+          tableName: modelName,
+          attribute: attribute,
+          details: details
+        }));
+      } else {
+        tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
+        models[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
+          tableName: modelName,
+          attribute: attribute,
+          details: details
+        }));
+
+        tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
+        models[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationUp)({
+          tableName: modelName,
+          attribute: attribute,
+          details: details
+        }));
+      }
     } else if (infos.verbose === 'belongsTo') {
       // Force singular foreign key.
       details.attribute = pluralize.singular(details.model);
@@ -96,47 +113,84 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
       details.column = utilsBookShelf.getPK(modelName, undefined, models);
 
       if (infos.nature === 'oneToMany' || infos.nature === 'oneWay') {
-        // Template: create a new column thanks to the attribute's relation.
-        // Simply make a `create` template for this attribute wich will be added
-        // to the table template-- either `./builder/tables/selectTable` or
-        // `./builder/tables/createTableIfNotExists`.
+        if (!toDrop) {
+          tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details,
+            nature: infos.nature
+          }));
+
+          tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationDown)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details
+          }));
+        } else {
+          tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details,
+          }));
+
+          tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details,
+            nature: infos.nature
+          }));
+        }
+      } else {
+        if (!toDrop) {
+          tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo-unique.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details
+          }));
+
+          tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationDown)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details
+          }));
+        } else {
+          tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details,
+          }));
+
+          tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
+          rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
+            tableName: modelName,
+            attribute: attribute,
+            details: details,
+            nature: infos.nature
+          }));
+        }
+      }
+    } else if (infos.verbose === 'hasMany') {
+      if (toDrop) {
+        tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
+        rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
+          tableName: modelName,
+          attribute: attribute,
+          details: details,
+        }));
+
         tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
-        rootModels[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
+        rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
           tableName: modelName,
           attribute: attribute,
           details: details,
           nature: infos.nature
-        }));
-
-        // Template: drop the column.
-        // Simply make a `delete` template for this attribute wich drop the column
-        // with the `./builder/columns/dropColumn` template.
-        tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
-        rootModels[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplRelationDown)({
-          tableName: modelName,
-          attribute: attribute,
-          details: details
-        }));
-      } else {
-        // Template: create a new column thanks to the attribute's relation.
-        // Simply make a `create` template for this attribute wich will be added
-        // to the table template-- either `./builder/tables/selectTable` or
-        // `./builder/tables/createTableIfNotExists`.
-        tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo-unique.template'), 'utf8');
-        rootModels[modelName].attributes[attribute].create.others = _.unescape(_.template(tplRelationUp)({
-          tableName: modelName,
-          attribute: attribute,
-          details: details
-        }));
-
-        // Template: drop the column.
-        // Simply make a `delete` template for this attribute wich drop the column
-        // with the `./builder/columns/dropColumn` template.
-        tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
-        rootModels[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplRelationDown)({
-          tableName: modelName,
-          attribute: attribute,
-          details: details
         }));
       }
     } else if (infos.verbose === 'belongsToMany') {
