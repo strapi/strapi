@@ -10,7 +10,6 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
-const pluralize = require('pluralize');
 
 /**
  * This `before` function is run before generating targets.
@@ -22,13 +21,13 @@ const pluralize = require('pluralize');
 
 module.exports = function (scope, cb) {
   if (!scope.rootPath || !scope.args[0]) {
-    return cb.invalid('Usage: `$ strapi generate:api apiName`');
+    return cb.invalid('Usage: `$ strapi generate:model modelName apiName`');
   }
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     id: scope.args[0],
-    idPluralized: pluralize.plural(scope.args[0]),
+    api: scope.args[1],
     environment: process.NODE_ENV || 'development'
   });
 
@@ -48,7 +47,7 @@ module.exports = function (scope, cb) {
   // Humanize output.
   _.defaults(scope, {
     humanizeId: scope.args[0],
-    humanizedPath: '`./api`'
+    humanizedPath: '`./api/' + scope.api + '/models`'
   });
 
   // Get default connection
@@ -59,5 +58,5 @@ module.exports = function (scope, cb) {
   }
 
   // Trigger callback with no error to proceed.
-  return cb.success();
+  return cb();
 };
