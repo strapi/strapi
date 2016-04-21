@@ -1,0 +1,42 @@
+{
+  "name": "strapi-generate-controller",
+  "version": "2.0.0",
+  "description": "Generate a controller for a Strapi API.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "controller",
+    "generate",
+    "generator",
+    "strapi"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "lodash": "~4.6.1"
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hack@wistity.co",
+    "name": "Wistity team",
+    "url": "http://wistity.co"
+  },
+  "maintainers": [
+    {
+      "name": "Wistity team",
+      "email": "hack@wistity.co",
+      "url": "http://wistity.co"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wistityhq/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wistityhq/strapi/issues"
+  },
+  "license": "MIT"
+}
