@@ -198,5 +198,14 @@ Then, you can apply one or more policies on each query and mutation.
 }
 ```
 
+## Use GraphQL in your codebase
+
+You can make GraphQL query in your codebase. The `graphql` is exposed in global, and Strapi add a new function called `query` to easily make GraphQL query.
+
+```javascript
+this.body = yield graphql.query("{articles{title}}", this);
+// Don't forget to send the context. This is needed to apply permissions.
+```
+
 !!! note
     The policy doesn't need to be in the same API folder. The GraphQL permissions are based on the global `strapi.policies` variable which is an aggregate of the policies of the whole application. Also, the request is apply to the policies, in others words, this means you can handle sessions and cookies in the policy as usual.
