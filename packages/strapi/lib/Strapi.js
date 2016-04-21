@@ -6,6 +6,7 @@
 
 // Node.js core.
 const path = require('path');
+const http = require('http');
 const events = require('events');
 const util = require('util');
 
@@ -44,8 +45,10 @@ function Strapi() {
   this.isStrapiAppSync = this.isStrapiAppSync.bind(this);
 
   // Expose `koa`.
-  this.server = require('koa');
   this.app = require('koa')();
+
+  // Mount the HTTP server.
+  this.server = http.Server(this.app.callback());
 
   // Expose every middleware inside `strapi.middlewares`.
   this.middlewares = require('koa-load-middlewares')({
@@ -69,7 +72,6 @@ util.inherits(Strapi, events.EventEmitter);
 
 Strapi.prototype.start = require('./start');
 Strapi.prototype.stop = require('./stop');
-Strapi.prototype.server = require('koa');
 Strapi.prototype.app = require('koa')();
 
 Strapi.prototype.middlewares = require('koa-load-middlewares')({

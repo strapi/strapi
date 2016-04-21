@@ -38,6 +38,10 @@ describe('core', function () {
     assert(typeof strapi.runBootstrap === 'function');
   });
 
+  it('`strapi.server` should be a object', function () {
+    assert(typeof strapi.server === 'object');
+  });
+
   it('`strapi.start` should be a function', function () {
     assert(typeof strapi.start === 'function');
   });

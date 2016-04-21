@@ -144,10 +144,10 @@ module.exports = strapi => {
           .timeout(strapi.config.reload.timeout)
           .size(strapi.config.reload.workers)
           .run(function () {
-            strapi.app.listen(strapi.config.port);
+            strapi.server.listen(strapi.config.port);
           });
       } else {
-        strapi.app.listen(strapi.config.port);
+        strapi.server.listen(strapi.config.port);
       }
 
       cb && cb(null, strapi);
