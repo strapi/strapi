@@ -69,8 +69,12 @@ module.exports = {
       other: ''
     };
 
+    if (_.isUndefined(models)) {
+      models = global['strapi'].models;
+    }
+
     if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
-      const relatedAttribute = strapi.models[association.collection].attributes[association.via];
+      const relatedAttribute = models[association.collection].attributes[association.via];
 
       types.current = 'collection';
 
@@ -83,7 +87,7 @@ module.exports = {
       types.current = 'modelD';
 
       // We have to find if they are a model linked to this key
-      _.forIn(strapi.models, function (model) {
+      _.forIn(models, function (model) {
         _.forIn(model.attributes, function (attribute) {
           if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection')) {
             types.other = 'collection';
@@ -102,7 +106,7 @@ module.exports = {
       types.current = 'model';
 
       // We have to find if they are a model linked to this key
-      _.forIn(strapi.models, function (model) {
+      _.forIn(models, function (model) {
         _.forIn(model.attributes, function (attribute) {
           if (attribute.hasOwnProperty('via') && attribute.via === key) {
             if (attribute.hasOwnProperty('collection')) {

@@ -64,6 +64,13 @@ module.exports = function (strapi) {
           // Expose the GraphQL schemas at `strapi.schemas`
           strapi.schemas = schemas;
 
+          global.graphql = require('graphql');
+          global.graphql.query = function * (query, context) {
+            return this.graphql(schemas, query, {
+              context: context
+            });
+          };
+
           cb();
         });
       } else {

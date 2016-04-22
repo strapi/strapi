@@ -1,0 +1,3 @@
+
+// Delete the foreign key on `<%= attribute %>` column.
+table.dropForeign('<%= attribute %>').dropColumn('<%= attribute %>')

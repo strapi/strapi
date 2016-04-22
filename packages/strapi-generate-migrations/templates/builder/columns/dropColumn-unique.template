@@ -1,0 +1,3 @@
+
+// Delete the `<%= attribute %>` column with unique constraint.
+table.dropUnique('<%= tableName.toLowerCase() %>_<%= attribute %>_unique').dropColumn('<%= attribute %>')

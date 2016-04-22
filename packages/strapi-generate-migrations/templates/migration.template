@@ -8,9 +8,34 @@
  */
 
 exports.up = function(connection, Promise) {
-  return Promise.all([
-    <% _.forEach(models, function(definition, model) { %><%= models[model].up %><% }); %>
-  ]);
+  <% var dropped = false; var onlyDrop = true;
+
+    _.forEach(models, function (definition, model) {
+      if (!_.isEmpty(_.get(models[model], 'up.drop'))) {
+        dropped = true;
+      }
+
+      if (!_.isEmpty(_.get(models[model], 'up.others'))) {
+        onlyDrop = false;
+      }
+    });
+
+    if (dropped === true && onlyDrop === false) { %> return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'up.drop') %><% }); %>
+    ]).then(function() {
+      return Promise.all([
+        <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'up.others') %><% }); %>
+      ]);
+    });
+  <% } else if (dropped === true && onlyDrop === true) { %>
+    return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'up.drop') %><% }); %>
+    ]);
+  <% } else { %>
+    return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'up.others') %><% }); %>
+    ]);
+  <% } %>
 };
 
 /**
@@ -21,9 +46,35 @@ exports.up = function(connection, Promise) {
  */
 
 exports.down = function(connection, Promise) {
-  return Promise.all([
-    <% _.forEach(models, function(definition, model) { %><%= models[model].down %><% }); %>
-  ]);
+  <% var dropped = false; var onlyDrop = true;
+
+    _.forEach(models, function (definition, model) {
+      if (!_.isEmpty(_.get(models[model], 'down.drop'))) {
+        dropped = true;
+      }
+
+      if (!_.isEmpty(_.get(models[model], 'down.others'))) {
+        onlyDrop = false;
+      }
+    });
+
+    if (dropped === true && onlyDrop === false) { %>
+    return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.drop') %><% }); %>
+    ]).then(function() {
+      return Promise.all([
+        <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.others') %><% }); %>
+      ]);
+    });
+  <% } else if (dropped === true && onlyDrop === true) { %>
+    return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.drop') %><% }); %>
+    ]);
+  <% } else { %>
+    return Promise.all([
+      <% _.forEach(models, function(definition, model) { %><%= _.get(models[model], 'down.others') %><% }); %>
+    ]);
+  <% } %>
 };
 
 /**

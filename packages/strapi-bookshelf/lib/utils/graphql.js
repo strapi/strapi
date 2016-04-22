@@ -9,6 +9,7 @@ const _ = require('lodash');
 
 // Strapi helper for GraphQL.
 const helpers = require('strapi/lib/configuration/hooks/graphql/helpers/');
+const utils = require('./');
 
 /**
  * Utils functions for BookShelf
@@ -131,6 +132,8 @@ module.exports = {
 
   update: function (collectionIdentity, rootValue, args) {
     _.merge(args, rootValue.context.request.body);
+
+    const PK = utils.getPK(collectionIdentity.toLowerCase(), null, strapi.models);
 
     return strapi.services[collectionIdentity.toLowerCase()]
       .edit(_.set({}, PK, args[PK]), _.omit(args, PK))

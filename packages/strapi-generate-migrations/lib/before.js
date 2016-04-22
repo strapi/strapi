@@ -76,61 +76,89 @@ module.exports = function (scope, cb) {
     }
   });
 
+  const history = (function () {
+    try {
+      return JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'data', 'migrations', '.history'), 'utf8'));
+    } catch (err) {
+      // File not existing
+      return {};
+    }
+  })();
+
   // Register every model.
-  const migrations = glob.sync(path.resolve(scope.rootPath, 'api', '**', 'models', '*.json')).map((file) => {
-    let modelName;
+  const migrations = glob.sync(path.resolve(scope.rootPath, 'api', '**', 'models', '*.json')).map((filepath) => {
+    try {
+      const file = JSON.parse(fs.readFileSync(path.resolve(filepath)));
 
-    // Only create migration file for the models with the specified connection.
-    if (JSON.parse(fs.readFileSync(path.resolve(file))).connection === scope.connection) {
+      // Only create migration file for the models with the specified connection.
+      if (_.get(file, 'connection') === _.get(scope, 'connection')) {
+        // Save the model name thanks to the given table name.
+        const modelName = _.get(file, 'tableName');
+        scope.models[modelName] = file;
 
-      // Save the model name thanks to the given table name.
-      modelName = JSON.parse(fs.readFileSync(path.resolve(file))).tableName;
-      scope.models[modelName] = JSON.parse(fs.readFileSync(path.resolve(file)));
-
-      // First, we need to know if the table already exists.
-      scope.db.schema.hasTable(modelName).then(function (exists) {
-
-        // If the table doesn't exist.
-        if (!exists) {
-
-          // Builder: add needed options specified in the model
-          // for each option.
-          _.forEach(scope.models[modelName].options, function (value, option) {
-            builder.options(scope.models, modelName, value, option);
-          });
-
-          // Builder: create template for each attribute-- either with a column type
-          // or with a relationship.
-          _.forEach(scope.models[modelName].attributes, function (details, attribute) {
-            if (details.type && _.isString(details.type)) {
-              builder.types(scope.models, modelName, details, attribute);
-            } else if (_.isString(details.collection) || _.isString(details.model)) {
-              builder.relations(scope.models, modelName, details, attribute);
-            }
-          });
-
-          // Builder: create and drop the table.
-          builder.createTable(scope.models, modelName);
+        if (!_.isEmpty(history) && history.hasOwnProperty(modelName)) {
+          _.set(scope.models, modelName + '.oldAttributes', _.get(history, modelName + '.attributes'));
+        } else {
+          _.set(scope.models, modelName + '.oldAttributes', {});
         }
 
-        // If the table already exists.
-        else {
+        // First, we need to know if the table already exists.
+        scope.db.schema.hasTable(modelName).then(function (exists) {
+          // If the table doesn't exist.
+          if (!exists) {
+            // Builder: add needed options specified in the model
+            // for each option.
+            _.forEach(scope.models[modelName].options, function (value, option) {
+              builder.options(scope.models, modelName, value, option);
+            });
 
-          // Ideally, we need to verify the table properties here
-          // to see if they still are the same.
+            // Builder: create template for each attribute-- either with a column type
+            // or with a relationship.
+            _.forEach(scope.models[modelName].attributes, function (details, attribute) {
+              if (details.type && _.isString(details.type)) {
+                builder.types(scope.models, modelName, details, attribute);
+              } else if (_.isString(details.collection) || _.isString(details.model)) {
+                builder.relations(scope.models, modelName, details, attribute);
+              }
+            });
 
-          // Parse every attribute.
-          _.forEach(scope.models[modelName].attributes, function (details, attribute) {
+            // Builder: create and drop the table.
+            builder.createTable(scope.models, modelName);
+          } else {
+            // If the table already exists.
 
-            // Verify if a column already exists for the attribute.
-            scope.db.schema.hasColumn(modelName, attribute).then(function (exists) {
-              scope.models[modelName].newAttributes = {};
+            // Set new attributes object
+            _.set(scope.models[modelName], 'newAttributes', {});
+
+            // Identity added, updated and removed attributes
+            const attributesRemoved = _.difference(_.keys(scope.models[modelName].oldAttributes), _.keys(scope.models[modelName].attributes));
+            const attributesAddedOrUpdated = _.difference(_.keys(scope.models[modelName].attributes), attributesRemoved);
+
+            // Parse every attribute which has been removed.
+            _.forEach(attributesRemoved, function (attribute) {
+              const details = scope.models[modelName].oldAttributes[attribute];
+              details.isRemoved = true;
+
+              // Save the attribute as a new attribute.
+              scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
+
+              // Builder: create template for each attribute-- either with a column type
+              // or with a relationship.
+              if (details.type && _.isString(details.type)) {
+                builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true);
+              } else if (_.isString(details.collection) || _.isString(details.model)) {
+                builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, true, history);
+              }
+            });
+
+            // Parse every attribute which has been added or updated.
+            _.forEach(attributesAddedOrUpdated, function (attribute) {
+              const details = scope.models[modelName].attributes[attribute];
 
               // If it's a new attribute.
-              if (!exists) {
-
+              if (!scope.models[modelName].oldAttributes.hasOwnProperty(attribute)) {
                 // Save the attribute as a new attribute.
-                scope.models[modelName].newAttributes[attribute] = details;
+                scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
 
                 // Builder: create template for each attribute-- either with a column type
                 // or with a relationship.
@@ -139,29 +167,71 @@ module.exports = function (scope, cb) {
                 } else if (_.isString(details.collection) || _.isString(details.model)) {
                   builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute);
                 }
+              } else {
+                // If it's an existing attribute.
 
-                // Builder: select the table.
-                builder.selectTable(scope.models, modelName);
+                // Try to identify attribute updates
+                const toDrop = (function () {
+                  if (details.hasOwnProperty('collection') && details.hasOwnProperty('via') &&
+                    (_.get(scope.models[modelName].oldAttributes[attribute], 'collection') !== details.collection || _.get(scope.models[modelName].oldAttributes[attribute], 'via') !== details.via)) {
+                    return true;
+                  } else if (details.hasOwnProperty('model') && details.hasOwnProperty('via') &&
+                    (_.get(scope.models[modelName].oldAttributes[attribute], 'model') !== details.model || _.get(scope.models[modelName].oldAttributes[attribute], 'via') !== details.via)) {
+                    return true;
+                  } else if (details.hasOwnProperty('model') &&
+                    (_.get(scope.models[modelName].oldAttributes[attribute], 'model') !== details.model)) {
+                    return true;
+                  } else if (details.hasOwnProperty('model') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('model')) {
+                    return true;
+                  } else if (details.hasOwnProperty('collection') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('collection')) {
+                    return true;
+                  } else if (details.hasOwnProperty('via') && !_.get(scope.models[modelName].oldAttributes, attribute).hasOwnProperty('via')) {
+                    return true;
+                  } else if (!_.isUndefined(details.type) && _.get(scope.models[modelName].oldAttributes[attribute], 'type') !== _.get(details, 'type')) {
+                    return true;
+                  } else if (!_.isUndefined(details.defaultValue) && _.get(scope.models[modelName].oldAttributes[attribute], 'defaultValue') === _.get(details, 'defaultValue')) {
+                    return true;
+                  } else if (!_.isUndefined(details.maxLength) && _.get(scope.models[modelName].oldAttributes[attribute], 'maxLength') === _.get(details, 'maxLength')) {
+                    return true;
+                  } else if (!_.isUndefined(details.nullable) && _.get(scope.models[modelName].oldAttributes[attribute], 'nullable') === _.get(details, 'nullable')) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                })();
+
+                // The attribute has been updated.
+                // We will drop it then create it again with the new options.
+                if (toDrop) {
+                  // Save the attribute as a new attribute.
+                  scope.models[modelName].newAttributes[attribute] = _.cloneDeep(details);
+
+                  // Builder: create template for each attribute-- either with a column type
+                  // or with a relationship.
+                  if (details.type && _.isString(details.type)) {
+                    builder.types(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true);
+                  } else if (_.isString(details.collection) || _.isString(details.model)) {
+                    builder.relations(scope.models, modelName, scope.models[modelName].newAttributes[attribute], attribute, true, false, history);
+                  }
+                }
               }
-
-              // If the column already exists.
-              else {
-
-                // TODO: Verify columns info are the same.
-                // scope.db(modelName).columnInfo(attribute).then(function (info) {
-                //
-                // });
-              }
-            }).catch(function (err) {
-              console.log(err);
             });
-          });
-        }
-      });
 
-      return new Promise((resolve) => {
-        asyncFunction(file, resolve);
-      });
+            // For lightweight migration file,
+            // only call this when new attributes are detected.
+            if (!_.isEmpty(scope.models[modelName].newAttributes)) {
+              // Builder: select the table.
+              builder.selectTable(scope.models, modelName);
+            }
+          }
+        });
+
+        return new Promise((resolve) => {
+          asyncFunction(filepath, resolve);
+        });
+      }
+    } catch (e) {
+      return cb.invalid(e);
     }
   });
 
