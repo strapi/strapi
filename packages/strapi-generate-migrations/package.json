@@ -17,6 +17,7 @@
     "lib": "./lib"
   },
   "dependencies": {
+    "async": "~1.5.2",
     "glob": "~7.0.3",
     "js-beautify": "~1.6.2",
     "knex": "~0.10.0",
