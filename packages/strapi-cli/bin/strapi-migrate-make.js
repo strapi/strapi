@@ -56,8 +56,8 @@ module.exports = function () {
 
     // Simply, log and exit the REPL in case of success.
     success: function returnSuccess() {
-      logger.info('Migration file successfully generated at `' + path.resolve(scope.rootPath, 'data', 'migrations', scope.connection) + '``.');
-      logger.info('Seed file created at `' + path.resolve(scope.rootPath, 'data', 'seeds', scope.connection) + '``.');
+      logger.info('Migration file successfully generated at `' + path.resolve(scope.rootPath, 'data', 'migrations', scope.connection) + '`.');
+      logger.info('Seed file created at `' + path.resolve(scope.rootPath, 'data', 'seeds', scope.connection) + '`.');
       logger.warn('This migration has been automatically generated.');
       logger.warn('We strongly advise you to manually verify those information.');
       process.exit(0);
