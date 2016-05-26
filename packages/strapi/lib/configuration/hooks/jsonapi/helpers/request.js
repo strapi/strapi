@@ -185,7 +185,7 @@ module.exports = {
         _.set(ctx.request.query, 'offset', strapi.config.jsonapi.paginate * (value - 1));
 
         // Remove JSON API page strategy
-        ctx.request.query = _.omit(ctx.request.query, 'page[number]');
+        ctx.request.query = _.omitBy(ctx.request.query, 'page[number]');
       }
     });
   },
@@ -228,7 +228,7 @@ module.exports = {
     }
 
     // Extract required attributes
-    const requiredAttributes = _.omit(_.mapValues(strapi.models[body.data.type].attributes, function (attr) {
+    const requiredAttributes = _.omitBy(_.mapValues(strapi.models[body.data.type].attributes, function (attr) {
       return (attr.required && attr.type) ? attr : undefined;
     }), _.isUndefined);
     // Identify missing attributes
