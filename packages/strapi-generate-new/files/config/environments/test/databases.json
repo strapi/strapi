@@ -1,0 +1,17 @@
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "client": "sqlite3",
+      "debug": false,
+      "acquireConnectionTimeout": 60000,
+      "useNullAsDefault": true,
+      "connection": {
+        "filename": "./data/db.sqlite"
+      },
+      "migrations": {
+        "tableName": "migrations"
+      }
+    }
+  }
+}
