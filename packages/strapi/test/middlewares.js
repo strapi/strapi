@@ -55,10 +55,6 @@ describe('middlewares', function () {
     assert(typeof strapi.middlewares.lusca === 'function');
   });
 
-  it('`strapi.middlewares.mount` should be a function', function () {
-    assert(typeof strapi.middlewares.mount === 'function');
-  });
-
   it('`strapi.middlewares.proxy` should be a function', function () {
     assert(typeof strapi.middlewares.proxy === 'function');
   });
