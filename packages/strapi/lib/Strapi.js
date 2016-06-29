@@ -74,16 +74,6 @@ Strapi.prototype.start = require('./start');
 Strapi.prototype.stop = require('./stop');
 Strapi.prototype.app = require('koa')();
 
-Strapi.prototype.middlewares = require('koa-load-middlewares')({
-  config: path.resolve(__dirname, '..', 'package.json'),
-  pattern: ['koa-*', 'koa.*'],
-  scope: ['dependencies', 'devDependencies'],
-  replaceString: /^koa(-|\.)/,
-  camelize: true
-});
-
-Strapi.prototype.log = require('strapi-utils').logger;
-
 /**
  * Private methods
  */
