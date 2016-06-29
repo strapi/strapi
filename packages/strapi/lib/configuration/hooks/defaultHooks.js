@@ -12,7 +12,6 @@ module.exports = {
   responseTime: true,
   bodyParser: true,
   session: true,
-  grant: true,
   proxy: true,
   ssl: true,
   ip: true,
@@ -23,11 +22,8 @@ module.exports = {
   i18n: true,
   cron: true,
   logger: true,
-  views: true,
   router: true,
   static: true,
   websockets: true,
-  jsonapi: true,
-  models: true,
-  graphql: true
+  models: true
 };

@@ -93,11 +93,6 @@ module.exports = function (strapi) {
             // Add the `responsesPolicy`.
             policies.push(responsesPolicy);
 
-            // Enabled JSON API support
-            if ((_.isPlainObject(strapi.config.jsonapi) && strapi.config.jsonapi.enabled === true) || (_.isBoolean(strapi.config.jsonapi) && strapi.config.jsonapi === true)) {
-              policies.push(JSONAPI.parse(strapi));
-            }
-
             if (_.isArray(value.policies) && !_.isEmpty(value.policies)) {
               _.forEach(value.policies, function (policy) {
                 if (strapi.policies[policy]) {

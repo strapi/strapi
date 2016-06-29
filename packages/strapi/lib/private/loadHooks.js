@@ -123,7 +123,7 @@ module.exports = function (strapi) {
 
       // Prepare all other hooks.
       prepare: function prepareHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router', 'graphql'), function (id, cb) {
+        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
           prepareHook(id);
           process.nextTick(cb);
         }, cb);
@@ -131,7 +131,7 @@ module.exports = function (strapi) {
 
       // Apply the default config for all other hooks.
       defaults: function defaultConfigHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router', 'graphql'), function (id, cb) {
+        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
           const hook = hooks[id];
           applyDefaults(hook);
           process.nextTick(cb);
@@ -140,19 +140,9 @@ module.exports = function (strapi) {
 
       // Load all other hooks.
       load: function loadOtherHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router', 'graphql'), function (id, cb) {
+        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
           loadHook(id, cb);
         }, cb);
-      },
-
-      // Load the GraphQL hook.
-      graphql: function loadGraphQLHook(cb) {
-        if (!hooks.graphql) {
-          return cb();
-        }
-        prepareHook('graphql');
-        applyDefaults(hooks.graphql);
-        loadHook('graphql', cb);
       },
 
       // Load the router hook.
