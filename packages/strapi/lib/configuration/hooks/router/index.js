@@ -11,7 +11,6 @@ const cluster = require('cluster');
 const _ = require('lodash');
 
 // Local utilities.
-const JSONAPI = require('../jsonapi')();
 const responsesPolicy = require('../responses/policy');
 
 // Strapi utilities.
