@@ -11,7 +11,7 @@ const herd = require('herd');
 
 // Local dependencies.
 const __Configuration = require('./configuration');
-const __initializeHooks = require('./private/loadHooks');
+const __loadHooks = require('./private/loadHooks');
 
 /**
  * Load the Strapi instance
@@ -19,7 +19,7 @@ const __initializeHooks = require('./private/loadHooks');
 
 module.exports = strapi => {
   const Configuration = __Configuration(strapi);
-  const initializeHooks = __initializeHooks(strapi);
+  const loadHooks = __loadHooks(strapi);
 
   /**
    * Expose loader start point
@@ -49,14 +49,20 @@ module.exports = strapi => {
     strapi.on('hook:_config:loaded', strapi.exposeGlobals);
 
     async.auto({
-
       // Apply core defaults and hook-agnostic configuration,
       // esp. overrides including command-line options, environment variables,
       // and options that were passed in programmatically.
       config: [Configuration.load],
-
-      // Load hooks into memory, with their middleware and routes.
-      hooks: ['config', loadHooks]
+      // Initiliaze hooks global variable and configurations
+      hooks: ['config', initializeHooks],
+      // Load core's hooks into memory, with their middleware and routes.
+      dictionary: ['hooks', (cb) => loader('dictionary', cb)],
+      // Load core's hooks into memory, with their middleware and routes.
+      core: ['dictionary', (cb) => loader('core', cb)],
+      // Load websocket's hooks into memory
+      websocket: ['core', (cb) => loader('websockets', cb)],
+      // Load models' hooks into memory
+      models: ['websocket', (cb) => loader('models', cb)]
     }, ready__(cb));
 
     // Makes `app.load()` chainable.
@@ -64,49 +70,37 @@ module.exports = strapi => {
   };
 
   /**
-   * Load hooks in parallel
-   * let them work out dependencies themselves,
-   * taking advantage of events fired from the `strapi` object.
+   * Initiliaze hooks,
+   * and put them back into `hooks` (probably `strapi.hooks`).
    *
    * @api private
    */
 
-  function loadHooks(cb) {
+  function initializeHooks(cb) {
     strapi.hooks = {};
 
-    // If `strapi.config.hooks` is disabled, skip hook loading altogether.
     if (strapi.config.hooks === false) {
       return cb();
     }
 
-    async.series([
-      cb => loadHookDefinitions(strapi.hooks, cb),
-      cb => initializeHooks(strapi.hooks, cb)
-    ], err => {
-      if (err) {
-        return cb(err);
-      }
+    // Mix in user-configured hook definitions.
+    _.assign(strapi.hooks, strapi.config.hooks);
 
-      // Inform any listeners that the initial, built-in hooks
-      // are finished loading.
-      strapi.emit('hooks:builtIn:ready');
-      return cb();
-    });
+    return cb();
   }
 
   /**
-   * Load built-in hook definitions from `strapi.config.hooks`
-   * and put them back into `hooks` (probably `strapi.hooks`)
+   * Hook generic loader
    *
    * @api private
    */
 
-  function loadHookDefinitions(hooks, cb) {
+  function loader(hookCategory, cb) {
+    if (_.get(strapi.hooks, hookCategory) === false) {
+      return cb();
+    }
 
-    // Mix in user-configured hook definitions.
-    _.assign(hooks, strapi.config.hooks);
-
-    return cb();
+    loadHooks(_.get(strapi.hooks, hookCategory), hookCategory, cb);
   }
 
   /**
@@ -116,9 +110,12 @@ module.exports = strapi => {
    */
 
   function ready__(cb) {
+    strapi.emit('hooks:builtIn:ready');
+
     return function (err) {
       if (err) {
-        return cb && cb(err);
+        // Displaying errors, try to start the server through
+        strapi.log.error(err);
       }
 
       // Automatically define the server URL from

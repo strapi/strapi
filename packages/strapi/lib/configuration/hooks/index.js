@@ -42,17 +42,7 @@ module.exports = function (strapi) {
         return cb();
       }
 
-      // Run `loadModules` method if it is loaded.
-      async.auto({
-        modules: function loadModules(cb) {
-          return cb();
-        }
-      }, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        self.initialize(cb);
-      });
+      self.initialize(cb);
     };
 
     /**
@@ -62,9 +52,7 @@ module.exports = function (strapi) {
      * @return {}
      */
 
-    this.defaults = function () {
-      return {};
-    };
+    this.defaults = {};
 
     /**
      * Hooks may override this function

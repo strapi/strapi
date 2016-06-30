@@ -74,7 +74,7 @@ module.exports = function initialize(cb) {
 
   // Only run the application bootstrap on master cluster if we don't have any workers.
   // Else, run the bootstrap logic on the workers.
-  if ((!strapi.config.reload && cluster.isMaster) || ((cluster.isWorker && strapi.config.reload.workers > 0) || (cluster.isMaster && strapi.config.reload.workers < 1))) {
+  if ((!self.config.reload && cluster.isMaster) || ((cluster.isWorker && self.config.reload.workers > 0) || (cluster.isMaster && self.config.reload.workers < 1))) {
     self.runBootstrap(function afterBootstrap(err) {
       if (err) {
         self.log.error('Bootstrap encountered an error.');

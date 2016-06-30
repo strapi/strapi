@@ -1,5 +1,8 @@
 'use strict';
 
+// Start date
+global.startedAt = Date.now();
+
 /**
  * Module dependencies
  */

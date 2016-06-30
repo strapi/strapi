@@ -49,6 +49,7 @@ module.exports = function start(configOverride, cb) {
       self.log.info('Server started in ' + self.config.appPath);
       self.log.info('Your server is running at ' + self.config.url);
       self.log.debug('Time: ' + new Date());
+      self.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds');
       self.log.debug('Environment: ' + self.config.environment);
       self.log.debug('Process PID: ' + process.pid);
       self.log.debug('Cluster: master');

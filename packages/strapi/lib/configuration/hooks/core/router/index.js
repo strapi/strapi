@@ -11,7 +11,7 @@ const cluster = require('cluster');
 const _ = require('lodash');
 
 // Local utilities.
-const responsesPolicy = require('../responses/policy');
+const responsesPolicy = require('../../core/responses/policy');
 
 // Strapi utilities.
 const regex = require('strapi-utils').regex;

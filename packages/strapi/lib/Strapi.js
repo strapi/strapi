@@ -72,7 +72,6 @@ util.inherits(Strapi, events.EventEmitter);
 
 Strapi.prototype.start = require('./start');
 Strapi.prototype.stop = require('./stop');
-Strapi.prototype.app = require('koa')();
 
 /**
  * Private methods

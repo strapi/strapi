@@ -37,6 +37,7 @@ module.exports = function mixinAfter(emitter) {
    */
 
   const _emit = _.assign(emitter.emit);
+  
   emitter.emit = function (evName) {
     emitter.warmEvents[evName] = true;
     _emit.apply(emitter, _.slice(arguments, 0));

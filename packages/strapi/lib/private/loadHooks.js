@@ -21,7 +21,8 @@ const __hooks = require('../configuration/hooks');
 module.exports = function (strapi) {
   const Hook = __hooks(strapi);
 
-  return function initializeHooks(hooks, cb) {
+  return (hooks, hookCategory, cb) => {
+
     function prepareHook(id) {
       let hookPrototype = hooks[id];
 
@@ -31,12 +32,6 @@ module.exports = function (strapi) {
         return;
       }
 
-      // Do not load the `studio` hook if the
-      // cluster is not the master.
-      if (!cluster.isMaster) {
-        delete hooks.studio;
-      }
-
       // Handle folder-defined modules (default to `./lib/index.js`)
       // Since a hook definition must be a function.
       if (_.isObject(hookPrototype) && !_.isArray(hookPrototype) && !_.isFunction(hookPrototype)) {
@@ -44,7 +39,7 @@ module.exports = function (strapi) {
       }
 
       if (!_.isFunction(hookPrototype)) {
-        strapi.log.error('Malformed (`' + id + '`) hook!');
+        strapi.log.error('Malformed (`' + id + '`) hook (in `' + hookCategory + '`)!');
         strapi.log.error('Hooks should be a function with one argument (`strapi`)');
         strapi.stop();
       }
@@ -66,18 +61,28 @@ module.exports = function (strapi) {
 
     // Function to apply a hook's `defaults` object or function.
     function applyDefaults(hook) {
-
       // Get the hook defaults.
       const defaults = (_.isFunction(hook.defaults) ? hook.defaults(strapi.config) : hook.defaults) || {};
+
       _.defaultsDeep(strapi.config, defaults);
     }
 
     // Load a hook and initialize it.
     function loadHook(id, cb) {
-      hooks[id].load(function (err) {
+      let timeout = true;
+
+      setTimeout(() => {
+        if (timeout) {
+          strapi.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)(in `' + hookCategory + '`)!');
+          process.nextTick(cb);
+        }
+      }, strapi.config.hookTimeout || 1000);
+
+      hooks[id].load((err) => {
+        timeout = false;
+
         if (err) {
-          console.log(err);
-          strapi.log.error('The hook `' + id + '` failed to load!');
+          strapi.log.error('The hook `' + id + '` failed to load (in `' + hookCategory + '`)!');
           strapi.emit('hook:' + id + ':error');
           return cb(err);
         }
@@ -89,74 +94,13 @@ module.exports = function (strapi) {
       });
     }
 
-    async.series({
-
-      // Load the user config dictionary.
-      _config: function loadConfigHook(cb) {
-        if (!hooks._config) {
-          return cb();
-        }
-        prepareHook('_config');
-        applyDefaults(hooks._config);
-        loadHook('_config', cb);
-      },
-
-      // Load the user APIs dictionary.
-      _api: function loadApiHook(cb) {
-        if (!hooks._api) {
-          return cb();
-        }
-        prepareHook('_api');
-        applyDefaults(hooks._api);
-        loadHook('_api', cb);
-      },
-
-      // Load the external hooks.
-      _hooks: function loadExternalHook(cb) {
-        if (!hooks._hooks) {
-          return cb();
-        }
-        prepareHook('_hooks');
-        applyDefaults(hooks._hooks);
-        loadHook('_hooks', cb);
-      },
-
-      // Prepare all other hooks.
-      prepare: function prepareHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
-          prepareHook(id);
-          process.nextTick(cb);
-        }, cb);
-      },
-
-      // Apply the default config for all other hooks.
-      defaults: function defaultConfigHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
-          const hook = hooks[id];
-          applyDefaults(hook);
-          process.nextTick(cb);
-        }, cb);
-      },
-
-      // Load all other hooks.
-      load: function loadOtherHooks(cb) {
-        async.each(_.without(_.keys(hooks), '_config', '_api', '_hooks', 'router'), function (id, cb) {
-          loadHook(id, cb);
-        }, cb);
-      },
-
-      // Load the router hook.
-      router: function loadRouterHook(cb) {
-        if (!hooks.router) {
-          return cb();
-        }
-        prepareHook('router');
-        applyDefaults(hooks.router);
-        loadHook('router', cb);
+    async.series(_.map(_.keys(hooks), hook => {
+      return (cb) => {
+        prepareHook(hook);
+        applyDefaults(_.get(hooks, hook));
+        loadHook(hook, cb);
       }
-    },
-
-    function hooksReady(err) {
+    }), err => {
       return cb(err);
     });
   };

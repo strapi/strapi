@@ -38,12 +38,12 @@ module.exports = function (strapi) {
 
       // Set up config defaults.
       return {
-
         // Core (default) hooks.
-        hooks: _.reduce(DEFAULT_HOOKS, function (memo, hookBundled, hookIdentity) {
-          memo[hookIdentity] = require('./hooks/' + hookIdentity);
-          return memo;
-        }, {}) || {},
+        hooks: _.mapValues(DEFAULT_HOOKS, function(hooks, hookCategory) {
+          return _.mapValues(hooks, function(hook, hookIdentity) {
+            return require('./hooks/' + hookCategory + '/' + hookIdentity);
+          });
+        }) || {},
 
         // Save `appPath` in implicit defaults.
         // `appPath` is passed from above in case `start` was used.
