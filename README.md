@@ -9,9 +9,9 @@
 
 > At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
 
-Web and mobile applications needed a powerful, simple to use and production-ready API-driven framework. That's why we created Strapi, an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
+Web and mobile applications needed a powerful, simple to use and production-ready API-driven solution. That's why we created Strapi, an open-source Content Management Framework (CMF) for managing and synchronizing your content (data, media) on multi-devices.
 
-Strapi enables developers to focus on writing reusable application logic instead of spending time building infrastructure. It is designed for building practical, production-ready Node.js applications in a matter of hours instead of weeks.
+Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A powerful administration panel to easily manage your content with a flexible framework layer to develop and integrate specific features.
 
 ## Features
 
@@ -24,8 +24,6 @@ Strapi enables developers to focus on writing reusable application logic instead
 - **GraphQL implementation** for describing data requirements and interactions.
 - **JSON API specification** to increase productivity by following shared conventions.
 - **Smooth WebSockets** to handle realtime connections and events.
-- **Flexible SQL dialect** with schema building for migrations, query building, transactions, and a lot more.
-- **Elegant SQL ORM** featuring relations, lifecycle events, etc.
 - **NoSQL support** if you need to plug specific data layers.
 
 Convinced? [Get started!](http://strapi.io/)
