@@ -29,9 +29,12 @@
   ],
   "directories": {
     "lib": "./lib",
-    "bin": "./bin/strapi.js"
+    "bin": "./bin"
   },
   "main": "./lib",
+  "bin": {
+      "strapi": "./bin/strapi.js"
+  },
   "dependencies": {
     "async": "~1.5.2",
     "co": "~4.6.0",
