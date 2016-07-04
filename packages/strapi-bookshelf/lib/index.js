@@ -123,6 +123,7 @@ module.exports = function (strapi) {
               };
 
               const ORM = bookshelf(strapi.connections[definition.connection]);
+              ORM.plugin('pagination');
 
               global[globalName] = ORM.Model.extend(loadedModel);
               global[pluralize(globalName)] = ORM.Collection.extend({
