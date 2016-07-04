@@ -28,7 +28,8 @@
     "websockets"
   ],
   "directories": {
-    "lib": "./lib"
+    "lib": "./lib",
+    "bin": "./bin/strapi.js"
   },
   "main": "./lib",
   "dependencies": {
@@ -61,6 +62,14 @@
     "lodash": "~4.6.1",
     "node-schedule": "~1.1.0",
     "socket.io": "~1.4.5",
+    "strapi-bookshelf": "~2.0.0",
+    "strapi-generate": "~2.0.0",
+    "strapi-generate-api": "~2.0.0",
+    "strapi-generate-migrations": "~2.0.0",
+    "strapi-generate-new": "~2.0.0",
+    "strapi-generate-policy": "~2.0.0",
+    "strapi-generate-service": "~2.0.0",
+    "strapi-knex": "~2.0.0",
     "strapi-utils": "~2.0.0"
   },
   "scripts": {
@@ -89,5 +98,6 @@
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
   },
+  "preferGlobal": true,
   "license": "MIT"
 }
