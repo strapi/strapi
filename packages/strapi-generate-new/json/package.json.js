@@ -23,7 +23,7 @@ module.exports = function dataForPackageJSON(scope) {
   // in the newly created `package.json`.
   const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi', 'package.json'))) || {};
   const knexPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi-knex', 'package.json'))) || {};
-  
+  console.log(getDependencyVersion(cliPkg, 'strapi'));
   // Finally, return the JSON.
   return _.merge(scope.appPackageJSON || {}, {
     'name': scope.name,
@@ -67,7 +67,5 @@ module.exports = function dataForPackageJSON(scope) {
  */
 
 function getDependencyVersion(packageJSON, module) {
-  return (
-    packageJSON.dependencies && packageJSON.dependencies[module]
-  );
+  return module === packageJSON.name ? packageJSON.version : packageJSON.dependencies && packageJSON.dependencies[module];
 }
