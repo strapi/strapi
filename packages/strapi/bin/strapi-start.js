@@ -10,7 +10,7 @@
 const path = require('path');
 
 // Local Strapi dependencies.
-const strapi = require('strapi/lib/server');
+const strapi = require('../lib/server');
 const packageJSON = require('../package.json');
 
 // Logger.
