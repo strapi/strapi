@@ -14,7 +14,7 @@ const cluster = require('cluster');
 const _ = require('lodash');
 
 // Local Strapi dependencies.
-const server = require('strapi/lib/server');
+const server = require('../lib/server');
 
 // Logger.
 const logger = require('strapi-utils').logger;
