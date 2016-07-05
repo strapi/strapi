@@ -62,7 +62,9 @@ module.exports = strapi => {
       // Load websocket's hooks into memory
       websocket: ['core', (cb) => loader('websockets', cb)],
       // Load models' hooks into memory
-      models: ['websocket', (cb) => loader('models', cb)]
+      models: ['websocket', (cb) => loader('models', cb)],
+      // Load external hooks into memory
+      external: ['models', (cb) => loader('external', cb)]
     }, ready__(cb));
 
     // Makes `app.load()` chainable.

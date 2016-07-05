@@ -17,6 +17,14 @@ const path = require('path');
 module.exports = {
 
   /**
+   * Initialize to prevent some mistakes
+   */
+
+  initialize: cb => {
+    cb();
+  },
+
+  /**
    * Find primary key per ORM
    */
 

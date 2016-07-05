@@ -7,7 +7,8 @@
 module.exports = {
   dictionary: {
     _config: true,
-    _api: true
+    _api: true,
+    _hooks: true
   },
   core: {
     responses: true,
@@ -30,7 +31,5 @@ module.exports = {
   websockets: {
     websockets: true
   },
-  models: {
-    _hooks: true
-  }
+  models: {}
 };
