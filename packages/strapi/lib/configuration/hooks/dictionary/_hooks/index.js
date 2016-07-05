@@ -63,6 +63,7 @@ module.exports = function (strapi) {
               cb(err);
             }
           }
+
           return memo;
         }, {}));
 
