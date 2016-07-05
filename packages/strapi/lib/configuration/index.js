@@ -40,7 +40,9 @@ module.exports = function (strapi) {
       return {
         // Core (default) hooks.
         hooks: _.mapValues(DEFAULT_HOOKS, function(hooks, hookCategory) {
-          return _.mapValues(hooks, function(hook, hookIdentity) {
+          return _.mapValues(_.omitBy(hooks, hook => {
+            return hook === false;
+          }), (hook, hookIdentity) => {
             return require('./hooks/' + hookCategory + '/' + hookIdentity);
           });
         }) || {},
