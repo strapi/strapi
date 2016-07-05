@@ -96,7 +96,7 @@ module.exports = strapi => {
    */
 
   function loader(hookCategory, cb) {
-    if (_.get(strapi.hooks, hookCategory) === false) {
+    if (_.isEmpty(_.get(strapi.hooks, hookCategory))) {
       return cb();
     }
 
