@@ -8,7 +8,7 @@ module.exports = {
   dictionary: {
     _config: true,
     _api: true,
-    _hooks: true
+    _externalHooks: true
   },
   core: {
     responses: true,

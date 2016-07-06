@@ -22,7 +22,8 @@
     "strapi": "~2.0.0"
   },
   "strapi": {
-    "isHook": true
+    "isHook": true,
+    "nextTo": ["strapi-knex"]
   },
   "scripts": {
     "prepublish": "npm prune"

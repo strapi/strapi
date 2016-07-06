@@ -48,10 +48,36 @@ module.exports = function (strapi) {
           return cb(err);
         }
 
-        // Add the loaded hooks into the hook dictionary exposed at `strapi.hooks`.
-        _.set(strapi.hooks, 'external', _.reduce(_.pickBy(hooks.externalHooks, hook => {
+        // Order hooks to consider specific use cases
+        // (ex: Knex needs to be load before Bookshelf)
+        const externalHooks = _.pickBy(hooks.externalHooks, hook => {
           return _.get(_.get(hook, 'package.json'), 'strapi.isHook');
-        }), function (memo, module, identity) {
+        });
+
+        // Array of hook names
+        const externalHooksKeys = _.keys(externalHooks);
+
+        // Sort array to load hook in order
+        _.forEach(externalHooksKeys, () => {
+          _.forEach(externalHooksKeys, (value, index) => {
+            const nextTo = _.first(_.get(externalHooks[value]['package.json'], 'strapi.nextTo'));
+
+            if (nextTo) {
+              const nextToIndex = _.indexOf(externalHooksKeys, nextTo);
+
+              if (index < nextToIndex) {
+                externalHooksKeys.unshift(externalHooksKeys[nextToIndex]);
+                externalHooksKeys.splice(nextToIndex + 1, 1);
+              }
+            }
+          });
+        });
+
+        // Transform array to object and replace integer key with hook name
+        const externalHooksOrdered = _.mapKeys(_.toPlainObject(externalHooksKeys), value => value);
+
+        // Add the loaded hooks into the hook dictionary exposed at `strapi.hooks`.
+        _.set(strapi.hooks, 'external', _.reduce(externalHooksOrdered, (memo, module, identity) => {
           const hookName = identity.replace(/^strapi-/, '');
 
           try {

@@ -37,27 +37,27 @@ module.exports = function (strapi) {
     initialize: function (cb) {
       let globalName;
 
+      // Make sure the Knex hook is present since Knex needs it.
+      if (!strapi.hooks.external.knex) {
+        strapi.log.error('Impossible to load the ORM without the query builder!');
+        strapi.log.error('You need to install the Strapi query builder with `$ npm install strapi-knex --save`.');
+        strapi.stop(1);
+      }
+
       // Only run this logic after the Knex has finished to load.
       strapi.after('hook:knex:loaded', function () {
-
-        // Make sure the Knex hook is present since Knex needs it.
-        if (!strapi.hooks.external.knex) {
-          strapi.log.error('Impossible to load the ORM without the query builder!');
-          strapi.log.error('You need to install the Strapi query builder with `$ npm install strapi-knex --save`.');
-          strapi.stop(1);
-        }
 
         // Initialize collections
         _.set(strapi, 'bookshelf.collections', {});
 
+        // Return callback if there is no model
+        if (_.isEmpty(strapi.models)) {
+          return cb();
+        }
+
         const loadedHook = _.after(_.size(strapi.models), function () {
           cb();
         });
-
-        // Return callback if there is no model
-        if (_.isEmpty(strapi.models)) {
-          cb();
-        }
 
         // Parse every registered model.
         _.forEach(strapi.models, function (definition, model) {
