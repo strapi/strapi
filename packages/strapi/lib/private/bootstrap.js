@@ -20,7 +20,7 @@ module.exports = function runBootstrap(cb) {
   // If bootstrap takes too long, display warning message
   // (just in case user forgot to call their bootstrap's `cb`).
   const timeoutMs = self.config.bootstrapTimeout || 3500;
-  const timer = setTimeout(function bootstrapTookTooLong() {
+  const timer = setTimeout(() => {
     self.log.warn('Bootstrap is taking unusually long to execute its callback (' + timeoutMs + ' miliseconds).');
     self.log.warn('Perhaps you forgot to call it?');
   }, timeoutMs);
@@ -28,7 +28,7 @@ module.exports = function runBootstrap(cb) {
   let ranBootstrapFn = false;
 
   try {
-    return self.config.bootstrap(function bootstrapDone(err) {
+    return self.config.bootstrap(err => {
       if (ranBootstrapFn) {
         self.log.error('You called the callback in `strapi.config.boostrap` more than once!');
         return;

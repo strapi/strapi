@@ -4,8 +4,8 @@
  * Logger hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -19,7 +19,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (strapi.config.logger === true) {
         strapi.app.use(function * (next) {
           const start = new Date();
@@ -32,6 +32,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

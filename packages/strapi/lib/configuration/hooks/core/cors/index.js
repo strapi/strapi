@@ -11,8 +11,8 @@ const _ = require('lodash');
  * CORS hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -47,7 +47,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isPlainObject(strapi.config.cors) && !_.isEmpty(strapi.config.cors)) {
         strapi.app.use(strapi.middlewares.cors({
           origin: strapi.config.cors.origin,
@@ -62,6 +62,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

@@ -18,12 +18,10 @@ const json = require('strapi-utils').json;
  */
 
 module.exports = function isLocalStrapiValid(strapiPath, appPath) {
-  const self = this;
-
   // Has no `package.json` file.
   if (!fs.existsSync(appPath + '/package.json')) {
-    self.log.error('Cannot read `package.json` in the current directory (`' + process.cwd() + '`).');
-    self.log.error('Are you sure this is a Strapi application?');
+    this.log.error('Cannot read `package.json` in the current directory (`' + process.cwd() + '`).');
+    this.log.error('Are you sure this is a Strapi application?');
     process.exit(1);
   }
 
@@ -33,8 +31,8 @@ module.exports = function isLocalStrapiValid(strapiPath, appPath) {
 
   // `package.json` exists, but doesn't list `strapi` as a dependency.
   if (!(appDependencies && appDependencies.strapi)) {
-    self.log.warn('The `package.json` in the current directory does not list Strapi as a dependency...');
-    self.log.warn('Are you sure ' + process.cwd() + ' is a Strapi application?');
+    this.log.warn('The `package.json` in the current directory does not list Strapi as a dependency...');
+    this.log.warn('Are you sure ' + process.cwd() + ' is a Strapi application?');
     return;
   }
 
@@ -48,9 +46,9 @@ module.exports = function isLocalStrapiValid(strapiPath, appPath) {
 
   // Local Strapi has a corrupted `package.json`.
   if (!strapiPackageJSON) {
-    self.log.warn('The local Strapi dependency has a corrupted `package.json`.');
-    self.log.warn('You may consider running:');
-    self.log.warn('`$ rm -rf ' + strapiPath + ' && npm install strapi@' + appDependencies.strapi + '`');
+    this.log.warn('The local Strapi dependency has a corrupted `package.json`.');
+    this.log.warn('You may consider running:');
+    this.log.warn('`$ rm -rf ' + strapiPath + ' && npm install strapi@' + appDependencies.strapi + '`');
     return;
   }
 

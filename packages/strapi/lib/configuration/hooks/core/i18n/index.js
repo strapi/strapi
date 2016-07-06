@@ -14,8 +14,8 @@ const _ = require('lodash');
  * i18n hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -40,7 +40,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isPlainObject(strapi.config.i18n) && !_.isEmpty(strapi.config.i18n)) {
         strapi.middlewares.locale(strapi.app);
         strapi.app.use(strapi.middlewares.i18n(strapi.app, {
@@ -56,6 +56,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

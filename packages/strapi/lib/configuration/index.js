@@ -17,7 +17,7 @@ const DEFAULT_HOOKS = require('./hooks/defaultHooks');
  * Expose new instance of `Configuration`
  */
 
-module.exports = function (strapi) {
+module.exports = strapi => {
   return new Configuration();
 
   function Configuration() {
@@ -28,7 +28,7 @@ module.exports = function (strapi) {
      * @api private
      */
 
-    this.defaults = function defaultConfig(appPath) {
+    this.defaults = appPath => {
 
       // If `appPath` not specified, unfortunately, this is a fatal error,
       // since reasonable defaults cannot be assumed.
@@ -39,7 +39,7 @@ module.exports = function (strapi) {
       // Set up config defaults.
       return {
         // Core (default) hooks.
-        hooks: _.mapValues(DEFAULT_HOOKS, function(hooks, hookCategory) {
+        hooks: _.mapValues(DEFAULT_HOOKS, (hooks, hookCategory) => {
           return _.mapValues(_.omitBy(hooks, hook => {
             return hook === false;
           }), (hook, hookIdentity) => {

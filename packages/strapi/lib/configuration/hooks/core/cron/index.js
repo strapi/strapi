@@ -12,8 +12,8 @@ const cron = require('node-schedule');
  * CRON hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -27,9 +27,9 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isPlainObject(strapi.config.cron) && !_.isEmpty(strapi.config.cron)) {
-        _.forEach(_.keys(strapi.config.cron), function (task) {
+        _.forEach(_.keys(strapi.config.cron), task => {
           cron.scheduleJob(task, strapi.config.cron[task]);
         });
       }
@@ -37,6 +37,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

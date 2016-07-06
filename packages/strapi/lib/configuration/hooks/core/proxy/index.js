@@ -11,8 +11,8 @@ const _ = require('lodash');
  * Proxy hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -26,7 +26,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isString(strapi.config.proxy)) {
         strapi.app.use(strapi.middlewares.proxy({
           host: strapi.config.proxy
@@ -36,6 +36,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

@@ -28,12 +28,13 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getPK: function (collectionIdentity, collection, models) {
+  getPK: (collectionIdentity, collection, models) => {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
-      let GraphQLFunctions;
+
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
+
         if (!_.isUndefined(GraphQLFunctions)) {
           return GraphQLFunctions.getPK(collectionIdentity, collection, models || strapi.models);
         }
@@ -49,12 +50,14 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getCount: function (collectionIdentity) {
+  getCount: collectionIdentity => {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
+
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
         const ORMFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
+
         if (!_.isUndefined(ORMFunctions)) {
           return ORMFunctions.getCount(collectionIdentity);
         }
@@ -70,7 +73,7 @@ module.exports = {
    * Find relation nature with verbose
    */
 
-  getNature: function (association, key, models) {
+  getNature: (association, key, models) => {
     const strapi = _.isUndefined(global['strapi']) && !_.isUndefined(models) ? _.set({}, 'models', models) : global['strapi'];
     const types = {
       current: '',
@@ -95,8 +98,8 @@ module.exports = {
       types.current = 'modelD';
 
       // We have to find if they are a model linked to this key
-      _.forIn(models, function (model) {
-        _.forIn(model.attributes, function (attribute) {
+      _.forIn(models, model => {
+        _.forIn(model.attributes, attribute => {
           if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection')) {
             types.other = 'collection';
 
@@ -114,8 +117,8 @@ module.exports = {
       types.current = 'model';
 
       // We have to find if they are a model linked to this key
-      _.forIn(models, function (model) {
-        _.forIn(model.attributes, function (attribute) {
+      _.forIn(models, model => {
+        _.forIn(model.attributes, attribute => {
           if (attribute.hasOwnProperty('via') && attribute.via === key) {
             if (attribute.hasOwnProperty('collection')) {
               types.other = 'collection';
@@ -172,7 +175,7 @@ module.exports = {
    * Return ORM used for this collection.
    */
 
-  getORM: function (collectionIdentity) {
+  getORM: collectionIdentity => {
     return _.get(strapi.models, collectionIdentity.toLowerCase() + '.orm');
   },
 
@@ -180,7 +183,7 @@ module.exports = {
    * Define associations key to models
    */
 
-  defineAssociations: function (model, definition, association, key) {
+  defineAssociations: (model, definition, association, key) => {
     // Initialize associations object
     definition.associations = [];
 

@@ -19,18 +19,18 @@ const dictionary = require('strapi-utils').dictionary;
  * dictionary of the external hooks
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       async.auto({
 
         // Load external hooks from the `node_modules` directory.
-        externalHooks: function (cb) {
+        externalHooks: cb => {
           dictionary.optional({
             dirname: path.resolve(strapi.config.appPath, 'node_modules'),
             filter: /^(package\.json)$/,
@@ -41,7 +41,7 @@ module.exports = function (strapi) {
       },
 
       // Callback.
-      function (err, hooks) {
+      (err, hooks) => {
 
         // Just in case there is an error.
         if (err) {
@@ -97,6 +97,4 @@ module.exports = function (strapi) {
       });
     }
   };
-
-  return hook;
 };

@@ -19,18 +19,18 @@ const dictionary = require('strapi-utils').dictionary;
  * dictionary of the user config
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       async.auto({
 
         // Load common settings from `./config/*.js|json`.
-        'config/*': function (cb) {
+        'config/*': cb => {
           dictionary.aggregate({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config),
             excludeDirs: /(locales|environments)$/,
@@ -40,7 +40,7 @@ module.exports = function (strapi) {
         },
 
         // Load locales from `./config/locales/*.json`.
-        'config/locales/*': function (cb) {
+        'config/locales/*': cb => {
           dictionary.optional({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'locales'),
             filter: /(.+)\.(json)$/,
@@ -50,7 +50,7 @@ module.exports = function (strapi) {
         },
 
         // Load functions config from `./config/functions/*.js`.
-        'config/functions/*': function (cb) {
+        'config/functions/*': cb => {
           dictionary.aggregate({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'functions'),
             filter: /(.+)\.(js)$/,
@@ -60,7 +60,7 @@ module.exports = function (strapi) {
 
         // Load all environments config from `./config/environments/*/*.js|json`.
         // Not really used inside the framework but useful for the Studio.
-        'config/environments/**': function (cb) {
+        'config/environments/**': cb => {
           dictionary.optional({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'environments'),
             filter: /(.+)\.(js|json)$/,
@@ -70,7 +70,7 @@ module.exports = function (strapi) {
         },
 
         // Load environment-specific config from `./config/environments/**/*.js|json`.
-        'config/environments/*': function (cb) {
+        'config/environments/*': cb => {
           dictionary.aggregate({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'environments', strapi.config.environment),
             filter: /(.+)\.(js|json)$/,
@@ -79,7 +79,7 @@ module.exports = function (strapi) {
         },
 
         // Load APIs from `./api/**/*.js|json`.
-        'api/**': function (cb) {
+        'api/**': cb => {
           dictionary.optional({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api),
             excludeDirs: /(public)$/,
@@ -90,7 +90,7 @@ module.exports = function (strapi) {
       },
 
       // Callback.
-      function (err, config) {
+      (err, config) => {
 
         // Just in case there is an error.
         if (err) {
@@ -119,10 +119,7 @@ module.exports = function (strapi) {
         // Add user locales for the settings of the `i18n` hook
         // aiming to load locales automatically.
         if (_.isPlainObject(strapi.config.i18n) && !_.isEmpty(strapi.config.i18n)) {
-          strapi.config.i18n.locales = [];
-          _.forEach(config['config/locales/*'], function (strings, lang) {
-            strapi.config.i18n.locales.push(lang);
-          });
+          strapi.config.i18n.locales = _.keys(config['config/locales/*']);
         }
 
         // Save different environments because we need it in the Strapi Studio.
@@ -140,6 +137,4 @@ module.exports = function (strapi) {
       });
     }
   };
-
-  return hook;
 };

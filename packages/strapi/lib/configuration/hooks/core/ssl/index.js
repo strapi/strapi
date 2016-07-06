@@ -11,8 +11,8 @@ const _ = require('lodash');
  * SSL hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -29,7 +29,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isPlainObject(strapi.config.ssl) && !_.isEmpty(strapi.config.ssl)) {
         strapi.app.use(strapi.middlewares.ssl({
           disabled: strapi.config.ssl.disabled,
@@ -40,6 +40,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

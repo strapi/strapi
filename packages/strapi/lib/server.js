@@ -1,11 +1,14 @@
 'use strict';
 
+// Start date
+global.startedAt = Date.now();
+
 /**
  * Module dependencies
  */
 
 // Local dependencies.
-const Strapi = require('./Strapi');
+const strapi = require('./Strapi');
 
 /**
  * Expose `Strapi` factory
@@ -15,7 +18,7 @@ const Strapi = require('./Strapi');
 module.exports = strapiFactory;
 
 function strapiFactory() {
-  return new Strapi();
+  return new strapi();
 }
 
 // Backwards compatibility for Strapi singleton usage.

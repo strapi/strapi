@@ -28,7 +28,7 @@ module.exports = strapi => {
    * @api public
    */
 
-  return function load(configOverride, cb) {
+  return (configOverride, cb) => {
     if (strapi._exiting) {
       strapi.log.error('Cannot load or start an application after it has already been stopped.');
       process.exit(1);
@@ -56,15 +56,15 @@ module.exports = strapi => {
       // Initiliaze hooks global variable and configurations
       hooks: ['config', initializeHooks],
       // Load core's hooks into memory, with their middleware and routes.
-      dictionary: ['hooks', (cb) => loader('dictionary', cb)],
+      dictionary: ['hooks', cb => loader('dictionary', cb)],
       // Load core's hooks into memory, with their middleware and routes.
-      core: ['dictionary', (cb) => loader('core', cb)],
+      core: ['dictionary', cb => loader('core', cb)],
       // Load websocket's hooks into memory
-      websocket: ['core', (cb) => loader('websockets', cb)],
+      websocket: ['core', cb => loader('websockets', cb)],
       // Load models' hooks into memory
-      models: ['websocket', (cb) => loader('models', cb)],
+      models: ['websocket', cb => loader('models', cb)],
       // Load external hooks into memory
-      external: ['models', (cb) => loader('external', cb)]
+      external: ['models', cb => loader('external', cb)]
     }, ready__(cb));
 
     // Makes `app.load()` chainable.
@@ -114,7 +114,7 @@ module.exports = strapi => {
   function ready__(cb) {
     strapi.emit('hooks:builtIn:ready');
 
-    return function (err) {
+    return err => {
       if (err) {
         // Displaying errors, try to start the server through
         strapi.log.error(err);

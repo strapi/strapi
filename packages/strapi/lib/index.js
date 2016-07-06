@@ -1,27 +1,24 @@
 'use strict';
 
-// Start date
-global.startedAt = Date.now();
-
 /**
  * Module dependencies
  */
 
 // Local dependencies.
-const Strapi = require('./server');
+const Server = require('./server');
 
 /**
  * Instantiate and expose a Strapi singleton
  * (maintains legacy support).
  */
 
-module.exports = new Strapi();
+module.exports = new Server(); // Strapi instance instanciated
 
 /**
  * Expose constructor for convenience/tests
  */
 
-module.exports.Strapi = Strapi;
+module.exports.Strapi = Server; // Strapi instance not instanciated
 
 // To access the Strapi application constructor, do:
 //   var strapi = require('strapi').constructor;

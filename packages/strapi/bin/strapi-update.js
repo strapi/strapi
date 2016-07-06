@@ -27,7 +27,7 @@ const logger = require('strapi-utils').logger;
 module.exports = function () {
   const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 
-  fs.access(path.resolve(HOME, '.strapirc'), fs.F_OK | fs.R_OK | fs.W_OK, function (err) {
+  fs.access(path.resolve(HOME, '.strapirc'), fs.F_OK | fs.R_OK | fs.W_OK, err => {
     if (err) {
       if (err.code === 'ENOENT') {
         logger.error('No `.strapirc` file detected at `' + HOME + '`.');
@@ -39,7 +39,7 @@ module.exports = function () {
       process.exit(1);
     } else {
       const config = JSON.parse(fs.readFileSync(path.resolve(HOME, '.strapirc')));
-      _.forEach(config.generators, function (info, name) {
+      _.forEach(config.generators, (info, name) => {
         try {
           process.chdir(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-' + name));
           logger.debug('Pulling the latest updates of `strapi-generate-' + name + '`.');

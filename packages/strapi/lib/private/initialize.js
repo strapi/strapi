@@ -33,24 +33,24 @@ module.exports = function initialize(cb) {
   if (cluster.isMaster) {
 
     // Handle `SIGUSR2` events.
-    process.once('SIGUSR2', function () {
-      self.stop(function () {
+    process.once('SIGUSR2', () => {
+      self.stop(() => {
         process.kill(process.pid, 'SIGUSR2');
       });
     });
 
     // Handle `SIGINT` events.
-    process.on('SIGINT', function () {
+    process.on('SIGINT', () => {
       self.stop(process.exit);
     });
 
     // Handle `SIGTERM` events.
-    process.on('SIGTERM', function () {
+    process.on('SIGTERM', () => {
       self.stop(process.exit);
     });
 
     // Handle `exit` events.
-    process.on('exit', function () {
+    process.on('exit', () => {
       if (!self._exiting) {
         self.stop();
       }
@@ -58,15 +58,15 @@ module.exports = function initialize(cb) {
 
     // Make sure the configured port is not already used
     // by an application or a service.
-    process.on('uncaughtException', function (err) {
+    process.on('uncaughtException', err => {
       if (err.errno === 'EADDRINUSE') {
         self.log.error('Port ' + self.config.port + ' already in use.');
         self.stop();
       }
     });
 
-    _.forEach(cluster.workers, function (worker) {
-      worker.on('message', function () {
+    _.forEach(cluster.workers, worker => {
+      worker.on('message', () => {
         self.emit('bootstrap:done');
       });
     });
@@ -75,7 +75,7 @@ module.exports = function initialize(cb) {
   // Only run the application bootstrap on master cluster if we don't have any workers.
   // Else, run the bootstrap logic on the workers.
   if ((!self.config.reload && cluster.isMaster) || ((cluster.isWorker && self.config.reload.workers > 0) || (cluster.isMaster && self.config.reload.workers < 1))) {
-    self.runBootstrap(function afterBootstrap(err) {
+    self.runBootstrap(err => {
       if (err) {
         self.log.error('Bootstrap encountered an error.');
         return cb(self.log.error(err));

@@ -37,8 +37,8 @@ module.exports = function mixinAfter(emitter) {
    */
 
   const _emit = _.assign(emitter.emit);
-  
-  emitter.emit = function (evName) {
+
+  emitter.emit = evName => {
     emitter.warmEvents[evName] = true;
     _emit.apply(emitter, _.slice(arguments, 0));
   };
@@ -54,7 +54,7 @@ module.exports = function mixinAfter(emitter) {
    * @context {Strapi}
    */
 
-  emitter.after = function (events, fn) {
+  emitter.after = (events, fn) => {
 
     // Support a single event or an array of events.
     if (!_.isArray(events)) {
@@ -63,22 +63,21 @@ module.exports = function mixinAfter(emitter) {
 
     // Convert named event dependencies into an array
     // of async-compatible functions.
-    const dependencies = _.reduce(events,
-      function (dependencies, event) {
-        const handlerFn = function (cb) {
-          if (emitter.warmEvents[event]) {
-            cb();
-          } else {
-            emitter.once(event, cb);
-          }
-        };
-        dependencies.push(handlerFn);
-        return dependencies;
-      }, []);
+    const dependencies = _.reduce(events, (dependencies, event) => {
+      const handlerFn = cb => {
+        if (emitter.warmEvents[event]) {
+          cb();
+        } else {
+          emitter.once(event, cb);
+        }
+      };
+      dependencies.push(handlerFn);
+      return dependencies;
+    }, []);
 
     // When all events have fired, call `fn`
     // (all arguments passed to `emit()` calls are discarded).
-    async.parallel(dependencies, function (err) {
+    async.parallel(dependencies, err => {
       if (err) {
         strapi.log.error(err);
       }

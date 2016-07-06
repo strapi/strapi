@@ -19,24 +19,24 @@ const dictionary = require('strapi-utils').dictionary;
  * dictionary of the user APIs.
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Initialize the hook
      */
 
-    initialize: function (cb) {
-      _.forEach(strapi.api, function (definition, api) {
+    initialize: cb => {
+      _.forEach(strapi.api, (definition, api) => {
         async.auto({
 
           // Expose the `name` of the API for the callback.
-          'name': function (cb) {
+          'name': cb => {
             cb(null, api);
           },
 
           // Load API controllers from `./api/*/controllers/*.js`.
-          'controllers/*': function (cb) {
+          'controllers/*': cb => {
             dictionary.optional({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.controllers),
               filter: /(.+)\.(js)$/,
@@ -45,32 +45,33 @@ module.exports = function (strapi) {
           },
 
           // Load API models from `./api/*/models/*.js` and `./api/*/models/*.settings.json`.
-          'models/*': function (cb) {
+          'models/*': cb => {
             async.parallel({
-              settings: function (cb) {
+              settings: cb => {
                 dictionary.optional({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.models),
                   filter: /(.+)\.settings.json$/,
                   depth: 1
                 }, cb);
               },
-              functions: function (cb) {
+              functions: cb => {
                 dictionary.optional({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.models),
                   filter: /(.+)\.js$/,
                   depth: 1
                 }, cb);
               }
-            }, function (err, models) {
+            }, (err, models) => {
               if (err) {
                 return cb(err);
               }
+
               return cb(null, _.merge(models.settings, models.functions));
             });
           },
 
           // Load API services from `./api/*/services/*.js`.
-          'services/*': function (cb) {
+          'services/*': cb => {
             dictionary.optional({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.services),
               filter: /(.+)\.(js)$/,
@@ -79,7 +80,7 @@ module.exports = function (strapi) {
           },
 
           // Load API policies from `./api/*/policies/*.js`.
-          'policies/*': function (cb) {
+          'policies/*': cb => {
             dictionary.aggregate({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.policies),
               filter: /(.+)\.(js)$/,
@@ -88,33 +89,34 @@ module.exports = function (strapi) {
           },
 
           // Load API config from `./api/*/config/*.js|json` and `./api/*/config/environments/**/*.js|json`.
-          'config/**': function (cb) {
+          'config/**': cb => {
             async.parallel({
-              common: function (cb) {
+              common: cb => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config),
                   filter: /(.+)\.(js|json)$/,
                   depth: 2
                 }, cb);
               },
-              specific: function (cb) {
+              specific: cb => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, 'environments', strapi.config.environment),
                   filter: /(.+)\.(js|json)$/,
                   depth: 2
                 }, cb);
               }
-            }, function (err, config) {
+            }, (err, config) => {
               if (err) {
                 return cb(err);
               }
+
               return cb(null, _.merge(config.common, config.specific));
             });
           }
         },
 
         // Callback.
-        function (err, api) {
+        (err, api) => {
 
           // Just in case there is an error.
           if (err) {
@@ -131,7 +133,7 @@ module.exports = function (strapi) {
           };
 
           // Delete the definition if it's empty.
-          _.forEach(strapi.api[api.name], function (dictionary, entry) {
+          _.forEach(strapi.api[api.name], (dictionary, entry) => {
             if (_.isEmpty(strapi.api[api.name][entry])) {
               delete strapi.api[api.name][entry];
             }
@@ -163,6 +165,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

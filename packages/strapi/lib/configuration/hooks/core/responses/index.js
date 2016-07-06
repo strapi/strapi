@@ -4,17 +4,15 @@
  * Custom responses hook
  */
 
-module.exports = function () {
-  const hook = {
+module.exports = () => {
+  return {
 
     /**
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       cb();
     }
   };
-
-  return hook;
 };

@@ -7,7 +7,7 @@
 // Node.js core.
 const path = require('path');
 const http = require('http');
-const events = require('events');
+const EventEmitter = require('events').EventEmitter;
 const util = require('util');
 
 // Local dependencies.
@@ -20,71 +20,71 @@ const mixinAfter = require('./private/after');
  * @constructor
  */
 
-function Strapi() {
+module.exports = class Strapi extends EventEmitter {
 
-  // Inherit methods from `EventEmitter`.
-  events.EventEmitter.call(this);
+  constructor() {
+    super();
 
-  // Remove memory-leak warning about max listeners.
-  this.setMaxListeners(0);
+    // Remove memory-leak warning about max listeners.
+    this.setMaxListeners(0);
 
-  // Mixin `load()` method to load the pieces of a Strapi application.
-  this.load = loadStrapi(this);
+    // Mixin support for `Strapi.prototype.after()`.
+    mixinAfter(this);
 
-  // Mixin support for `Strapi.prototype.after()`.
-  mixinAfter(this);
+    // Private method to load instance
+    this.load = loadStrapi(this);
 
-  // Bind `this` context for all `Strapi.prototype.*` methods.
-  this.load = this.load.bind(this);
-  this.start = this.start.bind(this);
-  this.stop = this.stop.bind(this);
-  this.initialize = this.initialize.bind(this);
-  this.exposeGlobals = this.exposeGlobals.bind(this);
-  this.runBootstrap = this.runBootstrap.bind(this);
-  this.isLocalStrapiValid = this.isLocalStrapiValid.bind(this);
-  this.isStrapiAppSync = this.isStrapiAppSync.bind(this);
+    // Private method to initialize instance
+    this.initialize = cb => {
+      require('./private/initialize').apply(this, [cb]);
+    };
 
-  // Expose `koa`.
-  this.app = require('koa')();
+    // Private method to start instance
+    this.start = (configOverride, cb) => {
+      require('./start').apply(this, [configOverride, cb]);
+    }
 
-  // Mount the HTTP server.
-  this.server = http.Server(this.app.callback());
+    // Private method to stop instance
+    this.stop = () => {
+      require('./stop').apply(this);
+    }
 
-  // Expose every middleware inside `strapi.middlewares`.
-  this.middlewares = require('koa-load-middlewares')({
-    config: path.resolve(__dirname, '..', 'package.json'),
-    pattern: ['koa-*', 'koa.*'],
-    scope: ['dependencies', 'devDependencies'],
-    replaceString: /^koa(-|\.)/,
-    camelize: true
-  });
+    // Private method to expose instance globals
+    this.exposeGlobals = () => {
+      require('./private/exposeGlobals').apply(this);
+    }
 
-  // New Winston logger.
-  this.log = require('strapi-utils').logger;
-}
+    // Private method to run instance bootstrap
+    this.runBootstrap = cb => {
+      require('./private/bootstrap').apply(this, [cb]);
+    }
 
-// Extend from `EventEmitter` to allow hooks to listen to stuff.
-util.inherits(Strapi, events.EventEmitter);
+    // Private method to verify strapi dependency
+    this.isLocalStrapiValid = (strapiPath, appPath) => {
+      require('./private/isLocalStrapiValid').apply(this, [strapiPath, appPath]);
+    }
 
-/**
- * Public methods
- */
+    // Private method to verify strapi application
+    this.isStrapiAppSync = appPath => {
+      require('./private/isStrapiAppSync').apply(this, [appPath]);
+    }
 
-Strapi.prototype.start = require('./start');
-Strapi.prototype.stop = require('./stop');
+    // Expose `koa`.
+    this.app = require('koa')();
 
-/**
- * Private methods
- */
+    // Mount the HTTP server.
+    this.server = http.Server(this.app.callback());
 
-Strapi.prototype.initialize = require('./private/initialize');
-Strapi.prototype.exposeGlobals = require('./private/exposeGlobals');
-Strapi.prototype.runBootstrap = require('./private/bootstrap');
-Strapi.prototype.isLocalStrapiValid = require('./private/isLocalStrapiValid');
-Strapi.prototype.isStrapiAppSync = require('./private/isStrapiAppSync');
+    // Expose every middleware inside `strapi.middlewares`.
+    this.middlewares = require('koa-load-middlewares')({
+      config: path.resolve(__dirname, '..', 'package.json'),
+      pattern: ['koa-*', 'koa.*'],
+      scope: ['dependencies', 'devDependencies'],
+      replaceString: /^koa(-|\.)/,
+      camelize: true
+    });
 
-/**
- * Expose Strapi constructor
- */
-
-module.exports = Strapi;
+    // New Winston logger.
+    this.log = require('strapi-utils').logger;
+  }
+};

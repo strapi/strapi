@@ -11,8 +11,8 @@ const _ = require('lodash');
  * Lusca hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -34,7 +34,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (_.isPlainObject(strapi.config.csrf) && !_.isEmpty(strapi.config.csrf)) {
         strapi.app.use(strapi.middlewares.lusca.csrf({
           key: strapi.config.csrf.key,
@@ -75,6 +75,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

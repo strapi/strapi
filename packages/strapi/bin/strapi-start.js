@@ -31,22 +31,17 @@ module.exports = function () {
     strapiPackageJSON: packageJSON
   };
 
-  // Use the current directory as application path.
-  const appPath = process.cwd();
-
   // Use the app's local `strapi` in `node_modules` if it's existant and valid.
-  const localStrapiPath = path.resolve(appPath, 'node_modules', 'strapi');
-  if (strapi.isLocalStrapiValid(localStrapiPath, appPath)) {
-    const localStrapi = require(localStrapiPath);
-    localStrapi.start(scope, afterwards);
-    return;
+  const localStrapiPath = path.resolve(scope.rootPath, 'node_modules', 'strapi');
+
+  if (strapi.isLocalStrapiValid(localStrapiPath, scope.rootPath)) {
+    return require(localStrapiPath).start(scope, afterwards);
   }
 
   // Otherwise, if no workable local `strapi` module exists,
   // run the application using the currently running version
   // of `strapi`. This is probably always the global install.
-  const globalStrapi = strapi();
-  globalStrapi.start(scope, afterwards);
+  strapi().start(scope, afterwards);
 
   function afterwards(err, strapi) {
     if (err) {

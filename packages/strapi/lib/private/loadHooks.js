@@ -10,7 +10,7 @@ const async = require('async');
 const cluster = require('cluster');
 
 // Local dependencies.
-const __hooks = require('../configuration/hooks');
+const Hook = require('../configuration/hooks');
 
 /**
  * Resolve the hook definitions and then finish loading them
@@ -19,8 +19,6 @@ const __hooks = require('../configuration/hooks');
  */
 
 module.exports = function (strapi) {
-  const Hook = __hooks(strapi);
-
   return (hooks, hookCategory, cb) => {
 
     function prepareHook(id) {
@@ -56,7 +54,7 @@ module.exports = function (strapi) {
       def.configKey = hookPrototype.configKey || def.identity;
 
       // New up an actual Hook instance.
-      hooks[id] = new Hook(def);
+      hooks[id] = new Hook(strapi, def);
     }
 
     // Function to apply a hook's `defaults` object or function.
@@ -78,7 +76,7 @@ module.exports = function (strapi) {
         }
       }, strapi.config.hookTimeout || 1000);
 
-      hooks[id].load((err) => {
+      hooks[id].load(err => {
         timeout = false;
 
         if (err) {
@@ -94,14 +92,12 @@ module.exports = function (strapi) {
       });
     }
 
-    async.series(_.map(_.keys(hooks), hook => {
-      return (cb) => {
-        prepareHook(hook);
-        applyDefaults(_.get(hooks, hook));
-        loadHook(hook, cb);
+    async.series(_.map(hooks, (hook, identity) => {
+      return cb => {
+        prepareHook(identity);
+        applyDefaults(hook);
+        loadHook(identity, cb);
       }
-    }), err => {
-      return cb(err);
-    });
+    }), err => cb(err));
   };
 };

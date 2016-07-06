@@ -4,8 +4,8 @@
  * Body parser hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -29,7 +29,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       strapi.app.use(strapi.middlewares.bodyparser({
         encode: strapi.config.parser.encode,
         formLimit: strapi.config.parser.formLimit,
@@ -41,6 +41,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

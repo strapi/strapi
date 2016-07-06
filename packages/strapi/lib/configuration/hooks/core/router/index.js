@@ -20,8 +20,8 @@ const regex = require('strapi-utils').regex;
  * Router hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -36,7 +36,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
 
       // Middleware used for every routes.
       // Expose the endpoint in `this`.
@@ -71,7 +71,7 @@ module.exports = function (strapi) {
 
         // Parse each route from the user config, load policies if any
         // and match the controller and action to the desired endpoint.
-        _.forEach(strapi.config.routes, function (value, endpoint) {
+        _.forEach(strapi.config.routes, (value, endpoint) => {
           try {
             route = regex.detectRoute(endpoint);
 
@@ -93,7 +93,7 @@ module.exports = function (strapi) {
             policies.push(responsesPolicy);
 
             if (_.isArray(value.policies) && !_.isEmpty(value.policies)) {
-              _.forEach(value.policies, function (policy) {
+              _.forEach(value.policies, policy => {
                 if (strapi.policies[policy]) {
                   policies.push(strapi.policies[policy]);
                 } else {
@@ -138,6 +138,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

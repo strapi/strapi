@@ -23,12 +23,12 @@ const logger = require('strapi-utils').logger;
 module.exports = function () {
   const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 
-  fs.access(path.resolve(HOME, '.strapirc'), fs.F_OK | fs.R_OK | fs.W_OK, function (err) {
+  fs.access(path.resolve(HOME, '.strapirc'), fs.F_OK | fs.R_OK | fs.W_OK, err => {
     if (err) {
       if (err.code === 'ENOENT') {
         fs.writeFile(path.resolve(HOME, '.strapirc'), JSON.stringify({
           generators: {}
-        }, null, '\t'), function (err) {
+        }, null, '\t'), err => {
           if (err) {
             logger.error('Impossible to write the `.strapirc` file at `' + HOME + '`');
             logger.error('Please check read/write permissions before execute `$ strapi config`');

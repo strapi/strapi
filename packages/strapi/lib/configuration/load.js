@@ -28,11 +28,7 @@ const json = require('strapi-utils').json;
  */
 
 module.exports = function (strapi) {
-
-  // Save reference to context for use in closures.
-  const self = this;
-
-  return function loadConfig(cb) {
+  return cb => {
 
     // Commence with loading/validating/defaulting all the rest of the config.
     async.auto({
@@ -42,7 +38,7 @@ module.exports = function (strapi) {
        * Strapi on the `strapi` object (from its `package.json`).
        */
 
-      versionAndDependencyInfo: function (cb) {
+      versionAndDependencyInfo: cb => {
         const pathToThisVersionOfStrapi = path.join(__dirname, '..', '..');
 
         json.getPackage(pathToThisVersionOfStrapi, function (err, pkg) {
@@ -56,16 +52,14 @@ module.exports = function (strapi) {
           cb();
         });
       }
-    },
-
-    function configLoaded(err) {
+    }, err => {
       if (err) {
         return cb(err);
       }
 
       // Override the previous contents of `strapi.config` with the new, validated
       // config with defaults and overrides mixed in the appropriate order.
-      strapi.config = self.defaults(strapi.config.appPath || process.cwd());
+      strapi.config = this.defaults(strapi.config.appPath || process.cwd());
 
       cb();
     });

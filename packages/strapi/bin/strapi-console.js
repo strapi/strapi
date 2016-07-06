@@ -36,7 +36,7 @@ module.exports = function () {
     strapi.log.info('Starting the application in interactive mode...');
   }
 
-  strapi.start({}, function (err) {
+  strapi.start({}, err => {
 
     // Log and exit the REPL in case there is an error
     // while we were trying to start the server.
@@ -49,7 +49,7 @@ module.exports = function () {
     // Open the Node.js REPL.
     if ((cluster.isMaster && _.isEmpty(cluster.workers)) || cluster.worker.id === 1) {
       const repl = REPL.start(strapi.config.name + ' > ' || 'strapi > ');
-      repl.on('exit', function (err) {
+      repl.on('exit', err => {
 
         // Log and exit the REPL in case there is an error
         // while we were trying to open the REPL.

@@ -11,8 +11,8 @@ const path = require('path');
  * Public assets hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -26,7 +26,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (strapi.config.static === true) {
         strapi.app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, strapi.config.paths.static)));
       }
@@ -34,6 +34,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

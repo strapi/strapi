@@ -4,8 +4,8 @@
  * X-Response-Time hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -19,7 +19,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (strapi.config.responseTime === true) {
         strapi.app.use(strapi.middlewares.responseTime());
       }
@@ -27,6 +27,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };

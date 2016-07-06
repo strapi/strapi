@@ -4,8 +4,8 @@
  * Gzip hook
  */
 
-module.exports = function (strapi) {
-  const hook = {
+module.exports = strapi => {
+  return {
 
     /**
      * Default options
@@ -19,7 +19,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       if (strapi.config.gzip === true) {
         strapi.app.use(strapi.middlewares.compress());
       }
@@ -27,6 +27,4 @@ module.exports = function (strapi) {
       cb();
     }
   };
-
-  return hook;
 };
