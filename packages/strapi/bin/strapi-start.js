@@ -10,7 +10,7 @@
 const path = require('path');
 
 // Local Strapi dependencies.
-const strapi = require('../lib/server');
+const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
 const packageJSON = require('../package.json');
 
 // Logger.
@@ -34,14 +34,14 @@ module.exports = function () {
   // Use the app's local `strapi` in `node_modules` if it's existant and valid.
   const localStrapiPath = path.resolve(scope.rootPath, 'node_modules', 'strapi');
 
-  if (strapi.isLocalStrapiValid(localStrapiPath, scope.rootPath)) {
+  if (isLocalStrapiValid(localStrapiPath, scope.rootPath)) {
     return require(localStrapiPath).start(scope, afterwards);
   }
 
   // Otherwise, if no workable local `strapi` module exists,
   // run the application using the currently running version
   // of `strapi`. This is probably always the global install.
-  strapi().start(scope, afterwards);
+  return require('../lib/')().start(scope, afterwards);
 
   function afterwards(err, strapi) {
     if (err) {

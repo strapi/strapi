@@ -14,7 +14,7 @@ const cluster = require('cluster');
 const _ = require('lodash');
 
 // Local Strapi dependencies.
-const server = require('../lib/server');
+const strapi = require('../lib/');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -27,9 +27,6 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = function () {
-
-  // Now load up the Strapi framework for real.
-  const strapi = server();
 
   // Only log if the process is a master.
   if (cluster.isMaster) {
