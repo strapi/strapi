@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-policy",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Generate a policy for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [

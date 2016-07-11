@@ -21,7 +21,7 @@ module.exports = function dataForPackageJSON(scope) {
 
   // To determine the Strapi dependency to inject
   // in the newly created `package.json`.
-  const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi', 'package.json'))) || {};
+  const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', '..', '..', 'strapi', 'package.json'))) || {};
   const knexPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi-knex', 'package.json'))) || {};
 
   // Finally, return the JSON.

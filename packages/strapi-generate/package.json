@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "http://strapi.io",
   "keywords": [

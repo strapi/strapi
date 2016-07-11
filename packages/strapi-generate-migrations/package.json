@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-migrations",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Generate migration files for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
