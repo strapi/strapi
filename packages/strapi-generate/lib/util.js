@@ -19,7 +19,7 @@
  * @api private
  */
 
-exports.pathRegexp = function (path, keys, sensitive, strict) {
+exports.pathRegexp = (path, keys, sensitive, strict) => {
   if (toString.call(path) === '[object RegExp]') {
     return path;
   }

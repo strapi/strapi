@@ -23,7 +23,7 @@ const selectTable = require('./selectTable');
  * Relationship templates
  */
 
-module.exports = function (rootModels, modelName, details, attribute, toDrop, onlyDrop, history) {
+module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, history) => {
   let tplRelationUp;
   let tplRelationDown;
   let infos = {};
@@ -198,7 +198,7 @@ module.exports = function (rootModels, modelName, details, attribute, toDrop, on
       const relationship = models[details.collection].attributes[details.via];
 
       // Construct relation table name.
-      const relationTable = _.map(_.sortBy([relationship, details], 'collection'), function (table) {
+      const relationTable = _.map(_.sortBy([relationship, details], 'collection'), table => {
         return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
       }).join('__');
 

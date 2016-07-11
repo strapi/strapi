@@ -13,7 +13,7 @@ const program = require('commander');
  */
 
 // Allow us to display `help()`, but omit the wildcard (`*`) command.
-program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = function () {
+program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = () => {
   program.commands = _.reject(program.commands, {
     _name: '*'
   });
@@ -21,7 +21,7 @@ program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = func
 };
 
 // Force commander to display version information.
-program.Command.prototype.versionInformation = program.versionInformation = function () {
+program.Command.prototype.versionInformation = program.versionInformation = () => {
   program.emit('version');
 };
 

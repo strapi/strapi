@@ -22,7 +22,7 @@ const logger = require('strapi-utils').logger;
  * @param {Function} cb
  */
 
-module.exports = function before(scope, cb) {
+module.exports = (scope, cb) => {
   let defaultName = scope.name;
   if (defaultName === '.' || !defaultName) {
     defaultName = path.basename(process.cwd());

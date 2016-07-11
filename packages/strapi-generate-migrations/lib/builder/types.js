@@ -15,7 +15,7 @@ const _ = require('lodash');
  * Template types
  */
 
-module.exports = function (models, modelName, details, attribute, toDrop, onlyDrop) {
+module.exports = (models, modelName, details, attribute, toDrop, onlyDrop) => {
 
   // Template: create a new column thanks to the attribute's type.
   // Firt, make sure we know the attribute type. If not, just do it

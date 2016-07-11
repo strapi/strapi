@@ -13,7 +13,7 @@ const _ = require('lodash');
  * @api private
  */
 
-exports.detectRoute = function (endpoint) {
+exports.detectRoute = endpoint => {
   const verbExpr = /^(all|get|post|put|delete|trace|options|connect|patch|head|redirect)\s+/i;
   let verb = _.last(endpoint.match(verbExpr) || []) || '';
   verb = verb.toLowerCase();

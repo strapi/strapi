@@ -23,13 +23,13 @@ const dictionary = require('strapi-utils/lib/dictionary');
  * @param {Function} cb
  */
 
-module.exports = function afterGenerate(scope, cb) {
+module.exports = (scope, cb) => {
   async.parallel({
-    migrationFile: function (cb) {
+    migrationFile: cb => {
       const migrationFile = path.resolve(scope.rootPath, 'data', 'migrations', scope.connection, scope.filename);
 
       // Read the migration file.
-      fs.readFile(migrationFile, 'utf8', function (err, data) {
+      fs.readFile(migrationFile, 'utf8', (err, data) => {
         if (err) {
           return cb.invalid(err);
         }
@@ -49,21 +49,21 @@ module.exports = function afterGenerate(scope, cb) {
         });
       });
     },
-    settings: function (cb) {
+    settings: cb => {
       dictionary.aggregate({
         dirname: path.resolve(scope.rootPath, 'api'),
         filter: /(.+)\.settings.json$/,
         depth: 4
       }, cb);
     },
-    functions: function (cb) {
+    functions: cb => {
       dictionary.aggregate({
         dirname: path.resolve(scope.rootPath, 'api'),
         filter: /(.+)\.js$/,
         depth: 4
       }, cb);
     }
-  }, function (err, data) {
+  }, (err, data) => {
     if (err) {
       return cb.invalid(err);
     }
@@ -72,11 +72,11 @@ module.exports = function afterGenerate(scope, cb) {
     const models = _.get(_.merge(data.settings, data.functions), 'models');
 
     if (!_.isUndefined(models)) {
-      _.mapValues(models, function (model) {
+      _.mapValues(models, model => {
         return _.omitBy(model, _.isFunction);
       });
 
-      const modelsKeyLowercased = _.mapKeys(models, function (model, key) {
+      const modelsKeyLowercased = _.mapKeys(models, (model, key) => {
         return key.toLowerCase();
       });
 
@@ -88,7 +88,7 @@ module.exports = function afterGenerate(scope, cb) {
         keep_function_indentation: true,
         space_before_conditional: true,
         end_with_newline: true
-      }), 'utf8', function (err) {
+      }), 'utf8', err => {
         if (err) {
           return cb.invalid(err);
         } else {

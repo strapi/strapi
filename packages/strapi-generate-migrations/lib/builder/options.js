@@ -15,7 +15,7 @@ const _ = require('lodash');
  * Add options to a table
  */
 
-module.exports = function (models, modelName, value, option) {
+module.exports = (models, modelName, value, option) => {
 
   // Template: add a specific option.
   // This is only called when we create a new table.

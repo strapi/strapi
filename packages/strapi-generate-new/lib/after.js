@@ -20,7 +20,7 @@ const logger = require('strapi-utils').logger;
  * @param {Function} cb
  */
 
-module.exports = function afterGenerate(scope, cb) {
+module.exports = (scope, cb) => {
   process.chdir(scope.rootPath);
 
   // Copy the default files.

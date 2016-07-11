@@ -19,7 +19,7 @@ const _ = require('lodash');
  * @api private
  */
 
-exports.parseJSONFile = function (path, cb) {
+exports.parseJSONFile = (path, cb) => {
   if (!cb) {
     throw new Error('Callback required!');
   }
@@ -36,7 +36,7 @@ exports.parseJSONFile = function (path, cb) {
     return andThen(jsonString);
   }
 
-  fs.readFile(path, 'utf-8', function (err, file) {
+  fs.readFile(path, 'utf-8', (err, file) => {
     if (err) {
       return cb(err);
     }
@@ -81,7 +81,7 @@ exports.parseJSONFile = function (path, cb) {
  * @api private
  */
 
-exports.parseJSONFileSync = function (path) {
+exports.parseJSONFileSync = path => {
   return exports.parseJSONFile(path, 'sync');
 };
 
@@ -94,11 +94,11 @@ exports.parseJSONFileSync = function (path) {
  * @api private
  */
 
-exports.getPackage = function (path, cb) {
+exports.getPackage = (path, cb) => {
   path = _.trimEnd(path, '/');
   path += '/package.json';
 
-  exports.parseJSONFile(path, function (err, json) {
+  exports.parseJSONFile(path, (err, json) => {
     if (err) {
       return cb(err);
     }
@@ -122,7 +122,7 @@ exports.getPackage = function (path, cb) {
  * @api private
  */
 
-exports.getPackageSync = function (path) {
+exports.getPackageSync = path => {
   path = _.trimEnd(path, '/');
   path += '/package.json';
 

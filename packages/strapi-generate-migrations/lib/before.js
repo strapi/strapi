@@ -23,7 +23,7 @@ const builder = require('./builder');
  * @param {Function} cb
  */
 
-module.exports = function (scope, cb) {
+module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.args[0] || !scope.args[1]) {
     return cb.invalid('Usage: `$ strapi migrate:make <connection_name> <migration_name>`');
   }
@@ -86,7 +86,7 @@ module.exports = function (scope, cb) {
   })();
 
   // Register every model.
-  const migrations = glob.sync(path.resolve(scope.rootPath, 'api', '**', 'models', '*.json')).map((filepath) => {
+  const migrations = glob.sync(path.resolve(scope.rootPath, 'api', '**', 'models', '*.json')).map(filepath => {
     try {
       const file = JSON.parse(fs.readFileSync(path.resolve(filepath)));
 
@@ -103,18 +103,18 @@ module.exports = function (scope, cb) {
         }
 
         // First, we need to know if the table already exists.
-        scope.db.schema.hasTable(modelName).then(function (exists) {
+        scope.db.schema.hasTable(modelName).then(exists => {
           // If the table doesn't exist.
           if (!exists) {
             // Builder: add needed options specified in the model
             // for each option.
-            _.forEach(scope.models[modelName].options, function (value, option) {
+            _.forEach(scope.models[modelName].options, (value, option) => {
               builder.options(scope.models, modelName, value, option);
             });
 
             // Builder: create template for each attribute-- either with a column type
             // or with a relationship.
-            _.forEach(scope.models[modelName].attributes, function (details, attribute) {
+            _.forEach(scope.models[modelName].attributes, (details, attribute) => {
               if (details.type && _.isString(details.type)) {
                 builder.types(scope.models, modelName, details, attribute);
               } else if (_.isString(details.collection) || _.isString(details.model)) {
@@ -135,7 +135,7 @@ module.exports = function (scope, cb) {
             const attributesAddedOrUpdated = _.difference(_.keys(scope.models[modelName].attributes), attributesRemoved);
 
             // Parse every attribute which has been removed.
-            _.forEach(attributesRemoved, function (attribute) {
+            _.forEach(attributesRemoved, attribute => {
               const details = scope.models[modelName].oldAttributes[attribute];
               details.isRemoved = true;
 
@@ -152,7 +152,7 @@ module.exports = function (scope, cb) {
             });
 
             // Parse every attribute which has been added or updated.
-            _.forEach(attributesAddedOrUpdated, function (attribute) {
+            _.forEach(attributesAddedOrUpdated, attribute => {
               const details = scope.models[modelName].attributes[attribute];
 
               // If it's a new attribute.
@@ -171,7 +171,7 @@ module.exports = function (scope, cb) {
                 // If it's an existing attribute.
 
                 // Try to identify attribute updates
-                const toDrop = (function () {
+                const toDrop = (() => {
                   if (details.hasOwnProperty('collection') && details.hasOwnProperty('via') &&
                     (_.get(scope.models[modelName].oldAttributes[attribute], 'collection') !== details.collection || _.get(scope.models[modelName].oldAttributes[attribute], 'via') !== details.via)) {
                     return true;
@@ -226,7 +226,7 @@ module.exports = function (scope, cb) {
           }
         });
 
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           asyncFunction(filepath, resolve);
         });
       }

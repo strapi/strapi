@@ -22,13 +22,13 @@ const logger = require('strapi-utils').logger;
  * @return {[Type]}
  */
 
-module.exports = function (scope, cb) {
+module.exports = (scope, cb) => {
   cb = cb || {};
   cb = reportback.extend(cb, {
     error: cb.error,
-    success: function () {},
-    notStrapiApp: function () {},
-    alreadyExists: function () {
+    success: () => {},
+    notStrapiApp: () => {},
+    alreadyExists: () => {
       return cb.error();
     }
   });

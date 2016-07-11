@@ -9,7 +9,7 @@
 
 process.chdir(__dirname);
 
-(function () {
+(() => {
   const strapi = require('strapi');
   strapi.start();
 })();

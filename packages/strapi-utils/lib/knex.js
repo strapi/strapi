@@ -18,7 +18,7 @@ const logger = require('./winston');
  * Check if connection is valid
  */
 
-module.exports = function (scope) {
+module.exports = scope => {
 
   // First, make sure the application we have access to
   // the migration generator.
@@ -58,7 +58,7 @@ module.exports = function (scope) {
   }
 
   // Make sure the needed client is installed.
-  _.forEach(scope.connections, function (config) {
+  _.forEach(scope.connections, config => {
     try {
       scope.db = require(path.resolve(scope.rootPath, 'node_modules', 'knex'))(scope.dbConfig);
     } catch (err) {

@@ -51,7 +51,7 @@ function generate(generator, scope, cb) {
       sb.log.verbose('Generating ' + util.inspect(generator) + ' at `' + scope.rootPath + '`...');
 
       // Process all of the generator's targets concurrently.
-      async.each(Object.keys(generator.targets), function (keyPath, asyncEachCb) {
+      async.each(Object.keys(generator.targets), (keyPath, asyncEachCb) => {
         const asyncEachSb = reportback.extend(asyncEachCb);
 
         // Create a new scope object for this target,
@@ -74,7 +74,7 @@ function generate(generator, scope, cb) {
         const params = [];
         pathRegexp(keyPath, params);
         let err;
-        const parsedKeyPath = _.reduce(params, function (memoKeyPath, param) {
+        const parsedKeyPath = _.reduce(params, (memoKeyPath, param) => {
           if (err) {
             return false;
           }
@@ -115,7 +115,7 @@ function generate(generator, scope, cb) {
 
         // If `target` is an array, run each item.
         if (_.isArray(target)) {
-          async.eachSeries(target, function (targetItem, asyncEachSeriesCb) {
+          async.eachSeries(target, (targetItem, asyncEachSeriesCb) => {
             generateTarget({
               target: targetItem,
               parent: generator,

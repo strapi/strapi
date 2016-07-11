@@ -15,7 +15,7 @@ const _ = require('lodash');
  * @param {Function} cb
  */
 
-module.exports = function (scope, cb) {
+module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.args[0]) {
     return cb.invalid('Usage: `$ strapi generate:service serviceName apiName`');
   }

@@ -25,7 +25,7 @@ const CLIENTS = [
  * Knex hook
  */
 
-module.exports = function (strapi) {
+module.exports = strapi => {
   const hook = {
 
     /**
@@ -53,11 +53,11 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       strapi.connections = {};
 
       // For each connection in the config register a new Knex connection.
-      _.forEach(strapi.config.connections, function (connection, name) {
+      _.forEach(strapi.config.connections, (connection, name) => {
 
         // Make sure we use the client even if the typo is not the exact one.
         switch (connection.client) {

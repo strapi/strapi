@@ -66,7 +66,7 @@ function dictionary(options, cb) {
   let dictionary = {};
 
   // Iterate through each module in the set.
-  _.forEach(files, function (module, filename) {
+  _.forEach(files, (module, filename) => {
 
     // Build the result object by merging all of the target modules
     // NOTE: Each module must export an object in order for this to work
@@ -139,7 +139,7 @@ function dictionary(options, cb) {
  * @param {Function} cb
  */
 
-module.exports.required = function (options, cb) {
+module.exports.required = (options, cb) => {
   return dictionary(options, cb);
 };
 
@@ -151,7 +151,7 @@ module.exports.required = function (options, cb) {
  * @param {Function} cb
  */
 
-module.exports.optional = function (options, cb) {
+module.exports.optional = (options, cb) => {
   options.optional = true;
   return dictionary(options, cb);
 };
@@ -164,7 +164,7 @@ module.exports.optional = function (options, cb) {
  * @param {Function} cb
  */
 
-module.exports.exists = function (options, cb) {
+module.exports.exists = (options, cb) => {
   options.optional = true;
   options.dontLoad = false;
   return dictionary(options, cb);
@@ -178,7 +178,7 @@ module.exports.exists = function (options, cb) {
  * @param {Function} cb
  */
 
-module.exports.aggregate = function (options, cb) {
+module.exports.aggregate = (options, cb) => {
   options.aggregate = true;
   options.optional = true;
   return dictionary(options, cb);

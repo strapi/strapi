@@ -16,7 +16,7 @@ const _ = require('lodash');
  * with basic info, dependencies, etc.
  */
 
-module.exports = function dataForPackageJSON(scope) {
+module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
 
   // To determine the Strapi dependency to inject

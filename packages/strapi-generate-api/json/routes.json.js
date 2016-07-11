@@ -15,7 +15,7 @@ const _ = require('lodash');
  * Expose main routes of the generated API
  */
 
-module.exports = function dataForRoutesJSON(scope) {
+module.exports = scope => {
   const newRoutes = {
     routes: {}
   };

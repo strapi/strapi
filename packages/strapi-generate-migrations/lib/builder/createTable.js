@@ -16,7 +16,7 @@ const _ = require('lodash');
  * and drop the table to reverse the migration.
  */
 
-module.exports = function (models, modelName) {
+module.exports = (models, modelName) => {
 
   // Template: create the table for the `up` export if it doesn't exist.
   // This adds a `up` logic for the current model.

@@ -15,7 +15,7 @@ const _ = require('lodash');
  * Select table
  */
 
-module.exports = function (models, modelName) {
+module.exports = (models, modelName) => {
 
   if (!models[modelName].hasOwnProperty('up')) {
     models[modelName].up = {
@@ -28,7 +28,7 @@ module.exports = function (models, modelName) {
   let emptyArrayForDrop = [];
   let emptyArrayForOthers = [];
 
-  _.forEach(models[modelName].newAttributes, function (attribute, key) {
+  _.forEach(models[modelName].newAttributes, (attribute, key) => {
     if (!_.isEmpty(_.get(models[modelName].attributes, key + '.create.drop'))) {
       emptyArrayForDrop.push(true);
     }
@@ -71,7 +71,7 @@ module.exports = function (models, modelName) {
   emptyArrayForDrop = [];
   emptyArrayForOthers = [];
 
-  _.forEach(models[modelName].newAttributes, function (attribute, key) {
+  _.forEach(models[modelName].newAttributes, (attribute, key) => {
     if (!_.isEmpty(_.get(models[modelName].attributes, key + '.delete.drop'))) {
       emptyArrayForDrop.push(true);
     }
