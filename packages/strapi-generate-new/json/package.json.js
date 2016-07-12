@@ -22,7 +22,6 @@ module.exports = scope => {
   // To determine the Strapi dependency to inject
   // in the newly created `package.json`.
   const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi', 'package.json'))) || {};
-  const knexPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi-knex', 'package.json'))) || {};
 
   // Finally, return the JSON.
   return _.merge(scope.appPackageJSON || {}, {
@@ -33,12 +32,9 @@ module.exports = scope => {
     'dependencies': {
       'async': getDependencyVersion(frameworkPkg, 'async'),
       'lodash': getDependencyVersion(frameworkPkg, 'lodash'),
-      'knex': getDependencyVersion(knexPkg, 'knex'),
       'socket.io': getDependencyVersion(frameworkPkg, 'socket.io'),
-      'sqlite3': getDependencyVersion(knexPkg, 'sqlite3'),
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-bookshelf': getDependencyVersion(cliPkg, 'strapi-bookshelf'),
-      'strapi-knex': getDependencyVersion(cliPkg, 'strapi-knex')
+      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi-mongoose')
     },
     'main': './server.js',
     'scripts': {
