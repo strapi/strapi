@@ -17,8 +17,7 @@
   "dependencies": {
     "mongoose": "~4.5.4",
     "lodash": "~4.6.1",
-    "pluralize": "~1.2.1",
-    "strapi": "~2.0.0"
+    "pluralize": "~1.2.1"
   },
   "strapi": {
     "isHook": true
