@@ -34,12 +34,15 @@ module.exports = function (strapi) {
     initialize: function (cb) {
       let globalName;
 
+      // Return callback if there is no model
+      if (_.isEmpty(strapi.models)) {
+        return cb();
+      }
+
       // Connect to mongo database
       mongoose.connect('mongodb://localhost/test');
 
       const db = mongoose.connection;
-
-      console.log("Strapi mongoose");
 
       // Handle error
       db.on('error', error => {
@@ -50,11 +53,6 @@ module.exports = function (strapi) {
       db.on('open', () => {
         // Initialize collections
         _.set(strapi, 'mongoose.collections', {});
-
-        // Return callback if there is no model
-        if (_.isEmpty(strapi.models)) {
-          return cb();
-        }
 
         const loadedHook = _.after(_.size(strapi.models), function () {
           cb();
