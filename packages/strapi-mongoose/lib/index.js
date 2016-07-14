@@ -99,31 +99,31 @@ module.exports = function (strapi) {
           const done = _.after(_.size(definition.attributes), function () {
             try {
               // Initialize lifecycle callbacks.
-              loadedModel.initialize = function () {
-                const self = this;
-                const lifecycle = {
-                  creating: 'beforeCreate',
-                  created: 'afterCreate',
-                  destroying: 'beforeDestroy',
-                  destroyed: 'afterDestroy',
-                  updating: 'beforeUpdate',
-                  updated: 'afterUpdate',
-                  fetching: 'beforeFetch',
-                  fetched: 'afterFetch',
-                  saving: 'beforeSave',
-                  saved: 'afterSave'
-                };
+              // loadedModel.initialize = function () {
+              //   const self = this;
+              //   const lifecycle = {
+              //     creating: 'beforeCreate',
+              //     created: 'afterCreate',
+              //     destroying: 'beforeDestroy',
+              //     destroyed: 'afterDestroy',
+              //     updating: 'beforeUpdate',
+              //     updated: 'afterUpdate',
+              //     fetching: 'beforeFetch',
+              //     fetched: 'afterFetch',
+              //     saving: 'beforeSave',
+              //     saved: 'afterSave'
+              //   };
+              //
+              //   _.forEach(lifecycle, function (fn, key) {
+              //     if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
+              //       self.on(key, strapi.models[model.toLowerCase()][fn]);
+              //     }
+              //   });
+              // };
 
-                _.forEach(lifecycle, function (fn, key) {
-                  if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
-                    self.on(key, strapi.models[model.toLowerCase()][fn]);
-                  }
-                });
-              };
+              console.log(loadedModel);
 
-              const schema = mongoose.Schema(loadedModel.attributes);
-
-              console.log(schema);
+              const schema = mongoose.Schema(loadedModel);
 
               global[globalName] = mongoose.model(globalName, schema);;
 
@@ -154,8 +154,7 @@ module.exports = function (strapi) {
             if (!_.isEmpty(verbose)) {
               utilsModels.defineAssociations(globalName, definition, details, name);
             } else {
-              console.log(name, details);
-              loadedModel[name].type = utils.convertType(details.type);
+              loadedModel[name].type = utils(mongoose).convertType(details.type);
             }
 
             switch (verbose) {

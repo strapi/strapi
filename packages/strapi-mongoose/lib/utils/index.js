@@ -7,12 +7,14 @@
 // Public node modules.
 const _ = require('lodash');
 
-module.exports = (mongoose) => {
-  const Decimal = require('mongoose-double').loadType(mongoose);
-  const Float = require('mongoose-float').loadType(mongoose);
+module.exports = mongoose => {
+  require('mongoose-double')(mongoose);
+  require('mongoose-float').loadType(mongoose);
+
+  const SchemaTypes = mongoose.Schema.Types;
 
   return {
-    convertType: (mongooseType) => {
+    convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
         case 'string':
         case 'text':
@@ -21,9 +23,9 @@ module.exports = (mongoose) => {
         case 'biginteger':
           return 'Number'
         case 'float':
-          return Float;
+          return SchemaTypes.Float;
         case 'decimal':
-          return Decimal;
+          return SchemaTypes.Double;
         case 'date':
         case 'time':
         case 'datetime':
