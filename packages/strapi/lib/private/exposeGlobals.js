@@ -8,11 +8,10 @@
  * @api private
  */
 
-module.exports = function exposeGlobals() {
+module.exports = cb => {
   global.async = require('async');
   global._ = require('lodash');
-
-  console.log(this);
-
   global.strapi = this;
+
+  return cb();
 };

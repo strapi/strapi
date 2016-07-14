@@ -44,17 +44,16 @@ module.exports = strapi => {
     configOverride = configOverride || {};
     strapi.config = _.cloneDeep(configOverride);
 
-    // Optionally expose globals as soon as the
-    // config hook is loaded.
-    strapi.on('hook:_config:loaded', strapi.exposeGlobals);
-
     async.auto({
       // Apply core defaults and hook-agnostic configuration,
       // esp. overrides including command-line options, environment variables,
       // and options that were passed in programmatically.
       config: [Configuration.load],
+      // Optionally expose globals as soon as the
+      // config hook is loaded.
+      exposeGlobals: ['config', strapi.exposeGlobals],
       // Initiliaze hooks global variable and configurations
-      hooks: ['config', initializeHooks],
+      hooks: ['exposeGlobals', initializeHooks],
       // Load core's hooks into memory, with their middleware and routes.
       dictionary: ['hooks', cb => loader('dictionary', cb)],
       // Load core's hooks into memory, with their middleware and routes.

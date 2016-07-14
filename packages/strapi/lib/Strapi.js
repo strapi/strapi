@@ -50,8 +50,8 @@ module.exports = class Strapi extends EventEmitter {
     }
 
     // Private method to expose instance globals
-    this.exposeGlobals = () => {
-      require('./private/exposeGlobals').apply(this);
+    this.exposeGlobals = cb => {
+      require('./private/exposeGlobals').apply(this, [cb]);
     }
 
     // Private method to run instance bootstrap
