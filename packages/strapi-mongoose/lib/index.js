@@ -9,6 +9,9 @@ const _ = require('lodash');
 const mongoose = require('mongoose');
 const pluralize = require('pluralize');
 
+// Local helpers.
+const utils = require('./utils/');
+
 // Strapi helpers for models.
 const utilsModels = require('strapi/lib/configuration/hooks/models/utils/');
 
@@ -150,6 +153,9 @@ module.exports = function (strapi) {
             // Build associations key
             if (!_.isEmpty(verbose)) {
               utilsModels.defineAssociations(globalName, definition, details, name);
+            } else {
+              console.log(name, details);
+              loadedModel[name].type = utils.convertType(details.type);
             }
 
             switch (verbose) {
