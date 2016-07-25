@@ -8,7 +8,7 @@
  * @api private
  */
 
-module.exports = cb => {
+module.exports = function (cb) {
   global.async = require('async');
   global._ = require('lodash');
   global.strapi = this;

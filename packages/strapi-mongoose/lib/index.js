@@ -121,8 +121,6 @@ module.exports = function (strapi) {
               //   });
               // };
 
-              console.log(loadedModel);
-
               const schema = mongoose.Schema(loadedModel);
 
               global[globalName] = mongoose.model(globalName, schema);;
@@ -159,54 +157,36 @@ module.exports = function (strapi) {
 
             switch (verbose) {
               case 'hasOne':
-                // const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
-                //   if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
-                //     return details;
-                //   }
-                // });
+                const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
+                  if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
+                    return details;
+                  }
+                });
 
                 loadedModel[name] = {
-                  type: Schema.Types.ObjectId,
-                  ref: strapi.models[details.model].attributes[FK].model
+                  type: mongoose.mongoose.Schema.Types.ObjectId,
+                  ref: _.capitalize(details.model)
                 };
                 break;
 
               case 'hasMany':
-                // const FK = _.findKey(strapi.models[details.collection].attributes, function (details) {
-                //   if (details.hasOwnProperty('collection') && details.collection === model && details.hasOwnProperty('via') && details.via === name) {
-                //     return details;
-                //   }
-                // });
-
                 loadedModel[name] = [{
-                  type: Schema.Types.ObjectId,
-                  ref: strapi.models[details.model].attributes[FK].collection
+                  type: mongoose.Schema.Types.ObjectId,
+                  ref: _.capitalize(details.collection)
                 }];
                 break;
 
               case 'belongsTo':
-                // const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
-                //   if (details.hasOwnProperty('model') && details.model === model) {
-                //     return details;
-                //   }
-                // });
-
                 loadedModel[name] = {
-                  type: Schema.Types.ObjectId,
-                  ref: strapi.models[details.model].attributes[FK].model
+                  type: mongoose.Schema.Types.ObjectId,
+                  ref: _.capitalize(details.model)
                 };
                 break;
 
               case 'belongsToMany':
-                // const FK = _.findKey(strapi.models[details.collection].attributes, function (details) {
-                //   if (details.hasOwnProperty('model') && details.collection === model) {
-                //     return details;
-                //   }
-                // });
-
                 loadedModel[name] = [{
-                  type: Schema.Types.ObjectId,
-                  ref: strapi.models[details.model].attributes[FK].collection
+                  type: mongoose.Schema.Types.ObjectId,
+                  ref: _.capitalize(details.collection)
                 }];
                 break;
 
