@@ -8,10 +8,8 @@
 const path = require('path');
 const http = require('http');
 const EventEmitter = require('events').EventEmitter;
-const util = require('util');
 
 // Local dependencies.
-const loadStrapi = require('./load');
 const mixinAfter = require('./private/after');
 
 /**
