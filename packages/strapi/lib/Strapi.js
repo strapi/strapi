@@ -20,54 +20,24 @@ const mixinAfter = require('./private/after');
  * @constructor
  */
 
-module.exports = class Strapi extends EventEmitter {
+ // Private properties
+let _instance = null;
+
+class Strapi extends EventEmitter {
 
   constructor() {
     super();
+
+    // Singleton
+    if (!_instance) {
+      _instance = this;
+    }
 
     // Remove memory-leak warning about max listeners.
     this.setMaxListeners(0);
 
     // Mixin support for `Strapi.prototype.after()`.
     mixinAfter(this);
-
-    // Private method to load instance
-    this.load = loadStrapi(this);
-
-    // Private method to initialize instance
-    this.initialize = cb => {
-      require('./private/initialize').apply(this, [cb]);
-    };
-
-    // Private method to start instance
-    this.start = (configOverride, cb) => {
-      require('./start').apply(this, [configOverride, cb]);
-    }
-
-    // Private method to stop instance
-    this.stop = () => {
-      require('./stop').apply(this);
-    }
-
-    // Private method to expose instance globals
-    this.exposeGlobals = cb => {
-      require('./private/exposeGlobals').apply(this, [cb]);
-    }
-
-    // Private method to run instance bootstrap
-    this.runBootstrap = cb => {
-      require('./private/bootstrap').apply(this, [cb]);
-    }
-
-    // Private method to verify strapi dependency
-    this.isLocalStrapiValid = (strapiPath, appPath) => {
-      require('./private/isLocalStrapiValid').apply(this, [strapiPath, appPath]);
-    }
-
-    // Private method to verify strapi application
-    this.isStrapiAppSync = appPath => {
-      require('./private/isStrapiAppSync').apply(this, [appPath]);
-    }
 
     // Expose `koa`.
     this.app = require('koa')();
@@ -86,5 +56,49 @@ module.exports = class Strapi extends EventEmitter {
 
     // New Winston logger.
     this.log = require('strapi-utils').logger;
+
+    return _instance;
   }
-};
+
+  // Method to initialize instance
+  initialize(cb) {
+    require('./private/initialize').apply(this, [cb]);
+  }
+
+  // Method to load instance
+  load(configOverride, cb) {
+    require('./load').apply(this, [configOverride, cb]);
+  }
+
+  // Method to start instance
+  start(configOverride, cb) {
+    require('./start').apply(this, [configOverride, cb]);
+  }
+
+  // Method to stop instance
+  stop() {
+    require('./stop').apply(this);
+  }
+
+  // Method to expose instance globals
+  exposeGlobals(cb) {
+    require('./private/exposeGlobals').apply(this, [cb]);
+  }
+
+  // Method to run instance bootstrap
+  runBootstrap(cb) {
+    require('./private/bootstrap').apply(this, [cb]);
+  }
+
+  // Method to verify strapi dependency
+  isLocalStrapiValid(strapiPath, appPath) {
+    require('./private/isLocalStrapiValid').apply(this, [strapiPath, appPath]);
+  }
+
+  // Method to verify strapi application
+  isStrapiAppSync(appPath) {
+    require('./private/isStrapiAppSync').apply(this, [appPath]);
+  }
+}
+
+module.exports = new Strapi();

@@ -19,26 +19,22 @@ const async = require('async');
  */
 
 module.exports = function start(configOverride, cb) {
-  const self = this;
-
   // Callback is optional.
   cb = cb || function (err) {
     if (err) {
-      return self.log.error(err);
+      return this.log.error(err);
     }
   };
 
   async.series([
-    cb => self.load(configOverride, cb),
-    this.initialize
-  ],
-
-  function strapiReady(err) {
+    cb => this.load(configOverride, cb),
+    cb => this.initialize(cb)
+  ], err => {
     if (err) {
-      return self.stop(function (errorStoppingStrapi) {
+      return this.stop(function (errorStoppingStrapi) {
         if (errorStoppingStrapi) {
-          self.log.error('When trying to stop the application as a result of a failed start');
-          self.log.error(errorStoppingStrapi);
+          this.log.error('When trying to stop the application as a result of a failed start');
+          this.log.error(errorStoppingStrapi);
         }
         cb(err);
       });
@@ -46,26 +42,26 @@ module.exports = function start(configOverride, cb) {
 
     // Log some server info.
     if (cluster.isMaster) {
-      self.log.info('Server started in ' + self.config.appPath);
-      self.log.info('Your server is running at ' + self.config.url);
-      self.log.debug('Time: ' + new Date());
-      self.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds');
-      self.log.debug('Environment: ' + self.config.environment);
-      self.log.debug('Process PID: ' + process.pid);
-      self.log.debug('Cluster: master');
-      self.log.info('To shut down your server, press <CTRL> + C at any time');
+      this.log.info('Server started in ' + this.config.appPath);
+      this.log.info('Your server is running at ' + this.config.url);
+      this.log.debug('Time: ' + new Date());
+      this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds');
+      this.log.debug('Environment: ' + this.config.environment);
+      this.log.debug('Process PID: ' + process.pid);
+      this.log.debug('Cluster: master');
+      this.log.info('To shut down your server, press <CTRL> + C at any time');
     } else {
-      self.log.warn('New worker starting...');
-      self.log.debug('Process PID: ' + process.pid);
-      self.log.debug('Cluster: worker #' + cluster.worker.id);
+      this.log.warn('New worker starting...');
+      this.log.debug('Process PID: ' + process.pid);
+      this.log.debug('Cluster: worker #' + cluster.worker.id);
     }
 
     // Blank log to give some space.
     console.log();
 
     // Emit an event when Strapi has started.
-    self.emit('started');
-    self.started = true;
-    return cb(null, self);
+    this.emit('started');
+    this.started = true;
+    return cb(null, this);
   });
 };
