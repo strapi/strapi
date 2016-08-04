@@ -57,46 +57,8 @@ module.exports = function (strapi) {
         // Initialize collections
         _.set(strapi, 'mongoose.collections', {});
 
-        const loadedHook = _.after(_.size(strapi.models), function () {
-          cb();
-        });
-
-        // Parse every registered model.
-        _.forEach(strapi.models, function (definition, model) {
-          globalName = _.capitalize(definition.globalId);
-
-          // Make sure the model has a table name.
-          // If not, use the model name.
-          if (_.isEmpty(definition.collectionName)) {
-            definition.collectionName = model;
-          }
-
-          // Make sure the model has a connection.
-          // If not, use the default connection.
-          if (_.isEmpty(definition.connection)) {
-            definition.connection = strapi.config.defaultConnection;
-          }
-
-          // Make sure this connection exists.
-          if (!_.has(strapi.config.connections, definition.connection)) {
-            strapi.log.error('The connection `' + definition.connection + '` specified in the `' + model + '` model does not exist.');
-            strapi.stop();
-          }
-
-          // Add some informations about ORM & client connection
-          definition.orm = 'mongoose';
-          definition.client = _.get(strapi.config.connections[definition.connection], 'client');
-
-          // Register the final model for Bookshelf.
-          const loadedModel = definition.attributes;
-
-          // Initialize the global variable with the
-          // capitalized model name.
-          global[globalName] = {};
-
-          // Call this callback function after we are done parsing
-          // all attributes for relationships-- see below.
-          const done = _.after(_.size(definition.attributes), function () {
+        const loadedAttributes = _.after(_.size(strapi.models), function () {
+          _.forEach(strapi.models, function (definition, model) {
             try {
               // Initialize lifecycle callbacks.
               // loadedModel.initialize = function () {
@@ -121,17 +83,37 @@ module.exports = function (strapi) {
               //   });
               // };
 
-              const schema = mongoose.Schema(loadedModel);
+              // Generate schema without virtual populate
+              const schema = mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+                return model.type === 'virtual';
+              }));
 
-              global[globalName] = mongoose.model(globalName, schema);;
+              // Add virtual key to provide populate and reverse populate
+              _.forEach(_.pickBy(definition.loadedModel, model => {
+                return model.type === 'virtual'
+              }), (value, key) => {
+                schema.virtual(key, {
+                  ref: value.ref,
+                  localField: '_id',
+                  foreignField: value.via
+                });
+              });
+
+              schema.set('toObject', {
+                virtuals: true
+              });
+
+              schema.set('toJSON', {
+                virtuals: true
+              });
+
+              global[definition.globalName] = mongoose.model(definition.globalName, schema);;
 
               // Push model to strapi global variables.
-              strapi.mongoose.collections[globalName.toLowerCase()] = global[globalName];
+              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)] = global[definition.globalName];
 
               // Push attributes to be aware of model schema.
-              strapi.mongoose.collections[globalName.toLowerCase()]._attributes = definition.attributes;
-
-              loadedHook();
+              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)]._attributes = definition.attributes;
             } catch (err) {
               strapi.log.error('Impossible to register the `' + model + '` model.');
               strapi.log.error(err);
@@ -139,9 +121,51 @@ module.exports = function (strapi) {
             }
           });
 
-          if (_.isEmpty(definition.attributes)) {
-            done();
+          cb();
+        });
+
+        // Parse every registered model.
+        _.forEach(strapi.models, function (definition, model) {
+          definition.globalName = _.capitalize(definition.globalId);
+
+          // Make sure the model has a table name.
+          // If not, use the model name.
+          if (_.isEmpty(definition.collectionName)) {
+            definition.collectionName = model;
           }
+
+          // Make sure the model has a connection.
+          // If not, use the default connection.
+          if (_.isEmpty(definition.connection)) {
+            definition.connection = strapi.config.defaultConnection;
+          }
+
+          // Make sure this connection exists.
+          if (!_.has(strapi.config.connections, definition.connection)) {
+            strapi.log.error('The connection `' + definition.connection + '` specified in the `' + model + '` model does not exist.');
+            strapi.stop();
+          }
+
+          // Add some informations about ORM & client connection
+          definition.orm = 'mongoose';
+          definition.client = _.get(strapi.config.connections[definition.connection], 'client');
+
+          // Register the final model for Bookshelf.
+          definition.loadedModel = _.cloneDeep(definition.attributes);
+
+          // Initialize the global variable with the
+          // capitalized model name.
+          global[definition.globalName] = {};
+
+          if (_.isEmpty(definition.attributes)) {
+            return loadedAttributes();
+          }
+
+          // Call this callback function after we are done parsing
+          // all attributes for relationships-- see below.
+          const done = _.after(_.size(definition.attributes), function () {
+            loadedAttributes();
+          });
 
           // Add every relationships to the loaded model for Bookshelf.
           // Basic attributes don't need this-- only relations.
@@ -152,42 +176,58 @@ module.exports = function (strapi) {
             if (!_.isEmpty(verbose)) {
               utilsModels.defineAssociations(globalName, definition, details, name);
             } else {
-              loadedModel[name].type = utils(mongoose).convertType(details.type);
+              definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
             }
+
+            let FK;
 
             switch (verbose) {
               case 'hasOne':
-                const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
-                  if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
-                    return details;
-                  }
-                });
-
-                loadedModel[name] = {
-                  type: mongoose.mongoose.Schema.Types.ObjectId,
+                definition.loadedModel[name] = {
+                  type: mongoose.Schema.Types.ObjectId,
                   ref: _.capitalize(details.model)
                 };
                 break;
 
               case 'hasMany':
-                loadedModel[name] = [{
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: _.capitalize(details.collection)
-                }];
+                FK = _.find(definition.associations, { alias : name});
+
+                if (FK) {
+                  definition.loadedModel[name] = {
+                    type: 'virtual',
+                    ref: _.capitalize(details.collection),
+                    via: FK.via
+                  };
+                } else {
+                  definition.loadedModel[name] = [{
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: _.capitalize(details.collection)
+                  }];
+                }
                 break;
 
               case 'belongsTo':
-                loadedModel[name] = {
+                definition.loadedModel[name] = {
                   type: mongoose.Schema.Types.ObjectId,
                   ref: _.capitalize(details.model)
                 };
                 break;
 
               case 'belongsToMany':
-                loadedModel[name] = [{
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: _.capitalize(details.collection)
-                }];
+                FK = _.find(definition.associations, { alias : name});
+
+                if (FK) {
+                  definition.loadedModel[name] = {
+                    type: 'virtual',
+                    ref: _.capitalize(details.collection),
+                    via: FK
+                  };
+                } else {
+                  definition.loadedModel[name] = [{
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: _.capitalize(details.collection)
+                  }];
+                }
                 break;
 
               default:
