@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const mongoose = require('mongoose');
+const mongooseUtils = require('mongoose/lib/utils');
 const pluralize = require('pluralize');
 
 // Local helpers.
@@ -58,6 +59,7 @@ module.exports = function (strapi) {
         _.set(strapi, 'mongoose.collections', {});
 
         const loadedAttributes = _.after(_.size(strapi.models), function () {
+          console.log(strapi.mongoose.collections);
           _.forEach(strapi.models, function (definition, model) {
             try {
               // Initialize lifecycle callbacks.
@@ -82,9 +84,13 @@ module.exports = function (strapi) {
               //     }
               //   });
               // };
+              console.log(model);
 
-              // Generate schema without virtual populate
-              const schema = mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+              console.log("NO VIRTUAL", _.omitBy(definition.loadedModel, model => {
+                return model.type === 'virtual';
+              }));
+
+              console.log("VIRTUAL", _.pickBy(definition.loadedModel, model => {
                 return model.type === 'virtual';
               }));
 
@@ -92,22 +98,25 @@ module.exports = function (strapi) {
               _.forEach(_.pickBy(definition.loadedModel, model => {
                 return model.type === 'virtual'
               }), (value, key) => {
-                schema.virtual(key, {
+                strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.virtual(key.replace('_v', ''), {
                   ref: value.ref,
                   localField: '_id',
-                  foreignField: value.via
+                  foreignField: value.via,
+                  justOne: value.justOne || false
                 });
               });
 
-              schema.set('toObject', {
+              console.log('------------------');
+
+              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.set('toObject', {
                 virtuals: true
               });
 
-              schema.set('toJSON', {
+              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.set('toJSON', {
                 virtuals: true
               });
 
-              global[definition.globalName] = mongoose.model(definition.globalName, schema);;
+              global[definition.globalName] = mongoose.model(definition.globalName, strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema);
 
               // Push model to strapi global variables.
               strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)] = global[definition.globalName];
@@ -164,6 +173,12 @@ module.exports = function (strapi) {
           // Call this callback function after we are done parsing
           // all attributes for relationships-- see below.
           const done = _.after(_.size(definition.attributes), function () {
+            // Generate schema without virtual populate
+            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+              return model.type === 'virtual';
+            })));
+
+            console.log('##################');
             loadedAttributes();
           });
 
@@ -180,6 +195,8 @@ module.exports = function (strapi) {
             }
 
             let FK;
+
+            console.log(model, verbose)
 
             switch (verbose) {
               case 'hasOne':
@@ -207,22 +224,33 @@ module.exports = function (strapi) {
                 break;
 
               case 'belongsTo':
-                definition.loadedModel[name] = {
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: _.capitalize(details.model)
-                };
+                FK = _.find(definition.associations, { alias : name});
+
+                if (FK && FK.nature === 'oneToOne') {
+                  definition.loadedModel[name] = {
+                    type: 'virtual',
+                    ref: _.capitalize(details.model),
+                    via: FK.via,
+                    justOne: true
+                  };
+                } else {
+                  definition.loadedModel[name] = {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: _.capitalize(details.model)
+                  };
+                }
                 break;
 
               case 'belongsToMany':
                 FK = _.find(definition.associations, { alias : name});
-
+                console.log(FK);
                 if (FK) {
-                  definition.loadedModel[name] = {
+                  definition.loadedModel[name + '_v'] = {
                     type: 'virtual',
                     ref: _.capitalize(details.collection),
-                    via: FK
+                    via: FK.via
                   };
-                } else {
+
                   definition.loadedModel[name] = [{
                     type: mongoose.Schema.Types.ObjectId,
                     ref: _.capitalize(details.collection)
