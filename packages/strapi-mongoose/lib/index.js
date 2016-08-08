@@ -61,34 +61,44 @@ module.exports = function (strapi) {
         const loadedAttributes = _.after(_.size(strapi.models), function () {
           _.forEach(strapi.models, function (definition, model) {
             try {
+              let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
+
               // Initialize lifecycle callbacks.
-              // loadedModel.initialize = function () {
-              //   const self = this;
-              //   const lifecycle = {
-              //     creating: 'beforeCreate',
-              //     created: 'afterCreate',
-              //     destroying: 'beforeDestroy',
-              //     destroyed: 'afterDestroy',
-              //     updating: 'beforeUpdate',
-              //     updated: 'afterUpdate',
-              //     fetching: 'beforeFetch',
-              //     fetched: 'afterFetch',
-              //     saving: 'beforeSave',
-              //     saved: 'afterSave'
-              //   };
-              //
-              //   _.forEach(lifecycle, function (fn, key) {
-              //     if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
-              //       self.on(key, strapi.models[model.toLowerCase()][fn]);
-              //     }
-              //   });
-              // };
+              const preLifecycle = {
+                validate: 'beforeCreate',
+                save: 'beforeCreate',
+                remove: 'beforeDestroy',
+                update: 'beforeUpdate',
+                find: 'beforeFetch',
+                save: 'beforeSave'
+              };
+
+              _.forEach(preLifecycle, function (fn, key) {
+                if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
+                  collection.schema.pre(key, strapi.models[model.toLowerCase()][fn]);
+                }
+              });
+
+              const postLifecycle = {
+                validate: 'afterCreate',
+                save: 'afterCreate',
+                remove: 'afterDestroy',
+                update: 'afterUpdate',
+                find: 'afterFetch',
+                save: 'afterSave'
+              };
+
+              _.forEach(postLifecycle, function (fn, key) {
+                if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
+                  collection.schema.post(key, strapi.models[model.toLowerCase()][fn]);
+                }
+              });
 
               // Add virtual key to provide populate and reverse populate
               _.forEach(_.pickBy(definition.loadedModel, model => {
                 return model.type === 'virtual'
               }), (value, key) => {
-                strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.virtual(key.replace('_v', ''), {
+                collection.schema.virtual(key.replace('_v', ''), {
                   ref: value.ref,
                   localField: '_id',
                   foreignField: value.via,
@@ -96,21 +106,21 @@ module.exports = function (strapi) {
                 });
               });
 
-              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.set('toObject', {
+              collection.schema.set('toObject', {
                 virtuals: true
               });
 
-              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema.set('toJSON', {
+              collection.schema.set('toJSON', {
                 virtuals: true
               });
 
-              global[definition.globalName] = mongoose.model(definition.globalName, strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)].schema);
+              global[definition.globalName] = mongoose.model(definition.globalName, collection.schema);
 
               // Push model to strapi global variables.
-              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)] = global[definition.globalName];
+              collection = global[definition.globalName];
 
               // Push attributes to be aware of model schema.
-              strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)]._attributes = definition.attributes;
+              collection._attributes = definition.attributes;
             } catch (err) {
               strapi.log.error('Impossible to register the `' + model + '` model.');
               strapi.log.error(err);
