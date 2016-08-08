@@ -89,8 +89,10 @@ module.exports = {
 
       types.current = 'collection';
 
-      if (relatedAttribute.hasOwnProperty('collection')) {
+      if (relatedAttribute.hasOwnProperty('collection') && relatedAttribute.hasOwnProperty('via')) {
         types.other = 'collection';
+      } else if (relatedAttribute.hasOwnProperty('collection') && !relatedAttribute.hasOwnProperty('via')) {
+        types.other = 'collectionD';
       } else if (relatedAttribute.hasOwnProperty('model')) {
         types.other = 'model';
       }
@@ -115,6 +117,27 @@ module.exports = {
       });
     } else if (association.hasOwnProperty('model')) {
       types.current = 'model';
+
+      // We have to find if they are a model linked to this key
+      _.forIn(models, model => {
+        _.forIn(model.attributes, attribute => {
+          if (attribute.hasOwnProperty('via') && attribute.via === key) {
+            if (attribute.hasOwnProperty('collection')) {
+              types.other = 'collection';
+
+              // Break loop
+              return false;
+            } else if (attribute.hasOwnProperty('model')) {
+              types.other = 'modelD';
+
+              // Break loop
+              return false;
+            }
+          }
+        });
+      });
+    } else if (association.hasOwnProperty('collection')) {
+      types.current = 'collectionD';
 
       // We have to find if they are a model linked to this key
       _.forIn(models, model => {
@@ -159,6 +182,16 @@ module.exports = {
     } else if (types.current === 'collection' && types.other === 'collection') {
       return {
         nature: 'manyToMany',
+        verbose: 'belongsToMany'
+      };
+    } else if (types.current === 'collectionD' && types.other === 'collection' || types.current === 'collection' && types.other === 'collectionD') {
+      return {
+        nature: 'manyToMany',
+        verbose: 'belongsToMany'
+      };
+    } else if (types.current === 'collectionD' && types.other === '') {
+      return {
+        nature: 'manyWay',
         verbose: 'belongsToMany'
       };
     } else if (types.current === 'model' && types.other === '') {
@@ -215,5 +248,9 @@ module.exports = {
         autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true
       });
     }
+  },
+
+  getVia: function (attribute, association) {
+    return _.findKey(strapi.models[association.model || association.collection].attributes, { via: attribute });
   }
 };
