@@ -9,6 +9,9 @@
 // Node.js core.
 const path = require('path');
 
+// Public dependencies
+const _ = require('lodash');
+
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
@@ -32,7 +35,7 @@ module.exports = function () {
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
-    args: cliArguments
+    args: _.concat(cliArguments, arguments[1].tpl)
   };
 
   // Register the generator type.

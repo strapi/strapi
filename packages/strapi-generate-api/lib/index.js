@@ -5,6 +5,7 @@
  */
 
 // Node.js core.
+const fs = require('fs');
 const path = require('path');
 
 // Local dependencies.
@@ -15,7 +16,17 @@ const routesJSON = require('../json/routes.json.js');
  */
 
 module.exports = {
-  templatesDirectory: path.resolve(__dirname, '..', 'templates'),
+  templatesDirectory: scope => {
+    try {
+      // Try to reach the path. If it fail, throw an error.
+      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args[1]), fs.constants.R_OK | fs.constants.W_OK);
+
+      return path.resolve(__dirname, '..', 'templates', scope.args[1]);
+    } catch (e) {
+      // Default template is Mongoose
+      return path.resolve(__dirname, '..', 'templates', 'mongoose');
+    }
+  },
   before: require('./before'),
   targets: {
 

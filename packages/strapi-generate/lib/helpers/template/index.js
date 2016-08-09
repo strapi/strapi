@@ -29,6 +29,10 @@ module.exports = function (options, cb) {
   // Compute the canonical path to a template
   // given its relative path from its source generator's
   // `templates` directory.
+  if (_.isFunction(options.templatesDirectory)) {
+    options.templatesDirectory = options.templatesDirectory(options);
+  }
+
   const absTemplatePath = path.resolve(options.templatesDirectory, options.templatePath);
 
   fs.readFile(absTemplatePath, 'utf8', function (err, contents) {
