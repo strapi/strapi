@@ -1,0 +1,7 @@
+{
+  "connection": "<%= connection %>",
+  "collectionName": "<%= id %>",
+  "attributes": {
+
+  }
+}

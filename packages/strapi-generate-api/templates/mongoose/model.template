@@ -1,0 +1,73 @@
+'use strict';
+
+/**
+ * Lifecycle callbacks for the `<%= globalID %>` model.
+ */
+
+module.exports = {
+
+  // Before saving a value.
+  // Fired before an `insert` or `update` query.
+  // beforeSave: (next) => {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After saving a value.
+  // Fired after an `insert` or `update` query.
+  // afterSave: (doc, next) => {
+  //   next();
+  // },
+
+  // Before fetching a value.
+  // Fired before a `fetch` operation.
+  // beforeFetch: (next) => {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After fetching a value.
+  // Fired after a `fetch` operation.
+  // afterFetch: (doc, next) => {
+  //   next();
+  // },
+
+  // Before creating a value.
+  // Fired before `insert` query.
+  // beforeCreate: (next) => {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After creating a value.
+  // Fired after `insert` query.
+  // afterCreate: (doc, next) => {
+  //   next();
+  // },
+
+  // Before updating a value.
+  // Fired before an `update` query.
+  // beforeUpdate: (next) => {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After updating a value.
+  // Fired after an `update` query.
+  // afterUpdate: (doc, next) => {
+  //   next();
+  // },
+
+  // Before destroying a value.
+  // Fired before a `delete` query.
+  // beforeDestroy: (next) => {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After destroying a value.
+  // Fired after a `delete` query.
+  // afterDestroy: (doc, next) => {
+  //   next();;
+  // }
+};
