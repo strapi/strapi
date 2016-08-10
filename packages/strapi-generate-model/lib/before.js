@@ -27,7 +27,8 @@ module.exports = (scope, cb) => {
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     id: scope.args[0],
-    api: scope.args[1],
+    attributes: _.takeRight(scope.args, _.size(scope.args) - 1),
+    api: {},
     environment: process.NODE_ENV || 'development'
   });
 
@@ -47,7 +48,17 @@ module.exports = (scope, cb) => {
   // Humanize output.
   _.defaults(scope, {
     humanizeId: scope.args[0],
-    humanizedPath: '`./api/' + scope.api + '/models`'
+    humanizedPath: '`./api/' + scope.globalID + '/models`'
+  });
+
+  _.forEach(scope.attributes, attribute => {
+    const object = attribute.split(':');
+
+    if (_.size(object) === 2) {
+      scope.api[_.first(object)] = {
+        type: _.last(object)
+      }
+    }
   });
 
   // Get default connection

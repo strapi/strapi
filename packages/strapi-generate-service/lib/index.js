@@ -25,7 +25,7 @@ module.exports = {
   },
   before: require('./before'),
   targets: {
-    'api/:api/services/:filename': {
+    'api/:humanizeId/services/:filename': {
       template: 'service.template'
     }
   }

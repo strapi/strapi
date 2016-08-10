@@ -1,0 +1,5 @@
+{
+  "connection": "<%= connection %>",
+  "collectionName": "<%= id %>",
+  "attributes": <%- JSON.stringify(api, null, '\t') %>
+}

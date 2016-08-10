@@ -25,7 +25,7 @@ module.exports = {
   },
   before: require('./before'),
   targets: {
-    'api/:api/controllers/:filename': {
+    'api/:humanizeId/controllers/:filename': {
       template: 'controller.template'
     }
   }

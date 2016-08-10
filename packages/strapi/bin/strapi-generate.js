@@ -25,7 +25,6 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = function () {
-
   // Pass the original CLI arguments down to the generator
   // (but first, remove commander's extra argument).
   const cliArguments = Array.prototype.slice.call(arguments);
@@ -35,8 +34,16 @@ module.exports = function () {
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
-    args: _.concat(cliArguments, arguments[1].tpl)
+    args: cliArguments,
   };
+
+  const template = _.find(arguments, o => {
+    return o.hasOwnProperty('tpl');
+  });
+
+  if (template) {
+    scope.template = template.tpl;
+  }
 
   // Register the generator type.
   // It can be a controller, model, service, etc.

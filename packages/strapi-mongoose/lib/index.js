@@ -165,6 +165,9 @@ module.exports = function (strapi) {
           global[definition.globalName] = {};
 
           if (_.isEmpty(definition.attributes)) {
+            // Generate empty schema
+            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', mongoose.Schema({}));
+
             return loadedAttributes();
           }
 
