@@ -2,8 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/strapi-knex.svg)](https://www.npmjs.org/package/strapi-knex)
 [![npm downloads](https://img.shields.io/npm/dm/strapi-knex.svg)](https://www.npmjs.org/package/strapi-knex)
-[![npm dependencies](https://david-dm.org/wistityhq/strapi-knex.svg)](https://david-dm.org/wistityhq/strapi-knex)
-[![Build status](https://travis-ci.org/wistityhq/strapi-knex.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-knex)
+[![npm dependencies](https://david-dm.org/strapi/strapi-knex.svg)](https://david-dm.org/strapi/strapi-knex)
+[![Build status](https://travis-ci.org/strapi/strapi-knex.svg?branch=master)](https://travis-ci.org/strapi/strapi-knex)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 This built-in hook allows you to directly make SQL queries from your Strapi connections to your databases thanks to the [Knex node module](http://knexjs.org/).

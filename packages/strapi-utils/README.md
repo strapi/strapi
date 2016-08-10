@@ -2,8 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils)
 [![npm downloads](https://img.shields.io/npm/dm/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils)
-[![npm dependencies](https://david-dm.org/wistityhq/strapi-utils.svg)](https://david-dm.org/wistityhq/strapi-utils)
-[![Build status](https://travis-ci.org/wistityhq/strapi-utils.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-utils)
+[![npm dependencies](https://david-dm.org/strapi/strapi-utils.svg)](https://david-dm.org/strapi/strapi-utils)
+[![Build status](https://travis-ci.org/strapi/strapi-utils.svg?branch=master)](https://travis-ci.org/strapi/strapi-utils)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 Shared utilities between Strapi packages.

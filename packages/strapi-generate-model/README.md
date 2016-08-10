@@ -2,8 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/strapi-generate-model.svg)](https://www.npmjs.org/package/strapi-generate-model)
 [![npm downloads](https://img.shields.io/npm/dm/strapi-generate-model.svg)](https://www.npmjs.org/package/strapi-generate-model)
-[![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-model.svg)](https://david-dm.org/wistityhq/strapi-generate-model)
-[![Build status](https://travis-ci.org/wistityhq/strapi-generate-model.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-generate-model)
+[![npm dependencies](https://david-dm.org/strapi/strapi-generate-model.svg)](https://david-dm.org/strapi/strapi-generate-model)
+[![Build status](https://travis-ci.org/strapi/strapi-generate-model.svg?branch=master)](https://travis-ci.org/strapi/strapi-generate-model)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 This Strapi generator contains the default files for a model.

@@ -1,27 +1,25 @@
 # Contributing
 
-Strapi is an open-source project administered by [the Wistity team](http://wistity.co).
+Strapi is an open-source project administered by [the Strapi team](http://strapi.io).
 
 We welcome and encourage everyone who want to help us on Strapi.
 
-Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) if you are interested in helping us or [drop us an email](mailto:hack@wistity.co) if you are interested in working with us.
+Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) if you are interested in helping us or [drop us an email](mailto:hi@strpai.co) if you are interested in working with us.
 
 ## Maintainers
 
-Strapi maintainers include Wistity employees and welcome other active community members:
-- Loïc Saint-Roch ([@loicsaintroch](https://github.com/loicsaintroch)) (Wistity)
-- Aurélien Georget ([@aurelsicoko](https://github.com/aurelsicoko)) (Wistity)
-- Jim Laurie ([@lauriejim](https://github.com/lauriejim)) (Wistity)
-- Pierre Burgy ([@pierreburgy](https://github.com/pierreburgy)) (Wistity)
+- Aurélien Georget ([@aurelsicoko](https://github.com/aurelsicoko)) (Strapi)
+- Jim Laurie ([@lauriejim](https://github.com/lauriejim)) (Strapi)
+- Pierre Burgy ([@pierreburgy](https://github.com/pierreburgy)) (Strapi)
 
-The Wistity team have npm publishing rights for modules and also has the final say on releasing new versions.
+The Strapi team have npm publishing rights for modules and also has the final say on releasing new versions.
 
 ## Reporting an issue
 
 Before reporting an issue you need to make sure:
 - You are experiencing a concrete technical issue with Strapi (ideas and feature proposals should happen [on Slack](http://slack.strapi.io)).
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
-- You have already searched for related [issues](https://github.com/wistityhq/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it in your post).
+- You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it in your post).
 - Your issue title is concise, on-topic and polite.
 - You can provide steps to reproduce this issue that others can follow.
 - You have tried all the following (if relevant) and your issue remains:
@@ -36,7 +34,7 @@ Before reporting an issue you need to make sure:
 
 ## Code of Conduct
 
-[The Wistity team](http://wistity.co) is committed to fostering a welcoming community for Strapi. If you encounter any unacceptable behavior, follow these steps to report the issue to the team. We are here to help.
+[The Strapi team](http://strapi.io) is committed to fostering a welcoming community for Strapi. If you encounter any unacceptable behavior, follow these steps to report the issue to the team. We are here to help.
 
 ### Our Pledge
 
@@ -60,16 +58,16 @@ Examples of unacceptable behavior by participants include:
 
 ### Our responsibilities
 
-The Wistity team is responsible for clarifying the standards of acceptable behavior and is expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
+The Strapi team is responsible for clarifying the standards of acceptable behavior and is expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
 
-The Wistity team has the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
+The Strapi team has the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
 
 ### Scope
 
-This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by the Wistity team.
+This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by the Strapi team.
 
 ### Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the support team at [support@wistity.co](mailto:support@wistity.co). All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the support team at [support@strapi.io](mailto:support@strapi.io). All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
 
 Project maintainers and contributors who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project's leadership.

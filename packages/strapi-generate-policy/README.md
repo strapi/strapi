@@ -2,8 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/strapi-generate-policy.svg)](https://www.npmjs.org/package/strapi-generate-policy)
 [![npm downloads](https://img.shields.io/npm/dm/strapi-generate-policy.svg)](https://www.npmjs.org/package/strapi-generate-policy)
-[![npm dependencies](https://david-dm.org/wistityhq/strapi-generate-policy.svg)](https://david-dm.org/wistityhq/strapi-generate-policy)
-[![Build status](https://travis-ci.org/wistityhq/strapi-generate-policy.svg?branch=master)](https://travis-ci.org/wistityhq/strapi-generate-policy)
+[![npm dependencies](https://david-dm.org/strapi/strapi-generate-policy.svg)](https://david-dm.org/strapi/strapi-generate-policy)
+[![Build status](https://travis-ci.org/strapi/strapi-generate-policy.svg?branch=master)](https://travis-ci.org/strapi/strapi-generate-policy)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 This Strapi generator contains the default files for a policy.

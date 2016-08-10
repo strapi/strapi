@@ -6,11 +6,11 @@ theme_dir: ./website/theme
 
 site_name: "Strapi"
 site_description: "Node.js framework powering API-driven web and mobile applications."
-site_author: "Wistity"
+site_author: "Strapi"
 site_url: "http://strapi.io/"
 
 repo_name: "Strapi"
-repo_url: "https://github.com/wistityhq/strapi"
+repo_url: "https://github.com/strapi/strapi"
 
 markdown_extensions:
   - admonition

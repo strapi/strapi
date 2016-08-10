@@ -1,7 +1,7 @@
 # Reporting security issues
 
 !!! warning
-    All security bugs in Strapi are taken seriously and should be reported by emailing [hack@wistity.co](mailto:hack@wistity.co)
+    All security bugs in Strapi are taken seriously and should be reported by emailing [support@strapi.io](mailto:support@strapi.io)
     **Please don't file a public issue.**
 
 This means including features to protect application makers from common issues like CRSF, Script Injection, SQL Injection, and the like. But it also means a clear policy on how to report vulnerabilities and receive updates when patches to those are released.

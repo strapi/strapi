@@ -23,23 +23,23 @@
     "prepublish": "npm prune"
   },
   "author": {
-    "name": "Wistity team",
-    "email": "hack@wistity.co",
-    "url": "http://wistity.co"
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Wistity team",
-      "email": "hack@wistity.co",
-      "url": "http://wistity.co"
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/wistityhq/strapi.git"
+    "url": "git://github.com/strapi/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/wistityhq/strapi/issues"
+    "url": "https://github.com/strapi/strapi/issues"
   },
   "license": "MIT"
 }

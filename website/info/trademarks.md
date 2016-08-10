@@ -1,8 +1,8 @@
 # Trademarks policy
 
-"Strapi", and the Strapi logo are registered trademarks of [Wistity](http://wistity.co). You may not use these trademarks in a commercial setting to infer that your product or service is endorsed or associated with Strapi without permission. You may use these marks to refer to Strapi in a way where it's clear that you're simply referring to the project, not claiming endorsement or association.
+"Strapi", and the Strapi logo are registered trademarks of [Strapi](http://strapi.io). You may not use these trademarks in a commercial setting to infer that your product or service is endorsed or associated with Strapi without permission. You may use these marks to refer to Strapi in a way where it's clear that you're simply referring to the project, not claiming endorsement or association.
 
-You can request permission by emailing [support@wistity.co](mailto:support@wistity.co).
+You can request permission by emailing [support@strapi.io](mailto:support@strapi.io).
 
 Examples of use that do not need permission:
 

@@ -1,6 +1,6 @@
 ## Why Strapi?
 
-> At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
+> At [Strapi](http://strapi.io), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
 
 Web and mobile applications needed a powerful, simple to use and production-ready API-driven framework. That's why we created Strapi, an open-source [Node.js](https://nodejs.org/) rich framework for building applications and services.
 

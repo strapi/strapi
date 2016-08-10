@@ -3,7 +3,7 @@
 We take security very seriously. This is why Strapi comes with several security layers that just work depending on your needs.
 
 !!! warning
-    All security bugs in Strapi are taken seriously and should be reported by emailing [hack@wistity.co](mailto:hack@wistity.co)
+    All security bugs in Strapi are taken seriously and should be reported by emailing [support@strapi.io](mailto:support@strapi.io)
     **Please don't file a public issue.** [Learn more about reporting security issues](../../info/security/index.html).
 
 ## CORS

@@ -99,7 +99,7 @@ module.exports = strapi => {
 
         // Finally, use the client via `knex`.
         // If anyone has a solution to use different paths for `knex` and clients
-        // please drop us an email at hack@wistity.co-- it would avoid the Strapi
+        // please drop us an email at support@strapi.io-- it would avoid the Strapi
         // applications to have `knex` as a dependency.
         try {
           strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(connection);
