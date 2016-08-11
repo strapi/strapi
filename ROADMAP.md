@@ -2,7 +2,7 @@
 
 ***This is a living document, it describes what features we should implement in priority.***
 
-This document could be influence by community feedback, security issues, stability future needs, etc.
+This document could be influenced by the community feedback, security issues, stability, future needs, etc.
 
 # Origins and purposes
 
@@ -32,7 +32,6 @@ In the near future, a marketplace will appear in the Strapi ecosystem. It will a
   * Users & Groups
   * Permissions Manager
 * Write ressources (documentation, tutorials)
-
 
 ### Administration layer
 

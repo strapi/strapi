@@ -33,7 +33,7 @@
   },
   "main": "./lib",
   "bin": {
-      "strapi": "./bin/strapi.js"
+    "strapi": "./bin/strapi.js"
   },
   "dependencies": {
     "async": "~1.5.2",
@@ -62,6 +62,7 @@
     "koa-session": "~3.3.1",
     "koa-ssl": "~2.0.0",
     "koa-static": "~2.0.0",
+    "koa-views": "^4.1.0",
     "lodash": "~4.6.1",
     "node-schedule": "~1.1.0",
     "socket.io": "~1.4.5",

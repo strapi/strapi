@@ -26,6 +26,7 @@ module.exports = {
     cron: true,
     logger: true,
     static: true,
+    views: true,
     router: true
   },
   websockets: {
