@@ -133,13 +133,7 @@ module.exports = function (strapi) {
 
         // Parse every registered model.
         _.forEach(strapi.models, function (definition, model) {
-          definition.globalName = _.capitalize(definition.globalId);
-
-          // Make sure the model has a table name.
-          // If not, use the model name.
-          if (_.isEmpty(definition.collectionName)) {
-            definition.collectionName = model;
-          }
+          definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
           // Make sure the model has a connection.
           // If not, use the default connection.

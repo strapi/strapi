@@ -14,20 +14,20 @@ const _ = require('lodash');
 module.exports = {
 
   /**
-   * Promise to fetch all <%= idPluralized %>.
+   * Promise to fetch all <%= humanizeIdPluralized %>.
    *
    * @return {Promise}
    */
 
   fetchAll: params => {
     return new Promise((resolve, reject) => {
-      <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= id %>.attributes, { autoPopulate: true })).join(' '))
-        .exec((err, <%= idPluralized %> =>) => {
+      <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '))
+        .exec((err, <%= idPluralized %>) => {
           if (err) {
             return reject(err);
           }
 
-          resolve(<%= idPluralized %> =>);
+          resolve(<%= idPluralized %>);
         });
     });
   },
@@ -40,13 +40,13 @@ module.exports = {
 
   fetch: params => {
     return new Promise((resolve, reject) => {
-      <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= id %>.attributes, { autoPopulate: true })).join(' '))
-        .exec((err, <%= id %>) => {
+      <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '))
+        .exec((err, <%= humanizeId %>) => {
           if (err) {
             return reject(err);
           }
 
-          resolve(<%= id %>);
+          resolve(<%= humanizeId %>);
         });
     });
   },
@@ -59,9 +59,9 @@ module.exports = {
 
   add: values => {
     return new Promise((resolve, reject) => {
-      const <%= id %> = new <%= globalID %>(values);
+      const <%= humanizeId %> = new <%= globalID %>(values);
 
-      <%= id %>.save((err, <%= id %>) => {
+      <%= humanizeId %>.save((err, <%= humanizeId %>) => {
         if (err) {
           return reject(err);
         }
@@ -83,7 +83,7 @@ module.exports = {
         if (err) {
           return reject(err);
         }
-        
+
         // NB: Raw contains the full response of Mongo.
         // To get the updated object, you have to execute the `findOne()` method
         // or use the `findOneOrUpdate()` method with `{ new:true }` option.
@@ -101,7 +101,7 @@ module.exports = {
 
   remove: params => {
     return new Promise((resolve, reject) => {
-      <%= globalID %>.findOneAndRemove(params, {}, (err, <%= id %>) => {
+      <%= globalID %>.findOneAndRemove(params, {}, (err, <%= humanizeId %>) => {
         if (err) {
           return reject(err);
         }
@@ -109,7 +109,7 @@ module.exports = {
         // NB: To get the full response of Mongo, use the `remove()` method
         // or add spent the parameter `{ passRawResult: true }` as second argument.
 
-        resolve(<%= id %>);
+        resolve(<%= humanizeId %>);
       });
     });
   }

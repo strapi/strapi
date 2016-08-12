@@ -1,9 +1,11 @@
 'use strict';
 
 /**
- * `<%= id %>` service.
+ * `<%= globalID %>` service.
  */
 
-exports.<%= id %> = function () {
-  
+module.exports = {
+  // exampleService: (arg1, arg2) => {
+  //   return isUserOnline(arg1, arg2);
+  // }
 };

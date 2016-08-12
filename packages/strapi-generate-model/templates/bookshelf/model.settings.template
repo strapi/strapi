@@ -1,6 +1,6 @@
 {
   "connection": "<%= connection %>",
-  "tableName": "<%= id %>",
+  "tableName": "<%= humanizeId %>",
   "options": {
     "increments": true,
     "timestamps": true,

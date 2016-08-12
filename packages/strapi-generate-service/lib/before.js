@@ -22,24 +22,25 @@ module.exports = (scope, cb) => {
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: scope.args[0],
+    id: _.trim(_.deburr(scope.args[0])),
     api: scope.args[1]
   });
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    ext: '.js'
+    globalID: _.upperFirst(_.camelCase(scope.id)),
+    ext: '.js',
   });
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
-    filename: scope.id + scope.ext
+    filename: scope.globalID + scope.ext
   });
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: scope.args[0],
+    humanizeId:  _.camelCase(scope.id).toLowerCase(),
     humanizedPath: '`./api/' + scope.api + '/services`'
   });
 

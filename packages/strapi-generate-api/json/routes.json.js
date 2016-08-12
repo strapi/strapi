@@ -20,123 +20,47 @@ module.exports = scope => {
     routes: {}
   };
 
-  // JSON API support is enabled or not.
-  let hasJSONAPI = false;
+  newRoutes.routes['GET /' + scope.humanizeId] = {
+    controller: scope.globalID,
+    action: 'find',
+    policies: []
+  };
 
-  try {
-    const JSONAPI = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'config', 'general.json'))).jsonapi;
+  newRoutes.routes['GET /' + scope.humanizeId + '/:id'] = {
+    controller: scope.globalID,
+    action: 'findOne',
+    policies: []
+  };
 
-    if (_.isPlainObject(JSONAPI) && _.get(JSONAPI, 'enabled') === true) {
-      hasJSONAPI = true;
-    }
-  } catch (err) {
-    throw err;
-  }
+  newRoutes.routes['POST /' + scope.humanizeId] = {
+    controller: scope.globalID,
+    action: 'create',
+    policies: []
+  };
 
-  // JSON API enabled
-  if (hasJSONAPI) {
-    newRoutes.routes['GET /' + scope.idPluralized] = {
-      controller: scope.globalID,
-      action: 'find',
-      policies: []
-    };
+  newRoutes.routes['PUT /' + scope.humanizeId + '/:id'] = {
+    controller: scope.globalID,
+    action: 'update',
+    policies: []
+  };
 
-    newRoutes.routes['GET /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'findOne',
-      policies: []
-    };
+  newRoutes.routes['DELETE /' + scope.humanizeId + '/:id'] = {
+    controller: scope.globalID,
+    action: 'destroy',
+    policies: []
+  };
 
-    newRoutes.routes['GET /' + scope.id + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'findOne',
-      policies: []
-    };
+  newRoutes.routes['POST /' + scope.humanizeId + '/:id/relationships/:relation'] = {
+    controller: scope.globalID,
+    action: 'createRelation',
+    policies: []
+  };
 
-    newRoutes.routes['GET /' + scope.id + '/:id/:relation'] = {
-      controller: scope.globalID,
-      action: 'findOne',
-      policies: []
-    };
-
-    newRoutes.routes['POST /' + scope.id] = {
-      controller: scope.globalID,
-      action: 'create',
-      policies: []
-    };
-
-    newRoutes.routes['PATCH /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'update',
-      policies: []
-    };
-
-    newRoutes.routes['DELETE /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'destroy',
-      policies: []
-    };
-
-    newRoutes.routes['POST /' + scope.id + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'createRelation',
-      policies: []
-    };
-
-    newRoutes.routes['PATCH /' + scope.id + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'updateRelation',
-      policies: []
-    };
-
-    newRoutes.routes['DELETE /' + scope.id + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'destroyRelation',
-      policies: []
-    };
-  } else {
-    newRoutes.routes['GET /' + scope.id] = {
-      controller: scope.globalID,
-      action: 'find',
-      policies: []
-    };
-
-    newRoutes.routes['GET /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'findOne',
-      policies: []
-    };
-
-    newRoutes.routes['POST /' + scope.id] = {
-      controller: scope.globalID,
-      action: 'create',
-      policies: []
-    };
-
-    newRoutes.routes['PUT /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'update',
-      policies: []
-    };
-
-    newRoutes.routes['DELETE /' + scope.id + '/:id'] = {
-      controller: scope.globalID,
-      action: 'destroy',
-      policies: []
-    };
-
-    newRoutes.routes['POST /' + scope.id + '/:parentId/:relation'] = {
-      controller: scope.globalID,
-      action: 'createRelation',
-      policies: []
-    };
-
-    newRoutes.routes['DELETE /' + scope.id + '/:parentId/:relation/:id'] = {
-      controller: scope.globalID,
-      action: 'destroyRelation',
-      policies: []
-    };
-  }
+  newRoutes.routes['DELETE /' + scope.humanizeId + '/:id/relationships/:relation'] = {
+    controller: scope.globalID,
+    action: 'destroyRelation',
+    policies: []
+  };
 
   return newRoutes;
 };

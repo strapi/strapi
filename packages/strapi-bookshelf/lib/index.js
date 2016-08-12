@@ -61,7 +61,7 @@ module.exports = function (strapi) {
 
         // Parse every registered model.
         _.forEach(strapi.models, function (definition, model) {
-          globalName = _.capitalize(definition.globalId);
+          globalName = _.upperFirst(_.camelCase(definition.globalId));
 
           // Make sure the model has a table name.
           // If not, use the model name.

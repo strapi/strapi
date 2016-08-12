@@ -27,14 +27,14 @@ module.exports = (scope, cb) => {
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: scope.args[0],
-    idPluralized: pluralize.plural(scope.args[0]),
+    id: _.trim(_.deburr(scope.args[0])),
+    idPluralized: pluralize.plural(_.trim(_.deburr(scope.args[0]))),
     environment: process.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.capitalize(scope.id),
+    globalID: _.upperFirst(_.camelCase(scope.id)),
     ext: '.js'
   });
 
@@ -47,7 +47,8 @@ module.exports = (scope, cb) => {
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: scope.args[0],
+    humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizeIdPluralized: pluralize.plural(_.camelCase(scope.id).toLowerCase()),
     humanizedPath: '`./api`'
   });
 

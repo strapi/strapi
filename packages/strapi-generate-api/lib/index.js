@@ -32,28 +32,28 @@ module.exports = {
 
     // Use the default `controller` file as a template for
     // every generated controller.
-    'api/:id/controllers/:filename': {
+    'api/:humanizeId/controllers/:filename': {
       template: 'controller.template'
     },
 
     // every generated controller.
-    'api/:id/services/:filename': {
+    'api/:humanizeId/services/:filename': {
       template: 'service.template'
     },
 
     // Copy an empty JavaScript model where every functions will be.
-    'api/:id/models/:filename': {
+    'api/:humanizeId/models/:filename': {
       template: 'model.template'
     },
 
     // Copy the generated JSON model for the connection,
     // schema and attributes.
-    'api/:id/models/:filenameSettings': {
+    'api/:humanizeId/models/:filenameSettings': {
       template: 'model.settings.template'
     },
 
     // Generate routes.
-    'api/:id/config/routes.json': {
+    'api/:humanizeId/config/routes.json': {
       jsonfile: routesJSON
     }
   }

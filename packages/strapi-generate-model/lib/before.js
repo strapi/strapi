@@ -26,7 +26,7 @@ module.exports = (scope, cb) => {
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: scope.args[0],
+    id: _.trim(_.deburr(scope.args[0])),
     attributes: _.takeRight(scope.args, _.size(scope.args) - 1),
     api: {},
     environment: process.NODE_ENV || 'development'
@@ -34,7 +34,7 @@ module.exports = (scope, cb) => {
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.capitalize(scope.id),
+    globalID: _.upperFirst(_.camelCase(scope.id)),
     ext: '.js'
   });
 
@@ -47,16 +47,16 @@ module.exports = (scope, cb) => {
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: scope.args[0],
-    humanizedPath: '`./api/' + scope.globalID + '/models`'
+    humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizedPath: '`./api/' + scope.id + '/models`'
   });
 
   _.forEach(scope.attributes, attribute => {
     const object = attribute.split(':');
 
     if (_.size(object) === 2) {
-      scope.api[_.first(object)] = {
-        type: _.last(object)
+      scope.api[_.trim(_.deburr(_.camelCase(_.first(object)).toLowerCase()))] = {
+        type: _.trim(_.deburr(_.camelCase(_.last(object).toLowerCase())))
       }
     }
   });
