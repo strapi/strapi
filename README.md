@@ -17,14 +17,23 @@ Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A
 
 - **100% JavaScript**, the language you probably already are using for the front-end.
 - **Rock-solid foundation** offering plenty of possibilities for web apps and APIs.
-- **Useful CLI** that let you scaffold projects, APIs and migrations on the fly.
-- **Front-end agnostic** and can be used with Angular, Backbone, React, Ember, Vue, iOS, Android, etc.
-- **Easy authentication** with 150+ supported providers to easily manage your authentication processes.
+- **Useful CLI** that let you scaffold projects and APIs on the fly.
+- **Front-end agnostic** and can be used with React, Vue, Angular, Backbone, Ember, iOS, Android, etc.
 - **Security layers** that just work and ships reusable security policies.
-- **GraphQL implementation** for describing data requirements and interactions.
-- **JSON API specification** to increase productivity by following shared conventions.
 - **Smooth WebSockets** to handle realtime connections and events.
-- **NoSQL support** if you need to plug specific data layers.
+- **Mongo** as a main database. Also support others specific data layers.
+
+## Plugins
+
+> Only what you need. No more. No less.
+
+Thanks to the plugins, you will be able to create the perfect app without useless features. The Strapi ecosystem has been thought to be the most granular as possible. Currently, we are building the main plugins to allow you to perform the same actions as on the v2.0. 
+
+- **Users Manager** will provide a full user management system. Also offers an authentication process.
+- **APIs Manager** will generate powerful APIs into your app thanks to an UI in seconds instead of minutes.
+- **Data Manager** will let your edit you content saved in your databases.
+- **Configurations Manager** will allow you to edit your configurations files per environment.
+- **Permissions Manager** will allow or disallow users to perform actions or not in your app.
 
 Convinced? [Get started!](http://strapi.io/)
 
