@@ -1,0 +1,52 @@
+{
+  "name": "strapi-utils",
+  "version": "2.0.0",
+  "description": "Shared utilities for the Strapi packages",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "dictionary",
+    "knex",
+    "strapi",
+    "utilities",
+    "utils",
+    "winston"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "commander": "~2.9.0",
+    "knex": "~0.10.0",
+    "include-all": "~0.1.6",
+    "lodash": "~4.6.1",
+    "winston": "~2.2.0"
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

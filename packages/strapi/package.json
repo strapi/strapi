@@ -1,0 +1,106 @@
+{
+  "name": "strapi",
+  "version": "2.0.0",
+  "description": "Build powerful back-end with no effort",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "api",
+    "auth",
+    "framework",
+    "grant",
+    "graphql",
+    "http",
+    "json",
+    "jsonapi",
+    "koa",
+    "koajs",
+    "lusca",
+    "mvc",
+    "oauth",
+    "oauth2",
+    "orm",
+    "realtime",
+    "rest",
+    "restful",
+    "security",
+    "socket.io",
+    "sockets",
+    "websockets"
+  ],
+  "directories": {
+    "lib": "./lib",
+    "bin": "./bin"
+  },
+  "main": "./lib",
+  "bin": {
+    "strapi": "./bin/strapi.js"
+  },
+  "dependencies": {
+    "async": "~1.5.2",
+    "co": "~4.6.0",
+    "consolidate": "~0.14.0",
+    "fs-extra": "~0.26.7",
+    "grant-koa": "~3.5.5",
+    "graphql": "~0.4.18",
+    "herd": "~1.0.0",
+    "jsonapi-serializer": "~3.0.0",
+    "koa": "~1.2.0",
+    "koa-bodyparser": "~2.0.1",
+    "koa-compose": "~2.4.0",
+    "koa-compress": "~1.0.9",
+    "koa-cors": "~0.0.16",
+    "koa-favicon": "~1.2.1",
+    "koa-i18n": "~1.2.0",
+    "koa-ip": "~0.1.0",
+    "koa-load-middlewares": "~1.0.0",
+    "koa-locale": "~1.0.0",
+    "koa-lusca": "~2.1.0",
+    "koa-proxy": "~0.5.0",
+    "koa-response-time": "~1.0.2",
+    "koa-router": "~5.4.0",
+    "koa-send": "~3.1.1",
+    "koa-session": "~3.3.1",
+    "koa-ssl": "~2.0.0",
+    "koa-static": "~2.0.0",
+    "koa-views": "^4.1.0",
+    "lodash": "~4.6.1",
+    "node-schedule": "~1.1.0",
+    "socket.io": "~1.4.5",
+    "strapi-generate": "~2.0.0",
+    "strapi-generate-api": "~2.0.0",
+    "strapi-generate-migrations": "~2.0.0",
+    "strapi-generate-new": "~2.0.0",
+    "strapi-generate-policy": "~2.0.0",
+    "strapi-generate-service": "~2.0.0",
+    "strapi-mongoose": "~2.0.0",
+    "strapi-utils": "~2.0.0"
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "preferGlobal": true,
+  "license": "MIT"
+}

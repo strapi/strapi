@@ -1,0 +1,53 @@
+{
+  "name": "strapi-generate-migrations",
+  "version": "2.0.0",
+  "description": "Generate migration files for a Strapi application.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "knex",
+    "migrations",
+    "sql",
+    "strapi",
+    "transactions"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "async": "~1.5.2",
+    "glob": "~7.0.3",
+    "js-beautify": "~1.6.2",
+    "knex": "~0.10.0",
+    "lodash": "~4.6.1",
+    "pluralize": "~1.2.1",
+    "strapi": "~2.0.0",
+    "strapi-bookshelf": "~2.0.0",
+    "strapi-utils": "~2.0.0"
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "license": "MIT"
+}

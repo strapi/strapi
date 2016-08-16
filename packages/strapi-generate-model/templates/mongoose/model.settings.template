@@ -1,0 +1,5 @@
+{
+  "connection": "<%= connection %>",
+  "collectionName": "<%= humanizeId %>",
+  "attributes": <%- JSON.stringify(api, null, '\t') %>
+}

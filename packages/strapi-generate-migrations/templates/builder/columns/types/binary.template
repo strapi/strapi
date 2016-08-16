@@ -1,0 +1,3 @@
+
+// "binary" column named `<%= attribute %>` with  optional length argument for MySQL.
+table.binary('<%= attribute %>', <%= details.length || 10 %>)

@@ -1,0 +1,3 @@
+
+// Delete the `<%= attribute %>` column.
+table.dropColumn('<%= attribute %>')

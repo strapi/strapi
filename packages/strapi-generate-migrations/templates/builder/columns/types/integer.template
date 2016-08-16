@@ -1,0 +1,3 @@
+
+// "integer" column named `<%= attribute %>`.
+table.integer('<%= attribute %>')

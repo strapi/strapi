@@ -1,0 +1,23 @@
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "client": "pg",
+      "debug": false,
+      "acquireConnectionTimeout": 60000,
+      "connection": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": ""
+      },
+      "pool": {
+        "min": 2,
+        "max": 10
+      },
+      "migrations": {
+        "tableName": "migrations"
+      }
+    }
+  }
+}

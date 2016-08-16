@@ -1,0 +1,10 @@
+'use strict';
+
+/**
+ * `<%= id %>` policy.
+ */
+
+exports.<%= id %> = function * (next) {
+
+  yield next;
+};

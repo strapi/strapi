@@ -1,0 +1,1 @@
+.defaultTo(<% if (_.isString(details.defaultTo)) { %>'<%= details.defaultTo %>'<% } else { %><%= details.defaultTo %><% } %>)

@@ -1,0 +1,15 @@
+'use strict';
+
+/**
+ * A set of functions called "actions" for `<%= globalID %>`
+ */
+
+module.exports = {
+  // exampleAction: function * () {
+  //   try {
+  //     this.body = 'ok';
+  //   } catch (err) {
+  //     this.body = err;
+  //   }
+  // }
+};

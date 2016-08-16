@@ -1,0 +1,122 @@
+'use strict';
+
+/**
+ * A set of functions called "actions" for `<%= globalID %>`
+ */
+
+module.exports = {
+  /**
+   * Get <%= id %> entries.
+   *
+   * @return {Object|Array}
+   */
+
+  find: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.fetchAll(this.query);
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Get a specific <%= id %>.
+   *
+   * @return {Object|Array}
+   */
+
+  findOne: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.fetch(this.params)
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Create a/an <%= id %> entry.
+   *
+   * @return {Object}
+   */
+
+  create: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.add(this.request.body);
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Update a/an <%= id %> entry.
+   *
+   * @return {Object}
+   */
+
+  update: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.edit(this.params, this.request.body) ;
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Destroy a/an <%= id %> entry.
+   *
+   * @return {Object}
+   */
+
+  destroy: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.remove(this.params);
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Add relation to a specific <%= id %>.
+   *
+   * @return {Object}
+   */
+
+  createRelation: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.addRelation(this.params, this.request.body);
+    } catch (err) {
+      this.status = 400;
+      this.body = err;
+    }
+  },
+
+  /**
+   * Update relation to a specific <%= id %>.
+   *
+   * @return {Object}
+   */
+
+  updateRelation: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.editRelation(this.params, this.request.body);
+    } catch (err) {
+      this.status = 400;
+      this.body = err;
+    }
+  },
+
+  /**
+   * Destroy relation to a specific <%= id %>.
+   *
+   * @return {Object}
+   */
+
+  destroyRelation: function * () {
+    try {
+      this.body = yield strapi.services.<%= id %>.removeRelation(this.params, this.request.body);
+    } catch (err) {
+      this.status = 400;
+      this.body = err;
+    }
+  }
+};

@@ -1,0 +1,55 @@
+{
+  "name": "strapi-bookshelf",
+  "version": "2.0.0",
+  "description": "Bookshelf hook for the Strapi framework",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "bookshelf",
+    "hook",
+    "migrations",
+    "orm",
+    "sql",
+    "strapi"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "bookshelf": "~0.9.2",
+    "lodash": "~4.6.1",
+    "pluralize": "~1.2.1",
+    "strapi": "~2.0.0"
+  },
+  "strapi": {
+    "isHook": true,
+    "nextTo": ["strapi-knex"]
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

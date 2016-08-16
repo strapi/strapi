@@ -1,31 +1,14 @@
-SRC = lib/*.js
+MAKEFLAGS = -j1
 
-REQUIRED = --require should --require should-http
+export NODE_ENV = test
 
-TESTS = test/application/* \
-	test/context/* \
-	test/request/* \
-	test/response/* \
-	test/middlewares/*
+.PHONY: test
 
-test:
-	@NODE_ENV=test node \
-		./node_modules/.bin/_mocha \
-		$(REQUIRED) \
-		$(TESTS) \
-		--bail
+lint:
+	./node_modules/.bin/xo
 
-test-travis:
-	@NODE_ENV=test node \
-		./node_modules/.bin/istanbul cover \
-		./node_modules/.bin/_mocha \
-		--report lcovonly \
-		-- -u exports \
-		$(REQUIRED) \
-		$(TESTS) \
-		--bail
+test: lint
+	./scripts/test.sh
 
-bench:
-	@$(MAKE) -C benchmarks
-
-.PHONY: test bench
+docs:
+	mkdocs build --clean

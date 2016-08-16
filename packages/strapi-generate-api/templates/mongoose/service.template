@@ -1,0 +1,116 @@
+'use strict';
+
+/**
+ * Module dependencies
+ */
+
+// Public dependencies.
+const _ = require('lodash');
+
+/**
+ * A set of functions called "actions" for `<%= globalID %>`
+ */
+
+module.exports = {
+
+  /**
+   * Promise to fetch all <%= humanizeIdPluralized %>.
+   *
+   * @return {Promise}
+   */
+
+  fetchAll: params => {
+    return new Promise((resolve, reject) => {
+      <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '))
+        .exec((err, <%= idPluralized %>) => {
+          if (err) {
+            return reject(err);
+          }
+
+          resolve(<%= idPluralized %>);
+        });
+    });
+  },
+
+  /**
+   * Promise to fetch a/an <%= id %>.
+   *
+   * @return {Promise}
+   */
+
+  fetch: params => {
+    return new Promise((resolve, reject) => {
+      <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '))
+        .exec((err, <%= humanizeId %>) => {
+          if (err) {
+            return reject(err);
+          }
+
+          resolve(<%= humanizeId %>);
+        });
+    });
+  },
+
+  /**
+   * Promise to add a/an <%= id %>.
+   *
+   * @return {Promise}
+   */
+
+  add: values => {
+    return new Promise((resolve, reject) => {
+      const <%= humanizeId %> = new <%= globalID %>(values);
+
+      <%= humanizeId %>.save((err, <%= humanizeId %>) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve(<%= id %>);
+      });
+    });
+  },
+
+  /**
+   * Promise to edit a/an <%= id %>.
+   *
+   * @return {Promise}
+   */
+
+  edit: (params, values) => {
+    return new Promise((resolve, reject) => {
+      <%= globalID %>.update(params, values, { multi: true }, (err, raw) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // NB: Raw contains the full response of Mongo.
+        // To get the updated object, you have to execute the `findOne()` method
+        // or use the `findOneOrUpdate()` method with `{ new:true }` option.
+
+        resolve(raw);
+      });
+    });
+  },
+
+  /**
+   * Promise to remove a/an <%= id %>.
+   *
+   * @return {Promise}
+   */
+
+  remove: params => {
+    return new Promise((resolve, reject) => {
+      <%= globalID %>.findOneAndRemove(params, {}, (err, <%= humanizeId %>) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // NB: To get the full response of Mongo, use the `remove()` method
+        // or add spent the parameter `{ passRawResult: true }` as second argument.
+
+        resolve(<%= humanizeId %>);
+      });
+    });
+  }
+};

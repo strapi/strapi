@@ -1,0 +1,45 @@
+{
+  "name": "strapi-generate",
+  "version": "2.0.0",
+  "description": "Master of ceremonies for the Strapi generators.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "strapi"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "async": "~1.5.2",
+    "fs-extra": "~0.26.7",
+    "lodash": "~4.6.1",
+    "reportback": "~0.1.9",
+    "strapi-utils": "~2.0.0"
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "license": "MIT"
+}

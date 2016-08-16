@@ -1,0 +1,7 @@
+{
+  "connection": "<%= connection %>",
+  "collectionName": "<%= humanizeId %>",
+  "attributes": {
+
+  }
+}

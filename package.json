@@ -1,175 +1,74 @@
 {
-  "name": "strapi",
-  "version": "1.5.4",
-  "description": "Build powerful back-end with no effort",
-  "homepage": "http://strapi.io",
-  "keywords": [
-    "api",
-    "auth",
-    "framework",
-    "grant",
-    "graphql",
-    "koa",
-    "koajs",
-    "lusca",
-    "mvc",
-    "oauth",
-    "oauth2",
-    "orm",
-    "realtime",
-    "rest",
-    "restful",
-    "security",
-    "socket.io",
-    "sockets",
-    "waterline",
-    "websockets"
-  ],
-  "directories": {
-    "bin": "./bin",
-    "lib": "./lib"
-  },
-  "main": "./lib",
-  "bin": "./bin/_spawn.js",
-  "dependencies": {
-    "async": "~1.5.0",
-    "commander": "~2.9.0",
-    "consolidate": "~0.13.1",
-    "fs-extra": "~0.26.2",
-    "grant-koa": "~3.5.3",
-    "graphql": "~0.4.14",
-    "herd": "~1.0.0",
-    "include-all": "~0.1.6",
-    "json-stringify-safe": "~5.0.1",
-    "koa": "~1.1.2",
-    "koa-bodyparser": "~2.0.1",
-    "koa-compose": "~2.3.0",
-    "koa-cors": "~0.0.16",
-    "koa-favicon": "~1.2.0",
-    "koa-graphql": "~0.4.4",
-    "koa-gzip": "~0.1.0",
-    "koa-i18n": "~1.2.0",
-    "koa-ip": "~0.1.0",
-    "koa-load-middlewares": "~1.0.0",
-    "koa-locale": "~1.0.0",
-    "koa-lusca": "~2.1.0",
-    "koa-mount": "~1.3.0",
-    "koa-proxy": "~0.4.1",
-    "koa-response-time": "~1.0.2",
-    "koa-router": "~5.3.0",
-    "koa-send": "~3.1.0",
-    "koa-session": "~3.3.1",
-    "koa-ssl": "~2.0.0",
-    "koa-static": "~1.5.2",
-    "koa-views": "~3.1.0",
-    "lodash": "~3.10.1",
-    "node-rsa": "~0.2.26",
-    "node-schedule": "~0.6.0",
-    "prompt": "~0.2.14",
-    "request": "~2.67.0",
-    "sails-disk": "~0.10.8",
-    "socket.io": "~1.3.7",
-    "socket.io-client": "~1.3.7",
-    "strapi-generate": "~1.5.0",
-    "strapi-generate-admin": "~1.5.0",
-    "strapi-generate-api": "~1.5.0",
-    "strapi-generate-email": "~1.5.0",
-    "strapi-generate-new": "~1.5.0",
-    "strapi-generate-upload": "~1.5.0",
-    "strapi-generate-users": "~1.5.0",
-    "unzip2": "~0.2.5",
-    "waterline": "~0.10.28",
-    "waterline-graphql": "~1.1.0",
-    "winston": "~2.1.1"
-  },
+  "private": true,
+  "version": "2.0.0",
   "devDependencies": {
-    "expect.js": "~0.3.1",
-    "istanbul": "~0.4.1",
-    "jade": "~1.11.0",
-    "methods": "~1.1.1",
-    "mocha": "~2.3.4",
+    "assert": "~1.3.0",
+    "coveralls": "~2.11.9",
+    "istanbul": "~0.4.2",
+    "mocha": "~2.4.5",
+    "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
-    "should": "~7.1.1",
-    "should-http": "~0.0.4",
-    "statuses": "~1.2.1",
-    "supertest": "~1.1.0",
-    "test-console": "~1.0.0",
-    "xo": "~0.11.2"
+    "xo": "~0.13.0"
   },
   "xo": {
     "space": true,
-    "esnext": true,
     "envs": [
-      "node",
-      "mocha"
+      "mocha",
+      "node"
     ],
     "globals": [
-      "strapi",
-      "angular",
-      "$",
-      "_"
+      "strapi"
     ],
-    "ignores": [
-      "bin/_spawn.js",
-      "node_modules/**",
-      "bower_components/**",
-      "coverage/**",
-      "test/**"
+    "ignore": [
+      "packages/strapi-generate-new/files/public/**",
+      "website/**"
     ],
     "rules": {
-      "babel/object-shorthand": 0,
-      "consistent-return": 0,
-      "consistent-this": 0,
+      "array-callback-return": 0,
+      "brace-style": 0,
+      "camelcase": 0,
+      "default-case": 0,
       "dot-notation": 0,
-      "global-require": 0,
-      "max-nested-callbacks": [
-        1,
-        6
-      ],
-      "new-cap": 0,
+      "no-case-declarations": 0,
       "no-else-return": 0,
-      "no-extra-parens": 0,
       "no-implicit-coercion": 0,
-      "no-inner-declarations": 0,
-      "no-invalid-this": 0,
       "no-lonely-if": 0,
       "no-negated-condition": 0,
       "no-throw-literal": 0,
       "no-unused-expressions": 0,
+      "no-unused-vars": 0,
       "padded-blocks": 0,
-      "prefer-arrow-callback": 0,
-      "prefer-reflect": 0,
       "prefer-template": 0,
+      "quote-props": 0,
+      "space-infix-ops": 0,
       "strict": 0
     }
   },
   "scripts": {
-    "test": "xo && make test",
-    "prepublish": "npm prune"
+    "test": "make test"
   },
   "author": {
-    "email": "hack@wistity.co",
-    "name": "Wistity team",
-    "url": "http://wistity.co"
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Wistity team",
-      "email": "hack@wistity.co",
-      "url": "http://wistity.co"
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/wistityhq/strapi.git"
+    "url": "git://github.com/strapi/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/wistityhq/strapi/issues"
+    "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 0.12.0",
-    "npm": ">= 2.0.0"
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
   },
-  "preferGlobal": true,
   "license": "MIT"
 }

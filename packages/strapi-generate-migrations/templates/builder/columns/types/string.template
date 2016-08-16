@@ -1,0 +1,3 @@
+
+// "string" column named `<%= attribute %>` with optional length defaulting to `255`.
+table.string('<%= attribute %>', <%= details.length || 255 %>)

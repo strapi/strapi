@@ -1,0 +1,3 @@
+
+// "boolean" column named `<%= attribute %>`.
+table.boolean('<%= attribute %>')

@@ -1,0 +1,53 @@
+{
+  "name": "strapi-knex",
+  "version": "2.0.0",
+  "description": "Knex hook for the Strapi framework",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "hook",
+    "knex",
+    "migrations",
+    "sql",
+    "strapi",
+    "transactions"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "knex": "~0.10.0",
+    "lodash": "~4.6.1",
+    "sqlite3": "~3.1.1"
+  },
+  "strapi": {
+    "isHook": true
+  },
+  "scripts": {
+    "prepublish": "npm prune"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

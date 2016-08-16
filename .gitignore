@@ -100,3 +100,10 @@ node_modules
 
 testApp
 coverage
+
+
+############################
+# Builds
+############################
+
+packages/strapi-generate-new/files/public/

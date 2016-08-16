@@ -1,0 +1,77 @@
+'use strict';
+
+/**
+ * A set of functions called "actions" for `<%= globalID %>`
+ */
+
+module.exports = {
+  /**
+   * Get <%= humanizeId %> entries.
+   *
+   * @return {Object|Array}
+   */
+
+  find: function * () {
+    try {
+      this.body = yield strapi.services.<%= humanizeId %>.fetchAll(this.query);
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Get a specific <%= humanizeId %>.
+   *
+   * @return {Object|Array}
+   */
+
+  findOne: function * () {
+    try {
+      this.body = yield strapi.services.<%= humanizeId %>.fetch(this.params)
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Create a/an <%= humanizeId %> entry.
+   *
+   * @return {Object}
+   */
+
+  create: function * () {
+    try {
+      this.body = yield strapi.services.<%= humanizeId %>.add(this.request.body);
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Update a/an <%= humanizeId %> entry.
+   *
+   * @return {Object}
+   */
+
+  update: function * () {
+    try {
+      this.body = yield strapi.services.<%= humanizeId %>.edit(this.params, this.request.body) ;
+    } catch (err) {
+      this.body = err;
+    }
+  },
+
+  /**
+   * Destroy a/an <%= humanizeId %> entry.
+   *
+   * @return {Object}
+   */
+
+  destroy: function * () {
+    try {
+      this.body = yield strapi.services.<%= humanizeId %>.remove(this.params);
+    } catch (err) {
+      this.body = err;
+    }
+  }
+};
