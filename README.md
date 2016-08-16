@@ -5,6 +5,12 @@
 [![Build status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
+## DISCLAIMER.
+
+Please DON'T USE this version in production or for your projects. For more information on the upcoming version, and why we decided to abort this version, [read our blog post](http://blog.strapi.io/inside-the-box-july-2016/).
+
+Feel free to join our [Slack](http://slack.strapi.io), or [send us an email](mailto:hi@strapi.io) to get in touch with our team!
+
 ## Why Strapi ?
 
 > At [Wistity](http://wistity.co), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
