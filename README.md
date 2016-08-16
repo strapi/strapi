@@ -5,6 +5,15 @@
 [![Build status](https://travis-ci.org/strapi/strapi.svg?branch=master)](https://travis-ci.org/strapi/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
+## v3.0.0 coming soon...
+We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel.
+
+Some parts of this work have been merged into our master branch. Currently, this is not stable. Please DON'T use the `master` in production. **To run and start your current project, we strongly recommend to use the v1.5.4.**
+
+For more information on the upcoming version including the v2.0 abort, [read our blog post](http://blog.strapi.io/inside-the-box-july-2016/).
+
+Thanks for your support!
+
 ## Why Strapi ?
 
 > At [Strapi](http://strapi.io), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
@@ -27,7 +36,7 @@ Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A
 
 > Only what you need. No more. No less.
 
-Thanks to the plugins, you will be able to create the perfect app without useless features. The Strapi ecosystem has been thought to be the most granular as possible. Currently, we are building the main plugins to allow you to perform the same actions as on the v2.0. 
+Thanks to the plugins, you will be able to create the perfect app without useless features. The Strapi ecosystem has been thought to be the most granular as possible. Currently, we are building the main plugins to allow you to perform the same actions as on the v2.0.
 
 - **Users Manager** will provide a full user management system. Also offers an authentication process.
 - **APIs Manager** will generate powerful APIs into your app thanks to an UI in seconds instead of minutes.
@@ -65,7 +74,7 @@ Also, you can follow and ping the Strapi team on [Twitter](https://twitter.com/s
 | [strapi-generate-controller](./packages/strapi-generate-controller) | [![npm version](https://img.shields.io/npm/v/strapi-generate-controller.svg)](https://www.npmjs.org/package/strapi-generate-controller) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-controller.svg)](https://david-dm.org/strapi/strapi-generate-controller) |
 | [strapi-generate-generator](./packages/strapi-generate-generator) | [![npm version](https://img.shields.io/npm/v/strapi-generate-generator.svg)](https://www.npmjs.org/package/strapi-generate-generator) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-generator.svg)](https://david-dm.org/strapi/strapi-generate-generator) |
 | [strapi-generate-hook](./packages/strapi-generate-hook) | [![npm version](https://img.shields.io/npm/v/strapi-generate-hook.svg)](https://www.npmjs.org/package/strapi-generate-hook) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-hook.svg)](https://david-dm.org/strapi/strapi-generate-hook) |
-| [strapi-generate-migrations](./packages/strapi-generate-migrations) | [![npm version](https://img.shields.io/npm/v/strapi-generate-migrations.svg)](https://www.npmjs.org/package/strapi-generate-migrations) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-migrations.svg)](https://david-dm.org/strapi/strapi-generate-migrations) |
+| [strapi-generate-migrations](./packages/strapi-generate-migrations) | [![npm version](https://img.shields.io/npm/v/strapi-generate-migrations.svg)](https://www.npmjs.com/package/strapi-generate-migrations) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-migrations.svg)](https://david-dm.org/strapi/strapi-generate-migrations) |
 | [strapi-generate-model](./packages/strapi-generate-model) | [![npm version](https://img.shields.io/npm/v/strapi-generate-model.svg)](https://www.npmjs.org/package/strapi-generate-model) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-model.svg)](https://david-dm.org/strapi/strapi-generate-model) |
 | [strapi-generate-new](./packages/strapi-generate-new) | [![npm version](https://img.shields.io/npm/v/strapi-generate-new.svg)](https://www.npmjs.org/package/strapi-generate-new) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-new.svg)](https://david-dm.org/strapi/strapi-generate-new) |
 | [strapi-generate-policy](./packages/strapi-generate-policy) | [![npm version](https://img.shields.io/npm/v/strapi-generate-policy.svg)](https://www.npmjs.org/package/strapi-generate-policy) | [![npm dependencies](https://david-dm.org/strapi/strapi-generate-policy.svg)](https://david-dm.org/strapi/strapi-generate-policy) |
