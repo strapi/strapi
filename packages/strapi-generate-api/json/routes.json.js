@@ -50,17 +50,19 @@ module.exports = scope => {
     policies: []
   };
 
-  newRoutes.routes['POST /' + scope.humanizeId + '/:id/relationships/:relation'] = {
-    controller: scope.globalID,
-    action: 'createRelation',
-    policies: []
-  };
+  if (scope.template && scope.template !== 'mongoose') {
+    newRoutes.routes['POST /' + scope.humanizeId + '/:id/relationships/:relation'] = {
+      controller: scope.globalID,
+      action: 'createRelation',
+      policies: []
+    };
 
-  newRoutes.routes['DELETE /' + scope.humanizeId + '/:id/relationships/:relation'] = {
-    controller: scope.globalID,
-    action: 'destroyRelation',
-    policies: []
-  };
+    newRoutes.routes['DELETE /' + scope.humanizeId + '/:id/relationships/:relation'] = {
+      controller: scope.globalID,
+      action: 'destroyRelation',
+      policies: []
+    };
+  }
 
   return newRoutes;
 };
