@@ -80,6 +80,11 @@ module.exports = strapi => {
         _.set(strapi.hooks, 'external', _.reduce(externalHooksOrdered, (memo, module, identity) => {
           const hookName = identity.replace(/^strapi-/, '');
 
+          // Don't load disabled hook
+          if (_.get(strapi.config.hooks.external, hookName) === false) {
+            return memo;
+          }
+
           try {
             memo[hookName] = require(identity);
           } catch (err) {

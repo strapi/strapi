@@ -12,6 +12,7 @@ const herd = require('herd');
 // Local dependencies.
 const __Configuration = require('./configuration');
 const __loadHooks = require('./private/loadHooks');
+const DEFAULT_HOOKS = require('./configuration/hooks/defaultHooks');
 
 /**
  * Load the Strapi instance
@@ -71,14 +72,14 @@ module.exports = function (configOverride, cb) {
    */
 
   function initializeHooks(cb) {
-    self.hooks = {};
-
-    if (self.config.hooks === false) {
-      return cb();
-    }
-
-    // Mix in user-configured hook definitions.
-    _.assign(self.hooks, self.config.hooks);
+    // Load core (default) hooks.
+    self.hooks = _.mapValues(DEFAULT_HOOKS, (hooks, hookCategory) => {
+      return _.mapValues(_.omitBy(hooks, hook => {
+        return hook === false;
+      }), (hook, hookIdentity) => {
+        return require('./configuration/hooks/' + hookCategory + '/' + hookIdentity);
+      });
+    }) || {};
 
     return cb();
   }
@@ -91,6 +92,11 @@ module.exports = function (configOverride, cb) {
 
   function loader(hookCategory, cb) {
     if (_.isEmpty(_.get(self.hooks, hookCategory))) {
+      return cb();
+    }
+
+    // Don't load an entire group of hooks.
+    if (_.get(self.hooks.config, hookCategory) === false) {
       return cb();
     }
 

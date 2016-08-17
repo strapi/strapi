@@ -24,12 +24,6 @@ module.exports = function (strapi) {
     function prepareHook(id) {
       let hookPrototype = hooks[id];
 
-      // Allow disabling of hooks by setting them to `false`.
-      if (strapi.config.hooks[hookPrototype] === false) {
-        delete hooks[id];
-        return;
-      }
-
       // Handle folder-defined modules (default to `./lib/index.js`)
       // Since a hook definition must be a function.
       if (_.isObject(hookPrototype) && !_.isArray(hookPrototype) && !_.isFunction(hookPrototype)) {
@@ -93,6 +87,13 @@ module.exports = function (strapi) {
     }
 
     async.series(_.map(hooks, (hook, identity) => {
+      // Don't load disabled hook
+      if (_.get(strapi.config.hooks[hookCategory], identity) === false) {
+        return cb => {
+          cb();
+        };
+      }
+
       return cb => {
         prepareHook(identity);
         applyDefaults(hook);

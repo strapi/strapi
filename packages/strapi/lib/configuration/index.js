@@ -10,9 +10,6 @@ const os = require('os');
 // Public node modules.
 const _ = require('lodash');
 
-// Local dependencies.
-const DEFAULT_HOOKS = require('./hooks/defaultHooks');
-
 /**
  * Expose new instance of `Configuration`
  */
@@ -38,15 +35,6 @@ module.exports = strapi => {
 
       // Set up config defaults.
       return {
-        // Core (default) hooks.
-        hooks: _.mapValues(DEFAULT_HOOKS, (hooks, hookCategory) => {
-          return _.mapValues(_.omitBy(hooks, hook => {
-            return hook === false;
-          }), (hook, hookIdentity) => {
-            return require('./hooks/' + hookCategory + '/' + hookIdentity);
-          });
-        }) || {},
-
         // Save `appPath` in implicit defaults.
         // `appPath` is passed from above in case `start` was used.
         // This is the directory where this Strapi process is being initiated from.
@@ -82,7 +70,8 @@ module.exports = strapi => {
         // Start off needed empty objects and strings.
         routes: {},
         collections: {},
-        frontendUrl: ''
+        frontendUrl: '',
+        hooks: {}
       };
     };
 
