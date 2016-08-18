@@ -1,0 +1,35 @@
+.textSection {
+  margin: 3em auto;
+}
+
+.textSection:first-child {
+  margin-top: 0;
+}
+
+.centered {
+  text-align: center;
+}
+
+p,
+label {
+  font-family: Georgia, Times, 'Times New Roman', serif;
+  line-height: 1.5em;
+}
+
+.link {
+  text-decoration: none;
+}
+
+.usernameForm {
+  margin-bottom: 1em;
+}
+
+.input {
+  outline: none;
+  border-bottom: 1px dotted #999;
+}
+
+.atPrefix {
+  color: black;
+  margin-left: 0.4em;
+}

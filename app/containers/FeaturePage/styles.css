@@ -1,0 +1,12 @@
+.list {
+  font-family: Georgia, Times, 'Times New Roman', serif;
+  padding-left: 1.75em;
+}
+
+.listItem {
+  margin: 1em 0;
+}
+
+.listItemTitle {
+  font-weight: bold;
+}
