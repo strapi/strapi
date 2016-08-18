@@ -15,6 +15,25 @@ const selectLocationState = () => {
   };
 };
 
+import { createSelector } from 'reselect';
+
+/**
+ * Direct selector to the languageToggle state domain
+ */
+const selectApp = () => state => state.get('app');
+
+/**
+ * Select the language locale
+ */
+
+const selectPlugins = () => createSelector(
+  selectApp(),
+  (languageState) => languageState.get('plugins')
+);
+
 export {
+  selectApp,
+  selectPlugins,
   selectLocationState,
 };
+

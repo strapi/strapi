@@ -12,20 +12,54 @@
  */
 
 import React from 'react';
+import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
+import { selectPlugins } from './selectors';
+import { registerPlugin } from './actions';
 
 import styles from './styles.css';
 
-export default class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   static propTypes = {
     children: React.PropTypes.node,
   };
 
   render() {
+    // Plugins list
+    const pluginsList = this.props.plugins;
+
+    // Generate the list of plugins jsx
+    const plugins = pluginsList.map(plugin => <li>{plugin.name}</li>);
+
     return (
       <div className={styles.container}>
+        <button onClick={this.props.onRegisterPluginClicked}>Register plugin</button>
+        <p>Plugins</p>
+        <ul>
+          {plugins}
+        </ul>
         {React.Children.toArray(this.props.children)}
       </div>
     );
   }
 }
+
+App.propTypes = {
+  plugins: React.PropTypes.object,
+  onRegisterPluginClicked: React.PropTypes.func,
+};
+
+const mapStateToProps = createSelector(
+  selectPlugins(),
+  (plugins) => ({ plugins })
+);
+
+function mapDispatchToProps(dispatch) {
+  return {
+    onRegisterPluginClicked: () => dispatch(registerPlugin({ name: 'New Plugin' })),
+    dispatch,
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
