@@ -25,6 +25,9 @@ import configureStore from './store';
 // Import i18n messages
 import { translationMessages } from './i18n';
 
+// Expose `Strapi` to the `window object`
+import 'expose?Strapi!./strapi';
+
 // Import the CSS reset, which HtmlWebpackPlugin transfers to the build folder
 import 'sanitize.css/sanitize.css';
 
