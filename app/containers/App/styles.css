@@ -1,40 +1,9 @@
-/* Global styles */
+/**
+ * styles.css
+ *
+ * App container styles
+ */
 
-html,
-body {
-  height: 100%;
-  width: 100%;
-}
-
-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-body.fontLoaded {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-:global(#app) {
-  background-color: #FAFAFA;
-  min-height: 100%;
-  min-width: 100%;
-}
-
-.wrapper {
-  max-width: calc(768px + 16px * 2);
-  margin: 0 auto;
-  display: flex;
-  min-height: 100%;
-  padding: 0 16px;
-  flex-direction: column;
-}
-
-.logoWrapper {
-  padding: 2em 0;
-}
-
-.logo {
-  width: 100%;
-  margin: 0 auto;
+.container {
   display: block;
 }
