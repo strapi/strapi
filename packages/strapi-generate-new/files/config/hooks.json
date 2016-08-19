@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "core": {
+      "bodyParser": true,
+      "cors": true,
+      "cron": true,
+      "favicon": true,
+      "gzip": true,
+      "i18n": true,
+      "ip": true,
+      "logger": true,
+      "lusca": true,
+      "proxy": true,
+      "responses": true,
+      "responseTime": true,
+      "router": true,
+      "session": true,
+      "ssl": true,
+      "static": true,
+      "views": true
+    },
+    "websockets": {
+      "websockets": true
+    },
+    "external": {
+      "mongoose": true
+    }
+  }
+}
