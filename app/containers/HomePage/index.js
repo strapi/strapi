@@ -15,12 +15,13 @@ import { createSelector } from 'reselect';
 import { selectPlugins } from '../App/selectors';
 import LeftMenu from '../LeftMenu';
 import Content from '../Content';
+import styles from './syles.css';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   render() {
     return (
-      <div>
+      <div className={styles.homePage}>
         <LeftMenu {...this.props}></LeftMenu>
         <Content></Content>
       </div>

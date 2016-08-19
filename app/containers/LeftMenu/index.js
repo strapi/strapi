@@ -14,13 +14,9 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
     const links = this.props.plugins.map(plugin => <li><Link to={`/${plugin.id}`}>{plugin.name}</Link></li>);
 
     return (
-      <div>
-        <p>Links</p>
-        <ul className={styles.leftMenu}>
-          {links}
-        </ul>
-      </div>
-
+      <ul className={styles.leftMenu}>
+        {links}
+      </ul>
     );
   }
 }
