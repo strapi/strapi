@@ -10,16 +10,38 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
+import { selectPlugins } from '../App/selectors';
+import LeftMenu from '../LeftMenu';
+import Content from '../Content';
 
-export default class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   render() {
     return (
-      <h1>
-        <FormattedMessage {...messages.header} />
-      </h1>
+      <div>
+        <LeftMenu {...this.props}></LeftMenu>
+        <Content></Content>
+      </div>
     );
   }
 }
+
+HomePage.propTypes = {
+  plugins: React.PropTypes.object,
+  onRegisterPluginClicked: React.PropTypes.func,
+};
+
+const mapStateToProps = createSelector(
+  selectPlugins(),
+  (plugins) => ({ plugins })
+);
+
+function mapDispatchToProps(dispatch) {
+  return {
+    dispatch,
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

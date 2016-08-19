@@ -15,7 +15,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { selectPlugins } from './selectors';
-import { registerPlugin } from './actions';
 
 import styles from './styles.css';
 
@@ -26,19 +25,8 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   };
 
   render() {
-    // Plugins list
-    const pluginsList = this.props.plugins;
-
-    // Generate the list of plugins jsx
-    const plugins = pluginsList.map(plugin => <li>{plugin.name}</li>);
-
     return (
       <div className={styles.container}>
-        <button onClick={this.props.onRegisterPluginClicked}>Register plugin</button>
-        <p>Plugins</p>
-        <ul>
-          {plugins}
-        </ul>
         {React.Children.toArray(this.props.children)}
       </div>
     );
@@ -57,7 +45,6 @@ const mapStateToProps = createSelector(
 
 function mapDispatchToProps(dispatch) {
   return {
-    onRegisterPluginClicked: () => dispatch(registerPlugin({ name: 'New Plugin' })),
     dispatch,
   };
 }
