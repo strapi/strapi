@@ -65,6 +65,7 @@
     "koa-views": "^4.1.0",
     "lodash": "~4.6.1",
     "node-schedule": "~1.1.0",
+    "nodemon": "^1.10.0",
     "socket.io": "~1.4.5",
     "strapi-generate": "~2.0.0",
     "strapi-generate-api": "~2.0.0",
@@ -102,5 +103,8 @@
     "npm": ">= 3.0.0"
   },
   "preferGlobal": true,
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "forever-monitor": "^1.7.0"
+  }
 }
