@@ -218,7 +218,9 @@ module.exports = {
 
   defineAssociations: function (model, definition, association, key) {
     // Initialize associations object
-    definition.associations = [];
+    if (definition.associations === undefined) {
+      definition.associations = [];
+    }
 
     // Exclude non-relational attribute
     if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model')) {
