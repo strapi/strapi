@@ -25,9 +25,6 @@ import configureStore from './store';
 // Import i18n messages
 import { translationMessages } from './i18n';
 
-// Expose `Strapi` to the `window object`
-import 'expose?Strapi!./strapi';
-
 // Import the CSS reset, which HtmlWebpackPlugin transfers to the build folder
 import 'sanitize.css/sanitize.css';
 
@@ -54,6 +51,11 @@ const rootRoute = {
   childRoutes: createRoutes(store),
 };
 
+// Export dispatch
+export const dispatch = store.dispatch;
+
+// Expose `Strapi` to the `window object`
+import 'expose?Strapi!./strapi';
 
 const render = (translatedMessages) => {
   ReactDOM.render(

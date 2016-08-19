@@ -1,3 +1,6 @@
+import { registerPlugin as registerPluginAction } from './containers/App/actions';
+import { dispatch } from './app';
+
 /**
  * Public Strapi object exposed to the `window` object
  */
@@ -7,8 +10,8 @@
  *
  * @param params
  */
-const registerPlugin = () => {
-  // console.log('registerPlugin');
+const registerPlugin = (params) => {
+  dispatch(registerPluginAction(params));
 };
 
 export {
