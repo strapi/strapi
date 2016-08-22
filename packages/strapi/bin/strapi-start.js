@@ -52,6 +52,7 @@ module.exports = function () {
 
     // Run listeners
     child.on('restart', function() {
+      console.log();
       logger.info('Restarting due to changes...');
       console.log();
     });
