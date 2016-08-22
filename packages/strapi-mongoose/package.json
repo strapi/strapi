@@ -15,11 +15,11 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "~4.6.1",
+    "lodash": "~4.15.0",
     "mongoose": "~4.5.4",
     "mongoose-double": "0.0.1",
     "mongoose-float": "^1.0.2",
-    "pluralize": "~1.2.1",
+    "pluralize": "~3.0.0",
     "strapi": "~2.0.0"
   },
   "strapi": {
