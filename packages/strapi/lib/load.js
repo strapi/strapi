@@ -45,19 +45,19 @@ module.exports = function (configOverride, cb) {
     config: [Configuration.load],
     // Optionally expose globals as soon as the
     // config hook is loaded.
-    exposeGlobals: ['config', cb => self.exposeGlobals(cb)],
+    exposeGlobals: ['config', (result, cb) => self.exposeGlobals(cb)],
     // Initiliaze hooks global variable and configurations
     hooks: ['exposeGlobals', initializeHooks],
     // Load core's hooks into memory, with their middleware and routes.
-    dictionary: ['hooks', cb => loader('dictionary', cb)],
+    dictionary: ['hooks', (result, cb) => loader('dictionary', cb)],
     // Load core's hooks into memory, with their middleware and routes.
-    core: ['dictionary', cb => loader('core', cb)],
+    core: ['dictionary', (result, cb) => loader('core', cb)],
     // Load websocket's hooks into memory
-    websocket: ['core', cb => loader('websockets', cb)],
+    websocket: ['core', (result, cb) => loader('websockets', cb)],
     // Load models' hooks into memory
-    models: ['websocket', cb => loader('models', cb)],
+    models: ['websocket', (result, cb) => loader('models', cb)],
     // Load external hooks into memory
-    external: ['models', cb => loader('external', cb)]
+    external: ['models', (result, cb) => loader('external', cb)]
   }, ready__(cb));
 
   // Makes `app.load()` chainable.
@@ -70,7 +70,7 @@ module.exports = function (configOverride, cb) {
    * @api private
    */
 
-  function initializeHooks(cb) {
+  function initializeHooks(result, cb) {
     self.hooks = {};
 
     if (self.config.hooks === false) {

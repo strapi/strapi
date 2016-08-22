@@ -13,9 +13,9 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "async": "~1.5.2",
-    "fs-extra": "~0.26.7",
-    "lodash": "~4.6.1",
+    "async": "~2.0.1",
+    "fs-extra": "~0.30.0",
+    "lodash": "~4.15.0",
     "reportback": "~0.1.9",
     "strapi-utils": "~2.0.0"
   },

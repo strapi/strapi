@@ -1,4 +1,4 @@
-# Strapi
+![Logo](https://cldup.com/7umchwdUBh.png)
 
 [![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi)
 [![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
