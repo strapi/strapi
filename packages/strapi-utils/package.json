@@ -17,9 +17,9 @@
   "main": "./lib",
   "dependencies": {
     "commander": "~2.9.0",
-    "knex": "~0.10.0",
+    "knex": "~0.11.10",
     "include-all": "~0.1.6",
-    "lodash": "~4.6.1",
+    "lodash": "~4.15.0",
     "winston": "~2.2.0"
   },
   "scripts": {
