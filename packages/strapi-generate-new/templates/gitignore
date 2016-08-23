@@ -116,3 +116,10 @@ bower_components
 ############################
 
 **/production/
+
+
+############################
+# Sensitive config
+############################
+
+databases.json
