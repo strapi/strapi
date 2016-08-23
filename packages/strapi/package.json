@@ -40,7 +40,6 @@
     "co": "~4.6.0",
     "consolidate": "~0.14.0",
     "fs-extra": "~0.30.0",
-    "grant-koa": "~3.6.3",
     "graphql": "~0.6.2",
     "herd": "~1.0.0",
     "jsonapi-serializer": "~3.3.0",
@@ -102,5 +101,8 @@
     "npm": ">= 3.0.0"
   },
   "preferGlobal": true,
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "forever-monitor": "^1.7.0"
+  }
 }
