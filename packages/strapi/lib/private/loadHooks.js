@@ -84,7 +84,7 @@ module.exports = function (strapi) {
           strapi.emit('hook:' + id + ':error');
           return cb(err);
         }
-
+        
         strapi.emit('hook:' + id + ':loaded');
 
         // Defer to next tick to allow other stuff to happen.
