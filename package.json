@@ -182,6 +182,7 @@
   "dependencies": {
     "babel-polyfill": "6.13.0",
     "chalk": "1.1.3",
+    "classnames": "^2.2.5",
     "compression": "1.6.2",
     "expose-loader": "^0.7.1",
     "express": "4.14.0",

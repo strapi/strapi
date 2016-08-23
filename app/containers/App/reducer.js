@@ -10,7 +10,7 @@ const initialState = fromJS({
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case REGISTER_PLUGIN:
-      return state.setIn(['plugins', action.plugin.name], action.plugin);
+      return state.setIn(['plugins', action.plugin.id], action.plugin);
     default:
       return state;
   }
