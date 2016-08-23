@@ -16,9 +16,9 @@
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "~0.9.2",
-    "lodash": "~4.6.1",
-    "pluralize": "~1.2.1",
+    "bookshelf": "~0.10.0",
+    "lodash": "~4.15.0",
+    "pluralize": "~3.0.0",
     "strapi": "~2.0.0"
   },
   "strapi": {

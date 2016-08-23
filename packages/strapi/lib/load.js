@@ -4,12 +4,16 @@
  * Module dependencies
  */
 
+ // Node.js core.
+ const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 const async = require('async');
 const herd = require('herd');
 
 // Local dependencies.
+const Hook = require('./configuration/hooks');
 const __Configuration = require('./configuration');
 const __loadHooks = require('./private/loadHooks');
 const DEFAULT_HOOKS = require('./configuration/hooks/defaultHooks');
@@ -38,6 +42,7 @@ module.exports = function (configOverride, cb) {
   // Ensure override is an object and clone it (or make an empty object if it's not).
   configOverride = configOverride || {};
   this.config = _.cloneDeep(configOverride);
+  this.hooks = {};
 
   async.auto({
     // Apply core defaults and hook-agnostic configuration,
@@ -46,19 +51,20 @@ module.exports = function (configOverride, cb) {
     config: [Configuration.load],
     // Optionally expose globals as soon as the
     // config hook is loaded.
-    exposeGlobals: ['config', cb => self.exposeGlobals(cb)],
-    // Initiliaze hooks global variable and configurations
-    hooks: ['exposeGlobals', initializeHooks],
-    // Load core's hooks into memory, with their middleware and routes.
-    dictionary: ['hooks', cb => loader('dictionary', cb)],
-    // Load core's hooks into memory, with their middleware and routes.
-    core: ['dictionary', cb => loader('core', cb)],
-    // Load websocket's hooks into memory
-    websocket: ['core', cb => loader('websockets', cb)],
-    // Load models' hooks into memory
-    models: ['websocket', cb => loader('models', cb)],
-    // Load external hooks into memory
-    external: ['models', cb => loader('external', cb)]
+    exposeGlobals: ['config', (result, cb) => self.exposeGlobals(cb)],
+    // Create configurations tree (dictionary).
+    dictionary: ['exposeGlobals', (result, cb) => {
+      // Pre-initialize hooks for create dictionary.
+      _.assign(self.hooks, _.mapValues(_.get(DEFAULT_HOOKS, 'dictionary'), (hook, hookIdentity) => {
+        return require('./configuration/hooks/dictionary/' + hookIdentity);
+      }));
+
+      loadHooks(self.hooks, cb);
+    }],
+    // Initialize hooks global variable and configurations
+    initializeHooks: ['dictionary', initializeHooks],
+    // Load hooks into memory.
+    loadHooks: ['initializeHooks', (result, cb) => loadHooks(self.hooks, cb)]
   }, ready__(cb));
 
   // Makes `app.load()` chainable.
@@ -71,38 +77,54 @@ module.exports = function (configOverride, cb) {
    * @api private
    */
 
-  function initializeHooks(cb) {
-    // Load core (default) hooks.
-    self.hooks = _.mapValues(DEFAULT_HOOKS, (hooks, hookCategory) => {
-      return _.mapValues(_.omitBy(hooks, hook => {
-        return hook === false;
-      }), (hook, hookIdentity) => {
-        return require('./configuration/hooks/' + hookCategory + '/' + hookIdentity);
+
+  function initializeHooks(result, cb) {
+    // Reset
+    self.hooks = {};
+
+    const tree = {};
+
+    // Create a tree of hook's path.
+    _.forEach(_.omit(DEFAULT_HOOKS, 'dictionary'), (hooks, hookCategory) => {
+      _.forEach(hooks, (hook, hookIdentity) => {
+         _.set(tree, hookIdentity, './configuration/hooks/' + hookCategory + '/' + hookIdentity);
       });
-    }) || {};
+    });
+
+    // Extend tree with external hooks.
+    _.forEach(self.externalHooks, (hook, hookIdentity) => {
+      _.set(tree, hookIdentity, hook);
+    });
+
+    // Remove this sensitive object.
+    delete strapi.externalHooks;
+
+    const mapper = _.clone(self.config.hooks);
+
+    // Map (warning: we could have some order issues).
+    _.assignWith(mapper, tree, (objValue, srcValue) => {
+      return objValue === false ? objValue : true;
+    });
+
+    // Pick hook to load.
+    self.hooks = _.pickBy(mapper, value => value !== false);
+
+    // Require only necessary hooks.
+    self.hooks =_.mapValues(self.hooks, (hook, hookIdentity) => {
+      try {
+        return require(_.get(tree, hookIdentity));
+      } catch (err) {
+        try {
+          return require(path.resolve(self.config.appPath, 'node_modules', hookIdentity));
+        } catch (err) {
+          cb(err);
+        }
+      }
+    });
 
     return cb();
   }
-
-  /**
-   * Hook generic loader
-   *
-   * @api private
-   */
-
-  function loader(hookCategory, cb) {
-    if (_.isEmpty(_.get(self.hooks, hookCategory))) {
-      return cb();
-    }
-
-    // Don't load an entire group of hooks.
-    if (_.get(self.hooks.config, hookCategory) === false) {
-      return cb();
-    }
-
-    loadHooks(_.get(self.hooks, hookCategory), hookCategory, cb);
-  }
-
+  
   /**
    * Returns function which is fired when Strapi is ready to go
    *

@@ -19,7 +19,7 @@ const Hook = require('../configuration/hooks');
  */
 
 module.exports = function (strapi) {
-  return (hooks, hookCategory, cb) => {
+  return (hooks, cb) => {
 
     function prepareHook(id) {
       let hookPrototype = hooks[id];
@@ -31,7 +31,7 @@ module.exports = function (strapi) {
       }
 
       if (!_.isFunction(hookPrototype)) {
-        strapi.log.error('Malformed (`' + id + '`) hook (in `' + hookCategory + '`)!');
+        strapi.log.error('Malformed (`' + id + '`) hook!');
         strapi.log.error('Hooks should be a function with one argument (`strapi`)');
         strapi.stop();
       }
@@ -65,7 +65,7 @@ module.exports = function (strapi) {
 
       setTimeout(() => {
         if (timeout) {
-          strapi.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)(in `' + hookCategory + '`)!');
+          strapi.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)!');
           process.nextTick(cb);
         }
       }, strapi.config.hookTimeout || 1000);
@@ -74,7 +74,7 @@ module.exports = function (strapi) {
         timeout = false;
 
         if (err) {
-          strapi.log.error('The hook `' + id + '` failed to load (in `' + hookCategory + '`)!');
+          strapi.log.error('The hook `' + id + '` failed to load!');
           strapi.emit('hook:' + id + ':error');
           return cb(err);
         }
@@ -88,7 +88,7 @@ module.exports = function (strapi) {
 
     async.series(_.map(hooks, (hook, identity) => {
       // Don't load disabled hook
-      if (_.get(strapi.config.hooks[hookCategory], identity) === false) {
+      if (_.get(strapi.config.hooks, identity) === false) {
         return cb => {
           cb();
         };

@@ -10,6 +10,9 @@ const cluster = require('cluster');
 // Public node modules.
 const async = require('async');
 
+// Local Strapi dependencies.
+const packageJSON = require('../package.json');
+
 /**
  * `Strapi.prototype.start()`
  *
@@ -18,7 +21,7 @@ const async = require('async');
  * @api public
  */
 
-module.exports = function start(configOverride, cb) {
+module.exports = function start(cb) {
   // Callback is optional.
   cb = cb || function (err) {
     if (err) {
@@ -26,8 +29,13 @@ module.exports = function start(configOverride, cb) {
     }
   };
 
+  const scope = {
+    rootPath: process.cwd(),
+    strapiPackageJSON: packageJSON
+  };
+
   async.series([
-    cb => this.load(configOverride, cb),
+    cb => this.load(scope, cb),
     cb => this.initialize(cb)
   ], err => {
     if (err) {
