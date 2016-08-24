@@ -16,7 +16,7 @@ import { selectPlugins } from '../App/selectors';
 import LeftMenu from '../LeftMenu';
 import Header from '../../components/Header/index';
 import Content from '../Content';
-import styles from './syles.css';
+import styles from './syles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
@@ -24,7 +24,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     return (
       <div className={styles.homePage}>
         <LeftMenu {...this.props}></LeftMenu>
-        <div>
+        <div className={styles.homePageRightWrapper}>
           <Header></Header>
           <Content></Content>
         </div>

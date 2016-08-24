@@ -6,23 +6,17 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import styles from './styles.css';
-import { Link } from 'react-router';
-import classNames from 'classnames';
+import styles from './styles.scss';
+import LeftMenuHeader from 'components/LeftMenuHeader';
+import LeftMenuLinkContainer from 'components/LeftMenuLinkContainer';
 
 export class LeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const links = this.props.plugins.map(plugin => {
-      const className = classNames({
-        active: this.props.params && this.props.params.plugin && this.props.params.plugin === plugin.id,
-      });
-      return <li className={className}><Link to={`/plugins/${plugin.id}`}>{plugin.name}</Link></li>;
-    });
-
     return (
-      <ul className={styles.leftMenu}>
-        {links}
-      </ul>
+      <div className={styles.leftMenu}>
+        <LeftMenuHeader></LeftMenuHeader>
+        <LeftMenuLinkContainer plugins={this.props.plugins}></LeftMenuLinkContainer>
+      </div>
     );
   }
 }

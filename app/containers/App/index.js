@@ -15,8 +15,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { selectPlugins } from './selectors';
-
-import styles from './styles.css';
+import '../../styles/main.scss';
+import styles from './styles.scss';
 
 export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
 

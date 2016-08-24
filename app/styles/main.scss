@@ -1,0 +1,17 @@
+// Import variables
+@import "variables/variables";
+
+html :global {
+  // Expose libs styles
+  @import "libs/ionicfont/ionicons-variables";
+  @import "libs/bootstrap/bootstrap";
+  @import "libs/ionicfont/ionicons-font";
+  @import "libs/ionicfont/ionicons";
+
+  // Expose base styles
+  @import "base/helpers";
+
+  // Set the global font-size in order
+  // to be able to have `1rem = 10px`.
+  font-size: 62.5%;
+}

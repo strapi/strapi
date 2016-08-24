@@ -1,0 +1,17 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuHeader { /* stylelint-ignore */
+  background: $left-menu-link-hover;
+  height: $header-height;
+}
+
+.projectName {
+  display: block;
+  text-align: center;
+  line-height: $header-height;
+  vertical-align: middle;
+  font-size: 2rem;
+  letter-spacing: 0.2rem;
+  color: $white;
+}

@@ -18,8 +18,8 @@ module.exports = (options) => ({
       exclude: /node_modules/,
       query: options.babelQuery,
     }, {
-      // Transform our own .css files with PostCSS and CSS-modules
-      test: /\.css$/,
+      // Transform our own .scss files with PostCSS and CSS-modules
+      test: /\.s?css$/,
       exclude: /node_modules/,
       loader: options.cssLoaders,
     }, {

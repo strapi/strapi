@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import styles from './styles.css';
+import styles from './styles.scss';
 import { createSelector } from 'reselect';
 import { selectPlugins } from '../App/selectors';
 
@@ -23,7 +23,9 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 
     return (
       <div className={styles.content}>
-        <p>Content</p>
+        <div className="alert alert-success" role="alert">
+          <strong>Welcome!</strong> You successfully loaded the admin panel.
+        </div>
         <Elem></Elem>
       </div>
     );
