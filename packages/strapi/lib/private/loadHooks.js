@@ -35,7 +35,7 @@ module.exports = function(cb) {
     }
 
     // Instantiate the hook.
-    const def = hookPrototype(strapi);
+    const def = hookPrototype(this);
 
     // Mix in an `identity` property to hook definition.
     def.identity = id.toLowerCase();

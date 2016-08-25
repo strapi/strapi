@@ -65,7 +65,7 @@ module.exports = strapi => {
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'environments'),
             filter: /(.+)\.(js|json)$/,
             identity: false,
-            depth: 4
+            depth: 3
           }, cb);
         },
 
@@ -84,7 +84,7 @@ module.exports = strapi => {
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api),
             excludeDirs: /(public)$/,
             filter: /(.+)\.(js|json)$/,
-            depth: 4
+            depth: 3
           }, cb);
         }
       },

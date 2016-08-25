@@ -9,6 +9,7 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
+const consolidate = require('consolidate');
 
 /**
  * Public assets hook
@@ -31,8 +32,6 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (_.isPlainObject(strapi.config.views) && !_.isEmpty(strapi.config.views)) {
-        // Load `consolidate` if necessary.
-        const consolidate = require('consolidate');
         const opts = _.clone(strapi.config.views);
 
         if (opts.hasOwnProperty('default')) {
