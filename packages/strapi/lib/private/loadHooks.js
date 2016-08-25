@@ -29,9 +29,9 @@ module.exports = function(cb) {
     }
 
     if (!_.isFunction(hookPrototype)) {
-      strapi.log.error('Malformed (`' + id + '`) hook!');
-      strapi.log.error('Hooks should be a function with one argument (`strapi`)');
-      strapi.stop();
+      this.log.error('Malformed (`' + id + '`) hook (in `' + _.get(this.tree, id + '.category') + '`)!');
+      this.log.error('Hooks should be a function with one argument (`strapi`)');
+      this.stop();
     }
 
     // Instantiate the hook.
@@ -46,7 +46,7 @@ module.exports = function(cb) {
     def.configKey = hookPrototype.configKey || def.identity;
 
     // New up an actual Hook instance.
-    this.hooks[id] = new Hook(this, def);
+    this.hooks[id] = new Hook(def);
   }
 
   // Function to apply a hook's `defaults` object or function.
@@ -63,7 +63,7 @@ module.exports = function(cb) {
 
     setTimeout(() => {
       if (timeout) {
-        this.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)!');
+        this.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)(in `' + _.get(this.tree, id + '.category') + '`)!');
         process.nextTick(cb);
       }
     }, this.config.hookTimeout || 1000);
@@ -72,7 +72,7 @@ module.exports = function(cb) {
       timeout = false;
 
       if (err) {
-        this.log.error('The hook `' + id + '` failed to load!');
+        this.log.error('The hook `' + id + '` failed to load (in `' + _.get(this.tree, id + '.category') + '`)!');
         this.emit('hook:' + id + ':error');
         return cb(err);
       }
@@ -85,13 +85,6 @@ module.exports = function(cb) {
   }
 
   async.series(_.map(this.hooks, (hook, identity) => {
-    // Don't load disabled hook
-    if (_.get(this.config.hooks, identity) === false) {
-      return cb => {
-        cb();
-      };
-    }
-
     return cb => {
       prepareHook.apply(this, [identity]);
       applyDefaults.apply(this, [hook]);

@@ -85,19 +85,24 @@ module.exports = function (configOverride, cb) {
   function initializeHooks(cb) {
     // Reset
     this.hooks = {};
-
-    const tree = {};
+    this.tree = {};
 
     // Create a tree of hook's path.
     _.forEach(_.omit(DEFAULT_HOOKS, 'dictionary'), (hooks, hookCategory) => {
       _.forEach(hooks, (hook, hookIdentity) => {
-         _.set(tree, hookIdentity, './configuration/hooks/' + hookCategory + '/' + hookIdentity);
+         _.set(this.tree, hookIdentity, {
+           path: './configuration/hooks/' + hookCategory + '/' + hookIdentity,
+           category: hookCategory
+         });
       });
     });
 
     // Extend tree with external hooks.
     _.forEach(this.externalHooks, (hook, hookIdentity) => {
-      _.set(tree, hookIdentity, hook);
+      _.set(this.tree, hookIdentity, {
+        path: hook,
+        category: 'external'
+      });
     });
 
     // Remove this sensitive object.
@@ -106,7 +111,7 @@ module.exports = function (configOverride, cb) {
     const mapper = _.clone(this.config.hooks);
 
     // Map (warning: we could have some order issues).
-    _.assignWith(mapper, tree, (objValue, srcValue) => {
+    _.assignWith(mapper, this.tree, (objValue, srcValue) => {
       return objValue === false ? objValue : true;
     });
 
@@ -116,7 +121,7 @@ module.exports = function (configOverride, cb) {
     // Require only necessary hooks.
     this.hooks =_.mapValues(this.hooks, (hook, hookIdentity) => {
       try {
-        return require(_.get(tree, hookIdentity));
+        return require(_.get(this.tree, hookIdentity + '.path'));
       } catch (err) {
         try {
           return require(path.resolve(this.config.appPath, 'node_modules', hookIdentity));
@@ -137,6 +142,9 @@ module.exports = function (configOverride, cb) {
 
   function ready__(cb) {
     this.emit('hooks:builtIn:ready');
+
+    // Remove sensitive object.
+    delete this.tree;
 
     return err => {
       if (err) {
