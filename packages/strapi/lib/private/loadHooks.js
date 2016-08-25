@@ -18,87 +18,84 @@ const Hook = require('../configuration/hooks');
  * @api private
  */
 
-module.exports = function (strapi) {
-  return (hooks, cb) => {
+module.exports = function(cb) {
+  function prepareHook(id) {
+    let hookPrototype = this.hooks[id];
 
-    function prepareHook(id) {
-      let hookPrototype = hooks[id];
-
-      // Handle folder-defined modules (default to `./lib/index.js`)
-      // Since a hook definition must be a function.
-      if (_.isObject(hookPrototype) && !_.isArray(hookPrototype) && !_.isFunction(hookPrototype)) {
-        hookPrototype = hookPrototype.index;
-      }
-
-      if (!_.isFunction(hookPrototype)) {
-        strapi.log.error('Malformed (`' + id + '`) hook!');
-        strapi.log.error('Hooks should be a function with one argument (`strapi`)');
-        strapi.stop();
-      }
-
-      // Instantiate the hook.
-      const def = hookPrototype(strapi);
-
-      // Mix in an `identity` property to hook definition.
-      def.identity = id.toLowerCase();
-
-      // If a config key was defined for this hook when it was loaded
-      // (probably because a user is overridding the default config key),
-      // set it on the hook definition.
-      def.configKey = hookPrototype.configKey || def.identity;
-
-      // New up an actual Hook instance.
-      hooks[id] = new Hook(strapi, def);
+    // Handle folder-defined modules (default to `./lib/index.js`)
+    // Since a hook definition must be a function.
+    if (_.isObject(hookPrototype) && !_.isArray(hookPrototype) && !_.isFunction(hookPrototype)) {
+      hookPrototype = hookPrototype.index;
     }
 
-    // Function to apply a hook's `defaults` object or function.
-    function applyDefaults(hook) {
-      // Get the hook defaults.
-      const defaults = (_.isFunction(hook.defaults) ? hook.defaults(strapi.config) : hook.defaults) || {};
-
-      _.defaultsDeep(strapi.config, defaults);
+    if (!_.isFunction(hookPrototype)) {
+      strapi.log.error('Malformed (`' + id + '`) hook!');
+      strapi.log.error('Hooks should be a function with one argument (`strapi`)');
+      strapi.stop();
     }
 
-    // Load a hook and initialize it.
-    function loadHook(id, cb) {
-      let timeout = true;
+    // Instantiate the hook.
+    const def = hookPrototype(strapi);
 
-      setTimeout(() => {
-        if (timeout) {
-          strapi.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)!');
-          process.nextTick(cb);
-        }
-      }, strapi.config.hookTimeout || 1000);
+    // Mix in an `identity` property to hook definition.
+    def.identity = id.toLowerCase();
 
-      hooks[id].load(err => {
-        timeout = false;
+    // If a config key was defined for this hook when it was loaded
+    // (probably because a user is overridding the default config key),
+    // set it on the hook definition.
+    def.configKey = hookPrototype.configKey || def.identity;
 
-        if (err) {
-          strapi.log.error('The hook `' + id + '` failed to load!');
-          strapi.emit('hook:' + id + ':error');
-          return cb(err);
-        }
+    // New up an actual Hook instance.
+    this.hooks[id] = new Hook(this, def);
+  }
 
-        strapi.emit('hook:' + id + ':loaded');
+  // Function to apply a hook's `defaults` object or function.
+  function applyDefaults(hook) {
+    // Get the hook defaults.
+    const defaults = (_.isFunction(hook.defaults) ? hook.defaults(this.config) : hook.defaults) || {};
 
-        // Defer to next tick to allow other stuff to happen.
+    _.defaultsDeep(this.config, defaults);
+  }
+
+  // Load a hook and initialize it.
+  function loadHook(id, cb) {
+    let timeout = true;
+
+    setTimeout(() => {
+      if (timeout) {
+        this.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)!');
         process.nextTick(cb);
-      });
+      }
+    }, this.config.hookTimeout || 1000);
+
+    this.hooks[id].load(err => {
+      timeout = false;
+
+      if (err) {
+        this.log.error('The hook `' + id + '` failed to load!');
+        this.emit('hook:' + id + ':error');
+        return cb(err);
+      }
+
+      this.emit('hook:' + id + ':loaded');
+
+      // Defer to next tick to allow other stuff to happen.
+      process.nextTick(cb);
+    });
+  }
+
+  async.series(_.map(this.hooks, (hook, identity) => {
+    // Don't load disabled hook
+    if (_.get(this.config.hooks, identity) === false) {
+      return cb => {
+        cb();
+      };
     }
 
-    async.series(_.map(hooks, (hook, identity) => {
-      // Don't load disabled hook
-      if (_.get(strapi.config.hooks, identity) === false) {
-        return cb => {
-          cb();
-        };
-      }
-
-      return cb => {
-        prepareHook(identity);
-        applyDefaults(hook);
-        loadHook(identity, cb);
-      }
-    }), err => cb(err));
-  };
+    return cb => {
+      prepareHook.apply(this, [identity]);
+      applyDefaults.apply(this, [hook]);
+      loadHook.apply(this, [identity, cb]);
+    }
+  }), err => cb(err));
 };
