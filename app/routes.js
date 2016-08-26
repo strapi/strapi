@@ -22,7 +22,6 @@ export default function createRoutes(store) {
       name: 'home',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
-          System.import('containers/HomePage/sagas'),
           System.import('containers/HomePage'),
         ]);
 
@@ -40,7 +39,6 @@ export default function createRoutes(store) {
       name: 'plugins',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
-          System.import('containers/HomePage/sagas'),
           System.import('containers/HomePage'),
         ]);
 
