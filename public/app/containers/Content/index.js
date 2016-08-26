@@ -31,9 +31,6 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 
     return (
       <div className={styles.content}>
-        <div className="alert alert-success" role="alert">
-          <strong>Welcome!</strong> You successfully loaded the admin panel.
-        </div>
         {content}
       </div>
     );
