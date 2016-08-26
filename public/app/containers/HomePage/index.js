@@ -26,7 +26,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <LeftMenu {...this.props}></LeftMenu>
         <div className={styles.homePageRightWrapper}>
           <Header></Header>
-          <Content></Content>
+          <Content {...this.props}></Content>
         </div>
       </div>
     );

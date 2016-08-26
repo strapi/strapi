@@ -14,19 +14,27 @@ export class Content extends React.Component { // eslint-disable-line react/pref
   render() {
     let plugin;
 
+    // Detect plugin according to params
     this.props.plugins.map(p => {
-      plugin = p;
-      return p;
+      if (this.props.params.plugin === p.id) {
+        plugin = p;
+      }
     });
 
-    const Elem = plugin.mainComponent;
+    let content;
+    if (!plugin) {
+      content = <p>Unknown plugin.</p>
+    } else {
+      const Elem = plugin.mainComponent;
+      content = <Elem plugin={plugin}></Elem>;
+    }
 
     return (
       <div className={styles.content}>
         <div className="alert alert-success" role="alert">
           <strong>Welcome!</strong> You successfully loaded the admin panel.
         </div>
-        <Elem></Elem>
+        {content}
       </div>
     );
   }

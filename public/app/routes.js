@@ -55,7 +55,7 @@ export default function createRoutes(store) {
       },
     }, {
       path: '*',
-      name: 'notfound',
+      name: '404',
       getComponent(nextState, cb) {
         System.import('containers/NotFoundPage')
           .then(loadModule(cb))
