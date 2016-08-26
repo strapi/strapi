@@ -17,9 +17,14 @@ export default class HomePage extends React.Component { // eslint-disable-line r
 
   render() {
     return (
-      <h1>
-        <FormattedMessage {...messages.header} />
-      </h1>
+      <div>
+        <div className="alert alert-success" role="alert">
+          <strong>Welcome!</strong> You successfully loaded the Settings Manager Plugin.
+        </div>
+        <h1>
+          <FormattedMessage {...messages.header} />
+        </h1>
+      </div>
     );
   }
 }
