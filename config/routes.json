@@ -1,0 +1,14 @@
+{
+  "routes": {
+    "GET /admin": {
+      "controller": "Admin",
+      "action": "index",
+      "policies": []
+    },
+    "GET /admin/:file": {
+      "controller": "Admin",
+      "action": "file",
+      "policies": []
+    }
+  }
+}
