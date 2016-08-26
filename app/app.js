@@ -51,12 +51,6 @@ const rootRoute = {
   childRoutes: createRoutes(store),
 };
 
-// Export dispatch
-export const dispatch = store.dispatch;
-
-// Expose `Strapi` to the `window object`
-import 'expose?Strapi!./strapi';
-
 const render = (translatedMessages) => {
   ReactDOM.render(
     <Provider store={store}>
@@ -101,3 +95,22 @@ if (!window.Intl) {
 // we do not want it installed
 import { install } from 'offline-plugin/runtime';
 install();
+
+import { registerPlugin as registerPluginAction } from './containers/App/actions';
+
+/**
+ * Public Strapi object exposed to the `window` object
+ */
+
+/**
+ * Register a plugin
+ *
+ * @param params
+ */
+const registerPlugin = (params) => {
+  store.dispatch(registerPluginAction(params));
+};
+
+window.Strapi = {
+  registerPlugin,
+};
