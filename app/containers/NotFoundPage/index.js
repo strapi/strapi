@@ -12,14 +12,22 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
+import styles from './styles.scss';
+import { Link } from 'react-router';
 
 export default class NotFound extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   render() {
     return (
-      <h1>
-        <FormattedMessage {...messages.header} />
-      </h1>
+      <div className={styles.notFound}>
+        <h1 className={styles.notFoundTitle}>
+          <FormattedMessage {...messages.header} />
+        </h1>
+        <h2 className={styles.notFoundDescription}>
+          <FormattedMessage {...messages.description} />
+        </h2>
+        <Link to={'/'}>Back to home page.</Link>
+      </div>
     );
   }
 }

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import styles from './styles.scss';
 import LeftMenuHeader from 'components/LeftMenuHeader';
 import LeftMenuLinkContainer from 'components/LeftMenuLinkContainer';
+import styles from './styles.scss';
 
 export class LeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

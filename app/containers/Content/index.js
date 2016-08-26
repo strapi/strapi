@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
 import { createSelector } from 'reselect';
-import { selectPlugins } from '../App/selectors';
+import { selectPlugins } from 'containers/App/selectors';
 
 export class Content extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

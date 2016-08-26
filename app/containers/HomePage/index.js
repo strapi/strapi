@@ -12,10 +12,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { selectPlugins } from '../App/selectors';
-import LeftMenu from '../LeftMenu';
-import Header from '../../components/Header/index';
-import Content from '../Content';
+import { selectPlugins } from 'containers/App/selectors';
+import LeftMenu from 'containers/LeftMenu';
+import Header from 'components/Header/index';
+import Content from 'containers/Content';
 import styles from './syles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function

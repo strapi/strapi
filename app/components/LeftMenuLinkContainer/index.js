@@ -10,7 +10,8 @@ import styles from './styles.scss';
 
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const links = this.props.plugins.map(p => <LeftMenuLink icon="ion-person" label={p.name} destination={`/plugins/${p.id}`}></LeftMenuLink>);
+    // List of links
+    const links = this.props.plugins.map(plugin => <LeftMenuLink icon={plugin.icon || 'ion-person'} label={plugin.name} destination={`/plugins/${plugin.id}`}></LeftMenuLink>);
 
     return (
       <div className={styles.leftMenuLinkContainer}>
