@@ -15,3 +15,9 @@
   letter-spacing: 0.2rem;
   color: $white;
 }
+
+.leftMenuHeaderLink {
+  &:hover {
+    text-decoration: none;
+  }
+}

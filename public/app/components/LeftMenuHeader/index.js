@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import { Link } from 'react-router';
 
 import styles from './styles.scss';
 
@@ -12,7 +13,9 @@ class LeftMenuHeader extends React.Component { // eslint-disable-line react/pref
   render() {
     return (
       <div className={styles.leftMenuHeader}>
-        <span className={styles.projectName}>MyApp</span>
+        <Link to="/" className={styles.leftMenuHeaderLink}>
+          <span className={styles.projectName}>MyApp</span>
+        </Link>
       </div>
     );
   }
