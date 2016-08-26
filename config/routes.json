@@ -1,0 +1,9 @@
+{
+  "routes": {
+    "GET /settingsmanager": {
+      "controller": "SettingsManager",
+      "action": "find",
+      "policies": []
+    }
+  }
+}
