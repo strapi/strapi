@@ -114,7 +114,7 @@ $body-color: $gray-dark !default;
 
 $link-color:            $brand-primary !default;
 $link-decoration:       none !default;
-$link-hover-color:      darken($link-color, 15%) !default;
+$link-hover-color:      $link-color !default;
 $link-hover-decoration: underline !default;
 
 
@@ -167,9 +167,9 @@ $font-family-base:       $font-family-sans-serif !default;
 $font-size-root: 16px !default;
 
 $font-size-base: 1.4rem !default;
-$font-size-lg:   1.25rem !default;
-$font-size-sm:   .875rem !default;
-$font-size-xs:   .75rem !default;
+$font-size-lg:   1.6rem !default;
+$font-size-sm:   1.3rem !default;
+$font-size-xs:   1.1rem !default;
 
 $line-height-base: 1.5 !default;
 
