@@ -16,7 +16,7 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
     return (
       <div className={styles.leftMenu}>
         <LeftMenuHeader></LeftMenuHeader>
-        <LeftMenuLinkContainer plugins={this.props.plugins}></LeftMenuLinkContainer>
+        <LeftMenuLinkContainer {...this.props}></LeftMenuLinkContainer>
         <LeftMenuFooter plugins={this.props.plugins}></LeftMenuFooter>
       </div>
     );

@@ -14,6 +14,10 @@
   }
 }
 
+.leftMenuLinkActive {
+  border-left: 0.4rem solid $strapi-blue;
+}
+
 .link {
   color: $left-menu-link-color;
   padding-left: 2.4rem;

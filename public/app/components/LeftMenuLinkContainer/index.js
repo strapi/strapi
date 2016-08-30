@@ -11,7 +11,7 @@ import styles from './styles.scss';
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     // List of links
-    const links = this.props.plugins.map(plugin => <LeftMenuLink icon={plugin.icon || 'ion-merge'} label={plugin.name} destination={`/plugins/${plugin.id}`}></LeftMenuLink>);
+    const links = this.props.plugins.map(plugin => <LeftMenuLink icon={plugin.icon || 'ion-merge'} label={plugin.name} destination={`/${plugin.id}`} isActive={this.props.params.plugin === plugin.id}></LeftMenuLink>);
 
     return (
       <div className={styles.leftMenuLinkContainer}>
@@ -25,7 +25,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
 }
 
 LeftMenuLinkContainer.propTypes = {
-  plugins: React.PropTypes.object,
+  plugins: React.PropTypes.object
 };
 
 export default LeftMenuLinkContainer;

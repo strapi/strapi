@@ -35,24 +35,25 @@ export default function createRoutes(store) {
 
         importModules.catch(errorLoading);
       },
-    }, {
-      path: '/plugins/:plugin',
-      name: 'plugins',
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/HomePage/sagas'),
-          System.import('containers/HomePage'),
-        ]);
+      childRoutes: [
+        {
+          path: '/:plugin',
+          name: 'plugin',
+          getComponent(nextState, cb) {
+            const importModules = Promise.all([
+              System.import('components/Plugin'),
+            ]);
 
-        const renderRoute = loadModule(cb);
+            const renderRoute = loadModule(cb);
 
-        importModules.then(([sagas, component]) => {
-          renderRoute(component);
-          injectSagas(sagas.default);
-        });
+            importModules.then(([component]) => {
+              renderRoute(component);
+            });
 
-        importModules.catch(errorLoading);
-      },
+            importModules.catch(errorLoading);
+          },
+        },
+      ],
     }, {
       path: '*',
       name: '404',

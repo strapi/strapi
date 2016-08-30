@@ -22,7 +22,9 @@ export class Content extends React.Component { // eslint-disable-line react/pref
     });
 
     let content;
-    if (!plugin) {
+    if (!this.props.params.plugin) {
+      content = <p>Home</p>
+    } else if (!plugin) {
       content = <p>Unknown plugin.</p>
     } else {
       const Elem = plugin.mainComponent;
