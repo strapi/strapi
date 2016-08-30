@@ -19,13 +19,14 @@ export class Content extends React.Component { // eslint-disable-line react/pref
       if (this.props.params.plugin === p.id) {
         plugin = p;
       }
+      return p;
     });
 
     let content;
     if (!this.props.params.plugin) {
-      content = <p>Home</p>
+      content = <p>Home</p>;
     } else if (!plugin) {
-      content = <p>Unknown plugin.</p>
+      content = <p>Unknown plugin.</p>;
     } else {
       const Elem = plugin.mainComponent;
       content = <Elem plugin={plugin}></Elem>;
@@ -42,6 +43,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 Content.propTypes = {
   plugins: React.PropTypes.object,
   onRegisterPluginClicked: React.PropTypes.func,
+  params: React.PropTypes.func,
 };
 
 const mapStateToProps = createSelector(
