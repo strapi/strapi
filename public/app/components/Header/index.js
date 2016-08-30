@@ -12,11 +12,7 @@ class Header extends React.Component { // eslint-disable-line react/prefer-state
   render() {
     return (
       <div className={styles.header}>
-        <div className="container-fluid">
-          <div className="pull-md-right cursor-pointer">
-            <span>John Doe</span>
-          </div>
-        </div>
+
       </div>
     );
   }
