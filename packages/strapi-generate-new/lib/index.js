@@ -60,7 +60,7 @@ module.exports = {
     // Empty plugins directory.
     'plugins': {
       folder: {}
-    }
+    },
 
     // Empty public directory.
     'public': {
