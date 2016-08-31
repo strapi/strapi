@@ -8,6 +8,6 @@ import { defineMessages } from 'react-intl';
 export default defineMessages({
   header: {
     id: 'app.components.HomePage.header',
-    defaultMessage: 'This is Settings Manager plugin!',
+    defaultMessage: 'This is the Settings Manager plugin!',
   },
 });
