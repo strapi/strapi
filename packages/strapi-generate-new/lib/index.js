@@ -50,6 +50,11 @@ module.exports = {
     // Empty API directory.
     'api': {
       folder: {}
+    },
+
+    // Empty plugins directory.
+    'plugins': {
+      folder: {}
     }
   }
 };
