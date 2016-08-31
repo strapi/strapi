@@ -4,6 +4,11 @@
       "controller": "SettingsManager",
       "action": "find",
       "policies": []
+    },
+    "GET /plugins/settingsmanager/:file": {
+      "controller": "SettingsManager",
+      "action": "file",
+      "policies": []
     }
   }
 }
