@@ -10,6 +10,7 @@ const logger = require('../../server/logger');
 const cheerio = require('cheerio');
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const dllPlugin = pkg.dllPlugin;
+const argv = require('minimist')(process.argv.slice(2));
 
 // PostCSS plugins
 const cssnext = require('postcss-cssnext');
@@ -24,12 +25,13 @@ const plugins = [
     templateContent: templateContent(), // eslint-disable-line no-use-before-define
   }),
 ];
+const port = argv.port || process.env.PORT || 3000;
 
 module.exports = require('./webpack.base.babel')({
   // Add hot reloading in development
   entry: [
     'eventsource-polyfill', // Necessary for hot reloading with IE
-    'webpack-hot-middleware/client',
+    `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
     path.join(process.cwd(), 'app/app.js'), // Start with js/app.js
   ],
 
@@ -37,6 +39,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
+    publicPath: `http://127.0.0.1:${port}/`,
   },
 
   // Add development plugins
