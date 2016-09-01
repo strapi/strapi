@@ -15,6 +15,7 @@ module.exports = {
     responses: true,
     responseTime: true,
     bodyParser: true,
+    compress: true,
     session: true,
     proxy: true,
     ssl: true,
