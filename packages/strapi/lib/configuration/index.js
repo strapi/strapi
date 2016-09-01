@@ -76,7 +76,8 @@ module.exports = strapi => {
           controllers: 'controllers',
           services: 'services',
           policies: 'policies',
-          models: 'models'
+          models: 'models',
+          plugins: 'plugins'
         },
 
         // Start off needed empty objects and strings.

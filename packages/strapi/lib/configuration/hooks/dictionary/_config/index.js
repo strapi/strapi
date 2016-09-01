@@ -86,6 +86,16 @@ module.exports = strapi => {
             filter: /(.+)\.(js|json)$/,
             depth: 4
           }, cb);
+        },
+
+        // Load plugins from `./plugins/**/*.js|json`.
+        'plugins/**': cb => {
+          dictionary.optional({
+            dirname: path.resolve(strapi.config.appPath, strapi.config.paths.plugins),
+            excludeDirs: /(public)$/,
+            filter: /(.+)\.(js|json)$/,
+            depth: 4
+          }, cb);
         }
       },
 
@@ -115,6 +125,9 @@ module.exports = strapi => {
 
         // Expose user APIs.
         strapi.api = config['api/**'];
+
+        // Expose user plugins.
+        strapi.plugins = config['plugins/**'];
 
         // Add user locales for the settings of the `i18n` hook
         // aiming to load locales automatically.
