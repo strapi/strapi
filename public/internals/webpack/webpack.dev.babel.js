@@ -39,7 +39,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
-    publicPath: `http://127.0.0.1:${argv.port || process.env.PORT || 3000}/`,
+    publicPath: `http://127.0.0.1:${argv.port || process.env.PORT || 4000}/`,
   },
 
   // Add development plugins
