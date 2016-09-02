@@ -22,26 +22,40 @@ export default function createRoutes(store) {
       name: 'home',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
-          System.import('containers/HomePage/sagas'),
           System.import('containers/HomePage'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([sagas, component]) => {
+        importModules.then(([component]) => {
           renderRoute(component);
-          injectSagas(sagas.default);
         });
 
         importModules.catch(errorLoading);
       },
       childRoutes: [
         {
-          path: '/:plugin',
+          path: '/plugins/:plugin',
           name: 'plugin',
           getComponent(nextState, cb) {
             const importModules = Promise.all([
-              System.import('components/Plugin'),
+              System.import('containers/PluginPage'),
+            ]);
+
+            const renderRoute = loadModule(cb);
+
+            importModules.then(([component]) => {
+              renderRoute(component);
+            });
+
+            importModules.catch(errorLoading);
+          },
+        }, {
+          path: '/plugins/:plugin/**',
+          name: 'plugin',
+          getComponent(nextState, cb) {
+            const importModules = Promise.all([
+              System.import('containers/PluginPage'),
             ]);
 
             const renderRoute = loadModule(cb);

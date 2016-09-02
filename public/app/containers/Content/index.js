@@ -11,30 +11,14 @@ import { createSelector } from 'reselect';
 import { selectPlugins } from 'containers/App/selectors';
 
 export class Content extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  static propTypes = {
+    children: React.PropTypes.node,
+  };
+
   render() {
-    let plugin;
-
-    // Detect plugin according to params
-    this.props.plugins.map(p => {
-      if (this.props.params.plugin === p.id) {
-        plugin = p;
-      }
-      return p;
-    });
-
-    let content;
-    if (!this.props.params.plugin) {
-      content = <p>Home</p>;
-    } else if (!plugin) {
-      content = <p>Unknown plugin.</p>;
-    } else {
-      const Elem = plugin.mainComponent;
-      content = <Elem plugin={plugin}></Elem>;
-    }
-
     return (
       <div className={styles.content}>
-        {content}
+        {React.Children.toArray(this.props.children)}
       </div>
     );
   }
@@ -43,7 +27,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 Content.propTypes = {
   plugins: React.PropTypes.object,
   onRegisterPluginClicked: React.PropTypes.func,
-  params: React.PropTypes.func,
+  params: React.PropTypes.object,
 };
 
 const mapStateToProps = createSelector(

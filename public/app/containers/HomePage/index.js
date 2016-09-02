@@ -19,7 +19,6 @@ import Content from 'containers/Content';
 import styles from './syles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
   render() {
     return (
       <div className={styles.homePage}>
