@@ -4,25 +4,24 @@
  * Module dependencies
  */
 
+ // Node.js core.
+ const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 const async = require('async');
 const herd = require('herd');
 
 // Local dependencies.
-const __Configuration = require('./configuration');
-const __loadHooks = require('./private/loadHooks');
+const Configuration = require('./configuration');
+const loadHooks = require('./private/loadHooks');
+const DEFAULT_HOOKS = require('./configuration/hooks/defaultHooks');
 
 /**
  * Load the Strapi instance
  */
 
 module.exports = function (configOverride, cb) {
-  const self = this;
-
-  const Configuration = __Configuration(this);
-  const loadHooks = __loadHooks(this);
-
   if (this._exiting) {
     this.log.error('Cannot load or start an application after it has already been stopped.');
     process.exit(1);
@@ -37,31 +36,44 @@ module.exports = function (configOverride, cb) {
   // Ensure override is an object and clone it (or make an empty object if it's not).
   configOverride = configOverride || {};
   this.config = _.cloneDeep(configOverride);
+  this.hooks = {};
 
   async.auto({
     // Apply core defaults and hook-agnostic configuration,
     // esp. overrides including command-line options, environment variables,
     // and options that were passed in programmatically.
-    config: [Configuration.load],
+    config: cb => new Configuration().load(this, cb),
     // Optionally expose globals as soon as the
     // config hook is loaded.
-    exposeGlobals: ['config', (result, cb) => self.exposeGlobals(cb)],
-    // Initiliaze hooks global variable and configurations
-    hooks: ['exposeGlobals', initializeHooks],
-    // Load core's hooks into memory, with their middleware and routes.
-    dictionary: ['hooks', (result, cb) => loader('dictionary', cb)],
-    // Load core's hooks into memory, with their middleware and routes.
-    core: ['dictionary', (result, cb) => loader('core', cb)],
-    // Load websocket's hooks into memory
-    websocket: ['core', (result, cb) => loader('websockets', cb)],
-    // Load models' hooks into memory
-    models: ['websocket', (result, cb) => loader('models', cb)],
-    // Load external hooks into memory
-    external: ['models', (result, cb) => loader('external', cb)]
-  }, ready__(cb));
+    exposeGlobals: ['config', (result, cb) => this.exposeGlobals(cb)],
+    // Initialize dictionary's hooks.
+    preInitializeHooks: ['exposeGlobals', (result, cb) => preInitializeHooks.apply(this, [cb])],
+    // Create configurations tree (dictionary).
+    loadDictionary: ['preInitializeHooks', (result, cb) => loadHooks.apply(this, [cb])],
+    // Initialize hooks left.
+    initializeHooks: ['loadDictionary', (result, cb) => initializeHooks.apply(this, [cb])],
+    // Load hooks into memory.
+    loadHooks: ['initializeHooks', (result, cb) => loadHooks.apply(this, [cb])]
+  }, (err, results) => ready__.apply(this, [cb])());
 
   // Makes `app.load()` chainable.
-  return self;
+  return this;
+
+  /**
+   * Pre-initialize hooks by putting only dictionary hooks,
+   * into the `hooks` global varialbe.
+   *
+   * @api private
+   */
+
+  function preInitializeHooks(cb) {
+    // Pre-initialize hooks for create dictionary.
+    _.assign(this.hooks, _.mapValues(_.get(DEFAULT_HOOKS, 'dictionary'), (hook, hookIdentity) => {
+      return require('./configuration/hooks/dictionary/' + hookIdentity);
+    }));
+
+    cb();
+  }
 
   /**
    * Initiliaze hooks,
@@ -70,31 +82,56 @@ module.exports = function (configOverride, cb) {
    * @api private
    */
 
-  function initializeHooks(result, cb) {
-    self.hooks = {};
+  function initializeHooks(cb) {
+    // Reset
+    this.hooks = {};
+    this.tree = {};
 
-    if (self.config.hooks === false) {
-      return cb();
-    }
+    // Create a tree of hook's path.
+    _.forEach(_.omit(DEFAULT_HOOKS, 'dictionary'), (hooks, hookCategory) => {
+      _.forEach(hooks, (hook, hookIdentity) => {
+         _.set(this.tree, hookIdentity, {
+           path: './configuration/hooks/' + hookCategory + '/' + hookIdentity,
+           category: hookCategory
+         });
+      });
+    });
 
-    // Mix in user-configured hook definitions.
-    _.assign(self.hooks, self.config.hooks);
+    // Extend tree with external hooks.
+    _.forEach(this.externalHooks, (hook, hookIdentity) => {
+      _.set(this.tree, hookIdentity, {
+        path: hook,
+        category: 'external'
+      });
+    });
+
+    // Remove this sensitive object.
+    delete this.externalHooks;
+
+    const mapper = _.clone(this.config.hooks);
+
+    // Map (warning: we could have some order issues).
+    _.assignWith(mapper, this.tree, (objValue, srcValue) => {
+      return objValue === false ? objValue : true;
+    });
+
+    // Pick hook to load.
+    this.hooks = _.pickBy(mapper, value => value !== false);
+
+    // Require only necessary hooks.
+    this.hooks =_.mapValues(this.hooks, (hook, hookIdentity) => {
+      try {
+        return require(_.get(this.tree, hookIdentity + '.path'));
+      } catch (err) {
+        try {
+          return require(path.resolve(this.config.appPath, 'node_modules', hookIdentity));
+        } catch (err) {
+          cb(err);
+        }
+      }
+    });
 
     return cb();
-  }
-
-  /**
-   * Hook generic loader
-   *
-   * @api private
-   */
-
-  function loader(hookCategory, cb) {
-    if (_.isEmpty(_.get(self.hooks, hookCategory))) {
-      return cb();
-    }
-
-    loadHooks(_.get(self.hooks, hookCategory), hookCategory, cb);
   }
 
   /**
@@ -104,44 +141,47 @@ module.exports = function (configOverride, cb) {
    */
 
   function ready__(cb) {
-    self.emit('hooks:builtIn:ready');
+    this.emit('hooks:builtIn:ready');
+
+    // Remove sensitive object.
+    delete this.tree;
 
     return err => {
       if (err) {
         // Displaying errors, try to start the server through
-        self.log.error(err);
+        this.log.error(err);
       }
 
       // Automatically define the server URL from
       // `proxy`, `ssl`, `host`, and `port` config.
-      if (_.isString(self.config.proxy)) {
-        self.config.url = self.config.proxy;
+      if (_.isString(this.config.proxy)) {
+        this.config.url = this.config.proxy;
       } else {
-        if (_.isPlainObject(self.config.ssl) && self.config.ssl.disabled === false) {
-          self.config.url = 'https://' + self.config.host + ':' + self.config.port;
+        if (_.isPlainObject(this.config.ssl) && this.config.ssl.disabled === false) {
+          this.config.url = 'https://' + this.config.host + ':' + this.config.port;
         } else {
-          self.config.url = 'http://' + self.config.host + ':' + self.config.port;
+          this.config.url = 'http://' + this.config.host + ':' + this.config.port;
         }
       }
 
       // We can finally make the server listen on the configured port.
       // Use of the `herd` node module to herd the child processes with
       // zero downtime reloads.
-      if (_.isPlainObject(self.config.reload) && !_.isEmpty(self.config.reload) && self.config.reload.workers > 0) {
-        herd(self.config.name)
+      if (_.isPlainObject(this.config.reload) && !_.isEmpty(this.config.reload) && this.config.reload.workers > 0) {
+        herd(this.config.name)
           .close(function () {
             process.send('message');
           })
-          .timeout(self.config.reload.timeout)
-          .size(self.config.reload.workers)
+          .timeout(this.config.reload.timeout)
+          .size(this.config.reload.workers)
           .run(function () {
-            self.server.listen(self.config.port);
+            this.server.listen(this.config.port);
           });
       } else {
-        self.server.listen(self.config.port);
+        this.server.listen(this.config.port);
       }
 
-      cb && cb(null, self);
+      cb && cb(null, this);
     };
   }
 };
