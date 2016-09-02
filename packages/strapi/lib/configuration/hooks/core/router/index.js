@@ -105,7 +105,7 @@ module.exports = strapi => {
 
         // Parse each route from the user config, load policies if any
         // and match the controller and action to the desired endpoint.
-        _.forEach(_.omit(strapi.config.routes, 'plugins'), (value, endpoint) => {
+        _.forEach(strapi.config.routes, (value, endpoint) => {
           try {
             const { route, policies, action } = routerChecker(value, endpoint);
 
@@ -116,7 +116,7 @@ module.exports = strapi => {
         });
 
         // Parse each plugin's routes.
-        _.forEach(strapi.config.routes.plugins, (value, plugin) => {
+        _.forEach(strapi.config.plugins.routes, (value, plugin) => {
           try {
             // Create router for each plugin.
             // Prefix router with the plugin's name.

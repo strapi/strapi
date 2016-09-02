@@ -136,7 +136,7 @@ module.exports = strapi => {
           strapi.plugins[plugin.name] = _.omitBy(_.get(strapi.plugins, plugin.name), _.isEmpty);
 
           // Merge API routes with the main ones.
-          _.set(strapi.config.routes, 'plugins.' + plugin.name, _.get(strapi.plugins, plugin.name + '.config.routes'));
+          _.set(strapi.config, 'plugins.routes.' + plugin.name, _.get(strapi.plugins, plugin.name + '.config.routes'));
 
           // If the module doesn't have a definition at all
           // just remove it completely from the dictionary.

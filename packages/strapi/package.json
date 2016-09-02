@@ -54,6 +54,7 @@
     "koa-load-middlewares": "~1.0.0",
     "koa-locale": "~1.2.0",
     "koa-lusca": "~2.2.0",
+    "koa-mount": "^1.3.0",
     "koa-proxy": "~0.6.0",
     "koa-response-time": "~1.0.2",
     "koa-router": "~5.4.0",
