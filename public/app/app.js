@@ -13,15 +13,13 @@ import 'file?name=[name].[ext]!./.htaccess';
 /* eslint-enable import/no-unresolved */
 // Import all the third party stuff
 import React from 'react';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyRouterMiddleware, Router, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import useScroll from 'react-router-scroll';
-import LanguageProvider from 'containers/LanguageProvider';
+// import LanguageProvider from 'containers/LanguageProvider';
 import configureStore from './store';
-
-
 
 // Import i18n messages
 import { translationMessages } from './i18n';
@@ -53,28 +51,24 @@ const rootRoute = {
 };
 
 
-const render = () => {
-  // ReactDOM.render(
-  return <Provider store={store}>
-            <Router
-              history={history}
-              routes={rootRoute}
-              render={
-                // Scroll to top when going to a new page, imitating default browser
-                // behaviour
-                applyRouterMiddleware(useScroll())
-              }
-            />
-          </Provider>;
-     // document.getElementById('app')
-   // );
- };
-
+const render = () => (
+  <Provider store={store}>
+    <Router
+      history={history}
+      routes={rootRoute}
+      render={
+        // Scroll to top when going to a new page, imitating default browser
+        // behaviour
+        applyRouterMiddleware(useScroll())
+      }
+    />
+  </Provider>
+);
 
 //  Hot reloadable translation json files
- if (module.hot) {
-   // modules.hot.accept does not accept dynamic dependencies,
-   // have to be constants at compile-time
+if (module.hot) {
+  // modules.hot.accept does not accept dynamic dependencies,
+  // have to be constants at compile-time
   module.hot.accept('./i18n', () => {
     render(translationMessages);
   });
@@ -96,7 +90,7 @@ const render = () => {
 // import { install } from 'offline-plugin/runtime';
 // install();
 
-import SettingsManagerHomePage from 'containers/HomePage/index';
+// import SettingsManagerHomePage from 'containers/HomePage/index';
 
 // Register the plugin
 window.Strapi.registerPlugin({
@@ -106,7 +100,5 @@ window.Strapi.registerPlugin({
     label: 'Settings Manager',
     to: '/settings-manager',
   },
-  mainComponent: () => {
-    return render();
-  },
+  mainComponent: () => (render()),
 });

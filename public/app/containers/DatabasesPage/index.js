@@ -15,12 +15,12 @@ export class DatabasesPage extends React.Component { // eslint-disable-line reac
   render() {
     return (
       <div className={styles.databasesPage}>
-      <Helmet
-        title="DatabasesPage"
-        meta={[
-          { name: 'description', content: 'Description of DatabasesPage' },
-        ]}
-      />
+        <Helmet
+          title="DatabasesPage"
+          meta={[
+            { name: 'description', content: 'Description of DatabasesPage' },
+          ]}
+        />
         <FormattedMessage {...messages.header} />
         <h3>Databases</h3>
       </div>
