@@ -1,7 +1,7 @@
 {
-  "name": "strapi-settings-manager",
+  "name": "strapi-admin",
   "version": "0.0.0",
-  "description": "Strapi Settings Manager",
+  "description": "Strapi Admin",
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi-admin.git"
