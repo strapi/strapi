@@ -12,7 +12,6 @@ import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-
     // Init variables
     let content;
 
@@ -35,6 +34,10 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
     );
   }
 }
+
+PluginPage.propTypes = {
+  plugins: React.PropTypes.object,
+};
 
 const mapStateToProps = createSelector(
   selectPlugins(),

@@ -1,0 +1,22 @@
+{
+  "name": "strapi-settings-manager",
+  "version": "0.0.0",
+  "description": "Strapi Settings Manager",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi-admin.git"
+  },
+  "engines": {
+    "npm": ">=3"
+  },
+  "author": "Strapi",
+  "license": "MIT",
+  "scripts": {
+    "lint:admin": "cd public && npm run lint:eslint"
+  },
+  "pre-commit": ["lint:admin"],
+  "dependencies": {},
+  "devDependencies": {
+    "pre-commit": "^1.1.3"
+  }
+}

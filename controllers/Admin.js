@@ -37,7 +37,7 @@ module.exports = {
         parsedHTML('body').append(pluginVendorScript);
       }
     });
-    
+
     // Finally, send the HTML file with injected scripts
     this.body = parsedHTML.html();
   },

@@ -2,14 +2,11 @@
   "name": "react-boilerplate",
   "version": "3.1.0",
   "description": "A highly scalable, offline-first foundation with the best DX and a focus on performance and best practices",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/mxstbr/react-boilerplate.git"
-  },
+  "private": true,
   "engines": {
     "npm": ">=3"
   },
-  "author": "Max Stoiber",
+  "author": "Strapi",
   "license": "MIT",
   "scripts": {
     "analyze:clean": "rimraf stats.json",
