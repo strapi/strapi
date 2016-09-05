@@ -12,7 +12,7 @@
   "author": "Strapi",
   "license": "MIT",
   "scripts": {
-    "lint:admin": "cd public && npm run lint:eslint"
+    "lint:admin": "cd public && npm run test"
   },
   "pre-commit": ["lint:admin"],
   "dependencies": {},
