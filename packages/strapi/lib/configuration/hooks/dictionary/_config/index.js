@@ -129,6 +129,9 @@ module.exports = strapi => {
         // Expose user plugins.
         strapi.plugins = config['plugins/**'];
 
+        // Initialize plugin's routes.
+        _.set(strapi.config, 'plugins.routes', {});
+
         // Add user locales for the settings of the `i18n` hook
         // aiming to load locales automatically.
         if (_.isPlainObject(strapi.config.i18n) && !_.isEmpty(strapi.config.i18n)) {
