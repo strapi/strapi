@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import {
-  REGISTER_PLUGIN,
+  PLUGIN_LOADED,
 } from './constants';
 
 const initialState = fromJS({
@@ -9,7 +9,7 @@ const initialState = fromJS({
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
-    case REGISTER_PLUGIN:
+    case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], action.plugin);
     default:
       return state;

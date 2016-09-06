@@ -19,6 +19,7 @@ import { Provider } from 'react-redux';
 import { applyRouterMiddleware, Router, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import useScroll from 'react-router-scroll';
+import _ from 'lodash';
 import LanguageProvider from 'containers/LanguageProvider';
 import configureStore from './store';
 
@@ -93,10 +94,10 @@ if (!window.Intl) {
 // Install ServiceWorker and AppCache in the end since
 // it's not most important operation and if main code fails,
 // we do not want it installed
-import { install } from 'offline-plugin/runtime';
-install();
+// import { install } from 'offline-plugin/runtime';
+// install();
 
-import { registerPlugin as registerPluginAction } from './containers/App/actions';
+import { pluginLoaded } from './containers/App/actions';
 
 /**
  * Public Strapi object exposed to the `window` object
@@ -107,8 +108,24 @@ import { registerPlugin as registerPluginAction } from './containers/App/actions
  *
  * @param params
  */
-const registerPlugin = (params) => {
-  store.dispatch(registerPluginAction(params));
+const registerPlugin = (plugin) => {
+  // Add routes
+  // Initial list of routes
+  const homeRoute = rootRoute.childRoutes[0];
+  const pluginsRoute = _.find(homeRoute.childRoutes, { name: 'plugins' });
+
+  // Create a new prefixed route for each plugin routes
+  if (plugin && plugin.routes && plugin.routes.childRoutes) {
+    plugin.routes.childRoutes.forEach(route => {
+      pluginsRoute.childRoutes.push({
+        path: `/plugins/${plugin.id}${route.path}`,
+        name: `plugins_${plugin.id}_${route.name}`,
+        getComponent: route.getComponent,
+      });
+    });
+  }
+
+  store.dispatch(pluginLoaded(plugin));
 };
 
 window.Strapi = {

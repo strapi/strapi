@@ -35,8 +35,8 @@ export default function createRoutes(store) {
       },
       childRoutes: [
         {
-          path: '/plugins/:plugin',
-          name: 'plugin',
+          path: '/plugins',
+          name: 'plugins',
           getComponent(nextState, cb) {
             const importModules = Promise.all([
               System.import('containers/PluginPage'),
@@ -50,22 +50,7 @@ export default function createRoutes(store) {
 
             importModules.catch(errorLoading);
           },
-        }, {
-          path: '/plugins/:plugin/**',
-          name: 'plugin',
-          getComponent(nextState, cb) {
-            const importModules = Promise.all([
-              System.import('containers/PluginPage'),
-            ]);
-
-            const renderRoute = loadModule(cb);
-
-            importModules.then(([component]) => {
-              renderRoute(component);
-            });
-
-            importModules.catch(errorLoading);
-          },
+          childRoutes: [],
         },
       ],
     }, {

@@ -4,4 +4,5 @@
  *
  */
 
-export const REGISTER_PLUGIN = 'app/App/REGISTER_PLUGIN';
+export const LOAD_PLUGIN = 'app/App/LOAD_PLUGIN';
+export const PLUGIN_LOADED = 'app/App/PLUGIN_LOADED';

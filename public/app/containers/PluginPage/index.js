@@ -11,16 +11,12 @@ import { createSelector } from 'reselect';
 import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
+  static propTypes = {
+    children: React.PropTypes.node,
+  };
+
   render() {
-    // Init variables
-    let content;
-
-    // Detect plugin according to params
-    content = this.props.plugins.valueSeq().map(plugin => {
-      let Plugin = plugin.mainComponent;
-      return <Plugin key={plugin.id} plugin={plugin}></Plugin>;
-    });
-
     return (
       <div>
         <Helmet
@@ -29,7 +25,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
             { name: 'description', content: 'Description of PluginPage' },
           ]}
         />
-        {content}
+        {React.Children.toArray(this.props.children)}
       </div>
     );
   }

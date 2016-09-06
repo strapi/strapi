@@ -5,12 +5,20 @@
  */
 
 import {
-  REGISTER_PLUGIN,
+  PLUGIN_LOADED,
+  LOAD_PLUGIN,
 } from './constants';
 
-export function registerPlugin(newPlugin) {
+export function loadPlugin(newPlugin) {
   return {
-    type: REGISTER_PLUGIN,
+    type: LOAD_PLUGIN,
+    plugin: newPlugin,
+  };
+}
+
+export function pluginLoaded(newPlugin) {
+  return {
+    type: PLUGIN_LOADED,
     plugin: newPlugin,
   };
 }
