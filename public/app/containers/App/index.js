@@ -12,7 +12,6 @@
  */
 
 import React from 'react';
-// import { hashHistory } from 'react-router';
 
 import styles from './styles.css';
 
@@ -23,7 +22,6 @@ export default class App extends React.Component { // eslint-disable-line react/
   };
 
   render() {
-    // hashHistory.push('/');
     return (
       <div className={styles.container}>
         {React.Children.toArray(this.props.children)}

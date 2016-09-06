@@ -7,7 +7,7 @@ import { defineMessages } from 'react-intl';
 
 export default defineMessages({
   header: {
-    id: 'app.containers.DatabasesPage.header',
-    defaultMessage: 'This is DatabasesPage container !',
+    id: 'app.components.DatabasesPage.header',
+    defaultMessage: 'This is the Databases page of the Settings Manager plugin!',
   },
 });

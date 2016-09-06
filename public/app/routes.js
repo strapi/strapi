@@ -18,7 +18,7 @@ export default function createRoutes(store) {
 
   return [
     {
-      path: '/plugins/settings-manager',
+      path: '',
       name: 'home',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
@@ -34,8 +34,8 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: '/plugins/settings-manager/databases',
-      name: 'home',
+      path: '/databases',
+      name: 'databases',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           System.import('containers/DatabasesPage'),
