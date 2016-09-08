@@ -1,0 +1,18 @@
+.leftMenuLink { /* stylelint-disable */
+  margin-bottom: .4rem;
+}
+
+.leftMenuLinkDestination {
+  display: block;
+  color: #3B3F49;
+  padding-left: 2rem;
+  line-height: 3.6rem;
+  font-size: 1.4rem;
+  border-radius: 2rem;
+
+  &:hover {
+    color: white;
+    text-decoration: none;
+    background-color: #1C5DE7;
+  }
+}

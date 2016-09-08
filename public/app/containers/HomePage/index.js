@@ -10,19 +10,47 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router';
-import messages from './messages';
+import PluginHeader from 'components/PluginHeader';
+import LeftMenu from 'components/LeftMenu';
+import RightContentTitle from 'components/RightContentTitle';
+import styles from './styles.css';
 
 export default class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   render() {
     return (
       <div>
-        <h1>
-          <FormattedMessage {...messages.header} />
-        </h1>
-        <Link to="/plugins/settings-manager/databases">Databases</Link>
+        <div className="container">
+          <PluginHeader></PluginHeader>
+          <div className={`row row-eq-height ${styles.homePageContent}`}>
+            <div className={`col-lg-3 p-l-0 p-r-0 ${styles.homePageLeftContent}`}>
+              <LeftMenu></LeftMenu>
+            </div>
+            <div className={`col-lg-9 ${styles.homePageRightContent}`}>
+              <RightContentTitle></RightContentTitle>
+              <h3 className={styles.homePageRightContentTitle}>Application</h3>
+              <p className={styles.homePageRightContentSubTitle}>The general settings of your Strapi application.</p>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
+                <div className="col-xs-5">
+                  <input className="form-control" type="text" placeholder="My Application" id="applicationName"></input>
+                </div>
+              </div>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
+                <div className="col-xs-5">
+                  <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
+                </div>
+              </div>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
+                <div className="col-xs-5">
+                  <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

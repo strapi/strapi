@@ -1,0 +1,20 @@
+.rightContentTitle { /* stylelint-disable */
+
+}
+
+.rightContentTitleName {
+  font-size: 1.8rem;
+  margin-bottom: .3rem;
+}
+
+.rightContentTitleDescription {
+  font-size: 1.3rem;
+  color: #787E8F;
+  margin-bottom: 1.5rem;
+}
+
+.rigthContentTitleSeparator {
+  margin-left: -3rem;
+  margin-right: -3rem;
+  margin-bottom: 1.5rem;
+}

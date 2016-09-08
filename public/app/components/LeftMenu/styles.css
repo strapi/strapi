@@ -1,0 +1,11 @@
+.leftMenu { /* stylelint-disable */
+  background-color: #F7F8F9;
+  height: 100%;
+  width: 100%;
+  padding-top: 1.7rem;
+}
+
+.leftMenuList {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
