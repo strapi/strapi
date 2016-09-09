@@ -11,7 +11,8 @@
 
 import React from 'react';
 import PluginHeader from 'components/PluginHeader';
-import LeftMenu from 'components/LeftMenu';
+import RightContentSectionTitle from 'components/RightContentSectionTitle';
+import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import styles from './styles.css';
 
@@ -22,34 +23,28 @@ export default class HomePage extends React.Component { // eslint-disable-line r
       <div>
         <div className="container">
           <PluginHeader></PluginHeader>
-          <div className={`row row-eq-height ${styles.homePageContent}`}>
-            <div className={`col-lg-3 p-l-0 p-r-0 ${styles.homePageLeftContent}`}>
-              <LeftMenu></LeftMenu>
-            </div>
-            <div className={`col-lg-9 ${styles.homePageRightContent}`}>
-              <RightContentTitle></RightContentTitle>
-              <h3 className={styles.homePageRightContentTitle}>Application</h3>
-              <p className={styles.homePageRightContentSubTitle}>The general settings of your Strapi application.</p>
-              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
-                <div className="col-xs-5">
-                  <input className="form-control" type="text" placeholder="My Application" id="applicationName"></input>
-                </div>
-              </div>
-              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
-                <div className="col-xs-5">
-                  <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
-                </div>
-              </div>
-              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
-                <div className="col-xs-5">
-                  <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
-                </div>
+          <Container>
+            <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
+            <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
+            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+              <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
+              <div className="col-xs-5">
+                <input className="form-control" type="text" placeholder="My Application" id="applicationName"></input>
               </div>
             </div>
-          </div>
+            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+              <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
+              <div className="col-xs-5">
+                <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
+              </div>
+            </div>
+            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+              <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
+              <div className="col-xs-5">
+                <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
+              </div>
+            </div>
+          </Container>
         </div>
       </div>
     );

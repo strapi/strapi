@@ -53,9 +53,8 @@ const rootRoute = {
 // import SettingsManagerApp from 'containers/App/index';
 
 // const render = () => (
-//   {/*<Provider store={store}>*/}
-//     {/*<SettingsManagerApp></SettingsManagerApp>*/}
-//     {/*<Router*/}
+//   {/*{<Provider store={store}>}*/}
+//     {/*{<Router}*/}
 //       {/*history={history}*/}
 //       {/*routes={rootRoute}*/}
 //       {/*render={*/}
@@ -92,8 +91,6 @@ const rootRoute = {
 // import { install } from 'offline-plugin/runtime';
 // install();
 
-import SettingsManagerHomePage from 'containers/HomePage/index';
-
 // Register the plugin
 window.Strapi.registerPlugin({
   name: 'Settings Manager',
@@ -104,5 +101,4 @@ window.Strapi.registerPlugin({
   },
   routes: rootRoute,
   mainComponent: App,
-  homePage: SettingsManagerHomePage,
 });

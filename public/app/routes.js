@@ -34,11 +34,75 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
+      path: '/languages',
+      name: 'languages',
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          System.import('containers/LanguagesPage'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
       path: '/databases',
       name: 'databases',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           System.import('containers/DatabasesPage'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: '/security',
+      name: 'security',
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          System.import('containers/SecurityPage'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: '/server',
+      name: 'server',
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          System.import('containers/ServerPage'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: '/advanced',
+      name: 'advanced',
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          System.import('containers/AdvancedPage'),
         ]);
 
         const renderRoute = loadModule(cb);

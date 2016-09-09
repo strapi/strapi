@@ -4,38 +4,8 @@
  * Home container styles
  */
 
-.homePage {
-  display: block;
-}
+.homePage { /* stylelint-disable */
 
-.homePageContent {
-  position: relative;
-  border: 1px solid #D7D8D9;
-  border-radius: 0.4rem;
-  overflow: hidden;
-  display: flex;
-}
-
-.homePageLeftContent {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.homePageRightContent {
-  background-color: #FFF;
-  padding: 2.4rem 3rem 50rem;
-}
-
-.homePageRightContentTitle {
-  text-transform: uppercase;
-  font-size: 1.4rem;
-  margin-top: 2.6rem;
-}
-
-.homePageRightContentSubTitle {
-  color: #8B91A0;
-  font-size: 1.2rem;
-  margin-bottom: 1.2rem;
 }
 
 .homePageRightContentFormGroup {

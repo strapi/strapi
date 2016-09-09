@@ -12,12 +12,17 @@ class RightContentTitle extends React.Component { // eslint-disable-line react/p
   render() {
     return (
       <div className={styles.rightContentTitle}>
-        <h2 className={styles.rightContentTitleName}>General</h2>
-        <p className={styles.rightContentTitleDescription}>Configure your general settings</p>
+        <h2 className={styles.rightContentTitleName}>{this.props.title}</h2>
+        <p className={styles.rightContentTitleDescription}>{this.props.description}</p>
         <hr className={styles.rigthContentTitleSeparator}></hr>
       </div>
     );
   }
 }
+
+RightContentTitle.propTypes = {
+  title: React.PropTypes.string,
+  description: React.PropTypes.string,
+};
 
 export default RightContentTitle;
