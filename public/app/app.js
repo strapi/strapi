@@ -82,14 +82,16 @@ if (module.hot) {
 }
 
 // Chunked polyfill for browsers without Intl support
-if (!window.Intl) {
-  Promise.all([
-    System.import('intl'),
-    System.import('intl/locale-data/jsonp/en.js'),
-  ]).then(() => render(translationMessages));
-} else {
-  render(translationMessages);
-}
+window.onload = function onLoad() {
+  if (!window.Intl) {
+    Promise.all([
+      System.import('intl'),
+      System.import('intl/locale-data/jsonp/en.js'),
+    ]).then(() => render(translationMessages));
+  } else {
+    render(translationMessages);
+  }
+};
 
 // Install ServiceWorker and AppCache in the end since
 // it's not most important operation and if main code fails,

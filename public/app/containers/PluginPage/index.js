@@ -17,6 +17,11 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
   };
 
   render() {
+    const containers = this.props.plugins.valueSeq().map((plugin, i) => {
+      const Elem = plugin.mainComponent;
+      return <Elem key={i} {...this.props}></Elem>;
+    });
+
     return (
       <div>
         <Helmet
@@ -25,7 +30,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
             { name: 'description', content: 'Description of PluginPage' },
           ]}
         />
-        {React.Children.toArray(this.props.children)}
+        {containers}
       </div>
     );
   }

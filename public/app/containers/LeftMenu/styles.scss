@@ -6,5 +6,7 @@
   height: 100vh;
   width: $left-menu-width;
   float: left;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
 }

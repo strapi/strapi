@@ -35,8 +35,10 @@
   // Placeholder
   &::placeholder {
     color: $input-color-placeholder;
+    font-weight: 200;
+    font-style: italic;
     // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526.
-    opacity: 1;
+    opacity: 0.8;
   }
 
   // Disabled and read-only inputs

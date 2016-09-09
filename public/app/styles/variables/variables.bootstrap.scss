@@ -158,7 +158,7 @@ $grid-gutter-width: 30px !default;
 //
 // Font, line-height, and color for body text, headings, and more.
 
-$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !default;
+$font-family-sans-serif: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !default;
 $font-family-serif:      Georgia, "Times New Roman", Times, serif !default;
 $font-family-monospace:  Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
 $font-family-base:       $font-family-sans-serif !default;
@@ -230,8 +230,8 @@ $list-inline-padding: 5px !default;
 $line-height-lg:         (4 / 3) !default;
 $line-height-sm:         1.5 !default;
 
-$border-radius:          .25rem !default;
-$border-radius-lg:       .3rem !default;
+$border-radius:          .4rem !default;
+$border-radius-lg:       .6rem !default;
 $border-radius-sm:       .2rem !default;
 
 $component-active-color: #fff !default;
@@ -261,8 +261,8 @@ $table-border-color:            $gray-lighter !default;
 //
 // For each of Bootstrap's buttons, define text, background and border color.
 
-$btn-padding-x:                  1rem !default;
-$btn-padding-y:                  .5rem !default;
+$btn-padding-x:                  3rem !default;
+$btn-padding-y:                  .6rem !default;
 $btn-line-height:                1.25 !default;
 $btn-font-weight:                normal !default;
 $btn-box-shadow:                 inset 0 1px 0 rgba(255,255,255,.15), 0 1px 1px rgba(0,0,0,.075) !default;
@@ -272,7 +272,7 @@ $btn-primary-color:              #fff !default;
 $btn-primary-bg:                 $brand-primary !default;
 $btn-primary-border:             $btn-primary-bg !default;
 
-$btn-secondary-color:            $gray-dark !default;
+$btn-secondary-color:            $gray-light !default;
 $btn-secondary-bg:               #fff !default;
 $btn-secondary-border:           #ccc !default;
 
@@ -311,8 +311,8 @@ $btn-border-radius-sm:           $border-radius-sm !default;
 
 // Forms
 
-$input-padding-x:                .75rem !default;
-$input-padding-y:                .5rem !default;
+$input-padding-x:                1.2rem !default;
+$input-padding-y:                .7rem !default;
 $input-line-height:              1.25 !default;
 
 $input-bg:                       #fff !default;
@@ -328,11 +328,11 @@ $input-border-radius-lg:         $border-radius-lg !default;
 $input-border-radius-sm:         $border-radius-sm !default;
 
 $input-bg-focus:                 $input-bg;
-$input-border-focus:             #66afe9 !default;
+$input-border-focus:             $brand-primary !default;
 $input-box-shadow-focus:         rgba(102,175,233,.6) !default;
 $input-color-focus:              $input-color;
 
-$input-color-placeholder:        #999 !default;
+$input-color-placeholder:        #858585 !default;
 
 $input-padding-x-sm:             .5rem !default;
 $input-padding-y-sm:             .25rem !default;

@@ -1,4 +1,4 @@
-// scss-lint:disable ImportantRule, QualifyingElement, DuplicateProperty
+// scss-lint:disable QualifyingElement, DuplicateProperty
 
 // Reboot
 //
@@ -304,8 +304,9 @@ label {
 //
 // Credit: https://github.com/suitcss/base/
 button:focus {
-  outline: 1px dotted;
-  outline: 5px auto -webkit-focus-ring-color;
+  // outline: 1px dotted;
+  // outline: 5px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 input,

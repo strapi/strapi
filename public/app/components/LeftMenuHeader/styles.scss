@@ -8,12 +8,20 @@
 
 .projectName {
   display: block;
+  height: 100%;
+  width: 100%;
   text-align: center;
   line-height: $header-height;
   vertical-align: middle;
   font-size: 2rem;
   letter-spacing: 0.2rem;
   color: $white;
+
+  // TMP
+  background-image: url('assets/images/logo-strapi.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 12rem auto;
 }
 
 .leftMenuHeaderLink {

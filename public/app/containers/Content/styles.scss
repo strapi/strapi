@@ -3,9 +3,9 @@
 
 .content { /* stylelint-ignore */
   background: $content-background;
-  height: calc(100vh - #{$header-height});
-  padding-top: 4.3rem;
-  padding-bottom: 4rem;
-  padding-left: 4rem;
-  padding-right: 4rem;
+  min-height: calc(100vh - #{$header-height});
+  width: calc(100vw - #{$left-menu-width});
+  margin-top: $header-height;
+  margin-left: $left-menu-width;
+  padding: 3rem;
 }
