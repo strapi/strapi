@@ -27,7 +27,7 @@ class Container extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 Container.propTypes = {
-  children: React.PropTypes.object,
+  children: React.PropTypes.array,
 };
 
 export default Container;
