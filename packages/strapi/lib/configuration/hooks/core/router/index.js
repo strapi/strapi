@@ -115,13 +115,15 @@ module.exports = strapi => {
           }
         });
 
+        console.log(strapi.config.plugins);
+
         // Parse each plugin's routes.
         _.forEach(strapi.config.plugins.routes, (value, plugin) => {
           try {
             // Create router for each plugin.
             // Prefix router with the plugin's name.
             const router = strapi.middlewares.router({
-              prefix: plugin
+              prefix: '/' + plugin
             });
 
             // Exclude routes with prefix.
