@@ -2,6 +2,7 @@
 
 const sendfile = require('koa-sendfile');
 const path = require('path');
+const _ = require('lodash');
 
 /**
  * A set of functions called "actions" for `SettingsManager`
@@ -9,8 +10,16 @@ const path = require('path');
 
 module.exports = {
 
-  find: function *() {
-    this.body = [];
+  getGeneralSettings: function *() {
+
+    // Pick values from `strapi.config`
+    const settings = _.pick(strapi.config, [
+      'name',
+      'version',
+      'description'
+    ]);
+
+    this.body = settings;
   },
 
   file: function *() {

@@ -1,11 +1,11 @@
 {
   "routes": {
-    "GET /settingsmanager": {
+    "GET /settings/general": {
       "controller": "SettingsManager",
-      "action": "find",
+      "action": "getGeneralSettings",
       "policies": []
     },
-    "GET /plugins/settingsmanager/:file": {
+    "GET /plugins/:file": {
       "controller": "SettingsManager",
       "action": "file",
       "policies": []
