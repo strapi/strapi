@@ -10,15 +10,33 @@
  */
 
 import React from 'react';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+
 import PluginHeader from 'components/PluginHeader';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
+
+import {
+  selectGeneralSettings,
+  selectLoading,
+  selectError,
+} from 'containers/HomePage/selectors';
+
+import { changeUsername } from './actions';
+import { loadGeneralSettings } from 'containers/HomePage/actions';
+
 import styles from './styles.css';
 
-export default class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class HomePage extends React.Component {
+
+  componentDidMount() {
+    this.props.onPageLoad();
+  }
 
   render() {
+    console.log('this.props.generalSettings', this.props.generalSettings);
     return (
       <div>
         <div className="container">
@@ -50,3 +68,42 @@ export default class HomePage extends React.Component { // eslint-disable-line r
     );
   }
 }
+
+HomePage.propTypes = {
+  // changeRoute: React.PropTypes.func,
+  // loading: React.PropTypes.bool,
+  // error: React.PropTypes.oneOfType([
+  //   React.PropTypes.object,
+  //   React.PropTypes.bool,
+  // ]),
+  // repos: React.PropTypes.oneOfType([
+  //   React.PropTypes.array,
+  //   React.PropTypes.bool,
+  // ]),
+  // onSubmitForm: React.PropTypes.func,
+  // username: React.PropTypes.string,
+  // onChangeUsername: React.PropTypes.func,
+};
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    // onChangeUsername: (evt) => dispatch(changeUsername(evt.target.value)),
+    // changeRoute: (url) => dispatch(push(url)),
+    onPageLoad: (evt) => {
+      // if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+      dispatch(loadGeneralSettings());
+    },
+
+    dispatch,
+  };
+}
+
+const mapStateToProps = createStructuredSelector({
+  generalSettings: selectGeneralSettings(),
+  // username: selectUsername(),
+  // loading: selectLoading(),
+  // error: selectError(),
+});
+
+// Wrap the component to inject dispatch and state into it
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
