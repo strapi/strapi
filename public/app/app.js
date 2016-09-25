@@ -12,9 +12,9 @@ import '!file?name=[name].[ext]!./manifest.json';
 import 'file?name=[name].[ext]!./.htaccess';
 /* eslint-enable import/no-unresolved */
 // Import all the third party stuff
-// import React from 'react';
-// import ReactDOM from 'react-dom';
-// import { Provider } from 'react-redux';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { browserHistory } from 'react-router';
 // import { syncHistoryWithStore } from 'react-router-redux';
 // import useScroll from 'react-router-scroll';
@@ -50,6 +50,10 @@ const rootRoute = {
   childRoutes: createRoutes(store),
 };
 
+export {
+  store,
+}
+
 // import SettingsManagerApp from 'containers/App/index';
 
 // const render = () => (
@@ -65,6 +69,16 @@ const rootRoute = {
 //     {/*/>*/}
   // </Provider>
 // );
+
+// const render = (messages) => {
+//   console.log('this', this);
+  // ReactDOM.render(
+  // return (
+  //  
+  // );
+    // </Provider>
+  // );
+// };
 
 //  Hot reloadable translation json files
 // if (module.hot) {

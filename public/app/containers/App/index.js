@@ -12,6 +12,8 @@
  */
 
 import React from 'react';
+import { Provider } from 'react-redux';
+import { store } from '../../app';
 
 import styles from './styles.css';
 
@@ -23,9 +25,11 @@ export default class App extends React.Component { // eslint-disable-line react/
 
   render() {
     return (
-      <div className={styles.container}>
-        {React.Children.toArray(this.props.children)}
-      </div>
+      <Provider store={store}>
+        <div className={styles.container}>
+          {React.Children.toArray(this.props.children)}
+        </div>
+      </Provider>
     );
   }
 }
