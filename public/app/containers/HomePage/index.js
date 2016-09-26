@@ -20,6 +20,8 @@ import RightContentTitle from 'components/RightContentTitle';
 
 import {
   selectName,
+  selectDescription,
+  selectVersion,
   selectLoading,
   selectError,
 } from 'containers/HomePage/selectors';
@@ -27,6 +29,8 @@ import {
 import {
   loadGeneralSettings,
   changeName,
+  changeDescription,
+  changeVersion,
   updateGeneralSettings,
 } from 'containers/HomePage/actions';
 
@@ -36,10 +40,6 @@ export class HomePage extends React.Component {
 
   componentDidMount() {
     this.props.onPageLoad();
-
-    setTimeout(() => {
-      this.props.onFormSubmit();
-    }, 1000);
   }
 
   render() {
@@ -60,20 +60,34 @@ export class HomePage extends React.Component {
                     placeholder="My Application"
                     id="applicationName"
                     value={this.props.name}
-                    onChange={this.props.onChangeAppName}
+                    onChange={this.props.onChangeName}
                   />
                 </div>
               </div>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
                 <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
                 <div className="col-xs-5">
-                  <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="A Strapi application"
+                    id="applicationDescription"
+                    value={this.props.description}
+                    onChange={this.props.onChangeDescription}
+                  />
                 </div>
               </div>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
                 <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
                 <div className="col-xs-5">
-                  <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="0.0.1"
+                    id="applicationVersion"
+                    value={this.props.version}
+                    onChange={this.props.onChangeVersion}
+                  />
                 </div>
               </div>
               <button className="btn btn-primary" type="submit">
@@ -98,15 +112,27 @@ HomePage.propTypes = {
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
+  description: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
+  version: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
   onPageLoad: React.PropTypes.func,
   onFormSubmit: React.PropTypes.func,
   // username: React.PropTypes.string,
-  onChangeAppName: React.PropTypes.func,
+  onChangeName: React.PropTypes.func,
+  onChangeDescription: React.PropTypes.func,
+  onChangeVersion: React.PropTypes.func,
 };
 
   export function mapDispatchToProps(dispatch) {
     return {
-      onChangeAppName: (evt) => dispatch(changeName(evt.target.value)),
+      onChangeName: (evt) => dispatch(changeName(evt.target.value)),
+      onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
+      onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),
       onFormSubmit: (e) => {
         e.preventDefault();
         dispatch(updateGeneralSettings());
@@ -124,6 +150,8 @@ HomePage.propTypes = {
 const mapStateToProps = createStructuredSelector({
   // generalSettings: selectGeneralSettings(),
   name: selectName(),
+  description: selectDescription(),
+  version: selectVersion(),
   // username: selectUsername(),
   // loading: selectLoading(),
   // error: selectError(),

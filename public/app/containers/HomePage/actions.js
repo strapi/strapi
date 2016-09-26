@@ -19,7 +19,9 @@ import {
   LOAD_GENERAL_SETTINGS,
   LOAD_GENERAL_SETTINGS_SUCCESS,
   LOAD_GENERAL_SETTINGS_ERROR,
-  CHANGE_APP_NAME,
+  CHANGE_NAME,
+  CHANGE_DESCRIPTION,
+  CHANGE_VERSION,
   UPDATE_GENERAL_SETTINGS,
 } from './constants';
 
@@ -65,8 +67,22 @@ export function generalSettingsLoadingError(error) {
 
 export function changeName(name) {
   return {
-    type: CHANGE_APP_NAME,
+    type: CHANGE_NAME,
     name: name
+  };
+}
+
+export function changeDescription(description) {
+  return {
+    type: CHANGE_DESCRIPTION,
+    description: description
+  };
+}
+
+export function changeVersion(version) {
+  return {
+    type: CHANGE_VERSION,
+    version: version
   };
 }
 

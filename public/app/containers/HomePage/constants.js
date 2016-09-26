@@ -12,5 +12,7 @@
 export const LOAD_GENERAL_SETTINGS = 'settingsmanager/HomePage/LOAD_GENERAL_SETTINGS';
 export const LOAD_GENERAL_SETTINGS_SUCCESS = 'settingsmanager/HomePage/LOAD_GENERAL_SETTINGS_SUCCESS';
 export const LOAD_GENERAL_SETTINGS_ERROR = 'settingsmanager/HomePage/LOAD_GENERAL_SETTINGS_ERROR';
-export const CHANGE_APP_NAME = 'settingsmanager/HomePage/CHANGE_APP_NAME';
+export const CHANGE_NAME = 'settingsmanager/HomePage/CHANGE_NAME';
+export const CHANGE_DESCRIPTION = 'settingsmanager/HomePage/CHANGE_DESCRIPTION';
+export const CHANGE_VERSION = 'settingsmanager/HomePage/CHANGE_VERSION';
 export const UPDATE_GENERAL_SETTINGS = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS';

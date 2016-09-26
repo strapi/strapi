@@ -9,7 +9,11 @@ import {
   UPDATE_GENERAL_SETTINGS,
 }  from 'containers/HomePage/constants';
 import { generalSettingsLoaded, generalSettingsLoadingError } from 'containers/HomePage/actions';
-import { selectName } from 'containers/HomePage/selectors';
+import {
+  selectName,
+  selectDescription,
+  selectVersion,
+} from 'containers/HomePage/selectors';
 
 import request from 'utils/request';
 
@@ -32,9 +36,9 @@ export function* getGeneralSettings() {
 export function* updateGeneralSettings() {
   const data = {
     name: yield select(selectName()),
+    description: yield select(selectDescription()),
+    version: yield select(selectVersion()),
   };
-
-  console.log('data', data);
 
   const requestURL = `http://localhost:1337/settingsmanager/settings`;
 

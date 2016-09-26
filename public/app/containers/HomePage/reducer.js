@@ -14,7 +14,9 @@ import {
   LOAD_GENERAL_SETTINGS_SUCCESS,
   LOAD_GENERAL_SETTINGS,
   LOAD_GENERAL_SETTINGS_ERROR,
-  CHANGE_APP_NAME,
+  CHANGE_NAME,
+  CHANGE_DESCRIPTION,
+  CHANGE_VERSION,
 } from './constants';
 import { fromJS } from 'immutable';
 
@@ -23,7 +25,7 @@ const initialState = fromJS({
   loading: false,
   error: false,
 
-  name: false ,
+  name: false,
   description: false,
   version: false,
 });
@@ -48,9 +50,15 @@ function appReducer(state = initialState, action) {
       return state
         .set('error', action.error)
         .set('loading', false);
-    case CHANGE_APP_NAME:
+    case CHANGE_NAME:
       return state
         .set('name', action.name);
+    case CHANGE_DESCRIPTION:
+      return state
+        .set('description', action.description);
+    case CHANGE_VERSION:
+      return state
+        .set('version', action.version);
     default:
       return state;
   }

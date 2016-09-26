@@ -26,6 +26,16 @@ const selectName = () => createSelector(
   (homeState) => homeState.get('name')
 );
 
+const selectDescription = () => createSelector(
+  selectHome(),
+  (homeState) => homeState.get('description')
+);
+
+const selectVersion = () => createSelector(
+  selectHome(),
+  (homeState) => homeState.get('version')
+);
+
 const selectLocationState = () => {
   let prevRoutingState;
   let prevRoutingStateJS;
@@ -48,5 +58,7 @@ export {
   selectError,
   selectGeneralSettings,
   selectName,
+  selectDescription,
+  selectVersion,
   selectLocationState,
 };

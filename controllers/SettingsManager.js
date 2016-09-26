@@ -31,8 +31,18 @@ module.exports = {
     // Update application name
     if (this.request.body.name) {
       packageJSONContent.name = this.request.body.name;
-      fs.writeFileSync('package.json', JSON.stringify(packageJSONContent, null, 4), 'utf8');
     }
+
+    if (this.request.body.description) {
+      packageJSONContent.description = this.request.body.description;
+    }
+
+    if (this.request.body.version) {
+      packageJSONContent.version = this.request.body.version;
+    }
+
+
+    fs.writeFileSync('package.json', JSON.stringify(packageJSONContent, null, 4), 'utf8');
 
     return this.body = {
       name: packageJSONContent.name
