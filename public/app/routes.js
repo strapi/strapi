@@ -5,6 +5,7 @@
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 
 const errorLoading = (err) => {
+  console.log('errLoading', err)
   console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
 };
 

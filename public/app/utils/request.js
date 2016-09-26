@@ -37,6 +37,13 @@ function checkStatus(response) {
  * @return {object}           An object containing either "data" or "err"
  */
 export default function request(url, options) {
+  // Default headers
+  options = options || {};
+  options.headers = options && options.headers || {
+    'Accept': 'application/json',
+      'Content-Type': 'application/json'
+  };
+
   return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)

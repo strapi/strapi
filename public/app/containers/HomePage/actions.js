@@ -19,6 +19,8 @@ import {
   LOAD_GENERAL_SETTINGS,
   LOAD_GENERAL_SETTINGS_SUCCESS,
   LOAD_GENERAL_SETTINGS_ERROR,
+  CHANGE_APP_NAME,
+  UPDATE_GENERAL_SETTINGS,
 } from './constants';
 
 /**
@@ -40,16 +42,15 @@ export function loadGeneralSettings() {
  *
  * @return {object}      An action object with a type of LOAD_GENERAL_SETTINGS_SUCCESS passing the generalSettings
  */
-export function generalSettingsLoaded(generalSettings, username) {
+export function generalSettingsLoaded(data) {
   return {
     type: LOAD_GENERAL_SETTINGS_SUCCESS,
-    generalSettings,
-    username,
+    data,
   };
 }
 
 /**
- * Dispatched when loading the generalSettingsitories fails
+ * Dispatched when loading the generalSettings fails
  *
  * @param  {object} error The error
  *
@@ -60,4 +61,18 @@ export function generalSettingsLoadingError(error) {
     type: LOAD_GENERAL_SETTINGS_ERROR,
     error,
   };
+}
+
+export function changeName(name) {
+  return {
+    type: CHANGE_APP_NAME,
+    name: name
+  };
+}
+
+export function updateGeneralSettings(data) {
+  return {
+    type: UPDATE_GENERAL_SETTINGS,
+    data: data
+  }
 }

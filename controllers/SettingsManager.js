@@ -3,6 +3,7 @@
 const sendfile = require('koa-sendfile');
 const path = require('path');
 const _ = require('lodash');
+const fs = require('fs');
 
 /**
  * A set of functions called "actions" for `SettingsManager`
@@ -10,8 +11,7 @@ const _ = require('lodash');
 
 module.exports = {
 
-  getGeneralSettings: function *() {
-
+  getGeneralSettings: function* () {
     // Pick values from `strapi.config`
     const settings = _.pick(strapi.config, [
       'name',
@@ -22,7 +22,24 @@ module.exports = {
     this.body = settings;
   },
 
-  file: function *() {
+  updateSettings: function* () {
+    console.log('updateSettings', this.request.body);
+
+    const packageJSONPath = fs.readFileSync(path.resolve(strapi.config.appPath, 'package.json'));
+    const packageJSONContent = JSON.parse(packageJSONPath, 'utf8');
+
+    // Update application name
+    if (this.request.body.name) {
+      packageJSONContent.name = this.request.body.name;
+      fs.writeFileSync('package.json', JSON.stringify(packageJSONContent, null, 4), 'utf8');
+    }
+
+    return this.body = {
+      name: packageJSONContent.name
+    };
+  },
+
+  file: function* () {
     yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
     if (!this.status) this.throw(404);
   }

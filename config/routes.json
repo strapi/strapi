@@ -5,6 +5,10 @@
       "action": "getGeneralSettings",
       "policies": []
     },
+    "PUT /settings": {
+      "controller": "SettingsManager",
+      "action": "updateSettings"
+    },
     "GET /plugins/:file": {
       "controller": "SettingsManager",
       "action": "file",

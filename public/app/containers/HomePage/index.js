@@ -19,13 +19,16 @@ import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 
 import {
-  selectGeneralSettings,
+  selectName,
   selectLoading,
   selectError,
 } from 'containers/HomePage/selectors';
 
-import { changeUsername } from './actions';
-import { loadGeneralSettings } from 'containers/HomePage/actions';
+import {
+  loadGeneralSettings,
+  changeName,
+  updateGeneralSettings,
+} from 'containers/HomePage/actions';
 
 import styles from './styles.css';
 
@@ -33,10 +36,13 @@ export class HomePage extends React.Component {
 
   componentDidMount() {
     this.props.onPageLoad();
+
+    setTimeout(() => {
+      this.props.onFormSubmit();
+    }, 1000);
   }
 
   render() {
-    console.log('this.props.generalSettings', this.props.generalSettings);
     return (
       <div>
         <div className="container">
@@ -44,24 +50,36 @@ export class HomePage extends React.Component {
           <Container>
             <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
             <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
-            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-              <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
-              <div className="col-xs-5">
-                <input className="form-control" type="text" placeholder="My Application" id="applicationName"></input>
+            <form onSubmit={this.props.onFormSubmit}>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
+                <div className="col-xs-5">
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="My Application"
+                    id="applicationName"
+                    value={this.props.name}
+                    onChange={this.props.onChangeAppName}
+                  />
+                </div>
               </div>
-            </div>
-            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-              <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
-              <div className="col-xs-5">
-                <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
+                <div className="col-xs-5">
+                  <input className="form-control" type="text" placeholder="A Strapi application" id="applicationDescription"></input>
+                </div>
               </div>
-            </div>
-            <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-              <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
-              <div className="col-xs-5">
-                <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
+              <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
+                <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
+                <div className="col-xs-5">
+                  <input className="form-control" type="text" placeholder="0.0.1" id="applicationVersion"></input>
+                </div>
               </div>
-            </div>
+              <button className="btn btn-primary" type="submit">
+                Submit
+              </button>
+            </form>
           </Container>
         </div>
       </div>
@@ -76,18 +94,23 @@ HomePage.propTypes = {
   //   React.PropTypes.object,
   //   React.PropTypes.bool,
   // ]),
-  // repos: React.PropTypes.oneOfType([
-  //   React.PropTypes.array,
-  //   React.PropTypes.bool,
-  // ]),
-  // onSubmitForm: React.PropTypes.func,
+  name: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
+  onPageLoad: React.PropTypes.func,
+  onFormSubmit: React.PropTypes.func,
   // username: React.PropTypes.string,
-  // onChangeUsername: React.PropTypes.func,
+  onChangeAppName: React.PropTypes.func,
 };
 
-export function mapDispatchToProps(dispatch) {
-  return {
-    // onChangeUsername: (evt) => dispatch(changeUsername(evt.target.value)),
+  export function mapDispatchToProps(dispatch) {
+    return {
+      onChangeAppName: (evt) => dispatch(changeName(evt.target.value)),
+      onFormSubmit: (e) => {
+        e.preventDefault();
+        dispatch(updateGeneralSettings());
+      },
     // changeRoute: (url) => dispatch(push(url)),
     onPageLoad: (evt) => {
       // if (evt !== undefined && evt.preventDefault) evt.preventDefault();
@@ -99,7 +122,8 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  generalSettings: selectGeneralSettings(),
+  // generalSettings: selectGeneralSettings(),
+  name: selectName(),
   // username: selectUsername(),
   // loading: selectLoading(),
   // error: selectError(),

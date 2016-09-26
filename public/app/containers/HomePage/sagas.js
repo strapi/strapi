@@ -4,8 +4,12 @@
 
 import { take, call, put, select, fork, cancel } from 'redux-saga/effects';
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { LOAD_GENERAL_SETTINGS }  from 'containers/HomePage/constants';
+import {
+  LOAD_GENERAL_SETTINGS,
+  UPDATE_GENERAL_SETTINGS,
+}  from 'containers/HomePage/constants';
 import { generalSettingsLoaded, generalSettingsLoadingError } from 'containers/HomePage/actions';
+import { selectName } from 'containers/HomePage/selectors';
 
 import request from 'utils/request';
 
@@ -13,7 +17,6 @@ import request from 'utils/request';
  * Github generalSettings request/response handler
  */
 export function* getGeneralSettings() {
-  // Select username from store
   const requestURL = `http://localhost:1337/settingsmanager/settings/general`;
 
   // Call our request helper (see 'utils/request')
@@ -26,6 +29,29 @@ export function* getGeneralSettings() {
   }
 }
 
+export function* updateGeneralSettings() {
+  const data = {
+    name: yield select(selectName()),
+  };
+
+  console.log('data', data);
+
+  const requestURL = `http://localhost:1337/settingsmanager/settings`;
+
+  // Call our request helper (see 'utils/request')
+  const generalSettings = yield call(
+    request,
+    requestURL, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    }
+  );
+}
+
 /**
  * Watches for LOAD_REPOS action and calls handler
  */
@@ -35,12 +61,20 @@ export function* getGeneralSettingsWatcher() {
   }
 }
 
+export function* updateGeneralSettingsWatcher() {
+  while (yield take(UPDATE_GENERAL_SETTINGS)) {
+    yield call(updateGeneralSettings);
+  }
+}
+
 /**
  * Root saga manages watcher lifecycle
  */
 export function* generalSettingsData() {
   // Fork watcher so we can continue execution
+
   const watcher = yield fork(getGeneralSettingsWatcher);
+  const updateWatcher = yield fork(updateGeneralSettingsWatcher);
 
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
