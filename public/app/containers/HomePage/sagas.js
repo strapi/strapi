@@ -8,7 +8,14 @@ import {
   LOAD_GENERAL_SETTINGS,
   UPDATE_GENERAL_SETTINGS,
 }  from 'containers/HomePage/constants';
-import { generalSettingsLoaded, generalSettingsLoadingError } from 'containers/HomePage/actions';
+
+import {
+  generalSettingsLoaded,
+  generalSettingsLoadingError,
+  generalSettingsUpdated,
+  generalSettingsUpdatedError,
+} from 'containers/HomePage/actions';
+
 import {
   selectName,
   selectDescription,
@@ -54,6 +61,12 @@ export function* updateGeneralSettings() {
       body: JSON.stringify(data),
     }
   );
+
+  if (!generalSettings.err) {
+    yield put(generalSettingsUpdated(generalSettings.data));
+  } else {
+    yield put(generalSettingsUpdatedError(generalSettings.err));
+  }
 }
 
 /**

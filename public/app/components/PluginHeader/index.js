@@ -19,7 +19,7 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
             <PluginHeaderTitle></PluginHeaderTitle>
           </div>
           <div className="col-lg-4">
-            <PluginHeaderActions></PluginHeaderActions>
+            <PluginHeaderActions {...this.props}></PluginHeaderActions>
           </div>
         </div>
       </div>

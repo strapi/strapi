@@ -23,6 +23,8 @@ import {
   CHANGE_DESCRIPTION,
   CHANGE_VERSION,
   UPDATE_GENERAL_SETTINGS,
+  UPDATE_GENERAL_SETTINGS_SUCCESS,
+  UPDATE_GENERAL_SETTINGS_ERROR,
 } from './constants';
 
 /**
@@ -90,5 +92,19 @@ export function updateGeneralSettings(data) {
   return {
     type: UPDATE_GENERAL_SETTINGS,
     data: data
+  }
+}
+
+export function generalSettingsUpdated(data) {
+  return {
+    type: UPDATE_GENERAL_SETTINGS_SUCCESS,
+    data: data
+  }
+}
+
+export function generalSettingsUpdatedError(error) {
+  return {
+    type: UPDATE_GENERAL_SETTINGS_ERROR,
+    error: error
   }
 }

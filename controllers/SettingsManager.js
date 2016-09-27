@@ -23,8 +23,6 @@ module.exports = {
   },
 
   updateSettings: function* () {
-    console.log('updateSettings', this.request.body);
-
     const packageJSONPath = fs.readFileSync(path.resolve(strapi.config.appPath, 'package.json'));
     const packageJSONContent = JSON.parse(packageJSONPath, 'utf8');
 

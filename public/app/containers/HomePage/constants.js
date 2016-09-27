@@ -16,3 +16,6 @@ export const CHANGE_NAME = 'settingsmanager/HomePage/CHANGE_NAME';
 export const CHANGE_DESCRIPTION = 'settingsmanager/HomePage/CHANGE_DESCRIPTION';
 export const CHANGE_VERSION = 'settingsmanager/HomePage/CHANGE_VERSION';
 export const UPDATE_GENERAL_SETTINGS = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS';
+export const UPDATE_GENERAL_SETTINGS_SUCCESS = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS_SUCCESS';
+export const UPDATE_GENERAL_SETTINGS_ERROR = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS_ERROR';
+

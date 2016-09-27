@@ -43,10 +43,15 @@ export class HomePage extends React.Component {
   }
 
   render() {
+    const error = this.props.error && <div className="row"><div className="alert alert-danger" role="alert"><strong>An error occurred.</strong> {this.props.error.message}</div></div>;
+    const success = this.props.success && <div className="row"><div className="alert alert-success" role="alert"><strong>Success!</strong> {this.props.success.message}</div></div>;
+
     return (
       <div>
         <div className="container">
-          <PluginHeader></PluginHeader>
+          {success}
+          {error}
+          <PluginHeader {...this.props}></PluginHeader>
           <Container>
             <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
             <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
@@ -59,8 +64,9 @@ export class HomePage extends React.Component {
                     type="text"
                     placeholder="My Application"
                     id="applicationName"
-                    value={this.props.name}
+                    value={this.props.name || ''}
                     onChange={this.props.onChangeName}
+                    autoFocus={true}
                   />
                 </div>
               </div>
@@ -72,7 +78,7 @@ export class HomePage extends React.Component {
                     type="text"
                     placeholder="A Strapi application"
                     id="applicationDescription"
-                    value={this.props.description}
+                    value={this.props.description || ''}
                     onChange={this.props.onChangeDescription}
                   />
                 </div>
@@ -85,14 +91,12 @@ export class HomePage extends React.Component {
                     type="text"
                     placeholder="0.0.1"
                     id="applicationVersion"
-                    value={this.props.version}
+                    value={this.props.version || ''}
                     onChange={this.props.onChangeVersion}
                   />
                 </div>
               </div>
-              <button className="btn btn-primary" type="submit">
-                Submit
-              </button>
+              <button className="btn btn-primary hidden-xs-up" type="submit">Submit</button>
             </form>
           </Container>
         </div>
@@ -102,12 +106,12 @@ export class HomePage extends React.Component {
 }
 
 HomePage.propTypes = {
-  // changeRoute: React.PropTypes.func,
-  // loading: React.PropTypes.bool,
-  // error: React.PropTypes.oneOfType([
-  //   React.PropTypes.object,
-  //   React.PropTypes.bool,
-  // ]),
+  changeRoute: React.PropTypes.func,
+  loading: React.PropTypes.bool,
+  error: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
   name: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
@@ -133,13 +137,13 @@ HomePage.propTypes = {
       onChangeName: (evt) => dispatch(changeName(evt.target.value)),
       onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
       onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),
-      onFormSubmit: (e) => {
-        e.preventDefault();
+      onFormSubmit: (evt) => {
+        if (evt !== undefined && evt.preventDefault) evt.preventDefault();
         dispatch(updateGeneralSettings());
       },
-    // changeRoute: (url) => dispatch(push(url)),
+    changeRoute: (url) => dispatch(push(url)),
     onPageLoad: (evt) => {
-      // if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+      if (evt !== undefined && evt.preventDefault) evt.preventDefault();
       dispatch(loadGeneralSettings());
     },
 
@@ -148,13 +152,11 @@ HomePage.propTypes = {
 }
 
 const mapStateToProps = createStructuredSelector({
-  // generalSettings: selectGeneralSettings(),
   name: selectName(),
   description: selectDescription(),
   version: selectVersion(),
-  // username: selectUsername(),
-  // loading: selectLoading(),
-  // error: selectError(),
+  loading: selectLoading(),
+  error: selectError(),
 });
 
 // Wrap the component to inject dispatch and state into it

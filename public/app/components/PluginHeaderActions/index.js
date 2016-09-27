@@ -12,11 +12,25 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
   render() {
     return (
       <div className={`${styles.pluginHeaderActions} pull-lg-right`}>
-        <button type="button" className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}>Cancel</button>
-        <button type="button" className={`${styles.pluginHeaderActionsButton} btn btn-primary`}>Save</button>
+        <button type="button"
+                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}>
+          Cancel
+        </button>
+        <button type="submit"
+                className={`${styles.pluginHeaderActionsButton} btn btn-primary`}
+                disabled={this.props.loading}
+                onClick={this.props.onFormSubmit}
+        >
+          Save
+        </button>
       </div>
     );
   }
 }
+
+PluginHeaderActions.propTypes = {
+  loading: React.PropTypes.bool,
+  onFormSubmit: React.PropTypes.func,
+};
 
 export default PluginHeaderActions;

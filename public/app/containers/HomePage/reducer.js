@@ -17,6 +17,9 @@ import {
   CHANGE_NAME,
   CHANGE_DESCRIPTION,
   CHANGE_VERSION,
+  UPDATE_GENERAL_SETTINGS,
+  UPDATE_GENERAL_SETTINGS_SUCCESS,
+  UPDATE_GENERAL_SETTINGS_ERROR,
 } from './constants';
 import { fromJS } from 'immutable';
 
@@ -31,7 +34,6 @@ const initialState = fromJS({
 });
 
 function appReducer(state = initialState, action) {
-  console.log(action.type);
   switch (action.type) {
     case LOAD_GENERAL_SETTINGS:
       return state
@@ -59,6 +61,17 @@ function appReducer(state = initialState, action) {
     case CHANGE_VERSION:
       return state
         .set('version', action.version);
+    case UPDATE_GENERAL_SETTINGS:
+      return state
+        .set('loading', true)
+        .set('error', false);
+    case UPDATE_GENERAL_SETTINGS_SUCCESS:
+      return state
+        .set('loading', false);
+    case UPDATE_GENERAL_SETTINGS_ERROR:
+      return state
+        .set('error', action.error)
+        .set('loading', false);
     default:
       return state;
   }
