@@ -13,7 +13,8 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
     return (
       <div className={`${styles.pluginHeaderActions} pull-lg-right`}>
         <button type="button"
-                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}>
+                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}
+                disabled={this.props.loading}>
           Cancel
         </button>
         <button type="submit"
