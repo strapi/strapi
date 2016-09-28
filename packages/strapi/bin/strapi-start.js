@@ -37,8 +37,7 @@ module.exports = function () {
     const server = require(path.resolve(process.cwd(), 'config', 'environments', 'development', 'server.json'));
 
     if (process.env.NODE_ENV === 'development' && server.reload === true) {
-
-      const options =  _.assign({}, {
+      const options = _.assign({}, {
         silent: false,
         watch: true,
         watchDirectory: process.cwd(),
@@ -49,7 +48,7 @@ module.exports = function () {
       const child = new (forever.Monitor)('server.js', options);
 
       // Run listeners
-      child.on('restart', function() {
+      child.on('restart', () => {
         console.log();
         logger.info('Restarting due to changes...');
       });
@@ -69,16 +68,16 @@ module.exports = function () {
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
     return require('../lib/')().start(afterwards);
-
-    function afterwards(err, strapi) {
-      if (err) {
-        logger.error(err.stack ? err.stack : err);
-
-        strapi ? strapi.stop() : process.exit(1);
-      }
-    }
   } catch (e) {
     logger.error(e);
     process.exit(0);
   }
 };
+
+function afterwards(err, strapi) {
+  if (err) {
+    logger.error(err.stack ? err.stack : err);
+
+    strapi ? strapi.stop() : process.exit(1);
+  }
+}

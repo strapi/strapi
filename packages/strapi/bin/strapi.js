@@ -70,21 +70,21 @@ cmd.action(require('./strapi-console'));
 // `$ strapi generate:api`
 cmd = program.command('generate:api');
 cmd.unknownOption = true;
-cmd.option('-t, --tpl <template>', 'template name')
+cmd.option('-t, --tpl <template>', 'template name');
 cmd.description('generate a basic API');
 cmd.action(require('./strapi-generate'));
 
 // `$ strapi generate:controller`
 cmd = program.command('generate:controller');
 cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name')
+cmd.option('-t, --tpl <template>', 'template name');
 cmd.description('generate a controller for an API');
 cmd.action(require('./strapi-generate'));
 
 // `$ strapi generate:model`
 cmd = program.command('generate:model');
 cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name')
+cmd.option('-t, --tpl <template>', 'template name');
 cmd.description('generate a model for an API');
 cmd.action(require('./strapi-generate'));
 
@@ -97,7 +97,7 @@ cmd.action(require('./strapi-generate'));
 // `$ strapi generate:service`
 cmd = program.command('generate:service');
 cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name')
+cmd.option('-t, --tpl <template>', 'template name');
 cmd.description('generate a service for an API');
 cmd.action(require('./strapi-generate'));
 

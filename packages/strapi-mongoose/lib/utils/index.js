@@ -21,7 +21,7 @@ module.exports = mongoose => {
           return 'String';
         case 'integer':
         case 'biginteger':
-          return 'Number'
+          return 'Number';
         case 'float':
           return SchemaTypes.Float;
         case 'decimal':
@@ -32,7 +32,7 @@ module.exports = mongoose => {
         case 'timestamp':
           return Date;
         case 'boolean':
-          return 'Boolean'
+          return 'Boolean';
         case 'binary':
           return 'Buffer';
         case 'uuid':
@@ -45,5 +45,5 @@ module.exports = mongoose => {
 
       }
     }
-  }
-}
+  };
+};

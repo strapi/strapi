@@ -18,7 +18,7 @@ const Hook = require('../configuration/hooks');
  * @api private
  */
 
-module.exports = function(cb) {
+module.exports = function (cb) {
   function prepareHook(id) {
     let hookPrototype = this.hooks[id];
 
@@ -89,6 +89,6 @@ module.exports = function(cb) {
       prepareHook.apply(this, [identity]);
       applyDefaults.apply(this, [hook]);
       loadHook.apply(this, [identity, cb]);
-    }
+    };
   }), err => cb(err));
 };

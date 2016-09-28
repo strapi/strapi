@@ -4,8 +4,8 @@
  * Module dependencies
  */
 
- // Node.js core.
- const path = require('path');
+// Node.js core.
+const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
@@ -54,7 +54,13 @@ module.exports = function (configOverride, cb) {
     initializeHooks: ['loadDictionary', (result, cb) => initializeHooks.apply(this, [cb])],
     // Load hooks into memory.
     loadHooks: ['initializeHooks', (result, cb) => loadHooks.apply(this, [cb])]
-  }, (err, results) => ready__.apply(this, [cb])());
+  }, (err, results) => {
+    if (err) {
+      console.log(err);
+    }
+
+    ready__.apply(this, [cb])();
+  });
 
   // Makes `app.load()` chainable.
   return this;
@@ -90,10 +96,10 @@ module.exports = function (configOverride, cb) {
     // Create a tree of hook's path.
     _.forEach(_.omit(DEFAULT_HOOKS, 'dictionary'), (hooks, hookCategory) => {
       _.forEach(hooks, (hook, hookIdentity) => {
-         _.set(this.tree, hookIdentity, {
-           path: './configuration/hooks/' + hookCategory + '/' + hookIdentity,
-           category: hookCategory
-         });
+        _.set(this.tree, hookIdentity, {
+          path: './configuration/hooks/' + hookCategory + '/' + hookIdentity,
+          category: hookCategory
+        });
       });
     });
 

@@ -17,8 +17,6 @@ const json = require('strapi-utils').json;
 
 module.exports = class Configuration {
 
-  constructor() {}
-
   /**
    * Strapi default configuration
    *
@@ -73,7 +71,7 @@ module.exports = class Configuration {
       frontendUrl: '',
       hooks: {}
     };
-  };
+  }
 
   /**
    * Load the configuration modules
