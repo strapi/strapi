@@ -14,8 +14,13 @@
   "scripts": {
     "lint:admin": "cd public && npm run test"
   },
-  "pre-commit": ["lint:admin"],
-  "dependencies": {},
+  "pre-commit": [
+    "lint:admin"
+  ],
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "koa-sendfile": "^2.0.0"
+  },
   "devDependencies": {
     "pre-commit": "^1.1.3"
   }
