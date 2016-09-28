@@ -1,7 +1,19 @@
+sudo: required
+
 git:
   depth: 1
 
 language: node_js
+
+install:
+  - cd packages/strapi-mongoose
+  - npm link
+  - cd ../strapi
+  - npm link strapi-mongoose
+  - npm install
+  - cd ..
+  - cd ..
+  - npm install
 
 node_js:
   - "5"
@@ -9,8 +21,5 @@ node_js:
 
 sudo: false
 
-script: "make test"
-
-notifications:
-  slack:
-    secure: WUmEtUpfbSrt59VsvYhdMHBJgqROaU3Zp5KRo/BpPdExQec00y0YikhJaDRkV2LMiq1I9dOW2kWRBpFSZqMcqIhPMN+poheqiuSs2Cly28UbzpAAb4dA574gfhgCCfEuAAHiAT6m89NWoF5opey7cha/tlKCnGuOTbDvm1S3OjcIhc+Jno4uE4BoMpH+75GBXKyTlICrLhnOT4RvoN2FrjnYA01+x2x283C7cIr77JviHcbh3l5Cy1fSkxB5liL1jyKypxUrELgW0cI+CegR8cJ1CUGurs7sB2I7s45lnNZdmUvl8ZDtt4SQCRTNvnU/hfHuDrK78c2JJu8xKGW7cpoDDROxk8gdiPYwWxh4SndtI04n9ZtdS7vW1uMqEH2ZI+96mcxvjYUxTGbfMouXSPTDqTYhwxm1NWYDiLN6lm1k37Xs/lY34jJqeiAQYtQzxxmxUgDmwxbgo5m0Y7ZMKAdv1+GvC9/DT8/9c779iTVC4rRAZOtsrC3sTJ3vG3gNsxuNk89eLxgd/VqvoVd7hwmr3g7l8n5waRKK0+gTW8jSu3CfZ0rXsOVe1NH48VYhU//efMDhjC8YMLcidrJywCesoRkYZ9gB08MeWuzMNgLRMYpddA0pm6dW9Sav8SH+HzbUDqeTH1+VzxoLUm4JpkFRJw37H18KMqLhVUE1V8c=
+script:
+  - npm test
