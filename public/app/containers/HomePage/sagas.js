@@ -63,8 +63,10 @@ export function* updateGeneralSettings() {
   );
 
   if (!generalSettings.err) {
+    window.Strapi.notification.success('Your settings have successfully updated.');
     yield put(generalSettingsUpdated(generalSettings.data));
   } else {
+    window.Strapi.notification.error('An error occurred during settings update.');
     yield put(generalSettingsUpdatedError(generalSettings.err));
   }
 }

@@ -126,13 +126,12 @@ HomePage.propTypes = {
   ]),
   onPageLoad: React.PropTypes.func,
   onFormSubmit: React.PropTypes.func,
-  // username: React.PropTypes.string,
   onChangeName: React.PropTypes.func,
   onChangeDescription: React.PropTypes.func,
   onChangeVersion: React.PropTypes.func,
 };
 
-  export function mapDispatchToProps(dispatch) {
+export function mapDispatchToProps(dispatch) {
     return {
       onChangeName: (evt) => dispatch(changeName(evt.target.value)),
       onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
