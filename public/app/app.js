@@ -21,6 +21,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import useScroll from 'react-router-scroll';
 import _ from 'lodash';
 import LanguageProvider from 'containers/LanguageProvider';
+import NotificationProvider from 'containers/NotificationProvider';
 import configureStore from './store';
 
 // Import i18n messages
@@ -56,15 +57,17 @@ const render = (translatedMessages) => {
   ReactDOM.render(
     <Provider store={store}>
       <LanguageProvider messages={translatedMessages}>
-        <Router
-          history={history}
-          routes={rootRoute}
-          render={
-            // Scroll to top when going to a new page, imitating default browser
-            // behaviour
-            applyRouterMiddleware(useScroll())
-          }
-        />
+        <NotificationProvider>
+          <Router
+            history={history}
+            routes={rootRoute}
+            render={
+              // Scroll to top when going to a new page, imitating default browser
+              // behaviour
+              applyRouterMiddleware(useScroll())
+            }
+          />
+        </NotificationProvider>
       </LanguageProvider>
     </Provider>,
     document.getElementById('app')
@@ -127,9 +130,42 @@ const registerPlugin = (plugin) => {
     });
   }
 
+  // TMP
+  // setTimeout(() => {
+  //   store.dispatch(showNotification('Plugin loaded!', 'success'));
+  //   store.dispatch(showNotification('Oooooops!', 'warning'));
+  //   store.dispatch(showNotification('An error occurred!', 'error'));
+  //   store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
+  // }, 500);
+
   store.dispatch(pluginLoaded(plugin));
+};
+
+import { showNotification } from './containers/NotificationProvider/actions';
+
+const displayNotification = (message, status) => {
+  store.dispatch(showNotification(message, status));
 };
 
 window.Strapi = {
   registerPlugin,
+  notification: {
+    success: (message) => {
+      displayNotification(message, 'success');
+    },
+    warning: (message) => {
+      displayNotification(message, 'warning');
+    },
+    error: (message) => {
+      displayNotification(message, 'error');
+    },
+    info: (message) => {
+      displayNotification(message, 'info');
+    },
+  }
 };
+
+const dispatch = store.dispatch;
+export {
+  dispatch,
+}

@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { createStructuredSelector } from 'reselect';
 import { selectPlugins } from 'containers/App/selectors';
 import LeftMenu from 'containers/LeftMenu';
 import Header from 'components/Header/index';
@@ -34,13 +34,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
 HomePage.propTypes = {
   plugins: React.PropTypes.object,
-  onRegisterPluginClicked: React.PropTypes.func,
 };
 
-const mapStateToProps = createSelector(
-  selectPlugins(),
-  (plugins) => ({ plugins })
-);
+const mapStateToProps = createStructuredSelector({
+  plugins: selectPlugins(),
+});
 
 function mapDispatchToProps(dispatch) {
   return {

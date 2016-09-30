@@ -13,8 +13,11 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { createStructuredSelector } from 'reselect';
 import { selectPlugins } from './selectors';
+import { hideNotification } from 'containers/NotificationProvider/actions';
+import { selectNotifications } from 'containers/NotificationProvider/selectors';
+import Notifications from 'components/Notifications';
 import '../../styles/main.scss';
 import styles from './styles.scss';
 
@@ -26,9 +29,12 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 
   render() {
     return (
-      <div className={styles.container}>
-        <div className={styles.baseline}></div>
-        {React.Children.toArray(this.props.children)}
+      <div>
+        <Notifications onHideNotification={this.props.onHideNotification} notifications={this.props.notifications}></Notifications>
+        <div className={styles.container}>
+          <div className={styles.baseline}></div>
+          {React.Children.toArray(this.props.children)}
+        </div>
       </div>
     );
   }
@@ -36,16 +42,17 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 
 App.propTypes = {
   plugins: React.PropTypes.object,
-  onRegisterPluginClicked: React.PropTypes.func,
+  notifications: React.PropTypes.object,
 };
 
-const mapStateToProps = createSelector(
-  selectPlugins(),
-  (plugins) => ({ plugins })
-);
+const mapStateToProps = createStructuredSelector({
+  plugins: selectPlugins(),
+  notifications: selectNotifications(),
+});
 
 function mapDispatchToProps(dispatch) {
   return {
+    onHideNotification: (id) => {dispatch(hideNotification(id))},
     dispatch,
   };
 }
