@@ -10,8 +10,8 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+import {connect} from 'react-redux';
+import {createStructuredSelector} from 'reselect';
 
 import PluginHeader from 'components/PluginHeader';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
@@ -43,18 +43,14 @@ export class HomePage extends React.Component {
   }
 
   render() {
-    const error = this.props.error && <div className="row"><div className="alert alert-danger" role="alert"><strong>An error occurred.</strong> {this.props.error.message}</div></div>;
-    const success = this.props.success && <div className="row"><div className="alert alert-success" role="alert"><strong>Success!</strong> {this.props.success.message}</div></div>;
-
     return (
       <div>
         <div className="container">
-          {success}
-          {error}
           <PluginHeader {...this.props}></PluginHeader>
           <Container>
             <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
-            <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
+            <RightContentSectionTitle title="Application"
+                                      description="The general settings of your Strapi application."></RightContentSectionTitle>
             <form onSubmit={this.props.onFormSubmit}>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
                 <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
@@ -132,14 +128,14 @@ HomePage.propTypes = {
 };
 
 export function mapDispatchToProps(dispatch) {
-    return {
-      onChangeName: (evt) => dispatch(changeName(evt.target.value)),
-      onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
-      onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),
-      onFormSubmit: (evt) => {
-        if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-        dispatch(updateGeneralSettings());
-      },
+  return {
+    onChangeName: (evt) => dispatch(changeName(evt.target.value)),
+    onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
+    onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),
+    onFormSubmit: (evt) => {
+      if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+      dispatch(updateGeneralSettings());
+    },
     changeRoute: (url) => dispatch(push(url)),
     onPageLoad: (evt) => {
       if (evt !== undefined && evt.preventDefault) evt.preventDefault();

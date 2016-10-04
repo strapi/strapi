@@ -23,27 +23,16 @@ module.exports = {
   },
 
   updateSettings: function* () {
-    const packageJSONPath = fs.readFileSync(path.resolve(strapi.config.appPath, 'package.json'));
-    const packageJSONContent = JSON.parse(packageJSONPath, 'utf8');
+    var data = this.request.body;
 
-    // Update application name
-    if (this.request.body.name) {
-      packageJSONContent.name = this.request.body.name;
-    }
-
-    if (this.request.body.description) {
-      packageJSONContent.description = this.request.body.description;
-    }
-
-    if (this.request.body.version) {
-      packageJSONContent.version = this.request.body.version;
-    }
-
-
-    fs.writeFileSync('package.json', JSON.stringify(packageJSONContent, null, 4), 'utf8');
-
-    return this.body = {
-      name: packageJSONContent.name
+    try {
+      const settingsUpdated = yield strapi.plugins.settingsmanager.services.settingsservice.configurationsManager(strapi, data);
+      this.body = settingsUpdated.values;
+    } catch (err) {
+      this.status = err && err.status || 400;
+      return this.body = {
+        message: err.msg || 'An error occurred during settings update'
+      };
     };
   },
 
@@ -51,5 +40,4 @@ module.exports = {
     yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
     if (!this.status) this.throw(404);
   }
-
 };

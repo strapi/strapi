@@ -42,9 +42,12 @@ export function* getGeneralSettings() {
 
 export function* updateGeneralSettings() {
   const data = {
-    name: yield select(selectName()),
-    description: yield select(selectDescription()),
-    version: yield select(selectVersion()),
+    values: {
+      version: yield select(selectVersion()),
+      name: yield select(selectName()),
+      description: yield select(selectDescription()),
+    },
+    type: 'general',
   };
 
   const requestURL = `http://localhost:1337/settingsmanager/settings`;
@@ -66,7 +69,7 @@ export function* updateGeneralSettings() {
     window.Strapi.notification.success('Your settings have successfully updated.');
     yield put(generalSettingsUpdated(generalSettings.data));
   } else {
-    window.Strapi.notification.error('An error occurred during settings update.');
+    window.Strapi.notification.error(generalSettings.err.message || 'An error occurred during settings update.');
     yield put(generalSettingsUpdatedError(generalSettings.err));
   }
 }
