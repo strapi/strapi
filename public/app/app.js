@@ -12,9 +12,9 @@ import '!file?name=[name].[ext]!./manifest.json';
 import 'file?name=[name].[ext]!./.htaccess';
 /* eslint-enable import/no-unresolved */
 // Import all the third party stuff
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+// import React from 'react';
+// import ReactDOM from 'react-dom';
+// import { Provider } from 'react-redux';
 import { browserHistory } from 'react-router';
 // import { syncHistoryWithStore } from 'react-router-redux';
 // import useScroll from 'react-router-scroll';
@@ -52,7 +52,7 @@ const rootRoute = {
 
 export {
   store,
-}
+};
 
 // import SettingsManagerApp from 'containers/App/index';
 
@@ -74,7 +74,6 @@ export {
 //   console.log('this', this);
   // ReactDOM.render(
   // return (
-  //  
   // );
     // </Provider>
   // );
@@ -106,13 +105,15 @@ export {
 // install();
 
 // Register the plugin
-window.Strapi.registerPlugin({
-  name: 'Settings Manager',
-  id: 'settings-manager',
-  leftMenuLink: {
-    label: 'Settings Manager',
-    to: '/settings-manager',
-  },
-  routes: rootRoute,
-  mainComponent: App,
-});
+if (window.Strapi) {
+  window.Strapi.registerPlugin({
+    name: 'Settings Manager',
+    id: 'settings-manager',
+    leftMenuLink: {
+      label: 'Settings Manager',
+      to: '/settings-manager',
+    },
+    routes: rootRoute,
+    mainComponent: App,
+  });
+}

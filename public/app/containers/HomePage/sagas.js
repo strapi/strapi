@@ -7,7 +7,7 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   LOAD_GENERAL_SETTINGS,
   UPDATE_GENERAL_SETTINGS,
-}  from 'containers/HomePage/constants';
+} from 'containers/HomePage/constants';
 
 import {
   generalSettingsLoaded,
@@ -28,7 +28,7 @@ import request from 'utils/request';
  * Github generalSettings request/response handler
  */
 export function* getGeneralSettings() {
-  const requestURL = `http://localhost:1337/settingsmanager/settings/general`;
+  const requestURL = 'http://localhost:1337/settingsmanager/settings/general';
 
   // Call our request helper (see 'utils/request')
   const generalSettings = yield call(request, requestURL);
@@ -36,7 +36,7 @@ export function* getGeneralSettings() {
   if (!generalSettings.err) {
     yield put(generalSettingsLoaded(generalSettings.data));
   } else {
-    yield put(repoLoadingError(generalSettings.err));
+    yield put(generalSettingsLoadingError(generalSettings.err));
   }
 }
 
@@ -50,7 +50,7 @@ export function* updateGeneralSettings() {
     type: 'general',
   };
 
-  const requestURL = `http://localhost:1337/settingsmanager/settings`;
+  const requestURL = 'http://localhost:1337/settingsmanager/settings';
 
   // Call our request helper (see 'utils/request')
   const generalSettings = yield call(
@@ -58,8 +58,8 @@ export function* updateGeneralSettings() {
     requestURL, {
       method: 'PUT',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     }
@@ -96,7 +96,7 @@ export function* generalSettingsData() {
   // Fork watcher so we can continue execution
 
   const watcher = yield fork(getGeneralSettingsWatcher);
-  const updateWatcher = yield fork(updateGeneralSettingsWatcher);
+  yield fork(updateGeneralSettingsWatcher);
 
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);

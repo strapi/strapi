@@ -22,7 +22,7 @@ import {
   UPDATE_GENERAL_SETTINGS_ERROR,
   CANCEL_GENERAL_SETTINGS,
 } from './constants';
-import {fromJS} from 'immutable';
+import { fromJS } from 'immutable';
 
 // The initial state of the App
 const initialState = fromJS({
@@ -36,7 +36,7 @@ const initialState = fromJS({
     name: false,
     description: false,
     version: false,
-  })
+  }),
 });
 
 function appReducer(state = initialState, action) {
@@ -85,11 +85,10 @@ function appReducer(state = initialState, action) {
         .set('error', action.error)
         .set('loading', false);
     case CANCEL_GENERAL_SETTINGS:
-      const backup = state.get('backup');
       return state
-        .set('name', backup.get('name'))
-        .set('description', backup.get('description'))
-        .set('version', backup.get('version'));
+        .set('name', state.get('backup').get('name'))
+        .set('description', state.get('backup').get('description'))
+        .set('version', state.get('backup').get('version'));
     default:
       return state;
   }

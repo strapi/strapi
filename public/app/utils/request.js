@@ -16,23 +16,20 @@ function parseJSON(response) {
  *
  * @param  {object} response   A response from a network request
  *
- * @return {object|undefined} Returns either the response, or throws an error
+ * @return {Promise} Returns either the response, or throws an error
  */
 function checkStatus(response) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     if (response.status >= 200 && response.status < 300) {
       return resolve(response);
     }
 
-    parseJSON(response)
+    return parseJSON(response)
       .then(data => {
         const error = new Error(data.message || response.statusText);
         error.data = data;
         error.response = response;
         throw error;
-      })
-      .catch(err => {
-        reject(err);
       });
   });
 }
@@ -47,13 +44,14 @@ function checkStatus(response) {
  */
 export default function request(url, options) {
   // Default headers
-  options = options || {};
-  options.headers = options && options.headers || {
-    'Accept': 'application/json',
-      'Content-Type': 'application/json'
+  const params = options || { };
+  const defaultHeaders = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
   };
+  params.headers = params && params.headers ? params.headers : defaultHeaders;
 
-  return fetch(url, options)
+  return fetch(url, params)
     .then(checkStatus)
     .then(parseJSON)
     .then((data) => ({ data }))

@@ -10,8 +10,8 @@
  */
 
 import React from 'react';
-import {connect} from 'react-redux';
-import {createStructuredSelector} from 'reselect';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 
 import PluginHeader from 'components/PluginHeader';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
@@ -50,8 +50,7 @@ export class HomePage extends React.Component {
           <PluginHeader {...this.props}></PluginHeader>
           <Container>
             <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
-            <RightContentSectionTitle title="Application"
-                                      description="The general settings of your Strapi application."></RightContentSectionTitle>
+            <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
             <form onSubmit={this.props.onFormSubmit}>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
                 <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
@@ -63,7 +62,7 @@ export class HomePage extends React.Component {
                     id="applicationName"
                     value={this.props.name || ''}
                     onChange={this.props.onChangeName}
-                    autoFocus={true}
+                    autoFocus
                   />
                 </div>
               </div>
@@ -104,34 +103,35 @@ export class HomePage extends React.Component {
 
 HomePage.propTypes = {
   changeRoute: React.PropTypes.func,
-  loading: React.PropTypes.bool,
-  error: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  name: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
-  ]),
   description: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
+  error: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  loading: React.PropTypes.bool,
+  name: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
+  onCancel: React.PropTypes.func,
+  onChangeName: React.PropTypes.func,
+  onChangeDescription: React.PropTypes.func,
+  onChangeVersion: React.PropTypes.func,
+  onFormSubmit: React.PropTypes.func,
+  onPageLoad: React.PropTypes.func,
   version: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-  onPageLoad: React.PropTypes.func,
-  onCancel: React.PropTypes.func,
-  onFormSubmit: React.PropTypes.func,
-  onChangeName: React.PropTypes.func,
-  onChangeDescription: React.PropTypes.func,
-  onChangeVersion: React.PropTypes.func,
+
 };
 
 export function mapDispatchToProps(dispatch) {
   return {
-    onCancel: (evt) => dispatch(cancelGeneralSettings()),
+    onCancel: () => dispatch(cancelGeneralSettings()),
     onChangeName: (evt) => dispatch(changeName(evt.target.value)),
     onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
     onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),
@@ -139,12 +139,10 @@ export function mapDispatchToProps(dispatch) {
       if (evt !== undefined && evt.preventDefault) evt.preventDefault();
       dispatch(updateGeneralSettings());
     },
-    changeRoute: (url) => dispatch(push(url)),
     onPageLoad: (evt) => {
       if (evt !== undefined && evt.preventDefault) evt.preventDefault();
       dispatch(loadGeneralSettings());
     },
-
     dispatch,
   };
 }
@@ -152,9 +150,9 @@ export function mapDispatchToProps(dispatch) {
 const mapStateToProps = createStructuredSelector({
   name: selectName(),
   description: selectDescription(),
-  version: selectVersion(),
-  loading: selectLoading(),
   error: selectError(),
+  loading: selectLoading(),
+  version: selectVersion(),
 });
 
 // Wrap the component to inject dispatch and state into it

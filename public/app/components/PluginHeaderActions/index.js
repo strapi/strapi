@@ -1,8 +1,8 @@
 /**
-*
-* PluginHeaderActions
-*
-*/
+ *
+ * PluginHeaderActions
+ *
+ */
 
 import React from 'react';
 
@@ -12,16 +12,18 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
   render() {
     return (
       <div className={`${styles.pluginHeaderActions} pull-lg-right`}>
-        <button type="button"
-                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}
-                onClick={this.props.onCancel}
+        <button
+          type="button"
+          className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}
+          onClick={this.props.onCancel}
         >
           Cancel
         </button>
-        <button type="submit"
-                className={`${styles.pluginHeaderActionsButton} btn btn-primary`}
-                disabled={this.props.loading}
-                onClick={this.props.onFormSubmit}
+        <button
+          type="submit"
+          className={`${styles.pluginHeaderActionsButton} btn btn-primary`}
+          disabled={this.props.loading}
+          onClick={this.props.onFormSubmit}
         >
           Save
         </button>

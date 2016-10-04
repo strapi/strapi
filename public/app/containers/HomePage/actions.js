@@ -71,47 +71,47 @@ export function generalSettingsLoadingError(error) {
 export function changeName(name) {
   return {
     type: CHANGE_NAME,
-    name: name
+    name,
   };
 }
 
 export function changeDescription(description) {
   return {
     type: CHANGE_DESCRIPTION,
-    description: description
+    description,
   };
 }
 
 export function changeVersion(version) {
   return {
     type: CHANGE_VERSION,
-    version: version
+    version,
   };
 }
 
 export function updateGeneralSettings(data) {
   return {
     type: UPDATE_GENERAL_SETTINGS,
-    data: data
-  }
+    data,
+  };
 }
 
 export function generalSettingsUpdated(data) {
   return {
     type: UPDATE_GENERAL_SETTINGS_SUCCESS,
-    data: data
-  }
+    data,
+  };
 }
 
 export function generalSettingsUpdatedError(error) {
   return {
     type: UPDATE_GENERAL_SETTINGS_ERROR,
-    error: error
-  }
+    error,
+  };
 }
 
 export function cancelGeneralSettings() {
   return {
     type: CANCEL_GENERAL_SETTINGS,
-  }
+  };
 }
