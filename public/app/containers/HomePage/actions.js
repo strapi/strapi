@@ -25,6 +25,7 @@ import {
   UPDATE_GENERAL_SETTINGS,
   UPDATE_GENERAL_SETTINGS_SUCCESS,
   UPDATE_GENERAL_SETTINGS_ERROR,
+  CANCEL_GENERAL_SETTINGS,
 } from './constants';
 
 /**
@@ -106,5 +107,11 @@ export function generalSettingsUpdatedError(error) {
   return {
     type: UPDATE_GENERAL_SETTINGS_ERROR,
     error: error
+  }
+}
+
+export function cancelGeneralSettings() {
+  return {
+    type: CANCEL_GENERAL_SETTINGS,
   }
 }

@@ -32,6 +32,7 @@ import {
   changeDescription,
   changeVersion,
   updateGeneralSettings,
+  cancelGeneralSettings,
 } from 'containers/HomePage/actions';
 
 import styles from './styles.css';
@@ -121,6 +122,7 @@ HomePage.propTypes = {
     React.PropTypes.bool,
   ]),
   onPageLoad: React.PropTypes.func,
+  onCancel: React.PropTypes.func,
   onFormSubmit: React.PropTypes.func,
   onChangeName: React.PropTypes.func,
   onChangeDescription: React.PropTypes.func,
@@ -129,6 +131,7 @@ HomePage.propTypes = {
 
 export function mapDispatchToProps(dispatch) {
   return {
+    onCancel: (evt) => dispatch(cancelGeneralSettings()),
     onChangeName: (evt) => dispatch(changeName(evt.target.value)),
     onChangeDescription: (evt) => dispatch(changeDescription(evt.target.value)),
     onChangeVersion: (evt) => dispatch(changeVersion(evt.target.value)),

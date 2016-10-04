@@ -18,4 +18,5 @@ export const CHANGE_VERSION = 'settingsmanager/HomePage/CHANGE_VERSION';
 export const UPDATE_GENERAL_SETTINGS = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS';
 export const UPDATE_GENERAL_SETTINGS_SUCCESS = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS_SUCCESS';
 export const UPDATE_GENERAL_SETTINGS_ERROR = 'settingsmanager/HomePage/UPDATE_GENERAL_SETTINGS_ERROR';
+export const CANCEL_GENERAL_SETTINGS = 'settingsmanager/HomePage/CANCEL_GENERAL_SETTINGS';
 

@@ -13,7 +13,9 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
     return (
       <div className={`${styles.pluginHeaderActions} pull-lg-right`}>
         <button type="button"
-                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}>
+                className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}
+                onClick={this.props.onCancel}
+        >
           Cancel
         </button>
         <button type="submit"
@@ -30,6 +32,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
 
 PluginHeaderActions.propTypes = {
   loading: React.PropTypes.bool,
+  onCancel: React.PropTypes.func,
   onFormSubmit: React.PropTypes.func,
 };
 

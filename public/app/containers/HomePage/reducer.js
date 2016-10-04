@@ -20,8 +20,9 @@ import {
   UPDATE_GENERAL_SETTINGS,
   UPDATE_GENERAL_SETTINGS_SUCCESS,
   UPDATE_GENERAL_SETTINGS_ERROR,
+  CANCEL_GENERAL_SETTINGS,
 } from './constants';
-import { fromJS } from 'immutable';
+import {fromJS} from 'immutable';
 
 // The initial state of the App
 const initialState = fromJS({
@@ -31,6 +32,11 @@ const initialState = fromJS({
   name: false,
   description: false,
   version: false,
+  backup: fromJS({
+    name: false,
+    description: false,
+    version: false,
+  })
 });
 
 function appReducer(state = initialState, action) {
@@ -47,7 +53,10 @@ function appReducer(state = initialState, action) {
         .set('loading', false)
         .set('name', action.data.name)
         .set('description', action.data.description)
-        .set('version', action.data.version);
+        .set('version', action.data.version)
+        .setIn(['backup', 'name'], action.data.name)
+        .setIn(['backup', 'description'], action.data.description)
+        .setIn(['backup', 'version'], action.data.version);
     case LOAD_GENERAL_SETTINGS_ERROR:
       return state
         .set('error', action.error)
@@ -67,11 +76,20 @@ function appReducer(state = initialState, action) {
         .set('error', false);
     case UPDATE_GENERAL_SETTINGS_SUCCESS:
       return state
-        .set('loading', false);
+        .set('loading', false)
+        .setIn(['backup', 'name'], action.data.name)
+        .setIn(['backup', 'description'], action.data.description)
+        .setIn(['backup', 'version'], action.data.version);
     case UPDATE_GENERAL_SETTINGS_ERROR:
       return state
         .set('error', action.error)
         .set('loading', false);
+    case CANCEL_GENERAL_SETTINGS:
+      const backup = state.get('backup');
+      return state
+        .set('name', backup.get('name'))
+        .set('description', backup.get('description'))
+        .set('version', backup.get('version'));
     default:
       return state;
   }
