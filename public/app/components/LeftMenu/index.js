@@ -7,7 +7,7 @@
 import React from 'react';
 import LeftMenuLink from 'components/LeftMenuLink';
 
-import styles from './styles.css';
+import styles from './styles.scss';
 
 class LeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
   links = [{

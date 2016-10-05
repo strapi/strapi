@@ -32,7 +32,7 @@ import {
   cancelGeneralSettings,
 } from 'containers/HomePage/actions';
 
-import styles from './styles.css';
+import styles from './styles.scss';
 
 export class HomePage extends React.Component {
 

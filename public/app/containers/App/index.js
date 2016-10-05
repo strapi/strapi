@@ -9,6 +9,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../../app';
 
+import '../../styles/main.scss';
+
 export default class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   static propTypes = {

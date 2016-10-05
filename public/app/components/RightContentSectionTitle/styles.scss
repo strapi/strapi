@@ -1,3 +1,6 @@
+/* Import */
+@import '../../styles/variables/variables';
+
 .rightContentSectionTitle { /* stylelint-disable */
   text-transform: uppercase;
   font-size: 1.4rem;
@@ -5,7 +8,7 @@
 }
 
 .rightContentSectionSubTitle {
-  color: #8B91A0;
+  color: $gray-light;
   font-size: 1.2rem;
   margin-bottom: 1.2rem;
 }

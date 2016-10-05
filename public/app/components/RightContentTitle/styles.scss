@@ -1,3 +1,6 @@
+/* Import */
+@import '../../styles/variables/variables';
+
 .rightContentTitle { /* stylelint-disable */
 
 }
@@ -9,11 +12,11 @@
 
 .rightContentTitleDescription {
   font-size: 1.3rem;
-  color: #787E8F;
+  color: $gray-light;
   margin-bottom: 1.5rem;
 }
 
-.rigthContentTitleSeparator {
+.rightContentTitleSeparator {
   margin-left: -3rem;
   margin-right: -3rem;
   margin-bottom: 1.5rem;

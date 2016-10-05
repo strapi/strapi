@@ -1,3 +1,6 @@
+/* Import */
+@import '../../styles/variables/variables';
+
 .leftMenuLink { /* stylelint-disable */
   margin-bottom: .4rem;
 }
@@ -11,12 +14,12 @@
   line-height: 3.6rem;
   font-size: 1.4rem;
   border-radius: 2rem;
-}
 
-.leftMenuLinkDestination:hover {
-  color: white;
-  text-decoration: none;
-  background-color: #1C5DE7;
+  &:hover {
+    color: white;
+    text-decoration: none;
+    background-color: $strapi-blue;
+  }
 }
 
 .leftMenuLinkDestinationActive {

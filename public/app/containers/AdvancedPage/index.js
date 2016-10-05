@@ -10,7 +10,7 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
-import styles from './styles.css';
+import styles from './styles.scss';
 
 export default class AdvancedPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

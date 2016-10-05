@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import styles from './styles.css';
+import styles from './styles.scss';
 
 class RightContentTitle extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -14,7 +14,7 @@ class RightContentTitle extends React.Component { // eslint-disable-line react/p
       <div className={styles.rightContentTitle}>
         <h2 className={styles.rightContentTitleName}>{this.props.title}</h2>
         <p className={styles.rightContentTitleDescription}>{this.props.description}</p>
-        <hr className={styles.rigthContentTitleSeparator}></hr>
+        <hr className={styles.rightContentTitleSeparator}></hr>
       </div>
     );
   }

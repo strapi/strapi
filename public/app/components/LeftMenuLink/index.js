@@ -7,8 +7,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 
-import styles from './styles.css';
-
+import styles from './styles.scss';
+console.log('styles', styles);
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
