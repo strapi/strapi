@@ -1,8 +1,8 @@
 /**
-*
-* Container
-*
-*/
+ *
+ * Container
+ *
+ */
 
 import React from 'react';
 import LeftMenu from 'components/LeftMenu';

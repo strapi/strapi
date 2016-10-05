@@ -14,7 +14,6 @@ module.exports = (plop) => {
   plop.setGenerator('component', componentGenerator);
   plop.setGenerator('container', containerGenerator);
   plop.setGenerator('route', routeGenerator);
-  plop.setGenerator('language', languageGenerator);
   plop.addHelper('directory', (comp) => {
     try {
       fs.accessSync(`app/containers/${comp}`, fs.F_OK);
