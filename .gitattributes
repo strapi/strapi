@@ -47,9 +47,6 @@
 *.tmpl text
 *.phtml text
 
-# server config
-.htaccess text
-
 # git config
 .gitattributes text
 .gitignore text
