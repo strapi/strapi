@@ -1,7 +1,5 @@
 /*
- *
  * LanguagesPage
- *
  */
 
 import React from 'react';
@@ -10,6 +8,7 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
+
 import styles from './styles.css';
 
 export default class LanguagesPage extends React.Component { // eslint-disable-line react/prefer-stateless-function

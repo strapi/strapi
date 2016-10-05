@@ -1,9 +1,12 @@
 /**
- * The global state selectors
+ * The home state selectors
  */
 
 import { createSelector } from 'reselect';
 
+/*
+ * Select home state
+ */
 const selectHome = () => (state) => state.get('home');
 
 const selectLoading = () => createSelector(

@@ -1,12 +1,5 @@
 /*
  * DatabasesPage
- *
- * This is the first thing users see of our App, at the '/' route
- *
- * NOTE: while this component should technically be a stateless functional
- * component (SFC), hot reloading does not currently support SFCs. If hot
- * reloading is not a neccessity for you then you can refactor it and remove
- * the linting exception.
  */
 
 import React from 'react';
@@ -15,6 +8,7 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
+
 import styles from './styles.css';
 
 export default class DatabasesPage extends React.Component { // eslint-disable-line react/prefer-stateless-function

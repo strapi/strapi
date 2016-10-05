@@ -1,31 +1,28 @@
 /**
- * Gets the generalSettingsitories of the user from Github
+ * Set of asynchronous functions.
  */
 
 import { take, call, put, select, fork, cancel } from 'redux-saga/effects';
 import { LOCATION_CHANGE } from 'react-router-redux';
+import request from 'utils/request';
 import {
   LOAD_GENERAL_SETTINGS,
   UPDATE_GENERAL_SETTINGS,
 } from 'containers/HomePage/constants';
-
 import {
   generalSettingsLoaded,
   generalSettingsLoadingError,
   generalSettingsUpdated,
   generalSettingsUpdatedError,
 } from 'containers/HomePage/actions';
-
 import {
   selectName,
   selectDescription,
   selectVersion,
 } from 'containers/HomePage/selectors';
 
-import request from 'utils/request';
-
 /**
- * Github generalSettings request/response handler
+ * General Settings request/response handler
  */
 export function* getGeneralSettings() {
   const requestURL = 'http://localhost:1337/settingsmanager/settings/general';
@@ -40,6 +37,9 @@ export function* getGeneralSettings() {
   }
 }
 
+/**
+ * Update general settings
+ */
 export function* updateGeneralSettings() {
   const data = {
     values: {
@@ -75,7 +75,7 @@ export function* updateGeneralSettings() {
 }
 
 /**
- * Watches for LOAD_REPOS action and calls handler
+ * Watches for LOAD_GENERAL_SETTINGS action and calls handler
  */
 export function* getGeneralSettingsWatcher() {
   while (yield take(LOAD_GENERAL_SETTINGS)) {
@@ -83,6 +83,9 @@ export function* getGeneralSettingsWatcher() {
   }
 }
 
+/**
+ * Watches for UPDATE_GENERAL_SETTINGS action and calls handler
+ */
 export function* updateGeneralSettingsWatcher() {
   while (yield take(UPDATE_GENERAL_SETTINGS)) {
     yield call(updateGeneralSettings);
@@ -93,8 +96,7 @@ export function* updateGeneralSettingsWatcher() {
  * Root saga manages watcher lifecycle
  */
 export function* generalSettingsData() {
-  // Fork watcher so we can continue execution
-
+  // Fork watchers so we can continue execution
   const watcher = yield fork(getGeneralSettingsWatcher);
   yield fork(updateGeneralSettingsWatcher);
 

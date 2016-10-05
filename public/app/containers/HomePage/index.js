@@ -12,12 +12,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-
 import PluginHeader from 'components/PluginHeader';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
-
 import {
   selectName,
   selectDescription,
@@ -25,7 +23,6 @@ import {
   selectLoading,
   selectError,
 } from 'containers/HomePage/selectors';
-
 import {
   loadGeneralSettings,
   changeName,

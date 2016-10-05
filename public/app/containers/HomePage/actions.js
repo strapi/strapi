@@ -1,18 +1,5 @@
 /*
- * App Actions
- *
- * Actions change things in your application
- * Since this boilerplate uses a uni-directional data flow, specifically redux,
- * we have these actions which are the only way your application interacts with
- * your application state. This guarantees that your state is up to date and nobody
- * messes it up weirdly somewhere.
- *
- * To add a new Action:
- * 1) Import your constant
- * 2) Add a function like this:
- *    export function yourAction(var) {
- *        return { type: YOUR_ACTION_CONSTANT, var: var }
- *    }
+ * Actions
  */
 
 import {
@@ -42,10 +29,9 @@ export function loadGeneralSettings() {
 /**
  * Dispatched when the generalSettings are loaded by the request saga
  *
- * @param  {array} generalSettings The generalSettings data
- * @param  {string} username The current username
+ * @param  {object} generalSettings The generalSettings data
  *
- * @return {object}      An action object with a type of LOAD_GENERAL_SETTINGS_SUCCESS passing the generalSettings
+ * @return {object}                 An action object with a type of LOAD_GENERAL_SETTINGS_SUCCESS passing the generalSettings
  */
 export function generalSettingsLoaded(data) {
   return {
@@ -68,6 +54,11 @@ export function generalSettingsLoadingError(error) {
   };
 }
 
+/**
+ * Change the `name` value
+ *
+ * @return {object} An action object with a type of CHANGE_NAME
+ */
 export function changeName(name) {
   return {
     type: CHANGE_NAME,
@@ -75,6 +66,11 @@ export function changeName(name) {
   };
 }
 
+/**
+ * Change the `description` value
+ *
+ * @return {object} An action object with a type of CHANGE_DESCRIPTION
+ */
 export function changeDescription(description) {
   return {
     type: CHANGE_DESCRIPTION,
@@ -82,6 +78,11 @@ export function changeDescription(description) {
   };
 }
 
+/**
+ * Change the `version` value
+ *
+ * @return {object} An action object with a type of CHANGE_VERSION
+ */
 export function changeVersion(version) {
   return {
     type: CHANGE_VERSION,
@@ -89,6 +90,11 @@ export function changeVersion(version) {
   };
 }
 
+/**
+ * Update the generalSettings, this action starts the request saga
+ *
+ * @return {object} An action object with a type of UPDATE_GENERAL_SETTINGS
+ */
 export function updateGeneralSettings(data) {
   return {
     type: UPDATE_GENERAL_SETTINGS,
@@ -96,6 +102,13 @@ export function updateGeneralSettings(data) {
   };
 }
 
+/**
+ * Dispatched when the generalSettings are updated by the request saga
+ *
+ * @param  {object} generalSettings The generalSettings data
+ *
+ * @return {object}                 An action object with a type of UPDATE_GENERAL_SETTINGS_SUCCESS passing the generalSettings
+ */
 export function generalSettingsUpdated(data) {
   return {
     type: UPDATE_GENERAL_SETTINGS_SUCCESS,
@@ -103,6 +116,13 @@ export function generalSettingsUpdated(data) {
   };
 }
 
+/**
+ * Dispatched when updating the generalSettings fails
+ *
+ * @param  {object} error The error
+ *
+ * @return {object}       An action object with a type of UPDATE_GENERAL_SETTINGS_ERROR passing the error
+ */
 export function generalSettingsUpdatedError(error) {
   return {
     type: UPDATE_GENERAL_SETTINGS_ERROR,
@@ -110,6 +130,11 @@ export function generalSettingsUpdatedError(error) {
   };
 }
 
+/**
+ * Dispatched when cancelling the data modifications
+ *
+ * @return {object}       An action object with a type of CANCEL_GENERAL_SETTINGS passing the error
+ */
 export function cancelGeneralSettings() {
   return {
     type: CANCEL_GENERAL_SETTINGS,
