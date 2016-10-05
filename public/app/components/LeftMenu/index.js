@@ -37,7 +37,6 @@ class LeftMenu extends React.Component { // eslint-disable-line react/prefer-sta
   }];
 
   render() {
-
     const linksElements = this.links.map((link, i) => (<LeftMenuLink key={i} link={link}></LeftMenuLink>));
 
     return (

@@ -16,7 +16,7 @@ module.exports = {
     const settings = _.pick(strapi.config, [
       'name',
       'version',
-      'description'
+    'description'
     ]);
 
     this.body = settings;
@@ -26,9 +26,10 @@ module.exports = {
     var data = this.request.body;
 
     try {
-      const settingsUpdated = yield strapi.plugins.settingsmanager.services.settingsservice.configurationsManager(strapi, data);
+      const settingsUpdated = yield strapi.plugins['settings-manager'].services.settingsservice.configurationsManager(strapi, data);
       this.body = settingsUpdated.values;
     } catch (err) {
+      console.log('err', err);
       this.status = err && err.status || 400;
       return this.body = {
         message: err.msg || 'An error occurred during settings update'

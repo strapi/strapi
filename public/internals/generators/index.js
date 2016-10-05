@@ -8,7 +8,6 @@ const fs = require('fs');
 const componentGenerator = require('./component/index.js');
 const containerGenerator = require('./container/index.js');
 const routeGenerator = require('./route/index.js');
-const languageGenerator = require('./language/index.js');
 
 module.exports = (plop) => {
   plop.setGenerator('component', componentGenerator);

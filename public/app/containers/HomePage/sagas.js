@@ -20,12 +20,13 @@ import {
   selectDescription,
   selectVersion,
 } from 'containers/HomePage/selectors';
+import { apiUrl } from '../../app';
 
 /**
  * General Settings request/response handler
  */
 export function* getGeneralSettings() {
-  const requestURL = 'http://localhost:1337/settingsmanager/settings/general';
+  const requestURL = `${apiUrl}/settings/general`;
 
   // Call our request helper (see 'utils/request')
   const generalSettings = yield call(request, requestURL);
@@ -50,7 +51,7 @@ export function* updateGeneralSettings() {
     type: 'general',
   };
 
-  const requestURL = 'http://localhost:1337/settingsmanager/settings';
+  const requestURL = `${apiUrl}/settings`;
 
   // Call our request helper (see 'utils/request')
   const generalSettings = yield call(

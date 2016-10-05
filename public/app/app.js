@@ -1,8 +1,8 @@
 /**
  * app.js
  *
- * This is the entry file for the application, only setup and plugin
- * code.
+ * This is the entry file for the application,
+ * only setup and plugin code.
  */
 
 import { browserHistory } from 'react-router';
@@ -19,11 +19,14 @@ const store = configureStore(initialState, browserHistory);
 import App from 'containers/App';
 import createRoutes from './routes';
 
+// Plugin identifier based on the package.json `name` value
+const pluginId = require('../package.json').name.replace(/^strapi-/i, '');
+
 // Register the plugin
 if (window.Strapi) {
   window.Strapi.registerPlugin({
     name: 'Settings Manager',
-    id: 'settings-manager',
+    id: pluginId,
     leftMenuLink: {
       label: 'Settings Manager',
       to: '/settings-manager',
@@ -33,7 +36,11 @@ if (window.Strapi) {
   });
 }
 
+// API
+const apiUrl = `${window.Strapi.apiUrl}/${pluginId}`;
+
 // Export store
 export {
   store,
+  apiUrl,
 };
