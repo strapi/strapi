@@ -6,7 +6,7 @@
 
 import {
   SHOW_NOTIFICATION,
-  HIDE_NOTIFICATION
+  HIDE_NOTIFICATION,
 } from './constants';
 
 import { dispatch } from '../../app';

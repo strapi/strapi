@@ -4,6 +4,8 @@ import { fromJS } from 'immutable';
 
 describe('notificationProviderReducer', () => {
   it('returns the initial state', () => {
-    expect(notificationProviderReducer(undefined, {})).toEqual(fromJS({}));
+    expect(notificationProviderReducer(undefined, {})).toEqual(fromJS({
+      notifications: [],
+    }));
   });
 });

@@ -1,18 +1,24 @@
 import expect from 'expect';
 import {
-  defaultAction,
+  showNotification,
 } from '../actions';
 import {
-  DEFAULT_ACTION,
+  SHOW_NOTIFICATION,
 } from '../constants';
 
 describe('NotificationProvider actions', () => {
   describe('Default Action', () => {
-    it('has a type of DEFAULT_ACTION', () => {
+    it('has a type of SHOW_NOTIFICATION', () => {
+      const message = 'Well done!';
+      const status = 'success';
+
       const expected = {
-        type: DEFAULT_ACTION,
+        type: SHOW_NOTIFICATION,
+        message,
+        status,
+        id: 1,
       };
-      expect(defaultAction()).toEqual(expected);
+      expect(showNotification(expected.message, expected.status)).toEqual(expected);
     });
   });
 });

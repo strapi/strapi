@@ -5,7 +5,6 @@
  */
 
 import { fromJS } from 'immutable';
-import _ from 'lodash';
 import {
   SHOW_NOTIFICATION,
   HIDE_NOTIFICATION,
@@ -16,6 +15,9 @@ const initialState = fromJS({
 });
 
 function notificationProviderReducer(state = initialState, action) {
+  // Init variable
+  let index;
+
   switch (action.type) {
     case SHOW_NOTIFICATION:
       return state.set('notifications', state.get('notifications').push({
@@ -25,7 +27,6 @@ function notificationProviderReducer(state = initialState, action) {
       }));
     case HIDE_NOTIFICATION:
       // Check that the index exists
-      let index;
       state.get('notifications').forEach((notification, i) => {
         if (notification.id === action.id) {
           index = i;
@@ -35,11 +36,10 @@ function notificationProviderReducer(state = initialState, action) {
       if (typeof index !== 'undefined') {
         // Remove the notification
         return state.set('notifications', state.get('notifications').splice(index, 1));
-      } else {
-        // Notification not found, return the current state
-        return state;
       }
 
+      // Notification not found, return the current state
+      return state;
     default:
       return state;
   }

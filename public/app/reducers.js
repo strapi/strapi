@@ -34,8 +34,8 @@ function routeReducer(state = routeInitialState, action) {
         locationBeforeTransitions: action.payload,
       });
     default:
-    return state;
-}
+      return state;
+  }
 }
 
 /**

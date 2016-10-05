@@ -131,12 +131,12 @@ const registerPlugin = (plugin) => {
   }
 
   // TMP
-  // setTimeout(() => {
-  //   store.dispatch(showNotification('Plugin loaded!', 'success'));
-  //   store.dispatch(showNotification('Oooooops!', 'warning'));
-  //   store.dispatch(showNotification('An error occurred!', 'error'));
-  //   store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
-  // }, 500);
+  setTimeout(() => {
+    store.dispatch(showNotification('Plugin loaded!', 'success'));
+    store.dispatch(showNotification('Oooooops!', 'warning'));
+    store.dispatch(showNotification('An error occurred!', 'error'));
+    store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
+  }, 500);
 
   store.dispatch(pluginLoaded(plugin));
 };
@@ -162,10 +162,10 @@ window.Strapi = {
     info: (message) => {
       displayNotification(message, 'info');
     },
-  }
+  },
 };
 
 const dispatch = store.dispatch;
 export {
   dispatch,
-}
+};

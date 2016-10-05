@@ -1,14 +1,6 @@
 /* Import */
 @import '../../styles/variables/variables';
 
-.notifications { /* stylelint-disable */
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
-  list-style: none;
-}
-
 .notification {
   position: relative;
   display: flex;

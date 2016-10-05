@@ -18,6 +18,10 @@ export class NotificationProvider extends React.Component { // eslint-disable-li
   }
 }
 
+NotificationProvider.propTypes = {
+  children: React.PropTypes.object,
+};
+
 const mapStateToProps = selectNotificationProvider();
 
 function mapDispatchToProps(dispatch) {

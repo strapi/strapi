@@ -17,7 +17,7 @@ import { createStructuredSelector } from 'reselect';
 import { selectPlugins } from './selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 import { selectNotifications } from 'containers/NotificationProvider/selectors';
-import Notifications from 'components/Notifications';
+import NotificationsContainer from 'components/NotificationsContainer';
 import '../../styles/main.scss';
 import styles from './styles.scss';
 
@@ -30,7 +30,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   render() {
     return (
       <div>
-        <Notifications onHideNotification={this.props.onHideNotification} notifications={this.props.notifications}></Notifications>
+        <NotificationsContainer onHideNotification={this.props.onHideNotification} notifications={this.props.notifications}></NotificationsContainer>
         <div className={styles.container}>
           <div className={styles.baseline}></div>
           {React.Children.toArray(this.props.children)}
@@ -43,6 +43,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 App.propTypes = {
   plugins: React.PropTypes.object,
   notifications: React.PropTypes.object,
+  onHideNotification: React.PropTypes.func,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -52,7 +53,7 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
-    onHideNotification: (id) => {dispatch(hideNotification(id))},
+    onHideNotification: (id) => { dispatch(hideNotification(id)); },
     dispatch,
   };
 }
