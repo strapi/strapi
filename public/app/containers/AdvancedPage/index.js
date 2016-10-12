@@ -10,26 +10,44 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
+import { injectIntl, intlShape } from 'react-intl';
+import appMessages from 'containers/App/messages';
+import messages from './messages';
+
 import styles from './styles.scss';
 
-export default class AdvancedPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class AdvancedPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const { formatMessage } = this.props.intl;
+
     return (
       <div className={styles.advancedPage}>
         <Helmet
           title="Settings Manager - Advanced"
           meta={[
-            { name: 'description', content: 'Configure your Advanced settings.' },
+            { name: 'description', content: formatMessage(messages.rightSectionDescription) },
           ]}
         />
         <div className="container">
-          <PluginHeader></PluginHeader>
+          <PluginHeader />
           <Container>
-            <RightContentTitle title="Advanced" description="Configure your advanced settings."></RightContentTitle>
-            <RightContentSectionTitle title="Coming soon" description=""></RightContentSectionTitle>
+            <RightContentTitle
+              title={formatMessage(appMessages.advancedSectionTitle)}
+              description={formatMessage(messages.rightSectionDescription)}
+            />
+            <RightContentSectionTitle
+              title={formatMessage(appMessages.comingSoon)}
+              description=""
+            />
           </Container>
         </div>
       </div>
     );
   }
 }
+
+AdvancedPage.propTypes = {
+  intl: intlShape.isRequired,
+};
+
+export default injectIntl(AdvancedPage);

@@ -58,12 +58,12 @@ module.exports = {
       abortOnFail: true,
     }];
 
-    // If they want a CSS file, add styles.scss
+    // If they want a CSS file, add styles.css
     if (data.wantCSS) {
       actions.push({
         type: 'add',
-        path: '../../app/containers/{{properCase name}}/styles.scss',
-        templateFile: './container/styles.scss.hbs',
+        path: '../../app/containers/{{properCase name}}/styles.css',
+        templateFile: './container/styles.css.hbs',
         abortOnFail: true,
       });
     }

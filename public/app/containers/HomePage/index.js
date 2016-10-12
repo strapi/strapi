@@ -31,6 +31,9 @@ import {
   updateGeneralSettings,
   cancelGeneralSettings,
 } from 'containers/HomePage/actions';
+import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+import appMessages from 'containers/App/messages';
+import messages from './messages';
 
 import styles from './styles.scss';
 
@@ -41,21 +44,31 @@ export class HomePage extends React.Component {
   }
 
   render() {
+    const { formatMessage } = this.props.intl;
+
     return (
       <div>
         <div className="container">
           <PluginHeader {...this.props}></PluginHeader>
           <Container>
-            <RightContentTitle title="General" description="Configure your general settings."></RightContentTitle>
-            <RightContentSectionTitle title="Application" description="The general settings of your Strapi application."></RightContentSectionTitle>
+            <RightContentTitle
+              title={formatMessage(appMessages.generalSectionTitle)}
+              description={formatMessage(messages.rightSectionDescription)}
+            />
+            <RightContentSectionTitle
+              title={formatMessage(messages.rightContentSectionTitle)}
+              description={formatMessage(messages.rightContentSectionDescription)}
+            />
             <form onSubmit={this.props.onFormSubmit}>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationName" className="col-xs-7 col-form-label">Name</label>
+                <label htmlFor="applicationName" className="col-xs-7 col-form-label">
+                  <FormattedMessage {...messages.nameLabel} />
+                </label>
                 <div className="col-xs-5">
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="My Application"
+                    placeholder={formatMessage(messages.namePlaceholder)}
                     id="applicationName"
                     value={this.props.name || ''}
                     onChange={this.props.onChangeName}
@@ -64,12 +77,14 @@ export class HomePage extends React.Component {
                 </div>
               </div>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">Description</label>
+                <label htmlFor="applicationDescription" className="col-xs-7 col-form-label">
+                  <FormattedMessage {...messages.descriptionLabel} />
+                </label>
                 <div className="col-xs-5">
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="A Strapi application"
+                    placeholder={formatMessage(messages.descriptionPlaceholder)}
                     id="applicationDescription"
                     value={this.props.description || ''}
                     onChange={this.props.onChangeDescription}
@@ -77,12 +92,14 @@ export class HomePage extends React.Component {
                 </div>
               </div>
               <div className={`form-group row ${styles.homePageRightContentFormGroup}`}>
-                <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">Version</label>
+                <label htmlFor="applicationVersion" className="col-xs-7 col-form-label">
+                  <FormattedMessage {...messages.versionLabel} />
+                </label>
                 <div className="col-xs-5">
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="0.0.1"
+                    placeholder={formatMessage(messages.versionPlaceholder)}
                     id="applicationVersion"
                     value={this.props.version || ''}
                     onChange={this.props.onChangeVersion}
@@ -108,6 +125,7 @@ HomePage.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  intl: intlShape.isRequired,
   loading: React.PropTypes.bool,
   name: React.PropTypes.oneOfType([
     React.PropTypes.string,
@@ -123,7 +141,6 @@ HomePage.propTypes = {
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -153,4 +170,4 @@ const mapStateToProps = createStructuredSelector({
 });
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(HomePage));

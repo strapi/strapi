@@ -8,27 +8,44 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
+import { injectIntl, intlShape } from 'react-intl';
+import appMessages from 'containers/App/messages';
+import messages from './messages';
 
 import styles from './styles.scss';
 
-export default class SecurityPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class SecurityPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const { formatMessage } = this.props.intl;
+
     return (
       <div className={styles.securityPage}>
         <Helmet
           title="Settings Manager - Security"
           meta={[
-            { name: 'description', content: 'Configure your security settings.' },
+            { name: 'description', content: formatMessage(messages.rightSectionDescription) },
           ]}
         />
         <div className="container">
-          <PluginHeader></PluginHeader>
+          <PluginHeader />
           <Container>
-            <RightContentTitle title="Security" description="Configure your security settings."></RightContentTitle>
-            <RightContentSectionTitle title="Coming soon" description=""></RightContentSectionTitle>
+            <RightContentTitle
+              title={formatMessage(appMessages.securitySectionTitle)}
+              description={formatMessage(messages.rightSectionDescription)}
+            />
+            <RightContentSectionTitle
+              title={formatMessage(appMessages.comingSoon)}
+              description=""
+            />
           </Container>
         </div>
       </div>
     );
   }
 }
+
+SecurityPage.propTypes = {
+  intl: intlShape.isRequired,
+};
+
+export default injectIntl(SecurityPage);

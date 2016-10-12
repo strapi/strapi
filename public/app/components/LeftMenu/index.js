@@ -11,27 +11,21 @@ import styles from './styles.scss';
 
 class LeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
   links = [{
-    label: 'General',
     value: 'general',
     to: '',
   }, {
-    label: 'Languages',
     value: 'languages',
     to: 'languages',
   }, {
-    label: 'Databases',
     value: 'databases',
     to: 'databases',
   }, {
-    label: 'Security',
     value: 'security',
     to: 'security',
   }, {
-    label: 'Server',
     value: 'server',
     to: 'server',
   }, {
-    label: 'Advanced',
     value: 'advanced',
     to: 'advanced',
   }];

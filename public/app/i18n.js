@@ -4,17 +4,22 @@
  * This will setup the i18n language files and locale data for your plugin.
  *
  */
-import { addLocaleData } from 'react-intl';
+// import { addLocaleData } from 'react-intl';
 
-import enLocaleData from 'react-intl/locale-data/en';
+// import enLocaleData from 'react-intl/locale-data/en';
+// import frLocaleData from 'react-intl/locale-data/fr';
 
-export const appLocales = [
-  'en',
-];
+// export const appLocales = [
+//   'en',
+//   'fr',
+//
+// ];
 
 import enTranslationMessages from './translations/en.json';
+import frTranslationMessages from './translations/fr.json';
 
-addLocaleData(enLocaleData);
+// addLocaleData(enLocaleData);
+// addLocaleData(frLocaleData);
 
 const formatTranslationMessages = (messages) => {
   const formattedMessages = {};
@@ -27,4 +32,5 @@ const formatTranslationMessages = (messages) => {
 
 export const translationMessages = {
   en: formatTranslationMessages(enTranslationMessages),
+  fr: formatTranslationMessages(frTranslationMessages),
 };

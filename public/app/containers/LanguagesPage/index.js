@@ -8,27 +8,45 @@ import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
+import { injectIntl, intlShape } from 'react-intl';
+import appMessages from 'containers/App/messages';
+import messages from './messages';
 
 import styles from './styles.scss';
 
-export default class LanguagesPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class LanguagesPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
   render() {
+    const { formatMessage } = this.props.intl;
+
     return (
       <div className={styles.languagesPage}>
         <Helmet
           title="Settings Manager - Languages"
           meta={[
-            { name: 'description', content: 'Configure your Languages settings.' },
+            { name: 'description', content: formatMessage(messages.rightSectionDescription) },
           ]}
         />
         <div className="container">
-          <PluginHeader></PluginHeader>
+          <PluginHeader />
           <Container>
-            <RightContentTitle title="Languages" description="Configure your languages settings."></RightContentTitle>
-            <RightContentSectionTitle title="Coming soon" description=""></RightContentSectionTitle>
+            <RightContentTitle
+              title={formatMessage(appMessages.languagesSectionTitle)}
+              description={formatMessage(messages.rightSectionDescription)}
+            />
+            <RightContentSectionTitle
+              title={formatMessage(appMessages.comingSoon)}
+              description=""
+            />
           </Container>
         </div>
       </div>
     );
   }
 }
+
+LanguagesPage.propTypes = {
+  intl: intlShape.isRequired,
+};
+
+export default injectIntl(LanguagesPage);

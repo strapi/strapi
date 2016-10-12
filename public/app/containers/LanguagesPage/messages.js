@@ -7,7 +7,7 @@ import { defineMessages } from 'react-intl';
 
 export default defineMessages({
   rightSectionDescription: {
-    id: 'settings-manager.components.DatabasesPage.rightSectionDescription',
-    defaultMessage: 'Configure your databases settings',
+    id: 'settings-manager.components.LanguagesPage.rightSectionDescription',
+    defaultMessage: 'Configure your languages settings',
   },
 });

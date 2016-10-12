@@ -28,10 +28,10 @@
     "start:production": "npm run build && npm run start:prod",
     "start:prod": "cross-env NODE_ENV=production node server",
     "generate": "plop --plopfile internals/generators/index.js",
-    "lint": "npm run lint:js && npm run lint:css",
+    "lint": "npm run lint:js && npm run lint:scss",
     "lint:eslint": "eslint --ignore-path .gitignore --ignore-pattern internals/scripts",
     "lint:js": "npm run lint:eslint -- . ",
-    "lint:css": "stylelint ./app/**/*.css",
+    "lint:scss": "stylelint ./app/**/*.scss",
     "lint:staged": "lint-staged",
     "pretest": "npm run test:clean && npm run lint",
     "test:clean": "rimraf ./coverage",
@@ -44,7 +44,7 @@
   },
   "lint-staged": {
     "*.js": "lint:eslint",
-    "*.css": "stylelint"
+    "*.scss": "stylelint"
   },
   "pre-commit": "lint:staged",
   "babel": {

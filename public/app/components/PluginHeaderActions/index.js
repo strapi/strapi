@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import messages from './messages';
+import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
@@ -17,7 +19,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
           className={`${styles.pluginHeaderActionsButton} btn btn-secondary`}
           onClick={this.props.onCancel}
         >
-          Cancel
+          <FormattedMessage {...messages.cancelLabel} />
         </button>
         <button
           type="submit"
@@ -25,7 +27,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
           disabled={this.props.loading}
           onClick={this.props.onFormSubmit}
         >
-          Save
+          <FormattedMessage {...messages.saveLabel} />
         </button>
       </div>
     );

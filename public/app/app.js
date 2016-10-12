@@ -18,6 +18,7 @@ const store = configureStore(initialState, browserHistory);
 // Set up the router, wrapping all Routes in the App component
 import App from 'containers/App';
 import createRoutes from './routes';
+import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
 const pluginId = require('../package.json').name.replace(/^strapi-/i, '');
@@ -33,6 +34,22 @@ if (window.Strapi) {
     },
     mainComponent: App,
     routes: createRoutes(store),
+    translationMessages,
+  });
+}
+
+// Hot reloadable translation json files
+if (module.hot) {
+  // modules.hot.accept does not accept dynamic dependencies,
+  // have to be constants at compile-time
+  module.hot.accept('./i18n', () => {
+    if (window.Strapi) {
+      System.import('./i18n')
+        .then(result => {
+          const translationMessagesUpdated = result.translationMessages;
+          window.Strapi.refresh(pluginId).translationMessages(translationMessagesUpdated);
+        });
+    }
   });
 }
 
