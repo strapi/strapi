@@ -9,8 +9,10 @@ import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
 import RightContentSectionTitle from 'components/RightContentSectionTitle';
 import { injectIntl, intlShape } from 'react-intl';
-import appMessages from 'containers/App/messages';
-import messages from './messages';
+import appMessages from 'containers/App/messages.json';
+import messages from './messages.json';
+import { define } from '../../i18n';
+define(messages);
 
 import styles from './styles.scss';
 

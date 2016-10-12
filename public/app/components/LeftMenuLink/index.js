@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Link } from 'react-router';
-import appMessages from 'containers/App/messages';
+import appMessages from 'containers/App/messages.json';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';

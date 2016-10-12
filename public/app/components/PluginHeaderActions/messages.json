@@ -1,0 +1,10 @@
+{
+  "cancelLabel": {
+    "id": "settings-manager.components.PluginHeaderActions.cancelLabel",
+    "defaultMessage": "Cancel"
+  },
+  "saveLabel": {
+    "id": "settings-manager.components.PluginHeaderActions.saveLabel",
+    "defaultMessage": "Save"
+  }
+}

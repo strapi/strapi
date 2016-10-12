@@ -1,0 +1,10 @@
+{
+  "title": {
+    "id": "settings-manager.components.PluginHeaderTitle.title",
+    "defaultMessage": "Settings Manager"
+  },
+  "description": {
+    "id": "settings-manager.components.PluginHeaderTitle.description",
+    "defaultMessage": "Easily configure your settings"
+  }
+}

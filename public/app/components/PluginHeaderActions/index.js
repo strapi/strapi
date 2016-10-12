@@ -5,7 +5,10 @@
  */
 
 import React from 'react';
-import messages from './messages';
+
+import messages from './messages.json';
+import { define } from '../../i18n';
+define(messages);
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';

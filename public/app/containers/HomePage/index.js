@@ -32,8 +32,10 @@ import {
   cancelGeneralSettings,
 } from 'containers/HomePage/actions';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
-import appMessages from 'containers/App/messages';
-import messages from './messages';
+import appMessages from 'containers/App/messages.json';
+import messages from './messages.json';
+import { define } from '../../i18n';
+define(messages);
 
 import styles from './styles.scss';
 
