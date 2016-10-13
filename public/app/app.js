@@ -90,11 +90,32 @@ window.onload = function onLoad() {
     Promise.all([
       System.import('intl'),
       System.import('intl/locale-data/jsonp/en.js'),
+      System.import('intl/locale-data/jsonp/en.js'),
+      System.import('intl/locale-data/jsonp/fr.js'),
     ]).then(() => render(translationMessages));
   } else {
     render(translationMessages);
   }
 };
+
+// Chunked polyfill for browsers without Intl support
+if (!window.Intl) {
+  (new Promise((resolve) => {
+    resolve(System.import('intl'));
+  }))
+    .then(() => Promise.all([
+      System.import('intl/locale-data/jsonp/en.js'),
+      System.import('intl/locale-data/jsonp/de.js'),
+      System.import('intl/locale-data/jsonp/en.js'),
+      System.import('intl/locale-data/jsonp/fr.js'),
+    ]))
+    .then(() => render(translationMessages))
+    .catch((err) => {
+      throw err;
+    });
+} else {
+  render(translationMessages);
+}
 
 // Install ServiceWorker and AppCache in the end since
 // it's not most important operation and if main code fails,
@@ -120,8 +141,8 @@ const registerPlugin = (plugin) => {
   const pluginsRoute = _.find(homeRoute.childRoutes, { name: 'plugins' });
 
   // Create a new prefixed route for each plugin routes
-  if (plugin && plugin.routes && plugin.routes.childRoutes) {
-    plugin.routes.childRoutes.forEach(route => {
+  if (plugin && plugin.routes) {
+    plugin.routes.forEach(route => {
       pluginsRoute.childRoutes.push({
         path: `/plugins/${plugin.id}${route.path}`,
         name: `plugins_${plugin.id}_${route.name}`,
@@ -131,12 +152,15 @@ const registerPlugin = (plugin) => {
   }
 
   // TMP
-  setTimeout(() => {
-    store.dispatch(showNotification('Plugin loaded!', 'success'));
-    store.dispatch(showNotification('Oooooops!', 'warning'));
-    store.dispatch(showNotification('An error occurred!', 'error'));
-    store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
-  }, 500);
+  // setTimeout(() => {
+  //   store.dispatch(showNotification('Plugin loaded!', 'success'));
+  //   store.dispatch(showNotification('Oooooops!', 'warning'));
+  //   store.dispatch(showNotification('An error occurred!', 'error'));
+  //   store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
+  // }, 500);
+
+  // Merge admin translation messages
+  _.merge(translationMessages, plugin.translationMessages);
 
   store.dispatch(pluginLoaded(plugin));
 };
@@ -146,6 +170,9 @@ import { showNotification } from './containers/NotificationProvider/actions';
 const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
+
+const port = window.Strapi && window.Strapi.port ? window.Strapi.port : 1337;
+const apiUrl = window.Strapi && window.Strapi.apiUrl ? window.Strapi.apiUrl : `http://localhost:${port}`;
 
 window.Strapi = {
   registerPlugin,
@@ -163,6 +190,13 @@ window.Strapi = {
       displayNotification(message, 'info');
     },
   },
+  port,
+  apiUrl,
+  refresh: () => ({
+    translationMessages: (translationMessagesUpdated) => {
+      render(_.merge({}, translationMessages, translationMessagesUpdated));
+    },
+  }),
 };
 
 const dispatch = store.dispatch;

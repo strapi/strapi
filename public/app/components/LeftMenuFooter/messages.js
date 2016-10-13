@@ -6,8 +6,8 @@
 import { defineMessages } from 'react-intl';
 
 export default defineMessages({
-  header: {
-    id: 'app.components.LeftMenuFooter.header',
+  poweredBy: {
+    id: 'app.components.LeftMenuFooter.poweredBy',
     defaultMessage: 'Proudly powered by ',
   },
 });
