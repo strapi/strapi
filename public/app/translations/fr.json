@@ -1,6 +1,4 @@
-[
-  {
-    "id": "app.components.LeftMenuFooter.poweredBy",
-    "defaultMessage": "Propulsé par"
-  }
-]
+{
+  "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
+  "app.components.NotFoundPage.description": "Page introuvable"
+}

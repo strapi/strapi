@@ -11,9 +11,11 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import styles from './styles.scss';
 import { Link } from 'react-router';
+import messages from './messages.json';
+import { define } from '../../i18n';
+define(messages);
 
 export default class NotFound extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
@@ -21,7 +23,7 @@ export default class NotFound extends React.Component { // eslint-disable-line r
     return (
       <div className={styles.notFound}>
         <h1 className={styles.notFoundTitle}>
-          <FormattedMessage {...messages.header} />
+          404
         </h1>
         <h2 className={styles.notFoundDescription}>
           <FormattedMessage {...messages.description} />

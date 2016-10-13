@@ -1,39 +1,38 @@
 /**
  * i18n.js
  *
- * This will setup the i18n language files and locale data for your app.
+ * This will setup the i18n language files and locale data for your plugin.
  *
  */
-import { addLocaleData } from 'react-intl';
 
-import enLocaleData from 'react-intl/locale-data/en';
-import frLocaleData from 'react-intl/locale-data/fr';
-
-export const appLocales = [
-  'en',
-  'fr',
-];
+import { addLocaleData, defineMessages } from 'react-intl';
 
 import enTranslationMessages from './translations/en.json';
 import frTranslationMessages from './translations/fr.json';
 
+import enLocaleData from 'react-intl/locale-data/en';
+import frLocaleData from 'react-intl/locale-data/fr';
+
+
 addLocaleData(enLocaleData);
 addLocaleData(frLocaleData);
 
-const formatTranslationMessages = (messages) => {
-  const formattedMessages = {};
-  for (const message of messages) {
-    formattedMessages[message.id] = message.message || message.defaultMessage;
-  }
-
-  return formattedMessages;
-};
+const appLocales = [
+  'en',
+  'fr',
+];
 
 const translationMessages = {
-  en: formatTranslationMessages(enTranslationMessages),
-  fr: formatTranslationMessages(frTranslationMessages),
+  en: enTranslationMessages,
+  fr: frTranslationMessages,
+};
+
+const define = messages => {
+  defineMessages(messages);
 };
 
 export {
+  appLocales,
+  define,
   translationMessages,
 };
