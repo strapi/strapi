@@ -31,6 +31,7 @@
       "dot-notation": 0,
       "no-case-declarations": 0,
       "no-else-return": 0,
+      "no-eval": 0,
       "no-implicit-coercion": 0,
       "no-lonely-if": 0,
       "no-negated-condition": 0,

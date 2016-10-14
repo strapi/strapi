@@ -97,6 +97,9 @@ module.exports = strapi => {
           return cb(err);
         }
 
+        // Template literal string
+        config = templateConfigurations(config);
+
         // Merge every user config together.
         const mergedConfig = _.merge(
           config['config/*'],
@@ -137,4 +140,24 @@ module.exports = strapi => {
       });
     }
   };
+
+  /**
+   * Allow dynamic config values through
+   * the native ES6 template string function.
+   */
+  function templateConfigurations(object) {
+    // Allow values which looks like such as
+    // an ES6 literal string without parenthesis inside (aka function call).
+    var regex = /^\$\{[^()]*\}$/g;
+
+    return _.mapValues(object, (value, key) => {
+      if (_.isPlainObject(value)) {
+        return templateConfigurations(value);
+      } else if (_.isString(value) && regex.test(value)) {
+        return eval('`' + value + '`');
+      }
+
+      return value;
+    });
+  }
 };
