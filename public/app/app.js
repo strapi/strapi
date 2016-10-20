@@ -54,7 +54,7 @@ if (module.hot) {
 }
 
 // API
-const apiUrl = `${window.Strapi.apiUrl}/${pluginId}`;
+const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 
 // Export store
 export {
