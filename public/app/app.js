@@ -90,32 +90,12 @@ window.onload = function onLoad() {
     Promise.all([
       System.import('intl'),
       System.import('intl/locale-data/jsonp/en.js'),
-      System.import('intl/locale-data/jsonp/en.js'),
       System.import('intl/locale-data/jsonp/fr.js'),
     ]).then(() => render(translationMessages));
   } else {
     render(translationMessages);
   }
 };
-
-// Chunked polyfill for browsers without Intl support
-if (!window.Intl) {
-  (new Promise((resolve) => {
-    resolve(System.import('intl'));
-  }))
-    .then(() => Promise.all([
-      System.import('intl/locale-data/jsonp/en.js'),
-      System.import('intl/locale-data/jsonp/de.js'),
-      System.import('intl/locale-data/jsonp/en.js'),
-      System.import('intl/locale-data/jsonp/fr.js'),
-    ]))
-    .then(() => render(translationMessages))
-    .catch((err) => {
-      throw err;
-    });
-} else {
-  render(translationMessages);
-}
 
 // Install ServiceWorker and AppCache in the end since
 // it's not most important operation and if main code fails,

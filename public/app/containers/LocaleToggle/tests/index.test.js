@@ -36,7 +36,7 @@ describe('<LocaleToggle />', () => {
         </LanguageProvider>
       </Provider>
     );
-    expect(renderedComponent.contains(<option value="en">en</option>)).toEqual(true);
+    expect(renderedComponent.contains(<option value="en">EN</option>)).toEqual(true);
   });
 
   describe('mapDispatchToProps', () => {
