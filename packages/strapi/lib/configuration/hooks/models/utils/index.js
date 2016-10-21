@@ -253,6 +253,6 @@ module.exports = {
   },
 
   getVia: function (attribute, association) {
-    return _.findKey(strapi.models[association.model || association.collection].attributes, { via: attribute });
+    return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
   }
 };

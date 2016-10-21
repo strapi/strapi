@@ -77,18 +77,10 @@ module.exports = strapi => {
         const externalHooksOrdered = _.mapKeys(_.toPlainObject(externalHooksKeys), value => value);
 
         // Add the loaded hooks into the hook dictionary exposed at `strapi.hooks`.
-        _.set(strapi.hooks, 'external', _.reduce(externalHooksOrdered, (memo, module, identity) => {
+        _.set(strapi, 'externalHooks', _.reduce(externalHooksOrdered, (memo, module, identity) => {
           const hookName = identity.replace(/^strapi-/, '');
 
-          try {
-            memo[hookName] = require(identity);
-          } catch (err) {
-            try {
-              memo[hookName] = require(path.resolve(strapi.config.appPath, 'node_modules', identity));
-            } catch (err) {
-              cb(err);
-            }
-          }
+          memo[hookName] = identity;
 
           return memo;
         }, {}));

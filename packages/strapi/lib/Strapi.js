@@ -41,7 +41,7 @@ class Strapi extends EventEmitter {
     this.app = require('koa')();
 
     // Mount the HTTP server.
-    this.server = http.Server(this.app.callback());
+    this.server = new http.Server(this.app.callback());
 
     // Expose every middleware inside `strapi.middlewares`.
     this.middlewares = require('koa-load-middlewares')({

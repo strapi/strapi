@@ -66,7 +66,6 @@ module.exports = function (strapi) {
               // Initialize lifecycle callbacks.
               const preLifecycle = {
                 validate: 'beforeCreate',
-                save: 'beforeCreate',
                 remove: 'beforeDestroy',
                 update: 'beforeUpdate',
                 find: 'beforeFetch',
@@ -81,7 +80,6 @@ module.exports = function (strapi) {
 
               const postLifecycle = {
                 validate: 'afterCreate',
-                save: 'afterCreate',
                 remove: 'afterDestroy',
                 update: 'afterUpdate',
                 find: 'afterFetch',
@@ -96,7 +94,7 @@ module.exports = function (strapi) {
 
               // Add virtual key to provide populate and reverse populate
               _.forEach(_.pickBy(definition.loadedModel, model => {
-                return model.type === 'virtual'
+                return model.type === 'virtual';
               }), (value, key) => {
                 collection.schema.virtual(key.replace('_v', ''), {
                   ref: value.ref,
@@ -160,7 +158,7 @@ module.exports = function (strapi) {
 
           if (_.isEmpty(definition.attributes)) {
             // Generate empty schema
-            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', mongoose.Schema({}));
+            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema({}));
 
             return loadedAttributes();
           }
@@ -169,7 +167,7 @@ module.exports = function (strapi) {
           // all attributes for relationships-- see below.
           const done = _.after(_.size(definition.attributes), function () {
             // Generate schema without virtual populate
-            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+            _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
               return model.type === 'virtual';
             })));
 
@@ -197,9 +195,8 @@ module.exports = function (strapi) {
                   ref: _.capitalize(details.model)
                 };
                 break;
-
               case 'hasMany':
-                FK = _.find(definition.associations, { alias : name });
+                FK = _.find(definition.associations, {alias: name});
 
                 if (FK) {
                   definition.loadedModel[name] = {
@@ -214,9 +211,8 @@ module.exports = function (strapi) {
                   }];
                 }
                 break;
-
               case 'belongsTo':
-                FK = _.find(definition.associations, { alias : name });
+                FK = _.find(definition.associations, {alias: name});
 
                 if (FK && FK.nature === 'oneToOne') {
                   definition.loadedModel[name] = {
@@ -232,9 +228,8 @@ module.exports = function (strapi) {
                   };
                 }
                 break;
-
               case 'belongsToMany':
-                FK = _.find(definition.associations, { alias : name });
+                FK = _.find(definition.associations, {alias: name});
 
                 if (FK && _.isUndefined(details.via)) {
                   definition.loadedModel[name] = {
@@ -249,7 +244,6 @@ module.exports = function (strapi) {
                   }];
                 }
                 break;
-
               default:
                 break;
             }

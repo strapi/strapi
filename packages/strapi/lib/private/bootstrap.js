@@ -9,28 +9,26 @@
  */
 
 module.exports = function runBootstrap(cb) {
-  const self = this;
-
   // Run boostrap script if specified.
   // Otherwise, do nothing and continue.
-  if (!self.config.bootstrap) {
+  if (!this.config.bootstrap) {
     return cb();
   }
 
   // If bootstrap takes too long, display warning message
   // (just in case user forgot to call their bootstrap's `cb`).
-  const timeoutMs = self.config.bootstrapTimeout || 3500;
+  const timeoutMs = this.config.bootstrapTimeout || 3500;
   const timer = setTimeout(() => {
-    self.log.warn('Bootstrap is taking unusually long to execute its callback (' + timeoutMs + ' miliseconds).');
-    self.log.warn('Perhaps you forgot to call it?');
+    this.log.warn('Bootstrap is taking unusually long to execute its callback (' + timeoutMs + ' miliseconds).');
+    this.log.warn('Perhaps you forgot to call it?');
   }, timeoutMs);
 
   let ranBootstrapFn = false;
 
   try {
-    return self.config.bootstrap(err => {
+    return this.config.bootstrap(err => {
       if (ranBootstrapFn) {
-        self.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+        this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
         return;
       }
       ranBootstrapFn = true;
@@ -39,8 +37,8 @@ module.exports = function runBootstrap(cb) {
     });
   } catch (e) {
     if (ranBootstrapFn) {
-      self.log.error('The bootstrap function threw an error after its callback was called.');
-      self.log.error(e);
+      this.log.error('The bootstrap function threw an error after its callback was called.');
+      this.log.error(e);
       return;
     }
     ranBootstrapFn = true;

@@ -35,9 +35,9 @@ describe('middlewares', function () {
     assert(typeof strapi.middlewares.favicon === 'function');
   });
 
-  it('`strapi.middlewares.graphql` should be a function', function () {
-    assert(typeof strapi.middlewares.graphql === 'function');
-  });
+  // it('`strapi.middlewares.graphql` should be a function', function () {
+  //   assert(typeof strapi.middlewares.graphql === 'function');
+  // });
 
   it('`strapi.middlewares.i18n` should be a function', function () {
     assert(typeof strapi.middlewares.i18n === 'function');

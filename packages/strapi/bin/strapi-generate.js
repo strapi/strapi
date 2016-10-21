@@ -34,7 +34,7 @@ module.exports = function () {
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
-    args: cliArguments,
+    args: cliArguments
   };
 
   const template = _.find(arguments, o => {

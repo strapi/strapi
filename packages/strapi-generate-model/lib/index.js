@@ -5,6 +5,7 @@
  */
 
 // Node.js core.
+const fs = require('fs');
 const path = require('path');
 
 /**
@@ -30,6 +31,6 @@ module.exports = {
     },
     'api/:humanizeId/models/:filenameSettings': {
       template: 'model.settings.template'
-    },
+    }
   }
 };

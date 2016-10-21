@@ -29,7 +29,7 @@ module.exports = (scope, cb) => {
   // Determine default values based on the available scope.
   _.defaults(scope, {
     globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js',
+    ext: '.js'
   });
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
@@ -40,7 +40,7 @@ module.exports = (scope, cb) => {
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId:  _.camelCase(scope.id).toLowerCase(),
+    humanizeId: _.camelCase(scope.id).toLowerCase(),
     humanizedPath: '`./api/' + scope.api + '/services`'
   });
 

@@ -57,7 +57,7 @@ module.exports = (scope, cb) => {
     if (_.size(object) === 2) {
       scope.api[_.trim(_.deburr(_.camelCase(_.first(object)).toLowerCase()))] = {
         type: _.trim(_.deburr(_.camelCase(_.last(object).toLowerCase())))
-      }
+      };
     }
   });
 
