@@ -22,21 +22,23 @@ module.exports = {
     // Use `cheerio` to parse the HTML string
     const parsedHTML = $.load(htmlString);
 
-    // // Some plugins are ignored
-    // const ignoredPlugins = ['admin', 'user'];
-    //
-    // // Inject `js` files from plugins builds in the main admin panel
-    // _.forEach(strapi.api, (value, pluginName) => {
-    //   if (!_.includes(ignoredPlugins, pluginName)) {
-    //     // Main plugin `js` file
-    //     const pluginMainScript = $('<script>').attr('src', '/plugins/' + pluginName + '/main.js');
-    //     parsedHTML('body').append(pluginMainScript);
-    //
-    //     // Vendors plugin `js` file
-    //     const pluginVendorScript = $('<script>').attr('src', '/plugins/' + pluginName + '/vendor.js');
-    //     parsedHTML('body').append(pluginVendorScript);
-    //   }
-    // });
+    // Some plugins are ignored
+    const ignoredPlugins = ['admin', 'user'];
+
+    console.log('strapi.plugins', strapi.plugins)
+
+    // Inject `js` files from plugins builds in the main admin panel
+    _.forEach(strapi.plugins, (value, pluginName) => {
+      if (!_.includes(ignoredPlugins, pluginName)) {
+        // Main plugin `js` file
+        const pluginMainScript = $('<script>').attr('src', '/' + pluginName + '/main.js');
+        parsedHTML('body').append(pluginMainScript);
+
+        // Vendors plugin `js` file
+        const pluginVendorScript = $('<script>').attr('src', '/' + pluginName + '/vendor.js');
+        parsedHTML('body').append(pluginVendorScript);
+      }
+    });
 
     // Finally, send the HTML file with injected scripts
     this.body = parsedHTML.html();
