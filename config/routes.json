@@ -9,7 +9,7 @@
       "controller": "SettingsManager",
       "action": "updateSettings"
     },
-    "GET /plugins/:file": {
+    "GET /:file": {
       "controller": "SettingsManager",
       "action": "file",
       "policies": []
