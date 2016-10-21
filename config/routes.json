@@ -3,12 +3,14 @@
     "GET /admin": {
       "controller": "Admin",
       "action": "index",
-      "policies": []
+      "policies": [],
+      "prefix": ""
     },
     "GET /admin/:file": {
       "controller": "Admin",
       "action": "file",
-      "policies": []
+      "policies": [],
+      "prefix": ""
     }
   }
 }

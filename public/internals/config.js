@@ -1,4 +1,4 @@
-const resolve = require('path').resolve;
+// const resolve = require('path').resolve;
 const pullAll = require('lodash/pullAll');
 const uniq = require('lodash/uniq');
 
@@ -37,7 +37,7 @@ const ReactBoilerplate = {
       include: ['core-js', 'eventsource-polyfill', 'babel-polyfill', 'lodash'],
 
       // The path where the DLL manifest and bundle will get built
-      path: resolve('../node_modules/react-boilerplate-dlls'),
+      // path: resolve('../node_modules/react-boilerplate-dlls'),
     },
 
     entry(pkg) {
