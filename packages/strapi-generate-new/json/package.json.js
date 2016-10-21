@@ -30,15 +30,13 @@ module.exports = scope => {
     'version': '0.1.0',
     'description': 'A Strapi application.',
     'dependencies': {
-      'async': getDependencyVersion(frameworkPkg, 'async'),
-      'lodash': getDependencyVersion(frameworkPkg, 'lodash'),
-      'socket.io': getDependencyVersion(frameworkPkg, 'socket.io'),
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi-mongoose')
     },
     'main': './server.js',
     'scripts': {
-      'start': 'node server.js'
+      'start': 'node server.js',
+      'strapi': 'node_modules/strapi/bin/strapi.js' // Allow to use `npm run strapi` CLI
     },
     'author': {
       'name': scope.author || 'A Strapi developer',

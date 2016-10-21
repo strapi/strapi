@@ -42,13 +42,18 @@ module.exports = {
       template: 'README.md'
     },
 
+    // Empty API directory.
+    'api': {
+      folder: {}
+    },
+
     // Empty data directory.
     'data': {
       folder: {}
     },
 
-    // Empty API directory.
-    'api': {
+    // Empty node_modules directory.
+    'node_modules': {
       folder: {}
     }
   }

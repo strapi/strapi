@@ -67,7 +67,7 @@ module.exports = function () {
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    return require('../lib/')().start(afterwards);
+    return require('strapi').start(afterwards);
   } catch (e) {
     logger.error(e);
     process.exit(0);
