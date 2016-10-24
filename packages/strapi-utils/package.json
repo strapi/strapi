@@ -17,8 +17,9 @@
   "main": "./lib",
   "dependencies": {
     "commander": "~2.9.0",
-    "knex": "~0.11.10",
     "include-all": "~0.1.6",
+    "joi-json": "^2.0.1",
+    "knex": "~0.11.10",
     "lodash": "~4.15.0",
     "winston": "~2.2.0"
   },

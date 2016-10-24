@@ -125,7 +125,7 @@ module.exports = function (configOverride, cb) {
     this.hooks = _.pickBy(mapper, value => value !== false);
 
     // Require only necessary hooks.
-    this.hooks =_.mapValues(this.hooks, (hook, hookIdentity) => {
+    this.hooks = _.mapValues(this.hooks, (hook, hookIdentity) => {
       try {
         return require(_.get(this.tree, hookIdentity + '.path'));
       } catch (err) {

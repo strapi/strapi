@@ -95,6 +95,14 @@ module.exports = strapi => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config),
                   filter: /(.+)\.(js|json)$/,
+                  excludeDirs: /(validators)$/,
+                  depth: 2
+                }, cb);
+              },
+              validators: cb => {
+                dictionary.aggregate({
+                  dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, 'validators'),
+                  filter: /(.+)\.(js|json)$/,
                   depth: 2
                 }, cb);
               },
@@ -110,7 +118,7 @@ module.exports = strapi => {
                 return cb(err);
               }
 
-              return cb(null, _.merge(config.common, config.specific));
+              return cb(null, _.merge(config.common, config.specific, {validators: config.validators}));
             });
           }
         },
@@ -154,7 +162,7 @@ module.exports = strapi => {
           strapi.policies = _.merge({}, strapi.policies, _.get(strapi.api, api.name + '.policies'));
 
           // Merge API routes with the main ones.
-          strapi.config.routes = _.merge({}, strapi.config.routes, _.get(strapi.api, api.name + '.config.routes'));
+          strapi.config.routes = _.union([], strapi.config.routes, _.get(strapi.api, api.name + '.config.routes'));
         });
       });
 

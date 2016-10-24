@@ -51,6 +51,7 @@
     "koa-favicon": "~1.2.1",
     "koa-i18n": "~1.2.0",
     "koa-ip": "~0.1.0",
+    "koa-joi-router": "^4.0.0",
     "koa-load-middlewares": "~1.0.0",
     "koa-locale": "~1.2.0",
     "koa-lusca": "~2.2.0",
