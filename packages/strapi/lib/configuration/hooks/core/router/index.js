@@ -128,6 +128,7 @@ module.exports = strapi => {
 
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
+        strapi.app.use(strapi.router.router.allowedMethods());
 
         // Handle router errors.
         strapi.app.use(function * (next) {
