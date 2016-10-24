@@ -8,6 +8,7 @@
 const path = require('path');
 
 // Public modules
+const _ = require('lodash');
 const koa = require('koa');
 
 /**

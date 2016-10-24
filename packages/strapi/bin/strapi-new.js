@@ -25,6 +25,7 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = function () {
+  logger.info('Creating your application... It might take a few seconds.');
 
   // Pass the original CLI arguments down to the generator
   // (but first, remove commander's extra argument).

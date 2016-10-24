@@ -1,4 +1,4 @@
-  'use strict';
+'use strict';
 
 /**
  * Module dependencies
@@ -107,7 +107,7 @@ module.exports = strapi => {
         // and match the controller and action to the desired endpoint.
         _.forEach(strapi.config.routes, (value, endpoint) => {
           try {
-            const { route, policies, action } = routerChecker(value, endpoint);
+            const {route, policies, action} = routerChecker(value, endpoint);
 
             strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
           } catch (err) {
@@ -131,7 +131,7 @@ module.exports = strapi => {
 
             // Add others routes to the plugin's router.
             _.forEach(_.omit(value, _.keys(excludedRoutes)), (value, endpoint) => {
-              const { route, policies, action } = routerChecker(value, endpoint, plugin);
+              const {route, policies, action} = routerChecker(value, endpoint, plugin);
 
               router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
             });
@@ -139,7 +139,7 @@ module.exports = strapi => {
             // /!\ Could override main router's routes.
             if (!_.isEmpty(excludedRoutes)) {
               _.forEach(excludedRoutes, (value, endpoint) => {
-                const { route, policies, action } = routerChecker(value, endpoint, plugin);
+                const {route, policies, action} = routerChecker(value, endpoint, plugin);
 
                 strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
               });

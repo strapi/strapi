@@ -8,6 +8,7 @@
 const path = require('path');
 
 // Public node modules.
+const _ = require('lodash');
 const fs = require('fs-extra');
 
 // Logger.
@@ -21,24 +22,36 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = (scope, cb) => {
+  const packageJSON = require(path.resolve(scope.rootPath, 'package.json'));
+  const strapiRootPath = path.resolve(scope.strapiRoot, '..');
+
   process.chdir(scope.rootPath);
 
   // Copy the default files.
   fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(scope.rootPath));
 
-  // Log an info.
-  logger.warn('Installing dependencies... It might take a few seconds.');
+  const missingDependencies = [];
 
-  // Create copies to all necessary node modules
-  // in the `node_modules` directory.
-  const srcDependencyPath = path.resolve(scope.strapiRoot, 'node_modules');
-  const destDependencyPath = path.resolve(scope.rootPath, 'node_modules');
-  fs.copy(srcDependencyPath, destDependencyPath, function (copyLinkErr) {
-    if (copyLinkErr) {
-      return cb(copyLinkErr);
+  // Verify if the dependencies are available into the global
+  _.forEach(_.get(packageJSON, 'dependencies'), (value, key) => {
+    try {
+      fs.accessSync(path.resolve(strapiRootPath, key), fs.constants.R_OK | fs.constants.W_OK);
+      fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
+    } catch (e) {
+      missingDependencies.push(key);
     }
-
-    logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
-    return cb();
   });
+
+  logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+
+  if (!_.isEmpty(missingDependencies)) {
+    console.log();
+    logger.warn('You should run `npm install` into your application before starting it.');
+    console.log();
+    logger.warn('Some dependencies could not be installed:');
+    _.forEach(missingDependencies, value => logger.warn('• ' + value));
+    console.log();
+  }
+
+  return cb();
 };
