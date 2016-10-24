@@ -53,12 +53,46 @@ module.exports = strapi => {
         };
       }
 
-      if (((cluster.isWorker && strapi.config.reload.workers > 0) || (cluster.isMaster && strapi.config.reload.workers < 1)) || (!strapi.config.reload && cluster.isMaster)) {
-        let route;
-        let controller;
+      function routerChecker(value, endpoint, plugin) {
         let action;
-        let policies = [];
+        const route = regex.detectRoute(endpoint);
 
+        // Check if the controller is a function.
+        if (typeof value.controller === 'function') {
+          action = value.controller;
+        } else {
+          const controller = strapi.controllers[value.controller.toLowerCase()] || strapi.plugins[plugin].controllers[value.controller.toLowerCase()];
+          action = controller[value.action];
+        }
+
+        // Init policies array.
+        const policies = [];
+
+        // Add the `globalPolicy`.
+        policies.push(globalPolicy(endpoint, value, route));
+
+        // Add the `responsesPolicy`.
+        policies.push(responsesPolicy);
+
+        if (_.isArray(value.policies) && !_.isEmpty(value.policies)) {
+          _.forEach(value.policies, policy => {
+            if (strapi.policies[policy]) {
+              policies.push(strapi.policies[policy]);
+            } else {
+              strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
+              process.exit(1);
+            }
+          });
+        }
+
+        return {
+          route: route,
+          policies: policies,
+          action: action
+        };
+      }
+
+      if (((cluster.isWorker && strapi.config.reload.workers > 0) || (cluster.isMaster && strapi.config.reload.workers < 1)) || (!strapi.config.reload && cluster.isMaster)) {
         // Initialize the router.
         if (!strapi.router) {
           strapi.router = strapi.middlewares.router({
@@ -66,43 +100,52 @@ module.exports = strapi => {
           });
         }
 
-        // Add response policy to the global variable
+        // Add response policy to the global variable.
         _.set(strapi.policies, 'responsesPolicy', responsesPolicy);
 
         // Parse each route from the user config, load policies if any
         // and match the controller and action to the desired endpoint.
         _.forEach(strapi.config.routes, (value, endpoint) => {
           try {
-            route = regex.detectRoute(endpoint);
+            const {route, policies, action} = routerChecker(value, endpoint);
 
-            // Check if the controller is a function.
-            if (typeof value.controller === 'function') {
-              action = value.controller;
-            } else {
-              controller = strapi.controllers[value.controller.toLowerCase()];
-              action = controller[value.action];
-            }
+            strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
+          } catch (err) {
+            strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+          }
+        });
 
-            // Init policies array.
-            policies = [];
+        console.log(strapi.config.plugins);
 
-            // Add the `globalPolicy`.
-            policies.push(globalPolicy(endpoint, value, route));
+        // Parse each plugin's routes.
+        _.forEach(strapi.config.plugins.routes, (value, plugin) => {
+          try {
+            // Create router for each plugin.
+            // Prefix router with the plugin's name.
+            const router = strapi.middlewares.router({
+              prefix: '/' + plugin
+            });
 
-            // Add the `responsesPolicy`.
-            policies.push(responsesPolicy);
+            // Exclude routes with prefix.
+            const excludedRoutes = _.omitBy(value, o => !o.hasOwnProperty('prefix'));
 
-            if (_.isArray(value.policies) && !_.isEmpty(value.policies)) {
-              _.forEach(value.policies, policy => {
-                if (strapi.policies[policy]) {
-                  policies.push(strapi.policies[policy]);
-                } else {
-                  strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
-                  process.exit(1);
-                }
+            // Add others routes to the plugin's router.
+            _.forEach(_.omit(value, _.keys(excludedRoutes)), (value, endpoint) => {
+              const {route, policies, action} = routerChecker(value, endpoint, plugin);
+
+              router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
+            });
+
+            // /!\ Could override main router's routes.
+            if (!_.isEmpty(excludedRoutes)) {
+              _.forEach(excludedRoutes, (value, endpoint) => {
+                const {route, policies, action} = routerChecker(value, endpoint, plugin);
+
+                strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
               });
             }
-            strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
+
+            strapi.router.use(router.routes(), router.allowedMethods());
           } catch (err) {
             strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
           }

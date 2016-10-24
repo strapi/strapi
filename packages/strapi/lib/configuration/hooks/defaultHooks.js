@@ -8,12 +8,14 @@ module.exports = {
   dictionary: {
     _config: true,
     _api: true,
+    _plugins: true,
     _externalHooks: true
   },
   core: {
     responses: true,
     responseTime: true,
     bodyParser: true,
+    compress: true,
     session: true,
     proxy: true,
     ssl: true,

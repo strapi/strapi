@@ -133,11 +133,7 @@ module.exports = strapi => {
           };
 
           // Delete the definition if it's empty.
-          _.forEach(strapi.api[api.name], (dictionary, entry) => {
-            if (_.isEmpty(strapi.api[api.name][entry])) {
-              delete strapi.api[api.name][entry];
-            }
-          });
+          strapi.api[api.name] = _.omitBy(strapi.api[api.name], _.isEmpty);
 
           // If the module doesn't have a definition at all
           // just remove it completely from the dictionary.

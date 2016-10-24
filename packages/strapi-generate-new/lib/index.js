@@ -42,6 +42,11 @@ module.exports = {
       template: 'README.md'
     },
 
+    // Empty admin directory.
+    'admin': {
+      folder: {}
+    },
+
     // Empty API directory.
     'api': {
       folder: {}
@@ -49,6 +54,16 @@ module.exports = {
 
     // Empty data directory.
     'data': {
+      folder: {}
+    },
+
+    // Empty plugins directory.
+    'plugins': {
+      folder: {}
+    },
+
+    // Empty public directory.
+    'public': {
       folder: {}
     },
 
