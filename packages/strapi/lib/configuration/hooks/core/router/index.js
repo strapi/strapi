@@ -126,8 +126,6 @@ module.exports = strapi => {
           strapi.router.use(router.middleware());
         });
 
-        console.log(strapi.router.routes);
-
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
 
@@ -178,25 +176,22 @@ module.exports = strapi => {
 
         // Define controller and action names.
         const handler = _.trim(value.handler).split('.');
-
         const controller = strapi.controllers[handler[0].toLowerCase()] || strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
         // Init policies array.
         const policies = [];
-
         // Add the `globalPolicy`.
         policies.push(globalPolicy(endpoint, value, route));
 
         // Add the `responsesPolicy`.
         policies.push(responsesPolicy);
-
         // Allow string instead of array of policies
-        if (!_.isArray(value.config.policies)) {
+        if (!_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           value.config.policies = [value.config.policies];
         }
 
-        if (_.isArray(value.config.policies) && !_.isEmpty(value.config.policies)) {
+        if (_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           _.forEach(value.config.policies, policy => {
             if (strapi.policies[policy]) {
               return policies.push(strapi.policies[policy]);
@@ -210,7 +205,7 @@ module.exports = strapi => {
         // Init validate
         const validate = {};
 
-        if (_.isString(value.config.validate) && !_.isEmpty(value.config.validate)) {
+        if (_.isString(_.get(value, 'config.validate')) && !_.isEmpty(_.get(value, 'config.validate'))) {
           // Retrieve the API's name where the controller is located
           // to access to the right validators
           const api = finder(strapi.api, controller);

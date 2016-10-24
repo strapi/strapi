@@ -64,7 +64,7 @@ describe('middlewares', function () {
   });
 
   it('`strapi.middlewares.router` should be a function', function () {
-    assert(typeof strapi.middlewares.router === 'function');
+    assert(typeof strapi.middlewares.joiRouter === 'function');
   });
 
   it('`strapi.middlewares.send` should be a function', function () {
