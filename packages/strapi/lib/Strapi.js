@@ -50,7 +50,7 @@ class Strapi extends EventEmitter {
       scope: ['dependencies', 'devDependencies'],
       replaceString: /^koa(-|\.)/,
       camelize: true,
-      lazy: false
+      lazy: true
     });
 
     // New Winston logger.

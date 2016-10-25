@@ -84,16 +84,16 @@ module.exports = strapi => {
             dictionary.optional({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, strapi.config.paths.policies),
               filter: /(.+)\.(js)$/,
-              depth: 1
+              depth: 2
             }, cb);
           },
 
           // Load API validators from `./api/*/config/validators/*.js`.
           'validators/*': cb => {
-            dictionary.optional({
+            dictionary.aggregate({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, strapi.config.paths.validators),
               filter: /(.+)\.(json|js)$/,
-              depth: 1
+              depth: 2
             }, cb);
           },
 

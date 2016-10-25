@@ -60,16 +60,18 @@ module.exports = strapi => {
           try {
             const {route, policies, action, validate} = routerChecker(value, endpoint);
 
+            if (_.isUndefined(action) || !_.isFunction(action)) {
+              return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+            }
+
             strapi.router.route(_.omitBy({
               method: value.method,
               path: value.path,
               handler: [strapi.middlewares.compose(policies), action],
               validate: validate
             }, _.isEmpty));
-
-            // strapi.router[route.verb.toLowerCase()](route.endpoint, strapi.middlewares.compose(policies), action);
           } catch (err) {
-            strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+            cb(err);
           }
         });
 
@@ -89,14 +91,18 @@ module.exports = strapi => {
             try {
               const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
 
+              if (_.isUndefined(action) || !_.isFunction(action)) {
+                return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+              }
+
               router.route(_.omitBy({
                 method: value.method,
                 path: value.path,
-                handler: [strapi.middlewares.compose(policies), action],
+                handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
                 validate: validate
               }, _.isEmpty));
             } catch (err) {
-              strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+              cb(err);
             }
           });
 
@@ -110,14 +116,18 @@ module.exports = strapi => {
               try {
                 const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
 
+                if (_.isUndefined(action) || !_.isFunction(action)) {
+                  return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+                }
+
                 strapi.router.route(_.omitBy({
                   method: value.method,
                   path: value.path,
-                  handler: [strapi.middlewares.compose(policies), action],
+                  handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
                   validate: validate
                 }, _.isEmpty));
               } catch (err) {
-                strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+                cb(err);
               }
             });
           }
@@ -180,6 +190,10 @@ module.exports = strapi => {
         const controller = strapi.controllers[handler[0].toLowerCase()] || strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
+        // Retrieve the API's name where the controller is located
+        // to access to the right validators
+        const currentApiName = finder(strapi.api, controller);
+
         // Init policies array.
         const policies = [];
         // Add the `globalPolicy`.
@@ -187,6 +201,7 @@ module.exports = strapi => {
 
         // Add the `responsesPolicy`.
         policies.push(responsesPolicy);
+
         // Allow string instead of array of policies
         if (!_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           value.config.policies = [value.config.policies];
@@ -194,12 +209,14 @@ module.exports = strapi => {
 
         if (_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           _.forEach(value.config.policies, policy => {
-            if (strapi.policies[policy]) {
-              return policies.push(strapi.policies[policy]);
+            // Looking for global policy or namespaced
+            if (_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.policies, policy.substring(1).toLowerCase()))) {
+              return policies.push(strapi.policies[policy.substring(1).toLowerCase()]);
+            } else if (!_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.policies.' + policy.toLowerCase()))) {
+              return policies.push(strapi.api[currentApiName].policies[policy.toLowerCase()]);
             }
 
             strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
-            process.exit(1);
           });
         }
 
@@ -207,10 +224,7 @@ module.exports = strapi => {
         const validate = {};
 
         if (_.isString(_.get(value, 'config.validate')) && !_.isEmpty(_.get(value, 'config.validate'))) {
-          // Retrieve the API's name where the controller is located
-          // to access to the right validators
-          const api = finder(strapi.api, controller);
-          const validator = _.get(strapi.api, api + '.validators.' + value.config.validate);
+          const validator = _.get(strapi.api, currentApiName + '.validators.' + value.config.validate);
 
           _.merge(validate, _.mapValues(validator, value => {
             return builder.build(value);
