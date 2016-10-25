@@ -78,6 +78,15 @@ module.exports = strapi => {
           }, cb);
         },
 
+        // Load global policies from `./config/policies/*.js`..
+        'config/policies/*': cb => {
+          dictionary.optional({
+            dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'policies'),
+            filter: /(.+)\.(js)$/,
+            depth: 1
+          }, cb);
+        },
+
         // Load APIs from `./api/**/*.js|json`.
         'api/**': cb => {
           dictionary.optional({
@@ -126,6 +135,9 @@ module.exports = strapi => {
         // Merge default config and user loaded config together inside `strapi.config`.
         strapi.config = _.merge(strapi.config, mergedConfig, packageJSON);
 
+        // Exposer global policies
+        strapi.policies = _.merge({}, config['config/policies/*']);
+
         // Expose user APIs.
         strapi.api = config['api/**'];
 
@@ -150,7 +162,6 @@ module.exports = strapi => {
         // Initialize empty API objects.
         strapi.controllers = {};
         strapi.models = {};
-        strapi.policies = {};
 
         cb();
       });

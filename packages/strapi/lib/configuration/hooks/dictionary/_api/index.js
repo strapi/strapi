@@ -79,11 +79,20 @@ module.exports = strapi => {
             }, cb);
           },
 
-          // Load API policies from `./api/*/policies/*.js`.
+          // Load API policies from `./api/*/config/policies/*.js`.
           'policies/*': cb => {
-            dictionary.aggregate({
-              dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.policies),
+            dictionary.optional({
+              dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, strapi.config.paths.policies),
               filter: /(.+)\.(js)$/,
+              depth: 1
+            }, cb);
+          },
+
+          // Load API validators from `./api/*/config/validators/*.js`.
+          'validators/*': cb => {
+            dictionary.optional({
+              dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, strapi.config.paths.validators),
+              filter: /(.+)\.(json|js)$/,
               depth: 1
             }, cb);
           },
@@ -99,13 +108,6 @@ module.exports = strapi => {
                   depth: 2
                 }, cb);
               },
-              validators: cb => {
-                dictionary.aggregate({
-                  dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, 'validators'),
-                  filter: /(.+)\.(js|json)$/,
-                  depth: 2
-                }, cb);
-              },
               specific: cb => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, 'environments', strapi.config.environment),
@@ -118,7 +120,7 @@ module.exports = strapi => {
                 return cb(err);
               }
 
-              return cb(null, _.merge(config.common, config.specific, {validators: config.validators}));
+              return cb(null, _.merge(config.common, config.specific));
             });
           }
         },
@@ -137,6 +139,7 @@ module.exports = strapi => {
             models: api['models/*'],
             services: api['services/*'],
             policies: api['policies/*'],
+            validators: api['validators/*'],
             config: api['config/**']
           };
 
@@ -157,9 +160,6 @@ module.exports = strapi => {
 
           // Merge API models with the main ones.
           strapi.models = _.merge({}, strapi.models, _.get(strapi.api, api.name + '.models'));
-
-          // Merge API policies with the main ones.
-          strapi.policies = _.merge({}, strapi.policies, _.get(strapi.api, api.name + '.policies'));
 
           // Merge API routes with the main ones.
           strapi.config.routes = _.union([], strapi.config.routes, _.get(strapi.api, api.name + '.config.routes'));

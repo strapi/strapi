@@ -210,7 +210,7 @@ module.exports = strapi => {
           // Retrieve the API's name where the controller is located
           // to access to the right validators
           const api = finder(strapi.api, controller);
-          const validator = _.get(strapi.api, api + '.config.validators.' + value.config.validate);
+          const validator = _.get(strapi.api, api + '.validators.' + value.config.validate);
 
           _.merge(validate, _.mapValues(validator, value => {
             return builder.build(value);
