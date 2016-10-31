@@ -16,6 +16,7 @@ For more details, [please read our blog](http://blog.strapi.io).
 
 ### α alpha
 **Expected release date: 20/12/2016**
+
 **Note:** This version will not be ready for production use. However, we will publish it on npm to allow the community to test it and give us feedback.
 
 * ~~Rewrite the entire project with ES6.~~
