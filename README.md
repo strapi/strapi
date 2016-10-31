@@ -8,9 +8,9 @@
 ## v3.0.0 coming soon...
 We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel.
 
-Some parts of this work have been merged into our master branch. Currently, this is not stable. Please DON'T use the `master` in production. **To run and start your current project, we strongly recommend to use the v1.5.4.**
+Some parts of this work have been merged into our master branch. Currently, this is not stable and ready. Please DON'T use the `master` in production. **To run and start your current project, we strongly recommend to use the v1.5.4.**
 
-For more information on the upcoming version including the v2.0 abort, [read our blog post](http://blog.strapi.io/inside-the-box-july-2016/).
+For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
 
 Thanks for your support!
 
