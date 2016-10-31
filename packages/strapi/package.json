@@ -58,7 +58,7 @@
     "koa-response-time": "~1.0.2",
     "koa-send": "~3.2.0",
     "koa-session": "~3.3.1",
-    "koa-ssl": "~2.0.0",
+    "koa-sslify": "^1.1.0",
     "koa-static": "~2.0.0",
     "koa-views": "^4.1.0",
     "lodash": "~4.15.0",

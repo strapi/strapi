@@ -20,8 +20,14 @@ module.exports = strapi => {
 
     defaults: {
       ssl: {
-        disabled: true,
-        trustProxy: false
+        trustProtoHeader: false,
+        trustAzureHeader: false,
+        port: 443,
+        ignoreUrl: false,
+        temporary: false,
+        skipDefaultPort: true,
+        redirectMethods: ['GET', 'HEAD'],
+        internalRedirectMethods: []
       }
     },
 
@@ -31,10 +37,7 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (_.isPlainObject(strapi.config.ssl) && !_.isEmpty(strapi.config.ssl)) {
-        strapi.app.use(strapi.middlewares.ssl({
-          disabled: strapi.config.ssl.disabled,
-          trustProxy: strapi.config.ssl.trustProxy
-        }));
+        strapi.app.use(strapi.middlewares.sslify(strapi.config.ssl));
       }
 
       cb();

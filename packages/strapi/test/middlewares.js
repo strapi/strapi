@@ -63,7 +63,7 @@ describe('middlewares', function () {
     assert(typeof strapi.middlewares.responseTime === 'function');
   });
 
-  it('`strapi.middlewares.router` should be a function', function () {
+  it('`strapi.middlewares.joiRouter` should be a function', function () {
     assert(typeof strapi.middlewares.joiRouter === 'function');
   });
 
@@ -73,6 +73,10 @@ describe('middlewares', function () {
 
   it('`strapi.middlewares.session` should be a function', function () {
     assert(typeof strapi.middlewares.session === 'function');
+  });
+
+  it('`strapi.middlewares.sslify` should be a function', function () {
+    assert(typeof strapi.middlewares.sslify === 'function');
   });
 
   it('`strapi.middlewares.static` should be a function', function () {
