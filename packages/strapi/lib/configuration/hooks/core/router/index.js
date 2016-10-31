@@ -55,6 +55,10 @@ module.exports = strapi => {
         // and match the controller and action to the desired endpoint.
 
         _.forEach(strapi.config.routes, value => {
+          if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+            return;
+          }
+
           const endpoint = `${value.method} ${value.path}`;
 
           try {
@@ -86,6 +90,10 @@ module.exports = strapi => {
 
           // Add others routes to the plugin's router.
           _.forEach(_.omit(value, _.keys(excludedRoutes)), value => {
+            if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+              return;
+            }
+
             const endpoint = `${value.method} ${value.path}`;
 
             try {
@@ -111,6 +119,10 @@ module.exports = strapi => {
           // /!\ Could override main router's routes.
           if (!_.isEmpty(excludedRoutes)) {
             _.forEach(excludedRoutes, value => {
+              if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+                return;
+              }
+
               const endpoint = `${value.method} ${value.path}`;
 
               try {
