@@ -62,7 +62,8 @@ module.exports = class Configuration {
         controllers: 'controllers',
         services: 'services',
         policies: 'policies',
-        models: 'models'
+        models: 'models',
+        plugins: 'plugins'
       },
 
       // Start off needed empty objects and strings.
