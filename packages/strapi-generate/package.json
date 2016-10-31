@@ -13,10 +13,10 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "async": "~2.0.1",
+    "async": "^2.1.2",
     "fs-extra": "~0.30.0",
-    "lodash": "~4.15.0",
-    "reportback": "~0.1.9",
+    "lodash": "^4.16.5",
+    "reportback": "^2.0.1",
     "strapi-utils": "~2.0.0"
   },
   "scripts": {

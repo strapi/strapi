@@ -17,13 +17,15 @@
   "main": "./lib",
   "dependencies": {
     "bookshelf": "~0.10.0",
-    "lodash": "~4.15.0",
+    "lodash": "^4.16.5",
     "pluralize": "~3.0.0",
-    "strapi": "~2.0.0"
+    "strapi-utils": "~2.0.0"
   },
   "strapi": {
     "isHook": true,
-    "nextTo": ["strapi-knex"]
+    "nextTo": [
+      "strapi-knex"
+    ]
   },
   "scripts": {
     "prepublish": "npm prune"

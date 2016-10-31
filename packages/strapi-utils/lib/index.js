@@ -5,12 +5,13 @@
  */
 
 module.exports = {
-  finder: require('./finder'),
   commander: require('./commander'),
   dictionary: require('./dictionary'),
+  finder: require('./finder'),
+  joijson: require('./joi-json'),
   json: require('./json'),
   knex: require('./knex'),
-  regex: require('./regex'),
   logger: require('./winston'),
-  joijson: require('./joi-json')
+  models: require('./models'),
+  regex: require('./regex')
 };

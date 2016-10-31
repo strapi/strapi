@@ -14,7 +14,7 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "~4.15.0"
+    "lodash": "^4.16.5"
   },
   "scripts": {
     "prepublish": "npm prune"
