@@ -42,7 +42,6 @@ module.exports = strapi => {
 
       // Callback.
       (err, hooks) => {
-
         // Just in case there is an error.
         if (err) {
           return cb(err);
