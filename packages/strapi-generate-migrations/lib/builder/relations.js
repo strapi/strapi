@@ -13,7 +13,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 // Collections utils.
-const utilsModels = require('strapi/lib/configuration/hooks/models/utils/');
+const utilsModels = require('strapi-utils').models;
 const utilsBookShelf = require('strapi-bookshelf/lib/utils/');
 
 // Template builder.

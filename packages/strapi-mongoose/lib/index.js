@@ -14,7 +14,7 @@ const pluralize = require('pluralize');
 const utils = require('./utils/');
 
 // Strapi helpers for models.
-const utilsModels = require('strapi/lib/configuration/hooks/models/utils/');
+const utilsModels = require('strapi-utils').models;
 
 /**
  * Bookshelf hook
