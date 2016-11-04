@@ -16,8 +16,7 @@ install:
   - npm install
 
 node_js:
-  - "5"
-  - "6"
+  - "7"
 
 sudo: false
 
