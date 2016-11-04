@@ -20,6 +20,8 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
+    publicPath: 'http://localhost:1337/settings-manager/',
+    assetsPublicPath: '/settings-manager/',
   },
 
   // We use ExtractTextPlugin so we get a seperate SCSS file instead
