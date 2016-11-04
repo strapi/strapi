@@ -11,6 +11,7 @@ const EventEmitter = require('events').EventEmitter;
 
 // Local dependencies.
 const _ = require('lodash');
+const convert = require('koa-convert');
 const Koa = require('koa');
 const mixinAfter = require('./private/after');
 
@@ -52,7 +53,7 @@ class Strapi extends EventEmitter {
       scope: ['dependencies', 'devDependencies'],
       replaceString: /^koa(-|\.)/,
       camelize: true,
-      lazy: false
+      lazy: true
     });
 
     // New Winston logger.

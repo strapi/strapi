@@ -14,9 +14,9 @@ const responses = require('./responses/index');
  * Policy used to add responses in the `this.response` object.
  */
 
-module.exports = function * (next) {
+module.exports = async function (ctx, next) {
 
   // Add the custom responses to the `this.response` object.
-  this.response = _.merge(this.response, responses);
-  yield next;
+  ctx.response = _.merge(ctx.response, responses);
+  await next();
 };

@@ -148,14 +148,12 @@ module.exports = strapi => {
           strapi.router.use(router.middleware());
         });
 
-        console.log(strapi.router.routes);
-
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
         strapi.app.use(strapi.router.router.allowedMethods());
 
         // Handle router errors.
-        strapi.app.use(async (ctx, next) => {
+        strapi.app.use((ctx, next) => {
           try {
             next();
 
@@ -184,15 +182,16 @@ module.exports = strapi => {
       // Middleware used for every routes.
       // Expose the endpoint in `this`.
       function globalPolicy(endpoint, value, route) {
-        return function * (next) {
-          this.request.route = {
+        return async function (ctx, next) {
+          ctx.request.route = {
             endpoint: _.trim(endpoint),
             controller: _.trim(value.controller),
             action: _.trim(value.action),
             splittedEndpoint: _.trim(route.endpoint),
             verb: route.verb && _.trim(route.verb.toLowerCase())
           };
-          yield next;
+
+          await next();
         };
       }
 
