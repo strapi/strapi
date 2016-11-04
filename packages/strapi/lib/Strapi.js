@@ -10,6 +10,8 @@ const http = require('http');
 const EventEmitter = require('events').EventEmitter;
 
 // Local dependencies.
+const _ = require('lodash');
+const Koa = require('koa');
 const mixinAfter = require('./private/after');
 
 /**
@@ -38,7 +40,7 @@ class Strapi extends EventEmitter {
     mixinAfter(this);
 
     // Expose `koa`.
-    this.app = require('koa')();
+    this.app = new Koa();
 
     // Mount the HTTP server.
     this.server = new http.Server(this.app.callback());
@@ -50,7 +52,7 @@ class Strapi extends EventEmitter {
       scope: ['dependencies', 'devDependencies'],
       replaceString: /^koa(-|\.)/,
       camelize: true,
-      lazy: true
+      lazy: false
     });
 
     // New Winston logger.

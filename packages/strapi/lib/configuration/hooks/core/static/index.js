@@ -9,7 +9,7 @@ const path = require('path');
 
 // Public modules
 const _ = require('lodash');
-const koa = require('koa');
+const Koa = require('koa');
 
 /**
  * Public assets hook
@@ -40,7 +40,7 @@ module.exports = strapi => {
       // Mount static to a specific path (pattern: `/plugins/xXx`)
       _.forEach(strapi.plugins, (value, plugin) => {
         // Create koa sub-app
-        const app = koa();
+        const app = new Koa();
 
         app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, 'plugins', plugin, strapi.config.paths.static), {
           gzip: true

@@ -71,7 +71,7 @@ module.exports = strapi => {
             strapi.router.route(_.omitBy({
               method: value.method,
               path: value.path,
-              handler: [strapi.middlewares.compose(policies), action],
+              handler: _.union(policies, [action]),
               validate: validate
             }, _.isEmpty));
           } catch (err) {
@@ -148,31 +148,33 @@ module.exports = strapi => {
           strapi.router.use(router.middleware());
         });
 
+        console.log(strapi.router.routes);
+
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
         strapi.app.use(strapi.router.router.allowedMethods());
 
         // Handle router errors.
-        strapi.app.use(function * (next) {
+        strapi.app.use(async (ctx, next) => {
           try {
-            yield next;
+            next();
 
-            const status = this.status || 404;
+            const status = ctx.status || 404;
 
             if (status === 404) {
-              this.throw(404);
+              ctx.throw(404);
             }
           } catch (err) {
             err.status = err.status || 500;
             err.message = err.expose ? err.message : 'Houston, we have a problem.';
 
-            this.status = err.status;
-            this.body = {
+            ctx.status = err.status;
+            ctx.body = {
               code: err.status,
               message: err.message
             };
 
-            this.app.emit('error', err, this);
+            ctx.app.emit('error', err, this);
           }
         });
       }
