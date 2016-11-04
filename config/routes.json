@@ -1,14 +1,16 @@
 {
   "routes": {
     "GET /admin": {
-      "controller": "Admin",
-      "action": "index",
+      "method": "GET",
+      "path": "/admin",
+      "handler": "Admin.index",
       "policies": [],
       "prefix": ""
     },
     "GET /admin/:file": {
-      "controller": "Admin",
-      "action": "file",
+      "method": "GET",
+      "path": "/admin/:file",
+      "handler": "Admin.file",
       "policies": [],
       "prefix": ""
     }
