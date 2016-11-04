@@ -1,17 +1,23 @@
 {
   "routes": {
     "GET /settings/general": {
-      "controller": "SettingsManager",
-      "action": "getGeneralSettings",
+      "method": "GET",
+      "path": "/settings/general",
+      "handler": "SettingsManager.getGeneralSettings",
       "policies": []
     },
     "PUT /settings": {
-      "controller": "SettingsManager",
-      "action": "updateSettings"
+      "action": "updateSettings",
+      "method": "PUT",
+      "path": "/settings",
+      "handler": "SettingsManager.updateSettings",
+      "policies": []
     },
     "GET /:file": {
-      "controller": "SettingsManager",
-      "action": "file",
+      "action": "updateSettings",
+      "method": "GET",
+      "path": "/:file",
+      "handler": "SettingsManager.file",
       "policies": []
     }
   }
