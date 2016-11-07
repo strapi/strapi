@@ -151,30 +151,6 @@ module.exports = strapi => {
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
         strapi.app.use(strapi.router.router.allowedMethods());
-
-        // Handle router errors.
-        strapi.app.use((ctx, next) => {
-          try {
-            next();
-
-            const status = ctx.status || 404;
-
-            if (status === 404) {
-              ctx.throw(404);
-            }
-          } catch (err) {
-            err.status = err.status || 500;
-            err.message = err.expose ? err.message : 'Houston, we have a problem.';
-
-            ctx.status = err.status;
-            ctx.body = {
-              code: err.status,
-              message: err.message
-            };
-
-            ctx.app.emit('error', err, this);
-          }
-        });
       }
 
       cb();

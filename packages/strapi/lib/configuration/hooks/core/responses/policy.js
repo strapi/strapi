@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const Boom = require('boom');
 
 // Local utilities.
 const responses = require('./responses/index');
@@ -15,8 +16,8 @@ const responses = require('./responses/index');
  */
 
 module.exports = async function (ctx, next) {
+  // Add the custom responses to the `ctx` object.
+  _.merge(ctx, responses, Boom);
 
-  // Add the custom responses to the `this.response` object.
-  ctx.response = _.merge(ctx.response, responses);
   await next();
 };
