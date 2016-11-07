@@ -61,9 +61,9 @@ module.exports = function () {
 
     // Run app as a child_process
     // when harmony flag is not detected.
-    if (!~process.execArgv.indexOf('--harmony')) {
+    if (!~process.execArgv.indexOf('--harmony-async-await')) {
       const opts = Object.create(process.env);
-      opts.execArgv = ['--harmony'];
+      opts.execArgv = ['--harmony-async-await'];
 
       return cp.fork(path.resolve(process.cwd(), 'server.js'), opts);
     }
