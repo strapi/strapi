@@ -43,7 +43,7 @@ module.exports = function () {
         try {
           process.chdir(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-' + name));
           logger.debug('Pulling the latest updates of `strapi-generate-' + name + '`.');
-          exec('git pull ' + info.remote + ' ' + info.branch, function (err) {
+          exec('git pull ' + info.remote + ' ' + info.branch, err => {
             if (err) {
               logger.error('Impossible to update `strapi-generate-' + name + '`.');
             } else {
@@ -53,7 +53,7 @@ module.exports = function () {
         } catch (err) {
           process.chdir(path.resolve(__dirname, '..', 'node_modules'));
           logger.debug('Cloning the `strapi-generate-' + name + '` repository for the first time...');
-          exec('git clone ' + info.repository + ' strapi-generate-' + name, function (err) {
+          exec('git clone ' + info.repository + ' strapi-generate-' + name, err => {
             if (err) {
               logger.error('Impossible to clone the `strapi-generate-' + name + '` repository.');
               console.log(err);
@@ -61,7 +61,7 @@ module.exports = function () {
               logger.info('Successfully cloned the `strapi-generate-' + name + '` repository.');
               process.chdir(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-' + name));
               logger.debug('Installing dependencies for `strapi-generate-' + name + '`...');
-              exec('npm install', function (err) {
+              exec('npm install', err => {
                 if (err) {
                   logger.error('Impossible to install dependencies for `strapi-generate-' + name + '`.');
                   console.log(err);

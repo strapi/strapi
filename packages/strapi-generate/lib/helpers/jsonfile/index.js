@@ -40,13 +40,13 @@ module.exports = function (options, handlers) {
   const rootPath = path.resolve(process.cwd(), options.rootPath);
 
   // Only override an existing file if `options.force` is true.
-  fs.exists(rootPath, function (exists) {
+  fs.exists(rootPath, exists => {
     if (exists && !options.force) {
       return handlers.alreadyExists('Something else already exists at `' + rootPath + '`.');
     }
 
     if (exists) {
-      fs.remove(rootPath, function deletedOldINode(err) {
+      fs.remove(rootPath, err => {
         if (err) {
           return handlers.error(err);
         }
@@ -57,7 +57,7 @@ module.exports = function (options, handlers) {
     }
 
     function _afterwards_() {
-      fs.outputJSON(rootPath, options.data, {spaces: 2}, function (err) {
+      fs.outputJSON(rootPath, options.data, {spaces: 2}, err => {
         if (err) {
           return handlers.error(err);
         } else {

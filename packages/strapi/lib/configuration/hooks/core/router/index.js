@@ -72,7 +72,7 @@ module.exports = strapi => {
               method: value.method,
               path: value.path,
               handler: _.union(policies, [action]),
-              validate: validate
+              validate
             }, _.isEmpty));
           } catch (err) {
             cb(err);
@@ -107,7 +107,7 @@ module.exports = strapi => {
                 method: value.method,
                 path: value.path,
                 handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
-                validate: validate
+                validate
               }, _.isEmpty));
             } catch (err) {
               cb(err);
@@ -136,7 +136,7 @@ module.exports = strapi => {
                   method: value.method,
                   path: value.path,
                   handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
-                  validate: validate
+                  validate
                 }, _.isEmpty));
               } catch (err) {
                 cb(err);
@@ -245,10 +245,10 @@ module.exports = strapi => {
         }
 
         return {
-          route: route,
-          policies: policies,
-          action: action,
-          validate: validate
+          route,
+          policies,
+          action,
+          validate
         };
       }
     }

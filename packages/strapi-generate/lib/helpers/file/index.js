@@ -43,7 +43,7 @@ module.exports = function (options, cb) {
   const rootPath = path.resolve(process.cwd(), options.rootPath);
 
   // Only override an existing file if `options.force` is true.
-  fs.exists(rootPath, function (exists) {
+  fs.exists(rootPath, exists => {
     if (exists && !options.force) {
       return cb.alreadyExists('Something else already exists at `' + rootPath + '`.');
     }

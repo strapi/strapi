@@ -44,7 +44,7 @@ module.exports = function () {
         watchDirectory: process.cwd(),
         killTree: true, // Kills the entire child process tree on `exit`,
         spinSleepTime: 0,
-        command: 'node --harmony'
+        command: 'node --harmony-async-await'
       });
 
       const child = new (forever.Monitor)('server.js', options);
@@ -61,7 +61,7 @@ module.exports = function () {
 
     // Run app as a child_process
     // when harmony flag is not detected.
-    if (!~process.execArgv.indexOf('--harmony-async-await')) {
+    if (!~process.execArgv.indexOf('--harmony')) {
       const opts = Object.create(process.env);
       opts.execArgv = ['--harmony-async-await'];
 

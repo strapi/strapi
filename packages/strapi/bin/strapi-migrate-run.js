@@ -41,10 +41,10 @@ module.exports = function () {
 
   // Run the migration.
   scope.db.migrate.latest()
-    .then(function () {
+    .then(() => {
       return scope.db.seed.run();
     })
-    .then(function () {
+    .then(() => {
       logger.info('Migration successfully made for the `' + scope.connection + '` connection!');
       process.exit(0);
     });

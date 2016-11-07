@@ -17,10 +17,10 @@ module.exports = {
    * Find primary key
    */
 
-  getPK: function (collectionIdentity, collection, models) {
+  getPK: (collectionIdentity, collection, models) => {
     // This is not a Bookshelf collection, only the name.
     if (_.isString(collectionIdentity) && !_.isUndefined(models)) {
-      const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), function (o) {
+      const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), o => {
         return o.hasOwnProperty('primary');
       });
 
@@ -52,9 +52,7 @@ module.exports = {
    * Find primary key
    */
 
-  getCount: function (type) {
-    return strapi.bookshelf.collections[type].forge().count().then(function (count) {
-      return count;
-    });
+  getCount: type => {
+    return strapi.bookshelf.collections[type].forge().count().then(count => count);
   }
 };

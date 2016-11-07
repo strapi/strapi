@@ -30,13 +30,13 @@ module.exports = function (options, cb) {
   // `templates` directory.
   const absSrcPath = path.resolve(options.templatesDirectory, options.templatePath);
 
-  fs.readFile(absSrcPath, 'utf8', function (err, contents) {
+  fs.readFile(absSrcPath, 'utf8', (err, contents) => {
     if (err) {
       return cb.error(err);
     }
 
     return fileHelper(_.merge(options, {
-      contents: contents
+      contents
     }), cb);
   });
 };

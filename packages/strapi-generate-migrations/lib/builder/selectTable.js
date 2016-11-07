@@ -44,7 +44,7 @@ module.exports = (models, modelName) => {
 
   if (!_.isEmpty(emptyArrayForDrop)) {
     models[modelName].up.drop += _.unescape(_.template(tplSelectTableUp)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].newAttributes,
       toDrop: true
@@ -53,7 +53,7 @@ module.exports = (models, modelName) => {
 
   if (!_.isEmpty(emptyArrayForOthers)) {
     models[modelName].up.others += _.unescape(_.template(tplSelectTableUp)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].newAttributes,
       toDrop: false
@@ -87,7 +87,7 @@ module.exports = (models, modelName) => {
 
   if (!_.isEmpty(emptyArrayForDrop)) {
     models[modelName].down.drop += _.unescape(_.template(tplSelectTableDown)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].newAttributes,
       toDrop: true
@@ -96,7 +96,7 @@ module.exports = (models, modelName) => {
 
   if (!_.isEmpty(emptyArrayForOthers)) {
     models[modelName].down.others += _.unescape(_.template(tplSelectTableDown)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].newAttributes,
       toDrop: false

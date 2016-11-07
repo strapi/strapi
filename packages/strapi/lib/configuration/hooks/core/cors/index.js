@@ -39,7 +39,8 @@ module.exports = strapi => {
         headers: [
           'Content-Type',
           'Authorization'
-        ]
+        ],
+        keepHeadersOnError: false
       }
     },
 
@@ -49,14 +50,15 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (_.isPlainObject(strapi.config.cors) && !_.isEmpty(strapi.config.cors)) {
-        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.cors({
+        strapi.app.use(strapi.middlewares.kcors({
           origin: strapi.config.cors.origin,
-          expose: strapi.config.cors.expose,
+          exposeHeaders: strapi.config.cors.expose,
           maxAge: strapi.config.cors.maxAge,
           credentials: strapi.config.cors.credentials,
-          methods: strapi.config.cors.methods,
-          headers: strapi.config.cors.headers
-        })));
+          allowMethods: strapi.config.cors.methods,
+          allowHeaders: strapi.config.cors.headers,
+          keepHeadersOnError: strapi.config.cors.keepHeadersOnError
+        }));
       }
 
       cb();

@@ -175,7 +175,7 @@ module.exports = function (configOverride, cb) {
       // zero downtime reloads.
       if (_.isPlainObject(this.config.reload) && !_.isEmpty(this.config.reload) && this.config.reload.workers > 0) {
         herd(this.config.name)
-          .close(function () {
+          .close(() => {
             process.send('message');
           })
           .timeout(this.config.reload.timeout)

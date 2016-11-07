@@ -29,7 +29,7 @@ exports.pathRegexp = (path, keys, sensitive, strict) => {
   path = path
     .concat(strict ? '' : '/?')
     .replace(/\/\(/g, '(?:/')
-    .replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, function (_, slash, format, key, capture, optional, star) {
+    .replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, (_, slash, format, key, capture, optional, star) => {
       keys.push({
         name: key,
         optional: !!optional

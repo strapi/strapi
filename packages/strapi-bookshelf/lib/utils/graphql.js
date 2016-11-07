@@ -23,7 +23,7 @@ module.exports = {
    * @return {String}
    */
 
-  getCollectionIdentity: function (collection) {
+  getCollectionIdentity: collection => {
     return _.capitalize(collection.forge().tableName);
   },
 
@@ -33,12 +33,10 @@ module.exports = {
    * @return {Object}
    */
 
-  fetch: function (collectionIdentity, collection, criteria) {
+  fetch: (collectionIdentity, collection, criteria) => {
     return collection.forge(criteria)
       .fetch({withRelated: helpers.getAssociationsByIdentity(collectionIdentity)})
-      .then(function (data) {
-        return _.isEmpty(data) ? data : data.toJSON();
-      });
+      .then(data => _.isEmpty(data) ? data : data.toJSON());
   },
 
   /**
@@ -47,17 +45,15 @@ module.exports = {
    * @return {Array}
    */
 
-  fetchAll: function (collectionIdentity, collection, criteria) {
-    const filters = _.omit(helpers.handleFilters(criteria), function (value) {
+  fetchAll: (collectionIdentity, collection, criteria) => {
+    const filters = _.omit(helpers.handleFilters(criteria), value => {
       return _.isUndefined(value) || _.isNumber(value) ? _.isNull(value) : _.isEmpty(value);
     });
 
     return collection.forge()
       .query(filters)
       .fetchAll({withRelated: helpers.getAssociationsByIdentity(collectionIdentity)})
-      .then(function (data) {
-        return data.toJSON() || data;
-      });
+      .then(data => data.toJSON() || data);
   },
 
   /**
@@ -66,8 +62,8 @@ module.exports = {
    * @return {Array}
    */
 
-  fetchLatest: function (collectionIdentity, collection, criteria) {
-    const filters = _.omit(helpers.handleFilters(criteria), function (value) {
+  fetchLatest: (collectionIdentity, collection, criteria) => {
+    const filters = _.omit(helpers.handleFilters(criteria), value => {
       return _.isUndefined(value) || _.isNumber(value) ? _.isNull(value) : _.isEmpty(value);
     });
 
@@ -80,9 +76,7 @@ module.exports = {
     return collection.forge(criteria)
       .query(filters)
       .fetchAll({withRelated: helpers.getAssociationsByIdentity(collectionIdentity)})
-      .then(function (data) {
-        return data.toJSON() || data;
-      });
+      .then(data => data.toJSON() || data);
   },
 
   /**
@@ -91,8 +85,8 @@ module.exports = {
    * @return {Array}
    */
 
-  fetchFirst: function (collectionIdentity, collection, criteria) {
-    const filters = _.omit(helpers.handleFilters(criteria), function (value) {
+  fetchFirst: (collectionIdentity, collection, criteria) => {
+    const filters = _.omit(helpers.handleFilters(criteria), value => {
       return _.isUndefined(value) || _.isNumber(value) ? _.isNull(value) : _.isEmpty(value);
     });
 
@@ -105,9 +99,7 @@ module.exports = {
     return collection.forge(criteria)
       .query(filters)
       .fetchAll({withRelated: helpers.getAssociationsByIdentity(collectionIdentity)})
-      .then(function (data) {
-        return data.toJSON() || data;
-      });
+      .then(data => data.toJSON() || data);
   },
 
   /**
@@ -116,12 +108,10 @@ module.exports = {
    * @return {Object}
    */
 
-  create: function (collectionIdentity, rootValue, args) {
+  create: (collectionIdentity, rootValue, args) => {
     return strapi.services[collectionIdentity.toLowerCase()]
       .add(rootValue.context.request.body)
-      .then(function (data) {
-        return _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
-      });
+      .then(data => _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data);
   },
 
   /**
@@ -130,16 +120,14 @@ module.exports = {
    * @return {Object}
    */
 
-  update: function (collectionIdentity, rootValue, args) {
+  update: (collectionIdentity, rootValue, args) => {
     _.merge(args, rootValue.context.request.body);
 
     const PK = utils.getPK(collectionIdentity.toLowerCase(), null, strapi.models);
 
     return strapi.services[collectionIdentity.toLowerCase()]
       .edit(_.set({}, PK, args[PK]), _.omit(args, PK))
-      .then(function (data) {
-        return _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
-      });
+      .then(data => _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data);
   },
 
   /**
@@ -148,14 +136,12 @@ module.exports = {
    * @return {Object}
    */
 
-  delete: function (collectionIdentity, rootValue, args) {
+  delete: (collectionIdentity, rootValue, args) => {
     _.merge(args, rootValue.context.request.body);
 
     return strapi.services[collectionIdentity.toLowerCase()]
       .remove(args)
-      .then(function (data) {
-        return _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data;
-      });
+      .then(data => _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data);
   },
 
   /**
@@ -164,7 +150,5 @@ module.exports = {
    * @return {Array}
    */
 
-  count: function (collectionIdentity, collection) {
-    return collection.forge().count();
-  }
+  count: (collectionIdentity, collection) => collection.forge().count()
 };

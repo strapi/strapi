@@ -35,7 +35,7 @@ module.exports = function (options, cb) {
 
   const absTemplatePath = path.resolve(options.templatesDirectory, options.templatePath);
 
-  fs.readFile(absTemplatePath, 'utf8', function (err, contents) {
+  fs.readFile(absTemplatePath, 'utf8', (err, contents) => {
     if (err) {
       err = err instanceof Error ? err : new Error(err);
       err.message = 'Template error: ' + err.message;
@@ -61,7 +61,7 @@ module.exports = function (options, cb) {
     }
 
     return fileHelper(_.merge(options, {
-      contents: contents
+      contents
     }), cb);
   });
 };

@@ -35,7 +35,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       let globalName;
 
       // Return callback if there is no model
@@ -58,8 +58,8 @@ module.exports = function (strapi) {
         // Initialize collections
         _.set(strapi, 'mongoose.collections', {});
 
-        const loadedAttributes = _.after(_.size(strapi.models), function () {
-          _.forEach(strapi.models, function (definition, model) {
+        const loadedAttributes = _.after(_.size(strapi.models), () => {
+          _.forEach(strapi.models, (definition, model) => {
             try {
               let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
 
@@ -72,7 +72,7 @@ module.exports = function (strapi) {
                 save: 'beforeSave'
               };
 
-              _.forEach(preLifecycle, function (fn, key) {
+              _.forEach(preLifecycle, (fn, key) => {
                 if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
                   collection.schema.pre(key, strapi.models[model.toLowerCase()][fn]);
                 }
@@ -86,7 +86,7 @@ module.exports = function (strapi) {
                 save: 'afterSave'
               };
 
-              _.forEach(postLifecycle, function (fn, key) {
+              _.forEach(postLifecycle, (fn, key) => {
                 if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
                   collection.schema.post(key, strapi.models[model.toLowerCase()][fn]);
                 }
@@ -130,7 +130,7 @@ module.exports = function (strapi) {
         });
 
         // Parse every registered model.
-        _.forEach(strapi.models, function (definition, model) {
+        _.forEach(strapi.models, (definition, model) => {
           definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
           // Make sure the model has a connection.
@@ -165,7 +165,7 @@ module.exports = function (strapi) {
 
           // Call this callback function after we are done parsing
           // all attributes for relationships-- see below.
-          const done = _.after(_.size(definition.attributes), function () {
+          const done = _.after(_.size(definition.attributes), () => {
             // Generate schema without virtual populate
             _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
               return model.type === 'virtual';
@@ -176,7 +176,7 @@ module.exports = function (strapi) {
 
           // Add every relationships to the loaded model for Bookshelf.
           // Basic attributes don't need this-- only relations.
-          _.forEach(definition.attributes, function (details, name) {
+          _.forEach(definition.attributes, (details, name) => {
             const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
 
             // Build associations key

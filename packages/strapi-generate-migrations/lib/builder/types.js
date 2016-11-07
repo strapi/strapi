@@ -36,7 +36,7 @@ module.exports = (models, modelName, details, attribute, toDrop, onlyDrop) => {
     // Template: delete a specific column.
     models[modelName].attributes[attribute].create.drop = _.unescape(_.template(tplTypeDelete)({
       tableName: modelName,
-      attribute: attribute
+      attribute
     }));
   }
 
@@ -44,8 +44,8 @@ module.exports = (models, modelName, details, attribute, toDrop, onlyDrop) => {
   if (_.isUndefined(onlyDrop)) {
     models[modelName].attributes[attribute].create.others = _.unescape(_.template(tplTypeCreate)({
       tableName: modelName,
-      attribute: attribute,
-      details: details
+      attribute,
+      details
     }));
   }
 
@@ -54,7 +54,7 @@ module.exports = (models, modelName, details, attribute, toDrop, onlyDrop) => {
   if (!_.isUndefined(details.defaultTo)) {
     const tplDefaultTo = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'chainables', 'defaultTo.template'), 'utf8');
     models[modelName].attributes[attribute].create.others += _.unescape(_.template(tplDefaultTo)({
-      details: details
+      details
     }));
   }
 
@@ -88,20 +88,20 @@ module.exports = (models, modelName, details, attribute, toDrop, onlyDrop) => {
       // Template: delete a specific column.
       models[modelName].attributes[attribute].delete.drop = _.unescape(_.template(tplTypeDelete)({
         tableName: modelName,
-        attribute: attribute
+        attribute
       }));
     }
 
     models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplTypeDeleteCreate)({
       tableName: modelName,
-      attribute: attribute,
+      attribute,
       details: models[modelName].oldAttributes[attribute]
     }));
   } else {
     // Template: delete a specific column.
     models[modelName].attributes[attribute].delete.others = _.unescape(_.template(tplTypeDelete)({
       tableName: modelName,
-      attribute: attribute
+      attribute
     }));
   }
 };

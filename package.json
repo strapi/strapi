@@ -12,6 +12,7 @@
   },
   "xo": {
     "space": true,
+    "esnext": true,
     "envs": [
       "mocha",
       "node"
@@ -68,7 +69,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
   "license": "MIT"

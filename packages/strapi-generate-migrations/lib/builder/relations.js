@@ -78,29 +78,29 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
         tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
         models[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
           tableName: modelName,
-          attribute: attribute,
-          details: details
+          attribute,
+          details
         }));
 
         tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
         models[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationDown)({
           tableName: modelName,
-          attribute: attribute,
-          details: details
+          attribute,
+          details
         }));
       } else {
         tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
         models[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
           tableName: modelName,
-          attribute: attribute,
-          details: details
+          attribute,
+          details
         }));
 
         tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'hasOne.template'), 'utf8');
         models[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationUp)({
           tableName: modelName,
-          attribute: attribute,
-          details: details
+          attribute,
+          details
         }));
       }
     } else if (infos.verbose === 'belongsTo') {
@@ -115,30 +115,30 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
           rootModels[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
             tableName: modelName,
-            attribute: attribute,
-            details: details,
+            attribute,
+            details,
             nature: infos.nature
           }));
 
           tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
           rootModels[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
-            attribute: attribute,
-            details: details
+            attribute,
+            details
           }));
         } else {
           tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
           rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
-            attribute: attribute,
-            details: details
+            attribute,
+            details
           }));
 
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
           rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
             tableName: modelName,
-            attribute: attribute,
-            details: details,
+            attribute,
+            details,
             nature: infos.nature
           }));
         }
@@ -147,29 +147,29 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo-unique.template'), 'utf8');
           rootModels[modelName].attributes[attribute].create.others += _.unescape(_.template(tplRelationUp)({
             tableName: modelName,
-            attribute: attribute,
-            details: details
+            attribute,
+            details
           }));
 
           tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn-unique.template'), 'utf8');
           rootModels[modelName].attributes[attribute].delete.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
-            attribute: attribute,
-            details: details
+            attribute,
+            details
           }));
         } else {
           tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropColumn.template'), 'utf8');
           rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
             tableName: modelName,
-            attribute: attribute,
-            details: details
+            attribute,
+            details
           }));
 
           tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
           rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
             tableName: modelName,
-            attribute: attribute,
-            details: details,
+            attribute,
+            details,
             nature: infos.nature
           }));
         }
@@ -179,15 +179,15 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
         tplRelationDown = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'columns', 'dropForeign.template'), 'utf8');
         rootModels[modelName].attributes[attribute].create.drop += _.unescape(_.template(tplRelationDown)({
           tableName: modelName,
-          attribute: attribute,
-          details: details
+          attribute,
+          details
         }));
 
         tplRelationUp = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'relations', 'belongsTo.template'), 'utf8');
         rootModels[modelName].attributes[attribute].delete.others += _.unescape(_.template(tplRelationUp)({
           tableName: modelName,
-          attribute: attribute,
-          details: details,
+          attribute,
+          details,
           nature: infos.nature
         }));
       }
@@ -240,10 +240,10 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
 
           // Create relationships table for many-to-many.
           rootModels[relationTable].up.others += _.unescape(_.template(tplTableUp)({
-            models: models,
+            models,
             tableName: relationTable,
-            details: details,
-            relationship: relationship
+            details,
+            relationship
           }));
 
           if (_.isUndefined(_.get(rootModels, relationTable + '.attributes.fk'))) {
@@ -268,7 +268,7 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
             };
 
             rootModels[relationTable].down.drop += _.unescape(_.template(tplSelectTableDown)({
-              models: models,
+              models,
               tableName: relationTable,
               attributes: models[relationTable].attributes,
               toDrop: true
@@ -382,10 +382,10 @@ module.exports = (rootModels, modelName, details, attribute, toDrop, onlyDrop, h
           if (rootModels[relationTable].down.others.indexOf('createTableIfNotExists(\'' + relationTable + '\'') === -1) {
             // Create previous relationships table on migration rollback.
             rootModels[relationTable].down.others += _.unescape(_.template(tplTableUp)({
-              models: models,
+              models,
               tableName: relationTable || relationTable,
-              details: details,
-              relationship: relationship
+              details,
+              relationship
             }));
           }
         }

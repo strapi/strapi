@@ -25,7 +25,7 @@ exports.detectRoute = endpoint => {
 
   // Return the verb and the endpoint.
   return {
-    verb: verb,
-    endpoint: endpoint
+    verb,
+    endpoint
   };
 };

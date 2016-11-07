@@ -49,11 +49,11 @@ class Strapi extends EventEmitter {
     // Expose every middleware inside `strapi.middlewares`.
     this.middlewares = require('koa-load-middlewares')({
       config: path.resolve(__dirname, '..', 'package.json'),
-      pattern: ['koa-*', 'koa.*'],
+      pattern: ['koa-*', 'koa.*', 'k*'],
       scope: ['dependencies', 'devDependencies'],
       replaceString: /^koa(-|\.)/,
       camelize: true,
-      lazy: true
+      lazy: false
     });
 
     // New Winston logger.

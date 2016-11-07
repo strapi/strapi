@@ -34,7 +34,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       let globalName;
 
       // Make sure the Knex hook is present since Knex needs it.
@@ -45,7 +45,7 @@ module.exports = function (strapi) {
       }
 
       // Only run this logic after the Knex has finished to load.
-      strapi.after('hook:knex:loaded', function () {
+      strapi.after('hook:knex:loaded', () => {
 
         // Initialize collections
         _.set(strapi, 'bookshelf.collections', {});
@@ -55,12 +55,12 @@ module.exports = function (strapi) {
           return cb();
         }
 
-        const loadedHook = _.after(_.size(strapi.models), function () {
+        const loadedHook = _.after(_.size(strapi.models), () => {
           cb();
         });
 
         // Parse every registered model.
-        _.forEach(strapi.models, function (definition, model) {
+        _.forEach(strapi.models, (definition, model) => {
           globalName = _.upperFirst(_.camelCase(definition.globalId));
 
           // Make sure the model has a table name.
@@ -97,10 +97,10 @@ module.exports = function (strapi) {
 
           // Call this callback function after we are done parsing
           // all attributes for relationships-- see below.
-          const done = _.after(_.size(definition.attributes), function () {
+          const done = _.after(_.size(definition.attributes), () => {
             try {
               // Initialize lifecycle callbacks.
-              loadedModel.initialize = function () {
+              loadedModel.initialize = () => {
                 const self = this;
                 const lifecycle = {
                   creating: 'beforeCreate',
@@ -115,7 +115,7 @@ module.exports = function (strapi) {
                   saved: 'afterSave'
                 };
 
-                _.forEach(lifecycle, function (fn, key) {
+                _.forEach(lifecycle, (fn, key) => {
                   if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
                     self.on(key, strapi.models[model.toLowerCase()][fn]);
                   }
@@ -149,7 +149,7 @@ module.exports = function (strapi) {
 
           // Add every relationships to the loaded model for Bookshelf.
           // Basic attributes don't need this-- only relations.
-          _.forEach(definition.attributes, function (details, name) {
+          _.forEach(definition.attributes, (details, name) => {
             const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
 
             // Build associations key
@@ -159,31 +159,31 @@ module.exports = function (strapi) {
 
             switch (verbose) {
               case 'hasOne':
-                const FK = _.findKey(strapi.models[details.model].attributes, function (details) {
+                const FK = _.findKey(strapi.models[details.model].attributes, details => {
                   if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
                     return details;
                   }
                 });
 
-                loadedModel[name] = function () {
+                loadedModel[name] = () => {
                   return this.hasOne(global[_.capitalize(details.model)], FK);
                 };
                 break;
 
               case 'hasMany':
-                loadedModel[name] = function () {
+                loadedModel[name] = () => {
                   return this.hasMany(global[_.capitalize(details.collection)], details.via);
                 };
                 break;
 
               case 'belongsTo':
-                loadedModel[name] = function () {
+                loadedModel[name] = () => {
                   return this.belongsTo(global[_.capitalize(details.model)], name);
                 };
                 break;
 
               case 'belongsToMany':
-                const tableName = _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), function (table) {
+                const tableName = _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
                   return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
                 }).join('__');
 
@@ -203,7 +203,7 @@ module.exports = function (strapi) {
                   relationship.attribute = pluralize.singular(details.via);
                 }
 
-                loadedModel[name] = function () {
+                loadedModel[name] = () => {
                   return this.belongsToMany(global[_.capitalize(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                 };
                 break;
