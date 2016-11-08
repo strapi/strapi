@@ -17,7 +17,7 @@ const responses = require('./responses/index');
 
 module.exports = async function (ctx, next) {
   // Add the custom responses to the `ctx` object.
-  _.merge(ctx, responses, Boom);
+  _.assign(ctx, responses, Boom);
 
   await next();
 };
