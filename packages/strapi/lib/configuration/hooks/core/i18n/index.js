@@ -41,7 +41,7 @@ module.exports = strapi => {
      */
 
     initialize: cb => {
-      if (_.isPlainObject(strapi.config.i18n) && !_.isEmpty(strapi.config.i18n)) {
+      if (_.isPlainObject(strapi.config.i18n) && !_.isEmpty(strapi.config.i18n) && _.get(strapi.config, 'i18n.enabled') !== false) {
         strapi.middlewares.locale(strapi.app);
         strapi.app.use(strapi.middlewares.convert(strapi.middlewares.i18n(strapi.app, {
           directory: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'locales'),

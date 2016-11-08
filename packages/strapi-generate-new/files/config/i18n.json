@@ -1,5 +1,6 @@
 {
   "i18n": {
+    "enabled": false,
     "defaultLocale": "en_US",
     "modes": [
       "query",
