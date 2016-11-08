@@ -122,7 +122,7 @@ module.exports = function (configOverride, cb) {
     });
 
     // Pick hook to load.
-    this.hooks = _.pickBy(mapper, value => value !== false);
+    this.hooks = _.pickBy(mapper, value => value === true);
 
     // Require only necessary hooks.
     this.hooks = _.mapValues(this.hooks, (hook, hookIdentity) => {

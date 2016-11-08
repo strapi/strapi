@@ -79,8 +79,8 @@ describe('middlewares', () => {
     assert(typeof strapi.middlewares.sslify === 'function');
   });
 
-  it('`strapi.middlewares.static` should be a function', () => {
-    assert(typeof strapi.middlewares.static === 'function');
+  it('`strapi.middlewares.betterStatic` should be a function', () => {
+    assert(typeof strapi.middlewares.betterStatic === 'function');
   });
 
   it('`strapi.middlewares.views` should be a function', () => {

@@ -185,6 +185,7 @@ module.exports = strapi => {
 
         // Init policies array.
         const policies = [];
+
         // Add the `globalPolicy`.
         policies.push(globalPolicy(endpoint, value, route));
 

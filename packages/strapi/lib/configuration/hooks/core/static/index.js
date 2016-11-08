@@ -32,9 +32,7 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (strapi.config.static === true) {
-        strapi.app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, strapi.config.paths.static), {
-          gzip: true
-        }));
+        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, strapi.config.paths.static))));
       }
 
       // Mount static to a specific path (pattern: `/plugins/xXx`)
@@ -42,9 +40,7 @@ module.exports = strapi => {
         // Create koa sub-app
         const app = new Koa();
 
-        app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, 'plugins', plugin, strapi.config.paths.static), {
-          gzip: true
-        }));
+        app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, 'plugins', plugin, strapi.config.paths.static))));
 
         strapi.app.use(strapi.middlewares.mount(path.join('/plugins', plugin), app));
       });
