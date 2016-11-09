@@ -11,7 +11,6 @@ const EventEmitter = require('events').EventEmitter;
 
 // Local dependencies.
 const _ = require('lodash');
-const convert = require('koa-convert');
 const Koa = require('koa');
 const mixinAfter = require('./private/after');
 

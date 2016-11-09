@@ -9,6 +9,7 @@ const cluster = require('cluster');
 
 // Public node modules.
 const _ = require('lodash');
+const Boom = require('boom');
 
 // Local utilities.
 const responsesPolicy = require('../../core/responses/policy');
@@ -148,9 +149,29 @@ module.exports = strapi => {
           strapi.router.use(router.middleware());
         });
 
+        // Wrap error into Boom object
+        strapi.app.use(async (ctx, next) => {
+          try {
+            await next();
+
+            if (ctx.status >= 400 || _.get(ctx.body, 'isBoom')) {
+              ctx.throw(ctx.status);
+            }
+          } catch (error) {
+            const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body : Boom.wrap(error, error.status, ctx.body);
+
+            ctx.status = formattedError.output.statusCode || error.status || 500;
+            ctx.body = formattedError.output.payload;
+          }
+        });
+
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
-        strapi.app.use(strapi.router.router.allowedMethods());
+        strapi.app.use(strapi.router.router.allowedMethods({
+          throw: false,
+          notImplemented: () => Boom.notImplemented(),
+          methodNotAllowed: () => Boom.methodNotAllowed()
+        }));
       }
 
       cb();
