@@ -38,7 +38,9 @@ module.exports = {
   },
 
   file: function* () {
+    console.log('file', this.params.file, ' ', path.resolve(__dirname, '..', 'public', 'build', this.params.file));
     yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
+    console.log(':(')
     if (!this.status) this.throw(404);
   }
 };

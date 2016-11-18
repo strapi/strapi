@@ -11,7 +11,7 @@ const divider = chalk.gray('\n-----------------------------------');
 const logger = {
 
   // Called whenever there's an error on the server we want to print
-  error: err => {
+  error: (err) => {
     console.error(chalk.red(err));
   },
 

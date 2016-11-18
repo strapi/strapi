@@ -13,19 +13,18 @@ import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 
 import appMessages from 'containers/App/messages.json';
 import messages from './messages.json';
-console.log('messages', messages)
 import { define } from '../../i18n';
 define(messages);
 
 import {
-  selectHome,
+  // selectHome,
   selectLoading,
   selectError,
-  selectGeneralSettings,
+  // selectGeneralSettings,
   selectName,
   selectDescription,
   selectVersion,
-  selectLocationState,
+  // selectLocationState,
 } from './selectors';
 
 import {
@@ -124,17 +123,17 @@ HomePage.propTypes = {
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-  error: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
+  // error: React.PropTypes.oneOfType([
+  //   React.PropTypes.object,
+  //   React.PropTypes.bool,
+  // ]),
   intl: intlShape.isRequired,
-  loading: React.PropTypes.bool,
+  // loading: React.PropTypes.bool,
   name: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-  onCancel: React.PropTypes.func,
+  // onCancel: React.PropTypes.func,
   onChangeName: React.PropTypes.func,
   onChangeDescription: React.PropTypes.func,
   onChangeVersion: React.PropTypes.func,

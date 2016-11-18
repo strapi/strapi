@@ -45,7 +45,7 @@ if (module.hot) {
   module.hot.accept('./i18n', () => {
     if (window.Strapi) {
       System.import('./i18n')
-        .then(result => {
+        .then((result) => {
           const translationMessagesUpdated = result.translationMessages;
           window.Strapi.refresh(pluginId).translationMessages(translationMessagesUpdated);
         });

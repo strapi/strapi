@@ -15,7 +15,7 @@ const translationMessages = {
   fr: frTranslationMessages,
 };
 
-const define = messages => {
+const define = (messages) => {
   defineMessages(messages);
 };
 

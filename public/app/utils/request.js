@@ -19,13 +19,13 @@ function parseJSON(response) {
  * @return {Promise} Returns either the response, or throws an error
  */
 function checkStatus(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.status >= 200 && response.status < 300) {
       return resolve(response);
     }
 
     return parseJSON(response)
-      .then(data => {
+      .then((data) => {
         const error = new Error(data.message || response.statusText);
         error.data = data;
         error.response = response;
