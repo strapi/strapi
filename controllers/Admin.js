@@ -35,8 +35,8 @@ module.exports = {
         parsedHTML('body').append(pluginMainScript);
 
         // Vendors plugin `js` file
-        const pluginVendorScript = $('<script>').attr('src', '/' + pluginName + '/vendor.js');
-        parsedHTML('body').append(pluginVendorScript);
+        // const pluginVendorScript = $('<script>').attr('src', '/' + pluginName + '/vendor.js');
+        // parsedHTML('body').append(pluginVendorScript);
       }
     });
 
