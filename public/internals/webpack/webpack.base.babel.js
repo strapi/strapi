@@ -65,23 +65,21 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
+    new webpack.NamedModulesPlugin(),
   ]),
-  postcss: () => options.postcssPlugins,
   resolve: {
     modules: ['app', 'node_modules'],
     extensions: [
-      '',
       '.js',
       '.jsx',
       '.react.js',
     ],
     mainFields: [
+      'browser',
       'jsnext:main',
       'main',
     ],
   },
   devtool: options.devtool,
   target: 'web', // Make web variables accessible to webpack, e.g. window
-  stats: false, // Don't show stats in the console
-  progress: true,
 });

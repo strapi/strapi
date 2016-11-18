@@ -1,28 +1,33 @@
 /*
  * HomePage
- *
- * This is the first thing users see of our App, at the '/' route
- *
- * NOTE: while this component should technically be a stateless functional
- * component (SFC), hot reloading does not currently support SFCs. If hot
- * reloading is not a neccessity for you then you can refactor it and remove
- * the linting exception.
  */
 
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import PluginHeader from 'components/PluginHeader';
-import RightContentSectionTitle from 'components/RightContentSectionTitle';
 import Container from 'components/Container';
 import RightContentTitle from 'components/RightContentTitle';
+import RightContentSectionTitle from 'components/RightContentSectionTitle';
+import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+
+import appMessages from 'containers/App/messages.json';
+import messages from './messages.json';
+console.log('messages', messages)
+import { define } from '../../i18n';
+define(messages);
+
 import {
+  selectHome,
+  selectLoading,
+  selectError,
+  selectGeneralSettings,
   selectName,
   selectDescription,
   selectVersion,
-  selectLoading,
-  selectError,
-} from 'containers/HomePage/selectors';
+  selectLocationState,
+} from './selectors';
+
 import {
   loadGeneralSettings,
   changeName,
@@ -30,12 +35,8 @@ import {
   changeVersion,
   updateGeneralSettings,
   cancelGeneralSettings,
-} from 'containers/HomePage/actions';
-import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
-import appMessages from 'containers/App/messages.json';
-import messages from './messages.json';
-import { define } from '../../i18n';
-define(messages);
+} from './actions';
+
 
 import styles from './styles.scss';
 
@@ -118,7 +119,7 @@ export class HomePage extends React.Component {
 }
 
 HomePage.propTypes = {
-  changeRoute: React.PropTypes.func,
+  // changeRoute: React.PropTypes.func,
   description: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
