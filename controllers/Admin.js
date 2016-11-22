@@ -25,18 +25,12 @@ module.exports = {
     // Some plugins are ignored
     const ignoredPlugins = ['admin', 'user'];
 
-    console.log('strapi.plugins', strapi.plugins)
-
     // Inject `js` files from plugins builds in the main admin panel
     _.forEach(strapi.plugins, (value, pluginName) => {
       if (!_.includes(ignoredPlugins, pluginName)) {
         // Main plugin `js` file
         const pluginMainScript = $('<script>').attr('src', '/' + pluginName + '/main.js');
         parsedHTML('body').append(pluginMainScript);
-
-        // Vendors plugin `js` file
-        // const pluginVendorScript = $('<script>').attr('src', '/' + pluginName + '/vendor.js');
-        // parsedHTML('body').append(pluginVendorScript);
       }
     });
 
@@ -45,6 +39,7 @@ module.exports = {
   },
 
   file: function *() {
+    yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
     yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
     if (!this.status) this.throw(404);
   }

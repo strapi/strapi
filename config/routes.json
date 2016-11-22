@@ -7,9 +7,9 @@
       "policies": [],
       "prefix": ""
     },
-    "GET /admin/:file": {
+    "GET /admin/*": {
       "method": "GET",
-      "path": "/admin/:file",
+      "path": "/admin/:file/*",
       "handler": "Admin.file",
       "policies": [],
       "prefix": ""
