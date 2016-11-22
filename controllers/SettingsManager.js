@@ -11,36 +11,33 @@ const fs = require('fs');
 
 module.exports = {
 
-  getGeneralSettings: function* () {
+  getGeneralSettings: function*() {
     // Pick values from `strapi.config`
     const settings = _.pick(strapi.config, [
       'name',
       'version',
-    'description'
+      'description'
     ]);
 
     this.body = settings;
   },
 
-  updateSettings: function* () {
+  updateSettings: function*() {
     var data = this.request.body;
 
     try {
       const settingsUpdated = yield strapi.plugins['settings-manager'].services.settingsservice.configurationsManager(strapi, data);
       this.body = settingsUpdated.values;
     } catch (err) {
-      console.log('err', err);
       this.status = err && err.status || 400;
       return this.body = {
         message: err.msg || 'An error occurred during settings update'
       };
-    };
+    }
   },
 
-  file: function* () {
-    console.log('file', this.params.file, ' ', path.resolve(__dirname, '..', 'public', 'build', this.params.file));
+  file: function*() {
     yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
-    console.log(':(')
     if (!this.status) this.throw(404);
   }
 };
