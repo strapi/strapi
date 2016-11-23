@@ -72,13 +72,50 @@ module.exports = strapi => {
             strapi.router.route(_.omitBy({
               method: value.method,
               path: value.path,
-              handler: _.union(policies, [action]),
+              handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
               validate
             }, _.isEmpty));
           } catch (err) {
             cb(err);
           }
         });
+
+        // Create router for admin.
+        // Prefix router with the admin's name.
+        const routerAdmin = strapi.middlewares.joiRouter();
+
+        _.forEach(strapi.admin.config.routes, value => {
+          if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+            return;
+          }
+
+          const endpoint = `${value.method} ${value.path}`;
+
+          try {
+            const {route, policies, action, validate} = routerChecker(value, endpoint);
+
+            if (_.isUndefined(action) || !_.isFunction(action)) {
+              return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+            }
+
+            routerAdmin.route(_.omitBy({
+              method: value.method,
+              path: value.path,
+              handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
+              validate
+            }, _.isEmpty));
+          } catch (err) {
+            cb(err);
+          }
+        });
+
+        routerAdmin.prefix(strapi.config.admin);
+
+        // TODO:
+        // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
+
+        // Mount admin router on Strapi router
+        strapi.app.use(routerAdmin.middleware());
 
         // Parse each plugin's routes.
         _.forEach(strapi.config.plugins.routes, (value, plugin) => {
@@ -145,8 +182,11 @@ module.exports = strapi => {
             });
           }
 
-          // Mount plugin router on Strapi router
-          strapi.router.use(router.middleware());
+          // TODO:
+          // - Mount on main router `strapi.router.use(router.middleware());`
+
+          // Mount plugin router
+          strapi.app.use(router.middleware());
         });
 
         // Wrap error into Boom object
@@ -165,6 +205,8 @@ module.exports = strapi => {
           }
         });
 
+        console.log(strapi.router.routes);
+
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
         strapi.app.use(strapi.router.router.allowedMethods({
@@ -172,6 +214,7 @@ module.exports = strapi => {
           notImplemented: () => Boom.notImplemented(),
           methodNotAllowed: () => Boom.methodNotAllowed()
         }));
+
       }
 
       cb();
@@ -194,10 +237,18 @@ module.exports = strapi => {
 
       function routerChecker(value, endpoint, plugin) {
         const route = regex.detectRoute(endpoint);
+        let pluginControllers;
 
         // Define controller and action names.
         const handler = _.trim(value.handler).split('.');
-        const controller = strapi.controllers[handler[0].toLowerCase()] || strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
+
+        try {
+          pluginControllers = strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
+        } catch (err) {
+          pluginControllers = undefined;
+        }
+
+        const controller = strapi.controllers[handler[0].toLowerCase()] || pluginControllers || strapi.admin.controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
         // Retrieve the API's name where the controller is located

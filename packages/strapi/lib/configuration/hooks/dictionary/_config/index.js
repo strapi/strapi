@@ -97,6 +97,16 @@ module.exports = strapi => {
           }, cb);
         },
 
+        // // Load admin from `./admin/**/*.js|json`.
+        // 'admin/**': cb => {
+        //   dictionary.optional({
+        //     dirname: path.resolve(strapi.config.appPath, strapi.config.paths.admin),
+        //     excludeDirs: /(public)$/,
+        //     filter: /(.+)\.(js|json)$/,
+        //     depth: 3
+        //   }, cb);
+        // },
+
         // Load plugins from `./plugins/**/*.js|json`.
         'plugins/**': cb => {
           dictionary.optional({
@@ -113,7 +123,7 @@ module.exports = strapi => {
 
         // Just in case there is an error.
         if (err) {
-          return cb(err);
+          // return cb(err);
         }
 
         // Template literal string
