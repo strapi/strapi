@@ -130,8 +130,6 @@ module.exports = strapi => {
           config: admin['config/**']
         };
 
-        console.log(strapi.admin);
-
         // If the module doesn't have a definition at all
         // just remove it completely from the dictionary.
         if (_.isEmpty(strapi.admin)) {

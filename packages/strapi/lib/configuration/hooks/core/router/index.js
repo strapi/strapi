@@ -109,7 +109,7 @@ module.exports = strapi => {
           }
         });
 
-        routerAdmin.prefix(strapi.config.admin);
+        routerAdmin.prefix(strapi.config.admin || `/${strapi.config.paths.admin}`);
 
         // TODO:
         // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
@@ -204,8 +204,6 @@ module.exports = strapi => {
             ctx.body = formattedError.output.payload;
           }
         });
-
-        console.log(strapi.router.routes);
 
         // Let the router use our routes and allowed methods.
         strapi.app.use(strapi.router.middleware());
