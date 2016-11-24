@@ -2,23 +2,26 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/admin",
+      "path": "/",
       "handler": "Admin.index",
-      "policies": [],
-      "prefix": ""
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "GET",
-      "path": "/admin/:file",
+      "path": "/:file",
       "handler": "Admin.file",
-      "policies": [],
-      "prefix": ""
+      "config": {
+        "policies": []
+      }
     }, {
       "method": "GET",
-      "path": "/admin/*",
+      "path": "/*",
       "handler": "Admin.index",
-      "policies": [],
-      "prefix": ""
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

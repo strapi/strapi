@@ -1,21 +1,25 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
-const sendfile = require('koa-sendfile');
-const _ = require('lodash');
+
 /**
  * A set of functions called "actions" for `Admin`
  */
 
 module.exports = {
 
-  index: function *() {
+  index: async (ctx, next) => {
     // Send the HTML file with injected scripts
-    this.body = strapi.plugins.admin.services.admin.generateAdminIndexFile();
+    ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
   },
 
-  file: function *() {
-    yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
-    if (!this.status) this.throw(404);
+  file: async (ctx) => {
+    try {
+      const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));
+      ctx.body = file;
+    } catch (err) {
+      ctx.body = ctx.notFound();
+    }
   }
 };
