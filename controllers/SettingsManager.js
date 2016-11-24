@@ -1,6 +1,5 @@
 'use strict';
 
-const sendfile = require('koa-sendfile');
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs');
@@ -11,7 +10,7 @@ const fs = require('fs');
 
 module.exports = {
 
-  getGeneralSettings: function*() {
+  getGeneralSettings: async (ctx) => {
     // Pick values from `strapi.config`
     const settings = _.pick(strapi.config, [
       'name',
@@ -19,25 +18,31 @@ module.exports = {
       'description'
     ]);
 
-    this.body = settings;
+    ctx.body = settings;
   },
 
-  updateSettings: function*() {
-    var data = this.request.body;
+  updateSettings: async (ctx) => {
+    const data = ctx.request.body;
 
     try {
-      const settingsUpdated = yield strapi.plugins['settings-manager'].services.settingsservice.configurationsManager(strapi, data);
-      this.body = settingsUpdated.values;
+      const settingsUpdated = await strapi.plugins['settings-manager'].services.settingsservice.configurationsManager(strapi, data);
+      ctx.body = settingsUpdated.values;
     } catch (err) {
-      this.status = err && err.status || 400;
-      return this.body = {
+      console.log('err', err);
+      ctx.status = err && err.status || 400;
+      return ctx.body = {
         message: err.msg || 'An error occurred during settings update'
       };
     }
   },
 
-  file: function*() {
-    yield sendfile(this, path.resolve(__dirname, '..', 'public', 'build', this.params.file));
-    if (!this.status) this.throw(404);
+  file: async (ctx) => {
+    console.log('ctx')
+    try {
+      const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));
+      ctx.body = file;
+    } catch (err) {
+      ctx.body = ctx.notFound();
+    }
   }
 };
