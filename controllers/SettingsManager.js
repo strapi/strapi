@@ -37,7 +37,6 @@ module.exports = {
   },
 
   file: async (ctx) => {
-    console.log('ctx')
     try {
       const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));
       ctx.body = file;
