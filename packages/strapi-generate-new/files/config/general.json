@@ -1,10 +1,10 @@
 {
-  "static": true,
-  "views": false,
-  "websockets": true,
   "favicon": {
     "path": "favicon.ico",
-    "maxAge": 86400000
+    "maxAge": 86400000,
   },
-  "prefix": ""
+  "prefix": "",
+  "static": true,
+  "views": false,
+  "websockets": true
 }
