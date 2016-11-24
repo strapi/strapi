@@ -62,10 +62,10 @@ cmd.description('start your Strapi application');
 cmd.action(require('./strapi-start'));
 
 // `$ strapi console`
-cmd = program.command('console');
-cmd.unknownOption = NOOP;
-cmd.description('open the Strapi framework console');
-cmd.action(require('./strapi-console'));
+// cmd = program.command('console');
+// cmd.unknownOption = NOOP;
+// cmd.description('open the Strapi framework console');
+// cmd.action(require('./strapi-console'));
 
 // `$ strapi generate:api`
 cmd = program.command('generate:api');
