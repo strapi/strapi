@@ -12,10 +12,11 @@
   "author": "Strapi",
   "license": "MIT",
   "scripts": {
-    "lint:admin": "cd public && npm run test"
+    "postinstall": "cd public && npm install",
+    "test": "cd public && npm run test"
   },
   "pre-commit": [
-    "lint:admin"
+    "test"
   ],
   "dependencies": {
     "cheerio": "0.22.0"

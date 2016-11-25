@@ -6,3 +6,5 @@ if [ -z "$TEST_GREP" ]; then
 fi
 
 node --harmony-async-await node_modules/mocha/bin/_mocha `scripts/_get-test-directories.sh` --opts test/mocha.opts --grep "$TEST_GREP"
+cd packages/strapi-admin
+npm run test
