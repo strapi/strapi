@@ -16,53 +16,42 @@ const _ = require('lodash');
  */
 
 module.exports = scope => {
-  const newRoutes = {
-    routes: {}
+  return {
+    routes: [{
+      method: 'GET',
+      path: '/ ' + scope.humanizeId,
+      handler: scope.globalID + '.find',
+      config: {
+        policies: []
+      }
+    }, {
+      method: 'GET',
+      path: '/ ' + scope.humanizeId + '/:id',
+      handler: scope.globalID + '.findOne',
+      config: {
+        policies: []
+      }
+    }, {
+      method: 'POST',
+      path: '/ ' + scope.humanizeId,
+      handler: scope.globalID + '.create',
+      config: {
+        policies: []
+      }
+    }, {
+      method: 'PUT',
+      path: '/ ' + scope.humanizeId + '/:id',
+      handler: scope.globalID + '.update',
+      config: {
+        policies: []
+      }
+    }, {
+      method: 'DELETE',
+      path: '/ ' + scope.humanizeId + '/:id',
+      handler: scope.globalID + '.destroy',
+      config: {
+        policies: []
+      }
+    }]
   };
-
-  newRoutes.routes['GET /' + scope.humanizeId] = {
-    controller: scope.globalID,
-    action: 'find',
-    policies: []
-  };
-
-  newRoutes.routes['GET /' + scope.humanizeId + '/:id'] = {
-    controller: scope.globalID,
-    action: 'findOne',
-    policies: []
-  };
-
-  newRoutes.routes['POST /' + scope.humanizeId] = {
-    controller: scope.globalID,
-    action: 'create',
-    policies: []
-  };
-
-  newRoutes.routes['PUT /' + scope.humanizeId + '/:id'] = {
-    controller: scope.globalID,
-    action: 'update',
-    policies: []
-  };
-
-  newRoutes.routes['DELETE /' + scope.humanizeId + '/:id'] = {
-    controller: scope.globalID,
-    action: 'destroy',
-    policies: []
-  };
-
-  if (scope.template && scope.template !== 'mongoose') {
-    newRoutes.routes['POST /' + scope.humanizeId + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'createRelation',
-      policies: []
-    };
-
-    newRoutes.routes['DELETE /' + scope.humanizeId + '/:id/relationships/:relation'] = {
-      controller: scope.globalID,
-      action: 'destroyRelation',
-      policies: []
-    };
-  }
-
-  return newRoutes;
 };
