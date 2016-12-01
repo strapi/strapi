@@ -233,7 +233,7 @@ function parseTarget(target, scope, cb) {
     // try requiring `strapi-generate-<module>` to get the core generator.
     if (!subGenerator && !module.match(/^strapi-generate-/)) {
       try {
-        subGenerator = require('strapi-generate-' + module);
+        subGenerator = require(path.resolve(scope.strapiRoot, 'node_modules', 'strapi-generate-' + module));
       } catch (e1) {
         requireError = e1;
       }

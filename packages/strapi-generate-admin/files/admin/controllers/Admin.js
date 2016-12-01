@@ -9,12 +9,12 @@ const path = require('path');
 
 module.exports = {
 
-  index: async (ctx, next) => {
+  index: async ctx => {
     // Send the HTML file with injected scripts
     ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
   },
 
-  file: async (ctx) => {
+  file: async ctx => {
     try {
       const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));
       ctx.body = file;

@@ -21,6 +21,9 @@ module.exports = {
   after: require('./after'),
   targets: {
 
+    // Call the `admin` generator.
+    '.': ['admin'],
+
     // Main package.
     'package.json': {
       jsonfile: packageJSON
@@ -40,11 +43,6 @@ module.exports = {
     // Copy Markdown files with some information.
     'README.md': {
       template: 'README.md'
-    },
-
-    // Empty admin directory.
-    'admin': {
-      folder: {}
     },
 
     // Empty API directory.

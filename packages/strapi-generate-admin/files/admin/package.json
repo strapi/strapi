@@ -19,7 +19,8 @@
     "test"
   ],
   "dependencies": {
-    "cheerio": "0.22.0"
+    "cheerio": "0.22.0",
+    "lodash": "^4.17.2"
   },
   "devDependencies": {
     "pre-commit": "1.1.3"

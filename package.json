@@ -22,7 +22,7 @@
     ],
     "ignore": [
       "packages/strapi-generate-new/files/public/**",
-      "packages/strapi-admin/**",
+      "packages/strapi-generate-admin/files/admin/public/**",
       "website/**"
     ],
     "rules": {
