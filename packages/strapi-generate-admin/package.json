@@ -18,7 +18,8 @@
     "strapi-utils": "~2.0.0"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublish": "npm prune",
+    "postinstall": "cd files/admin && npm install"
   },
   "author": {
     "email": "hi@strapi.io",

@@ -12,7 +12,7 @@
   "author": "Strapi",
   "license": "MIT",
   "scripts": {
-    "postinstall": "cd public && npm install",
+    "setup": "npm install && cd public && npm install && npm run build",
     "test": "cd public && npm run test"
   },
   "pre-commit": [
