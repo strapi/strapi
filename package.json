@@ -11,7 +11,9 @@
   },
   "author": "Strapi",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "setup": "npm i && cd public && npm i && npm run build"
+  },
   "pre-commit": [
     "lint:admin"
   ],
