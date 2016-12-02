@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Node.js core.
-const cluster = require('cluster');
-
 // Public node modules.
 const async = require('async');
 
@@ -49,20 +46,13 @@ module.exports = function start(cb) {
     }
 
     // Log some server info.
-    if (cluster.isMaster) {
-      this.log.info('Server started in ' + this.config.appPath);
-      this.log.info('Your server is running at ' + this.config.url);
-      this.log.debug('Time: ' + new Date());
-      this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds');
-      this.log.debug('Environment: ' + this.config.environment);
-      this.log.debug('Process PID: ' + process.pid);
-      this.log.debug('Cluster: master');
-      this.log.info('To shut down your server, press <CTRL> + C at any time');
-    } else {
-      this.log.warn('New worker starting...');
-      this.log.debug('Process PID: ' + process.pid);
-      this.log.debug('Cluster: worker #' + cluster.worker.id);
-    }
+    this.log.info('Server started in ' + this.config.appPath);
+    this.log.info('Your server is running at ' + this.config.url);
+    this.log.debug('Time: ' + new Date());
+    this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds');
+    this.log.debug('Environment: ' + this.config.environment);
+    this.log.debug('Process PID: ' + process.pid);
+    this.log.info('To shut down your server, press <CTRL> + C at any time');
 
     // Blank log to give some space.
     console.log();

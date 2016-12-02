@@ -11,11 +11,11 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  find: function * () {
+  find: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.fetchAll(this.query);
+      ctx.body = await strapi.services.<%= id %>.fetchAll(ctx.query);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -25,11 +25,11 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  findOne: function * () {
+  findOne: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.fetch(this.params)
+      ctx.body = await strapi.services.<%= id %>.fetch(ctx.params)
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -39,11 +39,11 @@ module.exports = {
    * @return {Object}
    */
 
-  create: function * () {
+  create: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.add(this.request.body);
+      ctx.body = await strapi.services.<%= id %>.add(ctx.request.body);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -53,11 +53,11 @@ module.exports = {
    * @return {Object}
    */
 
-  update: function * () {
+  update: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.edit(this.params, this.request.body) ;
+      ctx.body = await strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -67,11 +67,11 @@ module.exports = {
    * @return {Object}
    */
 
-  destroy: function * () {
+  destroy: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.remove(this.params);
+      ctx.body = await strapi.services.<%= id %>.remove(ctx.params);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -81,12 +81,12 @@ module.exports = {
    * @return {Object}
    */
 
-  createRelation: function * () {
+  createRelation: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.addRelation(this.params, this.request.body);
+      ctx.body = await strapi.services.<%= id %>.addRelation(ctx.params, ctx.request.body);
     } catch (err) {
-      this.status = 400;
-      this.body = err;
+      ctx.status = 400;
+      ctx.body = err;
     }
   },
 
@@ -96,12 +96,12 @@ module.exports = {
    * @return {Object}
    */
 
-  updateRelation: function * () {
+  updateRelation: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.editRelation(this.params, this.request.body);
+      ctx.body = await strapi.services.<%= id %>.editRelation(ctx.params, ctx.request.body);
     } catch (err) {
-      this.status = 400;
-      this.body = err;
+      ctx.status = 400;
+      ctx.body = err;
     }
   },
 
@@ -111,12 +111,12 @@ module.exports = {
    * @return {Object}
    */
 
-  destroyRelation: function * () {
+  destroyRelation: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= id %>.removeRelation(this.params, this.request.body);
+      ctx.body = await strapi.services.<%= id %>.removeRelation(ctx.params, ctx.request.body);
     } catch (err) {
-      this.status = 400;
-      this.body = err;
+      ctx.status = 400;
+      ctx.body = err;
     }
   }
 };
