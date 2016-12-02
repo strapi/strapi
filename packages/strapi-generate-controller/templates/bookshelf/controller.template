@@ -5,11 +5,11 @@
  */
 
 module.exports = {
-  // exampleAction: function * () {
+  // exampleAction: async (ctx, next) {
   //   try {
-  //     this.body = 'ok';
+  //     ctx.body = 'ok';
   //   } catch (err) {
-  //     this.body = err;
+  //     ctx.body = err;
   //   }
   // }
 };
