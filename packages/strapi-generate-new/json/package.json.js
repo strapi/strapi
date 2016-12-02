@@ -36,7 +36,7 @@ module.exports = scope => {
     },
     'main': './server.js',
     'scripts': {
-      'start': 'node server.js',
+      'start': 'node --harmony-async-await server.js',
       'strapi': 'node_modules/strapi/bin/strapi.js' // Allow to use `npm run strapi` CLI
     },
     'author': {
