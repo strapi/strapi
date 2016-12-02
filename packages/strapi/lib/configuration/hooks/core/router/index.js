@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Node.js core.
-const cluster = require('cluster');
-
 // Public node modules.
 const _ = require('lodash');
 const Boom = require('boom');
@@ -43,19 +40,90 @@ module.exports = strapi => {
       const Joi = strapi.middlewares.joiRouter.Joi;
       const builder = joijson.builder(Joi);
 
-      if (((cluster.isWorker && strapi.config.reload.workers > 0) || (cluster.isMaster && strapi.config.reload.workers < 1)) || (!strapi.config.reload && cluster.isMaster)) {
-        // Initialize the router.
-        if (!strapi.router) {
-          strapi.router = strapi.middlewares.joiRouter();
-          strapi.router.prefix(strapi.config.prefix);
+      // Initialize the router.
+      if (!strapi.router) {
+        strapi.router = strapi.middlewares.joiRouter();
+        strapi.router.prefix(strapi.config.prefix);
+      }
+
+      // Add response policy to the global variable.
+      _.set(strapi.policies, 'responsesPolicy', responsesPolicy);
+      // Parse each route from the user config, load policies if any
+      // and match the controller and action to the desired endpoint.
+
+      _.forEach(strapi.config.routes, value => {
+        if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+          return;
         }
 
-        // Add response policy to the global variable.
-        _.set(strapi.policies, 'responsesPolicy', responsesPolicy);
-        // Parse each route from the user config, load policies if any
-        // and match the controller and action to the desired endpoint.
+        const endpoint = `${value.method} ${value.path}`;
 
-        _.forEach(strapi.config.routes, value => {
+        try {
+          const {route, policies, action, validate} = routerChecker(value, endpoint);
+
+          if (_.isUndefined(action) || !_.isFunction(action)) {
+            return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+          }
+
+          strapi.router.route(_.omitBy({
+            method: value.method,
+            path: value.path,
+            handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
+            validate
+          }, _.isEmpty));
+        } catch (err) {
+          cb(err);
+        }
+      });
+
+      // Create router for admin.
+      // Prefix router with the admin's name.
+      const routerAdmin = strapi.middlewares.joiRouter();
+
+      _.forEach(strapi.admin.config.routes, value => {
+        if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
+          return;
+        }
+
+        const endpoint = `${value.method} ${value.path}`;
+
+        try {
+          const {route, policies, action, validate} = routerChecker(value, endpoint);
+
+          if (_.isUndefined(action) || !_.isFunction(action)) {
+            return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
+          }
+
+          routerAdmin.route(_.omitBy({
+            method: value.method,
+            path: value.path,
+            handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
+            validate
+          }, _.isEmpty));
+        } catch (err) {
+          cb(err);
+        }
+      });
+
+      routerAdmin.prefix(strapi.config.admin || `/${strapi.config.paths.admin}`);
+
+      // TODO:
+      // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
+
+      // Mount admin router on Strapi router
+      strapi.app.use(routerAdmin.middleware());
+
+      // Parse each plugin's routes.
+      _.forEach(strapi.config.plugins.routes, (value, plugin) => {
+        // Create router for each plugin.
+        // Prefix router with the plugin's name.
+        const router = strapi.middlewares.joiRouter();
+
+        // Exclude routes with prefix.
+        const excludedRoutes = _.omitBy(value, o => !o.hasOwnProperty('prefix'));
+
+        // Add others routes to the plugin's router.
+        _.forEach(_.omit(value, _.keys(excludedRoutes)), value => {
           if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
             return;
           }
@@ -63,13 +131,13 @@ module.exports = strapi => {
           const endpoint = `${value.method} ${value.path}`;
 
           try {
-            const {route, policies, action, validate} = routerChecker(value, endpoint);
+            const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
 
             if (_.isUndefined(action) || !_.isFunction(action)) {
               return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
             }
 
-            strapi.router.route(_.omitBy({
+            router.route(_.omitBy({
               method: value.method,
               path: value.path,
               handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
@@ -80,54 +148,11 @@ module.exports = strapi => {
           }
         });
 
-        // Create router for admin.
-        // Prefix router with the admin's name.
-        const routerAdmin = strapi.middlewares.joiRouter();
+        router.prefix('/' + plugin);
 
-        _.forEach(strapi.admin.config.routes, value => {
-          if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
-            return;
-          }
-
-          const endpoint = `${value.method} ${value.path}`;
-
-          try {
-            const {route, policies, action, validate} = routerChecker(value, endpoint);
-
-            if (_.isUndefined(action) || !_.isFunction(action)) {
-              return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
-            }
-
-            routerAdmin.route(_.omitBy({
-              method: value.method,
-              path: value.path,
-              handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
-              validate
-            }, _.isEmpty));
-          } catch (err) {
-            cb(err);
-          }
-        });
-
-        routerAdmin.prefix(strapi.config.admin || `/${strapi.config.paths.admin}`);
-
-        // TODO:
-        // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
-
-        // Mount admin router on Strapi router
-        strapi.app.use(routerAdmin.middleware());
-
-        // Parse each plugin's routes.
-        _.forEach(strapi.config.plugins.routes, (value, plugin) => {
-          // Create router for each plugin.
-          // Prefix router with the plugin's name.
-          const router = strapi.middlewares.joiRouter();
-
-          // Exclude routes with prefix.
-          const excludedRoutes = _.omitBy(value, o => !o.hasOwnProperty('prefix'));
-
-          // Add others routes to the plugin's router.
-          _.forEach(_.omit(value, _.keys(excludedRoutes)), value => {
+        // /!\ Could override main router's routes.
+        if (!_.isEmpty(excludedRoutes)) {
+          _.forEach(excludedRoutes, value => {
             if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
               return;
             }
@@ -141,7 +166,7 @@ module.exports = strapi => {
                 return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
               }
 
-              router.route(_.omitBy({
+              strapi.router.route(_.omitBy({
                 method: value.method,
                 path: value.path,
                 handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
@@ -151,69 +176,38 @@ module.exports = strapi => {
               cb(err);
             }
           });
+        }
 
-          router.prefix('/' + plugin);
+        // TODO:
+        // - Mount on main router `strapi.router.use(router.middleware());`
 
-          // /!\ Could override main router's routes.
-          if (!_.isEmpty(excludedRoutes)) {
-            _.forEach(excludedRoutes, value => {
-              if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
-                return;
-              }
+        // Mount plugin router
+        strapi.app.use(router.middleware());
+      });
 
-              const endpoint = `${value.method} ${value.path}`;
+      // Wrap error into Boom object
+      strapi.app.use(async (ctx, next) => {
+        try {
+          await next();
 
-              try {
-                const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
-
-                if (_.isUndefined(action) || !_.isFunction(action)) {
-                  return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
-                }
-
-                strapi.router.route(_.omitBy({
-                  method: value.method,
-                  path: value.path,
-                  handler: _.remove([strapi.middlewares.compose(policies), action], o => _.isFunction(o)),
-                  validate
-                }, _.isEmpty));
-              } catch (err) {
-                cb(err);
-              }
-            });
+          if (ctx.status >= 400 || _.get(ctx.body, 'isBoom')) {
+            ctx.throw(ctx.status);
           }
+        } catch (error) {
+          const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body : Boom.wrap(error, error.status, ctx.body);
 
-          // TODO:
-          // - Mount on main router `strapi.router.use(router.middleware());`
+          ctx.status = formattedError.output.statusCode || error.status || 500;
+          ctx.body = formattedError.output.payload;
+        }
+      });
 
-          // Mount plugin router
-          strapi.app.use(router.middleware());
-        });
-
-        // Wrap error into Boom object
-        strapi.app.use(async (ctx, next) => {
-          try {
-            await next();
-
-            if (ctx.status >= 400 || _.get(ctx.body, 'isBoom')) {
-              ctx.throw(ctx.status);
-            }
-          } catch (error) {
-            const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body : Boom.wrap(error, error.status, ctx.body);
-
-            ctx.status = formattedError.output.statusCode || error.status || 500;
-            ctx.body = formattedError.output.payload;
-          }
-        });
-
-        // Let the router use our routes and allowed methods.
-        strapi.app.use(strapi.router.middleware());
-        strapi.app.use(strapi.router.router.allowedMethods({
-          throw: false,
-          notImplemented: () => Boom.notImplemented(),
-          methodNotAllowed: () => Boom.methodNotAllowed()
-        }));
-
-      }
+      // Let the router use our routes and allowed methods.
+      strapi.app.use(strapi.router.middleware());
+      strapi.app.use(strapi.router.router.allowedMethods({
+        throw: false,
+        notImplemented: () => Boom.notImplemented(),
+        methodNotAllowed: () => Boom.methodNotAllowed()
+      }));
 
       cb();
 
