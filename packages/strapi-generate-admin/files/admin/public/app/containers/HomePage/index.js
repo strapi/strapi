@@ -25,7 +25,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <LeftMenu {...this.props}></LeftMenu>
         <div className={styles.homePageRightWrapper}>
           <Header></Header>
-          <Content {...this.props}></Content>
+          <Content {...this.props}>
+            <div className="panel">
+              <div className="alert alert-info" role="alert">
+                <strong>Welcome to your Strapi application admin panel!</strong>
+              </div>
+            </div>
+          </Content>
         </div>
       </div>
     );
