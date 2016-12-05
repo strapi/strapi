@@ -50,11 +50,6 @@ module.exports = {
       folder: {}
     },
 
-    // Empty data directory.
-    'data': {
-      folder: {}
-    },
-
     // Empty plugins directory.
     'plugins': {
       folder: {}
