@@ -38,11 +38,11 @@ function generateTarget(options, cb) {
   let _resolves = 0;
 
   async.until(
-    function checkIfTargetIsValidYet() {
+    () => {
       return isValidTarget(target) || ++_resolves > maxResolves;
     },
-    function tryToParseTarget(asyncCb) {
-      parseTarget(target, scope, function (err, resolvedTarget) {
+    asyncCb => {
+      parseTarget(target, scope, (err, resolvedTarget) => {
         if (err) {
           return asyncCb(err);
         }
@@ -50,7 +50,7 @@ function generateTarget(options, cb) {
         return asyncCb();
       });
     },
-    function afterwards(err) {
+    err => {
       if (err) {
         return sb(err);
       }
@@ -125,7 +125,7 @@ function mergeSubtargetScope(scope, subtarget) {
 const knownHelpers = ['folder', 'template', 'jsonfile', 'file', 'copy'];
 
 function targetIsHelper(target) {
-  return _.some(target, function (subTarget, key) {
+  return _.some(target, (subTarget, key) => {
     return _.includes(knownHelpers, key);
   });
 }
@@ -233,7 +233,7 @@ function parseTarget(target, scope, cb) {
     // try requiring `strapi-generate-<module>` to get the core generator.
     if (!subGenerator && !module.match(/^strapi-generate-/)) {
       try {
-        subGenerator = require('strapi-generate-' + module);
+        subGenerator = require(path.resolve(scope.strapiRoot, 'node_modules', 'strapi-generate-' + module));
       } catch (e1) {
         requireError = e1;
       }

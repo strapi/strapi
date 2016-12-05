@@ -31,10 +31,10 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (_.isPlainObject(strapi.config.ip) && !_.isEmpty(strapi.config.ip)) {
-        strapi.app.use(strapi.middlewares.ip({
+        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.ip({
           whiteList: strapi.config.ip.whiteList,
           blackList: strapi.config.ip.blackList
-        }));
+        })));
       }
 
       cb();

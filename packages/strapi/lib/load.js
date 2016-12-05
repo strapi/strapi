@@ -10,7 +10,6 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const async = require('async');
-const herd = require('herd');
 
 // Local dependencies.
 const Configuration = require('./configuration');
@@ -122,7 +121,7 @@ module.exports = function (configOverride, cb) {
     });
 
     // Pick hook to load.
-    this.hooks = _.pickBy(mapper, value => value !== false);
+    this.hooks = _.pickBy(mapper, value => value === true);
 
     // Require only necessary hooks.
     this.hooks = _.mapValues(this.hooks, (hook, hookIdentity) => {
@@ -171,21 +170,7 @@ module.exports = function (configOverride, cb) {
       }
 
       // We can finally make the server listen on the configured port.
-      // Use of the `herd` node module to herd the child processes with
-      // zero downtime reloads.
-      if (_.isPlainObject(this.config.reload) && !_.isEmpty(this.config.reload) && this.config.reload.workers > 0) {
-        herd(this.config.name)
-          .close(function () {
-            process.send('message');
-          })
-          .timeout(this.config.reload.timeout)
-          .size(this.config.reload.workers)
-          .run(function () {
-            this.server.listen(this.config.port);
-          });
-      } else {
-        this.server.listen(this.config.port);
-      }
+      this.server.listen(this.config.port);
 
       cb && cb(null, this);
     };

@@ -68,7 +68,7 @@ module.exports = (scope, cb) => {
   }
 
   // Make sure the needed client is installed.
-  _.forEach(scope.connections, function (config) {
+  _.forEach(scope.connections, config => {
     try {
       scope.db = require(path.resolve(scope.rootPath, 'node_modules', 'knex'))(scope.dbConfig);
     } catch (err) {

@@ -40,7 +40,7 @@ module.exports = strapi => {
         }
 
         // Map every template engine in config.
-        _.forEach(opts.map, function (engine) {
+        _.forEach(opts.map, engine => {
           if (!consolidate.requires[engine]) {
 
             // Try to require them using `consolidate` or throw an error.

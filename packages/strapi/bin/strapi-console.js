@@ -8,7 +8,6 @@
 
 // Node.js core.
 const REPL = require('repl');
-const cluster = require('cluster');
 
 // Public node modules.
 const _ = require('lodash');
@@ -29,9 +28,7 @@ const logger = require('strapi-utils').logger;
 module.exports = function () {
 
   // Only log if the process is a master.
-  if (cluster.isMaster) {
-    strapi.log.info('Starting the application in interactive mode...');
-  }
+  strapi.log.info('Starting the application in interactive mode...');
 
   strapi.start({}, err => {
 
@@ -44,19 +41,17 @@ module.exports = function () {
     }
 
     // Open the Node.js REPL.
-    if ((cluster.isMaster && _.isEmpty(cluster.workers)) || cluster.worker.id === 1) {
-      const repl = REPL.start(strapi.config.name + ' > ' || 'strapi > ');
-      repl.on('exit', err => {
+    const repl = REPL.start(strapi.config.name + ' > ' || 'strapi > ');
+    repl.on('exit', err => {
 
-        // Log and exit the REPL in case there is an error
-        // while we were trying to open the REPL.
-        if (err) {
-          logger.error(err);
-          process.exit(1);
-        }
+      // Log and exit the REPL in case there is an error
+      // while we were trying to open the REPL.
+      if (err) {
+        logger.error(err);
+        process.exit(1);
+      }
 
-        process.exit(0);
-      });
-    }
+      process.exit(0);
+    });
   });
 };

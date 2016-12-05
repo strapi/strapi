@@ -25,14 +25,14 @@ module.exports = (models, modelName) => {
   const tplTableCreate = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'createTableIfNotExists.template'), 'utf8');
   if (_.isEmpty(_.get(models[modelName], 'up.others'))) {
     _.set(models[modelName], 'up.others', _.unescape(_.template(tplTableCreate)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].attributes,
       options: models[modelName].options
     })));
   } else {
     models[modelName].up.others += _.unescape(_.template(tplTableCreate)({
-      models: models,
+      models,
       tableName: modelName,
       attributes: models[modelName].attributes,
       options: models[modelName].options

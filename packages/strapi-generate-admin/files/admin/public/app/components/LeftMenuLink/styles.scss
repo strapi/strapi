@@ -1,0 +1,49 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuLink { /* stylelint-ignore */
+  padding-top: 0.5rem;
+  padding-bottom: 0.2rem;
+  min-height: 4rem;
+  border-left: 0.4rem solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: $left-menu-link-hover;
+    border-left: 0.4rem solid $strapi-blue;
+  }
+}
+
+.leftMenuLinkActive {
+  border-left: 0.4rem solid $strapi-blue;
+}
+
+.link {
+  color: $left-menu-link-color;
+  padding-left: 2.4rem;
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    color: $left-menu-link-color;
+    text-decoration: none;
+  }
+}
+
+.linkIcon {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 1rem;
+  font-size: 1.8rem;
+
+  &:before {
+    position: absolute;
+    top: 0.5rem;
+  }
+}
+
+.linkLabel {
+  display: inline-block;
+  padding-right: 1rem;
+}

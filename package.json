@@ -12,6 +12,7 @@
   },
   "xo": {
     "space": true,
+    "esnext": true,
     "envs": [
       "mocha",
       "node"
@@ -21,6 +22,7 @@
     ],
     "ignore": [
       "packages/strapi-generate-new/files/public/**",
+      "packages/strapi-generate-admin/files/admin/public/**",
       "website/**"
     ],
     "rules": {
@@ -68,8 +70,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {}
 }

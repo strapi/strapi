@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-policy",
-  "version": "2.0.0",
+  "version": "3.0.0-alpha.1",
   "description": "Generate a policy for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -37,6 +37,10 @@
   },
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
   },
   "license": "MIT"
 }

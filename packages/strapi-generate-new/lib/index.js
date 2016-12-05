@@ -21,6 +21,9 @@ module.exports = {
   after: require('./after'),
   targets: {
 
+    // Call the `admin` generator.
+    '.': ['admin'],
+
     // Main package.
     'package.json': {
       jsonfile: packageJSON
@@ -42,18 +45,8 @@ module.exports = {
       template: 'README.md'
     },
 
-    // Empty admin directory.
-    'admin': {
-      folder: {}
-    },
-
     // Empty API directory.
     'api': {
-      folder: {}
-    },
-
-    // Empty data directory.
-    'data': {
       folder: {}
     },
 

@@ -11,11 +11,11 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  find: function * () {
+  find: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= humanizeId %>.fetchAll(this.query);
+      ctx.body = await strapi.services.<%= humanizeId %>.fetchAll(ctx.query);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -25,11 +25,11 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  findOne: function * () {
+  findOne: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= humanizeId %>.fetch(this.params)
+      ctx.body = await strapi.services.<%= humanizeId %>.fetch(ctx.params)
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -39,11 +39,11 @@ module.exports = {
    * @return {Object}
    */
 
-  create: function * () {
+  create: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= humanizeId %>.add(this.request.body);
+      ctx.body = await strapi.services.<%= humanizeId %>.add(ctx.request.body);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -53,11 +53,11 @@ module.exports = {
    * @return {Object}
    */
 
-  update: function * () {
+  update: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= humanizeId %>.edit(this.params, this.request.body) ;
+      ctx.body = await strapi.services.<%= humanizeId %>.edit(ctx.params, ctx.request.body) ;
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   },
 
@@ -67,11 +67,11 @@ module.exports = {
    * @return {Object}
    */
 
-  destroy: function * () {
+  destroy: async (ctx, next) => {
     try {
-      this.body = yield strapi.services.<%= humanizeId %>.remove(this.params);
+      ctx.body = await strapi.services.<%= humanizeId %>.remove(ctx.params);
     } catch (err) {
-      this.body = err;
+      ctx.body = err;
     }
   }
 };

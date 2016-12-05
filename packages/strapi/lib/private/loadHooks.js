@@ -7,7 +7,6 @@
 // Public node modules.
 const _ = require('lodash');
 const async = require('async');
-const cluster = require('cluster');
 
 // Local dependencies.
 const Hook = require('../configuration/hooks');

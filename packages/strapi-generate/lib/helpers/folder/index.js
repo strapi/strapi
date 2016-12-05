@@ -40,7 +40,7 @@ module.exports = function (options, cb) {
   const rootPath = path.resolve(process.cwd(), options.rootPath);
 
   // Only override an existing folder if `options.force` is true.
-  fs.lstat(rootPath, function (err) {
+  fs.lstat(rootPath, err => {
     const exists = !(err && err.code === 'ENOENT');
     if (exists && err) {
       return cb.error(err);
@@ -51,7 +51,7 @@ module.exports = function (options, cb) {
     }
 
     if (exists) {
-      fs.remove(rootPath, function deletedOldINode(err) {
+      fs.remove(rootPath, err => {
         if (err) {
           return cb.error(err);
         }
@@ -69,7 +69,7 @@ module.exports = function (options, cb) {
       }
 
       // Create the directory.
-      fs.mkdirs(rootPath, function directoryWasWritten(err) {
+      fs.mkdirs(rootPath, err => {
         if (err) {
           return cb.error(err);
         }

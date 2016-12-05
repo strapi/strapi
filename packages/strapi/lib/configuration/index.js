@@ -37,7 +37,7 @@ module.exports = class Configuration {
       // `appPath` is passed from above in case `start` was used.
       // This is the directory where this Strapi process is being initiated from.
       // Usually this means `process.cwd()`.
-      appPath: appPath,
+      appPath,
 
       // Core settings non provided by hooks.
       host: process.env.HOST || process.env.HOSTNAME || context.config.host || 'localhost',
@@ -64,7 +64,8 @@ module.exports = class Configuration {
         policies: 'policies',
         models: 'models',
         plugins: 'plugins',
-        validators: 'validators'
+        validators: 'validators',
+        admin: 'admin'
       },
 
       // Start off needed empty objects and strings.

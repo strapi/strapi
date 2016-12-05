@@ -1,0 +1,36 @@
+/**
+ * styles.css
+ *
+ * App container styles
+ */
+
+@import "../../styles/variables/variables";
+
+.container {
+  display: block;
+}
+
+@font-face {
+  font-family: 'ionicons';
+  src:url("../../styles/fonts/ionicfont/ionicons.eot?v=2.0.0");
+  src:url("../../styles/fonts/ionicfont/ionicons.eot?v=2.0.0#iefix") format("embedded-opentype"),
+  url("../../styles/fonts/ionicfont/ionicons.ttf?v=2.0.0") format("truetype"),
+  url("../../styles/fonts/ionicfont/ionicons.woff?v=2.0.0") format("woff"),
+  url("../../styles/fonts/ionicfont/ionicons.svg?v=2.0.0#Ionicons") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.baseline {
+  display: none;
+  z-index: 100001;
+  opacity: .2;
+  position: absolute;
+  top:0; left:0;
+  width: 100%;
+  height: 500%;
+  min-height: 100%;
+  //background: url('../../assets/images/baseline-18.png');
+  background: url('../../assets/images/baseline-20.png');
+  pointer-events: none;
+}

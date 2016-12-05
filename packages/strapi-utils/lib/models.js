@@ -28,7 +28,7 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getPK: function (collectionIdentity, collection, models) {
+  getPK: (collectionIdentity, collection, models) => {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
 
@@ -50,7 +50,7 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getCount: function (collectionIdentity) {
+  getCount: collectionIdentity => {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
 
@@ -73,7 +73,7 @@ module.exports = {
    * Find relation nature with verbose
    */
 
-  getNature: function (association, key, models) {
+  getNature: (association, key, models) => {
     const strapi = _.isUndefined(global['strapi']) && !_.isUndefined(models) ? _.set({}, 'models', models) : global['strapi'];
     const types = {
       current: '',
@@ -208,7 +208,7 @@ module.exports = {
    * Return ORM used for this collection.
    */
 
-  getORM: function (collectionIdentity) {
+  getORM: collectionIdentity => {
     return _.get(strapi.models, collectionIdentity.toLowerCase() + '.orm');
   },
 
@@ -216,7 +216,7 @@ module.exports = {
    * Define associations key to models
    */
 
-  defineAssociations: function (model, definition, association, key) {
+  defineAssociations: (model, definition, association, key) => {
     // Initialize associations object
     if (definition.associations === undefined) {
       definition.associations = [];
@@ -252,7 +252,7 @@ module.exports = {
     }
   },
 
-  getVia: function (attribute, association) {
+  getVia: (attribute, association) => {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
   }
 };

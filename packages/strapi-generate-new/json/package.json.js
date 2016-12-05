@@ -30,12 +30,13 @@ module.exports = scope => {
     'version': '0.1.0',
     'description': 'A Strapi application.',
     'dependencies': {
+      'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi-mongoose')
     },
     'main': './server.js',
     'scripts': {
-      'start': 'node server.js',
+      'start': 'node --harmony-async-await server.js',
       'strapi': 'node_modules/strapi/bin/strapi.js' // Allow to use `npm run strapi` CLI
     },
     'author': {
@@ -49,7 +50,7 @@ module.exports = scope => {
       'url': scope.website || ''
     }],
     'engines': {
-      'node': '>= 4.0.0',
+      'node': '>= 7.0.0',
       'npm': '>= 3.0.0'
     },
     'license': scope.license || 'MIT'

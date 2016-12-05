@@ -1,9 +1,6 @@
 {
   "frontendUrl": "",
-  "reload": {
-    "timeout": 1000,
-    "workers": 0
-  },
+  "reload": false,
   "logger": true,
   "parser": {
     "encode": "utf-8",

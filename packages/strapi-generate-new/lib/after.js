@@ -37,8 +37,13 @@ module.exports = (scope, cb) => {
     try {
       fs.accessSync(path.resolve(strapiRootPath, key), fs.constants.R_OK | fs.constants.W_OK);
       fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
-    } catch (e) {
-      missingDependencies.push(key);
+    } catch (e1) {
+      try {
+        fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', key), fs.constants.R_OK | fs.constants.W_OK);
+        fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
+      } catch (e2) {
+        missingDependencies.push(key);
+      }
     }
   });
 

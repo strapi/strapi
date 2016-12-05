@@ -9,7 +9,7 @@ const path = require('path');
 
 // Public modules
 const _ = require('lodash');
-const koa = require('koa');
+const Koa = require('koa');
 
 /**
  * Public assets hook
@@ -32,19 +32,20 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (strapi.config.static === true) {
-        strapi.app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, strapi.config.paths.static), {
-          gzip: true
-        }));
+        const isIndexRoute = strapi.config.routes.find(route => route.path === '/');
+
+        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, strapi.config.paths.static), {
+          index: isIndexRoute ? false : 'index.html',
+          maxage: 60000
+        })));
       }
 
       // Mount static to a specific path (pattern: `/plugins/xXx`)
       _.forEach(strapi.plugins, (value, plugin) => {
         // Create koa sub-app
-        const app = koa();
+        const app = new Koa();
 
-        app.use(strapi.middlewares.static(path.resolve(strapi.config.appPath, 'plugins', plugin, strapi.config.paths.static), {
-          gzip: true
-        }));
+        app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, 'plugins', plugin, strapi.config.paths.static))));
 
         strapi.app.use(strapi.middlewares.mount(path.join('/plugins', plugin), app));
       });

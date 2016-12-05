@@ -2,10 +2,7 @@
   "host": "localhost",
   "port": 1337,
   "frontendUrl": "",
-  "reload": {
-    "timeout": 1000,
-    "workers": 0
-  },
+  "reload": true,
   "logger": true,
   "parser": {
     "encode": "utf-8",

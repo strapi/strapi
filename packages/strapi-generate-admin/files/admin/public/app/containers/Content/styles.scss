@@ -1,0 +1,11 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.content { /* stylelint-ignore */
+  background: $content-background;
+  min-height: calc(100vh - #{$header-height});
+  width: calc(100vw - #{$left-menu-width});
+  margin-top: $header-height;
+  margin-left: $left-menu-width;
+  padding: 3rem;
+}

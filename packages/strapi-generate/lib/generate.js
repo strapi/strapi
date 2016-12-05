@@ -45,7 +45,7 @@ function generate(generator, scope, cb) {
   generator.before(scope, reportback.extend({
     error: sb.error,
     invalid: sb.invalid,
-    success: function () {
+    success: () => {
 
       // Emit output.
       sb.log.verbose('Generating ' + util.inspect(generator) + ' at `' + scope.rootPath + '`...');
@@ -110,7 +110,7 @@ function generate(generator, scope, cb) {
           rootPath: path.resolve(scope.rootPath, parsedKeyPath),
 
           // Include reference to original keypath for error reporting.
-          keyPath: keyPath
+          keyPath
         });
 
         // If `target` is an array, run each item.
@@ -128,14 +128,14 @@ function generate(generator, scope, cb) {
 
         // Otherwise, just run the single target generator/helper.
         generateTarget({
-          target: target,
+          target,
           parent: generator,
           scope: targetScope,
           recursiveGenerate: generate
         }, asyncEachSb);
       },
 
-      function done(err) {
+      err => {
 
         // Expose a `error` handler in generators.
         if (err) {

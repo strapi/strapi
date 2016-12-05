@@ -40,7 +40,7 @@ module.exports = (scope, cb) => {
           keep_function_indentation: true,
           space_before_conditional: true,
           end_with_newline: true
-        }), 'utf8', function (err) {
+        }), 'utf8', err => {
           if (err) {
             return cb(err, null);
           } else {

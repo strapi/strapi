@@ -40,7 +40,7 @@ program.allowUnknownOption(true);
 program.version(packageJSON.version, '-v, --version');
 
 // Make `-v` option case-insensitive.
-process.argv = _.map(process.argv, function (arg) {
+process.argv = _.map(process.argv, arg => {
   return (arg === '-V') ? '-v' : arg;
 });
 
@@ -62,10 +62,10 @@ cmd.description('start your Strapi application');
 cmd.action(require('./strapi-start'));
 
 // `$ strapi console`
-cmd = program.command('console');
-cmd.unknownOption = NOOP;
-cmd.description('open the Strapi framework console');
-cmd.action(require('./strapi-console'));
+// cmd = program.command('console');
+// cmd.unknownOption = NOOP;
+// cmd.description('open the Strapi framework console');
+// cmd.action(require('./strapi-console'));
 
 // `$ strapi generate:api`
 cmd = program.command('generate:api');
@@ -116,7 +116,7 @@ cmd.action(require('./strapi-generate'));
 // Custom generators from `.strapirc`.
 try {
   const config = JSON.parse(fs.readFileSync(path.resolve(HOME, '.strapirc')));
-  _.forEach(config.generators, function (info, name) {
+  _.forEach(config.generators, (info, name) => {
     cmd = program.command('generate:' + name);
     cmd.unknownOption = NOOP;
     cmd.description(info.description);

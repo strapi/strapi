@@ -1,25 +1,11 @@
 {
-  "static": true,
-  "views": false,
-  "websockets": true,
+  "admin": "/admin",
   "favicon": {
     "path": "favicon.ico",
     "maxAge": 86400000
   },
   "prefix": "",
-  "jsonapi": {
-    "enabled": false,
-    "keyForAttribute": "dash-case",
-    "ignoreRelationshipData": true,
-    "includedRelationshipData": true,
-    "paginate": 10,
-    "showVersion": false
-  },
-  "graphql": {
-    "enabled": false,
-    "graphiql": false,
-    "pretty": true,
-    "usefulQueries": false,
-    "ignoreMutations": true
-  }
+  "static": true,
+  "views": false,
+  "websockets": true
 }

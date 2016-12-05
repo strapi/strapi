@@ -42,7 +42,7 @@ module.exports = function () {
 
   // Run the rollback.
   scope.db.migrate.rollback()
-    .then(function () {
+    .then(() => {
       logger.info('Rollback successfully made for the `' + scope.connection + '` connection!');
       process.exit(0);
     });

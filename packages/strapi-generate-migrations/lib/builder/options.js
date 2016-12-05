@@ -24,7 +24,7 @@ module.exports = (models, modelName, value, option) => {
   const tplOption = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', 'builder', 'tables', 'options', option + '.template'), 'utf8');
   models[modelName][option] = _.unescape(_.template(tplOption)({
     tableName: modelName,
-    option: option,
-    value: value
+    option,
+    value
   }));
 };
