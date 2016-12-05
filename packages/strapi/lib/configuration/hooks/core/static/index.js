@@ -32,7 +32,12 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (strapi.config.static === true) {
-        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, strapi.config.paths.static))));
+        const isIndexRoute = strapi.config.routes.find(route => route.path === '/');
+
+        strapi.app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, strapi.config.paths.static), {
+          index: isIndexRoute ? false : 'index.html',
+          maxage: 60000
+        })));
       }
 
       // Mount static to a specific path (pattern: `/plugins/xXx`)
