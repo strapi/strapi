@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "2.0.0",
+  "version": "3.0.0-alpha.1",
   "description": "Build powerful back-end with no effort",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -60,14 +60,14 @@
     "lodash": "^4.16.5",
     "node-schedule": "^1.2.0",
     "socket.io": "^1.5.1",
-    "strapi-generate": "~2.0.0",
-    "strapi-generate-admin": "~2.0.0",
-    "strapi-generate-api": "~2.0.0",
-    "strapi-generate-new": "~2.0.0",
-    "strapi-generate-policy": "~2.0.0",
-    "strapi-generate-service": "~2.0.0",
-    "strapi-mongoose": "~2.0.0",
-    "strapi-utils": "~2.0.0"
+    "strapi-generate": "^3.0.0-alpha.1",
+    "strapi-generate-admin": "^3.0.0-alpha.1",
+    "strapi-generate-api": "^3.0.0-alpha.1",
+    "strapi-generate-new": "^3.0.0-alpha.1",
+    "strapi-generate-policy": "^3.0.0-alpha.1",
+    "strapi-generate-service": "^3.0.0-alpha.1",
+    "strapi-mongoose": "^3.0.0-alpha.1",
+    "strapi-utils": "^3.0.0-alpha.1"
   },
   "scripts": {
     "prepublish": "npm prune"
@@ -92,7 +92,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
   "preferGlobal": true,

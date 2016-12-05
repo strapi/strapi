@@ -1,6 +1,6 @@
 {
   "name": "strapi-mongoose",
-  "version": "2.0.0",
+  "version": "3.0.0-alpha.1",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,7 +20,7 @@
     "mongoose-double": "0.0.1",
     "mongoose-float": "^1.0.2",
     "pluralize": "~3.0.0",
-    "strapi-utils": "~2.0.0"
+    "strapi-utils": "^3.0.0-alpha.1"
   },
   "strapi": {
     "isHook": true
@@ -48,7 +48,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
   "license": "MIT"
