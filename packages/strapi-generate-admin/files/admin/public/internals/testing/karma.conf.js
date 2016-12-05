@@ -7,7 +7,7 @@ module.exports = (config) => {
     frameworks: ['mocha'],
     reporters: ['coverage', 'mocha'],
     browsers: process.env.TRAVIS // eslint-disable-line no-nested-ternary
-      ? ['ChromeTravis']
+      ? ['Chrome_travis_ci']
       : process.env.APPVEYOR
         ? ['IE'] : ['Chrome'],
 
@@ -42,7 +42,7 @@ module.exports = (config) => {
     },
 
     customLaunchers: {
-      ChromeTravis: {
+      Chrome_travis_ci: {
         base: 'Chrome',
         flags: ['--no-sandbox'],
       },
