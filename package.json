@@ -48,7 +48,8 @@
     }
   },
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "setup": "make setup"
   },
   "author": {
     "email": "hi@strapi.io",
