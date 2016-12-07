@@ -32,7 +32,7 @@ module.exports = strapi => {
 
     initialize: cb => {
       if (strapi.config.static === true) {
-        const isIndexRoute = strapi.config.routes.find(route => route.path === '/');
+        const isIndexRoute = _.isEmpty(strapi.config.routes) ? false : strapi.config.routes.find(route => route.path === '/');
 
         strapi.app.use(strapi.middlewares.convert(strapi.middlewares.betterStatic(path.resolve(strapi.config.appPath, strapi.config.paths.static), {
           index: isIndexRoute ? false : 'index.html',

@@ -12,3 +12,6 @@ test: lint
 
 docs:
 	mkdocs build --clean
+
+setup:
+	./scripts/setup.sh
