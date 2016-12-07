@@ -8,7 +8,8 @@
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
-    "xo": "~0.13.0"
+    "xo": "~0.13.0",
+    "lerna": "2.0.0-beta.30"
   },
   "xo": {
     "space": true,

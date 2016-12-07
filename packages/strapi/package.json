@@ -70,7 +70,7 @@
     "strapi-utils": "^3.0.0-alpha.1"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublish": "cd ./node_modules/koa-joi-router && sed -i.bu 's/await-busboy/co-busboy/' joi-router.js && npm install co-busboy"
   },
   "author": {
     "email": "hi@strapi.io",
