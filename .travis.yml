@@ -16,7 +16,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 
 install:
-  - yarn run setup
+  - npm run setup
 
 node_js:
   - "7"
@@ -24,4 +24,4 @@ node_js:
 sudo: false
 
 script:
-  - yarn run test
+  - npm run test
