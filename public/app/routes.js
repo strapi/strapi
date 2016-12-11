@@ -4,12 +4,12 @@
 // about the code splitting business
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 
-const errorLoading = (err) => {
-  console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
-};
-
 const loadModule = (cb) => (componentModule) => {
   cb(null, componentModule.default);
+};
+
+const errorLoading = (err) => {
+  console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
 };
 
 export default function createRoutes(store) {
@@ -21,101 +21,65 @@ export default function createRoutes(store) {
       path: '',
       name: 'home',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/HomePage/reducer'),
-          System.import('containers/HomePage/sagas'),
-          System.import('containers/HomePage'),
-        ]);
+        const reducer = require('containers/HomePage/reducer'); // eslint-disable-line global-require
+        const sagas = require('containers/HomePage/sagas'); // eslint-disable-line global-require
+        const component = require('containers/HomePage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
-          injectReducer('home', reducer.default);
-          injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        injectReducer('home', reducer.default);
+        injectSagas(sagas.default);
+        renderRoute(component);
       },
     }, {
       path: '/languages',
       name: 'languages',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/LanguagesPage'),
-        ]);
+        const component = require('containers/LanguagesPage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        renderRoute(component);
       },
     }, {
       path: '/databases',
       name: 'databases',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/DatabasesPage'),
-        ]);
+        const component = require('containers/DatabasesPage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        renderRoute(component);
       },
     }, {
       path: '/security',
       name: 'security',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/SecurityPage'),
-        ]);
+        const component = require('containers/SecurityPage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        renderRoute(component);
       },
     }, {
       path: '/server',
       name: 'server',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/ServerPage'),
-        ]);
+        const component = require('containers/ServerPage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        renderRoute(component);
       },
     }, {
       path: '/advanced',
       name: 'advanced',
       getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          System.import('containers/AdvancedPage'),
-        ]);
+        const component = require('containers/AdvancedPage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
+        renderRoute(component);
       },
     }, {
       path: '*',
