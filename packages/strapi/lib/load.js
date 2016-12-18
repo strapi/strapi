@@ -117,7 +117,11 @@ module.exports = function (configOverride, cb) {
 
     // Map (warning: we could have some order issues).
     _.assignWith(mapper, this.tree, (objValue, srcValue) => {
-      return objValue === false ? objValue : true;
+      if (_.isPlainObject(objValue)) {
+        return true;
+      }
+
+      return _.isBoolean(objValue) ? objValue : false;
     });
 
     // Pick hook to load.
