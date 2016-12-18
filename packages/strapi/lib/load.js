@@ -129,7 +129,7 @@ module.exports = function (configOverride, cb) {
         return require(_.get(this.tree, hookIdentity + '.path'));
       } catch (err) {
         try {
-          return require(path.resolve(this.config.appPath, 'node_modules', hookIdentity));
+          return require(path.resolve(this.config.appPath, 'node_modules', _.get(this.tree, hookIdentity + '.path')));
         } catch (err) {
           cb(err);
         }

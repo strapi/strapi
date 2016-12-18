@@ -42,6 +42,8 @@ module.exports = function () {
         silent: false,
         watch: true,
         watchDirectory: process.cwd(),
+        watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
+        watchIgnorePatterns: ['node_modules/*'], // Ignore patterns to use when watching files.
         killTree: true, // Kills the entire child process tree on `exit`,
         spinSleepTime: 0,
         command: 'node --harmony-async-await'
