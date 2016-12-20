@@ -22,13 +22,13 @@ module.exports = function (strapi) {
      * Default options
      */
 
-     defaults: {
-       root: path.join(strapi.config.appPath, strapi.config.paths.views),
-       layout: 'layout',
-       viewExt: 'ejs',
-       cache: true,
-       debug: true
-     },
+    defaults: {
+      root: path.join(strapi.config.appPath, strapi.config.paths.views),
+      layout: 'layout',
+      viewExt: 'ejs',
+      cache: true,
+      debug: true
+    },
 
     /**
      * Initialize the hook
