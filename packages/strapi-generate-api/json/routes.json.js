@@ -59,13 +59,25 @@ module.exports = scope => {
 
   // We have to delete current file
   if (!_.isEmpty(scope.subId)) {
-    const current = require(scope.rootPath);
+    let current;
 
     try {
+      // Copy current routes.json
+      current = require(scope.rootPath);
+
       // Remove current routes.json
       fs.unlinkSync(scope.rootPath);
-      // Merge both array of routes
-      current.routes = _.concat(generateRoutes().routes, current.routes);
+    } catch (e) {
+      // Fake existing routes
+      current = {
+        routes: []
+      };
+    }
+
+    try {
+      const newest = generateRoutes().routes;
+      // Merge both array of routes, and remove identical routes
+      _.set(current, 'routes', _.concat(newest, _.differenceWith(current.routes, newest, _.isEqual)));
 
       return current;
     } catch (e) {
