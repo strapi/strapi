@@ -36,6 +36,7 @@
     "async": "^2.1.2",
     "boom": "^4.2.0",
     "consolidate": "~0.14.0",
+    "delegates": "^1.0.0",
     "kcors": "^2.2.0",
     "koa": "^2.0.0-alpha.7",
     "koa-better-static": "^1.0.5",

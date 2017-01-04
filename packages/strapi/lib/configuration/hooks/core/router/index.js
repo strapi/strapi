@@ -185,22 +185,6 @@ module.exports = strapi => {
         strapi.app.use(router.middleware());
       });
 
-      // Wrap error into Boom object
-      strapi.app.use(async (ctx, next) => {
-        try {
-          await next();
-
-          if (ctx.status >= 400 || _.get(ctx.body, 'isBoom')) {
-            ctx.throw(ctx.status);
-          }
-        } catch (error) {
-          const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body : Boom.wrap(error, error.status, ctx.body);
-
-          ctx.status = formattedError.output.statusCode || error.status || 500;
-          ctx.body = formattedError.output.payload;
-        }
-      });
-
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
       strapi.app.use(strapi.router.router.allowedMethods({
@@ -214,7 +198,7 @@ module.exports = strapi => {
       // Middleware used for every routes.
       // Expose the endpoint in `this`.
       function globalPolicy(endpoint, value, route) {
-        return async function (ctx, next) {
+        return async (ctx, next) => {
           ctx.request.route = {
             endpoint: _.trim(endpoint),
             controller: _.trim(value.controller),

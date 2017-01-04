@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Default `ok` response.
+ * Default `send` response.
  */
 
 module.exports = function sendOk(data) {
