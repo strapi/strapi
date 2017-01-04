@@ -22,11 +22,11 @@ module.exports = scope => {
     'version': '0.1.0',
     'description': 'A Strapi application.',
     'devDependencies': {
-      "babel-eslint": "^7.1.1",
-      "eslint": "^3.12.2",
-      "eslint-config-airbnb": "^13.0.0",
-      "eslint-plugin-import": "^2.2.0",
-      "eslint-plugin-react": "^6.8.0"
+      'babel-eslint': '^7.1.1',
+      'eslint': '^3.12.2',
+      'eslint-config-airbnb': '^13.0.0',
+      'eslint-plugin-import': '^2.2.0',
+      'eslint-plugin-react': '^6.8.0'
     },
     'dependencies': {
       'lodash': '4.x.x',
