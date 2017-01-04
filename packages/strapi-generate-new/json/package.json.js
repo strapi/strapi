@@ -4,10 +4,6 @@
  * Module dependencies
  */
 
-// Node.js core.
-const fs = require('fs');
-const path = require('path');
-
 // Public node modules.
 const _ = require('lodash');
 
@@ -18,10 +14,6 @@ const _ = require('lodash');
 
 module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
-
-  // To determine the Strapi dependency to inject
-  // in the newly created `package.json`.
-  const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi', 'package.json'))) || {};
 
   // Finally, return the JSON.
   return _.merge(scope.appPackageJSON || {}, {

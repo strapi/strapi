@@ -158,7 +158,7 @@ module.exports = function (strapi) {
               }
 
               switch (verbose) {
-                case 'hasOne':
+                case 'hasOne': {
                   const FK = _.findKey(strapi.models[details.model].attributes, details => {
                     if (details.hasOwnProperty('model') && details.model === model && details.hasOwnProperty('via') && details.via === name) {
                       return details;
@@ -169,20 +169,20 @@ module.exports = function (strapi) {
                     return this.hasOne(global[_.capitalize(details.model)], FK);
                   };
                   break;
-
-                case 'hasMany':
+                }
+                case 'hasMany': {
                   loadedModel[name] = () => {
                     return this.hasMany(global[_.capitalize(details.collection)], details.via);
                   };
                   break;
-
-                case 'belongsTo':
+                }
+                case 'belongsTo': {
                   loadedModel[name] = () => {
                     return this.belongsTo(global[_.capitalize(details.model)], name);
                   };
                   break;
-
-                case 'belongsToMany':
+                }
+                case 'belongsToMany': {
                   const tableName = _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
                     return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
                   }).join('__');
@@ -207,9 +207,10 @@ module.exports = function (strapi) {
                     return this.belongsToMany(global[_.capitalize(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;
-
-                default:
+                }
+                default: {
                   break;
+                }
               }
 
               done();

@@ -187,7 +187,7 @@ module.exports = strapi => {
     // an ES6 literal string without parenthesis inside (aka function call).
     const regex = /^\$\{[^()]*\}$/g;
 
-    return _.mapValues(object, (value, key) => {
+    return _.mapValues(object, (value) => {
       if (_.isPlainObject(value)) {
         return templateConfigurations(value);
       } else if (_.isString(value) && regex.test(value)) {

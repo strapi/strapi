@@ -53,7 +53,7 @@ module.exports = function (configOverride, cb) {
     initializeHooks: ['loadDictionary', (result, cb) => initializeHooks.apply(this, [cb])],
     // Load hooks into memory.
     loadHooks: ['initializeHooks', (result, cb) => loadHooks.apply(this, [cb])]
-  }, (err, results) => {
+  }, (err) => {
     if (err) {
       console.log(err);
     }
@@ -116,7 +116,7 @@ module.exports = function (configOverride, cb) {
     const mapper = _.clone(this.config.hooks);
 
     // Map (warning: we could have some order issues).
-    _.assignWith(mapper, this.tree, (objValue, srcValue) => {
+    _.assignWith(mapper, this.tree, (objValue) => {
       if (_.isPlainObject(objValue)) {
         return true;
       }

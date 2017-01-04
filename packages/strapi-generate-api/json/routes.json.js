@@ -6,7 +6,6 @@
 
 // Node.js core.
 const fs = require('fs');
-const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');

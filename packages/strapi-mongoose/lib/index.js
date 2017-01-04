@@ -8,7 +8,6 @@
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const mongooseUtils = require('mongoose/lib/utils');
-const pluralize = require('pluralize');
 
 // Local helpers.
 const utils = require('./utils/');

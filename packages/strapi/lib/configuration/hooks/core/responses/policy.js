@@ -16,7 +16,7 @@ const responses = require('./responses/index');
 const createResponses = ctx => {
   return _.merge(
     responses,
-    _.mapValues(_.omit(Boom, ['wrap', 'create']), (fn, name) => (...rest) => {
+    _.mapValues(_.omit(Boom, ['wrap', 'create']), (fn) => (...rest) => {
       ctx.body = fn(...rest);
     })
   );

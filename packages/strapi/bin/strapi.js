@@ -122,7 +122,9 @@ try {
     cmd.description(info.description);
     cmd.action(require('./strapi-generate'));
   });
-} catch (err) {}
+} catch (err) {
+  logger.error(err);
+}
 
 // `$ strapi migrate:make`
 cmd = program.command('migrate:make');

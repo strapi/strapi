@@ -59,7 +59,7 @@ module.exports = strapi => {
         const endpoint = `${value.method} ${value.path}`;
 
         try {
-          const {route, policies, action, validate} = routerChecker(value, endpoint);
+          const {policies, action, validate} = routerChecker(value, endpoint);
 
           if (_.isUndefined(action) || !_.isFunction(action)) {
             return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
@@ -88,7 +88,7 @@ module.exports = strapi => {
         const endpoint = `${value.method} ${value.path}`;
 
         try {
-          const {route, policies, action, validate} = routerChecker(value, endpoint);
+          const {policies, action, validate} = routerChecker(value, endpoint);
 
           if (_.isUndefined(action) || !_.isFunction(action)) {
             return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
@@ -131,7 +131,7 @@ module.exports = strapi => {
           const endpoint = `${value.method} ${value.path}`;
 
           try {
-            const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
+            const {policies, action, validate} = routerChecker(value, endpoint, plugin);
 
             if (_.isUndefined(action) || !_.isFunction(action)) {
               return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');
@@ -160,7 +160,7 @@ module.exports = strapi => {
             const endpoint = `${value.method} ${value.path}`;
 
             try {
-              const {route, policies, action, validate} = routerChecker(value, endpoint, plugin);
+              const {policies, action, validate} = routerChecker(value, endpoint, plugin);
 
               if (_.isUndefined(action) || !_.isFunction(action)) {
                 return strapi.log.warn('Ignored attempt to bind route `' + endpoint + '` to unknown controller/action.');

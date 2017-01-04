@@ -10,7 +10,6 @@ const http = require('http');
 const EventEmitter = require('events').EventEmitter;
 
 // Local dependencies.
-const _ = require('lodash');
 const Koa = require('koa');
 const mixinAfter = require('./private/after');
 
