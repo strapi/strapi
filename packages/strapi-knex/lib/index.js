@@ -57,43 +57,43 @@ module.exports = strapi => {
       strapi.connections = {};
 
       // For each connection in the config register a new Knex connection.
-      _.forEach(strapi.config.connections, (connection, name) => {
+      _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'}), (connection, name) => {
 
         // Make sure we use the client even if the typo is not the exact one.
-        switch (connection.client) {
+        switch (connection.settings.client) {
           case 'postgre':
           case 'postgres':
           case 'postgresql':
-            connection.client = 'pg';
+            connection.settings.client = 'pg';
             break;
           case 'sqlite':
-            connection.client = 'sqlite3';
+            connection.settings.client = 'sqlite3';
             break;
           case 'maria':
           case 'mariadb':
-            connection.client = 'mariasql';
+            connection.settings.client = 'mariasql';
             break;
           case 'ms':
-            connection.client = 'mssql';
+            connection.settings.client = 'mssql';
             break;
           case 'web':
-            connection.client = 'websql';
+            connection.settings.client = 'websql';
             break;
         }
 
         // Make sure the client is supported.
-        if (!_.includes(CLIENTS, connection.client)) {
-          strapi.log.error('The client `' + connection.client + '` for the `' + name + '` connection is not supported.');
+        if (!_.includes(CLIENTS, connection.settings.client)) {
+          strapi.log.error('The client `' + connection.settings.client + '` for the `' + name + '` connection is not supported.');
           strapi.stop();
         }
 
         // Make sure the client is installed in the application
         // `node_modules` directory.
         try {
-          require(path.resolve(strapi.config.appPath, 'node_modules', connection.client));
+          require(path.resolve(strapi.config.appPath, 'node_modules', connection.settings.client));
         } catch (err) {
-          strapi.log.error('The client `' + connection.client + '` is not installed.');
-          strapi.log.error('You can install it with `$ npm install ' + connection.client + ' --save`.');
+          strapi.log.error('The client `' + connection.settings.client + '` is not installed.');
+          strapi.log.error('You can install it with `$ npm install ' + connection.settings.client + ' --save`.');
           strapi.stop();
         }
 
@@ -102,7 +102,7 @@ module.exports = strapi => {
         // please drop us an email at support@strapi.io-- it would avoid the Strapi
         // applications to have `knex` as a dependency.
         try {
-          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(connection);
+          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(connection.settings);
         } catch (err) {
           strapi.log.error('Impossible to use the `' + name + '` connection...');
           strapi.log.error(err);
