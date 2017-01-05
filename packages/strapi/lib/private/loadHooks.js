@@ -52,8 +52,15 @@ module.exports = function (cb) {
   function applyDefaults(id, hook) {
     // Get the hook defaults.
     const defaults = (_.isFunction(hook.defaults) ? hook.defaults(_.get(this.config, 'hooks.' + id)) : hook.defaults) || {};
+    // Get the current hook configuration
+    const current = _.get(this.config, 'hooks.' + id);
 
-    _.defaultsDeep(_.get(this.config, 'hooks.' + id), defaults);
+    if (current === true) {
+      // We cannot apply defaults where current configuration is a boolean.
+      _.set(this.config, 'hooks.' + id, defaults);
+    } else if (_.isPlainObject(current)) {
+      _.defaultsDeep(_.get(this.config, 'hooks.' + id), defaults);
+    }
   }
 
   // Load a hook and initialize it.
