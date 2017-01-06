@@ -122,7 +122,7 @@ module.exports = function (strapi) {
                   });
                 };
 
-                const ORM = bookshelf(connection.settings);
+                const ORM = new bookshelf(strapi.connections[connectionName]);
 
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({

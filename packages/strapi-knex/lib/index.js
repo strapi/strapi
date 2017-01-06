@@ -33,19 +33,9 @@ module.exports = strapi => {
      */
 
     defaults: {
-      connections: {
-        default: {
-          client: 'sqlite3',
-          debug: false,
-          acquireConnectionTimeout: 60000,
-          useNullAsDefault: true,
-          connection: {
-            filename: './data/db.sqlite'
-          },
-          migrations: {
-            tableName: 'migrations'
-          }
-        }
+      connection: {
+        host: 'locahost',
+        charset: 'utf-8'
       }
     },
 
@@ -97,14 +87,27 @@ module.exports = strapi => {
           strapi.stop();
         }
 
+        const options = _.defaultsDeep({
+          client: connection.settings.client,
+          connection: {
+            host: _.get(connection.settings, 'host'),
+            user: _.get(connection.settings, 'username'),
+            password: _.get(connection.settings, 'passsword'),
+            database: _.get(connection.settings, 'database'),
+            charset: _.get(connection.settings, 'charset')
+          }
+        }, strapi.config.hooks.knex);
+
         // Finally, use the client via `knex`.
         // If anyone has a solution to use different paths for `knex` and clients
         // please drop us an email at support@strapi.io-- it would avoid the Strapi
         // applications to have `knex` as a dependency.
         try {
-          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(connection.settings);
+          // Try to require from local dependency.
+          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options);
         } catch (err) {
           strapi.log.error('Impossible to use the `' + name + '` connection...');
+          strapi.log.warn('Be sure that your client `' + name + '` are in the same node_modules directory');
           strapi.log.error(err);
           strapi.stop();
         }
