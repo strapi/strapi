@@ -16,7 +16,7 @@ const responses = require('./responses/index');
 const createResponses = ctx => {
   return _.merge(
     responses,
-    _.mapValues(_.omit(Boom, ['wrap', 'create']), (fn) => (...rest) => {
+    _.mapValues(_.omit(Boom, ['create']), (fn) => (...rest) => {
       ctx.body = fn(...rest);
     })
   );
@@ -43,7 +43,7 @@ module.exports = async function (ctx, next) {
       ctx.throw(ctx.status);
     }
   } catch (error) {
-    const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body : Boom.wrap(error, error.status, ctx.body);
+    const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body || error.message : Boom.wrap(error, error.status, ctx.body || error.message);
 
     ctx.status = formattedError.output.statusCode || error.status || 500;
     ctx.body = formattedError.output.payload;

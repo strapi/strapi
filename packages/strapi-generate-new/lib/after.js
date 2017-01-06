@@ -10,7 +10,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const fs = require('fs-extra');
-const npm = require('npm');
+const npm = require('enpeem');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -48,10 +48,14 @@ module.exports = (scope, cb) => {
     }
   });
 
-  logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
-
   if (!_.isEmpty(missingDependencies)) {
-    npm.load({loglevel: 'silent'}, function(err) {
+    logger.verbose('Installing dependencies...');
+
+    npm.install({
+      dependencies: missingDependencies,
+      loglevel: 'silent',
+      'cache-min': 999999999
+    }, err => {
       if (err) {
         console.log();
         logger.warn('You should run `npm install` into your application before starting it.');
@@ -63,28 +67,9 @@ module.exports = (scope, cb) => {
         return cb();
       }
 
-      const installDependency = (dependency, index) => {
-        if (_.isEmpty(dependency)) {
-          console.log();
-          return cb();
-        }
+      logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
 
-        console.log();
-        logger.info('Installing ' + dependency + '...');
-        console.log();
-
-        npm.commands.install([dependency], (err) => {
-          if (err) {
-            console.log();
-            logger.warn('You should run `npm install ' + dependency + '` into your application before starting it.');
-            console.log();
-          }
-
-          installDependency(missingDependencies[index++], index);
-        });
-      };
-
-      installDependency(missingDependencies[0], 0);
+      cb();
     });
   }
 };
