@@ -43,6 +43,7 @@ module.exports = async function (ctx, next) {
       ctx.throw(ctx.status);
     }
   } catch (error) {
+    strapi.log.error(error);
     const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body || error.message : Boom.wrap(error, error.status, ctx.body || error.message);
 
     ctx.status = formattedError.output.statusCode || error.status || 500;
