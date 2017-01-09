@@ -7,5 +7,5 @@
   "prefix": "",
   "static": true,
   "views": false,
-  "websockets": true
+  "websockets": false
 }

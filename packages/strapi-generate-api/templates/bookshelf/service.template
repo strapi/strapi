@@ -17,7 +17,7 @@ const utils = require('strapi-bookshelf/lib/utils/');
 module.exports = {
 
   /**
-   * Promise to fetch all <%= idPluralized %>.
+   * Promise to fetch all <%= subIdPluralized || idPluralized %>.
    *
    * @return {Promise}
    */
@@ -25,10 +25,10 @@ module.exports = {
   fetchAll: params => {
     return new Promise((resolve, reject) => {
       <%= globalID %>.forge(params).query(params).fetchAll({
-        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
+        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
       })
-        .then(<%= idPluralized %> => {
-          resolve(<%= idPluralized %>);
+        .then(<%= subIdPluralized || idPluralized %> => {
+          resolve(<%= subIdPluralized || idPluralized %>);
         })
         .catch(err => {
           reject(err);
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   /**
-   * Promise to fetch a/an <%= id %>.
+   * Promise to fetch a/an <%= subId || id %>.
    *
    * @return {Promise}
    */
@@ -45,10 +45,10 @@ module.exports = {
   fetch: params => {
     return new Promise((resolve, reject) => {
       <%= globalID %>.forge(_.pick(params, 'id')).fetch({
-        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
+        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
       })
-        .then(<%= id %> => {
-          resolve(<%= id %>);
+        .then(<%= subId || id %> => {
+          resolve(<%= subId || id %>);
         })
         .catch(err => {
           reject(err);
@@ -57,7 +57,7 @@ module.exports = {
   },
 
   /**
-   * Promise to add a/an <%= id %>.
+   * Promise to add a/an <%= subId || id %>.
    *
    * @return {Promise}
    */
@@ -65,8 +65,8 @@ module.exports = {
   add: values => {
     return new Promise((resolve, reject) => {
       <%= globalID %>.forge(values).save()
-        .then(<%= id %> => {
-          resolve(<%= id %>);
+        .then(<%= subId || id %> => {
+          resolve(<%= subId || id %>);
         })
         .catch(err => {
           reject(err);
@@ -75,7 +75,7 @@ module.exports = {
   },
 
   /**
-   * Promise to edit a/an <%= id %>.
+   * Promise to edit a/an <%= subId || id %>.
    *
    * @return {Promise}
    */
@@ -83,8 +83,8 @@ module.exports = {
   edit: (params, values) => {
     return new Promise((resolve, reject) => {
       <%= globalID %>.forge(params).save(values, {path: true})
-        .then(<%= id %> => {
-          resolve(<%= id %>);
+        .then(<%= subId || id %> => {
+          resolve(<%= subId || id %>);
         })
         .catch(err => {
           reject(err);
@@ -93,7 +93,7 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a/an <%= id %>.
+   * Promise to remove a/an <%= subId || id %>.
    *
    * @return {Promise}
    */
@@ -101,8 +101,8 @@ module.exports = {
   remove: params => {
     return new Promise((resolve, reject) => {
       <%= globalID %>.forge(params).destroy()
-        .then(<%= id %> => {
-          resolve(<%= id %>);
+        .then(<%= subId || id %> => {
+          resolve(<%= subId || id %>);
         })
         .catch(err => {
           reject(err);
@@ -111,14 +111,14 @@ module.exports = {
   },
 
   /**
-   * Add relation to a specific <%= id %> (only from a to-many relationships).
+   * Add relation to a specific <%= subId || id %> (only from a to-many relationships).
    *
    * @return {Object}
    */
 
   addRelation: (params, values) => {
     return new Promise((resolve, reject) => {
-      const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
+      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
         switch (relation.nature) {
@@ -144,8 +144,8 @@ module.exports = {
             break;
           case 'manyToMany':
             <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(values)
-              .then(<%= id %> => {
-                resolve(<%= id %>);
+              .then(<%= subId || id %> => {
+                resolve(<%= subId || id %>);
               })
               .catch(err => {
                 reject(err);
@@ -161,14 +161,14 @@ module.exports = {
   },
 
   /**
-   * Edit relation to a specific <%= id %>.
+   * Edit relation to a specific <%= subId || id %>.
    *
    * @return {Object}
    */
 
   editRelation: (params, values) => {
     return new Promise((resolve, reject) => {
-      const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
+      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
         switch (relation.nature) {
@@ -178,7 +178,7 @@ module.exports = {
             const data = _.set({}, params.relation, _.first(values) || null);
 
             <%= globalID %>.forge(_.omit(params, 'relation')).save(data, {path: true})
-              .then(<%= id %> => {
+              .then(<%= subId || id %> => {
                 resolve();
               })
               .catch(err => {
@@ -191,8 +191,8 @@ module.exports = {
             <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
               withRelated: _.get(params, 'relation')
             })
-              .then(<%= id %> => {
-                const data = <%= id %>.toJSON() || {};
+              .then(<%= subId || id %> => {
+                const data = <%= subId || id %>.toJSON() || {};
                 const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
                 const valuesToRemove = _.difference(currentValues, values);
 
@@ -230,8 +230,8 @@ module.exports = {
             <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
               withRelated: _.get(params, 'relation')
             })
-              .then(<%= id %> => {
-                const data = <%= id %>.toJSON() || {};
+              .then(<%= subId || id %> => {
+                const data = <%= subId || id %>.toJSON() || {};
                 const PK = utils.getPK('<%= globalID %>', <%= globalID %>, strapi.models);
 
                 const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
@@ -241,11 +241,11 @@ module.exports = {
 
                 return <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(valuesToAdd)
                   .then(function () {
-                    return <%= id %>;
+                    return <%= subId || id %>;
                   })
               })
-              .then(<%= id %> => {
-                const data = <%= id %>.toJSON() || {};
+              .then(<%= subId || id %> => {
+                const data = <%= subId || id %>.toJSON() || {};
                 const PK = utils.getPK('<%= globalID %>', <%= globalID %>, strapi.models);
 
                 const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
@@ -272,14 +272,14 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a specific entry from a specific <%= id %> (only from a to-many relationships).
+   * Promise to remove a specific entry from a specific <%= subId || id %> (only from a to-many relationships).
    *
    * @return {Promise}
    */
 
   removeRelation: (params, values) => {
     return new Promise((resolve, reject) => {
-      const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
+      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
         switch (relation.nature) {
@@ -305,8 +305,8 @@ module.exports = {
             break;
           case 'manyToMany':
             <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().detach(values)
-              .then(<%= id %> => {
-                resolve(<%= id %>);
+              .then(<%= subId || id %> => {
+                resolve(<%= subId || id %>);
               })
               .catch(err => {
                 reject(err);

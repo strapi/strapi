@@ -9,9 +9,6 @@
 // Node.js core.
 const REPL = require('repl');
 
-// Public node modules.
-const _ = require('lodash');
-
 // Local Strapi dependencies.
 const strapi = require('../lib/');
 

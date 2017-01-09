@@ -1,12 +1,12 @@
 {
   "connection": "<%= connection %>",
-  "tableName": "<%= id %>",
+  "tableName": "<%= subId || id %>",
   "options": {
     "increments": true,
     "timestamps": true,
     "comment": ""
   },
   "attributes": {
-    
+
   }
 }

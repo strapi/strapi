@@ -7,17 +7,46 @@
 // Public node modules.
 const _ = require('lodash');
 const Boom = require('boom');
+const delegate = require('delegates');
 
 // Local utilities.
 const responses = require('./responses/index');
+
+// Custom function to avoid ctx.body repeat
+const createResponses = ctx => {
+  return _.merge(
+    responses,
+    _.mapValues(_.omit(Boom, ['create']), (fn) => (...rest) => {
+      ctx.body = fn(...rest);
+    })
+  );
+};
 
 /**
  * Policy used to add responses in the `this.response` object.
  */
 
 module.exports = async function (ctx, next) {
-  // Add the custom responses to the `ctx` object.
-  _.assign(ctx, responses, Boom);
+  const delegator = delegate(ctx, 'response');
 
-  await next();
+  _.forEach(createResponses(ctx), (value, key) => {
+    // Assign new error methods to context.response
+    ctx.response[key] = value;
+    // Delegate error methods to context
+    delegator.method(key);
+  });
+
+  try {
+    await next();
+
+    if (_.get(ctx.body, 'isBoom')) {
+      ctx.throw(ctx.status);
+    }
+  } catch (error) {
+    strapi.log.error(error);
+    const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body || error.message : Boom.wrap(error, error.status, ctx.body || error.message);
+
+    ctx.status = formattedError.output.statusCode || error.status || 500;
+    ctx.body = formattedError.output.payload;
+  }
 };

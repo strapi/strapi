@@ -10,6 +10,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const fs = require('fs-extra');
+const npm = require('enpeem');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -33,7 +34,7 @@ module.exports = (scope, cb) => {
   const missingDependencies = [];
 
   // Verify if the dependencies are available into the global
-  _.forEach(_.get(packageJSON, 'dependencies'), (value, key) => {
+  _.forEach(_.merge(_.get(packageJSON, 'dependencies'), _.get(packageJSON, 'devDependencies')), (value, key) => {
     try {
       fs.accessSync(path.resolve(strapiRootPath, key), fs.constants.R_OK | fs.constants.W_OK);
       fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
@@ -47,16 +48,28 @@ module.exports = (scope, cb) => {
     }
   });
 
-  logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
-
   if (!_.isEmpty(missingDependencies)) {
-    console.log();
-    logger.warn('You should run `npm install` into your application before starting it.');
-    console.log();
-    logger.warn('Some dependencies could not be installed:');
-    _.forEach(missingDependencies, value => logger.warn('• ' + value));
-    console.log();
-  }
+    logger.verbose('Installing dependencies...');
 
-  return cb();
+    npm.install({
+      dependencies: missingDependencies,
+      loglevel: 'silent',
+      'cache-min': 999999999
+    }, err => {
+      if (err) {
+        console.log();
+        logger.warn('You should run `npm install` into your application before starting it.');
+        console.log();
+        logger.warn('Some dependencies could not be installed:');
+        _.forEach(missingDependencies, value => logger.warn('• ' + value));
+        console.log();
+
+        return cb();
+      }
+
+      logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+
+      cb();
+    });
+  }
 };

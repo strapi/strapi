@@ -36,7 +36,6 @@ module.exports = (scope, cb) => {
   // Use configured module name for this `generatorType` if applicable.
   const module = 'strapi-generate-' + scope.generatorType;
   let generator;
-  let requireError;
 
   function throwIfModuleNotFoundError(error, module) {
     const isModuleNotFoundError = error && error.code === 'MODULE_NOT_FOUND' && error.message.match(new RegExp(module));
@@ -52,7 +51,7 @@ module.exports = (scope, cb) => {
   try {
     generator = require('../../' + module);
   } catch (error) {
-    requireError = throwIfModuleNotFoundError(error, module);
+    throwIfModuleNotFoundError(error, module);
   }
 
   if (!generator) {

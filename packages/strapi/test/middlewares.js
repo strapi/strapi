@@ -71,8 +71,8 @@ describe('middlewares', () => {
     assert(typeof strapi.middlewares.send === 'function');
   });
 
-  it('`strapi.middlewares.session` should be a function', () => {
-    assert(typeof strapi.middlewares.session === 'function');
+  it('`strapi.middlewares.genericSession` should be a function', () => {
+    assert(typeof strapi.middlewares.genericSession === 'function');
   });
 
   it('`strapi.middlewares.sslify` should be a function', () => {

@@ -1,30 +1,23 @@
 {
-  "name": "strapi-generate-migrations",
+  "name": "strapi-ejs",
   "version": "3.0.0-alpha.2",
-  "description": "Generate migration files for a Strapi application.",
+  "description": "EJS hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
-    "generate",
-    "generator",
-    "knex",
-    "migrations",
-    "sql",
-    "strapi",
-    "transactions"
+    "ejs",
+    "hook",
+    "strapi"
   ],
-  "main": "./lib/index.js",
   "directories": {
     "lib": "./lib"
   },
+  "main": "./lib",
   "dependencies": {
-    "async": "^2.1.2",
-    "glob": "^7.1.1",
-    "js-beautify": "^1.6.4",
-    "knex": "^0.12.6",
-    "lodash": "^4.16.5",
-    "pluralize": "^3.0.0",
-    "strapi-bookshelf": "^3.0.0-alpha.2",
-    "strapi-utils": "^3.0.0-alpha.2"
+    "co": "^4.6.0",
+    "koa-ejs": "^3.0.0"
+  },
+  "strapi": {
+    "isHook": true
   },
   "scripts": {
     "prepublish": "npm prune"

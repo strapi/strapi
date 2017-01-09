@@ -3,50 +3,18 @@
   "version": "3.0.0-alpha.1",
   "devDependencies": {
     "assert": "~1.3.0",
+    "babel-eslint": "^6.1.2",
     "coveralls": "~2.11.9",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^3.0.2",
+    "eslint-plugin-react": "^6.8.0",
     "istanbul": "~0.4.2",
+    "lerna": "2.0.0-beta.30",
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
-    "pre-commit": "~1.1.2",
-    "xo": "~0.13.0",
-    "lerna": "2.0.0-beta.30"
-  },
-  "xo": {
-    "space": true,
-    "esnext": true,
-    "envs": [
-      "mocha",
-      "node"
-    ],
-    "globals": [
-      "strapi"
-    ],
-    "ignore": [
-      "packages/strapi-generate-new/files/public/**",
-      "packages/strapi-generate-admin/files/admin/public/**",
-      "website/**"
-    ],
-    "rules": {
-      "array-callback-return": 0,
-      "brace-style": 0,
-      "camelcase": 0,
-      "default-case": 0,
-      "dot-notation": 0,
-      "no-case-declarations": 0,
-      "no-else-return": 0,
-      "no-eval": 0,
-      "no-implicit-coercion": 0,
-      "no-lonely-if": 0,
-      "no-negated-condition": 0,
-      "no-throw-literal": 0,
-      "no-unused-expressions": 0,
-      "no-unused-vars": 0,
-      "padded-blocks": 0,
-      "prefer-template": 0,
-      "quote-props": 0,
-      "space-infix-ops": 0,
-      "strict": 0
-    }
+    "pre-commit": "~1.1.2"
   },
   "scripts": {
     "test": "make test",
@@ -54,12 +22,12 @@
   },
   "author": {
     "email": "hi@strapi.io",
-    "name": "Strapi team",
+    "name": "Strapi Solutions",
     "url": "http://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
+      "name": "Strapi Solutions",
       "email": "hi@strapi.io",
       "url": "http://strapi.io"
     }
