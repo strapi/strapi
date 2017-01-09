@@ -126,9 +126,6 @@ module.exports = strapi => {
           // return cb(err);
         }
 
-        // Template literal string
-        config = templateConfigurations(config);
-
         // Merge every user config together.
         const mergedConfig = _.merge(
           config['config/*'],
@@ -169,6 +166,9 @@ module.exports = strapi => {
         // Make the application name in config match the server one.
         strapi.app.name = strapi.config.name;
 
+        // Template literal string
+        strapi.config = templateConfigurations(strapi.config);
+
         // Initialize empty API objects.
         strapi.controllers = {};
         strapi.models = {};
@@ -185,9 +185,9 @@ module.exports = strapi => {
   function templateConfigurations(object) {
     // Allow values which looks like such as
     // an ES6 literal string without parenthesis inside (aka function call).
-    const regex = /^\$\{[^()]*\}$/g;
+    const regex = /\$\{[^()]*\}/g;
 
-    return _.mapValues(object, (value, key) => {
+    return _.mapValues(object, (value) => {
       if (_.isPlainObject(value)) {
         return templateConfigurations(value);
       } else if (_.isString(value) && regex.test(value)) {

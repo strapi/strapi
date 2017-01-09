@@ -55,7 +55,6 @@ module.exports = {
       const ORM = this.getORM(collectionIdentity);
 
       try {
-        const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
         const ORMFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
 
         if (!_.isUndefined(ORMFunctions)) {
@@ -74,7 +73,6 @@ module.exports = {
    */
 
   getNature: (association, key, models) => {
-    const strapi = _.isUndefined(global['strapi']) && !_.isUndefined(models) ? _.set({}, 'models', models) : global['strapi'];
     const types = {
       current: '',
       other: ''

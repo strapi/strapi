@@ -6,7 +6,6 @@
 
 // Public node modules.
 const _ = require('lodash');
-const async = require('async');
 
 /**
  * Expose the strategy to load

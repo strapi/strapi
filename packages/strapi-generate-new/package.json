@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "Generate a new Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,9 +13,10 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "fs-extra": "~0.30.0",
+    "enpeem": "^2.2.0",
+    "fs-extra": "~1.0.0",
     "lodash": "^4.16.5",
-    "strapi-utils": "^3.0.0-alpha.1"
+    "strapi-utils": "^3.0.0-alpha.2"
   },
   "scripts": {
     "prepublish": "npm prune"

@@ -108,7 +108,7 @@ module.exports = {
    * @return {Object}
    */
 
-  create: (collectionIdentity, rootValue, args) => {
+  create: (collectionIdentity, rootValue) => {
     return strapi.services[collectionIdentity.toLowerCase()]
       .add(rootValue.context.request.body)
       .then(data => _.isFunction(_.get(data, 'toJSON')) ? data.toJSON() : data);

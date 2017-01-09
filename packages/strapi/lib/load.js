@@ -53,7 +53,7 @@ module.exports = function (configOverride, cb) {
     initializeHooks: ['loadDictionary', (result, cb) => initializeHooks.apply(this, [cb])],
     // Load hooks into memory.
     loadHooks: ['initializeHooks', (result, cb) => loadHooks.apply(this, [cb])]
-  }, (err, results) => {
+  }, (err) => {
     if (err) {
       console.log(err);
     }
@@ -116,8 +116,12 @@ module.exports = function (configOverride, cb) {
     const mapper = _.clone(this.config.hooks);
 
     // Map (warning: we could have some order issues).
-    _.assignWith(mapper, this.tree, (objValue, srcValue) => {
-      return objValue === false ? objValue : true;
+    _.assignWith(mapper, this.tree, (objValue) => {
+      if (_.isPlainObject(objValue)) {
+        return true;
+      }
+
+      return _.isBoolean(objValue) ? objValue : false;
     });
 
     // Pick hook to load.
@@ -129,7 +133,7 @@ module.exports = function (configOverride, cb) {
         return require(_.get(this.tree, hookIdentity + '.path'));
       } catch (err) {
         try {
-          return require(path.resolve(this.config.appPath, 'node_modules', hookIdentity));
+          return require(path.resolve(this.config.appPath, 'node_modules', _.get(this.tree, hookIdentity + '.path')));
         } catch (err) {
           cb(err);
         }

@@ -4,10 +4,6 @@
  * Module dependencies
  */
 
-// Node.js core.
-const fs = require('fs');
-const path = require('path');
-
 // Public node modules.
 const _ = require('lodash');
 
@@ -19,16 +15,19 @@ const _ = require('lodash');
 module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
 
-  // To determine the Strapi dependency to inject
-  // in the newly created `package.json`.
-  const frameworkPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', 'strapi', 'package.json'))) || {};
-
   // Finally, return the JSON.
   return _.merge(scope.appPackageJSON || {}, {
     'name': scope.name,
     'private': true,
     'version': '0.1.0',
     'description': 'A Strapi application.',
+    'devDependencies': {
+      'babel-eslint': '^7.1.1',
+      'eslint': '^3.12.2',
+      'eslint-config-airbnb': '^13.0.0',
+      'eslint-plugin-import': '^2.2.0',
+      'eslint-plugin-react': '^6.8.0'
+    },
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
@@ -37,7 +36,8 @@ module.exports = scope => {
     'main': './server.js',
     'scripts': {
       'start': 'node --harmony-async-await server.js',
-      'strapi': 'node_modules/strapi/bin/strapi.js' // Allow to use `npm run strapi` CLI
+      'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
+      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js'
     },
     'author': {
       'name': scope.author || 'A Strapi developer',

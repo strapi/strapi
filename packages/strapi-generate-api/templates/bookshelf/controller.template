@@ -6,84 +6,84 @@
 
 module.exports = {
   /**
-   * Get <%= id %> entries.
+   * Get <%= subId || id %> entries.
    *
    * @return {Object|Array}
    */
 
   find: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.fetchAll(ctx.query);
+      ctx.body = await strapi.services.<%= subId || id %>.fetchAll(ctx.query);
     } catch (err) {
       ctx.body = err;
     }
   },
 
   /**
-   * Get a specific <%= id %>.
+   * Get a specific <%= subId || id %>.
    *
    * @return {Object|Array}
    */
 
   findOne: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.fetch(ctx.params)
+      ctx.body = await strapi.services.<%= subId || id %>.fetch(ctx.params)
     } catch (err) {
       ctx.body = err;
     }
   },
 
   /**
-   * Create a/an <%= id %> entry.
+   * Create a/an <%= subId || id %> entry.
    *
    * @return {Object}
    */
 
   create: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.add(ctx.request.body);
+      ctx.body = await strapi.services.<%= subId || id %>.add(ctx.request.body);
     } catch (err) {
       ctx.body = err;
     }
   },
 
   /**
-   * Update a/an <%= id %> entry.
+   * Update a/an <%= subId || id %> entry.
    *
    * @return {Object}
    */
 
   update: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
+      ctx.body = await strapi.services.<%= subId || id %>.edit(ctx.params, ctx.request.body) ;
     } catch (err) {
       ctx.body = err;
     }
   },
 
   /**
-   * Destroy a/an <%= id %> entry.
+   * Destroy a/an <%= subId || id %> entry.
    *
    * @return {Object}
    */
 
   destroy: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.remove(ctx.params);
+      ctx.body = await strapi.services.<%= subId || id %>.remove(ctx.params);
     } catch (err) {
       ctx.body = err;
     }
   },
 
   /**
-   * Add relation to a specific <%= id %>.
+   * Add relation to a specific <%= subId || id %>.
    *
    * @return {Object}
    */
 
   createRelation: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.addRelation(ctx.params, ctx.request.body);
+      ctx.body = await strapi.services.<%= subId || id %>.addRelation(ctx.params, ctx.request.body);
     } catch (err) {
       ctx.status = 400;
       ctx.body = err;
@@ -91,14 +91,14 @@ module.exports = {
   },
 
   /**
-   * Update relation to a specific <%= id %>.
+   * Update relation to a specific <%= subId || id %>.
    *
    * @return {Object}
    */
 
   updateRelation: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.editRelation(ctx.params, ctx.request.body);
+      ctx.body = await strapi.services.<%= subId || id %>.editRelation(ctx.params, ctx.request.body);
     } catch (err) {
       ctx.status = 400;
       ctx.body = err;
@@ -106,14 +106,14 @@ module.exports = {
   },
 
   /**
-   * Destroy relation to a specific <%= id %>.
+   * Destroy relation to a specific <%= subId || id %>.
    *
    * @return {Object}
    */
 
   destroyRelation: async (ctx, next) => {
     try {
-      ctx.body = await strapi.services.<%= id %>.removeRelation(ctx.params, ctx.request.body);
+      ctx.body = await strapi.services.<%= subId || id %>.removeRelation(ctx.params, ctx.request.body);
     } catch (err) {
       ctx.status = 400;
       ctx.body = err;

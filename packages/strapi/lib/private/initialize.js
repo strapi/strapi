@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 /**
  * `strapi.prototype.initialize()`
  *

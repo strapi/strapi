@@ -29,12 +29,14 @@ module.exports = (scope, cb) => {
   _.defaults(scope, {
     id: _.trim(_.deburr(scope.args[0])),
     idPluralized: pluralize.plural(_.trim(_.deburr(scope.args[0]))),
+    subId: _.isEmpty(scope.args[1]) ? undefined : _.trim(_.deburr(scope.args[1])),
+    subIdPluralized: _.isEmpty(scope.args[1]) ? undefined : pluralize.plural(_.trim(_.deburr(scope.args[1]))),
     environment: process.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
+    globalID: _.upperFirst(_.camelCase(_.isEmpty(scope.subId) ? scope.id : scope.subId)),
     ext: '.js'
   });
 
@@ -48,7 +50,9 @@ module.exports = (scope, cb) => {
   // Humanize output.
   _.defaults(scope, {
     humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizeSubId: _.isUndefined(scope.subId) ? undefined : _.camelCase(scope.subId).toLowerCase(),
     humanizeIdPluralized: pluralize.plural(_.camelCase(scope.id).toLowerCase()),
+    humanizeSubIdPluralized: _.isUndefined(scope.subId) ? undefined : pluralize.plural(_.camelCase(scope.subId).toLowerCase()),
     humanizedPath: '`./api`'
   });
 

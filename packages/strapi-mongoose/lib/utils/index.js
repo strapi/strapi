@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 module.exports = mongoose => {
   require('mongoose-double')(mongoose);
   require('mongoose-float').loadType(mongoose);
