@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "Build powerful back-end with no effort",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -61,14 +61,14 @@
     "lodash": "^4.16.5",
     "node-schedule": "^1.2.0",
     "socket.io": "^1.5.1",
-    "strapi-generate": "^3.0.0-alpha.1",
-    "strapi-generate-admin": "^3.0.0-alpha.1",
-    "strapi-generate-api": "^3.0.0-alpha.1",
-    "strapi-generate-new": "^3.0.0-alpha.1",
-    "strapi-generate-policy": "^3.0.0-alpha.1",
-    "strapi-generate-service": "^3.0.0-alpha.1",
-    "strapi-mongoose": "^3.0.0-alpha.1",
-    "strapi-utils": "^3.0.0-alpha.1"
+    "strapi-generate": "^3.0.0-alpha.2",
+    "strapi-generate-admin": "^3.0.0-alpha.2",
+    "strapi-generate-api": "^3.0.0-alpha.2",
+    "strapi-generate-new": "^3.0.0-alpha.2",
+    "strapi-generate-policy": "^3.0.0-alpha.2",
+    "strapi-generate-service": "^3.0.0-alpha.2",
+    "strapi-mongoose": "^3.0.0-alpha.2",
+    "strapi-utils": "^3.0.0-alpha.2"
   },
   "scripts": {
     "prepublish": "cd ./node_modules/koa-joi-router && sed -i.bu 's/await-busboy/co-busboy/' joi-router.js && npm install co-busboy"
