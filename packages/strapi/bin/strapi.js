@@ -114,15 +114,17 @@ cmd.description('generate a custom generator');
 cmd.action(require('./strapi-generate'));
 
 // Custom generators from `.strapirc`.
-try {
-  const config = JSON.parse(fs.readFileSync(path.resolve(HOME, '.strapirc')));
-  _.forEach(config.generators, (info, name) => {
-    cmd = program.command('generate:' + name);
-    cmd.unknownOption = NOOP;
-    cmd.description(info.description);
-    cmd.action(require('./strapi-generate'));
-  });
-} catch (err) {}
+// try {
+//   const config = JSON.parse(fs.readFileSync(path.resolve(HOME, '.strapirc')));
+//   _.forEach(config.generators, (info, name) => {
+//     cmd = program.command('generate:' + name);
+//     cmd.unknownOption = NOOP;
+//     cmd.description(info.description);
+//     cmd.action(require('./strapi-generate'));
+//   });
+// } catch (err) {
+//   logger.error(err);
+// }
 
 // `$ strapi migrate:make`
 cmd = program.command('migrate:make');
