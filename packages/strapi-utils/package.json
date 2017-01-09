@@ -17,11 +17,11 @@
   "main": "./lib",
   "dependencies": {
     "commander": "~2.9.0",
-    "include-all": "^1.0.7",
+    "include-all": "^2.0.0",
     "joi-json": "^2.0.1",
     "knex": "^0.12.6",
     "lodash": "^4.16.5",
-    "winston": "~2.2.0"
+    "winston": "~2.3.0"
   },
   "scripts": {
     "prepublish": "npm prune"

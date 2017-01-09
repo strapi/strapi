@@ -53,7 +53,7 @@
     "koa-locale": "~1.2.0",
     "koa-lusca": "~2.2.0",
     "koa-mount": "koajs/mount#next",
-    "koa-proxy": "~0.6.0",
+    "koa-proxy": "~0.7.0",
     "koa-response-time": "koajs/response-time#v2.x",
     "koa-send": "koajs/send#2.x",
     "koa-sslify": "turboMaCk/koa-sslify#koa2",
