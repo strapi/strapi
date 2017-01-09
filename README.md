@@ -44,7 +44,7 @@ Thanks to the plugins, you will be able to create the perfect app without useles
 
 ### Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](./docs/). For additional help, you can use one of this channel to ask question:
+For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io). For additional help, you can use one of this channel to ask question:
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
 - [Slack](http://slack.strapi.io) (highly recommended for realtime support)
@@ -58,4 +58,4 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2016 [Strapi](http://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2017 [Strapi](http://strapi.io/).
