@@ -58,4 +58,4 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2017 [Strapi](http://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2017 [Strapi Solutions](http://strapi.io/).
