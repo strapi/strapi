@@ -28,7 +28,7 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getPK: (collectionIdentity, collection, models) => {
+  getPK: function (collectionIdentity, collection, models) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
 
@@ -50,7 +50,7 @@ module.exports = {
    * Find primary key per ORM
    */
 
-  getCount: collectionIdentity => {
+  getCount: function (collectionIdentity) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
 
@@ -214,7 +214,7 @@ module.exports = {
    * Define associations key to models
    */
 
-  defineAssociations: (model, definition, association, key) => {
+  defineAssociations: function (model, definition, association, key) {
     // Initialize associations object
     if (definition.associations === undefined) {
       definition.associations = [];

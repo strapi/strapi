@@ -39,11 +39,13 @@ module.exports = async function (ctx, next) {
   try {
     await next();
 
-    if (_.get(ctx.body, 'isBoom')) {
-      ctx.throw(ctx.status);
+    if (_.get(ctx.body, 'isBoom') || _.isError(ctx.body)) {
+      ctx.throw();
     }
   } catch (error) {
-    strapi.log.error(error);
+    // Error object could be also in the context body...
+    strapi.log.error(ctx.body || error);
+    // Wrap error into a Boom's response
     const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body || error.message : Boom.wrap(error, error.status, ctx.body || error.message);
 
     ctx.status = formattedError.output.statusCode || error.status || 500;
