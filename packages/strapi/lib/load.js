@@ -55,7 +55,14 @@ module.exports = function (configOverride, cb) {
     loadHooks: ['initializeHooks', (result, cb) => loadHooks.apply(this, [cb])]
   }, (err) => {
     if (err) {
-      console.log(err);
+      const hooksLoaded = _.keys(_.mapKeys(this.warmEvents, (value, key) => {
+        if (key.indexOf('hook:') !== -1) {
+          return key.split(':')[1];
+        }
+      }));
+
+      this.log.error(err);
+      this.log.debug('The hooks (' + hooksLoaded.join(', ') + ') are loaded, though.');
     }
 
     ready__.apply(this, [cb])();
@@ -129,6 +136,10 @@ module.exports = function (configOverride, cb) {
 
     // Require only necessary hooks.
     this.hooks = _.mapValues(this.hooks, (hook, hookIdentity) => {
+      if (_.isEmpty(_.get(this.tree, hookIdentity + '.path'))) {
+        return cb(`The hook strapi-${hookIdentity} cannot be found. Try to run \`npm install strapi-${hookIdentity}\`.`);
+      }
+
       try {
         return require(_.get(this.tree, hookIdentity + '.path'));
       } catch (err) {
