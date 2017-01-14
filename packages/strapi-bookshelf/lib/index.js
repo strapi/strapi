@@ -175,19 +175,19 @@ module.exports = function (strapi) {
                   });
 
                   loadedModel[name] = function () {
-                    return this.hasOne(global[_.capitalize(details.model)], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
+                    return this.hasOne(global[_.upperFirst(details.model)], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
                   };
                   break;
                 }
                 case 'hasMany': {
                   loadedModel[name] = function () {
-                    return this.hasMany(global[_.capitalize(details.collection)], details.via);
+                    return this.hasMany(global[_.upperFirst(details.collection)], details.via);
                   };
                   break;
                 }
                 case 'belongsTo': {
                   loadedModel[name] = function () {
-                    return this.belongsTo(global[_.capitalize(details.model)], _.get(details, 'columnName') || name);
+                    return this.belongsTo(global[_.upperFirst(details.model)], _.get(details, 'columnName') || name);
                   };
                   break;
                 }
@@ -213,7 +213,7 @@ module.exports = function (strapi) {
                   }
 
                   loadedModel[name] = function () {
-                    return this.belongsToMany(global[_.capitalize(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
+                    return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;
                 }
