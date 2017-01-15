@@ -39,6 +39,11 @@ module.exports = async function (ctx, next) {
   try {
     await next();
 
+    // Set context when no route is matched.
+    if (_.get(ctx.request, 'route') === undefined) {
+      ctx.notFound();
+    }
+
     if (_.get(ctx.body, 'isBoom') || _.isError(ctx.body)) {
       ctx.throw();
     }
