@@ -1,0 +1,44 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.leftMenuLink { /* stylelint-disable */
+  margin-bottom: .4rem;
+}
+
+.leftMenuLinkDestination {
+  display: block;
+  position: relative;
+  color: #3B3F49;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  line-height: 3.6rem;
+  font-size: 1.4rem;
+  border-radius: 2rem;
+
+  &:hover {
+    color: white;
+    text-decoration: none;
+    background-color: $strapi-blue;
+  }
+}
+
+.leftMenuLinkDestinationActive {
+  color: white;
+  text-decoration: none;
+  background-color: #1C5DE7;
+}
+
+.leftMenuLinkDestinationActive .leftMenuLinkIcon {
+  display: block;
+}
+
+.leftMenuLinkIcon {
+  display: none;
+  float: right;
+  padding-top: 1.1rem;
+  z-index: 10;
+}
+
+.leftMenuLinkDestination:hover .leftMenuLinkIcon {
+  display: block;
+}

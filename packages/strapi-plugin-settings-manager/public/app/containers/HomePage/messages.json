@@ -1,0 +1,42 @@
+{
+  "rightSectionDescription": {
+    "id": "settings-manager.components.HomePage.rightSectionDescription",
+    "defaultMessage": "Configure your general settings"
+  },
+  "rightContentSectionTitle": {
+    "id": "settings-manager.components.HomePage.rightContentSectionTitle",
+    "defaultMessage": "Application"
+  },
+  "rightContentSectionDescription": {
+    "id": "settings-manager.components.HomePage.rightContentSectionDescription",
+    "defaultMessage": "The general settings of your Strapi application."
+  },
+  "nameLabel": {
+    "id": "settings-manager.components.HomePage.nameLabel",
+    "defaultMessage": "Name"
+  },
+  "namePlaceholder": {
+    "id": "settings-manager.components.HomePage.namePlaceholder",
+    "defaultMessage": "My Application"
+  },
+  "descriptionLabel": {
+    "id": "settings-manager.components.HomePage.descriptionLabel",
+    "defaultMessage": "Description"
+  },
+  "descriptionPlaceholder": {
+    "id": "settings-manager.components.HomePage.descriptionPlaceholder",
+    "defaultMessage": "A Strapi application"
+  },
+  "versionLabel": {
+    "id": "settings-manager.components.HomePage.versionLabel",
+    "defaultMessage": "Version"
+  },
+  "versionPlaceholder": {
+    "id": "settings-manager.components.HomePage.versionPlaceholder",
+    "defaultMessage": "0.0.1"
+  },
+  "submit": {
+    "id": "settings-manager.components.HomePage.submit",
+    "defaultMessage": "Submit"
+  }
+}
