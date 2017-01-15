@@ -1,15 +1,23 @@
 {
-  "name": "strapi-settings-manager",
+  "name": "strapi-plugin-settings-manager",
   "version": "0.0.0",
-  "description": "Strapi Settings Manager",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi-settings-manager.git"
-  },
+  "description": "Strapi Plugin - Settings Manager",
   "engines": {
-    "npm": ">=3"
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
   },
-  "author": "Strapi",
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
   "license": "MIT",
   "scripts": {
     "setup": "npm i && cd public && npm i && npm run build"
