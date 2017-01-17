@@ -40,8 +40,7 @@ For more details, [please read our blog](http://blog.strapi.io).
 
 `strapi@alpha.3`
 _Reorganize the mono-repository. The rule to follow is to only have hooks without which Strapi cannot start or the CLI is unusable._
-- ~~Remove `strapi-bookshelf` from the main repository~~
-- ~~Remove `strapi-ejs` from the main repository~~
+- ~~Move `strapi-settings-manager` to the main repository~~
 - ~~Better handling for 404~~
 - ~~Update the generated API's files with async/await pattern~~
 
