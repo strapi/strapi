@@ -5,11 +5,11 @@
  */
 
 // Public node modules
-var _ = require('lodash');
-var validator = require('validator');
+const _ = require('lodash');
+const validator = require('validator');
 
-var SchemaDatabases = function(app) {
-  var schema = {
+const SchemaDatabases = function(app) {
+  const schema = {
     adapter: {
       type: 'string',
       path: null,
@@ -70,7 +70,7 @@ var SchemaDatabases = function(app) {
     }
   };
 
-  var schemaExtend = {
+  const schemaExtend = {
     adapter: {
       type: 'string',
       path: null,

@@ -5,17 +5,14 @@
  */
 
 // Public node modules
-var _ = require('lodash');
-var crypto = require('crypto');
-var fs = require('fs-extra');
-var path = require('path');
-var semver = require('semver');
+const _ = require('lodash');
+const semver = require('semver');
 
 // Local services
 // var SocketService = require('../SocketService');
 
-var SchemaGeneral = function() {
-  var schema = {
+const SchemaGeneral = function() {
+  const schema = {
     name: {
       type: 'string',
       path: 'package.json',

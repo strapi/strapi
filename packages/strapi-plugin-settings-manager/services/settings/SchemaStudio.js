@@ -4,8 +4,8 @@
  * Schema Dashboard & Studio variables dependencies
  */
 
-var SchemaStudio = function() {
-  var schema = {
+const SchemaStudio = function() {
+  const schema = {
     studio: {
       type: 'object',
       path: 'config/studio.json',

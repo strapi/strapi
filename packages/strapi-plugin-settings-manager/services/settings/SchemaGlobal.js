@@ -5,10 +5,10 @@
  */
 
 // Public node modules
-var _ = require('lodash');
+const _ = require('lodash');
 
-var SchemaGlobal = function(app) {
-  var schema = {};
+const SchemaGlobal = function(app) {
+  const schema = {};
 
   _.forEach(app.config.globals, function(value, key) {
     schema[key] = {

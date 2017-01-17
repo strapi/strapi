@@ -5,11 +5,11 @@
  */
 
 // Public node modules
-var _ = require('lodash');
-var validator = require('validator');
+const _ = require('lodash');
+const validator = require('validator');
 
-var SchemaServer = function(app) {
-  var schema = {
+const SchemaServer = function(app) {
+  const schema = {
     serverHost: {
       type: 'string',
       path: 'config/environments/' + app.currentUpdatedEnvironment + '/server.json',

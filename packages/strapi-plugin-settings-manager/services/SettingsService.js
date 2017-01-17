@@ -9,7 +9,6 @@ const path = require('path');
 
 // Public node modules
 const _ = require('lodash');
-const crypto = require('crypto');
 const fs = require('fs-extra');
 
 /**
@@ -391,9 +390,6 @@ exports.parse = (app, schema, params) => {
           return Promise.all(arrayOfResolvers);
         })
         .then(results => {
-          const arrayOfErrors = [];
-          const arrayOfValues = [];
-
           // Detect errors
           return Promise.all(results);
         })
@@ -599,7 +595,6 @@ exports.configurationsManager = (app, params) => {
             reject(errors);
           });
       } else {
-        console.log('gerzfger')
         reject('Unknown settings schema');
       }
     });

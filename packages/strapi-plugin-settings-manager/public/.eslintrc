@@ -21,7 +21,8 @@
   },
   "globals": {
     "strapi": true,
-    "window": true
+    "window": true,
+    "fetch": true
   },
   "rules": {
     "generator-star-spacing": 0,
@@ -30,6 +31,7 @@
     "linebreak-style": ["error", "unix"],
     "no-console": 0,
     "quotes": ["error", "single"],
-    "semi": ["error", "always"]
+    "semi": ["error", "always"],
+    "react/jsx-uses-vars": [2]
   }
 }

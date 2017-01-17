@@ -5,15 +5,15 @@
  */
 
 // Public node modules
-var _ = require('lodash');
-var path = require('path');
+const _ = require('lodash');
+const path = require('path');
 
 // Local services
-var SettingService = require('../SettingsService');
-// var SocketService = require('../SocketService');
+const SettingService = require('../SettingsService');
+// const SocketService = require('../SocketService');
 
-var SchemaLanguages = function(app) {
-  var schema = {
+const SchemaLanguages = function(app) {
+  const schema = {
     defaultLocale: {
       type: 'string',
       path: 'config/i18n.json',
@@ -62,23 +62,27 @@ var SchemaLanguages = function(app) {
               });
             });
 
+            return;
+
             // Remove locales from local machine
-            return SocketService.todo({
-              action: 'removeFileOrFolder',
-              from: app.token,
-              to: app.config.studio.appId,
-              toRemove: arrayOfPathToRemove
-            });
+            // return SocketService.todo({
+            //   action: 'removeFileOrFolder',
+            //   from: app.token,
+            //   to: app.config.studio.appId,
+            //   toRemove: arrayOfPathToRemove
+            // });
           })
           .then(function() {
-            return SocketService.zip(app.token, arrayOfFiles);
+            return;
+            // return SocketService.zip(app.token, arrayOfFiles);
           })
           .then(function() {
-            return SocketService.todo({
-              from: app.token,
-              to: app.config.studio.appId,
-              files: arrayOfFiles
-            });
+            return;
+            // return SocketService.todo({
+            //   from: app.token,
+            //   to: app.config.studio.appId,
+            //   files: arrayOfFiles
+            // });
           })
           .then(function() {
             cb(null, value);

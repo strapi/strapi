@@ -5,11 +5,11 @@
  */
 
 // Public node modules
-var _ = require('lodash');
-var validator = require('validator');
+const _ = require('lodash');
+const validator = require('validator');
 
-var SchemaSecurity = function(app) {
-  var schema = {
+const SchemaSecurity = function(app) {
+  const schema = {
     session: {
       type: ['boolean', 'object'],
       path: 'config/environments/' + app.currentUpdatedEnvironment + '/security.json',
