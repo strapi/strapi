@@ -8,10 +8,6 @@ const loadModule = (cb) => (componentModule) => {
   cb(null, componentModule.default);
 };
 
-const errorLoading = (err) => {
-  console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
-};
-
 export default function createRoutes(store) {
   // Create reusable async injectors using getAsyncInjectors factory
   const { injectReducer, injectSagas } = getAsyncInjectors(store); // eslint-disable-line no-unused-vars
@@ -30,64 +26,6 @@ export default function createRoutes(store) {
         injectReducer('home', reducer.default);
         injectSagas(sagas.default);
         renderRoute(component);
-      },
-    }, {
-      path: '/languages',
-      name: 'languages',
-      getComponent(nextState, cb) {
-        const component = require('containers/LanguagesPage'); // eslint-disable-line global-require
-
-        const renderRoute = loadModule(cb);
-
-        renderRoute(component);
-      },
-    }, {
-      path: '/databases',
-      name: 'databases',
-      getComponent(nextState, cb) {
-        const component = require('containers/DatabasesPage'); // eslint-disable-line global-require
-
-        const renderRoute = loadModule(cb);
-
-        renderRoute(component);
-      },
-    }, {
-      path: '/security',
-      name: 'security',
-      getComponent(nextState, cb) {
-        const component = require('containers/SecurityPage'); // eslint-disable-line global-require
-
-        const renderRoute = loadModule(cb);
-
-        renderRoute(component);
-      },
-    }, {
-      path: '/server',
-      name: 'server',
-      getComponent(nextState, cb) {
-        const component = require('containers/ServerPage'); // eslint-disable-line global-require
-
-        const renderRoute = loadModule(cb);
-
-        renderRoute(component);
-      },
-    }, {
-      path: '/advanced',
-      name: 'advanced',
-      getComponent(nextState, cb) {
-        const component = require('containers/AdvancedPage'); // eslint-disable-line global-require
-
-        const renderRoute = loadModule(cb);
-
-        renderRoute(component);
-      },
-    }, {
-      path: '*',
-      name: 'notfound',
-      getComponent(nextState, cb) {
-        System.import('containers/NotFoundPage')
-          .then(loadModule(cb))
-          .catch(errorLoading);
       },
     },
   ];

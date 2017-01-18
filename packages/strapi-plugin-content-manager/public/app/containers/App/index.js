@@ -8,9 +8,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../../app';
-import appMessages from 'containers/App/messages.json';
-import { define } from '../../i18n';
-define(appMessages);
 
 import '../../styles/main.scss';
 

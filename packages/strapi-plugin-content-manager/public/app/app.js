@@ -26,11 +26,11 @@ const pluginId = require('../package.json').name.replace(/^strapi-/i, '');
 // Register the plugin
 if (window.Strapi) {
   window.Strapi.registerPlugin({
-    name: 'Settings Manager',
+    name: 'Content Manager',
     id: pluginId,
     leftMenuLink: {
-      label: 'Settings Manager',
-      to: '/settings-manager',
+      label: 'Content Manager',
+      to: '/content-manager',
     },
     mainComponent: App,
     routes: createRoutes(store),
