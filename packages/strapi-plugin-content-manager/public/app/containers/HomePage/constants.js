@@ -9,4 +9,5 @@
  * export const YOUR_ACTION_CONSTANT = 'your-plugin/YourContainer/YOUR_ACTION_CONSTANT';
  */
 
-export const LOAD_DEFAULT = 'contentManager/HomePage/LOAD_DEFAULT';
+export const LOAD_SUCCESS = 'contentManager/HomePage/LOAD_SUCCESS';
+export const LOAD = 'contentManager/HomePage/LOAD';

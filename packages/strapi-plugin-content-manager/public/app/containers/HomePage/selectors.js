@@ -4,11 +4,16 @@
 
 import { createSelector } from 'reselect';
 
+const selectHome = (state) => state.get('home');
+
 const selectName = () => createSelector(
-  (state) => state.get('name')
+  selectHome,
+  (state) => {
+    return state.get('name');
+  }
 );
 
-
 export {
+  selectHome,
   selectName,
 };

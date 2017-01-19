@@ -10,19 +10,25 @@
  *   return state.set('yourStateVariable', true);
  */
 
-import { LOAD_DEFAULT } from './constants';
 import { fromJS } from 'immutable';
+
+import { LOAD, LOAD_SUCCESS } from './constants';
 
 // The initial state of the App
 const initialState = fromJS({
-  default: ''
+  loading: false,
+  name: null
 });
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
-    case LOAD_DEFAULT:
+    case LOAD:
       return state
-        .set('name', 'Content Manager');
+        .set('loading', true);
+    case LOAD_SUCCESS:
+      return state
+        .set('name', action.data.name)
+        .set('loading', false);
     default:
       return state;
   }

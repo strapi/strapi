@@ -9,25 +9,23 @@ import Container from 'components/Container';
 import { injectIntl } from 'react-intl';
 
 import {
-  defaultLoad,
+  load,
 } from './actions';
 
 import {
   selectName
 } from './selectors';
 
-
 export class HomePage extends React.Component {
 
-  componentDidMount() {
-    this.props.onDefault();
+  componentWillMount() {
+    this.props.load();
   }
 
   render() {
     return (
       <div>
         <div className="container">
-          // <PluginHeader {...this.props}></PluginHeader>
           <Container>
             {this.props.name}
           </Container>
@@ -41,8 +39,10 @@ HomePage.propTypes = {};
 
 export function mapDispatchToProps(dispatch) {
   return {
-    onDefault: () => dispatch(defaultLoad()),
-    dispatch,
+    load: () => {
+      console.log('dispatch LOAD');
+      dispatch(load());
+    }
   };
 }
 

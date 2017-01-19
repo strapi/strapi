@@ -21,7 +21,7 @@ import createRoutes from './routes';
 import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
-const pluginId = require('../package.json').name.replace(/^strapi-/i, '');
+const pluginId = require('../package.json').name.replace(/^strapi-plugin-/i, '');
 
 // Register the plugin
 if (window.Strapi) {

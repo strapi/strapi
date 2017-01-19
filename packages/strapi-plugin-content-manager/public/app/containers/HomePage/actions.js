@@ -3,7 +3,8 @@
  */
 
 import {
-  LOAD_DEFAULT
+  LOAD,
+  LOAD_SUCCESS
 } from './constants';
 
 /**
@@ -11,8 +12,17 @@ import {
  *
  * @return {object} An action object with a type of LOAD_GENERAL_SETTINGS
  */
-export function defaultLoad() {
+export function load_success(data) {
+  console.log('load_success() called');
   return {
-    type: LOAD_DEFAULT,
+    type: LOAD_SUCCESS,
+    data
+  };
+}
+
+export function load() {
+  console.log('load() called');
+  return {
+    type: LOAD
   };
 }
