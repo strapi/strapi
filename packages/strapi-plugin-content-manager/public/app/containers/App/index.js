@@ -20,7 +20,7 @@ export default class App extends React.Component { // eslint-disable-line react/
   render() {
     return (
       <Provider store={store}>
-        <div>
+        <div className='content-manager'>
           {React.Children.toArray(this.props.children)}
         </div>
       </Provider>

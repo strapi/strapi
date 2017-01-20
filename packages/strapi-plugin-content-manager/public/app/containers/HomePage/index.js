@@ -8,6 +8,8 @@ import { createStructuredSelector } from 'reselect';
 import Container from 'components/Container';
 import { injectIntl } from 'react-intl';
 
+import styles from './styles.scss';
+
 import {
   load,
 } from './actions';
@@ -25,9 +27,10 @@ export class HomePage extends React.Component {
   render() {
     return (
       <div>
-        <div className="container">
+        <div className={`container-fluid ${styles.containerFluid}`}>
           <Container>
-            {this.props.name}
+            <p>Nothing to do here.</p>
+            <p>To edit your content's entries go to the specific link in the left menu.</p>
           </Container>
         </div>
       </div>

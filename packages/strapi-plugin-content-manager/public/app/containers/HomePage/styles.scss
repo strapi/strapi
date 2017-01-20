@@ -4,11 +4,16 @@
  * Home container styles
  */
 
-.homePage { /* stylelint-disable */
+.containerFluid{
 
-}
+  .container { /* stylelint-disable */
+    border: 0;
+  }
 
-.homePageRightContentFormGroup {
-  padding-left: 1rem;
-  margin-bottom: 0.5rem;
+  p{
+    display: block;
+    margin: 0;
+    padding-bottom: 14px;
+    line-height: 18px;
+  }
 }
