@@ -10,19 +10,7 @@ import { injectIntl } from 'react-intl';
 
 import styles from './styles.scss';
 
-import {
-  load,
-} from './actions';
-
-import {
-  selectName
-} from './selectors';
-
 export class HomePage extends React.Component {
-
-  componentWillMount() {
-    this.props.load();
-  }
 
   render() {
     return (
@@ -40,18 +28,11 @@ export class HomePage extends React.Component {
 
 HomePage.propTypes = {};
 
-export function mapDispatchToProps(dispatch) {
-  return {
-    load: () => {
-      console.log('dispatch LOAD');
-      dispatch(load());
-    }
-  };
+export function mapDispatchToProps() {
+  return {};
 }
 
-const mapStateToProps = createStructuredSelector({
-  name: selectName()
-});
+const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(HomePage));

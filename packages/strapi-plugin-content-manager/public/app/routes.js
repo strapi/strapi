@@ -18,13 +18,11 @@ export default function createRoutes(store) {
       name: 'home',
       getComponent(nextState, cb) {
         const reducer = require('containers/HomePage/reducer'); // eslint-disable-line global-require
-        const sagas = require('containers/HomePage/sagas'); // eslint-disable-line global-require
         const component = require('containers/HomePage'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
         injectReducer('home', reducer.default);
-        injectSagas(sagas.default);
         renderRoute(component);
       },
     },

@@ -12,23 +12,11 @@
 
 import { fromJS } from 'immutable';
 
-import { LOAD, LOAD_SUCCESS } from './constants';
-
 // The initial state of the App
-const initialState = fromJS({
-  loading: false,
-  name: null
-});
+const initialState = fromJS({});
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
-    case LOAD:
-      return state
-        .set('loading', true);
-    case LOAD_SUCCESS:
-      return state
-        .set('name', action.data.name)
-        .set('loading', false);
     default:
       return state;
   }

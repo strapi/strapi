@@ -25,6 +25,4 @@ export function* mySaga() {
 }
 
 // Bootstrap sagas
-export default [
-  mySaga
-];
+export default [];
