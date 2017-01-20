@@ -11,11 +11,20 @@ import { injectIntl } from 'react-intl';
 import styles from './styles.scss';
 
 export class HomePage extends React.Component {
-
   render() {
+    const Plugin = this.props.plugin;
+
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
+          <Plugin title={{
+            id: 'plugin-content-manager-title',
+            defaultMessage: 'Content Manager'
+          }} description={{
+            id: 'plugin-content-manager-description',
+            defaultMessage: 'A powerful UI to easily manage your data.'
+          }} noActions={true}>
+          </Plugin>
           <Container>
             <p>Nothing to do here.</p>
             <p>To edit your content's entries go to the specific link in the left menu.</p>
@@ -25,8 +34,6 @@ export class HomePage extends React.Component {
     );
   }
 }
-
-HomePage.propTypes = {};
 
 export function mapDispatchToProps() {
   return {};

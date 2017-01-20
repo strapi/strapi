@@ -12,16 +12,18 @@ import { store } from '../../app';
 import '../../styles/main.scss';
 
 export default class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
-  static propTypes = {
-    children: React.PropTypes.node,
-  };
-
   render() {
+    // Assign plugin component to children
+    const childrenWithProps = React.Children.map(this.props.children,
+      (child) => React.cloneElement(child, {
+        plugin: this.props.plugin
+      })
+    );
+
     return (
       <Provider store={store}>
         <div className='content-manager'>
-          {React.Children.toArray(this.props.children)}
+          {React.Children.toArray(childrenWithProps)}
         </div>
       </Provider>
     );

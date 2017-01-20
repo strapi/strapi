@@ -27,11 +27,15 @@ const pluginId = require('../package.json').name.replace(/^strapi-plugin-/i, '')
 if (window.Strapi) {
   window.Strapi.registerPlugin({
     name: 'Content Manager',
+    icon: 'ion-document-text',
     id: pluginId,
-    leftMenuLink: {
-      label: 'Content Manager',
-      to: '/content-manager',
-    },
+    leftMenuLinks: [{
+      label: 'Articles',
+      to: 'content-manager/list/articles',
+    }, {
+      label: 'Categories',
+      to: 'content-manager/list/categories',
+    }],
     mainComponent: App,
     routes: createRoutes(store),
     translationMessages,
