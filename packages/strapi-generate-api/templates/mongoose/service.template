@@ -1,15 +1,13 @@
 'use strict';
 
 /**
- * Module dependencies
+ * <%= filename %> service
+ *
+ * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
 // Public dependencies.
 const _ = require('lodash');
-
-/**
- * A set of functions called "actions" for `<%= globalID %>`
- */
 
 module.exports = {
 
@@ -19,17 +17,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '))
-        .exec((err, <%= subIdPluralized || idPluralized %>) => {
-          if (err) {
-            return reject(err);
-          }
-
-          resolve(<%= subIdPluralized || idPluralized %>);
-        });
-    });
+  fetchAll: (params) => {
+    return <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**
@@ -38,17 +27,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetch: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '))
-        .exec((err, <%= humanizeSubId || humanizeId %>) => {
-          if (err) {
-            return reject(err);
-          }
-
-          resolve(<%= humanizeSubId || humanizeId %>);
-        });
-    });
+  fetch: (params) => {
+    return <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**
@@ -57,18 +37,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  add: values => {
-    return new Promise((resolve, reject) => {
-      const <%= humanizeSubId || humanizeId %> = new <%= globalID %>(values);
-
-      <%= humanizeSubId || humanizeId %>.save((err, <%= humanizeSubId || humanizeId %>) => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve(<%= subId || id %>);
-      });
-    });
+  add: (values) => {
+    return <%= humanizeSubId || humanizeId %>.create(values);
   },
 
   /**
@@ -78,19 +48,10 @@ module.exports = {
    */
 
   edit: (params, values) => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.update(params, values, { multi: true }, (err, raw) => {
-        if (err) {
-          return reject(err);
-        }
-
-        // NB: Raw contains the full response of Mongo.
-        // To get the updated object, you have to execute the `findOne()` method
-        // or use the `findOneOrUpdate()` method with `{ new:true }` option.
-
-        resolve(raw);
-      });
-    });
+    // Note: The current method will return the full response of Mongo.
+    // To get the updated object, you have to execute the `findOne()` method
+    // or use the `findOneOrUpdate()` method with `{ new:true }` option.
+    return <%= globalID %>.update(params, values, { multi: true });
   },
 
   /**
@@ -100,17 +61,8 @@ module.exports = {
    */
 
   remove: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.findOneAndRemove(params, {}, (err, <%= humanizeSubId || humanizeId %>) => {
-        if (err) {
-          return reject(err);
-        }
-
-        // NB: To get the full response of Mongo, use the `remove()` method
-        // or add spent the parameter `{ passRawResult: true }` as second argument.
-
-        resolve(<%= humanizeSubId || humanizeId %>);
-      });
-    });
+    // Note: To get the full response of Mongo, use the `remove()` method
+    // or add spent the parameter `{ passRawResult: true }` as second argument.
+    return <%= globalID %>.findOneAndRemove(params, {});
   }
 };

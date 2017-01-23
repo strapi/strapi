@@ -193,6 +193,8 @@ module.exports = strapi => {
         methodNotAllowed: () => Boom.methodNotAllowed()
       }));
 
+      strapi.app.use(responsesPolicy);
+
       cb();
 
       // Middleware used for every routes.

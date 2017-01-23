@@ -3,7 +3,8 @@
   "extends": "eslint:recommended",
   "plugins": [
       "react",
-      "jsx-a11y"
+      "babel",
+      "redux-saga"
   ],
   "env": {
       "commonjs": true,
@@ -19,9 +20,12 @@
       "sourceType": "module"
   },
   "globals": {
-    "strapi": true
+    "strapi": true,
+    "window": true
   },
   "rules": {
+    "generator-star-spacing": 0,
+    "babel/generator-star-spacing": 0,
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
     "no-console": 0,

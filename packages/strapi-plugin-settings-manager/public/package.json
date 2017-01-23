@@ -1,0 +1,204 @@
+{
+  "name": "strapi-settings-manager",
+  "version": "0.0.1",
+  "description": "Strapi Settings Manager",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi-settings-manager.git"
+  },
+  "engines": {
+    "npm": ">=3"
+  },
+  "author": "Strapi",
+  "license": "MIT",
+  "scripts": {
+    "analyze:clean": "rimraf stats.json",
+    "preanalyze": "npm run analyze:clean",
+    "analyze": "node ./internals/scripts/analyze.js",
+    "extract-intl": "babel-node --presets latest,stage-0 -- ./internals/scripts/extract-intl.js",
+    "npmcheckversion": "node ./internals/scripts/npmcheckversion.js",
+    "preinstall": "npm run npmcheckversion",
+    "postinstall": "npm run build:dll",
+    "prebuild": "npm run build:clean && npm run test",
+    "build": "cross-env NODE_ENV=production webpack --config internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "npm run test:clean && rimraf ./build",
+    "build:dll": "node ./internals/scripts/dependencies.js",
+    "start": "cross-env NODE_ENV=development node server",
+    "start:tunnel": "cross-env NODE_ENV=development ENABLE_TUNNEL=true node server",
+    "start:production": "npm run build && npm run start:prod",
+    "start:prod": "cross-env NODE_ENV=production node server",
+    "pagespeed": "node ./internals/scripts/pagespeed.js",
+    "presetup": "npm i chalk shelljs",
+    "setup": "node ./internals/scripts/setup.js",
+    "postsetup": "npm run build:dll",
+    "clean": "shjs ./internals/scripts/clean.js",
+    "clean:all": "npm run analyze:clean && npm run test:clean && npm run build:clean",
+    "generate": "plop --plopfile internals/generators/index.js",
+    "lint": "npm run lint:js",
+    "lint:eslint": "eslint --ignore-path .gitignore --ignore-pattern internals/scripts",
+    "lint:js": "npm run lint:eslint -- . ",
+    "lint:staged": "lint-staged",
+    "pretest": "npm run test:clean && npm run lint",
+    "test:clean": "rimraf ./coverage",
+    "test": "cross-env NODE_ENV=test karma start internals/testing/karma.conf.js --single-run",
+    "test:watch": "npm run test -- --auto-watch --no-single-run",
+    "test:firefox": "npm run test -- --browsers Firefox",
+    "test:safari": "npm run test -- --browsers Safari",
+    "test:ie": "npm run test -- --browsers IE",
+    "coveralls": "cat ./coverage/lcov/lcov.info | coveralls"
+  },
+  "lint-staged": {
+    "*.js": "lint:eslint"
+  },
+  "pre-commit": "lint:staged",
+  "babel": {
+    "presets": [
+      [
+        "latest",
+        {
+          "es2015": {
+            "modules": false
+          }
+        }
+      ],
+      "react",
+      "stage-0"
+    ],
+    "env": {
+      "production": {
+        "only": [
+          "app"
+        ],
+        "plugins": [
+          "transform-react-remove-prop-types",
+          "transform-react-constant-elements",
+          "transform-react-inline-elements"
+        ]
+      },
+      "test": {
+        "plugins": [
+          "istanbul"
+        ]
+      }
+    }
+  },
+  "dllPlugin": {
+    "path": "node_modules/react-boilerplate-dlls",
+    "exclude": [
+      "chalk",
+      "compression",
+      "cross-env",
+      "express",
+      "ip",
+      "minimist",
+      "sanitize.css"
+    ],
+    "include": [
+      "core-js",
+      "lodash",
+      "eventsource-polyfill"
+    ]
+  },
+  "dependencies": {
+    "babel-polyfill": "6.13.0",
+    "chalk": "1.1.3",
+    "compression": "1.6.2",
+    "cross-env": "3.1.3",
+    "express": "4.14.0",
+    "fontfaceobserver": "2.0.1",
+    "history": "3.0.0",
+    "immutable": "3.8.1",
+    "intl": "1.2.4",
+    "invariant": "2.2.1",
+    "ip": "1.1.3",
+    "lodash": "4.15.0",
+    "react": "15.3.0",
+    "react-dom": "15.3.0",
+    "react-helmet": "3.1.0",
+    "react-redux": "4.4.5",
+    "react-intl": "2.1.3",
+    "react-router": "2.6.1",
+    "react-router-redux": "4.0.5",
+    "react-router-scroll": "0.2.1",
+    "redux": "3.5.2",
+    "redux-immutable": "3.0.7",
+    "redux-saga": "0.11.0",
+    "reselect": "2.5.3",
+    "sanitize.css": "4.1.0",
+    "warning": "3.0.0",
+    "whatwg-fetch": "1.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "6.18.0",
+    "babel-core": "6.18.0",
+    "babel-eslint": "7.1.0",
+    "babel-loader": "6.2.7",
+    "babel-plugin-istanbul": "2.0.3",
+    "babel-plugin-react-intl": "2.2.0",
+    "babel-plugin-react-transform": "2.0.2",
+    "babel-plugin-transform-react-constant-elements": "6.9.1",
+    "babel-plugin-transform-react-inline-elements": "6.8.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.2.10",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-latest": "6.16.0",
+    "babel-preset-react": "6.16.0",
+    "babel-preset-react-hmre": "1.1.1",
+    "babel-preset-stage-0": "6.16.0",
+    "chai": "3.5.0",
+    "chai-enzyme": "0.5.2",
+    "cheerio": "0.22.0",
+    "coveralls": "2.11.14",
+    "css-loader": "0.25.0",
+    "enzyme": "2.5.1",
+    "eslint": "3.9.0",
+    "eslint-config-airbnb": "12.0.0",
+    "eslint-config-airbnb-base": "9.0.0",
+    "eslint-import-resolver-webpack": "0.6.0",
+    "eslint-plugin-import": "2.0.1",
+    "eslint-plugin-jsx-a11y": "2.2.3",
+    "eslint-plugin-react": "6.4.1",
+    "eslint-plugin-redux-saga": "0.1.5",
+    "eventsource-polyfill": "0.9.6",
+    "expect": "1.20.2",
+    "expect-jsx": "2.6.0",
+    "exports-loader": "0.6.3",
+    "file-loader": "0.9.0",
+    "html-loader": "0.4.4",
+    "html-webpack-plugin": "2.24.0",
+    "image-webpack-loader": "2.0.0",
+    "imports-loader": "0.6.5",
+    "json-loader": "0.5.4",
+    "karma": "1.3.0",
+    "karma-chrome-launcher": "2.0.0",
+    "karma-coverage": "1.1.1",
+    "karma-firefox-launcher": "1.0.0",
+    "karma-ie-launcher": "1.0.0",
+    "karma-mocha": "1.2.0",
+    "karma-mocha-reporter": "2.2.0",
+    "karma-safari-launcher": "1.0.0",
+    "karma-sourcemap-loader": "0.3.7",
+    "karma-webpack": "1.8.0",
+    "lint-staged": "3.2.0",
+    "mocha": "3.1.2",
+    "ngrok": "2.2.3",
+    "node-sass": "^3.13.0",
+    "null-loader": "0.1.1",
+    "offline-plugin": "3.4.2",
+    "plop": "1.5.0",
+    "postcss-cssnext": "^2.8.0",
+    "postcss-focus": "^1.0.0",
+    "postcss-loader": "^1.1.1",
+    "postcss-reporter": "^2.0.0",
+    "pre-commit": "1.1.3",
+    "psi": "2.0.4",
+    "rimraf": "2.5.4",
+    "sass-loader": "^4.0.2",
+    "shelljs": "0.7.5",
+    "sinon": "2.0.0-pre",
+    "style-loader": "0.13.1",
+    "url-loader": "0.5.7",
+    "webpack": "2.1.0-beta.25",
+    "webpack-dev-middleware": "1.8.4",
+    "webpack-hot-middleware": "2.13.1"
+  }
+}

@@ -1,7 +1,9 @@
 'use strict';
 
 /**
- * Module dependencies
+ * <%= filename %> service
+ *
+ * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
 // Public dependencies.
@@ -9,10 +11,6 @@ const _ = require('lodash');
 
 // Strapi utilities.
 const utils = require('strapi-bookshelf/lib/utils/');
-
-/**
- * A set of functions called "actions" for `<%= globalID %>`
- */
 
 module.exports = {
 
@@ -22,17 +20,9 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.forge(params).query(params).fetchAll({
-        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
-      })
-        .then(<%= subIdPluralized || idPluralized %> => {
-          resolve(<%= subIdPluralized || idPluralized %>);
-        })
-        .catch(err => {
-          reject(err);
-        });
+  fetchAll: (params) => {
+    return <%= globalID %>.forge(params).query(params).fetchAll({
+      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
     });
   },
 
@@ -42,17 +32,9 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetch: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.forge(_.pick(params, 'id')).fetch({
-        withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
-      })
-        .then(<%= subId || id %> => {
-          resolve(<%= subId || id %>);
-        })
-        .catch(err => {
-          reject(err);
-        });
+  fetch: (params) => {
+    return <%= globalID %>.forge(_.pick(params, 'id')).fetch({
+      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
     });
   },
 
@@ -62,16 +44,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  add: values => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.forge(values).save()
-        .then(<%= subId || id %> => {
-          resolve(<%= subId || id %>);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+  add: (values) => {
+    return <%= globalID %>.forge(values).save();
   },
 
   /**
@@ -81,15 +55,7 @@ module.exports = {
    */
 
   edit: (params, values) => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.forge(params).save(values, {path: true})
-        .then(<%= subId || id %> => {
-          resolve(<%= subId || id %>);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    return <%= globalID %>.forge(params).save(values, {path: true});
   },
 
   /**
@@ -98,16 +64,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  remove: params => {
-    return new Promise((resolve, reject) => {
-      <%= globalID %>.forge(params).destroy()
-        .then(<%= subId || id %> => {
-          resolve(<%= subId || id %>);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+  remove: (params) => {
+    return <%= globalID %>.forge(params).destroy();
   },
 
   /**
@@ -117,47 +75,33 @@ module.exports = {
    */
 
   addRelation: (params, values) => {
-    return new Promise((resolve, reject) => {
-      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
+    const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
-      if (!_.isEmpty(relation) && _.isArray(values)) {
-        switch (relation.nature) {
-          case 'manyToOne':
-            const PK = utils.getPK(_.get(relation, relation.type), undefined, strapi.models);
+    if (!_.isEmpty(relation) && _.isArray(values)) {
+      switch (relation.nature) {
+        case 'manyToOne': {
+          const PK = utils.getPK(_.get(relation, relation.type), undefined, strapi.models);
 
-            const arrayOfPromises = _.map(values, function (value) {
-              const parameters = {};
+          const arrayOfPromises = _.map(values, function (value) {
+            const parameters = {};
 
-              _.set(parameters, PK, value);
-              _.set(parameters, 'relation', relation.via);
+            _.set(parameters, PK, value);
+            _.set(parameters, 'relation', relation.via);
 
-              return strapi.services[_.get(relation, relation.type)].editRelation(parameters, [_.get(params, 'id') || null]);
-            });
+            return strapi.services[_.get(relation, relation.type)].editRelation(parameters, [_.get(params, 'id') || null]);
+          });
 
-            Promise.all(arrayOfPromises)
-              .then(() => {
-                resolve();
-              })
-              .catch(err => {
-                reject(err);
-              });
-            break;
-          case 'manyToMany':
-            <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(values)
-              .then(<%= subId || id %> => {
-                resolve(<%= subId || id %>);
-              })
-              .catch(err => {
-                reject(err);
-              });
-          break;
-          default:
-            reject('Impossible to add relation on this type of relation');
+          return Promise.all(arrayOfPromises);
         }
-      } else {
-        reject('Bad request');
+        case 'manyToMany': {
+          return <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(values);
+        }
+        default:
+          return new Error('Impossible to add relation on this type of relation');
       }
-    });
+    }
+
+    return new Error('Relationship Not Found');
   },
 
   /**
@@ -167,108 +111,93 @@ module.exports = {
    */
 
   editRelation: (params, values) => {
-    return new Promise((resolve, reject) => {
       const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
         switch (relation.nature) {
           case 'oneWay':
           case 'oneToOne':
-          case 'oneToMany':
+          case 'oneToMany': {
             const data = _.set({}, params.relation, _.first(values) || null);
 
-            <%= globalID %>.forge(_.omit(params, 'relation')).save(data, {path: true})
-              .then(<%= subId || id %> => {
-                resolve();
-              })
-              .catch(err => {
-                reject(err);
-              });
-            break;
-          case 'manyToOne':
+            return <%= globalID %>.forge(_.omit(params, 'relation')).save(data, {path: true});
+          }
+          case 'manyToOne': {
             const PK = utils.getPK(_.get(relation, relation.type), undefined, strapi.models);
 
-            <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
+            const results = await <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
               withRelated: _.get(params, 'relation')
-            })
-              .then(<%= subId || id %> => {
-                const data = <%= subId || id %>.toJSON() || {};
-                const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
-                const valuesToRemove = _.difference(currentValues, values);
+            });
 
-                const arrayOfPromises = _.map(valuesToRemove, value => {
-                  const params = {};
+            // Remove relationship between records.
+            const data = results.toJSON() || {};
+            const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
+            const valuesToRemove = _.difference(currentValues, values);
 
-                  _.set(params, PK, value);
-                  _.set(params, 'relation', relation.via);
+            const arrayOfRemovePromises = _.map(valuesToRemove, value => {
+              const params = {};
 
-                  return strapi.services[_.get(relation, relation.type)].editRelation(params, [null]);
-                });
+              _.set(params, PK, value);
+              _.set(params, 'relation', relation.via);
 
-                return Promise.all(arrayOfPromises);
-              })
-              .then(() => {
-                const arrayOfPromises = _.map(values, value => {
-                  const params = {};
+              return strapi.services[_.get(relation, relation.type)].editRelation(params, [null]);
+            });
 
-                  _.set(params, PK, value);
-                  _.set(params, 'relation', relation.via);
+            await Promise.all(arrayOfRemovePromises);
 
-                  return strapi.services[_.get(relation, relation.type)].editRelation(params, [_.get(params, 'id') || null]);
-                });
+            // Add relationship between records.
+            const arrayOfAddPromises = _.map(values, value => {
+              const params = {};
 
-                return Promise.all(arrayOfPromises);
-              })
-              .then(() => {
-                resolve();
-              })
-              .catch(err => {
-                reject(err);
-              });
-            break;
-          case 'manyToMany':
-            <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
+              _.set(params, PK, value);
+              _.set(params, 'relation', relation.via);
+
+              return strapi.services[_.get(relation, relation.type)].editRelation(params, [_.get(params, 'id') || null]);
+            });
+
+            await Promise.all(arrayOfAddPromises);
+
+            return;
+          }
+          case 'manyToMany': {
+            const results = <%= globalID %>.forge(_.omit(params, 'relation')).fetch({
               withRelated: _.get(params, 'relation')
-            })
-              .then(<%= subId || id %> => {
-                const data = <%= subId || id %>.toJSON() || {};
-                const PK = utils.getPK('<%= globalID %>', <%= globalID %>, strapi.models);
+            });
 
-                const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
-                const valuesToAdd = _.difference(_.map(values, o => {
-                  return o.toString();
-                }), currentValues);
+            const data = results.toJSON() || {};
+            const PK = utils.getPK('<%= globalID %>', <%= globalID %>, strapi.models);
 
-                return <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(valuesToAdd)
-                  .then(function () {
-                    return <%= subId || id %>;
-                  })
-              })
-              .then(<%= subId || id %> => {
-                const data = <%= subId || id %>.toJSON() || {};
-                const PK = utils.getPK('<%= globalID %>', <%= globalID %>, strapi.models);
+            // Values to add
+            const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
+            const valuesToAdd = _.difference(_.map(values, o => {
+              return o.toString();
+            }), currentValues);
 
-                const currentValues = _.keys(_.groupBy(_.get(data, _.get(params, 'relation')), PK));
-                const valuesToDrop = _.difference(currentValues, _.map(values, o => {
-                  return o.toString();
-                }));
+            try {
+              await <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().attach(valuesToAdd);
+            } catch (err) {
+              return err;
+            }
 
-                return <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().detach(valuesToDrop);
-              })
-              .then(() => {
-                resolve();
-              })
-              .catch(err => {
-                reject(err);
-              });
-            break;
+            // Values to remove
+            const valuesToDrop = _.difference(currentValues, _.map(values, o => {
+              return o.toString();
+            }));
+
+            try {
+              await <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().detach(valuesToDrop);
+            } catch (err) {
+              return err;
+            }
+
+            return;
+          }
           default:
-            reject('Impossible to update relation on this type of relation');
+            return new Error('Impossible to update relation on this type of relation');
         }
-      } else {
-        reject('Bad request');
       }
-    });
+
+      return new Error ('Relationship Not Found');
   },
 
   /**
@@ -278,46 +207,30 @@ module.exports = {
    */
 
   removeRelation: (params, values) => {
-    return new Promise((resolve, reject) => {
-      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
+    const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
 
-      if (!_.isEmpty(relation) && _.isArray(values)) {
-        switch (relation.nature) {
-          case 'manyToOne':
-            const PK = utils.getPK(_.get(relation, relation.type), undefined, strapi.models);
+    if (!_.isEmpty(relation) && _.isArray(values)) {
+      switch (relation.nature) {
+        case 'manyToOne':
+          const PK = utils.getPK(_.get(relation, relation.type), undefined, strapi.models);
 
-            const arrayOfPromises = _.map(values, value => {
-              const parameters = {};
+          const arrayOfPromises = _.map(values, value => {
+            const parameters = {};
 
-              _.set(parameters, PK, value);
-              _.set(parameters, 'relation', relation.via);
+            _.set(parameters, PK, value);
+            _.set(parameters, 'relation', relation.via);
 
-              return strapi.services[_.get(relation, relation.type)].editRelation(parameters, [null]);
-            });
+            return strapi.services[_.get(relation, relation.type)].editRelation(parameters, [null]);
+          });
 
-            Promise.all(arrayOfPromises)
-              .then(() => {
-                resolve();
-              })
-              .catch(err => {
-                reject(err);
-              });
-            break;
-          case 'manyToMany':
-            <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().detach(values)
-              .then(<%= subId || id %> => {
-                resolve(<%= subId || id %>);
-              })
-              .catch(err => {
-                reject(err);
-              });
-          break;
-          default:
-            reject('Impossible to delete relation on this type of relation');
-        }
-      } else {
-        reject('Bad request');
+          return Promise.all(arrayOfPromises);
+        case 'manyToMany':
+          return <%= globalID %>.forge(_.omit(params, 'relation'))[params.relation]().detach(values);
+        default:
+          return new Error('Impossible to delete relation on this type of relation');
       }
-    });
+    }
+
+    return new Error('Relationship Not Found');
   }
 };

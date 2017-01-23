@@ -1,0 +1,21 @@
+.container { /* stylelint-disable */
+
+}
+
+.containerContent {
+  position: relative;
+  border: 1px solid #D7D8D9;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  display: flex;
+}
+
+.containerLeftContent {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.containerRightContent {
+  background-color: #FFF;
+  padding: 2.4rem 3rem 50rem;
+}

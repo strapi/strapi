@@ -88,7 +88,7 @@ module.exports = function (strapi) {
             // Register the final model for Bookshelf.
             const loadedModel = {
               tableName: definition.tableName,
-              hasTimestamps: _.get(definition, 'options.timestamps') || true
+              hasTimestamps: _.get(definition, 'options.timestamps') === true
             };
 
             // Initialize the global variable with the
@@ -122,7 +122,16 @@ module.exports = function (strapi) {
                   });
                 };
 
+                loadedModel.hidden = _.keys(_.keyBy(_.filter(definition.attributes, (value, key) => {
+                  if (value.hasOwnProperty('columnName') && !_.isEmpty(value.columnName) && value.columnName !== key) {
+                    return true;
+                  }
+                }), 'columnName'));
+
                 const ORM = new bookshelf(strapi.connections[connectionName]);
+
+                // Load plugins
+                ORM.plugin('visibility');
 
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
@@ -165,20 +174,20 @@ module.exports = function (strapi) {
                     }
                   });
 
-                  loadedModel[name] = () => {
-                    return this.hasOne(global[_.capitalize(details.model)], FK);
+                  loadedModel[name] = function () {
+                    return this.hasOne(global[_.upperFirst(details.model)], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
                   };
                   break;
                 }
                 case 'hasMany': {
-                  loadedModel[name] = () => {
-                    return this.hasMany(global[_.capitalize(details.collection)], details.via);
+                  loadedModel[name] = function () {
+                    return this.hasMany(global[_.upperFirst(details.collection)], details.via);
                   };
                   break;
                 }
                 case 'belongsTo': {
-                  loadedModel[name] = () => {
-                    return this.belongsTo(global[_.capitalize(details.model)], name);
+                  loadedModel[name] = function () {
+                    return this.belongsTo(global[_.upperFirst(details.model)], _.get(details, 'columnName') || name);
                   };
                   break;
                 }
@@ -203,8 +212,8 @@ module.exports = function (strapi) {
                     relationship.attribute = pluralize.singular(details.via);
                   }
 
-                  loadedModel[name] = () => {
-                    return this.belongsToMany(global[_.capitalize(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
+                  loadedModel[name] = function () {
+                    return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;
                 }

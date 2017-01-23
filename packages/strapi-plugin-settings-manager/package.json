@@ -1,0 +1,35 @@
+{
+  "name": "strapi-plugin-settings-manager",
+  "version": "3.0.0-alpha.3",
+  "description": "Strapi Plugin - Settings Manager",
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "license": "MIT",
+  "scripts": {
+    "setup": "npm i && cd public && npm i && npm run build"
+  },
+  "pre-commit": [
+    "lint:admin"
+  ],
+  "dependencies": {
+    "fs-extra": "^1.0.0",
+    "lodash": "^4.17.2",
+    "semver": "^5.3.0",
+    "validator": "^6.1.0"
+  },
+  "devDependencies": {}
+}

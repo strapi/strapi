@@ -1,0 +1,29 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/settings/general",
+      "handler": "SettingsManager.getGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "action": "updateSettings",
+      "method": "PUT",
+      "path": "/settings",
+      "handler": "SettingsManager.updateSettings",
+      "config": {
+        "policies": []
+      }
+    }, {
+      "action": "updateSettings",
+      "method": "GET",
+      "path": "/:file",
+      "handler": "SettingsManager.file",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

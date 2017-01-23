@@ -19,30 +19,45 @@ For more details, [please read our blog](http://blog.strapi.io).
 
 **Note:** This version will not be ready for production use. However, we will publish it on npm to allow the community to test it and give us feedback.
 
+`strapi@alpha.1`
 * ~~Rewrite the entire project with ES6.~~
-* Move to Koa2. [(see current status)](https://github.com/strapi/strapi/issues/41)
+* ~~Move to Koa2. [(see current status)](https://github.com/strapi/strapi/issues/41).~~
 * ~~Use Mongo as main database.~~
 * ~~Use Joi as validation layer.~~
-* Handle errors with Boom.
 * ~~Load plugins.~~
 * ~~Load external hooks.~~
-* Build dashboard layout using React.
+* ~~Build dashboard layout using React.~~
 * ~~Dynamic configuration values.~~
 * ~~Handle internationalization (i18n).~~
 
-**Dashboard features through UI:**
+[`strapi@alpha.2`](https://github.com/strapi/strapi/pull/176)
+* ~~Ignore `node_modules` and `admin` folders when auto-reload is enabled.~~
+* ~~Apply defaults configurations values on `strapi.config.hooks.xxx`.~~
+* ~~Handle errors with Boom.~~
+* ~~Allow CLI to generate an API into another API.~~
+* ~~Use ESLint instead of xo.~~
+* ~~Update databases configurations to allow different connectors.~~
 
-* ~~Edit general settings (Settings Manager).~~
-* Generate a REST API (API Manager).
+`strapi@alpha.3`
+_Reorganize the mono-repository. The rule to follow is to only have hooks without which Strapi cannot start or the CLI is unusable._
+- ~~Move `strapi-settings-manager` to the main repository~~
+- ~~Better handling for 404~~
+- ~~Update the generated API's files with async/await pattern~~
+
+`strapi@alpha.4`:
+- [Plugin] Content Manager
+- Update React-Boilerplate to the latest version.
+- Implement Jest instead of Mocha. (only if we could see performances improvements)
+- Give the ability to create a log file (thanks to Winston).
+- Write better tests.
+- Improve `strapi-bookshelf` thanks to the work done by @dj-hedgehog and his team.
+
 
 ### β beta
 **Expected release date: 01/04/2017**
 
+* Remove harmony flag.
 * Load custom hooks.
 * Create plugin generator.
-
-**Dashboard features through UI:**
-
-* Edit data (Data Manager).
-* Manage users & groups.
-* Edit permissions on routes.
+* [Plugin] Users & groups.
+* [Plugin] Permissions Manager.
