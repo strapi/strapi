@@ -14,12 +14,21 @@ const selectListDomain = () => state => state.get('list');
  * Default selector used by List
  */
 
-const selectList = () => createSelector(
+const makeSelectModelRecords = () => createSelector(
   selectListDomain(),
-  (substate) => substate.toJS()
+  (substate) => {
+    const model = substate.get('currentModel');
+    return substate.getIn(['models', model]);
+  }
 );
 
-export default selectList;
+const makeSelectLoading = () => createSelector(
+  selectListDomain(),
+  (substate) => substate.get('loading')
+);
+
 export {
   selectListDomain,
+  makeSelectLoading,
+  makeSelectModelRecords
 };
