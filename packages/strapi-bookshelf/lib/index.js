@@ -192,7 +192,7 @@ module.exports = function (strapi) {
                   break;
                 }
                 case 'belongsToMany': {
-                  const tableName = _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
+                  const tableName = _.get(details, 'tableName') || _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
                     return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
                   }).join('__');
 

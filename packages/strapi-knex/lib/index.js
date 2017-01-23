@@ -91,12 +91,28 @@ module.exports = strapi => {
           client: connection.settings.client,
           connection: {
             host: _.get(connection.settings, 'host'),
-            user: _.get(connection.settings, 'username'),
+            user: _.get(connection.settings, 'username') || _.get(connection.settings, 'user'),
             password: _.get(connection.settings, 'password'),
             database: _.get(connection.settings, 'database'),
-            charset: _.get(connection.settings, 'charset')
-          }
+            charset: _.get(connection.settings, 'charset'),
+            schema: _.get(connection.settings, 'schema'),
+          },
+          debug: _.get(connection, 'debug') || false
         }, strapi.config.hooks.knex);
+
+        if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
+          options.pool = {
+            min: 0,
+            max: 10,
+            afterCreate: (conn, cb) => {
+              conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
+                cb(err, conn);
+              });
+            }
+          };
+        }
+
+        console.log(options);
 
         // Finally, use the client via `knex`.
         // If anyone has a solution to use different paths for `knex` and clients
