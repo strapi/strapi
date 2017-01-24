@@ -87,6 +87,10 @@ module.exports = function (strapi) {
               definition.tableName = model;
             }
 
+            if (!_.isEmpty(definition.collectionName)) {
+              return cb('Attribute `collectionName` should be `tableName` in ' + globalName + ' model');
+            }
+
             // Add some informations about ORM & client connection
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
@@ -94,7 +98,8 @@ module.exports = function (strapi) {
             // Register the final model for Bookshelf.
             const loadedModel = {
               tableName: definition.tableName,
-              hasTimestamps: _.get(definition, 'options.timestamps') === true
+              hasTimestamps: _.get(definition, 'options.timestamps') === true,
+              idAttribute: _.get(definition, 'options.idAttribute') || 'id'
             };
 
             // Initialize the global variable with the
