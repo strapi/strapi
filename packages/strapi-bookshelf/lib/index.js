@@ -55,7 +55,13 @@ module.exports = function (strapi) {
           return cb();
         }
 
-        _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'}), (connection, connectionName) => {
+        const connections = _.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'});
+
+        const done = _.after(_.size(connections), () => {
+          cb();
+        });
+
+        _.forEach(connections, (connection, connectionName) => {
           // Apply defaults
           _.defaults(connection.settings, strapi.hooks.bookshelf.defaults);
 
@@ -68,7 +74,7 @@ module.exports = function (strapi) {
           }
 
           const loadedHook = _.after(_.size(models), () => {
-            cb();
+            done();
           });
 
           // Parse every registered model.
