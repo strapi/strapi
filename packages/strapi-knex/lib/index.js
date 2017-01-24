@@ -112,8 +112,6 @@ module.exports = strapi => {
           };
         }
 
-        console.log(options);
-
         // Finally, use the client via `knex`.
         // If anyone has a solution to use different paths for `knex` and clients
         // please drop us an email at support@strapi.io-- it would avoid the Strapi

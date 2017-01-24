@@ -174,20 +174,27 @@ module.exports = function (strapi) {
                     }
                   });
 
+                  const globalId = _.get(strapi.models, `${details.model.toLowerCase()}.globalId`);
+
                   loadedModel[name] = function () {
-                    return this.hasOne(global[_.upperFirst(details.model)], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
+                    return this.hasOne(global[globalId], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
                   };
                   break;
                 }
                 case 'hasMany': {
+                  const globalId = _.get(strapi.models, `${details.collection.toLowerCase()}.globalId`);
+                  const FKTarget = _.get(strapi.models[globalId.toLowerCase()].attributes, `${details.via}.columnName`) || details.via;
+
                   loadedModel[name] = function () {
-                    return this.hasMany(global[_.upperFirst(details.collection)], details.via);
+                    return this.hasMany(global[globalId], FKTarget);
                   };
                   break;
                 }
                 case 'belongsTo': {
+                  const globalId = _.get(strapi.models, `${details.model.toLowerCase()}.globalId`);
+
                   loadedModel[name] = function () {
-                    return this.belongsTo(global[_.upperFirst(details.model)], _.get(details, 'columnName') || name);
+                    return this.belongsTo(global[globalId], _.get(details, 'columnName') || name);
                   };
                   break;
                 }
