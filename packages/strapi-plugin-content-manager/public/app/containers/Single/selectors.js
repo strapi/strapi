@@ -16,10 +16,11 @@ const selectSingleDomain = () => state => state.get('single');
 
 const selectSingle = () => createSelector(
   selectSingleDomain(),
-  (substate) => substate.toJS()
+  (substate) => substate.get('record')
 );
 
 export default selectSingle;
 export {
   selectSingleDomain,
+  selectSingle
 };

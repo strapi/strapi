@@ -2,11 +2,11 @@ import { takeLatest } from 'redux-saga';
 import { put } from 'redux-saga/effects';
 
 import {
-  loadedRecord,
+  loadedRecord
 } from './actions';
 
 import {
-  LOAD_RECORDS,
+  LOAD_RECORDS
 } from './constants';
 
 export function* getRecords() {

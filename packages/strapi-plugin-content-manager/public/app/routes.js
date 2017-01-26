@@ -49,7 +49,7 @@ export default function createRoutes(store) {
 
         const renderRoute = loadModule(cb);
 
-        injectReducer('list', reducer.default);
+        injectReducer('single', reducer.default);
         injectSagas(sagas.default);
         renderRoute(component);
       },

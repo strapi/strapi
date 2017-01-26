@@ -13,7 +13,9 @@ import ListItem from 'components/ListItem';
 
 import styles from './styles.scss';
 
-import { loadRecords } from './actions';
+import {
+  loadRecords
+} from './actions';
 
 import {
    makeSelectModelRecords,

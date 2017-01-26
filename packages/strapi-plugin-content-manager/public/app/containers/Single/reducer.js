@@ -6,15 +6,23 @@
 
 import { fromJS } from 'immutable';
 import {
-  DEFAULT_ACTION,
+  LOAD_RECORD,
+  LOADED_RECORD
 } from './constants';
 
-const initialState = fromJS({});
+const initialState = fromJS({
+  record: null
+});
 
 function singleReducer(state = initialState, action) {
   switch (action.type) {
-    case DEFAULT_ACTION:
-      return state;
+    case LOAD_RECORD:
+      return state
+        .set('model', action.model)
+        .set('id', action.id);
+    case LOADED_RECORD:
+      return state
+        .set('record', action.record);
     default:
       return state;
   }

@@ -5,11 +5,21 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  LOAD_RECORD,
+  LOADED_RECORD
 } from './constants';
 
-export function defaultAction() {
+export function loadRecord(model, id) {
   return {
-    type: DEFAULT_ACTION,
+    type: LOAD_RECORD,
+    model,
+    id
+  };
+}
+
+export function loadedRecord(record) {
+  return {
+    type: LOADED_RECORD,
+    record
   };
 }
