@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import Container from 'components/Container';
+import ListItem from 'components/ListItem';
 
 import styles from './styles.scss';
 
@@ -35,12 +36,11 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
     }
 
     const Plugin = this.props.plugin;
-    const ListItems = this.props.records.map((record, key) => {
+    const items = this.props.records.map((record, key) => {
+      const destination = this.props.route.path.replace(':slug', this.props.routeParams.slug) + '/' + record.id;
+
       return (
-        <li key={key}>
-          <h4>{record.title}</h4>
-          <p>{record.message}</p>
-        </li>
+        <ListItem key={key} destination={destination} {...record} />
       );
     });
 
@@ -58,7 +58,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           <Container>
             <p></p>
             <ul>
-              {ListItems}
+              {items}
             </ul>
           </Container>
         </div>

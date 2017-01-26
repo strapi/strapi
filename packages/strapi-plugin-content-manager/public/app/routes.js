@@ -39,6 +39,20 @@ export default function createRoutes(store) {
         injectSagas(sagas.default);
         renderRoute(component);
       },
+    }, {
+      path: '/list/:slug/:id',
+      name: 'list',
+      getComponent(nextState, cb) {
+        const reducer = require('containers/Single/reducer'); // eslint-disable-line global-require
+        const sagas = require('containers/Single/sagas'); // eslint-disable-line global-require
+        const component = require('containers/Single'); // eslint-disable-line global-require
+
+        const renderRoute = loadModule(cb);
+
+        injectReducer('list', reducer.default);
+        injectSagas(sagas.default);
+        renderRoute(component);
+      },
     },
   ];
 }
