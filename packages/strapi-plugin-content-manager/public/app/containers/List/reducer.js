@@ -13,7 +13,8 @@ import {
 const initialState = fromJS({
   loading: true,
   currentModel: null,
-  models: {}
+  models: {},
+  schema: {}
 });
 
 function listReducer(state = initialState, action) {
@@ -25,6 +26,7 @@ function listReducer(state = initialState, action) {
     case LOADED_RECORDS:
       return state
         .set('loading', false)
+        .set('schema', action.models)
         .setIn(['models', state.get('currentModel')], action.records);
     default:
       return state;

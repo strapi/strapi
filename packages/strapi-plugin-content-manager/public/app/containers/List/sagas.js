@@ -24,7 +24,19 @@ export function* getRecords() {
     message: 'Space X, Paypal, Tesla, & cie.'
   }];
 
-  yield put(loadedRecord(fakeData));
+  try {
+    const opts = {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'default'
+    };
+    const response = yield fetch('http://localhost:1337/admin/config/models', opts);
+    const data = yield response.json();
+
+    yield put(loadedRecord(fakeData, data));
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 

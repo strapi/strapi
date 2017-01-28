@@ -16,9 +16,10 @@ export function loadRecords(model) {
   };
 }
 
-export function loadedRecord(records) {
+export function loadedRecord(records, models) {
   return {
     type: LOADED_RECORDS,
-    records
+    records,
+    models
   };
 }
