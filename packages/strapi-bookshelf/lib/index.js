@@ -143,6 +143,7 @@ module.exports = function (strapi) {
 
                 // Load plugins
                 ORM.plugin('visibility');
+                ORM.plugin('pagination');
 
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
