@@ -120,6 +120,9 @@ module.exports = function (configOverride, cb) {
     // Remove this sensitive object.
     delete this.externalHooks;
 
+    // TODO:
+    // Inverse behavior, every detected hook should be loaded.
+    // Only hook sets to false should be excluded.
     const mapper = _.clone(this.config.hooks);
 
     // Map (warning: we could have some order issues).

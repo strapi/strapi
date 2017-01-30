@@ -69,7 +69,7 @@ module.exports = function (cb) {
 
     setTimeout(() => {
       if (timeout) {
-        this.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)(in `' + _.get(this.tree, id + '.category') + '`)!');
+        this.log.error('The hook `' + id + '` wasn\'t loaded (too long to load)(in `' + (_.get(this.tree, id + '.category') || 'dictionary') + '`)!');
         process.nextTick(cb);
       }
     }, this.config.hookTimeout || 1000);
@@ -78,7 +78,7 @@ module.exports = function (cb) {
       timeout = false;
 
       if (err) {
-        this.log.error('The hook `' + id + '` failed to load (in `' + _.get(this.tree, id + '.category') + '`)!');
+        this.log.error('The hook `' + id + '` failed to load (in `' + (_.get(this.tree, id + '.category') || 'dictionary') + '`)!');
         this.emit('hook:' + id + ':error');
         return cb(err);
       }
