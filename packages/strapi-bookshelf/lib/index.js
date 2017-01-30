@@ -4,6 +4,9 @@
  * Module dependencies
  */
 
+// Core
+const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 const bookshelf = require('bookshelf');
@@ -64,6 +67,20 @@ module.exports = function (strapi) {
         _.forEach(connections, (connection, connectionName) => {
           // Apply defaults
           _.defaults(connection.settings, strapi.hooks.bookshelf.defaults);
+
+          // Create Bookshelf instance for this connection.
+          const ORM = new bookshelf(strapi.connections[connectionName]);
+
+          try {
+            // Require `config/functions/bookshelf.js` file to customize connection.
+            require(path.resolve(strapi.config.appPath, 'config', 'functions', 'bookshelf.js'))(ORM, strapi.connections[connectionName]);
+          } catch (err) {
+            // This is not an error if the file is not found.
+          }
+
+          // Load plugins
+          ORM.plugin('visibility');
+          ORM.plugin('pagination');
 
           // Select models concerned by this connection
           const models = _.pickBy(strapi.models, {connection: connectionName});
@@ -138,12 +155,6 @@ module.exports = function (strapi) {
                     return true;
                   }
                 }), 'columnName'));
-
-                const ORM = new bookshelf(strapi.connections[connectionName]);
-
-                // Load plugins
-                ORM.plugin('visibility');
-                ORM.plugin('pagination');
 
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
