@@ -79,8 +79,10 @@ module.exports = function (strapi) {
           }
 
           // Load plugins
-          ORM.plugin('visibility');
-          ORM.plugin('pagination');
+          if (_.get(connection, 'options.plugins') !== false) {
+            ORM.plugin('visibility');
+            ORM.plugin('pagination');
+          }
 
           // Select models concerned by this connection
           const models = _.pickBy(strapi.models, {connection: connectionName});
