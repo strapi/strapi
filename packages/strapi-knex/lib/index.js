@@ -44,8 +44,6 @@ module.exports = strapi => {
      */
 
     initialize: cb => {
-      strapi.connections = {};
-
       // For each connection in the config register a new Knex connection.
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'}), (connection, name) => {
 
