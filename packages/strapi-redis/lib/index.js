@@ -54,6 +54,28 @@ module.exports = function () {
             return process.kill();
           });
 
+          // Utils function.
+          // Behavior: Try to retrieve data from Redis, if null
+          // execute callback and set the value in Redis for this serial key.
+          redis.cache = async (serial, cb, type) => {
+            let cache = await redis.get(serial);
+
+            if (!cache) {
+              cache = await cb();
+
+              if (cache) {
+                redis.set(serial, cache);
+              }
+            }
+
+            switch (type) {
+              case 'int':
+                return parseInt(cache);
+              default:
+                return cache;
+            }
+          };
+
           // Define as new connection.
           strapi.connections[name] = redis;
 
