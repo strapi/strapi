@@ -63,7 +63,7 @@ module.exports = function () {
             if (!cache) {
               cache = await cb();
 
-              if (cache) {
+              if (cache && _.get(connection, 'options.disabledCaching') !== true) {
                 redis.set(serial, cache);
               }
             }
