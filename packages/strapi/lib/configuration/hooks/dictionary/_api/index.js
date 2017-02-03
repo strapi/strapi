@@ -103,16 +103,16 @@ module.exports = strapi => {
               common: cb => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config),
+                  excludeDirs: /(locales|environments)$/,
                   filter: /(.+)\.(js|json)$/,
-                  excludeDirs: /(validators)$/,
                   depth: 2
                 }, cb);
               },
               specific: cb => {
-                dictionary.aggregate({
+                dictionary.optional({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, 'environments', strapi.config.environment),
                   filter: /(.+)\.(js|json)$/,
-                  depth: 2
+                  depth: 1
                 }, cb);
               }
             }, (err, config) => {
