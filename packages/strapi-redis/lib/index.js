@@ -93,14 +93,12 @@ module.exports = function () {
             });
           }
 
-
           done();
         } catch (e) {
           cb(e);
 
           return false;
         }
-
       });
     }
   };
