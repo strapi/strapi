@@ -53,14 +53,14 @@ module.exports = function () {
 
       // Run listeners
       child.on('watch:restart', (info) => {
-        console.log();
         logger.verbose('Restarting due to ' + info.file + '... (' + info.stat.replace(child.cwd, '.') + ')');
         console.log();
       });
 
       child.on('exit:code', function(code) {
-        console.log();
-        process.exit(code);
+        if (code) {
+          process.exit(code);
+        }
       });
 
       // Start child process
