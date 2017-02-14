@@ -15,7 +15,7 @@ const Redis = require('ioredis');
  * Redis hook
  */
 
-module.exports = function () {
+module.exports = function (strapi) {
   const hook = {
 
     /**
@@ -26,7 +26,8 @@ module.exports = function () {
       port: 6379,
       host: 'localhost',
       family: 4,
-      db: 0
+      db: 0,
+      showFriendlyErrorStack: (process.env.NODE_ENV !== 'production')
     },
 
     /**
@@ -49,9 +50,9 @@ module.exports = function () {
           const redis = new Redis(connection.settings);
 
           redis.on('error', (err) => {
-            cb(err);
-
-            return process.kill();
+            strapi.log.error(err);
+            process.exit(0);
+            return;
           });
 
           // Utils function.
@@ -93,7 +94,9 @@ module.exports = function () {
             });
           }
 
-          done();
+          redis.on('ready', () => {
+            done();
+          });
         } catch (e) {
           cb(e);
 

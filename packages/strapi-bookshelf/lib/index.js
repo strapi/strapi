@@ -90,7 +90,7 @@ module.exports = function (strapi) {
           // Return callback if there is no model
           if (_.isEmpty(models)) {
             cb();
-            
+
             // Break the loop.
             return false;
           }
