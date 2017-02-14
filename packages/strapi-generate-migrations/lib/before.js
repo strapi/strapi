@@ -24,13 +24,13 @@ const builder = require('./builder');
  */
 
 module.exports = (scope, cb) => {
-  if (!scope.rootPath || !scope.args[0] || !scope.args[1]) {
+  if (!scope.rootPath || !scope.id || !scope.args[1]) {
     return cb.invalid('Usage: `$ strapi migrate:make <connection_name> <migration_name>`');
   }
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    connection: scope.args[0],
+    connection: scope.id,
     name: scope.args[1],
     ext: '.js',
     environment: process.NODE_ENV || 'development'
@@ -46,7 +46,7 @@ module.exports = (scope, cb) => {
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: scope.args[0],
+    humanizeId: scope.id,
     humanizedPath: '`./data/migrations/' + scope.connection + '/`'
   });
 

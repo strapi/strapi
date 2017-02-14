@@ -4,7 +4,9 @@
  * `<%= id %>` policy.
  */
 
-exports.<%= id %> = function * (next) {
+module.export = async (next) => {
+  // Add your own logic here.
+  strapi.log('In <%= id %> policy.');
 
-  yield next;
+  await next();
 };

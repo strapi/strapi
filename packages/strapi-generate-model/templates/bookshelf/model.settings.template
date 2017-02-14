@@ -1,12 +1,12 @@
 {
   "connection": "<%= connection %>",
-  "tableName": "<%= humanizeId %>",
+  "tableName": "<%= idPluralized %>",
   "options": {
     "increments": true,
     "timestamps": true,
     "comment": ""
   },
   "attributes": {
-    <%= api %>
+<%= attributes %>
   }
 }

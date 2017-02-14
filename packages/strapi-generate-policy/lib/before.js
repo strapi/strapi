@@ -16,15 +16,18 @@ const _ = require('lodash');
  */
 
 module.exports = (scope, cb) => {
-  if (!scope.rootPath || !scope.args[0]) {
-    return cb.invalid('Usage: `$ strapi generate:policy policyName apiName`');
+  if (!scope.rootPath || !scope.id) {
+    return cb.invalid('Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`');
   }
 
-  // `scope.args` are the raw command line arguments.
-  _.defaults(scope, {
-    id: scope.args[0],
-    api: scope.args[1]
-  });
+  let filePath;
+  if (scope.args.api) {
+    filePath = `./api/${scope.args.api}/config/policies`;
+  } else if (scope.args.plugin) {
+    filePath = `./plugins/${scope.args.plugin}/config/policies`;
+  } else {
+    filePath = './config/policies';
+  }
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
@@ -33,14 +36,14 @@ module.exports = (scope, cb) => {
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
-    rootPath: scope.rootPath,
+    filePath,
     filename: scope.id + scope.ext
   });
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: scope.args[0],
-    humanizedPath: '`./api/' + scope.api + '/policies`'
+    humanizeId: scope.id,
+    humanizedPath: '`' + scope.filePath + '`'
   });
 
   // Trigger callback with no error to proceed.
