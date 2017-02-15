@@ -248,6 +248,10 @@ module.exports = function (strapi) {
                   }
 
                   loadedModel[name] = function () {
+                    if (_.isArray(_.get(details, 'withPivot')) && !_.isEmpty(details.withPivot)) {
+                      return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column).withPivot(details.withPivot);
+                    }
+
                     return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;
