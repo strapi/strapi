@@ -11,6 +11,8 @@ in a matter of hours instead of weeks.
 The framework sits on top of [Koa](http://koajs.com/). Its ensemble of small modules work
 together to provide simplicity, maintainability, and structural conventions to Node.js applications.
 
+**DISCLAIMER**: *This version is maintained for criticals issues only*.
+
 ## Getting started in a minute
 
 ### Installation
