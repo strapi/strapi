@@ -1,6 +1,7 @@
 'use strict';
 
 const context = require('../helpers/context');
+const should = require('should');
 
 describe('ctx.querystring', function () {
   it('should return the querystring', function () {
@@ -36,7 +37,7 @@ describe('ctx.querystring=', function () {
     ctx.querystring = 'page=2&color=blue';
     ctx.url.should.equal('/store/shoes?page=2&color=blue');
     ctx.search.should.equal('?page=2&color=blue');
-    ctx.query.should.eql({
+    should(ctx.query).deepEqual({
       page: '2',
       color: 'blue'
     });
