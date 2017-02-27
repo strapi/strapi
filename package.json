@@ -167,8 +167,8 @@
     "url": "https://github.com/wistityhq/strapi/issues"
   },
   "engines": {
-    "node": ">= 0.12.0",
-    "npm": ">= 2.0.0"
+    "node": ">=0.12.0 <5.12.0",
+    "npm": ">=2.0.0 <4.0.0"
   },
   "preferGlobal": true,
   "license": "MIT"
