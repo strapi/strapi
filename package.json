@@ -148,23 +148,23 @@
     "prepublish": "npm prune"
   },
   "author": {
-    "email": "hack@wistity.co",
-    "name": "Wistity team",
-    "url": "http://wistity.co"
+    "email": "support@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Wistity team",
-      "email": "hack@wistity.co",
-      "url": "http://wistity.co"
+      "name": "Strapi team",
+      "email": "support@strapi.io",
+      "url": "http://strapi.io"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/wistityhq/strapi.git"
+    "url": "git@github.com:strapi/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/wistityhq/strapi/issues"
+    "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
     "node": ">=0.12.0 <5.12.0",
