@@ -4,6 +4,9 @@
  * Module dependencies
  */
 
+// Core
+const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 const bookshelf = require('bookshelf');
@@ -14,6 +17,8 @@ const utils = require('./utils/');
 
 // Strapi helpers for models.
 const utilsModels = require('strapi-utils').models;
+
+const PIVOT_PREFIX = '_pivot_';
 
 /**
  * Bookshelf hook
@@ -55,20 +60,45 @@ module.exports = function (strapi) {
           return cb();
         }
 
-        _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'}), (connection, connectionName) => {
+        const connections = _.pickBy(strapi.config.connections, {connector: 'strapi-bookshelf'});
+
+        const done = _.after(_.size(connections), () => {
+          cb();
+        });
+
+        _.forEach(connections, (connection, connectionName) => {
           // Apply defaults
           _.defaults(connection.settings, strapi.hooks.bookshelf.defaults);
+
+          // Create Bookshelf instance for this connection.
+          const ORM = new bookshelf(strapi.connections[connectionName]);
+
+          try {
+            // Require `config/functions/bookshelf.js` file to customize connection.
+            require(path.resolve(strapi.config.appPath, 'config', 'functions', 'bookshelf.js'))(ORM, strapi.connections[connectionName]);
+          } catch (err) {
+            // This is not an error if the file is not found.
+          }
+
+          // Load plugins
+          if (_.get(connection, 'options.plugins') !== false) {
+            ORM.plugin('visibility');
+            ORM.plugin('pagination');
+          }
 
           // Select models concerned by this connection
           const models = _.pickBy(strapi.models, {connection: connectionName});
 
           // Return callback if there is no model
           if (_.isEmpty(models)) {
-            return cb();
+            cb();
+
+            // Break the loop.
+            return false;
           }
 
           const loadedHook = _.after(_.size(models), () => {
-            cb();
+            done();
           });
 
           // Parse every registered model.
@@ -81,6 +111,10 @@ module.exports = function (strapi) {
               definition.tableName = model;
             }
 
+            if (!_.isEmpty(definition.collectionName)) {
+              return cb('Attribute `collectionName` should be `tableName` in ' + globalName + ' model');
+            }
+
             // Add some informations about ORM & client connection
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
@@ -88,8 +122,30 @@ module.exports = function (strapi) {
             // Register the final model for Bookshelf.
             const loadedModel = {
               tableName: definition.tableName,
-              hasTimestamps: _.get(definition, 'options.timestamps') === true
+              hasTimestamps: _.get(definition, 'options.timestamps') === true,
+              idAttribute: _.get(definition, 'options.idAttribute') || 'id'
             };
+
+            if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
+              loadedModel.toJSON = function(options = {}) {
+                const { shallow = false, omitPivot = false } = options;
+                const attributes = this.serialize(options);
+
+                if (!shallow) {
+                  const pivot = this.pivot && !omitPivot && this.pivot.attributes;
+
+                  // Remove pivot attributes with prefix.
+                  _.keys(pivot).forEach(key => delete attributes[`${PIVOT_PREFIX}${key}`]);
+
+                  // Add pivot attributes without prefix.
+                  const pivotAttributes = _.mapKeys(pivot, (value, key) => `${connection.options.pivot_prefix}${key}`);
+
+                  return Object.assign({}, attributes, pivotAttributes);
+                }
+
+                return attributes;
+              };
+            }
 
             // Initialize the global variable with the
             // capitalized model name.
@@ -127,11 +183,6 @@ module.exports = function (strapi) {
                     return true;
                   }
                 }), 'columnName'));
-
-                const ORM = new bookshelf(strapi.connections[connectionName]);
-
-                // Load plugins
-                ORM.plugin('visibility');
 
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
@@ -174,25 +225,32 @@ module.exports = function (strapi) {
                     }
                   });
 
+                  const globalId = _.get(strapi.models, `${details.model.toLowerCase()}.globalId`);
+
                   loadedModel[name] = function () {
-                    return this.hasOne(global[_.upperFirst(details.model)], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
+                    return this.hasOne(global[globalId], _.get(strapi.models[details.model].attributes, `${FK}.columnName`) || FK);
                   };
                   break;
                 }
                 case 'hasMany': {
+                  const globalId = _.get(strapi.models, `${details.collection.toLowerCase()}.globalId`);
+                  const FKTarget = _.get(strapi.models[globalId.toLowerCase()].attributes, `${details.via}.columnName`) || details.via;
+
                   loadedModel[name] = function () {
-                    return this.hasMany(global[_.upperFirst(details.collection)], details.via);
+                    return this.hasMany(global[globalId], FKTarget);
                   };
                   break;
                 }
                 case 'belongsTo': {
+                  const globalId = _.get(strapi.models, `${details.model.toLowerCase()}.globalId`);
+
                   loadedModel[name] = function () {
-                    return this.belongsTo(global[_.upperFirst(details.model)], _.get(details, 'columnName') || name);
+                    return this.belongsTo(global[globalId], _.get(details, 'columnName') || name);
                   };
                   break;
                 }
                 case 'belongsToMany': {
-                  const tableName = _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
+                  const tableName = _.get(details, 'tableName') || _.map(_.sortBy([strapi.models[details.collection].attributes[details.via], details], 'collection'), table => {
                     return _.snakeCase(pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via));
                   }).join('__');
 
@@ -213,6 +271,10 @@ module.exports = function (strapi) {
                   }
 
                   loadedModel[name] = function () {
+                    if (_.isArray(_.get(details, 'withPivot')) && !_.isEmpty(details.withPivot)) {
+                      return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column).withPivot(details.withPivot);
+                    }
+
                     return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;

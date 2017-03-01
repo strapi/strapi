@@ -53,7 +53,7 @@ module.exports = strapi => {
         'config/functions/*': cb => {
           dictionary.aggregate({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config, 'functions'),
-            filter: /(.+)\.(js)$/,
+            filter: /^(?!bookshelf)((.+)\.(js))$/,
             depth: 1
           }, cb);
         },
