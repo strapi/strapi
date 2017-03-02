@@ -38,7 +38,7 @@ module.exports = {
    */
 
   add: (values) => {
-    return <%= humanizeId %>.create(values);
+    return <%= globalID %>.create(values);
   },
 
   /**
