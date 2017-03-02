@@ -255,6 +255,8 @@ module.exports = strapi => {
             // Looking for global policy or namespaced.
             if (_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(strapi.policies, policy.replace(globalPolicyPrefix, ''))) {
               return policies.push(strapi.policies[policy.replace(globalPolicyPrefix, '').toLowerCase()]);
+            } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.policies.' + policy.toLowerCase()))) {
+              return policies.push(strapi.api[currentApiName].policies[policy.toLowerCase()]);
             }
 
             strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
