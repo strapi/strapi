@@ -43,7 +43,7 @@ module.exports = function () {
         watch: true,
         watchDirectory: process.cwd(),
         watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
-        watchIgnorePatterns: ['node_modules/**/*', 'public/**/*'], // Ignore patterns to use when watching files.
+        watchIgnorePatterns: ['node_modules/**/*', 'public/**/*', '.git/**/*', '.idea'], // Ignore patterns to use when watching files.
         killTree: true, // Kills the entire child process tree on `exit`,
         spinSleepTime: 0,
         command: 'node --harmony-async-await'
@@ -52,9 +52,15 @@ module.exports = function () {
       const child = new (forever.Monitor)('server.js', options);
 
       // Run listeners
-      child.on('restart', () => {
+      child.on('watch:restart', (info) => {
+        logger.verbose('Restarting due to ' + info.file + '... (' + info.stat.replace(child.cwd, '.') + ')');
         console.log();
-        logger.info('Restarting due to changes...');
+      });
+
+      child.on('exit:code', function(code) {
+        if (code) {
+          process.exit(code);
+        }
       });
 
       // Start child process

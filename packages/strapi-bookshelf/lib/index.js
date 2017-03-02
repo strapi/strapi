@@ -18,6 +18,8 @@ const utils = require('./utils/');
 // Strapi helpers for models.
 const utilsModels = require('strapi-utils').models;
 
+const PIVOT_PREFIX = '_pivot_';
+
 /**
  * Bookshelf hook
  */
@@ -90,7 +92,7 @@ module.exports = function (strapi) {
           // Return callback if there is no model
           if (_.isEmpty(models)) {
             cb();
-            
+
             // Break the loop.
             return false;
           }
@@ -123,6 +125,27 @@ module.exports = function (strapi) {
               hasTimestamps: _.get(definition, 'options.timestamps') === true,
               idAttribute: _.get(definition, 'options.idAttribute') || 'id'
             };
+
+            if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
+              loadedModel.toJSON = function(options = {}) {
+                const { shallow = false, omitPivot = false } = options;
+                const attributes = this.serialize(options);
+
+                if (!shallow) {
+                  const pivot = this.pivot && !omitPivot && this.pivot.attributes;
+
+                  // Remove pivot attributes with prefix.
+                  _.keys(pivot).forEach(key => delete attributes[`${PIVOT_PREFIX}${key}`]);
+
+                  // Add pivot attributes without prefix.
+                  const pivotAttributes = _.mapKeys(pivot, (value, key) => `${connection.options.pivot_prefix}${key}`);
+
+                  return Object.assign({}, attributes, pivotAttributes);
+                }
+
+                return attributes;
+              };
+            }
 
             // Initialize the global variable with the
             // capitalized model name.
@@ -248,6 +271,10 @@ module.exports = function (strapi) {
                   }
 
                   loadedModel[name] = function () {
+                    if (_.isArray(_.get(details, 'withPivot')) && !_.isEmpty(details.withPivot)) {
+                      return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column).withPivot(details.withPivot);
+                    }
+
                     return this.belongsToMany(global[_.upperFirst(details.collection)], tableName, relationship.attribute + '_' + relationship.column, details.attribute + '_' + details.column);
                   };
                   break;
