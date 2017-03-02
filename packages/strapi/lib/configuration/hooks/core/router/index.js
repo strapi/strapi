@@ -242,25 +242,26 @@ module.exports = strapi => {
         // Add the `responsesPolicy`.
         policies.push(responsesPolicy);
 
-        // Allow string instead of array of policies
+        // Allow string instead of array of policies.
         if (!_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           value.config.policies = [value.config.policies];
         }
 
         if (_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           _.forEach(value.config.policies, policy => {
-            // Looking for global policy or namespaced
-            if (_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.policies, policy.substring(1).toLowerCase()))) {
-              return policies.push(strapi.policies[policy.substring(1).toLowerCase()]);
-            } else if (!_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.policies.' + policy.toLowerCase()))) {
-              return policies.push(strapi.api[currentApiName].policies[policy.toLowerCase()]);
+            // Define global policy prefix.
+            const globalPolicyPrefix = 'global.';
+
+            // Looking for global policy or namespaced.
+            if (_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(strapi.policies, policy.replace(globalPolicyPrefix, ''))) {
+              return policies.push(strapi.policies[policy.replace(globalPolicyPrefix, '').toLowerCase()]);
             }
 
             strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
           });
         }
 
-        // Init validate
+        // Init validate.
         const validate = {};
 
         if (_.isString(_.get(value, 'config.validate')) && !_.isEmpty(_.get(value, 'config.validate'))) {
