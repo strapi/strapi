@@ -41,7 +41,7 @@ module.exports = function (strapi) {
       let globalName;
 
       // Return callback if there is no model
-      if (_.isEmpty(strapi.models) || _.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'})) {
+      if (_.isEmpty(strapi.models) || !_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'})) {
         return cb();
       }
 
