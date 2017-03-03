@@ -81,8 +81,8 @@ module.exports = strapi => {
 
           // Load API policies from `./plugins/*/policies/*.js`.
           'policies/*': cb => {
-            dictionary.aggregate({
-              dirname: path.resolve(strapi.config.appPath, strapi.config.paths.plugins, plugin, strapi.config.paths.policies),
+            dictionary.optional({
+              dirname: path.resolve(strapi.config.appPath, strapi.config.paths.plugins, plugin, strapi.config.paths.config, strapi.config.paths.policies),
               filter: /(.+)\.(js)$/,
               depth: 1
             }, cb);

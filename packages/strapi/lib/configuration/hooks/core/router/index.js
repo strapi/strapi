@@ -254,8 +254,13 @@ module.exports = strapi => {
 
             // Looking for global policy or namespaced.
             if (_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(strapi.policies, policy.replace(globalPolicyPrefix, ''))) {
+              // Global policy.
               return policies.push(strapi.policies[policy.replace(globalPolicyPrefix, '').toLowerCase()]);
+            } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && plugin && !_.isEmpty(_.get(strapi.plugins, plugin + '.policies.' + policy.toLowerCase()))) {
+              // Plugin policy used in the plugin itself.
+              return policies.push(strapi.plugins[plugin].policies[policy.toLowerCase()]);
             } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.policies.' + policy.toLowerCase()))) {
+              // API policy used in the API itself.
               return policies.push(strapi.api[currentApiName].policies[policy.toLowerCase()]);
             }
 
