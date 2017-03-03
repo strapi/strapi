@@ -215,18 +215,10 @@ module.exports = strapi => {
 
       function routerChecker(value, endpoint, plugin) {
         const route = regex.detectRoute(endpoint);
-        let pluginControllers;
 
         // Define controller and action names.
         const handler = _.trim(value.handler).split('.');
-
-        try {
-          pluginControllers = strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
-        } catch (err) {
-          pluginControllers = undefined;
-        }
-
-        const controller = strapi.controllers[handler[0].toLowerCase()] || pluginControllers || strapi.admin.controllers[handler[0].toLowerCase()];
+        const controller = plugin ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()] : strapi.controllers[handler[0].toLowerCase()] || strapi.admin.controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
         // Retrieve the API's name where the controller is located
@@ -251,11 +243,16 @@ module.exports = strapi => {
           _.forEach(value.config.policies, policy => {
             // Define global policy prefix.
             const globalPolicyPrefix = 'global.';
+            const pluginPolicyPrefix = 'plugins.';
+            const policySplited = policy.split('.');
 
             // Looking for global policy or namespaced.
             if (_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(strapi.policies, policy.replace(globalPolicyPrefix, ''))) {
               // Global policy.
               return policies.push(strapi.policies[policy.replace(globalPolicyPrefix, '').toLowerCase()]);
+            } else if (_.startsWith(policy, pluginPolicyPrefix, 0) && strapi.plugins[policySplited[1]] && strapi.plugins[policySplited[1]].policies[policySplited[2].toLowerCase()]) {
+              // Plugin's policies can be used from app APIs with a specific syntax (`plugins.pluginName.policyName`).
+              return policies.push(strapi.plugins[policySplited[1]].policies[policySplited[2].toLowerCase()]);
             } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && plugin && !_.isEmpty(_.get(strapi.plugins, plugin + '.policies.' + policy.toLowerCase()))) {
               // Plugin policy used in the plugin itself.
               return policies.push(strapi.plugins[plugin].policies[policy.toLowerCase()]);
