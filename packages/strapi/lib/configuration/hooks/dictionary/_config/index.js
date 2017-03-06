@@ -33,7 +33,7 @@ module.exports = strapi => {
         'config/*': cb => {
           dictionary.aggregate({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.config),
-            excludeDirs: /(locales|environments)$/,
+            excludeDirs: /(locales|environments|policies)$/,
             filter: /(.+)\.(js|json)$/,
             depth: 2
           }, cb);
@@ -142,8 +142,8 @@ module.exports = strapi => {
         // Merge default config and user loaded config together inside `strapi.config`.
         strapi.config = _.merge(strapi.config, mergedConfig, packageJSON);
 
-        // Exposer global policies
-        strapi.policies = _.merge({}, config['config/policies/*']);
+        // Set policies value.
+        strapi.config.policies = config['config/policies/*'];
 
         // Expose user APIs.
         strapi.api = config['api/**'];

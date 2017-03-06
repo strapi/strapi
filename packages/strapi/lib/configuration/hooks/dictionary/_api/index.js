@@ -80,7 +80,7 @@ module.exports = strapi => {
           },
 
           // Load API policies from `./api/*/config/policies/*.js`.
-          'policies/*': cb => {
+          'config/policies/*': cb => {
             dictionary.optional({
               dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config, strapi.config.paths.policies),
               filter: /(.+)\.(js)$/,
@@ -103,7 +103,7 @@ module.exports = strapi => {
               common: cb => {
                 dictionary.aggregate({
                   dirname: path.resolve(strapi.config.appPath, strapi.config.paths.api, api, strapi.config.paths.config),
-                  excludeDirs: /(locales|environments)$/,
+                  excludeDirs: /(locales|environments|policies)$/,
                   filter: /(.+)\.(js|json)$/,
                   depth: 2
                 }, cb);
@@ -138,10 +138,12 @@ module.exports = strapi => {
             controllers: api['controllers/*'],
             models: api['models/*'],
             services: api['services/*'],
-            policies: api['policies/*'],
             validators: api['validators/*'],
             config: api['config/**']
           };
+
+          // Set policies value.
+          strapi.api[api.name].config.policies = api['config/policies/*'];
 
           // Delete the definition if it's empty.
           strapi.api[api.name] = _.omitBy(strapi.api[api.name], _.isEmpty);
