@@ -21,7 +21,7 @@
   },
   "scripts": {
     "test": "make test",
-    "setup": "make setup"
+    "setup": "npm install && lerna bootstrap && cd packages/strapi && npm link"
   },
   "author": {
     "email": "hi@strapi.io",
