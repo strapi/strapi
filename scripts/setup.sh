@@ -9,7 +9,7 @@ echo "${GREEN}Installing dependencies..."
 npm install
 echo "${GREEN}Bootstraping packages and building dashboard...${NC}"
 echo "This can take few minutes (2-3)"
-node node_modules/lerna/bin/lerna bootstrap
+node node_modules/lerna/bin/lerna bootstrap --nohoist --stream
 echo "${GREEN}Linking Strapi CLI...${NC}"
 cd packages/strapi
 npm link
