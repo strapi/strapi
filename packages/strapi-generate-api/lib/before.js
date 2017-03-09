@@ -31,12 +31,14 @@ module.exports = (scope, cb) => {
   // Check `api` and `plugin` parameters
   const parent = scope.args.api || scope.args.plugin;
 
+  // Format `id`.
+  scope.id = _.trim(_.camelCase(scope.id));
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-    idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
+    idPluralized: pluralize.plural(_.trim(_.camelCase(scope.id))),
     parentId: _.isEmpty(parent) ? undefined : _.trim(_.deburr(parent)),
-    parentIdPluralized: _.isEmpty(scope.parentId) ? undefined : pluralize.plural(_.trim(_.deburr(scope.parentId))),
+    parentIdPluralized: _.isEmpty(scope.parentId) ? undefined : pluralize.plural(_.trim(_.camelCase(scope.parentId))),
     environment: process.NODE_ENV || 'development'
   });
 
