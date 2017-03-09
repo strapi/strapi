@@ -255,7 +255,7 @@ module.exports = strapi => {
               return policies.push(_.get(strapi.plugins, policySplited[1] + '.config.policies.' + policySplited[2].toLowerCase()));
             } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && plugin && !_.isEmpty(_.get(strapi.plugins, plugin + '.config.policies.' + policy.toLowerCase()))) {
               // Plugin policy used in the plugin itself.
-              return policies.push(strapi.plugins[plugin].config.policies[policy.toLowerCase()]);
+              return policies.push(_.get(strapi.plugins, plugin + '.config.policies.' + policy.toLowerCase()));
             } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.config.policies.' + policy.toLowerCase()))) {
               // API policy used in the API itself.
               return policies.push(_.get(strapi.api, currentApiName + '.config.policies.' + policy.toLowerCase()));
