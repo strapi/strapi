@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "0.0.0",
+  "version": "3.0.0-alpha.3",
   "description": "Strapi Plugin - Content Manager",
   "engines": {
     "node": ">= 7.0.0",
