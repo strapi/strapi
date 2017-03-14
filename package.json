@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "make test",
-    "setup": "node ./scripts/setup.js"
+    "setup": "npm install && node ./scripts/setup.js"
   },
   "author": {
     "email": "hi@strapi.io",

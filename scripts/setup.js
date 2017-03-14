@@ -3,8 +3,6 @@ const shell = require('shelljs');
 // Remove existing binary.
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
-shell.echo('Installing dependencies...');
-shell.exec('npm install');
 shell.echo('Bootstraping packages and building dashboard...');
 shell.echo('This can take few minutes (2-3)');
 shell.exec('node node_modules/lerna/bin/lerna bootstrap --nohoist --stream');
