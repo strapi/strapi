@@ -16,9 +16,9 @@ module.exports = {
   templatesDirectory: scope => {
     try {
       // Try to reach the path. If it fail, throw an error.
-      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args[1]), fs.constants.R_OK | fs.constants.W_OK);
+      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args.tpl), fs.constants.R_OK | fs.constants.W_OK);
 
-      return path.resolve(__dirname, '..', 'templates', scope.args[1]);
+      return path.resolve(__dirname, '..', 'templates', scope.args.tpl);
     } catch (e) {
       // Default template is Mongoose
       return path.resolve(__dirname, '..', 'templates', 'mongoose');
@@ -26,7 +26,7 @@ module.exports = {
   },
   before: require('./before'),
   targets: {
-    'api/:humanizeId/services/:filename': {
+    'api/:api/services/:filename': {
       template: 'service.template'
     }
   }

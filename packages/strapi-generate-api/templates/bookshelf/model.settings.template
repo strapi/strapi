@@ -1,12 +1,12 @@
 {
   "connection": "<%= connection %>",
-  "tableName": "<%= subId || id %>",
+  "tableName": "<%= idPluralized %>",
   "options": {
     "increments": true,
     "timestamps": true,
     "comment": ""
   },
   "attributes": {
-
+<%= attributes %>
   }
 }

@@ -12,27 +12,27 @@ const _ = require('lodash');
 module.exports = {
 
   /**
-   * Promise to fetch all <%= humanizeSubIdPluralized || humanizeSubId || humanizeIdPluralized %>.
+   * Promise to fetch all <%= humanizeIdPluralized %>.
    *
    * @return {Promise}
    */
 
   fetchAll: (params) => {
-    return <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+    return <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**
-   * Promise to fetch a/an <%= subId || id %>.
+   * Promise to fetch a/an <%= id %>.
    *
    * @return {Promise}
    */
 
   fetch: (params) => {
-    return <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeSubId || humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+    return <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**
-   * Promise to add a/an <%= subId || id %>.
+   * Promise to add a/an <%= id %>.
    *
    * @return {Promise}
    */
@@ -42,7 +42,7 @@ module.exports = {
   },
 
   /**
-   * Promise to edit a/an <%= subId || id %>.
+   * Promise to edit a/an <%= id %>.
    *
    * @return {Promise}
    */
@@ -55,7 +55,7 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a/an <%= subId || id %>.
+   * Promise to remove a/an <%= id %>.
    *
    * @return {Promise}
    */

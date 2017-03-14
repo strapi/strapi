@@ -1,7 +1,7 @@
 {
   "connection": "<%= connection %>",
-  "collectionName": "<%= humanizeSubId || humanizeId %>",
+  "collectionName": "<%= idPluralized %>",
   "attributes": {
-
+<%= attributes %>
   }
 }

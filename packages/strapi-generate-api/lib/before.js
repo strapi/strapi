@@ -12,6 +12,9 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+// Fetch stub attribute template on initial load.
+const attributeTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'templates', 'attribute.template'), 'utf8');
+
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -21,40 +24,89 @@ const pluralize = require('pluralize');
  */
 
 module.exports = (scope, cb) => {
-  if (!scope.rootPath || !scope.args[0]) {
+  if (!scope.rootPath || !scope.id) {
     return cb.invalid('Usage: `$ strapi generate:api apiName`');
   }
 
+  // Check `api` and `plugin` parameters
+  const parent = scope.args.api || scope.args.plugin;
+
+  // Format `id`.
+  scope.id = _.trim(_.camelCase(scope.id));
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.args[0])),
-    idPluralized: pluralize.plural(_.trim(_.deburr(scope.args[0]))),
-    subId: _.isEmpty(scope.args[1]) ? undefined : _.trim(_.deburr(scope.args[1])),
-    subIdPluralized: _.isEmpty(scope.args[1]) ? undefined : pluralize.plural(_.trim(_.deburr(scope.args[1]))),
+    idPluralized: pluralize.plural(_.trim(_.camelCase(scope.id))),
+    parentId: _.isEmpty(parent) ? undefined : _.trim(_.deburr(parent)),
+    parentIdPluralized: _.isEmpty(scope.parentId) ? undefined : pluralize.plural(_.trim(_.camelCase(scope.parentId))),
     environment: process.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(_.isEmpty(scope.subId) ? scope.id : scope.subId)),
+    globalID: _.upperFirst(_.camelCase(scope.id)),
     ext: '.js'
   });
+
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
-    filename: scope.globalID + scope.ext,
-    filenameSettings: scope.globalID + '.settings.json'
+    filename: `${scope.globalID}${scope.ext}`,
+    filenameSettings: scope.globalID + '.settings.json',
+    folderPrefix: !scope.args.api && scope.args.plugin ? 'plugins' : 'api',
+    folderName: _.camelCase(scope.parentId || scope.id).toLowerCase()
   });
+
 
   // Humanize output.
   _.defaults(scope, {
     humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizeSubId: _.isUndefined(scope.subId) ? undefined : _.camelCase(scope.subId).toLowerCase(),
     humanizeIdPluralized: pluralize.plural(_.camelCase(scope.id).toLowerCase()),
-    humanizeSubIdPluralized: _.isUndefined(scope.subId) ? undefined : pluralize.plural(_.camelCase(scope.subId).toLowerCase()),
-    humanizedPath: '`./api`'
+    humanizedPath: `\`./${scope.folderPrefix}/${scope.parentId ? '' + scope.folderName : ''}\``
   });
+
+  // Validate optional attribute arguments.
+  const invalidAttributes = [];
+
+  // Map attributes and split them.
+  scope.attributes = scope.args.attributes.map((attribute) => {
+    const parts = attribute.split(':');
+
+    parts[1] = parts[1] || 'string';
+
+    // Handle invalid attributes.
+    if (!parts[1] || !parts[0]) {
+      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+      return;
+    }
+
+    return {
+      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
+      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
+    };
+  });
+
+  // Handle invalid action arguments.
+  // Send back invalidActions.
+  if (invalidAttributes.length) {
+    return cb.invalid(invalidAttributes);
+  }
+
+  // Make sure there aren't duplicates.
+  if (_(scope.attributes.map(attribute => (attribute.name))).uniq().valueOf().length !== scope.attributes.length) {
+    return cb.invalid('Duplicate attributes not allowed!');
+  }
+
+  // Render some stringified code from the action template
+  // and make it available in our scope for use later on.
+  scope.attributes = scope.attributes.map((attribute) => {
+    const compiled = _.template(attributeTemplate);
+    return _.trimEnd(_.unescape(compiled({
+      name: attribute.name,
+      type: attribute.type
+    })));
+  }).join(',\n');
 
   // Get default connection
   try {

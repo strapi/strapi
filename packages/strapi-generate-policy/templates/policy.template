@@ -4,7 +4,9 @@
  * `<%= id %>` policy.
  */
 
-exports.<%= id %> = function * (next) {
+module.exports = async (ctx, next) => {
+  // Add your own logic here.
+  console.log('In <%= id %> policy.');
 
-  yield next;
+  await next();
 };

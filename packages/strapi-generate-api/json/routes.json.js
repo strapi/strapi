@@ -19,35 +19,35 @@ module.exports = scope => {
     return {
       routes: [{
         method: 'GET',
-        path: '/' + (scope.humanizeSubId || scope.humanizeId),
+        path: '/' + scope.humanizeId,
         handler: scope.globalID + '.find',
         config: {
           policies: []
         }
       }, {
         method: 'GET',
-        path: '/' + (scope.humanizeSubId || scope.humanizeId) + '/:id',
+        path: '/' + scope.humanizeId + '/:id',
         handler: scope.globalID + '.findOne',
         config: {
           policies: []
         }
       }, {
         method: 'POST',
-        path: '/' + (scope.humanizeSubId || scope.humanizeId),
+        path: '/' + scope.humanizeId,
         handler: scope.globalID + '.create',
         config: {
           policies: []
         }
       }, {
         method: 'PUT',
-        path: '/' + (scope.humanizeSubId || scope.humanizeId) + '/:id',
+        path: '/' + scope.humanizeId + '/:id',
         handler: scope.globalID + '.update',
         config: {
           policies: []
         }
       }, {
         method: 'DELETE',
-        path: '/' + (scope.humanizeSubId || scope.humanizeId) + '/:id',
+        path: '/' + scope.humanizeId + '/:id',
         handler: scope.globalID + '.destroy',
         config: {
           policies: []
@@ -57,7 +57,7 @@ module.exports = scope => {
   }
 
   // We have to delete current file
-  if (!_.isEmpty(scope.subId)) {
+  if (!_.isEmpty(scope.parentId)) {
     let current;
 
     try {
