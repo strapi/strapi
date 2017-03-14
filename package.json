@@ -17,11 +17,12 @@
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
-    "redux-saga": "^0.14.3"
+    "redux-saga": "^0.14.3",
+    "shelljs": "^0.7.7"
   },
   "scripts": {
     "test": "make test",
-    "setup": "make setup"
+    "setup": "node ./scripts/setup.js"
   },
   "author": {
     "email": "hi@strapi.io",
