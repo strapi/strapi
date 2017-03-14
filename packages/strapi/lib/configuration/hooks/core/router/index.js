@@ -47,7 +47,7 @@ module.exports = strapi => {
       }
 
       // Add response policy to the global variable.
-      _.set(strapi.policies, 'responsesPolicy', responsesPolicy);
+      _.set(strapi.config.policies, 'responsesPolicy', responsesPolicy);
       // Parse each route from the user config, load policies if any
       // and match the controller and action to the desired endpoint.
 
@@ -215,18 +215,10 @@ module.exports = strapi => {
 
       function routerChecker(value, endpoint, plugin) {
         const route = regex.detectRoute(endpoint);
-        let pluginControllers;
 
         // Define controller and action names.
         const handler = _.trim(value.handler).split('.');
-
-        try {
-          pluginControllers = strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
-        } catch (err) {
-          pluginControllers = undefined;
-        }
-
-        const controller = strapi.controllers[handler[0].toLowerCase()] || pluginControllers || strapi.admin.controllers[handler[0].toLowerCase()];
+        const controller = plugin ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()] : strapi.controllers[handler[0].toLowerCase()] || strapi.admin.controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
         // Retrieve the API's name where the controller is located
@@ -242,25 +234,38 @@ module.exports = strapi => {
         // Add the `responsesPolicy`.
         policies.push(responsesPolicy);
 
-        // Allow string instead of array of policies
+        // Allow string instead of array of policies.
         if (!_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           value.config.policies = [value.config.policies];
         }
 
         if (_.isArray(_.get(value, 'config.policies')) && !_.isEmpty(_.get(value, 'config.policies'))) {
           _.forEach(value.config.policies, policy => {
-            // Looking for global policy or namespaced
-            if (_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.policies, policy.substring(1).toLowerCase()))) {
-              return policies.push(strapi.policies[policy.substring(1).toLowerCase()]);
-            } else if (!_.startsWith(policy, '*', 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.policies.' + policy.toLowerCase()))) {
-              return policies.push(strapi.api[currentApiName].policies[policy.toLowerCase()]);
+            // Define global policy prefix.
+            const globalPolicyPrefix = 'global.';
+            const pluginPolicyPrefix = 'plugins.';
+            const policySplited = policy.split('.');
+
+            // Looking for global policy or namespaced.
+            if (_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(strapi.config.policies, policy.replace(globalPolicyPrefix, ''))) {
+              // Global policy.
+              return policies.push(strapi.config.policies[policy.replace(globalPolicyPrefix, '').toLowerCase()]);
+            } else if (_.startsWith(policy, pluginPolicyPrefix, 0) && strapi.plugins[policySplited[1]] && !_.isEmpty(_.get(strapi.plugins, policySplited[1] + '.config.policies.' + policySplited[2].toLowerCase()))) {
+              // Plugin's policies can be used from app APIs with a specific syntax (`plugins.pluginName.policyName`).
+              return policies.push(_.get(strapi.plugins, policySplited[1] + '.config.policies.' + policySplited[2].toLowerCase()));
+            } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && plugin && !_.isEmpty(_.get(strapi.plugins, plugin + '.config.policies.' + policy.toLowerCase()))) {
+              // Plugin policy used in the plugin itself.
+              return policies.push(_.get(strapi.plugins, plugin + '.config.policies.' + policy.toLowerCase()));
+            } else if (!_.startsWith(policy, globalPolicyPrefix, 0) && !_.isEmpty(_.get(strapi.api, currentApiName + '.config.policies.' + policy.toLowerCase()))) {
+              // API policy used in the API itself.
+              return policies.push(_.get(strapi.api, currentApiName + '.config.policies.' + policy.toLowerCase()));
             }
 
             strapi.log.error('Ignored attempt to bind route `' + endpoint + '` with unknown policy `' + policy + '`.');
           });
         }
 
-        // Init validate
+        // Init validate.
         const validate = {};
 
         if (_.isString(_.get(value, 'config.validate')) && !_.isEmpty(_.get(value, 'config.validate'))) {
