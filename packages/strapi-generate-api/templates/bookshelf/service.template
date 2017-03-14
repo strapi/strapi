@@ -15,31 +15,31 @@ const utils = require('strapi-bookshelf/lib/utils/');
 module.exports = {
 
   /**
-   * Promise to fetch all <%= subIdPluralized || idPluralized %>.
+   * Promise to fetch all <%= idPluralized %>.
    *
    * @return {Promise}
    */
 
   fetchAll: (params) => {
     return <%= globalID %>.forge(params).query(params).fetchAll({
-      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
+      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
     });
   },
 
   /**
-   * Promise to fetch a/an <%= subId || id %>.
+   * Promise to fetch a/an <%= id %>.
    *
    * @return {Promise}
    */
 
   fetch: (params) => {
     return <%= globalID %>.forge(_.pick(params, 'id')).fetch({
-      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= subId || id %>.associations, {autoPopulate: false}), 'alias'))
+      withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
     });
   },
 
   /**
-   * Promise to add a/an <%= subId || id %>.
+   * Promise to add a/an <%= id %>.
    *
    * @return {Promise}
    */
@@ -49,7 +49,7 @@ module.exports = {
   },
 
   /**
-   * Promise to edit a/an <%= subId || id %>.
+   * Promise to edit a/an <%= id %>.
    *
    * @return {Promise}
    */
@@ -59,7 +59,7 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a/an <%= subId || id %>.
+   * Promise to remove a/an <%= id %>.
    *
    * @return {Promise}
    */
@@ -69,13 +69,13 @@ module.exports = {
   },
 
   /**
-   * Add relation to a specific <%= subId || id %> (only from a to-many relationships).
+   * Add relation to a specific <%= id %> (only from a to-many relationships).
    *
    * @return {Object}
    */
 
   addRelation: (params, values) => {
-    const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
+    const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
 
     if (!_.isEmpty(relation) && _.isArray(values)) {
       switch (relation.nature) {
@@ -105,13 +105,13 @@ module.exports = {
   },
 
   /**
-   * Edit relation to a specific <%= subId || id %>.
+   * Edit relation to a specific <%= id %>.
    *
    * @return {Object}
    */
 
   editRelation: (params, values) => {
-      const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
+      const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
         switch (relation.nature) {
@@ -201,13 +201,13 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a specific entry from a specific <%= subId || id %> (only from a to-many relationships).
+   * Promise to remove a specific entry from a specific <%= id %> (only from a to-many relationships).
    *
    * @return {Promise}
    */
 
   removeRelation: (params, values) => {
-    const relation = _.find(strapi.models.<%= subId || id %>.associations, {alias: params.relation});
+    const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
 
     if (!_.isEmpty(relation) && _.isArray(values)) {
       switch (relation.nature) {

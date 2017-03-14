@@ -65,7 +65,6 @@ $RECYCLE.BIN/
 # Logs and databases
 ############################
 
-.tmp
 *.log
 *.sql
 *.sqlite
@@ -76,6 +75,7 @@ $RECYCLE.BIN/
 ############################
 
 *#
+ssl
 .idea
 nbproject
 
@@ -100,11 +100,3 @@ node_modules
 
 testApp
 coverage
-
-
-############################
-# Builds
-############################
-
-packages/strapi-generate-new/files/public/
-packages/*/yarn.lock

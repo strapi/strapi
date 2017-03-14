@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.3",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -13,15 +13,16 @@
     "eslint-plugin-react": "^6.8.0",
     "eslint-plugin-redux-saga": "^0.3.0",
     "istanbul": "~0.4.2",
-    "lerna": "2.0.0-beta.30",
+    "lerna": "2.0.0-beta.36",
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
-    "redux-saga": "^0.14.3"
+    "redux-saga": "^0.14.3",
+    "shelljs": "^0.7.7"
   },
   "scripts": {
     "test": "make test",
-    "setup": "make setup"
+    "setup": "npm install && node ./scripts/setup.js"
   },
   "author": {
     "email": "hi@strapi.io",

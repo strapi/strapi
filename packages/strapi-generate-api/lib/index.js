@@ -19,9 +19,9 @@ module.exports = {
   templatesDirectory: scope => {
     try {
       // Try to reach the path. If it fail, throw an error.
-      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.template), fs.constants.R_OK | fs.constants.W_OK);
+      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args.tpl), fs.constants.R_OK | fs.constants.W_OK);
 
-      return path.resolve(__dirname, '..', 'templates', scope.template);
+      return path.resolve(__dirname, '..', 'templates', scope.args.tpl);
     } catch (e) {
       // Default template is Mongoose
       return path.resolve(__dirname, '..', 'templates', 'mongoose');
@@ -32,28 +32,28 @@ module.exports = {
 
     // Use the default `controller` file as a template for
     // every generated controller.
-    'api/:humanizeId/controllers/:filename': {
+    ':folderPrefix/:folderName/controllers/:filename': {
       template: 'controller.template'
     },
 
     // every generated controller.
-    'api/:humanizeId/services/:filename': {
+    ':folderPrefix/:folderName/services/:filename': {
       template: 'service.template'
     },
 
     // Copy an empty JavaScript model where every functions will be.
-    'api/:humanizeId/models/:filename': {
+    ':folderPrefix/:folderName/models/:filename': {
       template: 'model.template'
     },
 
     // Copy the generated JSON model for the connection,
     // schema and attributes.
-    'api/:humanizeId/models/:filenameSettings': {
+    ':folderPrefix/:folderName/models/:filenameSettings': {
       template: 'model.settings.template'
     },
 
     // Generate routes.
-    'api/:humanizeId/config/routes.json': {
+    ':folderPrefix/:folderName/config/routes.json': {
       jsonfile: routesJSON
     }
   }
