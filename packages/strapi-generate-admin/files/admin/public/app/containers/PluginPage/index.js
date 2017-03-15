@@ -9,6 +9,11 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createSelector } from 'reselect';
 import { selectPlugins } from 'containers/App/selectors';
+import PluginHeader from 'components/PluginHeader';
+
+const exposedComponents = {
+  PluginHeader,
+};
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
@@ -19,7 +24,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
   render() {
     const containers = this.props.plugins.valueSeq().map((plugin, i) => {
       const Elem = plugin.mainComponent;
-      return <Elem key={i} {...this.props}></Elem>;
+      return <Elem key={i} {...this.props} exposedComponents={exposedComponents}></Elem>;
     });
 
     return (

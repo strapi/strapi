@@ -1,0 +1,31 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuLink { /* stylelint-ignore */
+  padding-top: 0.5rem;
+  padding-bottom: 0.2rem;
+  min-height: 3rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.leftMenuLinkActive {
+  border-left: 0.4rem solid $strapi-blue;
+}
+
+.link {
+  color: $left-menu-link-color;
+  padding-left: 5.8rem;
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    color: $white;
+    text-decoration: none;
+  }
+}
+
+.linkLabel {
+  display: inline-block;
+  padding-right: 1rem;
+}

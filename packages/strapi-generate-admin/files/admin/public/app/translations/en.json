@@ -1,4 +1,6 @@
 {
   "app.components.LeftMenuFooter.poweredBy": "",
-  "app.components.NotFoundPage.description": ""
+  "app.components.NotFoundPage.description": "",
+  "settings-manager.components.PluginHeaderTitle.description": "",
+  "settings-manager.components.PluginHeaderTitle.title": ""
 }

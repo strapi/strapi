@@ -16,7 +16,7 @@ export default class App extends React.Component { // eslint-disable-line react/
     // Assign plugin component to children
     const childrenWithProps = React.Children.map(this.props.children,
       (child) => React.cloneElement(child, {
-        plugin: this.props.plugin
+        exposedComponents: this.props.exposedComponents
       })
     );
 

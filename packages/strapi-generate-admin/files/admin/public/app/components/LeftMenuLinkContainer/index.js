@@ -1,8 +1,8 @@
 /**
-*
-* LeftMenuLinkContainer
-*
-*/
+ *
+ * LeftMenuLinkContainer
+ *
+ */
 
 import React from 'react';
 import LeftMenuLink from 'components/LeftMenuLink';
@@ -11,7 +11,16 @@ import styles from './styles.scss';
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     // List of links
-    let links = this.props.plugins.valueSeq().map(plugin => <LeftMenuLink key={plugin.id} icon={plugin.icon || 'ion-merge'} label={plugin.name} destination={`/plugins/${plugin.id}`} isActive={this.props.params.plugin === plugin.id}></LeftMenuLink>);
+    let links = this.props.plugins.valueSeq().map(plugin => (
+      <LeftMenuLink
+        key={plugin.id}
+        icon={plugin.icon || 'ion-merge'}
+        label={plugin.name}
+        destination={`/plugins/${plugin.id}`}
+        isActive={this.props.params.plugin === plugin.id}
+        leftMenuLinks={plugin.leftMenuLinks}
+      />
+    ));
 
     // Check if the plugins list is empty or not
     if (!links.size) {
