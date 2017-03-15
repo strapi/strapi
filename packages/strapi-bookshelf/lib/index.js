@@ -156,7 +156,7 @@ module.exports = function (strapi) {
             const done = _.after(_.size(definition.attributes), () => {
               try {
                 // Initialize lifecycle callbacks.
-                loadedModel.initialize = () => {
+                loadedModel.initialize = function () {
                   const self = this;
                   const lifecycle = {
                     creating: 'beforeCreate',
