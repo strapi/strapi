@@ -18,6 +18,10 @@ module.exports = {
     }
   },
 
+  models: async (ctx) => {
+    ctx.body = strapi.models;
+  },
+
   file: async ctx => {
     try {
       const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));

@@ -30,7 +30,7 @@ export function* getRecords() {
       mode: 'cors',
       cache: 'default'
     };
-    const response = yield fetch('http://localhost:1337/admin/config/models', opts);
+    const response = yield fetch('http://localhost:1337/admin/api/models', opts);
     const data = yield response.json();
 
     yield put(loadedRecord(fakeData, data));

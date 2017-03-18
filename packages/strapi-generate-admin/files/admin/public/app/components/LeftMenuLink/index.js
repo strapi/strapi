@@ -1,8 +1,8 @@
 /**
-*
-* LeftMenuLink
-*
-*/
+ *
+ * LeftMenuLink
+ *
+ */
 
 import React from 'react';
 import styles from './styles.scss';
@@ -12,8 +12,13 @@ import LeftMenuSubLinkContainer from 'components/LeftMenuSubLinkContainer';
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     let subLinksContainer;
-    if (this.props.leftMenuLinks && this.props.leftMenuLinks.length) {
-      subLinksContainer = <LeftMenuSubLinkContainer subLinks={this.props.leftMenuLinks} />;
+    if (this.props.leftMenuLinks && this.props.leftMenuLinks.size) {
+      subLinksContainer = (
+        <LeftMenuSubLinkContainer
+          subLinks={this.props.leftMenuLinks}
+          destinationPrefix={this.props.destination}
+        />
+      );
     }
 
     return (
@@ -33,7 +38,7 @@ LeftMenuLink.propTypes = {
   label: React.PropTypes.string,
   destination: React.PropTypes.string,
   isActive: React.PropTypes.bool,
-  leftMenuLinks: React.PropTypes.array,
+  leftMenuLinks: React.PropTypes.object,
 };
 
 export default LeftMenuLink;

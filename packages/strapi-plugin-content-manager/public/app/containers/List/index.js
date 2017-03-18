@@ -19,7 +19,7 @@ import {
 
 import {
    makeSelectModelRecords,
-   makeSelectLoading
+   makeSelectLoading,
 } from './selectors';
 
 export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -84,7 +84,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   records: makeSelectModelRecords(),
-  loading: makeSelectLoading()
+  loading: makeSelectLoading(),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(List));

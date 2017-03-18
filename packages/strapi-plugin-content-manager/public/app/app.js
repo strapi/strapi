@@ -7,6 +7,8 @@
 
 import { browserHistory } from 'react-router';
 import configureStore from './store';
+import React from 'react';
+import { Provider } from 'react-redux';
 
 // Create redux store with history
 // this uses the singleton browserHistory provided by react-router
@@ -23,20 +25,24 @@ import { translationMessages } from './i18n';
 // Plugin identifier based on the package.json `name` value
 const pluginId = require('../package.json').name.replace(/^strapi-plugin-/i, '');
 
+class comp extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  render() {
+    return (
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+  }
+}
+
 // Register the plugin
 if (window.Strapi) {
   window.Strapi.registerPlugin({
     name: 'Content Manager',
     icon: 'ion-document-text',
     id: pluginId,
-    leftMenuLinks: [{
-      label: 'Articles',
-      to: 'content-manager/list/articles',
-    }, {
-      label: 'Categories',
-      to: 'content-manager/list/categories',
-    }],
-    mainComponent: App,
+    leftMenuLinks: [],
+    mainComponent: comp,
     routes: createRoutes(store),
     translationMessages,
   });
@@ -64,4 +70,5 @@ const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 export {
   store,
   apiUrl,
+  pluginId,
 };

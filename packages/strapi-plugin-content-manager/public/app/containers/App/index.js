@@ -6,12 +6,18 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from '../../app';
+import { createStructuredSelector } from 'reselect';
+import { loadModels } from './actions';
+import { makeSelectModels } from './selectors';
+import { connect } from 'react-redux';
 
 import '../../styles/main.scss';
 
-export default class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentWillMount() {
+    this.props.loadModels();
+  }
+
   render() {
     // Assign plugin component to children
     const childrenWithProps = React.Children.map(this.props.children,
@@ -21,11 +27,28 @@ export default class App extends React.Component { // eslint-disable-line react/
     );
 
     return (
-      <Provider store={store}>
-        <div className='content-manager'>
-          {React.Children.toArray(childrenWithProps)}
-        </div>
-      </Provider>
+      <div className='content-manager'>
+        {React.Children.toArray(childrenWithProps)}
+      </div>
     );
   }
 }
+
+App.propTypes = {
+  children: React.PropTypes.node,
+  loadModels: React.PropTypes.func,
+};
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    loadModels: () => dispatch(loadModels()),
+    dispatch,
+  };
+}
+
+const mapStateToProps = createStructuredSelector({
+  models: makeSelectModels(),
+});
+
+// Wrap the component to inject dispatch and state into it
+export default connect(mapStateToProps, mapDispatchToProps)(App);

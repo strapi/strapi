@@ -103,7 +103,7 @@ window.onload = function onLoad() {
 // import { install } from 'offline-plugin/runtime';
 // install();
 
-import { pluginLoaded } from './containers/App/actions';
+import { pluginLoaded, updatePlugin } from './containers/App/actions';
 
 /**
  * Public Strapi object exposed to the `window` object
@@ -172,9 +172,12 @@ window.Strapi = {
   },
   port,
   apiUrl,
-  refresh: () => ({
+  refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
       render(_.merge({}, translationMessages, translationMessagesUpdated));
+    },
+    leftMenuLinks: (leftMenuLinksUpdated) => {
+      store.dispatch(updatePlugin(pluginId, 'leftMenuLinks', leftMenuLinksUpdated));
     },
   }),
 };

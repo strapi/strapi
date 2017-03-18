@@ -11,14 +11,14 @@ import styles from './styles.scss';
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     // List of links
-    let links = this.props.plugins.valueSeq().map(plugin => (
+    let links = this.props.plugins.valueSeq().map((plugin) => (
       <LeftMenuLink
-        key={plugin.id}
-        icon={plugin.icon || 'ion-merge'}
-        label={plugin.name}
-        destination={`/plugins/${plugin.id}`}
-        isActive={this.props.params.plugin === plugin.id}
-        leftMenuLinks={plugin.leftMenuLinks}
+        key={plugin.get('id')}
+        icon={plugin.get('icon') || 'ion-merge'}
+        label={plugin.get('name')}
+        destination={`/plugins/${plugin.get('id')}`}
+        isActive={this.props.params.plugin === plugin.get('id')}
+        leftMenuLinks={plugin.get('leftMenuLinks')}
       />
     ));
 

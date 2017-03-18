@@ -7,6 +7,13 @@
       "config": {
         "policies": []
       }
+    }, {
+      "method": "GET",
+      "path": "/api/models",
+      "handler": "Admin.models",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "GET",
