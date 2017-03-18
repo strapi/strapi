@@ -16,7 +16,6 @@ class LeftMenuSubLinkContainer extends React.Component { // eslint-disable-line 
         key={i}
         label={subLink.get('label')}
         destination={`${this.props.destinationPrefix}/${subLink.get('to')}`}
-        isActive={false}
       />
     ));
 

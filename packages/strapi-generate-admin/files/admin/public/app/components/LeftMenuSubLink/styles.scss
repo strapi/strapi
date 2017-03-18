@@ -9,10 +9,6 @@
   font-size: 1.2rem;
 }
 
-.leftMenuLinkActive {
-  border-left: 0.4rem solid $strapi-blue;
-}
-
 .link {
   color: $left-menu-link-color;
   padding-left: 5.8rem;
@@ -23,6 +19,10 @@
     color: $white;
     text-decoration: none;
   }
+}
+
+.linkActive {
+  color: $white;
 }
 
 .linkLabel {

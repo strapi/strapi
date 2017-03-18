@@ -11,8 +11,8 @@ import { Link } from 'react-router';
 class LeftMenuSubLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <li className={`${styles.leftMenuLink} ${this.props.isActive ? styles.leftMenuLinkActive : ''}`}>
-        <Link className={styles.link} to={this.props.destination}>
+      <li className={styles.leftMenuLink}>
+        <Link className={styles.link} to={this.props.destination} activeClassName={styles.linkActive}>
           <span className={styles.linkLabel}>{this.props.label}</span>
         </Link>
       </li>
@@ -23,7 +23,6 @@ class LeftMenuSubLink extends React.Component { // eslint-disable-line react/pre
 LeftMenuSubLink.propTypes = {
   label: React.PropTypes.string,
   destination: React.PropTypes.string,
-  isActive: React.PropTypes.bool,
 };
 
 export default LeftMenuSubLink;

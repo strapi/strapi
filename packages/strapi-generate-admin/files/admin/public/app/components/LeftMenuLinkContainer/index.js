@@ -17,7 +17,6 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
         icon={plugin.get('icon') || 'ion-merge'}
         label={plugin.get('name')}
         destination={`/plugins/${plugin.get('id')}`}
-        isActive={this.props.params.plugin === plugin.get('id')}
         leftMenuLinks={plugin.get('leftMenuLinks')}
       />
     ));
