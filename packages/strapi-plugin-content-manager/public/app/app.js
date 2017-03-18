@@ -29,7 +29,7 @@ class comp extends React.Component { // eslint-disable-line react/prefer-statele
   render() {
     return (
       <Provider store={store}>
-        <App />
+        <App {...this.props} />
       </Provider>
     );
   }
