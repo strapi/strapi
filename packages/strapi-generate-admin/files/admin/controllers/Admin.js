@@ -9,17 +9,13 @@ const path = require('path');
 
 module.exports = {
 
-  index: async (ctx) => {
+  index: async(ctx) => {
     try {
       // Send the HTML file with injected scripts
       ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
     } catch (err) {
       ctx.body = err;
     }
-  },
-
-  models: async (ctx) => {
-    ctx.body = strapi.models;
   },
 
   file: async ctx => {

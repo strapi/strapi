@@ -5,21 +5,27 @@
  */
 
 import {
+  SET_CURRENT_MODEL,
   LOAD_RECORDS,
   LOADED_RECORDS
 } from './constants';
 
-export function loadRecords(model) {
+export function setCurrentModel(model) {
   return {
-    type: LOAD_RECORDS,
+    type: SET_CURRENT_MODEL,
     model
   };
 }
 
-export function loadedRecord(records, models) {
+export function loadRecords() {
+  return {
+    type: LOAD_RECORDS,
+  };
+}
+
+export function loadedRecord(records) {
   return {
     type: LOADED_RECORDS,
     records,
-    models
   };
 }

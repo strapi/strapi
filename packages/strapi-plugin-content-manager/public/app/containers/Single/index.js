@@ -7,42 +7,90 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import Container from 'components/Container';
 
 import {
-  loadRecord
+  setCurrentModel,
+  loadRecord,
 } from './actions';
 
 import {
-  selectSingle
+  makeSelectRecord,
+  makeSelectLoading,
 } from './selectors';
 
 export class Single extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   componentWillMount() {
-    this.props.loadRecord(this.props.routeParams.slug, this.props.routeParams.id);
+    this.props.setCurrentModel(this.props.routeParams.slug.toLowerCase());
+    this.props.loadRecord(this.props.routeParams.id);
   }
 
   render() {
-    const display = [];
+    const PluginHeader = this.props.exposedComponents.PluginHeader;
 
-    for(var key in this.props.record) {
-      display.push(<li key={key}>{this.props.record[key]}</li>);
+    let content;
+    if (this.props.loading) {
+      content = (
+        <div>
+          <p>Loading...</p>
+        </div>
+      );
+    } else if (this.props.record) {
+      const items = [];
+      for(var key in this.props.record) {
+        items.push(<li key={key}>{key}: {this.props.record[key]}</li>);
+      }
+
+      content = (
+        <ul>
+          {items}
+        </ul>
+      )
     }
+
     return (
-      <ul>
-        {display}
-      </ul>
+      <div>
+        <div className="container-fluid">
+          <PluginHeader title={{
+            id: 'plugin-content-manager-title',
+            defaultMessage: `Content Manager > ${this.props.routeParams.slug}`
+          }} description={{
+            id: 'plugin-content-manager-description',
+            defaultMessage: `Manage your ${this.props.routeParams.slug}`
+          }} noActions={false}>
+          </PluginHeader>
+          <Container>
+            <p></p>
+            {content}
+          </Container>
+        </div>
+      </div>
     );
   }
 }
 
+
+Single.propTypes = {
+  setCurrentModel: React.PropTypes.func,
+  loadRecord: React.PropTypes.func,
+  loading: React.PropTypes.bool,
+  record: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+};
+
+
 const mapStateToProps = createStructuredSelector({
-  record: selectSingle()
+  record: makeSelectRecord(),
+  loading: makeSelectLoading(),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
-    loadRecord: (model, id) => dispatch(loadRecord(model, id)),
+    setCurrentModel: (model) => dispatch(setCurrentModel(model)),
+    loadRecord: (id) => dispatch(loadRecord(id)),
     dispatch,
   };
 }

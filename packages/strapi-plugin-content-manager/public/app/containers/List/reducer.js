@@ -6,28 +6,29 @@
 
 import { fromJS } from 'immutable';
 import {
+  SET_CURRENT_MODEL,
   LOAD_RECORDS,
   LOADED_RECORDS
 } from './constants';
 
 const initialState = fromJS({
-  loading: true,
   currentModel: null,
-  models: {},
-  schema: {}
+  loading: true,
+  records: false,
 });
 
 function listReducer(state = initialState, action) {
   switch (action.type) {
+    case SET_CURRENT_MODEL:
+      return state
+        .set('currentModel', action.model);
     case LOAD_RECORDS:
       return state
-        .set('loading', true)
-        .set('currentModel', action.model);
+        .set('loading', true);
     case LOADED_RECORDS:
       return state
         .set('loading', false)
-        .set('schema', action.models)
-        .setIn(['models', state.get('currentModel')], action.records);
+        .set('records', action.records);
     default:
       return state;
   }

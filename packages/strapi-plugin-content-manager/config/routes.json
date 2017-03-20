@@ -1,3 +1,28 @@
 {
-  "routes": []
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/models",
+      "handler": "ContentManager.models",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model",
+      "handler": "ContentManager.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.findOne",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
 }

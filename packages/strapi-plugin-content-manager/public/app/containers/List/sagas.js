@@ -1,5 +1,5 @@
 import { takeLatest } from 'redux-saga';
-import { put } from 'redux-saga/effects';
+import { put, select } from 'redux-saga/effects';
 
 import {
   loadedRecord
@@ -9,20 +9,12 @@ import {
   LOAD_RECORDS
 } from './constants';
 
+import {
+  makeSelectCurrentModel,
+} from './selectors';
+
 export function* getRecords() {
-  const fakeData = [{
-    id: 1,
-    title: 'Roger Federer has won the first set.',
-    message: 'Try to do better than that man and you will be a winner.'
-  }, {
-    id: 2,
-    title: 'Lewis Hamilton is on fire.',
-    message: 'Did you ever seen someone like that guy?'
-  }, {
-    id: 3,
-    title: 'Elon Musk is awesome!',
-    message: 'Space X, Paypal, Tesla, & cie.'
-  }];
+  const currentModel = yield select(makeSelectCurrentModel());
 
   try {
     const opts = {
@@ -30,10 +22,10 @@ export function* getRecords() {
       mode: 'cors',
       cache: 'default'
     };
-    const response = yield fetch('http://localhost:1337/admin/api/models', opts);
+    const response = yield fetch(`http://localhost:1337/content-manager/explorer/${currentModel}`, opts);
     const data = yield response.json();
 
-    yield put(loadedRecord(fakeData, data));
+    yield put(loadedRecord(data));
   } catch (err) {
     console.error(err);
   }

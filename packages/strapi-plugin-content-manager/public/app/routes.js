@@ -30,7 +30,7 @@ export default function createRoutes(store) {
         renderRoute(component);
       },
     }, {
-      path: '/list/:slug',
+      path: '/:slug',
       name: 'list',
       getComponent(nextState, cb) {
         const reducer = require('containers/List/reducer'); // eslint-disable-line global-require
@@ -44,7 +44,7 @@ export default function createRoutes(store) {
         renderRoute(component);
       },
     }, {
-      path: '/list/:slug/:id',
+      path: '/:slug/:id',
       name: 'list',
       getComponent(nextState, cb) {
         const reducer = require('containers/Single/reducer'); // eslint-disable-line global-require

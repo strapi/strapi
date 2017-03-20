@@ -14,13 +14,26 @@ const selectSingleDomain = () => state => state.get('single');
  * Default selector used by Single
  */
 
-const selectSingle = () => createSelector(
+const makeSelectRecord = () => createSelector(
   selectSingleDomain(),
-  (substate) => substate.get('record')
+  (substate) => {
+    return substate.get('record');
+  }
 );
 
-export default selectSingle;
+const makeSelectLoading = () => createSelector(
+  selectSingleDomain(),
+  (substate) => substate.get('loading')
+);
+
+const makeSelectCurrentModel = () => createSelector(
+  selectSingleDomain(),
+  (substate) => substate.get('currentModel')
+);
+
+export default selectSingleDomain;
 export {
-  selectSingleDomain,
-  selectSingle
+  makeSelectRecord,
+  makeSelectLoading,
+  makeSelectCurrentModel,
 };
