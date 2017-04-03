@@ -94,6 +94,7 @@ module.exports = strapi => {
             database: _.get(connection.settings, 'database'),
             charset: _.get(connection.settings, 'charset'),
             schema: _.get(connection.settings, 'schema'),
+            port: _.get(connection.settings, 'port'),
           },
           debug: _.get(connection, 'debug') || false
         }, strapi.config.hooks.knex);

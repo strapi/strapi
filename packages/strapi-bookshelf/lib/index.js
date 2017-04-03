@@ -184,6 +184,15 @@ module.exports = function (strapi) {
                   }
                 }), 'columnName'));
 
+                loadedModel.save = function() {
+                  arguments['0'] = _.mapKeys(arguments['0'], function(value, key) {
+                    var attr = definition.attributes[key];
+                    return (attr.hasOwnProperty('columnName') && !_.isEmpty(attr.columnName) && attr.columnName !== key) ? attr.columnName : key;
+                  });
+
+                  return ORM.Model.prototype.save.apply(this, arguments);
+                };
+
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
                   model: global[globalName]
