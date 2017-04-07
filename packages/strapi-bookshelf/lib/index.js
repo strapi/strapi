@@ -120,11 +120,11 @@ module.exports = function (strapi) {
             definition.client = _.get(connection.settings, 'client');
 
             // Register the final model for Bookshelf.
-            const loadedModel = {
+            const loadedModel = _.assign({
               tableName: definition.tableName,
               hasTimestamps: _.get(definition, 'options.timestamps') === true,
               idAttribute: _.get(definition, 'options.idAttribute') || 'id'
-            };
+            }, definition.options);
 
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
