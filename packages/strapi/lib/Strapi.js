@@ -19,11 +19,10 @@ const mixinAfter = require('./private/after');
  * @constructor
  */
 
- // Private properties
+// Private properties
 let _instance = null;
 
 class Strapi extends EventEmitter {
-
   constructor() {
     super();
 
