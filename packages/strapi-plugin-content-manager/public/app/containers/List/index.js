@@ -9,24 +9,29 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import Container from 'components/Container';
-import ListItem from 'components/ListItem';
+import Table from 'components/Table';
+import _ from 'lodash';
 
 import styles from './styles.scss';
 
 import {
-  setCurrentModel,
+  setCurrentModelName,
   loadRecords,
 } from './actions';
 
 import {
   makeSelectLoading,
   makeSelectModelRecords,
+  makeSelectCurrentModelName,
 } from './selectors';
 
-export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
+import {
+  makeSelectModels,
+} from 'containers/App/selectors';
 
+export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentWillMount() {
-    this.props.setCurrentModel(this.props.routeParams.slug.toLowerCase());
+    this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
     this.props.loadRecords();
   }
 
@@ -41,18 +46,24 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
         </div>
       );
     } else {
-      const items = this.props.records.map((record, key) => {
-        const destination = this.props.route.path.replace(':slug', this.props.routeParams.slug) + '/' + record.id;
+      // Detect current model structure from models list
+      const currentModel = this.props.models[this.props.currentModelName];
 
-        return (
-          <ListItem key={key} destination={destination} {...record} />
-        );
-      });
+      // Define table headers
+      const tableHeaders = _.map(currentModel.attributes, (value, key) => ({
+          name: key,
+          label: key,
+          type: value.type,
+        })
+      );
 
       content = (
-        <ul>
-          {items}
-        </ul>
+        <Table
+          records={this.props.records}
+          route={this.props.route}
+          routeParams={this.props.routeParams}
+          headers={tableHeaders}
+        />
       )
     }
 
@@ -78,18 +89,23 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
 }
 
 List.propTypes = {
-  setCurrentModel: React.PropTypes.func,
+  setCurrentModelName: React.PropTypes.func,
   records: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.bool,
   ]),
   loadRecords: React.PropTypes.func,
-  loading: React.PropTypes.bool
+  loading: React.PropTypes.bool,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  currentModelName: React.PropTypes.string,
 };
 
 function mapDispatchToProps(dispatch) {
   return {
-    setCurrentModel: (model) => dispatch(setCurrentModel(model)),
+    setCurrentModelName: (modelName) => dispatch(setCurrentModelName(modelName)),
     loadRecords: () => dispatch(loadRecords()),
     dispatch,
   };
@@ -98,6 +114,8 @@ function mapDispatchToProps(dispatch) {
 const mapStateToProps = createStructuredSelector({
   records: makeSelectModelRecords(),
   loading: makeSelectLoading(),
+  models: makeSelectModels(),
+  currentModelName: makeSelectCurrentModelName(),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(List));

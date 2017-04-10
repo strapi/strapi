@@ -5,15 +5,15 @@
  */
 
 import {
-  SET_CURRENT_MODEL,
+  SET_CURRENT_MODEL_NAME,
   LOAD_RECORDS,
   LOADED_RECORDS
 } from './constants';
 
-export function setCurrentModel(model) {
+export function setCurrentModelName(modelName) {
   return {
-    type: SET_CURRENT_MODEL,
-    model
+    type: SET_CURRENT_MODEL_NAME,
+    modelName
   };
 }
 

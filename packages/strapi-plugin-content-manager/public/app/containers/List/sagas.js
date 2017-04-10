@@ -10,11 +10,11 @@ import {
 } from './constants';
 
 import {
-  makeSelectCurrentModel,
+  makeSelectCurrentModelName,
 } from './selectors';
 
 export function* getRecords() {
-  const currentModel = yield select(makeSelectCurrentModel());
+  const currentModel = yield select(makeSelectCurrentModelName());
 
   try {
     const opts = {

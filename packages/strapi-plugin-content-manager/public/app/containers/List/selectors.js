@@ -26,14 +26,14 @@ const makeSelectLoading = () => createSelector(
   (substate) => substate.get('loading')
 );
 
-const makeSelectCurrentModel = () => createSelector(
+const makeSelectCurrentModelName = () => createSelector(
   selectListDomain(),
-  (substate) => substate.get('currentModel')
+  (substate) => substate.get('currentModelName')
 );
 
 export {
   selectListDomain,
   makeSelectLoading,
   makeSelectModelRecords,
-  makeSelectCurrentModel,
+  makeSelectCurrentModelName,
 };

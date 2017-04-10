@@ -1,6 +1,4 @@
 {
   "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
-  "app.components.NotFoundPage.description": "Page introuvable",
-  "settings-manager.components.PluginHeaderTitle.description": "",
-  "settings-manager.components.PluginHeaderTitle.title": ""
+  "app.components.NotFoundPage.description": "Page introuvable"
 }

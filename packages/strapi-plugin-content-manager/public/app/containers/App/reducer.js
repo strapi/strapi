@@ -12,7 +12,7 @@ import {
 
 const initialState = fromJS({
   loading: false,
-  models: {}
+  models: false,
 });
 
 function appReducer(state = initialState, action) {
