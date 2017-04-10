@@ -49,8 +49,11 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
       // Detect current model structure from models list
       const currentModel = this.props.models[this.props.currentModelName];
 
+      // Hide non displayed attributes
+      const displayedAttributes = _.pickBy(currentModel.attributes, (attr) => (!attr.admin || attr.admin.displayed !== false));
+
       // Define table headers
-      const tableHeaders = _.map(currentModel.attributes, (value, key) => ({
+      const tableHeaders = _.map(displayedAttributes, (value, key) => ({
           name: key,
           label: key,
           type: value.type,
