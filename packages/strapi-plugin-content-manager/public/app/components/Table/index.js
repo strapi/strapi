@@ -9,8 +9,6 @@ import React from 'react';
 import TableHeader from 'components/TableHeader';
 import TableRow from 'components/TableRow';
 
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import styles from './styles.scss';
 
 class Table extends React.Component { // eslint-disable-line react/prefer-stateless-function

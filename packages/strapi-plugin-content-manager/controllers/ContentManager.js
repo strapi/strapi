@@ -16,10 +16,28 @@ module.exports = {
   find: async(ctx) => {
     const model = ctx.params.model;
 
+    const {
+      limit = 10,
+      skip = 0,
+    } = ctx.request.query;
+
     const entries = await User
-      .find();
+      .find()
+      .limit(limit)
+      .limit(skip);
 
     ctx.body = entries;
+  },
+
+  count: async(ctx) => {
+    const model = ctx.params.model;
+
+    const count = await User
+      .count();
+
+    ctx.body = {
+      count: Number(count)
+    };
   },
 
   findOne: async(ctx) => {
@@ -28,7 +46,7 @@ module.exports = {
 
     const entries = await User
       .find({
-        id: id
+        id
       });
 
     ctx.body = entries;

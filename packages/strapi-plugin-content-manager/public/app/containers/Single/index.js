@@ -46,7 +46,7 @@ export class Single extends React.Component { // eslint-disable-line react/prefe
         <ul>
           {items}
         </ul>
-      )
+      );
     }
 
     return (

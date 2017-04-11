@@ -14,16 +14,38 @@ const selectListDomain = () => state => state.get('list');
  * Default selector used by List
  */
 
-const makeSelectModelRecords = () => createSelector(
+const makeSelectRecords = () => createSelector(
   selectListDomain(),
   (substate) => {
     return substate.get('records');
   }
 );
 
-const makeSelectLoading = () => createSelector(
+const makeSelectLoadingRecords = () => createSelector(
   selectListDomain(),
-  (substate) => substate.get('loading')
+  (substate) => substate.get('loadingRecords')
+);
+
+const makeSelectCount = () => createSelector(
+  selectListDomain(),
+  (substate) => {
+    return substate.get('count');
+  }
+);
+
+const makeSelectLoadingCount = () => createSelector(
+  selectListDomain(),
+  (substate) => substate.get('loadingCount')
+);
+
+const makeSelectCurrentPage = () => createSelector(
+  selectListDomain(),
+  (substate) => substate.get('currentPage')
+);
+
+const makeSelectLimitPerPage = () => createSelector(
+  selectListDomain(),
+  (substate) => substate.get('limitPerPage')
 );
 
 const makeSelectCurrentModelName = () => createSelector(
@@ -33,7 +55,11 @@ const makeSelectCurrentModelName = () => createSelector(
 
 export {
   selectListDomain,
-  makeSelectLoading,
-  makeSelectModelRecords,
+  makeSelectRecords,
+  makeSelectLoadingRecords,
+  makeSelectCount,
+  makeSelectLoadingCount,
+  makeSelectCurrentPage,
+  makeSelectLimitPerPage,
   makeSelectCurrentModelName,
 };

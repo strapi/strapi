@@ -8,21 +8,30 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
+import _ from 'lodash';
+
 import Container from 'components/Container';
 import Table from 'components/Table';
-import _ from 'lodash';
+import Pagination from 'components/Pagination';
 
 import styles from './styles.scss';
 
 import {
   setCurrentModelName,
   loadRecords,
+  loadCount,
+  goNextPage,
+  goPreviousPage,
 } from './actions';
 
 import {
-  makeSelectLoading,
-  makeSelectModelRecords,
+  makeSelectRecords,
+  makeSelectLoadingRecords,
   makeSelectCurrentModelName,
+  makeSelectCount,
+  makeSelectCurrentPage,
+  makeSelectLimitPerPage,
+  makeSelectLoadingCount,
 } from './selectors';
 
 import {
@@ -33,13 +42,14 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
   componentWillMount() {
     this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
     this.props.loadRecords();
+    this.props.loadCount();
   }
 
   render() {
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content;
-    if (this.props.loading) {
+    if (this.props.loadingRecords) {
       content = (
         <div>
           <p>Loading...</p>
@@ -54,11 +64,10 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
 
       // Define table headers
       const tableHeaders = _.map(displayedAttributes, (value, key) => ({
-          name: key,
-          label: key,
-          type: value.type,
-        })
-      );
+        name: key,
+        label: key,
+        type: value.type,
+      }));
 
       content = (
         <Table
@@ -67,7 +76,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           routeParams={this.props.routeParams}
           headers={tableHeaders}
         />
-      )
+      );
     }
 
     return (
@@ -84,6 +93,13 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           <Container>
             <p></p>
             {content}
+            <Pagination
+              limitPerPage={this.props.limitPerPage}
+              currentPage={this.props.currentPage}
+              goNextPage={this.props.goNextPage}
+              goPreviousPage={this.props.goPreviousPage}
+              count={this.props.count}
+            />
           </Container>
         </div>
       </div>
@@ -98,26 +114,45 @@ List.propTypes = {
     React.PropTypes.bool,
   ]),
   loadRecords: React.PropTypes.func,
-  loading: React.PropTypes.bool,
+  loadingRecords: React.PropTypes.bool,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  currentPage: React.PropTypes.number,
+  limitPerPage: React.PropTypes.number,
   currentModelName: React.PropTypes.string,
+  goNextPage: React.PropTypes.func,
+  goPreviousPage: React.PropTypes.func,
 };
 
 function mapDispatchToProps(dispatch) {
   return {
     setCurrentModelName: (modelName) => dispatch(setCurrentModelName(modelName)),
     loadRecords: () => dispatch(loadRecords()),
+    loadCount: () => dispatch(loadCount()),
+    goNextPage: () => {
+      dispatch(goNextPage());
+      dispatch(loadRecords());
+      dispatch(loadCount());
+    },
+    goPreviousPage: () => {
+      dispatch(goPreviousPage());
+      dispatch(loadRecords());
+      dispatch(loadCount());
+    },
     dispatch,
   };
 }
 
 const mapStateToProps = createStructuredSelector({
-  records: makeSelectModelRecords(),
-  loading: makeSelectLoading(),
+  records: makeSelectRecords(),
+  loadingRecords: makeSelectLoadingRecords(),
+  count: makeSelectCount(),
+  loadingCount: makeSelectLoadingCount(),
   models: makeSelectModels(),
+  currentPage: makeSelectCurrentPage(),
+  limitPerPage: makeSelectLimitPerPage(),
   currentModelName: makeSelectCurrentModelName(),
 });
 

@@ -5,17 +5,13 @@
  */
 
 import React from 'react';
-
 import { Link } from 'react-router';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+
 import styles from './styles.scss';
 
 class TableRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const cells = this.props.headers.map((header, i) => {
-      return <td key={i} className={styles.tableRowCell}>{this.props.record[header.name]}</td>
-    });
+    const cells = this.props.headers.map((header, i) => (<td key={i} className={styles.tableRowCell}>{this.props.record[header.name]}</td>));
 
     return (
       <tr className={styles.tableRow}>

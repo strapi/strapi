@@ -1,19 +1,53 @@
 import { takeLatest } from 'redux-saga';
-import { put, select } from 'redux-saga/effects';
+import { put, select, fork, call } from 'redux-saga/effects';
+import request from 'utils/request';
 
 import {
-  loadedRecord
+  loadedRecord,
+  loadedCount,
 } from './actions';
 
 import {
-  LOAD_RECORDS
+  LOAD_RECORDS,
+  LOAD_COUNT,
 } from './constants';
 
 import {
   makeSelectCurrentModelName,
+  makeSelectLimitPerPage,
+  makeSelectCurrentPage,
 } from './selectors';
 
 export function* getRecords() {
+  const currentModel = yield select(makeSelectCurrentModelName());
+  const limitPerPage = yield select(makeSelectLimitPerPage());
+  const currentPage = yield select(makeSelectCurrentPage());
+
+  // Calculate the number of values to be skip
+  const skip = (currentPage - 1) * limitPerPage;
+
+  // Init `params` object
+  const params = {
+    skip,
+    limit: limitPerPage,
+  };
+
+  try {
+    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModel}`;
+
+    // Call our request helper (see 'utils/request')
+    const data = yield call(request, requestURL, {
+      method: 'GET',
+      params,
+    });
+
+    yield put(loadedRecord(data));
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export function* getCount() {
   const currentModel = yield select(makeSelectCurrentModelName());
 
   try {
@@ -22,19 +56,20 @@ export function* getRecords() {
       mode: 'cors',
       cache: 'default'
     };
-    const response = yield fetch(`http://localhost:1337/content-manager/explorer/${currentModel}`, opts);
+    const response = yield fetch(`http://localhost:1337/content-manager/explorer/${currentModel}/count`, opts);
+
     const data = yield response.json();
 
-    yield put(loadedRecord(data));
+    yield put(loadedCount(data.count));
   } catch (err) {
     console.error(err);
   }
 }
 
-
 // Individual exports for testing
 export function* defaultSaga() {
-  yield takeLatest(LOAD_RECORDS, getRecords);
+  yield fork(takeLatest, LOAD_RECORDS, getRecords);
+  yield fork(takeLatest, LOAD_COUNT, getCount);
 }
 
 // All sagas to be loaded

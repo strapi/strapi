@@ -16,22 +16,32 @@ function parseJSON(response) {
  *
  * @param  {object} response   A response from a network request
  *
- * @return {Promise} Returns either the response, or throws an error
+ * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response) {
-  return new Promise((resolve) => {
-    if (response.status >= 200 && response.status < 300) {
-      return resolve(response);
-    }
+  if (response.status >= 200 && response.status < 300) {
+    return response;
+  }
 
-    return parseJSON(response)
-      .then((data) => {
-        const error = new Error(data.message || response.statusText);
-        error.data = data;
-        error.response = response;
-        throw error;
-      });
-  });
+  return parseJSON(response)
+    .then((responseFormatted) => {
+      const error = new Error(response.statusText);
+      error.response = response;
+      error.response.payload = responseFormatted;
+      throw error;
+    });
+}
+
+/**
+ * Format query params
+ *
+ * @param params
+ * @returns {string}
+ */
+function formatQueryParams(params) {
+  return Object.keys(params)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .join('&');
 }
 
 /**
@@ -40,20 +50,29 @@ function checkStatus(response) {
  * @param  {string} url       The URL we want to request
  * @param  {object} [options] The options we want to pass to "fetch"
  *
- * @return {object}           An object containing either "data" or "err"
+ * @return {object}           The response data
  */
 export default function request(url, options) {
-  // Default headers
-  const params = options || { };
-  const defaultHeaders = {
-    Accept: 'application/json',
+  const optionsObj = options || {};
+
+  // Set headers
+  optionsObj.headers = {
     'Content-Type': 'application/json',
   };
-  params.headers = params && params.headers ? params.headers : defaultHeaders;
 
-  return fetch(url, params)
+  // Add parameters to url
+  let urlFormatted = url;
+  if (optionsObj && optionsObj.params) {
+    const params = formatQueryParams(optionsObj.params);
+    urlFormatted = `${url}?${params}`;
+  }
+
+  // Stringify body object
+  if (optionsObj && optionsObj.body) {
+    optionsObj.body = JSON.stringify(optionsObj.body);
+  }
+
+  return fetch(urlFormatted, optionsObj)
     .then(checkStatus)
-    .then(parseJSON)
-    .then((data) => ({ data }))
-    .catch((err) => ({ err }));
+    .then(parseJSON);
 }

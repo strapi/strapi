@@ -18,6 +18,14 @@
     },
     {
       "method": "GET",
+      "path": "/explorer/:model/count",
+      "handler": "ContentManager.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
       "config": {
