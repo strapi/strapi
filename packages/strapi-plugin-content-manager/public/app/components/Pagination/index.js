@@ -133,8 +133,6 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
 
   render() {
     // Init variables
-    let beforeLinksDots;
-    let afterLinksDots;
     const linksOptions = [];
 
     // Add active page link
@@ -217,9 +215,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
         <div className={styles.separator}></div>
         <nav className={styles.nav}>
           <ul className={styles.navUl}>
-            { beforeLinksDots }
             {links}
-            { afterLinksDots }
           </ul>
         </nav>
         <a href
@@ -236,5 +232,15 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     );
   }
 }
+
+Pagination.propTypes = {
+  limit: React.PropTypes.number,
+  currentPage: React.PropTypes.number,
+  changePage: React.PropTypes.func,
+  count: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.bool,
+  ]),
+};
 
 export default Pagination;

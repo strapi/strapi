@@ -12,8 +12,7 @@ import _ from 'lodash';
 
 import Container from 'components/Container';
 import Table from 'components/Table';
-import Pagination from 'components/Pagination';
-import LimitSelect from 'components/LimitSelect';
+import TableFooter from 'components/TableFooter';
 
 import styles from './styles.scss';
 
@@ -105,25 +104,14 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           </PluginHeader>
           <Container>
             {content}
-            <div className="row">
-              <div className="col-md-6">
-                <Pagination
-                  limit={this.props.limit}
-                  currentPage={this.props.currentPage}
-                  changePage={this.props.changePage}
-                  count={this.props.count}
-                />
-              </div>
-              <div className="col-md-6">
-                <div className="pull-xs-right">
-                  <LimitSelect
-                    className="push-lg-right"
-                    onLimitChange={this.props.onLimitChange}
-                    limit={this.props.limit}
-                  />
-                </div>
-              </div>
-            </div>
+            <TableFooter
+              limit={this.props.limit}
+              currentPage={this.props.currentPage}
+              changePage={this.props.changePage}
+              count={this.props.count}
+              className="push-lg-right"
+              onLimitChange={this.props.onLimitChange}
+            />
           </Container>
         </div>
       </div>
@@ -153,6 +141,10 @@ List.propTypes = {
   currentModelName: React.PropTypes.string,
   changeSort: React.PropTypes.func,
   onLimitChange: React.PropTypes.func,
+  count: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.bool,
+  ]),
 };
 
 function mapDispatchToProps(dispatch) {

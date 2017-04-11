@@ -52,4 +52,9 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
   }
 }
 
+LimitSelect.propTypes = {
+  limit: React.PropTypes.number,
+  onLimitChange: React.PropTypes.func,
+};
+
 export default LimitSelect;
