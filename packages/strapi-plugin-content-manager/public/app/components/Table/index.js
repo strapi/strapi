@@ -30,6 +30,8 @@ class Table extends React.Component { // eslint-disable-line react/prefer-statel
       <table className={`table ${styles.table}`}>
         <TableHeader
           headers={this.props.headers}
+          changeSort={this.props.changeSort}
+          sort={this.props.sort}
         />
         <tbody>
         {tableRows}
@@ -44,6 +46,8 @@ Table.propTypes = {
   route: React.PropTypes.object,
   routeParams: React.PropTypes.object,
   headers: React.PropTypes.array,
+  changeSort: React.PropTypes.func,
+  sort: React.PropTypes.string,
 };
 
 export default Table;

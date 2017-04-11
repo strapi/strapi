@@ -11,7 +11,7 @@ import {
   LOAD_COUNT,
   LOADED_COUNT,
   CHANGE_PAGE,
-  CHANGE_ORDER,
+  CHANGE_SORT,
 } from './constants';
 
 export function setCurrentModelName(modelName) {
@@ -51,5 +51,12 @@ export function changePage(page) {
   return {
     type: CHANGE_PAGE,
     page,
+  };
+}
+
+export function changeSort(sort) {
+  return {
+    type: CHANGE_SORT,
+    sort,
   };
 }

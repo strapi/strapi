@@ -13,3 +13,4 @@ export const LOAD_COUNT = 'app/List/LOAD_COUNT';
 export const LOADED_COUNT = 'app/List/LOADED_COUNT';
 
 export const CHANGE_PAGE = 'app/List/CHANGE_PAGE';
+export const CHANGE_SORT = 'app/List/CHANGE_SORT';

@@ -9,8 +9,33 @@ import React from 'react';
 import styles from './styles.scss';
 
 class TableHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  changeSort(name) {
+    if (this.props.sort === name) {
+      this.props.changeSort(`-${name}`);
+    } else if (this.props.sort === `-${name}`) {
+      this.props.changeSort('id');
+    } else {
+      this.props.changeSort(name);
+    }
+  }
+
   render() {
-    const headers = this.props.headers.map((header, i) => (<th key={i}>{header.label}</th>));
+    // Generate headers list
+    const headers = this.props.headers.map((header, i) => {
+      // Define sort icon
+      let icon;
+      if (this.props.sort === header.name) {
+        icon = (<i className={`ion ion-arrow-up-b ${styles.icon}`}></i>);
+      } else if (this.props.sort === `-${header.name}`) {
+        icon = (<i className={`ion ion-arrow-down-b ${styles.icon}`}></i>);
+      }
+
+      return (
+        <th key={i} onClick={() => this.changeSort(header.name)}>
+          {header.label} {icon}
+        </th>
+      );
+    });
 
     return (
       <thead className={styles.tableHeader}>

@@ -19,11 +19,13 @@ module.exports = {
     const {
       limit = 10,
       skip = 0,
+      sort = 'id'
     } = ctx.request.query;
 
     const entries = await User
       .find()
       .limit(limit)
+      .sort(sort)
       .limit(skip);
 
     ctx.body = entries;

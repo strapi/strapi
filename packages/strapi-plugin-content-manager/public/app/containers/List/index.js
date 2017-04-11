@@ -21,6 +21,7 @@ import {
   loadRecords,
   loadCount,
   changePage,
+  changeSort,
 } from './actions';
 
 import {
@@ -30,6 +31,7 @@ import {
   makeSelectCount,
   makeSelectCurrentPage,
   makeSelectLimitPerPage,
+  makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
 
@@ -74,6 +76,8 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           route={this.props.route}
           routeParams={this.props.routeParams}
           headers={tableHeaders}
+          changeSort={this.props.changeSort}
+          sort={this.props.sort}
         />
       );
     }
@@ -119,8 +123,9 @@ List.propTypes = {
   ]),
   currentPage: React.PropTypes.number,
   limitPerPage: React.PropTypes.number,
+  sort: React.PropTypes.string,
   currentModelName: React.PropTypes.string,
-  goPage: React.PropTypes.func,
+  changeSort: React.PropTypes.func,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -132,6 +137,10 @@ function mapDispatchToProps(dispatch) {
       dispatch(changePage(page));
       dispatch(loadRecords());
       dispatch(loadCount());
+    },
+    changeSort: (sort) => {
+      dispatch(changeSort(sort));
+      dispatch(loadRecords());
     },
     dispatch,
   };
@@ -145,6 +154,7 @@ const mapStateToProps = createStructuredSelector({
   models: makeSelectModels(),
   currentPage: makeSelectCurrentPage(),
   limitPerPage: makeSelectLimitPerPage(),
+  sort: makeSelectSort(),
   currentModelName: makeSelectCurrentModelName(),
 });
 

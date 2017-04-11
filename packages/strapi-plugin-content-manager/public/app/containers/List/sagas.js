@@ -16,12 +16,14 @@ import {
   makeSelectCurrentModelName,
   makeSelectLimitPerPage,
   makeSelectCurrentPage,
+  makeSelectSort,
 } from './selectors';
 
 export function* getRecords() {
   const currentModel = yield select(makeSelectCurrentModelName());
   const limitPerPage = yield select(makeSelectLimitPerPage());
   const currentPage = yield select(makeSelectCurrentPage());
+  const sort = yield select(makeSelectSort());
 
   // Calculate the number of values to be skip
   const skip = (currentPage - 1) * limitPerPage;
@@ -30,6 +32,7 @@ export function* getRecords() {
   const params = {
     skip,
     limit: limitPerPage,
+    sort,
   };
 
   try {
