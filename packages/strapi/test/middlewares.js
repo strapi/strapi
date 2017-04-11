@@ -16,7 +16,7 @@ describe('middlewares', () => {
   });
 
   it('`strapi.middlewares.bodyparser` should be a function', () => {
-    assert(typeof strapi.middlewares.bodyparser === 'function');
+    assert(typeof strapi.middlewares.body === 'function');
   });
 
   it('`strapi.middlewares.compose` should be a function', () => {
