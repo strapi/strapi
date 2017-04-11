@@ -172,6 +172,7 @@ function mapDispatchToProps(dispatch) {
     onLimitChange: (e) => {
       const newLimit = Number(e.target.value);
       dispatch(changeLimit(newLimit));
+      dispatch(changePage(1));
       dispatch(loadRecords());
       e.target.blur();
     },
