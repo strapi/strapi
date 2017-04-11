@@ -15,20 +15,13 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
     this.setState({ id });
   }
 
+  /**
+   * Return the list of default values to populate the select options
+   *
+   * @returns {number[]}
+   */
   getOptionsValues() {
-    return [{
-      value: 10,
-      label: 10,
-    }, {
-      value: 20,
-      label: 20,
-    }, {
-      value: 50,
-      label: 50,
-    }, {
-      value: 100,
-      label: 100,
-    }];
+    return [10, 20, 50, 100];
   }
 
   shouldComponentUpdate() {
@@ -38,7 +31,7 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
   render() {
     // Generate options
     const options = this.getOptionsValues().map((optionValue) => (
-      <option value={optionValue.value} key={optionValue.value}>{optionValue.label}</option>
+      <option value={optionValue} key={optionValue}>{optionValue}</option>
     ));
 
     // Get id in order to link the `label` and the `select` elements
