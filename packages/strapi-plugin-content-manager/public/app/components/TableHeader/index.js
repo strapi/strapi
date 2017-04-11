@@ -40,7 +40,6 @@ class TableHeader extends React.Component { // eslint-disable-line react/prefer-
     return (
       <thead className={styles.tableHeader}>
       <tr className={styles.tableHeader}>
-        <th>ID</th>
         {headers}
         <th></th>
       </tr>

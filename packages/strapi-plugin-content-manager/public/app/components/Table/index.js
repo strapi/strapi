@@ -22,6 +22,7 @@ class Table extends React.Component { // eslint-disable-line react/prefer-statel
           destination={destination}
           headers={this.props.headers}
           record={record}
+          history={this.props.history}
         />
       );
     });
@@ -41,6 +42,10 @@ class Table extends React.Component { // eslint-disable-line react/prefer-statel
   }
 }
 
+Table.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
 Table.propTypes = {
   records: React.PropTypes.array,
   route: React.PropTypes.object,
@@ -48,6 +53,7 @@ Table.propTypes = {
   headers: React.PropTypes.array,
   changeSort: React.PropTypes.func,
   sort: React.PropTypes.string,
+  history: React.PropTypes.object,
 };
 
 export default Table;

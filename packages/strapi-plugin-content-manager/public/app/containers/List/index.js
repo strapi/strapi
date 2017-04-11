@@ -70,6 +70,13 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
         type: value.type,
       }));
 
+      // Add `id` column
+      tableHeaders.unshift({
+        name: 'id',
+        label: 'ID',
+        type: 'string',
+      });
+
       content = (
         <Table
           records={this.props.records}
@@ -78,6 +85,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           headers={tableHeaders}
           changeSort={this.props.changeSort}
           sort={this.props.sort}
+          history={this.props.history}
         />
       );
     }
@@ -108,6 +116,10 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
     );
   }
 }
+
+List.contextTypes = {
+  router: React.PropTypes.object.isRequired
+};
 
 List.propTypes = {
   setCurrentModelName: React.PropTypes.func,

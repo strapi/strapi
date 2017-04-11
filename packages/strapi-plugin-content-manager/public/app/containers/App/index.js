@@ -34,6 +34,10 @@ class App extends React.Component { // eslint-disable-line react/prefer-stateles
   }
 }
 
+App.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
 App.propTypes = {
   children: React.PropTypes.node,
   loadModels: React.PropTypes.func,
