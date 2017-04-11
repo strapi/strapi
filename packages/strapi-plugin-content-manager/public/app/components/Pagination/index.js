@@ -11,11 +11,10 @@ import styles from './styles.scss';
 class Pagination extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
-    this.state = {
-      progress: -1,
-    };
     this.onGoPreviousPageClicked = this.onGoPreviousPageClicked.bind(this);
     this.onGoNextPageClicked = this.onGoNextPageClicked.bind(this);
+    this.onGoFirstPageClicked = this.onGoFirstPageClicked.bind(this);
+    this.onGoLastPageClicked = this.onGoLastPageClicked.bind(this);
   }
 
   /**
@@ -28,16 +27,23 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   /**
-   * Check if the
+   * Check if the previous links dots
+   * should be displayed or not
    *
    * @returns {boolean}
    */
   needPreviousLinksDots() {
-    return this.props.currentPage >= 3;
+    return this.props.currentPage > 3;
   }
 
+  /**
+   * Check if the after links dots
+   * should be displayed or not
+   *
+   * @returns {boolean}
+   */
   needAfterLinksDots() {
-    return this.props.currentPage < this.lastPage() - 1;
+    return this.props.currentPage < this.getLastPageNumber() - 1;
   }
 
   /**
@@ -45,7 +51,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
    *
    * @returns {number}
    */
-  lastPage() {
+  getLastPageNumber() {
     return Math.ceil(this.props.count / this.props.limit);
   }
 
@@ -55,13 +61,13 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
    * @returns {boolean}
    */
   isLastPage() {
-    return this.props.currentPage === this.lastPage();
+    return this.props.currentPage === this.getLastPageNumber();
   }
 
   /**
-   * Triggered on previous page click.
+   * Triggered on previous page click
    *
-   * Prevent link default behavior and go to previous page.
+   * Prevent link default behavior and go to previous page
    *
    * @param e {Object} Click event
    */
@@ -74,9 +80,9 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   /**
-   * Triggered on next page click.
+   * Triggered on next page click
    *
-   * Prevent link default behavior and go to next page.
+   * Prevent link default behavior and go to next page
    *
    * @param e {Object} Click event
    */
@@ -88,12 +94,48 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     }
   }
 
+  /**
+   * Triggered on dots click
+   *
+   * Simply prevent link default behavior
+   *
+   * @param e {Object} Click event
+   */
+  onDotsClicked(e) {
+    e.preventDefault();
+  }
+
+  /**
+   * Triggered on first page click
+   *
+   * Prevent link default behavior and go to first page
+   *
+   * @param e {Object} Click event
+   */
+  onGoFirstPageClicked(e) {
+    e.preventDefault();
+
+    this.props.changePage(1);
+  }
+
+  /**
+   * Triggered on last page click
+   *
+   * Prevent link default behavior and go to last page
+   *
+   * @param e {Object} Click event
+   */
+  onGoLastPageClicked(e) {
+    e.preventDefault();
+
+    this.props.changePage(this.getLastPageNumber());
+  }
+
   render() {
     // Init variables
     let beforeLinksDots;
     let afterLinksDots;
     const linksOptions = [];
-    const dotsElem = (<li className={styles.navLi}><span>...</span></li>);
 
     // Add active page link
     linksOptions.push({
@@ -122,19 +164,37 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
       });
     }
 
-    // Add previous link dots
+    // Add previous link dots and first page link
     if (this.needPreviousLinksDots()) {
-      beforeLinksDots = dotsElem;
+      linksOptions.unshift({
+        value: '...',
+        isActive: false,
+        onClick: this.onDotsClicked,
+      });
+      linksOptions.unshift({
+        value: 1,
+        isActive: false,
+        onClick: this.onGoFirstPageClicked,
+      });
     }
 
-    // Add next link dots
+    // Add next link dots and last page link
     if (this.needAfterLinksDots()) {
-      afterLinksDots = dotsElem;
+      linksOptions.push({
+        value: '...',
+        isActive: false,
+        onClick: this.onDotsClicked,
+      });
+      linksOptions.push({
+        value: this.getLastPageNumber(),
+        isActive: false,
+        onClick: this.onGoLastPageClicked,
+      });
     }
 
     // Generate links
-    const links = linksOptions.map((linksOption) => (
-        <li className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`} key={linksOption.value}>
+    const links = linksOptions.map((linksOption, i) => (
+        <li className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`} key={i}>
           <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
             {linksOption.value}
           </a>
