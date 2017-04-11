@@ -36,3 +36,9 @@
     }
   }
 }
+
+.idLink {
+  &:hover {
+    text-decoration: none;
+  }
+}
