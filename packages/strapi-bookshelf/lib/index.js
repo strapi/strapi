@@ -240,18 +240,6 @@ module.exports = function(strapi) {
                   )
                 );
 
-                // loadedModel.save = function() {
-                //
-                //
-                //   console.log('Attributes');
-                //   console.log(this.attributes);
-                //   console.log('Arguments');
-                //   console.log(arguments);
-                //   console.log('----------');
-                //
-                //   return ORM.Model.prototype.save.apply(this, arguments);
-                // };
-
                 global[globalName] = ORM.Model.extend(loadedModel);
                 global[pluralize(globalName)] = ORM.Collection.extend({
                   model: global[globalName]
