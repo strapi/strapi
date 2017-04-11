@@ -46,7 +46,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
    * @returns {number}
    */
   lastPage() {
-    return Math.ceil(this.props.count / this.props.limitPerPage);
+    return Math.ceil(this.props.count / this.props.limit);
   }
 
   /**

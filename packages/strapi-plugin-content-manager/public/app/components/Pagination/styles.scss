@@ -1,15 +1,14 @@
 .pagination {
   display: inline-flex;
   flex-direction: row;
-  margin-top: 2rem;
   border: 1px solid #DADBDC;
   border-radius: 2.4rem;
+  height: 3.4rem;
 }
 
 .paginationNavigator {
   background: #FFFFFF;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.5rem;
   padding-left: 2rem;
   padding-right: 2rem;
   border-right: 1px solid #EFF3F6;
@@ -49,7 +48,7 @@
 }
 
 .navLi {
-  padding-top: 1rem;
+  padding-top: 0.5rem;
   padding-left: 0.8rem;
   padding-right: 0.8rem;
   color: #465373;
@@ -70,6 +69,7 @@
 
 .navLiActive {
   border-bottom: 3px solid #215CEA;
+  font-weight: 600;
 
   a,
   a:hover{

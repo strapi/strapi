@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Link, browserHistory, Match, propTypes } from 'react-router';
+import { Link } from 'react-router';
 
 import styles from './styles.scss';
 

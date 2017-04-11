@@ -43,9 +43,9 @@ const makeSelectCurrentPage = () => createSelector(
   (substate) => substate.get('currentPage')
 );
 
-const makeSelectLimitPerPage = () => createSelector(
+const makeSelectLimit = () => createSelector(
   selectListDomain(),
-  (substate) => substate.get('limitPerPage')
+  (substate) => substate.get('limit')
 );
 
 const makeSelectSort = () => createSelector(
@@ -65,7 +65,7 @@ export {
   makeSelectCount,
   makeSelectLoadingCount,
   makeSelectCurrentPage,
-  makeSelectLimitPerPage,
+  makeSelectLimit,
   makeSelectSort,
   makeSelectCurrentModelName,
 };

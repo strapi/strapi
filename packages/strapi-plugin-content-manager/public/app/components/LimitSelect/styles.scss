@@ -1,0 +1,26 @@
+.selectWrapper {
+  display: inline-block;
+
+  &:after {
+    content: "\f104";
+    position: absolute;
+    top: 10px;
+    right: 26px;
+    font-family: 'ionicons', Helvetica;
+    color: #465373;
+    font-size: 1.1rem;
+  }
+}
+
+.select {
+  -webkit-appearance: none;
+  background: #ffffff;
+  border-radius: 2.4rem;
+  padding-top: 0.6rem;
+  padding-right: 1.4rem;
+}
+
+.label {
+  color: #465373;
+  margin-right: 1rem;
+}

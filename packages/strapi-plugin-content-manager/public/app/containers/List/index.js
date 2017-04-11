@@ -13,6 +13,7 @@ import _ from 'lodash';
 import Container from 'components/Container';
 import Table from 'components/Table';
 import Pagination from 'components/Pagination';
+import LimitSelect from 'components/LimitSelect';
 
 import styles from './styles.scss';
 
@@ -22,6 +23,7 @@ import {
   loadCount,
   changePage,
   changeSort,
+  changeLimit,
 } from './actions';
 
 import {
@@ -30,7 +32,7 @@ import {
   makeSelectCurrentModelName,
   makeSelectCount,
   makeSelectCurrentPage,
-  makeSelectLimitPerPage,
+  makeSelectLimit,
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
@@ -102,14 +104,26 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           }} noActions={false}>
           </PluginHeader>
           <Container>
-            <p></p>
             {content}
-            <Pagination
-              limitPerPage={this.props.limitPerPage}
-              currentPage={this.props.currentPage}
-              changePage={this.props.changePage}
-              count={this.props.count}
-            />
+            <div className="row">
+              <div className="col-md-6">
+                <Pagination
+                  limit={this.props.limit}
+                  currentPage={this.props.currentPage}
+                  changePage={this.props.changePage}
+                  count={this.props.count}
+                />
+              </div>
+              <div className="col-md-6">
+                <div className="pull-xs-right">
+                  <LimitSelect
+                    className="push-lg-right"
+                    onLimitChange={this.props.onLimitChange}
+                    limit={this.props.limit}
+                  />
+                </div>
+              </div>
+            </div>
           </Container>
         </div>
       </div>
@@ -134,10 +148,11 @@ List.propTypes = {
     React.PropTypes.bool,
   ]),
   currentPage: React.PropTypes.number,
-  limitPerPage: React.PropTypes.number,
+  limit: React.PropTypes.number,
   sort: React.PropTypes.string,
   currentModelName: React.PropTypes.string,
   changeSort: React.PropTypes.func,
+  onLimitChange: React.PropTypes.func,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -154,6 +169,12 @@ function mapDispatchToProps(dispatch) {
       dispatch(changeSort(sort));
       dispatch(loadRecords());
     },
+    onLimitChange: (e) => {
+      const newLimit = Number(e.target.value);
+      dispatch(changeLimit(newLimit));
+      dispatch(loadRecords());
+      e.target.blur();
+    },
     dispatch,
   };
 }
@@ -165,7 +186,7 @@ const mapStateToProps = createStructuredSelector({
   loadingCount: makeSelectLoadingCount(),
   models: makeSelectModels(),
   currentPage: makeSelectCurrentPage(),
-  limitPerPage: makeSelectLimitPerPage(),
+  limit: makeSelectLimit(),
   sort: makeSelectSort(),
   currentModelName: makeSelectCurrentModelName(),
 });

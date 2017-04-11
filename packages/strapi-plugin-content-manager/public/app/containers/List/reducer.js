@@ -13,6 +13,7 @@ import {
   LOADED_COUNT,
   CHANGE_PAGE,
   CHANGE_SORT,
+  CHANGE_LIMIT,
 } from './constants';
 
 const initialState = fromJS({
@@ -22,7 +23,7 @@ const initialState = fromJS({
   loadingCount: true,
   count: false,
   currentPage: 1,
-  limitPerPage: 10,
+  limit: 10,
   sort: 'id',
 });
 
@@ -51,6 +52,9 @@ function listReducer(state = initialState, action) {
     case CHANGE_SORT:
       return state
         .set('sort', action.sort);
+    case CHANGE_LIMIT:
+      return state
+        .set('limit', action.limit);
     default:
       return state;
   }

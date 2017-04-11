@@ -12,6 +12,7 @@ import {
   LOADED_COUNT,
   CHANGE_PAGE,
   CHANGE_SORT,
+  CHANGE_LIMIT,
 } from './constants';
 
 export function setCurrentModelName(modelName) {
@@ -58,5 +59,12 @@ export function changeSort(sort) {
   return {
     type: CHANGE_SORT,
     sort,
+  };
+}
+
+export function changeLimit(limit) {
+  return {
+    type: CHANGE_LIMIT,
+    limit,
   };
 }
