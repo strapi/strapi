@@ -20,8 +20,7 @@ import {
   setCurrentModelName,
   loadRecords,
   loadCount,
-  goNextPage,
-  goPreviousPage,
+  changePage,
 } from './actions';
 
 import {
@@ -96,8 +95,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
             <Pagination
               limitPerPage={this.props.limitPerPage}
               currentPage={this.props.currentPage}
-              goNextPage={this.props.goNextPage}
-              goPreviousPage={this.props.goPreviousPage}
+              changePage={this.props.changePage}
               count={this.props.count}
             />
           </Container>
@@ -122,8 +120,7 @@ List.propTypes = {
   currentPage: React.PropTypes.number,
   limitPerPage: React.PropTypes.number,
   currentModelName: React.PropTypes.string,
-  goNextPage: React.PropTypes.func,
-  goPreviousPage: React.PropTypes.func,
+  goPage: React.PropTypes.func,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -131,13 +128,8 @@ function mapDispatchToProps(dispatch) {
     setCurrentModelName: (modelName) => dispatch(setCurrentModelName(modelName)),
     loadRecords: () => dispatch(loadRecords()),
     loadCount: () => dispatch(loadCount()),
-    goNextPage: () => {
-      dispatch(goNextPage());
-      dispatch(loadRecords());
-      dispatch(loadCount());
-    },
-    goPreviousPage: () => {
-      dispatch(goPreviousPage());
+    changePage: (page) => {
+      dispatch(changePage(page));
       dispatch(loadRecords());
       dispatch(loadCount());
     },

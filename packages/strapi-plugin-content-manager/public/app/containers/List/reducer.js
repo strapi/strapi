@@ -11,8 +11,7 @@ import {
   LOADED_RECORDS,
   LOAD_COUNT,
   LOADED_COUNT,
-  GO_NEXT_PAGE,
-  GO_PREVIOUS_PAGE,
+  CHANGE_PAGE,
 } from './constants';
 
 const initialState = fromJS({
@@ -44,12 +43,9 @@ function listReducer(state = initialState, action) {
       return state
         .set('loadingCount', false)
         .set('count', action.count);
-    case GO_NEXT_PAGE:
+    case CHANGE_PAGE:
       return state
-        .set('currentPage', state.get('currentPage') + 1);
-    case GO_PREVIOUS_PAGE:
-      return state
-        .set('currentPage', state.get('currentPage') - 1);
+        .set('currentPage', action.page);
     default:
       return state;
   }

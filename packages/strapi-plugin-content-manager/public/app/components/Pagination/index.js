@@ -69,7 +69,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     e.preventDefault();
 
     if (!this.isFirstPage()) {
-      this.props.goPreviousPage();
+      this.props.changePage(this.props.currentPage - 1);
     }
   }
 
@@ -84,7 +84,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     e.preventDefault();
 
     if (!this.isLastPage()) {
-      this.props.goNextPage();
+      this.props.changePage(this.props.currentPage + 1);
     }
   }
 

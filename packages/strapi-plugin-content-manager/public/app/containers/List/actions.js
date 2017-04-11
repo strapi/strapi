@@ -10,8 +10,8 @@ import {
   LOADED_RECORDS,
   LOAD_COUNT,
   LOADED_COUNT,
-  GO_NEXT_PAGE,
-  GO_PREVIOUS_PAGE,
+  CHANGE_PAGE,
+  CHANGE_ORDER,
 } from './constants';
 
 export function setCurrentModelName(modelName) {
@@ -47,14 +47,9 @@ export function loadedCount(count) {
   };
 }
 
-export function goNextPage() {
+export function changePage(page) {
   return {
-    type: GO_NEXT_PAGE,
-  };
-}
-
-export function goPreviousPage() {
-  return {
-    type: GO_PREVIOUS_PAGE,
+    type: CHANGE_PAGE,
+    page,
   };
 }
