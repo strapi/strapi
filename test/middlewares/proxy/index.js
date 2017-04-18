@@ -266,49 +266,6 @@ describe('proxy', function () {
       });
   });
 
-  // it('pass request body', function (done) {
-  //   const app = new Koa();
-  //
-  //   app.use(strapi.middlewares.proxy({
-  //     host: 'http://localhost:1234',
-  //   }));
-  //
-  //   request(app.listen())
-  //     .post('/postme', {
-  //       form: {
-  //         foo: 'bar'
-  //       },
-  //       json: true
-  //     }, function (err, res) {
-  //       if (err) {
-  //         return done(err);
-  //       }
-  //       res.text.should.equal('{"foo":"bar"}');
-  //       done();
-  //     });
-  // });
-
-  it('pass parsed request body', function (done) {
-    const app = new Koa();
-
-    app.use(strapi.middlewares.bodyparser());
-
-    app.use(strapi.middlewares.proxy({
-      host: 'http://localhost:1234'
-    }));
-
-    request(app.listen())
-      .post('/postme', {
-        foo: 'bar'
-      }, function (err, res) {
-        if (err) {
-          return done(err);
-        }
-        res.text.should.equal('{"foo":"bar"}');
-        done();
-      });
-  });
-
   it('statusCode', function (done) {
     const app = new Koa();
 

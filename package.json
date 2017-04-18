@@ -168,8 +168,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=0.12.0 <=4.8.2",
-    "npm": ">=2.0.0 <=4.0.0"
+    "node": ">= 0.12.0",
+    "npm": ">= 2.0.0"
   },
   "preferGlobal": true,
   "license": "MIT"
