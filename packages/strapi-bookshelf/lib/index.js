@@ -395,13 +395,18 @@ module.exports = function(strapi) {
                     relationship.attribute = pluralize.singular(details.via);
                   }
 
+                  const globalId = _.get(
+                    strapi.models,
+                    `${details.collection.toLowerCase()}.globalId`
+                  );
+
                   loadedModel[name] = function() {
                     if (
                       _.isArray(_.get(details, 'withPivot')) &&
                       !_.isEmpty(details.withPivot)
                     ) {
                       return this.belongsToMany(
-                        global[_.upperFirst(details.collection)],
+                        global[globalId],
                         tableName,
                         relationship.attribute + '_' + relationship.column,
                         details.attribute + '_' + details.column
@@ -409,7 +414,7 @@ module.exports = function(strapi) {
                     }
 
                     return this.belongsToMany(
-                      global[_.upperFirst(details.collection)],
+                      global[globalId],
                       tableName,
                       relationship.attribute + '_' + relationship.column,
                       details.attribute + '_' + details.column
