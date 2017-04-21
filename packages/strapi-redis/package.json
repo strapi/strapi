@@ -17,6 +17,7 @@
   "dependencies": {
     "ioredis": "^2.5.0",
     "lodash": "^4.16.5",
+    "stack-trace": "0.0.9",
     "strapi-utils": "^3.0.0-alpha.3"
   },
   "strapi": {
