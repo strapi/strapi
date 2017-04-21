@@ -10,7 +10,7 @@ import styles from './styles.scss';
 
 class PluginHeaderActions extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const actions = this.props.actions.map((action, i) => (
+    const actions = this.props.actions && this.props.actions.map((action, i) => (
       <button
         key={i}
         className={`btn ${action.class} ${styles.btn}`}
