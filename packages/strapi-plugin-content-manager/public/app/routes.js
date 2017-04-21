@@ -47,13 +47,13 @@ export default function createRoutes(store) {
       path: '/:slug/:id',
       name: 'list',
       getComponent(nextState, cb) {
-        const reducer = require('containers/Single/reducer'); // eslint-disable-line global-require
-        const sagas = require('containers/Single/sagas'); // eslint-disable-line global-require
-        const component = require('containers/Single'); // eslint-disable-line global-require
+        const reducer = require('containers/Edit/reducer'); // eslint-disable-line global-require
+        const sagas = require('containers/Edit/sagas'); // eslint-disable-line global-require
+        const component = require('containers/Edit'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
-        injectReducer('single', reducer.default);
+        injectReducer('edit', reducer.default);
         injectSagas(sagas.default);
         renderRoute(component);
       },

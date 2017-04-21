@@ -1,6 +1,6 @@
 /*
  *
- * Single
+ * Edit
  *
  */
 
@@ -19,7 +19,7 @@ import {
   makeSelectLoading,
 } from './selectors';
 
-export class Single extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class Edit extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   componentWillMount() {
     this.props.setCurrentModel(this.props.routeParams.slug.toLowerCase());
@@ -71,7 +71,7 @@ export class Single extends React.Component { // eslint-disable-line react/prefe
 }
 
 
-Single.propTypes = {
+Edit.propTypes = {
   setCurrentModel: React.PropTypes.func,
   loadRecord: React.PropTypes.func,
   loading: React.PropTypes.bool,
@@ -95,4 +95,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Single);
+export default connect(mapStateToProps, mapDispatchToProps)(Edit);

@@ -1,6 +1,6 @@
 /*
  *
- * Single actions
+ * Edit actions
  *
  */
 

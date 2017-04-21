@@ -1,9 +1,9 @@
 import { createSelector } from 'reselect';
 
 /**
- * Direct selector to the single state domain
+ * Direct selector to the edit state domain
  */
-const selectSingleDomain = () => state => state.get('single');
+const selectEditDomain = () => state => state.get('edit');
 
 /**
  * Other specific selectors
@@ -11,27 +11,27 @@ const selectSingleDomain = () => state => state.get('single');
 
 
 /**
- * Default selector used by Single
+ * Default selector used by Edit
  */
 
 const makeSelectRecord = () => createSelector(
-  selectSingleDomain(),
+  selectEditDomain(),
   (substate) => {
     return substate.get('record');
   }
 );
 
 const makeSelectLoading = () => createSelector(
-  selectSingleDomain(),
+  selectEditDomain(),
   (substate) => substate.get('loading')
 );
 
 const makeSelectCurrentModel = () => createSelector(
-  selectSingleDomain(),
+  selectEditDomain(),
   (substate) => substate.get('currentModel')
 );
 
-export default selectSingleDomain;
+export default selectEditDomain;
 export {
   makeSelectRecord,
   makeSelectLoading,

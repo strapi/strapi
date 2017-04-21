@@ -1,6 +1,6 @@
 /*
  *
- * Single reducer
+ * Edit reducer
  *
  */
 
@@ -17,7 +17,7 @@ const initialState = fromJS({
   record: null,
 });
 
-function singleReducer(state = initialState, action) {
+function editReducer(state = initialState, action) {
   switch (action.type) {
     case SET_CURRENT_MODEL:
       return state
@@ -36,4 +36,4 @@ function singleReducer(state = initialState, action) {
   }
 }
 
-export default singleReducer;
+export default editReducer;
