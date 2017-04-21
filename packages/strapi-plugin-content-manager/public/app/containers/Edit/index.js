@@ -16,6 +16,7 @@ import {
   loadRecord,
   setRecordAttribute,
   editRecord,
+  deleteRecord,
 } from './actions';
 
 import {
@@ -23,6 +24,7 @@ import {
   makeSelectLoading,
   makeSelectCurrentModelName,
   makeSelectEditing,
+  makeSelectDeleting,
 } from './selectors';
 
 import {
@@ -65,6 +67,8 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
     }, {
       label: 'Delete',
       class: 'btn-danger',
+      onClick: this.props.deleteRecord,
+      disabled: this.props.deleting,
     }];
 
     return (
@@ -109,6 +113,7 @@ Edit.propTypes = {
   ]),
   editRecord: React.PropTypes.func,
   editing: React.PropTypes.bool,
+  deleting: React.PropTypes.bool,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -117,6 +122,7 @@ const mapStateToProps = createStructuredSelector({
   currentModelName: makeSelectCurrentModelName(),
   models: makeSelectModels(),
   editing: makeSelectEditing(),
+  deleting: makeSelectDeleting(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -125,6 +131,12 @@ function mapDispatchToProps(dispatch) {
     loadRecord: (id) => dispatch(loadRecord(id)),
     setRecordAttribute: (key, value) => dispatch(setRecordAttribute(key, value)),
     editRecord: () => dispatch(editRecord()),
+    deleteRecord: () => {
+      // TODO: improve confirmation UX.
+      if (confirm('Are you sure ?')) {
+        dispatch(deleteRecord());
+      }
+    },
     dispatch,
   };
 }

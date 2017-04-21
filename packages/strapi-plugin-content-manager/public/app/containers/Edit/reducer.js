@@ -13,6 +13,9 @@ import {
   EDIT_RECORD,
   EDIT_RECORD_SUCCESS,
   EDIT_RECORD_ERROR,
+  DELETE_RECORD,
+  DELETE_RECORD_SUCCESS,
+  DELETE_RECORD_ERROR,
 } from './constants';
 
 const initialState = fromJS({
@@ -20,6 +23,7 @@ const initialState = fromJS({
   loading: false,
   record: null,
   editing: false,
+  deleting: false,
 });
 
 function editReducer(state = initialState, action) {
@@ -48,6 +52,15 @@ function editReducer(state = initialState, action) {
     case EDIT_RECORD_ERROR:
       return state
         .set('editing', false);
+    case DELETE_RECORD:
+      return state
+        .set('deleting', true);
+    case DELETE_RECORD_SUCCESS:
+      return state
+        .set('deleting', false);
+    case DELETE_RECORD_ERROR:
+      return state
+        .set('deleting', false);
     default:
       return state;
   }

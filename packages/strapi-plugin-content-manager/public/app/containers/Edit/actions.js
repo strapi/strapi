@@ -12,6 +12,9 @@ import {
   EDIT_RECORD,
   EDIT_RECORD_SUCCESS,
   EDIT_RECORD_ERROR,
+  DELETE_RECORD,
+  DELETE_RECORD_SUCCESS,
+  DELETE_RECORD_ERROR,
 } from './constants';
 
 export function setCurrentModelName(currentModelName) {
@@ -58,5 +61,23 @@ export function recordEdited() {
 export function recordEditError() {
   return {
     type: EDIT_RECORD_ERROR,
+  };
+}
+
+export function deleteRecord() {
+  return {
+    type: DELETE_RECORD,
+  };
+}
+
+export function recordDeleted() {
+  return {
+    type: DELETE_RECORD_SUCCESS,
+  };
+}
+
+export function recordDeleteError() {
+  return {
+    type: DELETE_RECORD_ERROR,
   };
 }

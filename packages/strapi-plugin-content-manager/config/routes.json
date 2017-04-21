@@ -39,6 +39,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "DELETE",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.delete",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

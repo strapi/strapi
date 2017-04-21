@@ -45,7 +45,7 @@ module.exports = {
 
     const entries = await User
       .find({
-        _id
+        id
       });
 
     ctx.body = entries;
@@ -53,8 +53,15 @@ module.exports = {
 
   update: async(ctx) => {
     const entryUpdated = await User
-      .update({_id: ctx.request.body._id}, ctx.request.body);
+      .update({_id: ctx.request.params.id}, ctx.request.body);
 
-    return ctx.body = entryUpdated;
+    ctx.body = entryUpdated;
+  },
+
+  delete: async(ctx) => {
+    const entryDeleted = await User
+      .remove({_id: ctx.request.params.id});
+
+    ctx.body = entryDeleted;
   }
 };
