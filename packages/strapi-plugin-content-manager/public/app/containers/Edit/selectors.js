@@ -26,14 +26,20 @@ const makeSelectLoading = () => createSelector(
   (substate) => substate.get('loading')
 );
 
-const makeSelectCurrentModel = () => createSelector(
+const makeSelectCurrentModelName = () => createSelector(
   selectEditDomain(),
-  (substate) => substate.get('currentModel')
+  (substate) => substate.get('currentModelName')
+);
+
+const makeSelectEditing = () => createSelector(
+  selectEditDomain(),
+  (substate) => substate.get('editing')
 );
 
 export default selectEditDomain;
 export {
   makeSelectRecord,
   makeSelectLoading,
-  makeSelectCurrentModel,
+  makeSelectCurrentModelName,
+  makeSelectEditing,
 };

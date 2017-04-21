@@ -31,6 +31,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "PUT",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.update",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

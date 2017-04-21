@@ -1,8 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -19,7 +16,7 @@ module.exports = {
     const {
       limit = 10,
       skip = 0,
-      sort = 'id'
+      sort = '_id'
     } = ctx.request.query;
 
     const entries = await User
@@ -44,13 +41,20 @@ module.exports = {
 
   findOne: async(ctx) => {
     const model = ctx.params.model;
-    const id = ctx.params.id;
+    const _id = ctx.params._id;
 
     const entries = await User
       .find({
-        id
+        _id
       });
 
     ctx.body = entries;
+  },
+
+  update: async(ctx) => {
+    const entryUpdated = await User
+      .update({_id: ctx.request.body._id}, ctx.request.body);
+
+    return ctx.body = entryUpdated;
   }
 };

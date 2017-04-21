@@ -1,39 +1,65 @@
 import { takeLatest } from 'redux-saga';
-import { put, select } from 'redux-saga/effects';
+import { put, select, fork, call } from 'redux-saga/effects';
+import request from 'utils/request';
 
 import {
-  loadedRecord,
+  recordLoaded,
+  recordEdited,
+  recordEditError,
 } from './actions';
 
 import {
   LOAD_RECORD,
+  EDIT_RECORD,
 } from './constants';
 
 import {
-  makeSelectCurrentModel,
+  makeSelectCurrentModelName,
+  makeSelectRecord,
 } from './selectors';
 
 export function* getRecord(params) {
-  const currentModel = yield select(makeSelectCurrentModel());
+  const currentModelName = yield select(makeSelectCurrentModelName());
 
   try {
-    const opts = {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'default'
-    };
-    const response = yield fetch(`http://localhost:1337/content-manager/explorer/${currentModel}/${params.id}`, opts);
-    const data = yield response.json();
+    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModelName}/${params.id}`;
 
-    yield put(loadedRecord(data));
+    // Call our request helper (see 'utils/request')
+    const data = yield call(request, requestURL, {
+      method: 'GET',
+    });
+
+    yield put(recordLoaded(data));
   } catch (err) {
     console.error(err);
   }
 }
 
-// Individual exports for testing
+export function* editRecord() {
+  const currentModelName = yield select(makeSelectCurrentModelName());
+  const record = yield select(makeSelectRecord());
+  const recordJSON = record.toJSON();
+
+  try {
+    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
+
+    // Call our request helper (see 'utils/request')
+    yield call(request, requestURL, {
+      method: 'PUT',
+      body: recordJSON,
+    });
+
+    yield put(recordEdited());
+    window.Strapi.notification.success('The entry has been successfully updated.');
+  } catch (err) {
+    yield put(recordEditError());
+    window.Strapi.notification.error('An error occurred during record update.');
+  }
+}
+
 export function* defaultSaga() {
-  yield takeLatest(LOAD_RECORD, getRecord);
+  yield fork(takeLatest, LOAD_RECORD, getRecord);
+  yield fork(takeLatest, EDIT_RECORD, editRecord);
 }
 
 // All sagas to be loaded

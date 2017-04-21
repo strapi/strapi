@@ -7,62 +7,87 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+
 import Container from 'components/Container';
+import EditForm from 'components/EditForm';
 
 import {
-  setCurrentModel,
+  setCurrentModelName,
   loadRecord,
+  setRecordAttribute,
+  editRecord,
 } from './actions';
 
 import {
   makeSelectRecord,
   makeSelectLoading,
+  makeSelectCurrentModelName,
+  makeSelectEditing,
 } from './selectors';
 
-export class Edit extends React.Component { // eslint-disable-line react/prefer-stateless-function
+import {
+  makeSelectModels,
+} from 'containers/App/selectors';
 
+export class Edit extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentWillMount() {
-    this.props.setCurrentModel(this.props.routeParams.slug.toLowerCase());
+    this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
     this.props.loadRecord(this.props.routeParams.id);
   }
 
   render() {
+    // Detect current model structure from models list
+    const currentModel = this.props.models[this.props.currentModelName];
+
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
-    let content;
-    if (this.props.loading) {
+    let content = <p>Loading...</p>;
+    if (currentModel && currentModel.attributes) {
       content = (
-        <div>
-          <p>Loading...</p>
-        </div>
-      );
-    } else if (this.props.record) {
-      const items = [];
-      for(var key in this.props.record) {
-        items.push(<li key={key}>{key}: {this.props.record[key]}</li>);
-      }
-
-      content = (
-        <ul>
-          {items}
-        </ul>
+        <EditForm
+          record={this.props.record}
+          currentModel={currentModel}
+          setRecordAttribute={this.props.setRecordAttribute}
+          editRecord={this.props.editRecord}
+          editing={this.props.editing}
+        />
       );
     }
 
+    const headersActions = [{
+      label: 'Cancel',
+      class: 'btn-default',
+    }, {
+      label: this.props.editing ? 'Editing...' : 'Submit',
+      class: 'btn-primary',
+      onClick: this.props.editRecord,
+      disabled: this.props.editing,
+    }, {
+      label: 'Delete',
+      class: 'btn-danger',
+    }];
+
     return (
-      <div>
+      <div className="col-md-12">
         <div className="container-fluid">
-          <PluginHeader title={{
-            id: 'plugin-content-manager-title',
-            defaultMessage: `Content Manager > ${this.props.routeParams.slug}`
-          }} description={{
-            id: 'plugin-content-manager-description',
-            defaultMessage: `Manage your ${this.props.routeParams.slug}`
-          }} noActions={false}>
-          </PluginHeader>
+          <PluginHeader
+            title={{
+              id: 'plugin-content-manager-title',
+              defaultMessage: `Content Manager > ${this.props.routeParams.slug}`
+            }}
+            description={{
+              id: 'plugin-content-manager-description',
+              defaultMessage: `Manage your ${this.props.routeParams.slug}`
+            }}
+            actions={headersActions}
+          />
           <Container>
             <p></p>
-            {content}
+            <div className="row">
+              <div className="col-md-8">
+                {content}
+              </div>
+            </div>
           </Container>
         </div>
       </div>
@@ -70,27 +95,36 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
   }
 }
 
-
 Edit.propTypes = {
-  setCurrentModel: React.PropTypes.func,
+  setCurrentModelName: React.PropTypes.func,
   loadRecord: React.PropTypes.func,
   loading: React.PropTypes.bool,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  editRecord: React.PropTypes.func,
+  editing: React.PropTypes.bool,
 };
-
 
 const mapStateToProps = createStructuredSelector({
   record: makeSelectRecord(),
   loading: makeSelectLoading(),
+  currentModelName: makeSelectCurrentModelName(),
+  models: makeSelectModels(),
+  editing: makeSelectEditing(),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
-    setCurrentModel: (model) => dispatch(setCurrentModel(model)),
+    setCurrentModelName: (currentModelName) => dispatch(setCurrentModelName(currentModelName)),
     loadRecord: (id) => dispatch(loadRecord(id)),
+    setRecordAttribute: (key, value) => dispatch(setRecordAttribute(key, value)),
+    editRecord: () => dispatch(editRecord()),
     dispatch,
   };
 }
