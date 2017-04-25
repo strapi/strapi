@@ -58,6 +58,11 @@ const makeSelectCurrentModelName = () => createSelector(
   (substate) => substate.get('currentModelName')
 );
 
+const makeSelectCurrentModelNamePluralized = () => createSelector(
+  selectListDomain(),
+  (substate) => substate.get('currentModelNamePluralized')
+);
+
 export {
   selectListDomain,
   makeSelectRecords,
@@ -68,4 +73,5 @@ export {
   makeSelectLimit,
   makeSelectSort,
   makeSelectCurrentModelName,
+  makeSelectCurrentModelNamePluralized,
 };

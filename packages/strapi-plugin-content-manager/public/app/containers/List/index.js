@@ -29,6 +29,7 @@ import {
   makeSelectRecords,
   makeSelectLoadingRecords,
   makeSelectCurrentModelName,
+  makeSelectCurrentModelNamePluralized,
   makeSelectCount,
   makeSelectCurrentPage,
   makeSelectLimit,
@@ -94,13 +95,16 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
-          <PluginHeader title={{
-            id: 'plugin-content-manager-title',
-            defaultMessage: `Content Manager > ${this.props.routeParams.slug}`
-          }} description={{
-            id: 'plugin-content-manager-description',
-            defaultMessage: `Manage your ${this.props.routeParams.slug}`
-          }} noActions={false}>
+          <PluginHeader
+            title={{
+              id: 'plugin-content-manager-title',
+              defaultMessage: `${_.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager'}`
+            }}
+            description={{
+              id: 'plugin-content-manager-description',
+              defaultMessage: `Manage your ${this.props.currentModelNamePluralized}`
+            }}
+          >
           </PluginHeader>
           <Container>
             {content}
@@ -139,6 +143,7 @@ List.propTypes = {
   limit: React.PropTypes.number,
   sort: React.PropTypes.string,
   currentModelName: React.PropTypes.string,
+  currentModelNamePluralized: React.PropTypes.string,
   changeSort: React.PropTypes.func,
   onLimitChange: React.PropTypes.func,
   count: React.PropTypes.oneOfType([
@@ -182,6 +187,7 @@ const mapStateToProps = createStructuredSelector({
   limit: makeSelectLimit(),
   sort: makeSelectSort(),
   currentModelName: makeSelectCurrentModelName(),
+  currentModelNamePluralized: makeSelectCurrentModelNamePluralized(),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(List));

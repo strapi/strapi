@@ -18,6 +18,7 @@ import {
 
 const initialState = fromJS({
   currentModel: null,
+  currentModelNamePluralized: null,
   loadingRecords: true,
   records: false,
   loadingCount: true,
@@ -31,7 +32,8 @@ function listReducer(state = initialState, action) {
   switch (action.type) {
     case SET_CURRENT_MODEL_NAME:
       return state
-        .set('currentModelName', action.modelName);
+        .set('currentModelName', action.modelName)
+        .set('currentModelNamePluralized', action.modelNamePluralized);
     case LOAD_RECORDS:
       return state
         .set('loadingRecords', true);

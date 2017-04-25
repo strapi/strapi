@@ -4,6 +4,8 @@
  *
  */
 
+import pluralize from 'pluralize';
+
 import {
   SET_CURRENT_MODEL_NAME,
   LOAD_RECORDS,
@@ -18,7 +20,8 @@ import {
 export function setCurrentModelName(modelName) {
   return {
     type: SET_CURRENT_MODEL_NAME,
-    modelName
+    modelName,
+    modelNamePluralized: pluralize(modelName),
   };
 }
 
