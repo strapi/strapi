@@ -92,20 +92,23 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
       );
     }
 
+    // Plugin header config
+    const pluginHeaderTitle = _.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager';
+    const pluginHeaderDescription = `Manage your ${this.props.currentModelNamePluralized}`;
+
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
               id: 'plugin-content-manager-title',
-              defaultMessage: `${_.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager'}`
+              defaultMessage: `${pluginHeaderTitle}`
             }}
             description={{
               id: 'plugin-content-manager-description',
-              defaultMessage: `Manage your ${this.props.currentModelNamePluralized}`
+              defaultMessage: `${pluginHeaderDescription}`
             }}
-          >
-          </PluginHeader>
+          />
           <Container>
             {content}
             <TableFooter

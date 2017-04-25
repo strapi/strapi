@@ -7,6 +7,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import _ from 'lodash';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
@@ -71,17 +72,21 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
       disabled: this.props.deleting,
     }];
 
+    // Plugin header config
+    const pluginHeaderTitle = _.upperFirst(this.props.routeParams.slug) || 'Content Manager';
+    const pluginHeaderDescription = this.props.record ? `#${this.props.record.get('id') }` : 'Content Manager';
+
     return (
       <div className="col-md-12">
         <div className="container-fluid">
           <PluginHeader
             title={{
               id: 'plugin-content-manager-title',
-              defaultMessage: `Content Manager > ${this.props.routeParams.slug}`
+              defaultMessage: `${pluginHeaderTitle}`
             }}
             description={{
               id: 'plugin-content-manager-description',
-              defaultMessage: `Manage your ${this.props.routeParams.slug}`
+              defaultMessage: `${pluginHeaderDescription}`
             }}
             actions={headersActions}
           />
@@ -133,7 +138,7 @@ function mapDispatchToProps(dispatch) {
     editRecord: () => dispatch(editRecord()),
     deleteRecord: () => {
       // TODO: improve confirmation UX.
-      if (confirm('Are you sure ?')) {
+      if (window.confirm('Are you sure ?')) {
         dispatch(deleteRecord());
       }
     },
