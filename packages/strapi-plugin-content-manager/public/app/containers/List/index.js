@@ -58,6 +58,8 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           <p>Loading...</p>
         </div>
       );
+    } else if (!this.props.records.length) {
+      content = <p>No results.</p>;
     } else {
       // Detect current model structure from models list
       const currentModel = this.props.models[this.props.currentModelName];
