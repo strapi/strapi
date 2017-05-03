@@ -133,6 +133,12 @@ program
   .description('install a Strapi plugin')
   .action(require('./strapi-install'));
 
+// `$ strapi uninstall`
+program
+  .command('uninstall <plugin>')
+  .description('uninstall a Strapi plugin')
+  .action(require('./strapi-uninstall'));
+
 // `$ strapi migrate:make`
 program
   .command('migrate:make')
