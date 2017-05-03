@@ -9,10 +9,9 @@
 // Node.js core.
 const exec = require('child_process').exec;
 const fs = require('fs');
-const path = require('path');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, cli } = require('strapi-utils');
 
 /**
  * `$ strapi install`
@@ -25,6 +24,11 @@ module.exports = function (plugin, cliArguments) {
   const pluginPrefix = 'strapi-plugin-';
   const pluginId = `${pluginPrefix}${plugin}`;
   const pluginPath = `./plugins/${plugin}`;
+
+  // Check that we're in a valid Strapi project.
+  if (!cli.isStrapiApp()) {
+    return logger.error('This command can only be used inside a Strapi project.');
+  }
 
   // Check that the plugin is not installed yet.
   if (fs.existsSync(pluginPath)) {

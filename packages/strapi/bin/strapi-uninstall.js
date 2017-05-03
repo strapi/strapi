@@ -13,7 +13,7 @@ const path = require('path');
 const rimraf = require('rimraf');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, cli } = require('strapi-utils');
 
 /**
  * `$ strapi uninstall`
@@ -24,6 +24,11 @@ const logger = require('strapi-utils').logger;
 module.exports = function (plugin) {
   // Define variables.
   const pluginPath = `./plugins/${plugin}`;
+
+  // Check that we're in a valid Strapi project.
+  if (!cli.isStrapiApp()) {
+    return logger.error('This command can only be used inside a Strapi project.');
+  }
 
   // Check that the plugin is installed.
   if (!fs.existsSync(pluginPath)) {
