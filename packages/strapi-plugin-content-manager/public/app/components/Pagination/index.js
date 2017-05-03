@@ -154,7 +154,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     }
 
     // Add next page link
-    if (!this.isLastPage()) {
+    if (!this.isLastPage() && !this.isFirstPage()) {
       linksOptions.push({
         value: this.props.currentPage + 1,
         isActive: false,
