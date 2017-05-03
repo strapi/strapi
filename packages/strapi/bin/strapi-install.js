@@ -28,7 +28,7 @@ module.exports = function (plugin, cliArguments) {
 
   // Check that the plugin is not installed yet.
   if (fs.existsSync(pluginPath)) {
-    logger.error(`It looks like this plugin is already installed. Please check in ${pluginPath}.`);
+    logger.error(`It looks like this plugin is already installed. Please check in \`${pluginPath}\`.`);
     process.exit(1);
   }
 
