@@ -21,9 +21,9 @@ module.exports = {
 
     const entries = await User
       .find()
-      .limit(limit)
+      .limit(Number(limit))
       .sort(sort)
-      .limit(skip);
+      .skip(Number(skip));
 
     ctx.body = entries;
   },
