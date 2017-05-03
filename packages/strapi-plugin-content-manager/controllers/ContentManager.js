@@ -41,11 +41,11 @@ module.exports = {
 
   findOne: async(ctx) => {
     const model = ctx.params.model;
-    const _id = ctx.params._id;
+    const _id = ctx.params.id;
 
     const entries = await User
-      .find({
-        id
+      .findOne({
+        _id
       });
 
     ctx.body = entries;
