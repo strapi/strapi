@@ -44,6 +44,7 @@ import {
 export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentWillMount() {
     this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
+    this.props.changeSort(this.props.models[this.props.routeParams.slug.toLowerCase()].primaryKey);
     this.props.loadRecords();
     this.props.loadCount();
   }
@@ -74,9 +75,9 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
         type: value.type,
       }));
 
-      // Add `id` column
+      // Add the primary key column
       tableHeaders.unshift({
-        name: 'id',
+        name: currentModel.primaryKey,
         label: 'ID',
         type: 'string',
       });
@@ -90,6 +91,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           changeSort={this.props.changeSort}
           sort={this.props.sort}
           history={this.props.history}
+          primaryKey={currentModel.primaryKey || 'id'}
         />
       );
     }

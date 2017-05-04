@@ -12,11 +12,12 @@ module.exports = {
 
   find: async(ctx) => {
     const model = ctx.params.model;
+    const primaryKey = strapi.models[model].primaryKey;
 
     const {
       limit = 10,
       skip = 0,
-      sort = '_id'
+      sort = primaryKey
     } = ctx.request.query;
 
     const entries = await User
@@ -41,26 +42,36 @@ module.exports = {
 
   findOne: async(ctx) => {
     const model = ctx.params.model;
-    const _id = ctx.params.id;
+    const primaryKey = strapi.models[model].primaryKey;
+    const params = {};
+    params[primaryKey] = ctx.params.id;
 
-    const entries = await User
-      .findOne({
-        _id
-      });
+    const entry = await User
+      .findOne(params);
 
-    ctx.body = entries;
+    ctx.body = entry;
   },
 
   update: async(ctx) => {
+    const model = ctx.params.model;
+    const primaryKey = strapi.models[model].primaryKey;
+    const params = {};
+    params[primaryKey] = ctx.params.id;
+
     const entryUpdated = await User
-      .update({_id: ctx.request.params.id}, ctx.request.body);
+      .update(params, ctx.request.body);
 
     ctx.body = entryUpdated;
   },
 
   delete: async(ctx) => {
+    const model = ctx.params.model;
+    const primaryKey = strapi.models[model].primaryKey;
+    const params = {};
+    params[primaryKey] = ctx.params.id;
+
     const entryDeleted = await User
-      .remove({_id: ctx.request.params.id});
+      .remove(params);
 
     ctx.body = entryDeleted;
   }

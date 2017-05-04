@@ -80,6 +80,11 @@ module.exports = function (strapi) {
               try {
                 let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
 
+                // Set the default values to model settings.
+                _.defaults(definition, {
+                  primaryKey: '_id'
+                });
+
                 // Initialize lifecycle callbacks.
                 const preLifecycle = {
                   validate: 'beforeCreate',

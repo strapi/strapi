@@ -14,7 +14,7 @@ import styles from './styles.scss';
 class Table extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const tableRows = this.props.records.map((record, key) => {
-      const destination = this.props.route.path.replace(':slug', this.props.routeParams.slug) + '/' + record.id;
+      const destination = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`;
 
       return (
         <TableRow
@@ -23,6 +23,7 @@ class Table extends React.Component { // eslint-disable-line react/prefer-statel
           headers={this.props.headers}
           record={record}
           history={this.props.history}
+          primaryKey={this.props.primaryKey}
         />
       );
     });
@@ -54,6 +55,7 @@ Table.propTypes = {
   changeSort: React.PropTypes.func,
   sort: React.PropTypes.string,
   history: React.PropTypes.object,
+  primaryKey: React.PropTypes.string,
 };
 
 export default Table;

@@ -8,7 +8,10 @@
 import React from 'react';
 import { createStructuredSelector } from 'reselect';
 import { loadModels } from './actions';
-import { makeSelectModels } from './selectors';
+import {
+  makeSelectModels,
+  makeSelectLoading,
+} from './selectors';
 import { connect } from 'react-redux';
 
 import '../../styles/main.scss';
@@ -19,16 +22,20 @@ class App extends React.Component { // eslint-disable-line react/prefer-stateles
   }
 
   render() {
-    // Assign plugin component to children
-    const childrenWithProps = React.Children.map(this.props.children,
-      (child) => React.cloneElement(child, {
-        exposedComponents: this.props.exposedComponents
-      })
-    );
+    let content = <div></div>;
+
+    if (this.props.models) {
+      // Assign plugin component to children
+      content = React.Children.map(this.props.children,
+        (child) => React.cloneElement(child, {
+          exposedComponents: this.props.exposedComponents
+        })
+      );
+    }
 
     return (
       <div className='content-manager'>
-        {React.Children.toArray(childrenWithProps)}
+        {React.Children.toArray(content)}
       </div>
     );
   }
@@ -52,6 +59,7 @@ export function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   models: makeSelectModels(),
+  loading: makeSelectLoading(),
 });
 
 // Wrap the component to inject dispatch and state into it

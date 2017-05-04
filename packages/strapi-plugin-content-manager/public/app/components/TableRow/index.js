@@ -49,7 +49,7 @@ class TableRow extends React.Component { // eslint-disable-line react/prefer-sta
       let content = this.getDisplayedValue(header.type, this.props.record[header.name]);
 
       // Display a link if the current column is the `id` column
-      if (header.name === 'id') {
+      if (header.name === this.props.primaryKey) {
         content = (
           <Link to={this.props.destination} className={styles.idLink}>
             {this.getDisplayedValue(header.type, this.props.record[header.name])}
@@ -89,6 +89,7 @@ TableRow.propTypes = {
   record: React.PropTypes.object,
   destination: React.PropTypes.string,
   history: React.PropTypes.object,
+  primaryKey: React.PropTypes.string,
 };
 
 export default TableRow;
