@@ -52,6 +52,15 @@ module.exports = {
     ctx.body = entry;
   },
 
+  create: async(ctx) => {
+    const model = ctx.params.model;
+
+    const entryCreated = await User
+      .create(ctx.request.body);
+
+    ctx.body = entryCreated;
+  },
+
   update: async(ctx) => {
     const model = ctx.params.model;
     const primaryKey = strapi.models[model].primaryKey;

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
@@ -47,6 +48,10 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
     this.props.changeSort(this.props.models[this.props.routeParams.slug.toLowerCase()].primaryKey);
     this.props.loadRecords();
     this.props.loadCount();
+
+    // Define the `create` route url
+    this.addRoute = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/create`;
+
   }
 
   render() {
@@ -96,6 +101,13 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
       );
     }
 
+    // Define plugin header actions
+    const pluginHeaderActions = [{
+      label: 'Add an entry',
+      class: 'btn-primary',
+      onClick: () => this.context.router.push(this.addRoute),
+    }];
+
     // Plugin header config
     const pluginHeaderTitle = _.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager';
     const pluginHeaderDescription = `Manage your ${this.props.currentModelNamePluralized}`;
@@ -112,6 +124,7 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`
             }}
+            actions={pluginHeaderActions}
           />
           <Container>
             {content}

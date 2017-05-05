@@ -6,6 +6,7 @@
 
 import {
   SET_CURRENT_MODEL_NAME,
+  SET_IS_CREATING,
   LOAD_RECORD,
   LOAD_RECORD_SUCCESS,
   SET_RECORD_ATTRIBUTE,
@@ -21,6 +22,12 @@ export function setCurrentModelName(currentModelName) {
   return {
     type: SET_CURRENT_MODEL_NAME,
     currentModelName,
+  };
+}
+
+export function setIsCreating() {
+  return {
+    type: SET_IS_CREATING,
   };
 }
 

@@ -41,6 +41,11 @@ const makeSelectDeleting = () => createSelector(
   (substate) => substate.get('deleting')
 );
 
+const makeSelectIsCreating = () => createSelector(
+  selectEditDomain(),
+  (substate) => substate.get('isCreating')
+);
+
 export default selectEditDomain;
 export {
   makeSelectRecord,
@@ -48,4 +53,5 @@ export {
   makeSelectCurrentModelName,
   makeSelectEditing,
   makeSelectDeleting,
+  makeSelectIsCreating,
 };

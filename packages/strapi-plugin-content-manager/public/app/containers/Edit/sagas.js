@@ -20,6 +20,7 @@ import {
 import {
   makeSelectCurrentModelName,
   makeSelectRecord,
+  makeSelectIsCreating,
 } from './selectors';
 
 export function* getRecord(params) {
@@ -44,20 +45,23 @@ export function* editRecord() {
   const record = yield select(makeSelectRecord());
   const recordJSON = record.toJSON();
 
+  const isCreating =  yield select(makeSelectIsCreating());
+  const id = isCreating ? '' : recordJSON.id;
+
   try {
-    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
+    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestURL, {
-      method: 'PUT',
+      method: isCreating ? 'POST' : 'PUT',
       body: recordJSON,
     });
 
     yield put(recordEdited());
-    window.Strapi.notification.success('The entry has been successfully updated.');
+    window.Strapi.notification.success(`The entry has been successfully ${isCreating ? 'created' : 'updated'}.`);
   } catch (err) {
     yield put(recordEditError());
-    window.Strapi.notification.error('An error occurred during record update.');
+    window.Strapi.notification.error(`An error occurred during record ${isCreating ? 'creation' : 'update'}.`);
   }
 }
 

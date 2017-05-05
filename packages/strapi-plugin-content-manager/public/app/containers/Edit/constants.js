@@ -5,6 +5,7 @@
  */
 
 export const SET_CURRENT_MODEL_NAME = 'app/Edit/SET_CURRENT_MODEL_NAME';
+export const SET_IS_CREATING = 'app/Edit/SET_IS_CREATING';
 
 export const LOAD_RECORD = 'app/Edit/LOAD_RECORD';
 export const LOAD_RECORD_SUCCESS = 'app/Edit/LOAD_RECORD_SUCCESS';

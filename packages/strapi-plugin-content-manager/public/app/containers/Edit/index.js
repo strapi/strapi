@@ -14,6 +14,7 @@ import EditForm from 'components/EditForm';
 
 import {
   setCurrentModelName,
+  setIsCreating,
   loadRecord,
   setRecordAttribute,
   editRecord,
@@ -26,6 +27,7 @@ import {
   makeSelectCurrentModelName,
   makeSelectEditing,
   makeSelectDeleting,
+  makeSelectIsCreating,
 } from './selectors';
 
 import {
@@ -35,7 +37,13 @@ import {
 export class Edit extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentWillMount() {
     this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
-    this.props.loadRecord(this.props.routeParams.id);
+
+    // Detect that the current route is the `create` route or not
+    if (this.props.routeParams.id === 'create') {
+      this.props.setIsCreating();
+    } else {
+      this.props.loadRecord(this.props.routeParams.id);
+    }
   }
 
   render() {
@@ -57,7 +65,8 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
       );
     }
 
-    const headersActions = [{
+    // Define plugin header actions
+    const pluginHeaderActions = [{
       label: 'Cancel',
       class: 'btn-default',
     }, {
@@ -65,16 +74,21 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
       class: 'btn-primary',
       onClick: this.props.editRecord,
       disabled: this.props.editing,
-    }, {
-      label: 'Delete',
-      class: 'btn-danger',
-      onClick: this.props.deleteRecord,
-      disabled: this.props.deleting,
     }];
+
+    // Add the `Delete` button only in edit mode
+    if (!this.props.isAdding) {
+      pluginHeaderActions.push({
+       label: 'Delete',
+       class: 'btn-danger',
+       onClick: this.props.deleteRecord,
+       disabled: this.props.deleting,
+     })
+    }
 
     // Plugin header config
     const pluginHeaderTitle = _.upperFirst(this.props.routeParams.slug) || 'Content Manager';
-    const pluginHeaderDescription = this.props.record ? `#${this.props.record.get('id') }` : 'Content Manager';
+    const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record.get('id') }`;
 
     return (
       <div className="col-md-12">
@@ -88,7 +102,7 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`
             }}
-            actions={headersActions}
+            actions={pluginHeaderActions}
           />
           <Container>
             <p></p>
@@ -128,11 +142,13 @@ const mapStateToProps = createStructuredSelector({
   models: makeSelectModels(),
   editing: makeSelectEditing(),
   deleting: makeSelectDeleting(),
+  isCreating: makeSelectIsCreating(),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
     setCurrentModelName: (currentModelName) => dispatch(setCurrentModelName(currentModelName)),
+    setIsCreating: () => dispatch(setIsCreating()),
     loadRecord: (id) => dispatch(loadRecord(id)),
     setRecordAttribute: (key, value) => dispatch(setRecordAttribute(key, value)),
     editRecord: () => dispatch(editRecord()),

@@ -31,6 +31,13 @@
       "config": {
         "policies": []
       }
+    },{
+      "method": "POST",
+      "path": "/explorer/:model",
+      "handler": "ContentManager.create",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "PUT",
