@@ -43,15 +43,36 @@ import {
 } from 'containers/App/selectors';
 
 export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  componentWillMount() {
-    this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
-    this.props.changeSort(this.props.models[this.props.routeParams.slug.toLowerCase()].primaryKey);
+  init(slug) {
+    // Set current model name
+    this.props.setCurrentModelName(slug.toLowerCase());
+
+    // Set default sort value
+    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey);
+
+    // Load records
     this.props.loadRecords();
+
+    // Get the records count
     this.props.loadCount();
 
     // Define the `create` route url
-    this.addRoute = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/create`;
+    this.addRoute = `${this.props.route.path.replace(':slug', slug)}/create`;
+  }
 
+  componentWillMount() {
+    // Init the view
+    this.init(this.props.routeParams.slug);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Check if the current slug changed in the url
+    const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
+
+    // If the location changed, init the view
+    if (locationChanged) {
+      this.init(nextProps.params.slug);
+    }
   }
 
   render() {
