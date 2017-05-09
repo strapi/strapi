@@ -25,7 +25,15 @@ import { translationMessages } from './i18n';
 // Plugin identifier based on the package.json `name` value
 const pluginId = require('../package.json').name.replace(/^strapi-plugin-/i, '');
 
+// Define Strapi admin router
+let router;
+
 class comp extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentWillMount() {
+    // Expose Strapi admin router
+    router = this.context.router;
+  }
+
   render() {
     return (
       <Provider store={store}>
@@ -34,6 +42,10 @@ class comp extends React.Component { // eslint-disable-line react/prefer-statele
     );
   }
 }
+
+comp.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
 
 // Register the plugin
 if (window.Strapi) {
@@ -71,4 +83,5 @@ export {
   store,
   apiUrl,
   pluginId,
+  router,
 };
