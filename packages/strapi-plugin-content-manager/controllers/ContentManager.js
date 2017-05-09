@@ -7,12 +7,21 @@
 module.exports = {
 
   models: async(ctx) => {
-    ctx.body = strapi.models;
+    ctx.body = _.mapValues(strapi.models, (model) => (_.pick(model, [
+      'connection',
+      'collectionName',
+      'attributes',
+      'identity',
+      'globalId',
+      'globalName',
+      'orm',
+      'loadedModel',
+      'primaryKey',
+    ])));
   },
 
   find: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
     const primaryKey = model.primaryKey;
 
     const {
@@ -21,7 +30,7 @@ module.exports = {
       sort = primaryKey
     } = ctx.request.query;
 
-    const entries = await collection
+    const entries = await model
       .find()
       .limit(Number(limit))
       .sort(sort)
@@ -32,9 +41,8 @@ module.exports = {
 
   count: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
 
-    const count = await collection
+    const count = await model
       .count();
 
     ctx.body = {
@@ -44,12 +52,11 @@ module.exports = {
 
   findOne: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
     const primaryKey = model.primaryKey;
     const params = {};
     params[primaryKey] = ctx.params.id;
 
-    const entry = await collection
+    const entry = await model
       .findOne(params);
 
     ctx.body = entry;
@@ -57,9 +64,8 @@ module.exports = {
 
   create: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
 
-    const entryCreated = await collection
+    const entryCreated = await model
       .create(ctx.request.body);
 
     ctx.body = entryCreated;
@@ -67,13 +73,12 @@ module.exports = {
 
   update: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
     const primaryKey = model.primaryKey;
     const params = {};
 
     params[primaryKey] = ctx.params.id;
 
-    const entryUpdated = await collection
+    const entryUpdated = await model
       .update(params, ctx.request.body);
 
     ctx.body = entryUpdated;
@@ -81,12 +86,11 @@ module.exports = {
 
   delete: async(ctx) => {
     const model = strapi.models[ctx.params.model];
-    const collection = global[model.globalName];
     const primaryKey = model.primaryKey;
     const params = {};
     params[primaryKey] = ctx.params.id;
 
-    const entryDeleted = await collection
+    const entryDeleted = await model
       .remove(params);
 
     ctx.body = entryDeleted;

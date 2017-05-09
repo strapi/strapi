@@ -136,6 +136,9 @@ module.exports = function (strapi) {
 
                 global[definition.globalName] = mongoose.model(definition.globalName, collection.schema);
 
+                // Expose ORM functions through the `strapi.models` object.
+                strapi.models[model] = _.assign(mongoose.model(definition.globalName), strapi.models[model]);
+
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];
 
