@@ -180,6 +180,7 @@ window.Strapi = {
       store.dispatch(updatePlugin(pluginId, 'leftMenuLinks', leftMenuLinksUpdated));
     },
   }),
+  router: browserHistory,
 };
 
 const dispatch = store.dispatch;

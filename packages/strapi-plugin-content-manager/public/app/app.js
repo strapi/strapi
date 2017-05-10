@@ -6,6 +6,7 @@
  */
 
 import { browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
 import configureStore from './store';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -14,8 +15,15 @@ import { Provider } from 'react-redux';
 // this uses the singleton browserHistory provided by react-router
 // Optionally, this could be changed to leverage a created history
 // e.g. `const browserHistory = useRouterHistory(createBrowserHistory)();`
-const initialState = {};
-const store = configureStore(initialState, browserHistory);
+const store = configureStore({}, window.Strapi.router);
+
+// Sync history and store, as the react-router-redux reducer
+// is under the non-default key ("routing"), selectLocationState
+// must be provided for resolving how to retrieve the "route" in the state
+import { selectLocationState } from 'containers/App/selectors';
+syncHistoryWithStore(window.Strapi.router, store, {
+  selectLocationState: selectLocationState(),
+});
 
 // Set up the router, wrapping all Routes in the App component
 import App from 'containers/App';

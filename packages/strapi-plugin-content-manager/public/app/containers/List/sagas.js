@@ -1,6 +1,7 @@
 import { takeLatest } from 'redux-saga';
-import { put, select, fork, call } from 'redux-saga/effects';
+import { put, select, fork, call, take, cancel } from 'redux-saga/effects';
 import request from 'utils/request';
+import { LOCATION_CHANGE } from 'react-router-redux';
 
 import {
   loadedRecord,
@@ -71,8 +72,13 @@ export function* getCount() {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  yield fork(takeLatest, LOAD_RECORDS, getRecords);
-  yield fork(takeLatest, LOAD_COUNT, getCount);
+  const loadRecordsWatcher = yield fork(takeLatest, LOAD_RECORDS, getRecords);
+  const loudCountWatcher = yield fork(takeLatest, LOAD_COUNT, getCount);
+
+  // Suspend execution until location changes
+  yield take(LOCATION_CHANGE);
+  yield cancel(loadRecordsWatcher);
+  yield cancel(loudCountWatcher);
 }
 
 // All sagas to be loaded

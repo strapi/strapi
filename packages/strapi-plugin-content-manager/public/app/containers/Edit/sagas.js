@@ -1,8 +1,9 @@
 import { takeLatest } from 'redux-saga';
-import { put, select, fork, call } from 'redux-saga/effects';
+import { put, select, fork, call, cancel, take } from 'redux-saga/effects';
 import request from 'utils/request';
 import { browserHistory } from 'react-router';
 import { router } from 'app';
+import { LOCATION_CHANGE } from 'react-router-redux';
 
 import {
   recordLoaded,
@@ -46,7 +47,7 @@ export function* editRecord() {
   const record = yield select(makeSelectRecord());
   const recordJSON = record.toJSON();
 
-  const isCreating =  yield select(makeSelectIsCreating());
+  const isCreating = yield select(makeSelectIsCreating());
   const id = isCreating ? '' : recordJSON.id;
 
   try {
@@ -91,9 +92,15 @@ export function* deleteRecord() {
 }
 
 export function* defaultSaga() {
-  yield fork(takeLatest, LOAD_RECORD, getRecord);
-  yield fork(takeLatest, EDIT_RECORD, editRecord);
-  yield fork(takeLatest, DELETE_RECORD, deleteRecord);
+  const loadRecordWatcher = yield fork(takeLatest, LOAD_RECORD, getRecord);
+  const editRecordWatcher = yield fork(takeLatest, EDIT_RECORD, editRecord);
+  const deleteRecordWatcher = yield fork(takeLatest, DELETE_RECORD, deleteRecord);
+
+  // Suspend execution until location changes
+  yield take(LOCATION_CHANGE);
+  yield cancel(loadRecordWatcher);
+  yield cancel(editRecordWatcher);
+  yield cancel(deleteRecordWatcher);
 }
 
 // All sagas to be loaded

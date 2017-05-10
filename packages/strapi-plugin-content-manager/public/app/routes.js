@@ -26,8 +26,10 @@ export default function createRoutes(store) {
 
         const renderRoute = loadModule(cb);
 
-        injectReducer('home', reducer.default);
-        renderRoute(component);
+        process.nextTick(() => {
+          kinjectReducer('home', reducer.default);
+          renderRoute(component);
+        });
       },
     }, {
       path: '/:slug',
@@ -39,9 +41,11 @@ export default function createRoutes(store) {
 
         const renderRoute = loadModule(cb);
 
-        injectReducer('list', reducer.default);
-        injectSagas(sagas.default);
-        renderRoute(component);
+        process.nextTick(() => {
+          injectReducer('list', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
       },
     }, {
       path: '/:slug/:id',
@@ -53,9 +57,11 @@ export default function createRoutes(store) {
 
         const renderRoute = loadModule(cb);
 
-        injectReducer('edit', reducer.default);
-        injectSagas(sagas.default);
-        renderRoute(component);
+        process.nextTick(() => {
+          injectReducer('edit', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
       },
     },
   ];
