@@ -27,7 +27,7 @@ export default function createRoutes(store) {
         const renderRoute = loadModule(cb);
 
         process.nextTick(() => {
-          kinjectReducer('home', reducer.default);
+          injectReducer('home', reducer.default);
           renderRoute(component);
         });
       },

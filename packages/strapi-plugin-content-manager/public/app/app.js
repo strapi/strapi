@@ -5,7 +5,6 @@
  * only setup and plugin code.
  */
 
-import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import configureStore from './store';
 import React from 'react';

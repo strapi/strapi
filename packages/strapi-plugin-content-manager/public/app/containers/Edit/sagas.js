@@ -1,7 +1,6 @@
 import { takeLatest } from 'redux-saga';
 import { put, select, fork, call, cancel, take } from 'redux-saga/effects';
 import request from 'utils/request';
-import { browserHistory } from 'react-router';
 import { router } from 'app';
 import { LOCATION_CHANGE } from 'react-router-redux';
 

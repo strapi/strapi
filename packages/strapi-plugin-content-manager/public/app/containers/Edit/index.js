@@ -79,11 +79,11 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
     // Add the `Delete` button only in edit mode
     if (!this.props.isAdding) {
       pluginHeaderActions.push({
-       label: 'Delete',
-       class: 'btn-danger',
-       onClick: this.props.deleteRecord,
-       disabled: this.props.deleting,
-     })
+        label: 'Delete',
+        class: 'btn-danger',
+        onClick: this.props.deleteRecord,
+        disabled: this.props.deleting,
+      });
     }
 
     // Plugin header config
