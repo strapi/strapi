@@ -21,4 +21,7 @@ app.listen(port, (err) => {
   if (err) {
     return logger.error(err.message);
   }
+
+  // Print start logs.
+  logger.appStarted(port);
 });

@@ -16,19 +16,12 @@ const logger = {
   },
 
   // Called when express.js app starts on given port w/o errors
-  appStarted: (port, tunnelStarted) => {
-    console.log(`Server started ${chalk.green('✓')}`);
-
-    // If the tunnel started, log that and the URL it's available at
-    if (tunnelStarted) {
-      console.log(`Tunnel initialised ${chalk.green('✓')}`);
-    }
+  appStarted: (port) => {
+    console.log(`Strapi plugin succesfully started in development mode. ${chalk.green('✓')}`);
 
     console.log(`
-${chalk.bold('Access URLs:')}${divider}
+${chalk.bold('Access URL:')}${divider}
 Localhost: ${chalk.magenta(`http://localhost:${port}`)}
-      LAN: ${chalk.magenta(`http://${ip.address()}:${port}`) +
-(tunnelStarted ? `\n    Proxy: ${chalk.magenta(tunnelStarted)}` : '')}${divider}
 ${chalk.blue(`Press ${chalk.italic('CTRL-C')} to stop`)}
     `);
   },
