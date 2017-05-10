@@ -58,7 +58,7 @@ module.exports = {
       abortOnFail: true,
     }];
 
-    // If they want a CSS file, add styles.css
+    // If they want a SCSS file, add styles.scss
     if (data.wantCSS) {
       actions.push({
         type: 'add',
