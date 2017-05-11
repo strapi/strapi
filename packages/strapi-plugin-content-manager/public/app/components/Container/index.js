@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import styles from './styles.scss';
 
 class Container extends React.Component {

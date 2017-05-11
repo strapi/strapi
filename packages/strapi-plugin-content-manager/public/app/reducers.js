@@ -7,7 +7,7 @@ import { combineReducers } from 'redux-immutable';
 import { fromJS } from 'immutable';
 import { LOCATION_CHANGE } from 'react-router-redux';
 
-import globalReducer from 'containers/App/reducer';
+import globalReducer from './containers/App/reducer';
 
 /*
  * routeReducer

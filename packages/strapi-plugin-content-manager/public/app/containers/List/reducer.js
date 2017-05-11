@@ -5,6 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
+
 import {
   SET_CURRENT_MODEL_NAME,
   LOAD_RECORDS,
@@ -15,7 +16,6 @@ import {
   CHANGE_SORT,
   CHANGE_LIMIT,
 } from './constants';
-
 const initialState = fromJS({
   currentModel: false,
   currentModelNamePluralized: false,

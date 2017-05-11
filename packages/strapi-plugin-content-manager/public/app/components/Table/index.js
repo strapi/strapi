@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import TableHeader from 'components/TableHeader';
-import TableRow from 'components/TableRow';
+import TableHeader from '../TableHeader';
+import TableRow from '../TableRow';
 
 import styles from './styles.scss';
 

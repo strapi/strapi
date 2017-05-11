@@ -1,7 +1,8 @@
 import { conformsTo, isEmpty, isFunction, isObject, isString } from 'lodash';
 import invariant from 'invariant';
 import warning from 'warning';
-import createReducer from 'reducers';
+
+import createReducer from '../reducers';
 
 /**
  * Validate the shape of redux store

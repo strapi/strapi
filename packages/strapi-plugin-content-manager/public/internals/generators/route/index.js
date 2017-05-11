@@ -2,6 +2,7 @@
  * Route Generator
  */
 const fs = require('fs');
+
 const componentExists = require('../utils/componentExists');
 
 function reducerExists(comp) {

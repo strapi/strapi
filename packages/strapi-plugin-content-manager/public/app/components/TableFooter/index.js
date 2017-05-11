@@ -5,8 +5,9 @@
 */
 
 import React from 'react';
-import Pagination from 'components/Pagination';
-import LimitSelect from 'components/LimitSelect';
+
+import LimitSelect from '../LimitSelect';
+import Pagination from '../Pagination';
 
 import styles from './styles.scss';
 

@@ -5,6 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
+
 import { LOAD_MODELS, LOADED_MODELS } from './constants';
 
 const initialState = fromJS({

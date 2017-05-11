@@ -1,8 +1,9 @@
 import { takeLatest } from 'redux-saga';
-import { put, select, fork, call, cancel, take } from 'redux-saga/effects';
-import request from 'utils/request';
-import { router } from 'app';
+import { call, cancel, fork, put, take, select } from 'redux-saga/effects';
 import { LOCATION_CHANGE } from 'react-router-redux';
+
+import request from '../../utils/request';
+import { router } from '../../app';
 
 import {
   recordLoaded,
@@ -11,9 +12,7 @@ import {
   recordDeleted,
   recordDeleteError,
 } from './actions';
-
 import { LOAD_RECORD, EDIT_RECORD, DELETE_RECORD } from './constants';
-
 import {
   makeSelectCurrentModelName,
   makeSelectRecord,

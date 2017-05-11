@@ -1,9 +1,8 @@
+import _ from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
-import _ from 'lodash';
 
 import { loadedModels } from './actions';
-
 import { LOAD_MODELS } from './constants';
 
 export function* getModels() {

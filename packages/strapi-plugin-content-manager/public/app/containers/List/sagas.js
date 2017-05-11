@@ -1,12 +1,11 @@
 import { takeLatest } from 'redux-saga';
 import { put, select, fork, call, take, cancel } from 'redux-saga/effects';
-import request from 'utils/request';
 import { LOCATION_CHANGE } from 'react-router-redux';
 
+import request from '../../utils/request';
+
 import { loadedRecord, loadedCount } from './actions';
-
 import { LOAD_RECORDS, LOAD_COUNT } from './constants';
-
 import {
   makeSelectCurrentModelName,
   makeSelectLimit,

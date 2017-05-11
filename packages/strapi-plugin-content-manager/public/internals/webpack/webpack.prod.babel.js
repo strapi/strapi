@@ -1,13 +1,13 @@
 // Important modules this config uses
 const path = require('path');
-const webpack = require('webpack');
-const pkg = require(path.resolve(process.cwd(), 'package.json'));
-const pluginId = pkg.name.replace(/^strapi-/i, '');
 
-// PostCSS plugins
 const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
+const webpack = require('webpack');
+
+const pkg = require(path.resolve(process.cwd(), 'package.json'));
+const pluginId = pkg.name.replace(/^strapi-/i, '');
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff

@@ -5,10 +5,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import Container from 'components/Container';
 import { injectIntl } from 'react-intl';
 
+import Container from '../../components/Container';
+
 import styles from './styles.scss';
+
 export class HomePage extends React.Component {
   render() {
     const PluginHeader = this.props.exposedComponents.PluginHeader;

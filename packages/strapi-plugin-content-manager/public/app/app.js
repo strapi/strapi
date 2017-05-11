@@ -5,10 +5,15 @@
  * only setup and plugin code.
  */
 
-import { syncHistoryWithStore } from 'react-router-redux';
-import configureStore from './store';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { syncHistoryWithStore } from 'react-router-redux';
+
+import App from './containers/App';
+import createRoutes from './routes';
+import configureStore from './store';
+import { selectLocationState } from './containers/App/selectors';
+import { translationMessages } from './i18n';
 
 // Create redux store with history
 // this uses the singleton browserHistory provided by react-router
@@ -19,15 +24,9 @@ const store = configureStore({}, window.Strapi.router);
 // Sync history and store, as the react-router-redux reducer
 // is under the non-default key ("routing"), selectLocationState
 // must be provided for resolving how to retrieve the "route" in the state
-import { selectLocationState } from 'containers/App/selectors';
 syncHistoryWithStore(window.Strapi.router, store, {
   selectLocationState: selectLocationState(),
 });
-
-// Set up the router, wrapping all Routes in the App component
-import App from 'containers/App';
-import createRoutes from './routes';
-import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
 const pluginId = require('../package.json').name.replace(

@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
+import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+
 import { loadModels } from './actions';
 import { makeSelectModels, makeSelectLoading } from './selectors';
-import { connect } from 'react-redux';
-
-import '../../styles/main.scss';
 
 class App extends React.Component {
   componentWillMount() {

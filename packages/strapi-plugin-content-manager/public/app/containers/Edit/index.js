@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import _ from 'lodash';
 
-import Container from 'components/Container';
-import EditForm from 'components/EditForm';
+import Container from '../../components/Container';
+import EditForm from '../../components/EditForm';
+import { makeSelectModels } from '../App/selectors';
 
 import {
   setCurrentModelName,
@@ -20,7 +21,6 @@ import {
   editRecord,
   deleteRecord,
 } from './actions';
-
 import {
   makeSelectRecord,
   makeSelectLoading,
@@ -29,8 +29,6 @@ import {
   makeSelectDeleting,
   makeSelectIsCreating,
 } from './selectors';
-
-import { makeSelectModels } from 'containers/App/selectors';
 
 export class Edit extends React.Component {
   componentWillMount() {

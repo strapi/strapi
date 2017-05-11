@@ -5,6 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
+
 import {
   SET_CURRENT_MODEL_NAME,
   SET_IS_CREATING,

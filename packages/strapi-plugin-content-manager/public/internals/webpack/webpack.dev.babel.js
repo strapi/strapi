@@ -4,12 +4,8 @@
 
 const path = require('path');
 const fs = require('fs');
-const webpack = require('webpack');
-const logger = require('../../server/logger');
-const pkg = require(path.resolve(process.cwd(), 'package.json'));
-const dllPlugin = pkg.dllPlugin;
-const pluginId = pkg.name.replace(/^strapi-/i, '');
 
+const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
 // PostCSS plugins
 const cssnext = require('postcss-cssnext');
@@ -19,6 +15,12 @@ const plugins = [
   new webpack.HotModuleReplacementPlugin(), // Tell webpack we want hot reloading
   new webpack.NoErrorsPlugin(),
 ];
+
+const logger = require('../../server/logger');
+
+const pkg = require(path.resolve(process.cwd(), 'package.json'));
+const dllPlugin = pkg.dllPlugin;
+const pluginId = pkg.name.replace(/^strapi-/i, '');
 const port = argv.port || process.env.PORT || 3000;
 
 module.exports = require('./webpack.base.babel')({
