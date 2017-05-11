@@ -5,7 +5,7 @@
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import appSagas from 'containers/App/sagas';
 
-const loadModule = (cb) => (componentModule) => {
+const loadModule = cb => componentModule => {
   cb(null, componentModule.default);
 };
 
@@ -31,7 +31,8 @@ export default function createRoutes(store) {
           renderRoute(component);
         });
       },
-    }, {
+    },
+    {
       path: '/:slug',
       name: 'list',
       getComponent(nextState, cb) {
@@ -47,7 +48,8 @@ export default function createRoutes(store) {
           renderRoute(component);
         });
       },
-    }, {
+    },
+    {
       path: '/:slug/:id',
       name: 'list',
       getComponent(nextState, cb) {

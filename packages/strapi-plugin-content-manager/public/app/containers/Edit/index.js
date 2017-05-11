@@ -30,11 +30,9 @@ import {
   makeSelectIsCreating,
 } from './selectors';
 
-import {
-  makeSelectModels,
-} from 'containers/App/selectors';
+import { makeSelectModels } from 'containers/App/selectors';
 
-export class Edit extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class Edit extends React.Component {
   componentWillMount() {
     this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
 
@@ -66,18 +64,21 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
     }
 
     // Define plugin header actions
-    const pluginHeaderActions = [{
-      label: 'Cancel',
-      class: 'btn-default',
-    }, {
-      label: this.props.editing ? 'Editing...' : 'Submit',
-      class: 'btn-primary',
-      onClick: this.props.editRecord,
-      disabled: this.props.editing,
-    }];
+    const pluginHeaderActions = [
+      {
+        label: 'Cancel',
+        class: 'btn-default',
+      },
+      {
+        label: this.props.editing ? 'Editing...' : 'Submit',
+        class: 'btn-primary',
+        onClick: this.props.editRecord,
+        disabled: this.props.editing,
+      },
+    ];
 
     // Add the `Delete` button only in edit mode
-    if (!this.props.isAdding) {
+    if (!this.props.isCreating) {
       pluginHeaderActions.push({
         label: 'Delete',
         class: 'btn-danger',
@@ -87,8 +88,11 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
     }
 
     // Plugin header config
-    const pluginHeaderTitle = _.upperFirst(this.props.routeParams.slug) || 'Content Manager';
-    const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record.get('id') }`;
+    const pluginHeaderTitle =
+      _.upperFirst(this.props.routeParams.slug) || 'Content Manager';
+    const pluginHeaderDescription = this.props.isCreating
+      ? 'New entry'
+      : `#${this.props.record.get('id')}`;
 
     return (
       <div className="col-md-12">
@@ -96,16 +100,16 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
           <PluginHeader
             title={{
               id: 'plugin-content-manager-title',
-              defaultMessage: `${pluginHeaderTitle}`
+              defaultMessage: `${pluginHeaderTitle}`,
             }}
             description={{
               id: 'plugin-content-manager-description',
-              defaultMessage: `${pluginHeaderDescription}`
+              defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={pluginHeaderActions}
           />
           <Container>
-            <p></p>
+            <p />
             <div className="row">
               <div className="col-md-8">
                 {content}
@@ -119,9 +123,8 @@ export class Edit extends React.Component { // eslint-disable-line react/prefer-
 }
 
 Edit.propTypes = {
-  setCurrentModelName: React.PropTypes.func,
-  loadRecord: React.PropTypes.func,
-  loading: React.PropTypes.bool,
+  setCurrentModelName: React.PropTypes.func.isRequired,
+  loadRecord: React.PropTypes.func.isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -130,9 +133,19 @@ Edit.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
-  editRecord: React.PropTypes.func,
-  editing: React.PropTypes.bool,
-  deleting: React.PropTypes.bool,
+  editRecord: React.PropTypes.func.isRequired,
+  editing: React.PropTypes.bool.isRequired,
+  deleting: React.PropTypes.bool.isRequired,
+  routeParams: React.PropTypes.object.isRequired,
+  setIsCreating: React.PropTypes.func.isRequired,
+  deleteRecord: React.PropTypes.func.isRequired,
+  isCreating: React.PropTypes.bool.isRequired,
+  setRecordAttribute: React.PropTypes.func.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired,
+  currentModelName: React.PropTypes.oneOfType([
+    React.PropTypes.bool,
+    React.PropTypes.string,
+  ]),
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -147,10 +160,12 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
-    setCurrentModelName: (currentModelName) => dispatch(setCurrentModelName(currentModelName)),
+    setCurrentModelName: currentModelName =>
+      dispatch(setCurrentModelName(currentModelName)),
     setIsCreating: () => dispatch(setIsCreating()),
-    loadRecord: (id) => dispatch(loadRecord(id)),
-    setRecordAttribute: (key, value) => dispatch(setRecordAttribute(key, value)),
+    loadRecord: id => dispatch(loadRecord(id)),
+    setRecordAttribute: (key, value) =>
+      dispatch(setRecordAttribute(key, value)),
     editRecord: () => dispatch(editRecord()),
     deleteRecord: () => {
       // TODO: improve confirmation UX.

@@ -4,10 +4,7 @@
  *
  */
 
-import {
-  LOAD_MODELS,
-  LOADED_MODELS
-} from './constants';
+import { LOAD_MODELS, LOADED_MODELS } from './constants';
 
 export function loadModels() {
   return {
@@ -18,6 +15,6 @@ export function loadModels() {
 export function loadedModels(models) {
   return {
     type: LOADED_MODELS,
-    models
+    models,
   };
 }

@@ -23,13 +23,12 @@ function checkStatus(response) {
     return response;
   }
 
-  return parseJSON(response)
-    .then((responseFormatted) => {
-      const error = new Error(response.statusText);
-      error.response = response;
-      error.response.payload = responseFormatted;
-      throw error;
-    });
+  return parseJSON(response).then(responseFormatted => {
+    const error = new Error(response.statusText);
+    error.response = response;
+    error.response.payload = responseFormatted;
+    throw error;
+  });
 }
 
 /**
@@ -40,7 +39,7 @@ function checkStatus(response) {
  */
 function formatQueryParams(params) {
   return Object.keys(params)
-    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 }
 
@@ -72,7 +71,5 @@ export default function request(url, options) {
     optionsObj.body = JSON.stringify(optionsObj.body);
   }
 
-  return fetch(urlFormatted, optionsObj)
-    .then(checkStatus)
-    .then(parseJSON);
+  return fetch(urlFormatted, optionsObj).then(checkStatus).then(parseJSON);
 }

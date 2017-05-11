@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the list state domain
  */
-const selectGlobalDomain = () => (state) => state.get('global');
+const selectGlobalDomain = () => state => state.get('global');
 
 /**
  * Other specific selectors
@@ -13,7 +13,7 @@ const selectLocationState = () => {
   let prevRoutingState;
   let prevRoutingStateJS;
 
-  return (state) => {
+  return state => {
     const routingState = state.get('route'); // or state.route
 
     if (!routingState.equals(prevRoutingState)) {
@@ -29,15 +29,13 @@ const selectLocationState = () => {
  * Default selector used by List
  */
 
-const makeSelectModels = () => createSelector(
-  selectGlobalDomain(),
-  (globalState) => globalState.get('models'),
-);
+const makeSelectModels = () =>
+  createSelector(selectGlobalDomain(), globalState =>
+    globalState.get('models')
+  );
 
-const makeSelectLoading = () => createSelector(
-  selectGlobalDomain(),
-  (substate) => substate.get('loading')
-);
+const makeSelectLoading = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('loading'));
 
 export {
   selectGlobalDomain,

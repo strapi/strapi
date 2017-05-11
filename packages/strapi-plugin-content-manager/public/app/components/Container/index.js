@@ -7,7 +7,7 @@
 import React from 'react';
 import styles from './styles.scss';
 
-class Container extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class Container extends React.Component {
   render() {
     return (
       <div className={styles.container}>
@@ -20,7 +20,7 @@ class Container extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 Container.propTypes = {
-  children: React.PropTypes.array,
+  children: React.PropTypes.array.isRequired,
 };
 
 export default Container;

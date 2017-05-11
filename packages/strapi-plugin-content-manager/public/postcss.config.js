@@ -1,7 +1,11 @@
+const postcssSmartImport = require('postcss-smart-import');
+const precss = require('precss');
+const autoprefixer = require('autoprefixer');
+
 module.exports = {
   plugins: [
-    require('postcss-smart-import')(),
-    require('precss')(),
-    require('autoprefixer')()
-  ]
+    postcssSmartImport(),
+    precss(),
+    autoprefixer(),
+  ],
 };

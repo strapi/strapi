@@ -6,7 +6,6 @@ const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
 const logger = require('../../server/logger');
-const cheerio = require('cheerio');
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const dllPlugin = pkg.dllPlugin;
 const pluginId = pkg.name.replace(/^strapi-/i, '');

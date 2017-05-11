@@ -2,8 +2,6 @@
  * The home state selectors
  */
 
-const selectHome = (state) => state.get('home');
+const selectHome = state => state.get('home');
 
-export {
-  selectHome
-};
+export { selectHome };

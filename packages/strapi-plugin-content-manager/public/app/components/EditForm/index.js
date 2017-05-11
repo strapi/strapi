@@ -7,7 +7,7 @@
 import React from 'react';
 import _ from 'lodash';
 
-class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class EditForm extends React.Component {
   constructor(props) {
     super(props);
     this.onFormSubmit = this.onFormSubmit.bind(this);
@@ -18,87 +18,110 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
     this.props.editRecord();
   }
 
+  generateField(attributeValue, attributeKey) {
+    let input;
+
+    // Generate fields according to attribute type
+    switch (attributeValue.type) {
+      case 'boolean':
+        input = (
+          <select
+            className="form-control"
+            onChange={e =>
+              this.props.setRecordAttribute(
+                attributeKey,
+                e.target.value === 'true'
+              )}
+            defaultValue={
+              this.props.record && this.props.record.get(attributeKey)
+            }
+          >
+            <option disabled>Select an option</option>
+            <option value>True</option>
+            <option value={false}>False</option>
+          </select>
+        );
+        break;
+      case 'integer':
+        input = (
+          <input
+            type="number"
+            className="form-control"
+            id={attributeKey}
+            placeholder={attributeKey}
+            value={
+              (this.props.record && this.props.record.get(attributeKey)) || ''
+            }
+            onChange={e =>
+              this.props.setRecordAttribute(attributeKey, e.target.value)}
+          />
+        );
+        break;
+      case 'string':
+        input = (
+          <input
+            type="text"
+            className="form-control"
+            id={attributeKey}
+            placeholder={attributeKey}
+            value={
+              (this.props.record && this.props.record.get(attributeKey)) || ''
+            }
+            onChange={e =>
+              this.props.setRecordAttribute(attributeKey, e.target.value)}
+          />
+        );
+        break;
+      default:
+        input = (
+          <input
+            type="text"
+            className="form-control"
+            id={attributeKey}
+            placeholder={attributeKey}
+            value={
+              (this.props.record && this.props.record.get(attributeKey)) || ''
+            }
+            onChange={e =>
+              this.props.setRecordAttribute(attributeKey, e.target.value)}
+          />
+        );
+    }
+
+    return (
+      <div key={attributeKey} className="form-group">
+        <label htmlFor={attributeKey}>{attributeKey}</label>
+        {input}
+      </div>
+    );
+  }
+
   render() {
-    const fields = _.map(this.props.currentModel.attributes, (attributeValue, attributeKey) => {
-      let input;
-
-      // TMP - Skip attribute without `type` attribute.
-      // Relations are not supported yet.
-      if (!attributeValue.type) {
-        return;
-      }
-
-      // Generate fields according to attribute type
-      switch (attributeValue.type) {
-        case 'boolean':
-          input = (
-            <select
-              className="form-control"
-              onChange={(e) => this.props.setRecordAttribute(attributeKey, e.target.value === 'true' ? true : false)}
-              defaultValue={this.props.record && this.props.record.get(attributeKey)}
-            >
-              <option disabled>Select an option</option>
-              <option value={true}>True</option>
-              <option value={false}>False</option>
-            </select>
-          );
-          break;
-        case 'integer':
-          input = (
-            <input
-              type="number"
-              className="form-control"
-              id={attributeKey}
-              placeholder={attributeKey}
-              value={this.props.record && this.props.record.get(attributeKey) || ''}
-              onChange={(e) => this.props.setRecordAttribute(attributeKey, e.target.value)}
-            />
-          );
-          break;
-        case 'string':
-          input = (
-            <input
-              type="text"
-              className="form-control"
-              id={attributeKey}
-              placeholder={attributeKey}
-              value={this.props.record && this.props.record.get(attributeKey) || ''}
-              onChange={(e) => this.props.setRecordAttribute(attributeKey, e.target.value)}
-            />
-          );
-          break;
-        default:
-          input = (
-            <input
-              type="text"
-              className="form-control"
-              id={attributeKey}
-              placeholder={attributeKey}
-              value={this.props.record && this.props.record.get(attributeKey) || ''}
-              onChange={(e) => this.props.setRecordAttribute(attributeKey, e.target.value)}
-            />
-          );
-      }
-
-      return (
-        <div key={attributeKey} className="form-group">
-          <label htmlFor={attributeKey}>{attributeKey}</label>
-          {input}
-        </div>
-      );
-    });
+    const fields = _.map(
+      this.props.currentModel.attributes,
+      (attributeValue, attributeKey) =>
+        this.generateField(attributeValue, attributeKey)
+    );
 
     return (
       <div>
         <form onSubmit={this.onFormSubmit}>
           {fields}
-          <input type="submit" className="hidden-xs-up"/>
+          <input type="submit" className="hidden-xs-up" />
         </form>
       </div>
     );
   }
 }
 
-EditForm.propTypes = {};
+EditForm.propTypes = {
+  currentModel: React.PropTypes.object.isRequired,
+  record: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  editRecord: React.PropTypes.func.isRequired,
+  setRecordAttribute: React.PropTypes.func.isRequired,
+};
 
 export default EditForm;

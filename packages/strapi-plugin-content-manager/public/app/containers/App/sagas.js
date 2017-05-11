@@ -2,22 +2,21 @@ import { takeLatest } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import _ from 'lodash';
 
-import {
-  loadedModels
-} from './actions';
+import { loadedModels } from './actions';
 
-import {
-  LOAD_MODELS,
-} from './constants';
+import { LOAD_MODELS } from './constants';
 
 export function* getModels() {
   try {
     const opts = {
       method: 'GET',
       mode: 'cors',
-      cache: 'default'
+      cache: 'default',
     };
-    const response = yield fetch('http://localhost:1337/content-manager/models', opts);
+    const response = yield fetch(
+      'http://localhost:1337/content-manager/models',
+      opts
+    );
     const data = yield response.json();
 
     yield put(loadedModels(data));
@@ -30,7 +29,9 @@ export function* getModels() {
     // Update the admin left menu links
     window.Strapi.refresh('content-manager').leftMenuLinks(leftMenuLinks);
   } catch (err) {
-    console.error(err);
+    window.Strapi.notification.error(
+      'An error occurred during models config fetch.'
+    );
   }
 }
 
@@ -41,6 +42,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default [defaultSaga];

@@ -15,11 +15,8 @@ const translationMessages = {
   fr: frTranslationMessages,
 };
 
-const define = (messages) => {
+const define = messages => {
   defineMessages(messages);
 };
 
-export {
-  translationMessages,
-  define,
-};
+export { translationMessages, define };

@@ -3,15 +3,9 @@ import { put, select, fork, call, take, cancel } from 'redux-saga/effects';
 import request from 'utils/request';
 import { LOCATION_CHANGE } from 'react-router-redux';
 
-import {
-  loadedRecord,
-  loadedCount,
-} from './actions';
+import { loadedRecord, loadedCount } from './actions';
 
-import {
-  LOAD_RECORDS,
-  LOAD_COUNT,
-} from './constants';
+import { LOAD_RECORDS, LOAD_COUNT } from './constants';
 
 import {
   makeSelectCurrentModelName,
@@ -47,7 +41,7 @@ export function* getRecords() {
 
     yield put(loadedRecord(data));
   } catch (err) {
-    console.error(err);
+    window.Strapi.notification.error('An error occurred during records fetch.');
   }
 }
 
@@ -58,15 +52,20 @@ export function* getCount() {
     const opts = {
       method: 'GET',
       mode: 'cors',
-      cache: 'default'
+      cache: 'default',
     };
-    const response = yield fetch(`http://localhost:1337/content-manager/explorer/${currentModel}/count`, opts);
+    const response = yield fetch(
+      `http://localhost:1337/content-manager/explorer/${currentModel}/count`,
+      opts
+    );
 
     const data = yield response.json();
 
     yield put(loadedCount(data.count));
   } catch (err) {
-    console.error(err);
+    window.Strapi.notification.error(
+      'An error occurred during count records fetch.'
+    );
   }
 }
 
@@ -82,6 +81,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default [defaultSaga];

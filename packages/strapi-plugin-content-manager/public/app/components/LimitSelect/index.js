@@ -9,10 +9,14 @@ import _ from 'lodash';
 
 import styles from './styles.scss';
 
-class LimitSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class LimitSelect extends React.Component {
   componentWillMount() {
     const id = _.uniqueId();
     this.setState({ id });
+  }
+
+  shouldComponentUpdate() {
+    return false;
   }
 
   /**
@@ -24,13 +28,9 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
     return [10, 20, 50, 100];
   }
 
-  shouldComponentUpdate() {
-    return false;
-  }
-
   render() {
     // Generate options
-    const options = this.getOptionsValues().map((optionValue) => (
+    const options = this.getOptionsValues().map(optionValue => (
       <option value={optionValue} key={optionValue}>{optionValue}</option>
     ));
 
@@ -42,7 +42,11 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
         <div className="form-group">
           <label className={styles.label} htmlFor={id}>Items per page:</label>
           <div className={styles.selectWrapper}>
-            <select onChange={this.props.onLimitChange} className={`form-control ${styles.select}`} id={id}>
+            <select
+              onChange={this.props.onLimitChange}
+              className={`form-control ${styles.select}`}
+              id={id}
+            >
               {options}
             </select>
           </div>
@@ -53,8 +57,7 @@ class LimitSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 LimitSelect.propTypes = {
-  limit: React.PropTypes.number,
-  onLimitChange: React.PropTypes.func,
+  onLimitChange: React.PropTypes.func.isRequired,
 };
 
 export default LimitSelect;

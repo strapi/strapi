@@ -38,6 +38,7 @@
     "lint:js": "npm run lint:eslint -- . ",
     "lint:staged": "lint-staged",
     "pretest": "npm run test:clean && npm run lint",
+    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{app,__{tests,mocks}__}/**/*.js\"",
     "test:clean": "rimraf ./coverage",
     "test": "cross-env NODE_ENV=test karma start internals/testing/karma.conf.js --single-run",
     "test:watch": "npm run test -- --auto-watch --no-single-run",
@@ -47,7 +48,10 @@
     "coveralls": "cat ./coverage/lcov/lcov.info | coveralls"
   },
   "lint-staged": {
-    "*.js": "lint:eslint"
+    "*.js": [
+      "npm run prettier",
+      "lint:eslint"
+    ]
   },
   "pre-commit": "lint:staged",
   "babel": {
@@ -76,9 +80,87 @@
       },
       "test": {
         "plugins": [
-          "transform-es2015-modules-commonjs",
-          "dynamic-import-node"
+          "istanbul"
         ]
+      }
+    }
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": [
+      "airbnb",
+      "prettier"
+    ],
+    "env": {
+      "browser": true,
+      "node": true,
+      "mocha": true,
+      "es6": true
+    },
+    "plugins": [
+      "redux-saga",
+      "react",
+      "jsx-a11y"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "rules": {
+      "comma-dangle": [
+        2,
+        "always-multiline"
+      ],
+      "import/imports-first": 0,
+      "import/newline-after-import": 0,
+      "import/no-dynamic-require": 0,
+      "import/no-extraneous-dependencies": 0,
+      "import/no-named-as-default": 0,
+      "import/no-unresolved": 2,
+      "import/prefer-default-export": 0,
+      "indent": [
+        2,
+        2,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "jsx-a11y/aria-props": 2,
+      "jsx-a11y/heading-has-content": 0,
+      "jsx-a11y/href-no-hash": 2,
+      "jsx-a11y/label-has-for": 2,
+      "jsx-a11y/mouse-events-have-key-events": 2,
+      "jsx-a11y/role-has-required-aria-props": 2,
+      "jsx-a11y/role-supports-aria-props": 2,
+      "max-len": 0,
+      "newline-per-chained-call": 0,
+      "no-console": 1,
+      "no-use-before-define": 0,
+      "prefer-template": 2,
+      "class-methods-use-this": 0,
+      "react/forbid-prop-types": 0,
+      "react/jsx-first-prop-new-line": [
+        2,
+        "multiline"
+      ],
+      "react/jsx-filename-extension": 0,
+      "react/jsx-no-target-blank": 0,
+      "react/require-extension": 0,
+      "react/self-closing-comp": 0,
+      "redux-saga/no-yield-in-race": 2,
+      "redux-saga/yield-effects": 2,
+      "require-yield": 0,
+      "react/no-unescaped-entities": 0,
+      "react/prefer-stateless-function": 0
+    },
+    "settings": {
+      "import/resolver": {
+        "webpack": {
+          "config": "./internals/webpack/webpack.test.babel.js"
+        }
       }
     }
   },
@@ -110,7 +192,6 @@
     "immutable": "3.8.1",
     "intl": "1.2.4",
     "invariant": "2.2.1",
-    "ip": "1.1.3",
     "lodash": "4.15.0",
     "react": "15.3.0",
     "react-dom": "15.3.0",
@@ -156,6 +237,7 @@
     "eslint": "3.9.0",
     "eslint-config-airbnb": "12.0.0",
     "eslint-config-airbnb-base": "9.0.0",
+    "eslint-config-prettier": "^2.0.0",
     "eslint-import-resolver-webpack": "0.6.0",
     "eslint-plugin-import": "2.0.1",
     "eslint-plugin-jsx-a11y": "2.2.3",
@@ -191,6 +273,7 @@
     "postcss-smart-import": "^0.6.7",
     "pre-commit": "1.1.3",
     "precss": "^1.4.0",
+    "prettier": "^1.3.1",
     "psi": "2.0.4",
     "rimraf": "2.5.4",
     "sass-loader": "^4.0.2",

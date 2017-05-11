@@ -9,7 +9,6 @@ import Container from 'components/Container';
 import { injectIntl } from 'react-intl';
 
 import styles from './styles.scss';
-
 export class HomePage extends React.Component {
   render() {
     const PluginHeader = this.props.exposedComponents.PluginHeader;
@@ -17,23 +16,31 @@ export class HomePage extends React.Component {
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
-          <PluginHeader title={{
-            id: 'plugin-content-manager-title',
-            defaultMessage: 'Content Manager'
-          }} description={{
-            id: 'plugin-content-manager-description',
-            defaultMessage: 'A powerful UI to easily manage your data.'
-          }} noActions={true}>
-          </PluginHeader>
+          <PluginHeader
+            title={{
+              id: 'plugin-content-manager-title',
+              defaultMessage: 'Content Manager',
+            }}
+            description={{
+              id: 'plugin-content-manager-description',
+              defaultMessage: 'A powerful UI to easily manage your data.',
+            }}
+          />
           <Container>
             <p>Nothing to do here.</p>
-            <p>To edit your content's entries go to the specific link in the left menu.</p>
+            <p>
+              To edit your content's entries go to the specific link in the left menu.
+            </p>
           </Container>
         </div>
       </div>
     );
   }
 }
+
+HomePage.propTypes = {
+  exposedComponents: React.PropTypes.object.isRequired,
+};
 
 export function mapDispatchToProps() {
   return {};
@@ -42,4 +49,6 @@ export function mapDispatchToProps() {
 const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(HomePage));
+export default connect(mapStateToProps, mapDispatchToProps)(
+  injectIntl(HomePage)
+);

@@ -10,17 +10,10 @@ import _ from 'lodash';
 
 import styles from './styles.scss';
 
-class TableRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class TableRow extends React.Component {
   constructor(props) {
     super(props);
     this.goEditPage = this.goEditPage.bind(this);
-  }
-
-  /**
-   * Redirect to the edit page
-   */
-  goEditPage() {
-    this.context.router.push(this.props.destination);
   }
 
   /**
@@ -42,17 +35,30 @@ class TableRow extends React.Component { // eslint-disable-line react/prefer-sta
     }
   }
 
+  /**
+   * Redirect to the edit page
+   */
+  goEditPage() {
+    this.context.router.push(this.props.destination);
+  }
+
   render() {
     // Generate cells
     const cells = this.props.headers.map((header, i) => {
       // Default content
-      let content = this.getDisplayedValue(header.type, this.props.record[header.name]);
+      let content = this.getDisplayedValue(
+        header.type,
+        this.props.record[header.name]
+      );
 
       // Display a link if the current column is the `id` column
       if (header.name === this.props.primaryKey) {
         content = (
           <Link to={this.props.destination} className={styles.idLink}>
-            {this.getDisplayedValue(header.type, this.props.record[header.name])}
+            {this.getDisplayedValue(
+              header.type,
+              this.props.record[header.name]
+            )}
           </Link>
         );
       }
@@ -65,14 +71,17 @@ class TableRow extends React.Component { // eslint-disable-line react/prefer-sta
     });
 
     return (
-      <tr className={styles.tableRow} onClick={() => this.goEditPage(this.props.destination)}>
+      <tr // eslint-disable-line jsx-a11y/no-static-element-interactions
+        className={styles.tableRow}
+        onClick={() => this.goEditPage(this.props.destination)}
+      >
         {cells}
         <td className={styles.actions}>
           <Link to={this.props.destination}>
-            <i className="ion ion-edit"></i>
+            <i className="ion ion-edit" />
           </Link>
           <Link to={this.props.destination}>
-            <i className="ion ion-close-round"></i>
+            <i className="ion ion-close-round" />
           </Link>
         </td>
       </tr>
@@ -81,15 +90,14 @@ class TableRow extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 TableRow.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
 };
 
 TableRow.propTypes = {
-  headers: React.PropTypes.array,
-  record: React.PropTypes.object,
-  destination: React.PropTypes.string,
-  history: React.PropTypes.object,
-  primaryKey: React.PropTypes.string,
+  headers: React.PropTypes.array.isRequired,
+  record: React.PropTypes.object.isRequired,
+  destination: React.PropTypes.string.isRequired,
+  primaryKey: React.PropTypes.string.isRequired,
 };
 
 export default TableRow;

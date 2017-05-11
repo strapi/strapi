@@ -5,30 +5,27 @@
  */
 
 module.exports = {
-
-  models: async(ctx) => {
-    ctx.body = _.mapValues(strapi.models, (model) => (_.pick(model, [
-      'connection',
-      'collectionName',
-      'attributes',
-      'identity',
-      'globalId',
-      'globalName',
-      'orm',
-      'loadedModel',
-      'primaryKey',
-    ])));
+  models: async ctx => {
+    ctx.body = _.mapValues(strapi.models, model =>
+      _.pick(model, [
+        'connection',
+        'collectionName',
+        'attributes',
+        'identity',
+        'globalId',
+        'globalName',
+        'orm',
+        'loadedModel',
+        'primaryKey',
+      ])
+    );
   },
 
-  find: async(ctx) => {
+  find: async ctx => {
     const model = strapi.models[ctx.params.model];
     const primaryKey = model.primaryKey;
 
-    const {
-      limit = 10,
-      skip = 0,
-      sort = primaryKey
-    } = ctx.request.query;
+    const { limit = 10, skip = 0, sort = primaryKey } = ctx.request.query;
 
     const entries = await model
       .find()
@@ -39,60 +36,55 @@ module.exports = {
     ctx.body = entries;
   },
 
-  count: async(ctx) => {
+  count: async ctx => {
     const model = strapi.models[ctx.params.model];
 
-    const count = await model
-      .count();
+    const count = await model.count();
 
     ctx.body = {
-      count: Number(count)
+      count: Number(count),
     };
   },
 
-  findOne: async(ctx) => {
+  findOne: async ctx => {
     const model = strapi.models[ctx.params.model];
     const primaryKey = model.primaryKey;
     const params = {};
     params[primaryKey] = ctx.params.id;
 
-    const entry = await model
-      .findOne(params);
+    const entry = await model.findOne(params);
 
     ctx.body = entry;
   },
 
-  create: async(ctx) => {
+  create: async ctx => {
     const model = strapi.models[ctx.params.model];
 
-    const entryCreated = await model
-      .create(ctx.request.body);
+    const entryCreated = await model.create(ctx.request.body);
 
     ctx.body = entryCreated;
   },
 
-  update: async(ctx) => {
+  update: async ctx => {
     const model = strapi.models[ctx.params.model];
     const primaryKey = model.primaryKey;
     const params = {};
 
     params[primaryKey] = ctx.params.id;
 
-    const entryUpdated = await model
-      .update(params, ctx.request.body);
+    const entryUpdated = await model.update(params, ctx.request.body);
 
     ctx.body = entryUpdated;
   },
 
-  delete: async(ctx) => {
+  delete: async ctx => {
     const model = strapi.models[ctx.params.model];
     const primaryKey = model.primaryKey;
     const params = {};
     params[primaryKey] = ctx.params.id;
 
-    const entryDeleted = await model
-      .remove(params);
+    const entryDeleted = await model.remove(params);
 
     ctx.body = entryDeleted;
-  }
+  },
 };

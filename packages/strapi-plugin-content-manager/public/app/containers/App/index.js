@@ -8,33 +8,30 @@
 import React from 'react';
 import { createStructuredSelector } from 'reselect';
 import { loadModels } from './actions';
-import {
-  makeSelectModels,
-  makeSelectLoading,
-} from './selectors';
+import { makeSelectModels, makeSelectLoading } from './selectors';
 import { connect } from 'react-redux';
 
 import '../../styles/main.scss';
 
-class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class App extends React.Component {
   componentWillMount() {
     this.props.loadModels();
   }
 
   render() {
-    let content = <div></div>;
+    let content = <div />;
 
     if (this.props.models) {
       // Assign plugin component to children
-      content = React.Children.map(this.props.children,
-        (child) => React.cloneElement(child, {
-          exposedComponents: this.props.exposedComponents
+      content = React.Children.map(this.props.children, child =>
+        React.cloneElement(child, {
+          exposedComponents: this.props.exposedComponents,
         })
       );
     }
 
     return (
-      <div className='content-manager'>
+      <div className="content-manager">
         {React.Children.toArray(content)}
       </div>
     );
@@ -46,8 +43,13 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  children: React.PropTypes.node,
-  loadModels: React.PropTypes.func,
+  children: React.PropTypes.node.isRequired,
+  loadModels: React.PropTypes.func.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
 };
 
 export function mapDispatchToProps(dispatch) {

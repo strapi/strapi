@@ -11,7 +11,7 @@ import TableRow from 'components/TableRow';
 
 import styles from './styles.scss';
 
-class Table extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class Table extends React.Component {
   render() {
     const tableRows = this.props.records.map((record, key) => {
       const destination = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`;
@@ -36,7 +36,7 @@ class Table extends React.Component { // eslint-disable-line react/prefer-statel
           sort={this.props.sort}
         />
         <tbody>
-        {tableRows}
+          {tableRows}
         </tbody>
       </table>
     );
@@ -48,14 +48,14 @@ Table.contextTypes = {
 };
 
 Table.propTypes = {
-  records: React.PropTypes.array,
-  route: React.PropTypes.object,
-  routeParams: React.PropTypes.object,
-  headers: React.PropTypes.array,
-  changeSort: React.PropTypes.func,
-  sort: React.PropTypes.string,
-  history: React.PropTypes.object,
-  primaryKey: React.PropTypes.string,
+  records: React.PropTypes.array.isRequired,
+  route: React.PropTypes.object.isRequired,
+  routeParams: React.PropTypes.object.isRequired,
+  headers: React.PropTypes.array.isRequired,
+  changeSort: React.PropTypes.func.isRequired,
+  sort: React.PropTypes.string.isRequired,
+  history: React.PropTypes.object.isRequired,
+  primaryKey: React.PropTypes.string.isRequired,
 };
 
 export default Table;

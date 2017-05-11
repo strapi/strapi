@@ -8,7 +8,7 @@ import React from 'react';
 
 import styles from './styles.scss';
 
-class Pagination extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class Pagination extends React.Component {
   constructor(props) {
     super(props);
     this.onGoPreviousPageClicked = this.onGoPreviousPageClicked.bind(this);
@@ -16,52 +16,15 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     this.onGoFirstPageClicked = this.onGoFirstPageClicked.bind(this);
     this.onGoLastPageClicked = this.onGoLastPageClicked.bind(this);
   }
-
   /**
-   * Check if the current page is the first one or not
+   * Triggered on dots click
    *
-   * @returns {boolean}
-   */
-  isFirstPage() {
-    return this.props.currentPage === 1;
-  }
-
-  /**
-   * Check if the previous links dots
-   * should be displayed or not
+   * Simply prevent link default behavior
    *
-   * @returns {boolean}
+   * @param e {Object} Click event
    */
-  needPreviousLinksDots() {
-    return this.props.currentPage > 3;
-  }
-
-  /**
-   * Check if the after links dots
-   * should be displayed or not
-   *
-   * @returns {boolean}
-   */
-  needAfterLinksDots() {
-    return this.props.currentPage < this.getLastPageNumber() - 1;
-  }
-
-  /**
-   * Return the last page number
-   *
-   * @returns {number}
-   */
-  getLastPageNumber() {
-    return Math.ceil(this.props.count / this.props.limit);
-  }
-
-  /**
-   * Check if the current page is the last one
-   *
-   * @returns {boolean}
-   */
-  isLastPage() {
-    return this.props.currentPage === this.getLastPageNumber();
+  onDotsClicked(e) {
+    e.preventDefault();
   }
 
   /**
@@ -93,18 +56,6 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
       this.props.changePage(this.props.currentPage + 1);
     }
   }
-
-  /**
-   * Triggered on dots click
-   *
-   * Simply prevent link default behavior
-   *
-   * @param e {Object} Click event
-   */
-  onDotsClicked(e) {
-    e.preventDefault();
-  }
-
   /**
    * Triggered on first page click
    *
@@ -131,6 +82,52 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     this.props.changePage(this.getLastPageNumber());
   }
 
+  /**
+   * Return the last page number
+   *
+   * @returns {number}
+   */
+  getLastPageNumber() {
+    return Math.ceil(this.props.count / this.props.limit);
+  }
+
+  /**
+   * Check if the current page is the first one or not
+   *
+   * @returns {boolean}
+   */
+  isFirstPage() {
+    return this.props.currentPage === 1;
+  }
+
+  /**
+   * Check if the previous links dots
+   * should be displayed or not
+   *
+   * @returns {boolean}
+   */
+  needPreviousLinksDots() {
+    return this.props.currentPage > 3;
+  }
+  /**
+   * Check if the after links dots
+   * should be displayed or not
+   *
+   * @returns {boolean}
+   */
+  needAfterLinksDots() {
+    return this.props.currentPage < this.getLastPageNumber() - 1;
+  }
+
+  /**
+   * Check if the current page is the last one
+   *
+   * @returns {boolean}
+   */
+  isLastPage() {
+    return this.props.currentPage === this.getLastPageNumber();
+  }
+
   render() {
     // Init variables
     const linksOptions = [];
@@ -139,7 +136,7 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
     linksOptions.push({
       value: this.props.currentPage,
       isActive: true,
-      onClick: (e) => {
+      onClick: e => {
         e.preventDefault();
       },
     });
@@ -192,41 +189,47 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
 
     // Generate links
     const links = linksOptions.map((linksOption, i) => (
-        <li className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`} key={i}>
-          <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
-            {linksOption.value}
-          </a>
-        </li>
-      )
-    );
+      <li
+        className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`}
+        key={i}
+      >
+        <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
+          {linksOption.value}
+        </a>
+      </li>
+    ));
 
     return (
       <div className={styles.pagination}>
-        <a href
-           className={`
+        <a
+          href
+          className={`
              ${styles.paginationNavigator}
              ${styles.paginationNavigatorPrevious}
              ${this.isFirstPage() && styles.paginationNavigatorDisabled}
            `}
-           onClick={this.onGoPreviousPageClicked}
-           disabled={this.isFirstPage()}>
-          <i className="ion ion-chevron-left"></i>
+          onClick={this.onGoPreviousPageClicked}
+          disabled={this.isFirstPage()}
+        >
+          <i className="ion ion-chevron-left" />
         </a>
-        <div className={styles.separator}></div>
+        <div className={styles.separator} />
         <nav className={styles.nav}>
           <ul className={styles.navUl}>
             {links}
           </ul>
         </nav>
-        <a href
-           className={`
+        <a
+          href
+          className={`
              ${styles.paginationNavigator}
              ${styles.paginationNavigatorNext}
              ${this.isLastPage() && styles.paginationNavigatorDisabled}
            `}
-           onClick={this.onGoNextPageClicked}
-           disabled={this.isLastPage()}>
-          <i className="ion ion-chevron-right"></i>
+          onClick={this.onGoNextPageClicked}
+          disabled={this.isLastPage()}
+        >
+          <i className="ion ion-chevron-right" />
         </a>
       </div>
     );
@@ -234,9 +237,9 @@ class Pagination extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 Pagination.propTypes = {
-  limit: React.PropTypes.number,
-  currentPage: React.PropTypes.number,
-  changePage: React.PropTypes.func,
+  limit: React.PropTypes.number.isRequired,
+  currentPage: React.PropTypes.number.isRequired,
+  changePage: React.PropTypes.func.isRequired,
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,

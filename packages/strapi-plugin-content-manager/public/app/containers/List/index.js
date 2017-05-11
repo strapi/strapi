@@ -37,11 +37,25 @@ import {
   makeSelectLoadingCount,
 } from './selectors';
 
-import {
-  makeSelectModels,
-} from 'containers/App/selectors';
+import { makeSelectModels } from 'containers/App/selectors';
 
-export class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class List extends React.Component {
+  componentWillMount() {
+    // Init the view
+    this.init(this.props.routeParams.slug);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Check if the current slug changed in the url
+    const locationChanged =
+      nextProps.location.pathname !== this.props.location.pathname;
+
+    // If the location changed, init the view
+    if (locationChanged) {
+      this.init(nextProps.params.slug);
+    }
+  }
+
   init(slug) {
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
@@ -57,21 +71,6 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
 
     // Define the `create` route url
     this.addRoute = `${this.props.route.path.replace(':slug', slug)}/create`;
-  }
-
-  componentWillMount() {
-    // Init the view
-    this.init(this.props.routeParams.slug);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // Check if the current slug changed in the url
-    const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
-
-    // If the location changed, init the view
-    if (locationChanged) {
-      this.init(nextProps.params.slug);
-    }
   }
 
   render() {
@@ -91,7 +90,10 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
       const currentModel = this.props.models[this.props.currentModelName];
 
       // Hide non displayed attributes
-      const displayedAttributes = _.pickBy(currentModel.attributes, (attr) => (!attr.admin || attr.admin.displayed !== false));
+      const displayedAttributes = _.pickBy(
+        currentModel.attributes,
+        attr => !attr.admin || attr.admin.displayed !== false
+      );
 
       // Define table headers
       const tableHeaders = _.map(displayedAttributes, (value, key) => ({
@@ -122,14 +124,17 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
     }
 
     // Define plugin header actions
-    const pluginHeaderActions = [{
-      label: 'Add an entry',
-      class: 'btn-primary',
-      onClick: () => this.context.router.push(this.addRoute),
-    }];
+    const pluginHeaderActions = [
+      {
+        label: 'Add an entry',
+        class: 'btn-primary',
+        onClick: () => this.context.router.push(this.addRoute),
+      },
+    ];
 
     // Plugin header config
-    const pluginHeaderTitle = _.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager';
+    const pluginHeaderTitle =
+      _.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager';
     const pluginHeaderDescription = `Manage your ${this.props.currentModelNamePluralized}`;
 
     return (
@@ -138,11 +143,11 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
           <PluginHeader
             title={{
               id: 'plugin-content-manager-title',
-              defaultMessage: `${pluginHeaderTitle}`
+              defaultMessage: `${pluginHeaderTitle}`,
             }}
             description={{
               id: 'plugin-content-manager-description',
-              defaultMessage: `${pluginHeaderDescription}`
+              defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={pluginHeaderActions}
           />
@@ -164,49 +169,62 @@ export class List extends React.Component { // eslint-disable-line react/prefer-
 }
 
 List.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
 };
 
 List.propTypes = {
-  setCurrentModelName: React.PropTypes.func,
+  setCurrentModelName: React.PropTypes.func.isRequired,
   records: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.bool,
   ]),
-  loadRecords: React.PropTypes.func,
-  loadingRecords: React.PropTypes.bool,
+  loadRecords: React.PropTypes.func.isRequired,
+  loadingRecords: React.PropTypes.bool.isRequired,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
-  currentPage: React.PropTypes.number,
-  limit: React.PropTypes.number,
-  sort: React.PropTypes.string,
-  currentModelName: React.PropTypes.string,
-  currentModelNamePluralized: React.PropTypes.string,
-  changeSort: React.PropTypes.func,
-  onLimitChange: React.PropTypes.func,
+  currentPage: React.PropTypes.number.isRequired,
+  limit: React.PropTypes.number.isRequired,
+  sort: React.PropTypes.string.isRequired,
+  currentModelName: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
+  currentModelNamePluralized: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
+  changeSort: React.PropTypes.func.isRequired,
+  onLimitChange: React.PropTypes.func.isRequired,
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
   ]),
+  exposedComponents: React.PropTypes.object.isRequired,
+  loadCount: React.PropTypes.func.isRequired,
+  route: React.PropTypes.object.isRequired,
+  routeParams: React.PropTypes.object.isRequired,
+  location: React.PropTypes.object.isRequired,
+  history: React.PropTypes.object.isRequired,
+  changePage: React.PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
   return {
-    setCurrentModelName: (modelName) => dispatch(setCurrentModelName(modelName)),
+    setCurrentModelName: modelName => dispatch(setCurrentModelName(modelName)),
     loadRecords: () => dispatch(loadRecords()),
     loadCount: () => dispatch(loadCount()),
-    changePage: (page) => {
+    changePage: page => {
       dispatch(changePage(page));
       dispatch(loadRecords());
       dispatch(loadCount());
     },
-    changeSort: (sort) => {
+    changeSort: sort => {
       dispatch(changeSort(sort));
       dispatch(loadRecords());
     },
-    onLimitChange: (e) => {
+    onLimitChange: e => {
       const newLimit = Number(e.target.value);
       dispatch(changeLimit(newLimit));
       dispatch(changePage(1));

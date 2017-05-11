@@ -12,11 +12,7 @@ import {
   recordDeleteError,
 } from './actions';
 
-import {
-  LOAD_RECORD,
-  EDIT_RECORD,
-  DELETE_RECORD,
-} from './constants';
+import { LOAD_RECORD, EDIT_RECORD, DELETE_RECORD } from './constants';
 
 import {
   makeSelectCurrentModelName,
@@ -37,7 +33,7 @@ export function* getRecord(params) {
 
     yield put(recordLoaded(data));
   } catch (err) {
-    console.error(err);
+    window.Strapi.notification.error('An error occurred during record fetch.');
   }
 }
 
@@ -59,10 +55,14 @@ export function* editRecord() {
     });
 
     yield put(recordEdited());
-    window.Strapi.notification.success(`The entry has been successfully ${isCreating ? 'created' : 'updated'}.`);
+    window.Strapi.notification.success(
+      `The entry has been successfully ${isCreating ? 'created' : 'updated'}.`
+    );
   } catch (err) {
     yield put(recordEditError());
-    window.Strapi.notification.error(`An error occurred during record ${isCreating ? 'creation' : 'update'}.`);
+    window.Strapi.notification.error(
+      `An error occurred during record ${isCreating ? 'creation' : 'update'}.`
+    );
   }
 }
 
@@ -80,20 +80,28 @@ export function* deleteRecord() {
     });
 
     yield put(recordDeleted());
-    window.Strapi.notification.success('The entry has been successfully deleted.');
+    window.Strapi.notification.success(
+      'The entry has been successfully deleted.'
+    );
 
     // Redirect to the list page.
     router.push(`/plugins/content-manager/${currentModelName}`);
   } catch (err) {
     yield put(recordDeleteError());
-    window.Strapi.notification.error('An error occurred during record deletion.');
+    window.Strapi.notification.error(
+      'An error occurred during record deletion.'
+    );
   }
 }
 
 export function* defaultSaga() {
   const loadRecordWatcher = yield fork(takeLatest, LOAD_RECORD, getRecord);
   const editRecordWatcher = yield fork(takeLatest, EDIT_RECORD, editRecord);
-  const deleteRecordWatcher = yield fork(takeLatest, DELETE_RECORD, deleteRecord);
+  const deleteRecordWatcher = yield fork(
+    takeLatest,
+    DELETE_RECORD,
+    deleteRecord
+  );
 
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
@@ -103,6 +111,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default [defaultSaga];

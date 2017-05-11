@@ -30,12 +30,15 @@ import createRoutes from './routes';
 import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
-const pluginId = require('../package.json').name.replace(/^strapi-plugin-/i, '');
+const pluginId = require('../package.json').name.replace(
+  /^strapi-plugin-/i,
+  ''
+);
 
 // Define Strapi admin router
-let router;
+let router; // eslint-disable-line import/no-mutable-exports
 
-class comp extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class comp extends React.Component {
   componentWillMount() {
     // Expose Strapi admin router
     router = this.context.router;
@@ -73,11 +76,12 @@ if (module.hot) {
   // have to be constants at compile-time
   module.hot.accept('./i18n', () => {
     if (window.Strapi) {
-      System.import('./i18n')
-        .then((result) => {
-          const translationMessagesUpdated = result.translationMessages;
-          window.Strapi.refresh(pluginId).translationMessages(translationMessagesUpdated);
-        });
+      System.import('./i18n').then(result => {
+        const translationMessagesUpdated = result.translationMessages;
+        window.Strapi
+          .refresh(pluginId)
+          .translationMessages(translationMessagesUpdated);
+      });
     }
   });
 }
@@ -86,9 +90,4 @@ if (module.hot) {
 const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 
 // Export store
-export {
-  store,
-  apiUrl,
-  pluginId,
-  router,
-};
+export { store, apiUrl, pluginId, router };

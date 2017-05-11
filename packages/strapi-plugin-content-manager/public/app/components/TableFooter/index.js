@@ -10,7 +10,7 @@ import LimitSelect from 'components/LimitSelect';
 
 import styles from './styles.scss';
 
-class TableFooter extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class TableFooter extends React.Component {
   render() {
     return (
       <div className={`row ${styles.tableFooter}`}>
@@ -37,14 +37,14 @@ class TableFooter extends React.Component { // eslint-disable-line react/prefer-
 }
 
 TableFooter.propTypes = {
-  limit: React.PropTypes.number,
-  currentPage: React.PropTypes.number,
-  changePage: React.PropTypes.func,
+  limit: React.PropTypes.number.isRequired,
+  currentPage: React.PropTypes.number.isRequired,
+  changePage: React.PropTypes.func.isRequired,
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
   ]),
-  onLimitChange: React.PropTypes.func,
+  onLimitChange: React.PropTypes.func.isRequired,
 };
 
 export default TableFooter;

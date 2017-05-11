@@ -17,8 +17,8 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  currentModel: null,
-  currentModelNamePluralized: null,
+  currentModel: false,
+  currentModelNamePluralized: false,
   loadingRecords: true,
   records: false,
   loadingCount: true,
@@ -35,28 +35,19 @@ function listReducer(state = initialState, action) {
         .set('currentModelName', action.modelName)
         .set('currentModelNamePluralized', action.modelNamePluralized);
     case LOAD_RECORDS:
-      return state
-        .set('loadingRecords', true);
+      return state.set('loadingRecords', true);
     case LOADED_RECORDS:
-      return state
-        .set('loadingRecords', false)
-        .set('records', action.records);
+      return state.set('loadingRecords', false).set('records', action.records);
     case LOAD_COUNT:
-      return state
-        .set('loadingCount', true);
+      return state.set('loadingCount', true);
     case LOADED_COUNT:
-      return state
-        .set('loadingCount', false)
-        .set('count', action.count);
+      return state.set('loadingCount', false).set('count', action.count);
     case CHANGE_PAGE:
-      return state
-        .set('currentPage', action.page);
+      return state.set('currentPage', action.page);
     case CHANGE_SORT:
-      return state
-        .set('sort', action.sort);
+      return state.set('sort', action.sort);
     case CHANGE_LIMIT:
-      return state
-        .set('limit', action.limit);
+      return state.set('limit', action.limit);
     default:
       return state;
   }

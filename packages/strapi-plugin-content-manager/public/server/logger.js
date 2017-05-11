@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 const chalk = require('chalk');
-const ip = require('ip');
 
 const divider = chalk.gray('\n-----------------------------------');
 
@@ -17,11 +16,11 @@ const logger = {
 
   // Called when express.js app starts on given port w/o errors
   appStarted: (port) => {
-    console.log(`Strapi plugin succesfully started in development mode. ${chalk.green('✓')}`);
 
     console.log(`
-${chalk.bold('Access URL:')}${divider}
-Localhost: ${chalk.magenta(`http://localhost:${port}`)}
+Strapi plugin succesfully started in development mode. ${chalk.green('✓')}
+${divider}
+${chalk.bold('Access URL:')} ${chalk.magenta(`http://localhost:${port}`)}${divider}
 ${chalk.blue(`Press ${chalk.italic('CTRL-C')} to stop`)}
     `);
   },
