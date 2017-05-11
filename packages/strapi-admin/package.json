@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "cd files/public && npm run test",
-    "prepublish": "cd files/public && npm install && npm run build"
+    "prepublish": "cd files && npm run setup"
   },
   "author": {
     "email": "hi@strapi.io",
