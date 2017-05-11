@@ -205,7 +205,6 @@
     "redux-immutable": "3.0.7",
     "redux-saga": "0.11.0",
     "reselect": "2.5.3",
-    "sanitize.css": "4.1.0",
     "warning": "3.0.0",
     "whatwg-fetch": "1.0.0"
   },
