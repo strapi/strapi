@@ -21,13 +21,11 @@ export default function createRoutes(store) {
       path: '',
       name: 'home',
       getComponent(nextState, cb) {
-        const reducer = require('./containers/HomePage/reducer'); // eslint-disable-line global-require
-        const component = require('./containers/HomePage'); // eslint-disable-line global-require
+        const component = require('./containers/Home'); // eslint-disable-line global-require
 
         const renderRoute = loadModule(cb);
 
         process.nextTick(() => {
-          injectReducer('home', reducer.default);
           renderRoute(component);
         });
       },

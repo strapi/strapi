@@ -15,6 +15,14 @@ import configureStore from './store';
 import { selectLocationState } from './containers/App/selectors';
 import { translationMessages } from './i18n';
 
+// Plugin identifier based on the package.json `name` value
+const pluginId = require('../package.json').name.replace(
+  /^strapi-plugin-/i,
+  ''
+);
+const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
+const router = window.Strapi.router;
+
 // Create redux store with history
 // this uses the singleton browserHistory provided by react-router
 // Optionally, this could be changed to leverage a created history
@@ -28,31 +36,17 @@ syncHistoryWithStore(window.Strapi.router, store, {
   selectLocationState: selectLocationState(),
 });
 
-// Plugin identifier based on the package.json `name` value
-const pluginId = require('../package.json').name.replace(
-  /^strapi-plugin-/i,
-  ''
-);
-
-// Define Strapi admin router
-let router; // eslint-disable-line import/no-mutable-exports
-
-class comp extends React.Component {
-  componentWillMount() {
-    // Expose Strapi admin router
-    router = this.context.router;
-  }
-
-  render() {
-    return (
-      <Provider store={store}>
-        <App {...this.props} />
-      </Provider>
-    );
-  }
+// Define the plugin root component
+function Comp(props) {
+  return (
+    <Provider store={store}>
+      <App {...props} />
+    </Provider>
+  );
 }
 
-comp.contextTypes = {
+// Add contextTypes to get access to the admin router
+Comp.contextTypes = {
   router: React.PropTypes.object.isRequired,
 };
 
@@ -63,30 +57,11 @@ if (window.Strapi) {
     icon: 'ion-document-text',
     id: pluginId,
     leftMenuLinks: [],
-    mainComponent: comp,
+    mainComponent: Comp,
     routes: createRoutes(store),
     translationMessages,
   });
 }
-
-// Hot reloadable translation json files
-if (module.hot) {
-  // modules.hot.accept does not accept dynamic dependencies,
-  // have to be constants at compile-time
-  module.hot.accept('./i18n', () => {
-    if (window.Strapi) {
-      System.import('./i18n').then(result => {
-        const translationMessagesUpdated = result.translationMessages;
-        window.Strapi
-          .refresh(pluginId)
-          .translationMessages(translationMessagesUpdated);
-      });
-    }
-  });
-}
-
-// API
-const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 
 // Export store
 export { store, apiUrl, pluginId, router };

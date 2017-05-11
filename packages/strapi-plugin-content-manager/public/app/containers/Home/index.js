@@ -1,5 +1,5 @@
 /*
- * HomePage
+ * Home
  */
 
 import React from 'react';
@@ -11,7 +11,7 @@ import Container from '../../components/Container';
 
 import styles from './styles.scss';
 
-export class HomePage extends React.Component {
+export class Home extends React.Component {
   render() {
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
@@ -40,7 +40,7 @@ export class HomePage extends React.Component {
   }
 }
 
-HomePage.propTypes = {
+Home.propTypes = {
   exposedComponents: React.PropTypes.object.isRequired,
 };
 
@@ -52,5 +52,5 @@ const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
 export default connect(mapStateToProps, mapDispatchToProps)(
-  injectIntl(HomePage)
+  injectIntl(Home)
 );

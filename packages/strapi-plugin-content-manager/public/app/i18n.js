@@ -19,4 +19,20 @@ const define = messages => {
   defineMessages(messages);
 };
 
+// Hot reloadable translation json files
+if (module.hot) {
+  // modules.hot.accept does not accept dynamic dependencies,
+  // have to be constants at compile-time
+  module.hot.accept('./i18n', () => {
+    if (window.Strapi) {
+      System.import('./i18n').then(result => {
+        const translationMessagesUpdated = result.translationMessages;
+        window.Strapi
+          .refresh(pluginId)
+          .translationMessages(translationMessagesUpdated);
+      });
+    }
+  });
+}
+
 export { translationMessages, define };
