@@ -48,14 +48,14 @@ Table.contextTypes = {
 };
 
 Table.propTypes = {
+  changeSort: React.PropTypes.func.isRequired,
+  headers: React.PropTypes.array.isRequired,
+  history: React.PropTypes.object.isRequired,
+  primaryKey: React.PropTypes.string.isRequired,
   records: React.PropTypes.array.isRequired,
   route: React.PropTypes.object.isRequired,
   routeParams: React.PropTypes.object.isRequired,
-  headers: React.PropTypes.array.isRequired,
-  changeSort: React.PropTypes.func.isRequired,
   sort: React.PropTypes.string.isRequired,
-  history: React.PropTypes.object.isRequired,
-  primaryKey: React.PropTypes.string.isRequired,
 };
 
 export default Table;

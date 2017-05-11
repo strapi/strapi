@@ -94,10 +94,10 @@ TableRow.contextTypes = {
 };
 
 TableRow.propTypes = {
-  headers: React.PropTypes.array.isRequired,
-  record: React.PropTypes.object.isRequired,
   destination: React.PropTypes.string.isRequired,
+  headers: React.PropTypes.array.isRequired,
   primaryKey: React.PropTypes.string.isRequired,
+  record: React.PropTypes.object.isRequired,
 };
 
 export default TableRow;

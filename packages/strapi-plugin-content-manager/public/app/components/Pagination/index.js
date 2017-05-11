@@ -237,13 +237,13 @@ class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
-  limit: React.PropTypes.number.isRequired,
-  currentPage: React.PropTypes.number.isRequired,
   changePage: React.PropTypes.func.isRequired,
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
   ]),
+  currentPage: React.PropTypes.number.isRequired,
+  limit: React.PropTypes.number.isRequired,
 };
 
 export default Pagination;

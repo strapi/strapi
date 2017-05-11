@@ -123,29 +123,29 @@ export class Edit extends React.Component {
 }
 
 Edit.propTypes = {
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  loadRecord: React.PropTypes.func.isRequired,
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  editRecord: React.PropTypes.func.isRequired,
-  editing: React.PropTypes.bool.isRequired,
-  deleting: React.PropTypes.bool.isRequired,
-  routeParams: React.PropTypes.object.isRequired,
-  setIsCreating: React.PropTypes.func.isRequired,
-  deleteRecord: React.PropTypes.func.isRequired,
-  isCreating: React.PropTypes.bool.isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
-  exposedComponents: React.PropTypes.object.isRequired,
   currentModelName: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.string,
   ]),
+  deleteRecord: React.PropTypes.func.isRequired,
+  deleting: React.PropTypes.bool.isRequired,
+  editing: React.PropTypes.bool.isRequired,
+  editRecord: React.PropTypes.func.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired,
+  isCreating: React.PropTypes.bool.isRequired,
+  loadRecord: React.PropTypes.func.isRequired,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  record: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
+  routeParams: React.PropTypes.object.isRequired,
+  setCurrentModelName: React.PropTypes.func.isRequired,
+  setIsCreating: React.PropTypes.func.isRequired,
+  setRecordAttribute: React.PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

@@ -52,8 +52,8 @@ class TableHeader extends React.Component {
 }
 
 TableHeader.propTypes = {
-  headers: React.PropTypes.array.isRequired,
   changeSort: React.PropTypes.func.isRequired,
+  headers: React.PropTypes.array.isRequired,
   sort: React.PropTypes.string.isRequired,
 };
 

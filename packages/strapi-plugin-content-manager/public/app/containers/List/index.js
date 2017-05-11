@@ -173,20 +173,12 @@ List.contextTypes = {
 };
 
 List.propTypes = {
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  records: React.PropTypes.oneOfType([
-    React.PropTypes.array,
+  changePage: React.PropTypes.func.isRequired,
+  changeSort: React.PropTypes.func.isRequired,
+  count: React.PropTypes.oneOfType([
+    React.PropTypes.number,
     React.PropTypes.bool,
   ]),
-  loadRecords: React.PropTypes.func.isRequired,
-  loadingRecords: React.PropTypes.bool.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  currentPage: React.PropTypes.number.isRequired,
-  limit: React.PropTypes.number.isRequired,
-  sort: React.PropTypes.string.isRequired,
   currentModelName: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
@@ -195,19 +187,27 @@ List.propTypes = {
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-  changeSort: React.PropTypes.func.isRequired,
-  onLimitChange: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
+  currentPage: React.PropTypes.number.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired,
+  history: React.PropTypes.object.isRequired,
+  limit: React.PropTypes.number.isRequired,
+  loadCount: React.PropTypes.func.isRequired,
+  loadingRecords: React.PropTypes.bool.isRequired,
+  loadRecords: React.PropTypes.func.isRequired,
+  location: React.PropTypes.object.isRequired,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
     React.PropTypes.bool,
   ]),
-  exposedComponents: React.PropTypes.object.isRequired,
-  loadCount: React.PropTypes.func.isRequired,
+  onLimitChange: React.PropTypes.func.isRequired,
+  records: React.PropTypes.oneOfType([
+    React.PropTypes.array,
+    React.PropTypes.bool,
+  ]),
   route: React.PropTypes.object.isRequired,
   routeParams: React.PropTypes.object.isRequired,
-  location: React.PropTypes.object.isRequired,
-  history: React.PropTypes.object.isRequired,
-  changePage: React.PropTypes.func.isRequired,
+  setCurrentModelName: React.PropTypes.func.isRequired,
+  sort: React.PropTypes.string.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

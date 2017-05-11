@@ -116,11 +116,11 @@ class EditForm extends React.Component {
 
 EditForm.propTypes = {
   currentModel: React.PropTypes.object.isRequired,
+  editRecord: React.PropTypes.func.isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
-  editRecord: React.PropTypes.func.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };
 
