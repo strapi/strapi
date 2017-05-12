@@ -1,12 +1,11 @@
 {
-  "name": "strapi-generate-admin",
+  "name": "strapi-admin",
   "version": "3.0.0-alpha.3",
-  "description": "Generate the default admin panel for a Strapi application.",
+  "description": "Strapi Admin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "generate",
-    "generator",
-    "strapi"
+    "strapi",
+    "admin"
   ],
   "main": "./lib/index.js",
   "directories": {
@@ -15,7 +14,11 @@
   "dependencies": {
     "fs-extra": "~0.30.0",
     "lodash": "^4.16.5",
-    "strapi-admin": "^3.0.0-alpha.3"
+    "strapi-utils": "^3.0.0-alpha.3"
+  },
+  "scripts": {
+    "test": "cd files/public && npm run test",
+    "prepublish": "cd files && npm run setup"
   },
   "author": {
     "email": "hi@strapi.io",
