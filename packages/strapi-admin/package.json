@@ -1,30 +1,24 @@
 {
-  "name": "strapi-redis",
+  "name": "strapi-admin",
   "version": "3.0.0-alpha.3",
-  "description": "Redis hook for the Strapi framework",
+  "description": "Strapi Admin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "redis",
-    "hook",
-    "memory",
-    "cache",
-    "strapi"
+    "strapi",
+    "admin"
   ],
+  "main": "./lib/index.js",
   "directories": {
     "lib": "./lib"
   },
-  "main": "./lib",
   "dependencies": {
-    "ioredis": "^2.5.0",
+    "fs-extra": "~0.30.0",
     "lodash": "^4.16.5",
-    "stack-trace": "0.0.9",
     "strapi-utils": "^3.0.0-alpha.3"
   },
-  "strapi": {
-    "isHook": true
-  },
   "scripts": {
-    "prepublish": "npm prune"
+    "test": "cd files/public && npm run test",
+    "prepublish": "cd files && npm run setup"
   },
   "author": {
     "email": "hi@strapi.io",

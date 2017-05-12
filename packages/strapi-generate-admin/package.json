@@ -15,10 +15,7 @@
   "dependencies": {
     "fs-extra": "~0.30.0",
     "lodash": "^4.16.5",
-    "strapi-utils": "^3.0.0-alpha.3"
-  },
-  "scripts": {
-    "prepublish": "cd files/admin && npm run setup"
+    "strapi-admin": "^3.0.0-alpha.3"
   },
   "author": {
     "email": "hi@strapi.io",
