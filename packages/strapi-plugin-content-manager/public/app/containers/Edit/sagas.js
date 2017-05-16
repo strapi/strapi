@@ -2,8 +2,8 @@ import { takeLatest } from 'redux-saga';
 import { call, cancel, fork, put, take, select } from 'redux-saga/effects';
 import { LOCATION_CHANGE } from 'react-router-redux';
 
-import request from '../../utils/request';
-import { router } from '../../app';
+import request from 'utils/request';
+import { router } from 'app';
 
 import {
   recordLoaded,

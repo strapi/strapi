@@ -9,9 +9,9 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
-import Container from '../../components/Container';
-import EditForm from '../../components/EditForm';
-import { makeSelectModels } from '../App/selectors';
+import Container from 'components/Container';
+import EditForm from 'components/EditForm';
+import { makeSelectModels } from 'containers/App/selectors';
 
 import {
   setCurrentModelName,

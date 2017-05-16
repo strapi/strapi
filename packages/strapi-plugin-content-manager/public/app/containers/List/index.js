@@ -10,10 +10,10 @@ import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 
-import { makeSelectModels } from '../App/selectors';
-import Container from '../../components/Container';
-import Table from '../../components/Table';
-import TableFooter from '../../components/TableFooter';
+import { makeSelectModels } from 'containers/App/selectors';
+import Container from 'components/Container';
+import Table from 'components/Table';
+import TableFooter from 'components/TableFooter';
 
 import styles from './styles.scss';
 import {

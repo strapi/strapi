@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 
-import Container from '../../components/Container';
+import Container from 'components/Container';
 
 import styles from './styles.scss';
 
