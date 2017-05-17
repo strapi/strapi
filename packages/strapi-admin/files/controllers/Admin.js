@@ -18,6 +18,15 @@ module.exports = {
     }
   },
 
+  pluginFile: async ctx => {
+    try {
+      const file = fs.readFileSync(path.resolve(process.cwd(), 'plugins', ctx.params.plugin, 'public', 'build', 'main.js'));
+      ctx.body = file;
+    } catch (err) {
+      ctx.body = ctx.notFound();
+    }
+  },
+
   file: async ctx => {
     try {
       const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));

@@ -16,8 +16,6 @@ const plugins = [
   new webpack.NoErrorsPlugin(),
 ];
 
-console.log(path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'))
-
 const logger = require('../../server/logger');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
@@ -30,7 +28,7 @@ module.exports = require('./webpack.base.babel')({
   entry: [
     'eventsource-polyfill', // Necessary for hot reloading with IE
     `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app', 'app.js'), // Start with js/app.js
+    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app', 'app.js'),
   ],
 
   // Don't use hashes in dev mode for better performance
@@ -43,8 +41,7 @@ module.exports = require('./webpack.base.babel')({
   // Add development plugins
   plugins: dependencyHandlers().concat(plugins), // eslint-disable-line no-use-before-define
 
-  // Load the SCSS in a style tag in development
-  // cssLoaders: 'style-loader!css-loader?modules&importLoaders=1&sourceMap!postcss-loader!sass-loader',
+// Transform our own .scss files
   cssLoaders: [{
     loader: 'style-loader',
   }, {

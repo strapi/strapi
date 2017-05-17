@@ -12,20 +12,35 @@ const pluginId = pkg.name.replace(/^strapi-/i, '');
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: [
-    path.join(process.cwd(), 'app/app.js'),
+    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app', 'app.js'),
   ],
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    // publicPath: 'http://localhost:1337/settings-manager/',
     publicPath: '/content-manager/',
   },
 
-  // We use ExtractTextPlugin so we get a seperate SCSS file instead
-  // of the CSS being in the JS and injected as a style tag
-  cssLoaders: `style-loader!css-loader?localIdentName=${pluginId}[local]__[path][name]__[hash:base64:5]&modules&importLoaders=1&sourceMap!postcss-loader?config=${path.resolve(__dirname, '..', 'postcss', 'postcss.config.js')}!sass-loader`,
+  // Transform our own .scss files
+  cssLoaders: [{
+    loader: 'style-loader',
+  }, {
+    loader: 'css-loader',
+    options: {
+      localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
+      modules: true,
+      importLoaders: 1,
+      sourceMap: true,
+    }
+  }, {
+    loader: 'postcss-loader',
+    options: {
+      config: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js')
+    }
+  }, {
+    loader: 'sass-loader',
+  }],
 
   // In production, we minify our CSS with cssnano
   postcssPlugins: [

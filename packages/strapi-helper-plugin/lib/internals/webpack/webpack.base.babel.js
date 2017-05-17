@@ -37,9 +37,9 @@ module.exports = (options) => ({
                 "app"
               ],
               "plugins": [
-                "transform-react-remove-prop-types",
-                "transform-react-constant-elements",
-                "transform-react-inline-elements"
+                require.resolve('babel-plugin-transform-react-remove-prop-types'),
+                require.resolve('babel-plugin-transform-react-constant-elements'),
+                require.resolve('babel-plugin-transform-react-inline-elements'),
               ]
             },
             "test": {
@@ -56,7 +56,7 @@ module.exports = (options) => ({
         path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app'),
       ],
     }, {
-      // Transform our own .css files with PostCSS and CSS-modules
+      // Transform our own .scss files
       test: /\.scss$/,
       exclude: /node_modules/,
       // loader: 'null-loader'
