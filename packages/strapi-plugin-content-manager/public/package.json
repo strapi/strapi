@@ -2,13 +2,26 @@
   "name": "strapi-plugin-content-manager",
   "version": "0.0.1",
   "description": "Strapi Plugin - Content Manager",
-  "repository": {
-    "type": "git"
-  },
   "engines": {
-    "npm": ">=7"
+    "npm": ">=3",
+    "node": ">=5"
   },
-  "author": "Strapi",
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
   "license": "MIT",
   "scripts": {
     "analyze:clean": "./node_modules/strapi-helper-plugin/node_modules/rimraf/bin.js stats.json",
@@ -23,26 +36,15 @@
     "build:dll": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/dependencies.js",
     "start": "./node_modules/strapi-helper-plugin/node_modules/cross-env/bin/cross-env.js NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "./node_modules/strapi-helper-plugin/node_modules/plop/plop.js --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint": "npm run lint:js",
-    "lint:eslint": "./node_modules/strapi-helper-plugin/node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json",
-    "lint:js": "npm run lint:eslint -- . ",
-    "lint:staged": "lint-staged",
+    "lint": "./node_modules/strapi-helper-plugin/node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json .",
     "pretest": "npm run lint",
     "prettier": "./node_modules/strapi-helper-plugin/node_modules/prettier/bin/prettier.js --single-quote --trailing-comma es5 --write \"{app,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo Tests are not implemented.",
-    "coveralls": "cat ./coverage/lcov/lcov.info | coveralls"
-  },
-  "lint-staged": {
-    "*.js": [
-      "npm run prettier",
-      "lint:eslint"
-    ]
+    "test": "echo Tests are not implemented."
   },
   "strapi": {
     "name": "Content Manager",
     "icon": "ion-document-text"
   },
-  "pre-commit": "lint:staged",
   "dependencies": {},
   "devDependencies": {
     "strapi-helper-plugin": "^3.0.0-alpha.3"
