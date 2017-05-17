@@ -19,7 +19,8 @@ export default function createRoutes(store) {
   const { injectReducer, injectSagas } = getAsyncInjectors(store); // eslint-disable-line no-unused-vars
 
   // Inject app sagas
-  injectSagas(appSagas);
+  const appSagas = tryRequire('App/sagas');
+  if (appSagas) injectSagas(appSagas.default);
 
   return map(routes, (route, key) => {
     return {
