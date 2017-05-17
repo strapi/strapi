@@ -17,13 +17,12 @@ const dllPlugin = require('../config').dllPlugin;
 const helperPkg = require(join(__dirname, '..', '..', '..', 'package.json'));
 
 const pluginPkg = require(join(process.cwd(), 'package.json'));
-if (!pluginPkg.dllPlugin) { process.exit(0); }
+if (!pluginPkg.dllPlugin) { pluginPkg.dllPlugin = {}; }
 const dllConfig = defaults(pluginPkg.dllPlugin, dllPlugin.defaults);
 const outputPath = join(process.cwd(), dllConfig.path);
 
 module.exports = {
   context: process.cwd(),
-  // entry: dllConfig.dlls ? dllConfig.dlls : dllPlugin.entry(pluginPkg),
   entry: dllPlugin.entry(helperPkg, pluginPkg),
   devtool: 'eval',
   output: {

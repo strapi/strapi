@@ -43,23 +43,6 @@
     "icon": "ion-document-text"
   },
   "pre-commit": "lint:staged",
-  "dllPlugin": {
-    "path": "node_modules/react-boilerplate-dlls",
-    "exclude": [
-      "chalk",
-      "compression",
-      "cross-env",
-      "express",
-      "ip",
-      "minimist",
-      "sanitize.css"
-    ],
-    "include": [
-      "core-js",
-      "lodash",
-      "eventsource-polyfill"
-    ]
-  },
   "dependencies": {},
   "devDependencies": {
     "strapi-helper-plugin": "^3.0.0-alpha.3"

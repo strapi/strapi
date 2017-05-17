@@ -6,7 +6,6 @@ const path = require('path');
 
 const webpack = require('webpack');
 
-console.log(require.resolve('babel-preset-latest'))
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js

@@ -107,16 +107,14 @@ function dependencyHandlers() {
     ];
   }
 
-  const dllPath = path.resolve(process.cwd(), dllPlugin.path || 'node_modules/react-boilerplate-dlls');
+  const dllPath = path.resolve(process.cwd(), dllPlugin.path || 'node_modules/strapi-plugin-dlls');
 
   /**
    * If DLLs aren't explicitly defined, we assume all production dependencies listed in package.json
    * Reminder: You need to exclude any server side dependencies by listing them in dllConfig.exclude
-   *
-   * @see https://github.com/mxstbr/react-boilerplate/tree/master/docs/general/webpack.md
    */
   if (!dllPlugin.dlls) {
-    const manifestPath = path.resolve(dllPath, 'reactBoilerplateDeps.json');
+    const manifestPath = path.resolve(dllPath, 'strapiPluginDeps.json');
 
     if (!fs.existsSync(manifestPath)) {
       logger.error('The DLL manifest is missing. Please run `npm run build:dll`');

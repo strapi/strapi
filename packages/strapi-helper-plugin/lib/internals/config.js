@@ -4,10 +4,7 @@ const pullAll = require('lodash/pullAll');
 const uniq = require('lodash/uniq');
 const merge = require('lodash/uniq');
 
-const ReactBoilerplate = {
-  // This refers to the react-boilerplate version this project is based on.
-  version: '3.0.0',
-
+const StrapiPlugin = {
   /**
    * The DLL Plugin provides a dramatic speed increase to webpack build and hot module reloading
    * by caching the module metadata for all of our npm dependencies. We enable it by default
@@ -27,9 +24,7 @@ const ReactBoilerplate = {
         'compression',
         'cross-env',
         'express',
-        'ip',
         'minimist',
-        'sanitize.css',
       ],
 
       /**
@@ -39,20 +34,20 @@ const ReactBoilerplate = {
       include: ['core-js', 'eventsource-polyfill', 'babel-polyfill', 'lodash'],
 
       // The path where the DLL manifest and bundle will get built
-      path: resolve('../node_modules/react-boilerplate-dlls'),
+      path: resolve('../node_modules/strapi-plugin-dlls'),
     },
 
     entry(helperPkg, pluginPkg) {
       const dependencyNames = merge(Object.keys(helperPkg.dependencies), Object.keys(pluginPkg.dependencies));
-      const exclude = ReactBoilerplate.dllPlugin.defaults.exclude;
-      const include = ReactBoilerplate.dllPlugin.defaults.include;
+      const exclude = pluginPkg.dllPlugin.exclude || StrapiPlugin.dllPlugin.defaults.exclude;
+      const include = pluginPkg.dllPlugin.include || StrapiPlugin.dllPlugin.defaults.include;
       const includeDependencies = uniq(dependencyNames.concat(include));
 
       return {
-        reactBoilerplateDeps: pullAll(includeDependencies, exclude),
+        strapiPluginDeps: pullAll(includeDependencies, exclude),
       };
     },
   },
 };
 
-module.exports = ReactBoilerplate;
+module.exports = StrapiPlugin;

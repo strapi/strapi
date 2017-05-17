@@ -18,9 +18,6 @@ module.exports = (plop) => {
   plop.setGenerator('route', routeGenerator);
   plop.setGenerator('language', languageGenerator);
   plop.addHelper('directory', (comp) => {
-    console.log('-----------------------------------------------')
-    console.log(path.resolve(process.cwd(), 'app', 'containers', comp))
-    console.log('-----------------------------------------------')
     try {
       fs.accessSync(`${path.resolve(process.cwd(), 'app', 'containers', comp)}`, fs.F_OK);
       return `${path.resolve(process.cwd(), 'app', 'containers', comp)}`;
