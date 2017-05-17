@@ -9,7 +9,8 @@ const webpack = require('webpack');
 const modules = [
   'app',
   'node_modules',
-  'node_modules/strapi-helper-plugin/lib/app'
+  'node_modules/strapi-helper-plugin/lib/app',
+  'node_modules/strapi-helper-plugin/node_modules',
 ];
 
 module.exports = {
