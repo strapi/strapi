@@ -19,7 +19,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: '/content-manager/',
+    publicPath: `/${pluginId}/`,
   },
 
   // Transform our own .scss files

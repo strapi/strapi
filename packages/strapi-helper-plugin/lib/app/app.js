@@ -15,7 +15,8 @@ import { selectLocationState } from 'containers/App/selectors';
 // import { translationMessages } from 'i18n';
 
 // Plugin identifier based on the package.json `name` value
-const pluginId = require('../../../../package.json').name.replace(
+const pluginPkg = require('../../../../package.json');
+const pluginId = pluginPkg.name.replace(
   /^strapi-plugin-/i,
   ''
 );
@@ -50,17 +51,16 @@ Comp.contextTypes = {
 };
 
 // Register the plugin
-if (window.Strapi) {
-  window.Strapi.registerPlugin({
-    name: 'Content Manager',
-    icon: 'ion-document-text',
-    id: pluginId,
-    leftMenuLinks: [],
-    mainComponent: Comp,
-    routes: createRoutes(store),
-    // translationMessages,
-  });
-}
+window.Strapi.registerPlugin({
+  name: pluginPkg.strapi.name,
+  icon: pluginPkg.strapi.icon,
+  id: pluginId,
+  leftMenuLinks: [],
+  mainComponent: Comp,
+  routes: createRoutes(store),
+  // translationMessages,
+});
+
 
 // Export store
 export { store, apiUrl, pluginId, router };

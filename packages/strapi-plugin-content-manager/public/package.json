@@ -38,6 +38,10 @@
       "lint:eslint"
     ]
   },
+  "strapi": {
+    "name": "Content Manager",
+    "icon": "ion-document-text"
+  },
   "pre-commit": "lint:staged",
   "eslintConfig": {
     "parser": "babel-eslint",
