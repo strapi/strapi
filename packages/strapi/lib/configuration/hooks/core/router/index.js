@@ -10,6 +10,7 @@ const Boom = require('boom');
 
 // Local utilities.
 const responsesPolicy = require('../../core/responses/policy');
+const handler404 = require('./404.js');
 
 // Strapi utilities.
 const finder = require('strapi-utils').finder;
@@ -52,7 +53,8 @@ module.exports = strapi => {
 
       _.forEach(strapi.config.routes, value => {
         if (
-          _.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))
+          _.isEmpty(_.get(value, 'method')) ||
+          _.isEmpty(_.get(value, 'path'))
         ) {
           return;
         }
@@ -95,7 +97,8 @@ module.exports = strapi => {
 
       _.forEach(strapi.admin.config.routes, value => {
         if (
-          _.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))
+          _.isEmpty(_.get(value, 'method')) ||
+          _.isEmpty(_.get(value, 'path'))
         ) {
           return;
         }
@@ -157,7 +160,8 @@ module.exports = strapi => {
         // Add others routes to the plugin's router.
         _.forEach(_.omit(value, _.keys(excludedRoutes)), value => {
           if (
-            _.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))
+            _.isEmpty(_.get(value, 'method')) ||
+            _.isEmpty(_.get(value, 'path'))
           ) {
             return;
           }
@@ -254,6 +258,13 @@ module.exports = strapi => {
         strapi.app.use(router.middleware());
       });
 
+      // Custom 404
+      strapi.router.route({
+        method: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'PATCH'],
+        path: '*',
+        handler: handler404
+      });
+
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
       strapi.app.use(
@@ -286,13 +297,22 @@ module.exports = strapi => {
 
       function routerChecker(value, endpoint, plugin) {
         const route = regex.detectRoute(endpoint);
+        let pluginControllers;
 
         // Define controller and action names.
         const handler = _.trim(value.handler).split('.');
-        const controller = plugin
-          ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()]
-          : strapi.controllers[handler[0].toLowerCase()] ||
-              strapi.admin.controllers[handler[0].toLowerCase()];
+
+        try {
+          pluginControllers =
+            strapi.plugins[plugin].controllers[handler[0].toLowerCase()];
+        } catch (err) {
+          pluginControllers = undefined;
+        }
+
+        const controller =
+          strapi.controllers[handler[0].toLowerCase()] ||
+          pluginControllers ||
+          strapi.admin.controllers[handler[0].toLowerCase()];
         const action = controller[handler[1]];
 
         // Retrieve the API's name where the controller is located
