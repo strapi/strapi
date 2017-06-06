@@ -7,8 +7,8 @@
 
 import { defineMessages } from 'react-intl';
 
-import enTranslationMessages from './translations/en.json';
-import frTranslationMessages from './translations/fr.json';
+import enTranslationMessages from './translations/en.json'; // eslint-disable-line
+import frTranslationMessages from './translations/fr.json'; // eslint-disable-line
 
 const translationMessages = {
   en: enTranslationMessages,

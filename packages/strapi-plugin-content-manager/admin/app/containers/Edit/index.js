@@ -167,7 +167,7 @@ function mapDispatchToProps(dispatch) {
     editRecord: () => dispatch(editRecord()),
     deleteRecord: () => {
       // TODO: improve confirmation UX.
-      if (window.confirm('Are you sure ?')) {
+      if (window.confirm('Are you sure ?')) { // eslint-disable-line no-alert
         dispatch(deleteRecord());
       }
     },

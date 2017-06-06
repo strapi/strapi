@@ -32,12 +32,12 @@ module.exports = require('./webpack.base.babel')({
       modules: true,
       importLoaders: 1,
       sourceMap: true,
-    }
+    },
   }, {
     loader: 'postcss-loader',
     options: {
-      config: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js')
-    }
+      config: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+    },
   }, {
     loader: 'sass-loader',
   }],

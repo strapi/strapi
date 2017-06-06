@@ -23,9 +23,9 @@ module.exports = (options) => ({
               require.resolve('babel-preset-latest'),
               {
                 "es2015": {
-                  "modules": false
-                }
-              }
+                  "modules": false,
+                },
+              },
             ],
             require.resolve('babel-preset-react'),
             require.resolve('babel-preset-stage-0'),
@@ -33,20 +33,20 @@ module.exports = (options) => ({
           "env": {
             "production": {
               "only": [
-                "app"
+                "app",
               ],
               "plugins": [
                 require.resolve('babel-plugin-transform-react-remove-prop-types'),
                 require.resolve('babel-plugin-transform-react-constant-elements'),
                 require.resolve('babel-plugin-transform-react-inline-elements'),
-              ]
+              ],
             },
             "test": {
               "plugins": [
-                "istanbul"
-              ]
-            }
-          }
+                "istanbul",
+              ],
+            },
+          },
         },
       },
       include: [
@@ -107,7 +107,7 @@ module.exports = (options) => ({
       'app',
       'node_modules/strapi-helper-plugin/lib/app',
       'node_modules/strapi-helper-plugin/node_modules',
-      'node_modules'
+      'node_modules',
     ],
     symlinks: false,
     extensions: [
@@ -126,7 +126,7 @@ module.exports = (options) => ({
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),
       path.join(process.cwd(), 'node_modules'),
-    ]
+    ],
   },
   devtool: options.devtool,
   target: 'web', // Make web variables accessible to webpack, e.g. window

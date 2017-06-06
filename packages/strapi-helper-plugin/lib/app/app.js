@@ -8,10 +8,10 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { syncHistoryWithStore } from 'react-router-redux';
-import App from 'containers/App';
-import createRoutes from 'routes';
+import App from 'containers/App'; // eslint-disable-line
+import { selectLocationState } from 'containers/App/selectors'; // eslint-disable-line
 import configureStore from 'store';
-import { selectLocationState } from 'containers/App/selectors';
+import createRoutes from 'routes';
 // import { translationMessages } from 'i18n';
 
 // Plugin identifier based on the package.json `name` value

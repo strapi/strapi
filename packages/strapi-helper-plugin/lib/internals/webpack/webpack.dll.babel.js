@@ -36,7 +36,7 @@ module.exports = {
   resolve: {
     modules: [
       'node_modules',
-      'node_modules/strapi-helper-plugin/node_modules'
+      'node_modules/strapi-helper-plugin/node_modules',
     ],
   },
 };
