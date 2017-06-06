@@ -37,10 +37,9 @@ module.exports = (scope, cb) => {
     filename: `${scope.globalID}${scope.ext}`
   });
 
-
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizeId: scope.id.toLowerCase(),
     humanizedPath: '`./plugins`'
   });
 
