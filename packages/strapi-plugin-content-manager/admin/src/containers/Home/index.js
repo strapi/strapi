@@ -51,6 +51,4 @@ export function mapDispatchToProps() {
 const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(
-  injectIntl(Home)
-);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Home));

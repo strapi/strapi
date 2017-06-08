@@ -20,6 +20,8 @@ const pluginId = pluginPkg.name.replace(
   /^strapi-plugin-/i,
   ''
 );
+const pluginName = pluginPkg.strapi.name;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 const router = window.Strapi.router;
 
@@ -63,4 +65,4 @@ window.Strapi.registerPlugin({
 
 
 // Export store
-export { store, apiUrl, pluginId, router };
+export { store, apiUrl, pluginId, pluginName, pluginDescription, router };

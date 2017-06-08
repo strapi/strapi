@@ -39,12 +39,12 @@ module.exports = {
     // Generate index.js and index.test.js
     const actions = [{
       type: 'add',
-      path: '../../../../../app/components/{{properCase name}}/index.js',
+      path: '../../../../../admin/src/components/{{properCase name}}/index.js',
       templateFile: data.type === 'ES6 Class' ? './component/es6.js.hbs' : './component/stateless.js.hbs',
       abortOnFail: true,
     }, {
       type: 'add',
-      path: '../../../../../app/components/{{properCase name}}/tests/index.test.js',
+      path: '../../../../../admin/src/components/{{properCase name}}/tests/index.test.js',
       templateFile: './component/test.js.hbs',
       abortOnFail: true,
     }];
@@ -53,7 +53,7 @@ module.exports = {
     if (data.wantCSS) {
       actions.push({
         type: 'add',
-        path: '../../../../../app/components/{{properCase name}}/styles.scss',
+        path: '../../../../../admin/src/components/{{properCase name}}/styles.scss',
         templateFile: './component/styles.scss.hbs',
         abortOnFail: true,
       });
@@ -63,7 +63,7 @@ module.exports = {
     if (data.wantMessages) {
       actions.push({
         type: 'add',
-        path: '../../../../../app/components/{{properCase name}}/messages.js',
+        path: '../../../../../admin/src/components/{{properCase name}}/messages.js',
         templateFile: './component/messages.js.hbs',
         abortOnFail: true,
       });

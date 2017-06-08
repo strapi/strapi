@@ -28,7 +28,7 @@ module.exports = require('./webpack.base.babel')({
   entry: [
     'eventsource-polyfill', // Necessary for hot reloading with IE
     `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app', 'app.js'),
+    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js'),
   ],
 
   // Don't use hashes in dev mode for better performance

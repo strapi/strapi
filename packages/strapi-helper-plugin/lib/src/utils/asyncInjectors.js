@@ -17,7 +17,7 @@ export function checkStore(store) {
   };
   invariant(
     conformsTo(store, shape),
-    '(app/utils...) asyncInjectors: Expected a valid redux store'
+    '(src/utils...) asyncInjectors: Expected a valid redux store'
   );
 }
 
@@ -30,7 +30,7 @@ export function injectAsyncReducer(store, isValid) {
 
     invariant(
       isString(name) && !isEmpty(name) && isFunction(asyncReducer),
-      '(app/utils...) injectAsyncReducer: Expected `asyncReducer` to be a reducer function'
+      '(src/utils...) injectAsyncReducer: Expected `asyncReducer` to be a reducer function'
     );
 
     store.asyncReducers[name] = asyncReducer; // eslint-disable-line no-param-reassign
@@ -47,12 +47,12 @@ export function injectAsyncSagas(store, isValid) {
 
     invariant(
       Array.isArray(sagas),
-      '(app/utils...) injectAsyncSagas: Expected `sagas` to be an array of generator functions'
+      '(src/utils...) injectAsyncSagas: Expected `sagas` to be an array of generator functions'
     );
 
     warning(
       !isEmpty(sagas),
-      '(app/utils...) injectAsyncSagas: Received an empty `sagas` array'
+      '(src/utils...) injectAsyncSagas: Received an empty `sagas` array'
     );
 
     sagas.map(store.runSaga);

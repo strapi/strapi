@@ -19,10 +19,10 @@ module.exports = (plop) => {
   plop.setGenerator('language', languageGenerator);
   plop.addHelper('directory', (comp) => {
     try {
-      fs.accessSync(`${path.resolve(process.cwd(), 'app', 'containers', comp)}`, fs.F_OK);
-      return `${path.resolve(process.cwd(), 'app', 'containers', comp)}`;
+      fs.accessSync(`${path.resolve(process.cwd(), 'admin', 'src', 'containers', comp)}`, fs.F_OK);
+      return `${path.resolve(process.cwd(), 'admin', 'src', 'containers', comp)}`;
     } catch (e) {
-      return `${path.resolve(process.cwd(), 'app', 'components', comp)}`;
+      return `${path.resolve(process.cwd(), 'admin', 'src', 'components', comp)}`;
     }
   });
   plop.addHelper('curly', (object, open) => (open ? '{' : '}'));

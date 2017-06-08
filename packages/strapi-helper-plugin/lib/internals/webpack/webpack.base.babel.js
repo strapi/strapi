@@ -33,7 +33,7 @@ module.exports = (options) => ({
           "env": {
             "production": {
               "only": [
-                "app",
+                "src",
               ],
               "plugins": [
                 require.resolve('babel-plugin-transform-react-remove-prop-types'),
@@ -50,9 +50,9 @@ module.exports = (options) => ({
         },
       },
       include: [
-        path.join(process.cwd(), 'app'),
+        path.join(process.cwd(), 'admin', 'src'),
         // Add the `strapi-helper-plugin` folders watched by babel
-        path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app'),
+        path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src'),
       ],
     }, {
       // Transform our own .scss files
@@ -104,8 +104,8 @@ module.exports = (options) => ({
   ]),
   resolve: {
     modules: [
-      'app',
-      'node_modules/strapi-helper-plugin/lib/app',
+      'admin/src',
+      'node_modules/strapi-helper-plugin/lib/src',
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],

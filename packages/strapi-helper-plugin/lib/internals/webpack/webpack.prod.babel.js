@@ -12,7 +12,7 @@ const pluginId = pkg.name.replace(/^strapi-/i, '');
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: [
-    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'app', 'app.js'),
+    path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js'),
   ],
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets

@@ -7,7 +7,7 @@ const componentExists = require('../utils/componentExists');
 
 function reducerExists(comp) {
   try {
-    fs.accessSync(`app/containers/${comp}/reducer.js`, fs.F_OK);
+    fs.accessSync(`src/containers/${comp}/reducer.js`, fs.F_OK);
     return true;
   } catch (e) {
     return false;
@@ -16,7 +16,7 @@ function reducerExists(comp) {
 
 function sagasExists(comp) {
   try {
-    fs.accessSync(`app/containers/${comp}/sagas.js`, fs.F_OK);
+    fs.accessSync(`src/containers/${comp}/sagas.js`, fs.F_OK);
     return true;
   } catch (e) {
     return false;
@@ -63,14 +63,14 @@ module.exports = {
       data.useSagas = sagasExists(data.component); // eslint-disable-line no-param-reassign
       actions.push({
         type: 'modify',
-        path: '../../../../../app/routes.js',
+        path: '../../../../../admin/src/routes.js',
         pattern: /(\s{\n\s{0,}path: '\*',)/g,
         template: trimTemplateFile('routeWithReducer.hbs'),
       });
     } else {
       actions.push({
         type: 'modify',
-        path: '../../../../../app/routes.js',
+        path: '../../../../../admin/src/routes.js',
         pattern: /(\s{\n\s{0,}path: '\*',)/g,
         template: trimTemplateFile('route.hbs'),
       });
