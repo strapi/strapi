@@ -13,7 +13,7 @@ const path = require('path');
  * @returns {boolean}
  */
 
-exports.isStrapiApp = () => {
+const isStrapiApp = () => {
   const pathToPackageJSON = path.resolve(process.cwd(), 'package.json');
   let validPackageJSON = true;
 
@@ -24,4 +24,8 @@ exports.isStrapiApp = () => {
   }
 
   return validPackageJSON;
+};
+
+module.exports = {
+  isStrapiApp
 };
