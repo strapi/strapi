@@ -31,8 +31,6 @@
     "analyze:clean": "node_modules/strapi-helper-plugin/node_modules/rimraf/bin.js stats.json",
     "preanalyze": "npm run analyze:clean",
     "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "npmcheckversion": "node node_modules/strapi-helper-plugin/lib/internals/scripts/npmcheckversion.js",
-    "preinstall": "npm run npmcheckversion",
     "postinstall": "npm run build:dll",
     "prebuild": "npm run build:clean && npm run test",
     "build": "node_modules/strapi-helper-plugin/node_modules/cross-env/bin/cross-env.js NODE_ENV=production node_modules/strapi-helper-plugin/node_modules/webpack/bin/webpack.js --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
