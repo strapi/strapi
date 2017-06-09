@@ -14,18 +14,16 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
   render() {
     return (
       <div className={`${styles.pluginHeader} row`}>
-        <div className="row">
-          <div className="col-lg-6">
-            <PluginHeaderTitle
-              title={this.props.title}
-              description={this.props.description}
-            />
-          </div>
-          <div className="col-lg-6">
-            <PluginHeaderActions
-              actions={this.props.actions}
-            />
-          </div>
+        <div className="col-lg-6">
+          <PluginHeaderTitle
+            title={this.props.title}
+            description={this.props.description}
+          />
+        </div>
+        <div className="col-lg-6">
+          <PluginHeaderActions
+            actions={this.props.actions}
+          />
         </div>
       </div>
     );

@@ -111,7 +111,7 @@ module.exports = strapi => {
         'plugins/**': cb => {
           dictionary.optional({
             dirname: path.resolve(strapi.config.appPath, strapi.config.paths.plugins),
-            excludeDirs: /(public)$/,
+            excludeDirs: /(public|admin)$/,
             filter: /(.+)\.(js|json)$/,
             depth: 4
           }, cb);

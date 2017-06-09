@@ -33,7 +33,7 @@ module.exports = {
     _.forEach(strapi.plugins, (value, pluginName) => {
       if (!_.includes(ignoredPlugins, pluginName)) {
         // Main plugin `js` file
-        const pluginMainScript = $('<script>').attr('src', '/' + pluginName + '/main.js');
+        const pluginMainScript = $('<script>').attr('src', `/admin/${pluginName}/main.js`);
         parsedHTML('body').append(pluginMainScript);
       }
     });
@@ -41,5 +41,4 @@ module.exports = {
     // Finally, return the HTML file with injected scripts
     return parsedHTML.html();
   }
-
 };
