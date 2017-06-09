@@ -38,7 +38,8 @@ module.exports = scope => {
       'lint': 'node_modules/strapi-helper-plugin/node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin',
       'pretest': 'npm run lint',
       'prettier': 'node_modules/strapi-helper-plugin/node_modules/prettier/bin/prettier.js --single-quote --trailing-comma es5 --write \'{admin,__{tests,mocks}__}/**/*.js\'',
-      'test': 'echo Tests are not implemented.'
+      'test': 'echo Tests are not implemented.',
+      'prepublish': 'npm run build'
     },
     'dependencies': {},
     'devDependencies': {
