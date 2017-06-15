@@ -18,7 +18,7 @@ const createResponses = ctx => {
     responses,
     _.mapValues(_.omit(Boom, ['create']), fn => (...rest) => {
       ctx.body = fn(...rest);
-    }),
+    })
   );
 };
 
