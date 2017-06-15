@@ -29,7 +29,7 @@ module.exports = strapi => {
 
     defaults: {
       prefix: '',
-      routes: {}
+      routes: {},
     },
 
     /**
@@ -68,7 +68,7 @@ module.exports = strapi => {
             return strapi.log.warn(
               'Ignored attempt to bind route `' +
                 endpoint +
-                '` to unknown controller/action.'
+                '` to unknown controller/action.',
             );
           }
 
@@ -79,12 +79,12 @@ module.exports = strapi => {
                 path: value.path,
                 handler: _.remove(
                   [strapi.middlewares.compose(policies), action],
-                  o => _.isFunction(o)
+                  o => _.isFunction(o),
                 ),
-                validate
+                validate,
               },
-              _.isEmpty
-            )
+              _.isEmpty,
+            ),
           );
         } catch (err) {
           cb(err);
@@ -112,7 +112,7 @@ module.exports = strapi => {
             return strapi.log.warn(
               'Ignored attempt to bind route `' +
                 endpoint +
-                '` to unknown controller/action.'
+                '` to unknown controller/action.',
             );
           }
 
@@ -123,12 +123,12 @@ module.exports = strapi => {
                 path: value.path,
                 handler: _.remove(
                   [strapi.middlewares.compose(policies), action],
-                  o => _.isFunction(o)
+                  o => _.isFunction(o),
                 ),
-                validate
+                validate,
               },
-              _.isEmpty
-            )
+              _.isEmpty,
+            ),
           );
         } catch (err) {
           cb(err);
@@ -136,7 +136,7 @@ module.exports = strapi => {
       });
 
       routerAdmin.prefix(
-        strapi.config.admin || `/${strapi.config.paths.admin}`
+        strapi.config.admin || `/${strapi.config.paths.admin}`,
       );
 
       // TODO:
@@ -154,7 +154,7 @@ module.exports = strapi => {
         // Exclude routes with prefix.
         const excludedRoutes = _.omitBy(
           value,
-          o => !o.hasOwnProperty('prefix')
+          o => !o.hasOwnProperty('prefix'),
         );
 
         // Add others routes to the plugin's router.
@@ -172,14 +172,14 @@ module.exports = strapi => {
             const { policies, action, validate } = routerChecker(
               value,
               endpoint,
-              plugin
+              plugin,
             );
 
             if (_.isUndefined(action) || !_.isFunction(action)) {
               return strapi.log.warn(
                 'Ignored attempt to bind route `' +
                   endpoint +
-                  '` to unknown controller/action.'
+                  '` to unknown controller/action.',
               );
             }
 
@@ -190,12 +190,12 @@ module.exports = strapi => {
                   path: value.path,
                   handler: _.remove(
                     [strapi.middlewares.compose(policies), action],
-                    o => _.isFunction(o)
+                    o => _.isFunction(o),
                   ),
-                  validate
+                  validate,
                 },
-                _.isEmpty
-              )
+                _.isEmpty,
+              ),
             );
           } catch (err) {
             cb(err);
@@ -220,14 +220,14 @@ module.exports = strapi => {
               const { policies, action, validate } = routerChecker(
                 value,
                 endpoint,
-                plugin
+                plugin,
               );
 
               if (_.isUndefined(action) || !_.isFunction(action)) {
                 return strapi.log.warn(
                   'Ignored attempt to bind route `' +
                     endpoint +
-                    '` to unknown controller/action.'
+                    '` to unknown controller/action.',
                 );
               }
 
@@ -238,12 +238,12 @@ module.exports = strapi => {
                     path: value.path,
                     handler: _.remove(
                       [strapi.middlewares.compose(policies), action],
-                      o => _.isFunction(o)
+                      o => _.isFunction(o),
                     ),
-                    validate
+                    validate,
                   },
-                  _.isEmpty
-                )
+                  _.isEmpty,
+                ),
               );
             } catch (err) {
               cb(err);
@@ -262,8 +262,10 @@ module.exports = strapi => {
       strapi.router.route({
         method: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'PATCH'],
         path: '*',
-        handler: handler404
+        handler: handler404,
       });
+
+      strapi.app.use(responsesPolicy);
 
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
@@ -271,11 +273,9 @@ module.exports = strapi => {
         strapi.router.router.allowedMethods({
           throw: false,
           notImplemented: () => Boom.notImplemented(),
-          methodNotAllowed: () => Boom.methodNotAllowed()
-        })
+          methodNotAllowed: () => Boom.methodNotAllowed(),
+        }),
       );
-
-      strapi.app.use(responsesPolicy);
 
       cb();
 
@@ -288,7 +288,7 @@ module.exports = strapi => {
             controller: _.trim(value.controller),
             action: _.trim(value.action),
             splittedEndpoint: _.trim(route.endpoint),
-            verb: route.verb && _.trim(route.verb.toLowerCase())
+            verb: route.verb && _.trim(route.verb.toLowerCase()),
           };
 
           await next();
@@ -351,14 +351,14 @@ module.exports = strapi => {
               _.startsWith(policy, globalPolicyPrefix, 0) &&
               !_.isEmpty(
                 strapi.config.policies,
-                policy.replace(globalPolicyPrefix, '')
+                policy.replace(globalPolicyPrefix, ''),
               )
             ) {
               // Global policy.
               return policies.push(
                 strapi.config.policies[
                   policy.replace(globalPolicyPrefix, '').toLowerCase()
-                ]
+                ],
               );
             } else if (
               _.startsWith(policy, pluginPolicyPrefix, 0) &&
@@ -368,8 +368,8 @@ module.exports = strapi => {
                   strapi.plugins,
                   policySplited[1] +
                     '.config.policies.' +
-                    policySplited[2].toLowerCase()
-                )
+                    policySplited[2].toLowerCase(),
+                ),
               )
             ) {
               // Plugin's policies can be used from app APIs with a specific syntax (`plugins.pluginName.policyName`).
@@ -378,8 +378,8 @@ module.exports = strapi => {
                   strapi.plugins,
                   policySplited[1] +
                     '.config.policies.' +
-                    policySplited[2].toLowerCase()
-                )
+                    policySplited[2].toLowerCase(),
+                ),
               );
             } else if (
               !_.startsWith(policy, globalPolicyPrefix, 0) &&
@@ -387,32 +387,32 @@ module.exports = strapi => {
               !_.isEmpty(
                 _.get(
                   strapi.plugins,
-                  plugin + '.config.policies.' + policy.toLowerCase()
-                )
+                  plugin + '.config.policies.' + policy.toLowerCase(),
+                ),
               )
             ) {
               // Plugin policy used in the plugin itself.
               return policies.push(
                 _.get(
                   strapi.plugins,
-                  plugin + '.config.policies.' + policy.toLowerCase()
-                )
+                  plugin + '.config.policies.' + policy.toLowerCase(),
+                ),
               );
             } else if (
               !_.startsWith(policy, globalPolicyPrefix, 0) &&
               !_.isEmpty(
                 _.get(
                   strapi.api,
-                  currentApiName + '.config.policies.' + policy.toLowerCase()
-                )
+                  currentApiName + '.config.policies.' + policy.toLowerCase(),
+                ),
               )
             ) {
               // API policy used in the API itself.
               return policies.push(
                 _.get(
                   strapi.api,
-                  currentApiName + '.config.policies.' + policy.toLowerCase()
-                )
+                  currentApiName + '.config.policies.' + policy.toLowerCase(),
+                ),
               );
             }
 
@@ -421,7 +421,7 @@ module.exports = strapi => {
                 endpoint +
                 '` with unknown policy `' +
                 policy +
-                '`.'
+                '`.',
             );
           });
         }
@@ -435,14 +435,14 @@ module.exports = strapi => {
         ) {
           const validator = _.get(
             strapi.api,
-            currentApiName + '.validators.' + value.config.validate
+            currentApiName + '.validators.' + value.config.validate,
           );
 
           _.merge(
             validate,
             _.mapValues(validator, value => {
               return builder.build(value);
-            })
+            }),
           );
         }
 
@@ -450,9 +450,9 @@ module.exports = strapi => {
           route,
           policies,
           action,
-          validate
+          validate,
         };
       }
-    }
+    },
   };
 };

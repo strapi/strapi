@@ -27,7 +27,7 @@ const logger = require('strapi-utils').logger;
  * (fire up the application in our working directory).
  */
 
-module.exports = function () {
+module.exports = function() {
   try {
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
@@ -35,25 +35,45 @@ module.exports = function () {
     }
 
     // Require server configurations
-    const server = require(path.resolve(process.cwd(), 'config', 'environments', 'development', 'server.json'));
+    const server = require(path.resolve(
+      process.cwd(),
+      'config',
+      'environments',
+      'development',
+      'server.json',
+    ));
 
     if (process.env.NODE_ENV === 'development' && server.reload === true) {
-      const options = _.assign({}, {
-        silent: false,
-        watch: true,
-        watchDirectory: process.cwd(),
-        watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
-        watchIgnorePatterns: ['node_modules/**/*', 'public/**/*', '.git/**/*', '.idea'], // Ignore patterns to use when watching files.
-        killTree: true, // Kills the entire child process tree on `exit`,
-        spinSleepTime: 0,
-        command: 'node --harmony-async-await'
-      });
+      const options = _.assign(
+        {},
+        {
+          silent: false,
+          watch: true,
+          watchDirectory: process.cwd(),
+          watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
+          watchIgnorePatterns: [
+            'node_modules/**/*',
+            'public/**/*',
+            '.git/**/*',
+            '.idea',
+          ], // Ignore patterns to use when watching files.
+          killTree: true, // Kills the entire child process tree on `exit`,
+          spinSleepTime: 0,
+          command: 'node',
+        },
+      );
 
-      const child = new (forever.Monitor)('server.js', options);
+      const child = new forever.Monitor('server.js', options);
 
       // Run listeners
-      child.on('watch:restart', (info) => {
-        logger.verbose('Restarting due to ' + info.file + '... (' + info.stat.replace(child.cwd, '.') + ')');
+      child.on('watch:restart', info => {
+        logger.verbose(
+          'Restarting due to ' +
+            info.file +
+            '... (' +
+            info.stat.replace(child.cwd, '.') +
+            ')',
+        );
         console.log();
       });
 
@@ -77,7 +97,11 @@ module.exports = function () {
     }
 
     // Use the app's local `strapi` in `node_modules` if it's existant and valid.
-    const localStrapiPath = path.resolve(process.cwd(), 'node_modules', 'strapi');
+    const localStrapiPath = path.resolve(
+      process.cwd(),
+      'node_modules',
+      'strapi',
+    );
 
     if (isLocalStrapiValid(localStrapiPath, process.cwd())) {
       return require(localStrapiPath).start(afterwards);

@@ -13,8 +13,8 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "fs-extra": "~0.30.0",
-    "lodash": "^4.16.5",
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.17.4",
     "strapi-admin": "^3.0.0-alpha.3"
   },
   "author": {
