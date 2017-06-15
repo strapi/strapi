@@ -40,7 +40,7 @@ module.exports = function() {
       'config',
       'environments',
       'development',
-      'server.json',
+      'server.json'
     ));
 
     if (process.env.NODE_ENV === 'development' && server.reload === true) {
@@ -55,12 +55,12 @@ module.exports = function() {
             'node_modules/**/*',
             'public/**/*',
             '.git/**/*',
-            '.idea',
+            '.idea'
           ], // Ignore patterns to use when watching files.
           killTree: true, // Kills the entire child process tree on `exit`,
           spinSleepTime: 0,
-          command: 'node',
-        },
+          command: 'node'
+        }
       );
 
       const child = new forever.Monitor('server.js', options);
@@ -72,7 +72,7 @@ module.exports = function() {
             info.file +
             '... (' +
             info.stat.replace(child.cwd, '.') +
-            ')',
+            ')'
         );
         console.log();
       });
@@ -100,7 +100,7 @@ module.exports = function() {
     const localStrapiPath = path.resolve(
       process.cwd(),
       'node_modules',
-      'strapi',
+      'strapi'
     );
 
     if (isLocalStrapiValid(localStrapiPath, process.cwd())) {
