@@ -17,12 +17,12 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "async": "^2.1.2",
-    "glob": "^7.1.1",
-    "js-beautify": "^1.6.4",
-    "knex": "^0.12.6",
-    "lodash": "^4.16.5",
-    "pluralize": "^3.0.0",
+    "async": "^2.4.1",
+    "glob": "^7.1.2",
+    "js-beautify": "^1.6.14",
+    "knex": "^0.12.9",
+    "lodash": "^4.17.4",
+    "pluralize": "^3.1.0",
     "strapi-bookshelf": "^3.0.0-alpha.3",
     "strapi-utils": "^3.0.0-alpha.3"
   },

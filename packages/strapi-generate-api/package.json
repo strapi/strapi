@@ -13,8 +13,8 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "^4.16.5",
-    "pluralize": "~3.1.0"
+    "lodash": "^4.17.4",
+    "pluralize": "^3.1.0"
   },
   "scripts": {
     "prepublish": "npm prune"

@@ -16,7 +16,7 @@ const responses = require('./responses/index');
 const createResponses = ctx => {
   return _.merge(
     responses,
-    _.mapValues(_.omit(Boom, ['create']), (fn) => (...rest) => {
+    _.mapValues(_.omit(Boom, ['create']), fn => (...rest) => {
       ctx.body = fn(...rest);
     })
   );
@@ -26,7 +26,7 @@ const createResponses = ctx => {
  * Policy used to add responses in the `this.response` object.
  */
 
-module.exports = async function (ctx, next) {
+module.exports = async function(ctx, next) {
   const delegator = delegate(ctx, 'response');
 
   _.forEach(createResponses(ctx), (value, key) => {
@@ -51,9 +51,16 @@ module.exports = async function (ctx, next) {
     // Error object could be also in the context body...
     strapi.log.error(ctx.body || error);
     // Wrap error into a Boom's response
-    const formattedError = _.get(ctx.body, 'isBoom') ? ctx.body || error.message : Boom.wrap(error, error.status, ctx.body || error.message);
+    const formattedError = _.get(ctx.body, 'isBoom')
+      ? ctx.body || error.message
+      : Boom.wrap(error, error.status, ctx.body || error.message);
 
     ctx.status = formattedError.output.statusCode || error.status || 500;
     ctx.body = formattedError.output.payload;
+
+    // Call custom responses.
+    if (_.isFunction(_.get(strapi.config, `responses.${ctx.status}`))) {
+      await strapi.config.responses[ctx.status].call(this, ctx);
+    }
   }
 };
