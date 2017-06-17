@@ -72,11 +72,20 @@ module.exports = require('./webpack.base.babel')({
     }),
   ],
 
-  // Tell babel that we want to hot-reload
-  babelQuery: {
-    presets: ['react-hmre'],
-    plugins: ['transform-runtime'],
-  },
+  // Tell babel that we want presets and to hot-reload
+  babelPresets: [
+    [
+      require.resolve('babel-preset-latest'),
+      {
+        "es2015": {
+          "modules": false,
+        },
+      },
+    ],
+    require.resolve('babel-preset-react'),
+    require.resolve('babel-preset-stage-0'),
+    require.resolve('babel-preset-react-hmre'),
+  ],
 
   // Emit a source map for easier debugging
   devtool: 'cheap-module-eval-source-map',

@@ -18,18 +18,7 @@ module.exports = (options) => ({
       use: {
         loader: 'babel',
         options: {
-          "presets": [
-            [
-              require.resolve('babel-preset-latest'),
-              {
-                "es2015": {
-                  "modules": false,
-                },
-              },
-            ],
-            require.resolve('babel-preset-react'),
-            require.resolve('babel-preset-stage-0'),
-          ],
+          "presets": options.babelPresets,
           "env": {
             "production": {
               "only": [
@@ -47,7 +36,7 @@ module.exports = (options) => ({
               ],
             },
           },
-        },
+        }
       },
       include: [
         path.join(process.cwd(), 'admin', 'src'),

@@ -67,4 +67,17 @@ module.exports = require('./webpack.base.babel')({
       },
     }),
   ],
+  // Babel presets configuration
+  babelPresets: [
+    [
+      require.resolve('babel-preset-latest'),
+      {
+        "es2015": {
+          "modules": false,
+        },
+      },
+    ],
+    require.resolve('babel-preset-react'),
+    require.resolve('babel-preset-stage-0'),
+  ],
 });
