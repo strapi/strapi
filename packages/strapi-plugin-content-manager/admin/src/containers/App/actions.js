@@ -4,7 +4,7 @@
  *
  */
 
-import { LOAD_MODELS, LOADED_MODELS } from './constants';
+import { LOAD_MODELS, LOADED_MODELS, UPDATE_SCHEMA } from './constants';
 
 export function loadModels() {
   return {
@@ -16,5 +16,12 @@ export function loadedModels(models) {
   return {
     type: LOADED_MODELS,
     models,
+  };
+}
+
+export function updateSchema(schema) {
+  return {
+    type: UPDATE_SCHEMA,
+    schema,
   };
 }

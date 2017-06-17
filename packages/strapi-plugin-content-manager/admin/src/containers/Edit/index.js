@@ -5,13 +5,12 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
-import { makeSelectModels } from 'containers/App/selectors';
+import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 
 import {
   setCurrentModelName,
@@ -49,11 +48,12 @@ export class Edit extends React.Component {
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content = <p>Loading...</p>;
-    if (currentModel && currentModel.attributes) {
+    if (this.props.schema && currentModel && currentModel.attributes) {
       content = (
         <EditForm
           record={this.props.record}
-          currentModel={currentModel}
+          currentModelName={this.props.currentModelName}
+          schema={this.props.schema}
           setRecordAttribute={this.props.setRecordAttribute}
           editRecord={this.props.editRecord}
           editing={this.props.editing}
@@ -86,8 +86,7 @@ export class Edit extends React.Component {
     }
 
     // Plugin header config
-    const pluginHeaderTitle =
-      _.upperFirst(this.props.routeParams.slug) || 'Content Manager';
+    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
     const pluginHeaderDescription = this.props.isCreating
       ? 'New entry'
       : `#${this.props.record.get('id')}`;
@@ -141,6 +140,10 @@ Edit.propTypes = {
     React.PropTypes.bool,
   ]),
   routeParams: React.PropTypes.object.isRequired,
+  schema: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
   setCurrentModelName: React.PropTypes.func.isRequired,
   setIsCreating: React.PropTypes.func.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
@@ -154,6 +157,7 @@ const mapStateToProps = createStructuredSelector({
   editing: makeSelectEditing(),
   deleting: makeSelectDeleting(),
   isCreating: makeSelectIsCreating(),
+  schema: makeSelectSchema(),
 });
 
 function mapDispatchToProps(dispatch) {

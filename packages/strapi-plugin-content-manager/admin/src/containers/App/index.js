@@ -9,12 +9,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
-import { loadModels } from './actions';
+import config from '../../../../config/admin.json';
+import { loadModels, updateSchema } from './actions';
 import { makeSelectModels, makeSelectLoading } from './selectors';
 
 class App extends React.Component {
   componentWillMount() {
     this.props.loadModels();
+    this.props.updateSchema(config.admin.schema);
   }
 
   render() {
@@ -49,11 +51,13 @@ App.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  updateSchema: React.PropTypes.func.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
   return {
     loadModels: () => dispatch(loadModels()),
+    updateSchema: (schema) => dispatch(updateSchema(schema)),
     dispatch,
   };
 }

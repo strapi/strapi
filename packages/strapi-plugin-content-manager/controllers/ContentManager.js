@@ -23,67 +23,105 @@ module.exports = {
 
   find: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
-
     const { limit = 10, skip = 0, sort = primaryKey } = ctx.request.query;
 
-    const entries = await model
-      .find()
-      .limit(Number(limit))
-      .sort(sort)
-      .skip(Number(skip));
+    // Find entries using `queries` system
+    const entries = await queries
+      .find({
+        model,
+        limit,
+        skip,
+        sort
+      });
 
     ctx.body = entries;
   },
 
   count: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
 
-    const count = await model.count();
+    // Count using `queries` system
+    const count = await queries.count({ model });
 
     ctx.body = {
-      count: Number(count),
+      count,
     };
   },
 
   findOne: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
-    const params = {};
-    params[primaryKey] = ctx.params.id;
+    const id = ctx.params.id;
 
-    const entry = await model.findOne(params);
+    // Find an entry using `queries` system
+    const entry = await queries.findOne({
+      model,
+      primaryKey,
+      id
+    });
+
+    // Entry not found
+    if (!entry) {
+      return (ctx.notFound('Entry not found'));
+    }
 
     ctx.body = entry;
   },
 
   create: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
+    const values = ctx.request.body;
 
-    const entryCreated = await model.create(ctx.request.body);
+    // Create an entry using `queries` system
+    const entryCreated = await queries.create({
+      model,
+      values
+    });
 
     ctx.body = entryCreated;
   },
 
   update: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
-    const params = {};
+    const id = ctx.params.id;
+    const values = ctx.request.body;
 
-    params[primaryKey] = ctx.params.id;
-
-    const entryUpdated = await model.update(params, ctx.request.body);
+    // Update an entry using `queries` system
+    const entryUpdated = await queries.update({
+      model,
+      primaryKey,
+      id,
+      values
+    });
 
     ctx.body = entryUpdated;
   },
 
   delete: async ctx => {
     const model = strapi.models[ctx.params.model];
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
-    const params = {};
-    params[primaryKey] = ctx.params.id;
+    const id = ctx.params.id;
 
-    const entryDeleted = await model.remove(params);
+    // Delete an entry using `queries` system
+    const entryDeleted = await queries.delete({
+      model,
+      primaryKey,
+      id
+    });
 
     ctx.body = entryDeleted;
   },

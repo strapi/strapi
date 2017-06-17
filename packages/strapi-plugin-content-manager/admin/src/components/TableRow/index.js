@@ -27,9 +27,9 @@ class TableRow extends React.Component {
   getDisplayedValue(type, value) {
     switch (type) {
       case 'string':
-        return !_.isEmpty(value) ? value.toString() : '-';
+        return !_.isEmpty(value.toString()) ? value.toString() : '-';
       case 'integer':
-        return !_.isEmpty(value) ? Number(value) : '-';
+        return !_.isEmpty(value.toString()) ? value.toString() : '-';
       default:
         return '-';
     }

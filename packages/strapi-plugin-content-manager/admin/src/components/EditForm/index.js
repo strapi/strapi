@@ -20,6 +20,7 @@ class EditForm extends React.Component {
 
   generateField(attributeValue, attributeKey) {
     let input;
+    const value = this.props.record && this.props.record.get(attributeKey);
 
     // Generate fields according to attribute type
     switch (attributeValue.type) {
@@ -30,15 +31,14 @@ class EditForm extends React.Component {
             onChange={e =>
               this.props.setRecordAttribute(
                 attributeKey,
-                e.target.value === 'true'
+                e.target.value === 'null'
+                  ? null
+                  : e.target.value === 'true'
               )}
-            defaultValue={
-              this.props.record && this.props.record.get(attributeKey)
-            }
           >
-            <option disabled>Select an option</option>
-            <option value>True</option>
-            <option value={false}>False</option>
+            <option value={'null'} selected={value !== true && value !== false}>Select an option</option>
+            <option value selected={value === true}>True</option>
+            <option value={false} selected={value === false}>False</option>
           </select>
         );
         break;
@@ -48,10 +48,8 @@ class EditForm extends React.Component {
             type="number"
             className="form-control"
             id={attributeKey}
-            placeholder={attributeKey}
-            value={
-              (this.props.record && this.props.record.get(attributeKey)) || ''
-            }
+            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
+            value={value}
             onChange={e =>
               this.props.setRecordAttribute(attributeKey, e.target.value)}
           />
@@ -63,10 +61,21 @@ class EditForm extends React.Component {
             type="text"
             className="form-control"
             id={attributeKey}
-            placeholder={attributeKey}
-            value={
-              (this.props.record && this.props.record.get(attributeKey)) || ''
-            }
+            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
+            value={value}
+            onChange={e =>
+              this.props.setRecordAttribute(attributeKey, e.target.value)}
+          />
+        );
+        break;
+      case 'url':
+        input = (
+          <input
+            type="url"
+            className="form-control"
+            id={attributeKey}
+            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
+            value={value}
             onChange={e =>
               this.props.setRecordAttribute(attributeKey, e.target.value)}
           />
@@ -78,19 +87,22 @@ class EditForm extends React.Component {
             type="text"
             className="form-control"
             id={attributeKey}
-            placeholder={attributeKey}
-            value={
-              (this.props.record && this.props.record.get(attributeKey)) || ''
-            }
+            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
+            value={value}
             onChange={e =>
               this.props.setRecordAttribute(attributeKey, e.target.value)}
           />
         );
     }
 
+    const description = attributeValue.description
+      ? <p>{attributeValue.description}</p>
+      : '';
+
     return (
       <div key={attributeKey} className="form-group">
-        <label htmlFor={attributeKey}>{attributeKey}</label>
+        <label htmlFor={attributeKey}>{attributeValue.label || attributeKey}</label>
+        {description}
         {input}
       </div>
     );
@@ -98,7 +110,7 @@ class EditForm extends React.Component {
 
   render() {
     const fields = _.map(
-      this.props.currentModel.attributes,
+      this.props.schema[this.props.currentModelName].fields,
       (attributeValue, attributeKey) =>
         this.generateField(attributeValue, attributeKey)
     );
@@ -115,12 +127,13 @@ class EditForm extends React.Component {
 }
 
 EditForm.propTypes = {
-  currentModel: React.PropTypes.object.isRequired,
+  currentModelName: React.PropTypes.string.isRequired,
   editRecord: React.PropTypes.func.isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  schema: React.PropTypes.object.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };
 

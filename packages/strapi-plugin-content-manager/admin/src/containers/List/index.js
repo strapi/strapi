@@ -10,7 +10,7 @@ import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 
-import { makeSelectModels } from 'containers/App/selectors';
+import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
@@ -86,25 +86,12 @@ export class List extends React.Component {
       // Detect current model structure from models list
       const currentModel = this.props.models[this.props.currentModelName];
 
-      // Hide non displayed attributes
-      const displayedAttributes = _.pickBy(
-        currentModel.attributes,
-        attr => !attr.admin || attr.admin.displayed !== false
-      );
-
       // Define table headers
-      const tableHeaders = _.map(displayedAttributes, (value, key) => ({
-        name: key,
-        label: key,
-        type: value.type,
+      const tableHeaders = _.map(this.props.schema[this.props.currentModelName].list, (value) => ({
+        name: value,
+        label: this.props.schema[this.props.currentModelName].fields[value].label,
+        type: this.props.schema[this.props.currentModelName].fields[value].type,
       }));
-
-      // Add the primary key column
-      tableHeaders.unshift({
-        name: currentModel.primaryKey,
-        label: 'ID',
-        type: 'string',
-      });
 
       content = (
         <Table
@@ -130,9 +117,8 @@ export class List extends React.Component {
     ];
 
     // Plugin header config
-    const pluginHeaderTitle =
-      _.upperFirst(this.props.currentModelNamePluralized) || 'Content Manager';
-    const pluginHeaderDescription = `Manage your ${this.props.currentModelNamePluralized}`;
+    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
+    const pluginHeaderDescription = `Manage your ${this.props.schema[this.props.currentModelName].labelPlural.toLowerCase()}`;
 
     return (
       <div>
@@ -180,10 +166,6 @@ List.propTypes = {
     React.PropTypes.string,
     React.PropTypes.bool,
   ]),
-  currentModelNamePluralized: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
-  ]),
   currentPage: React.PropTypes.number.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
   history: React.PropTypes.object.isRequired,
@@ -203,6 +185,10 @@ List.propTypes = {
   ]),
   route: React.PropTypes.object.isRequired,
   routeParams: React.PropTypes.object.isRequired,
+  schema: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]),
   setCurrentModelName: React.PropTypes.func.isRequired,
   sort: React.PropTypes.string.isRequired,
 };
@@ -243,6 +229,7 @@ const mapStateToProps = createStructuredSelector({
   sort: makeSelectSort(),
   currentModelName: makeSelectCurrentModelName(),
   currentModelNamePluralized: makeSelectCurrentModelNamePluralized(),
+  schema: makeSelectSchema(),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(List));
