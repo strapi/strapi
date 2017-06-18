@@ -28,7 +28,7 @@ export function* getModels() {
 
 export function* schemaUpdated(action) {
   const leftMenuLinks = _.map(action.schema, (model, key) => ({
-    label: model.plural ||  model.label || key,
+    label: model.labelPlural ||  model.label || key,
     to: key,
   }));
 

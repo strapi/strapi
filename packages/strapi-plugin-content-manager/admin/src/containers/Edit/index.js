@@ -7,10 +7,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import _ from 'lodash';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import EditFormRelations from 'components/EditFormRelations';
 
 import {
   setCurrentModelName,
@@ -48,7 +50,8 @@ export class Edit extends React.Component {
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content = <p>Loading...</p>;
-    if (this.props.schema && currentModel && currentModel.attributes) {
+    let relations;
+    if (this.props.schema && currentModel && currentModel.attributes && this.props.record) {
       content = (
         <EditForm
           record={this.props.record}
@@ -57,6 +60,14 @@ export class Edit extends React.Component {
           setRecordAttribute={this.props.setRecordAttribute}
           editRecord={this.props.editRecord}
           editing={this.props.editing}
+        />
+      );
+      relations = (
+        <EditFormRelations
+          currentModelName={this.props.currentModelName}
+          record={this.props.record}
+          schema={this.props.schema}
+          setRecordAttribute={this.props.setRecordAttribute}
         />
       );
     }
@@ -86,10 +97,10 @@ export class Edit extends React.Component {
     }
 
     // Plugin header config
-    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
+    const pluginHeaderTitle = _.get(this.props.schema, [this.props.currentModelName, 'label']) || 'Content Manager';
     const pluginHeaderDescription = this.props.isCreating
       ? 'New entry'
-      : `#${this.props.record.get('id')}`;
+      : `#${this.props.record && this.props.record.get('id')}`;
 
     return (
       <div className="col-md-12">
@@ -110,6 +121,7 @@ export class Edit extends React.Component {
             <div className="row">
               <div className="col-md-8">
                 {content}
+                {relations}
               </div>
             </div>
           </Container>

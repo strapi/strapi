@@ -26,7 +26,7 @@ module.exports = {
     const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
-    const { limit = 10, skip = 0, sort = primaryKey } = ctx.request.query;
+    const {limit, skip = 0, sort = primaryKey, query, queryAttribute} = ctx.request.query;
 
     // Find entries using `queries` system
     const entries = await queries
@@ -34,7 +34,9 @@ module.exports = {
         model,
         limit,
         skip,
-        sort
+        sort,
+        query,
+        queryAttribute
       });
 
     ctx.body = entries;
@@ -46,7 +48,7 @@ module.exports = {
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
 
     // Count using `queries` system
-    const count = await queries.count({ model });
+    const count = await queries.count({model});
 
     ctx.body = {
       count,

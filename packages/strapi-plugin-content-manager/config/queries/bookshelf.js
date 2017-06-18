@@ -3,12 +3,18 @@ module.exports = {
   find: async (params) => {
     const entries = await params.model
       .forge()
-      .query({
-        limit: Number(params.limit),
-        orderBy: params.sort,
-        offset: Number(params.skip),
+      .query((qb) => {
+        qb.limit(Number(params.limit));
+        qb.orderBy(params.sort);
+        qb.offset(Number(params.skip));
+
+        if (params.query && params.queryAttribute) {
+          qb.whereRaw(`LOWER(${params.queryAttribute}) LIKE '%' || LOWER(?) || '%'`, params.query);
+        }
       })
-      .fetchAll();
+      .fetchAll({
+        withRelated: _.map(params.model.associations, 'alias')
+      });
 
     return entries;
   },

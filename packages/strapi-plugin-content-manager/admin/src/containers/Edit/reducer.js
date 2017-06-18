@@ -23,7 +23,7 @@ import {
 const initialState = fromJS({
   currentModelName: null,
   loading: false,
-  record: {},
+  record: false,
   editing: false,
   deleting: false,
   isCreating: false,

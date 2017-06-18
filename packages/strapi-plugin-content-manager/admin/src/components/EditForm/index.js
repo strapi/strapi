@@ -70,15 +70,18 @@ class EditForm extends React.Component {
         break;
       case 'url':
         input = (
-          <input
-            type="url"
-            className="form-control"
-            id={attributeKey}
-            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
-            value={value}
-            onChange={e =>
-              this.props.setRecordAttribute(attributeKey, e.target.value)}
-          />
+          <div>
+            <input
+              type="url"
+              className="form-control"
+              id={attributeKey}
+              placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
+              value={value}
+              onChange={e =>
+                this.props.setRecordAttribute(attributeKey, e.target.value)}
+            />
+            {value ? <a href={value} target="_blank">{value}</a> : ''}
+          </div>
         );
         break;
       default:
