@@ -7,6 +7,7 @@
 import { fromJS } from 'immutable';
 
 import {
+  SET_INITIAL_STATE,
   SET_CURRENT_MODEL_NAME,
   SET_IS_CREATING,
   LOAD_RECORD,
@@ -31,10 +32,15 @@ const initialState = fromJS({
 
 function editReducer(state = initialState, action) {
   switch (action.type) {
+    case SET_INITIAL_STATE:
+      return initialState;
     case SET_CURRENT_MODEL_NAME:
       return state.set('currentModelName', action.currentModelName);
     case SET_IS_CREATING:
-      return state.set('isCreating', true);
+      return state
+        .set('isCreating', true)
+        .set('loading', false)
+        .set('record', fromJS({}));
     case LOAD_RECORD:
       return state
         .set('loading', true)

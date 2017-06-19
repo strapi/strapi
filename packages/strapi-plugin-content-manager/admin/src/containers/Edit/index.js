@@ -11,10 +11,11 @@ import _ from 'lodash';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
-import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import { makeSelectSchema } from 'containers/App/selectors';
 import EditFormRelations from 'components/EditFormRelations';
 
 import {
+  setInitialState,
   setCurrentModelName,
   setIsCreating,
   loadRecord,
@@ -33,6 +34,7 @@ import {
 
 export class Edit extends React.Component {
   componentWillMount() {
+    this.props.setInitialState();
     this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
 
     // Detect that the current route is the `create` route or not
@@ -44,14 +46,11 @@ export class Edit extends React.Component {
   }
 
   render() {
-    // Detect current model structure from models list
-    const currentModel = this.props.models[this.props.currentModelName];
-
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content = <p>Loading...</p>;
     let relations;
-    if (this.props.schema && currentModel && currentModel.attributes && this.props.record) {
+    if (!this.props.loading && this.props.schema && this.props.currentModelName) {
       content = (
         <EditForm
           record={this.props.record}
@@ -142,11 +141,8 @@ Edit.propTypes = {
   editRecord: React.PropTypes.func.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
   isCreating: React.PropTypes.bool.isRequired,
+  loading: React.PropTypes.bool.isRequired,
   loadRecord: React.PropTypes.func.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -157,6 +153,7 @@ Edit.propTypes = {
     React.PropTypes.bool,
   ]),
   setCurrentModelName: React.PropTypes.func.isRequired,
+  setInitialState: React.PropTypes.func.isRequired,
   setIsCreating: React.PropTypes.func.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };
@@ -165,7 +162,6 @@ const mapStateToProps = createStructuredSelector({
   record: makeSelectRecord(),
   loading: makeSelectLoading(),
   currentModelName: makeSelectCurrentModelName(),
-  models: makeSelectModels(),
   editing: makeSelectEditing(),
   deleting: makeSelectDeleting(),
   isCreating: makeSelectIsCreating(),
@@ -174,6 +170,7 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
+    setInitialState: () => dispatch(setInitialState()),
     setCurrentModelName: currentModelName =>
       dispatch(setCurrentModelName(currentModelName)),
     setIsCreating: () => dispatch(setIsCreating()),

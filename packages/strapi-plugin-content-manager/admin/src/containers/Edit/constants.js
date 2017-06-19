@@ -4,6 +4,7 @@
  *
  */
 
+export const SET_INITIAL_STATE = 'app/Edit/SET_INITIAL_STATE';
 export const SET_CURRENT_MODEL_NAME = 'app/Edit/SET_CURRENT_MODEL_NAME';
 export const SET_IS_CREATING = 'app/Edit/SET_IS_CREATING';
 

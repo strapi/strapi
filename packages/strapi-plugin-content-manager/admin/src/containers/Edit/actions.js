@@ -5,6 +5,7 @@
  */
 
 import {
+  SET_INITIAL_STATE,
   SET_CURRENT_MODEL_NAME,
   SET_IS_CREATING,
   LOAD_RECORD,
@@ -17,6 +18,12 @@ import {
   DELETE_RECORD_SUCCESS,
   DELETE_RECORD_ERROR,
 } from './constants';
+
+export function setInitialState() {
+  return {
+    type: SET_INITIAL_STATE,
+  };
+}
 
 export function setCurrentModelName(currentModelName) {
   return {
