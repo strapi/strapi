@@ -13,7 +13,7 @@ export function* getModels() {
       cache: 'default',
     };
     const response = yield fetch(
-      'http://localhost:1337/content-manager/models',
+      '/content-manager/models',
       opts
     );
     const data = yield response.json();

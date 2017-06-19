@@ -23,7 +23,7 @@ export function* getRecord(params) {
   const currentModelName = yield select(makeSelectCurrentModelName());
 
   try {
-    const requestUrl = `http://localhost:1337/content-manager/explorer/${currentModelName}/${params.id}`;
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${params.id}`;
 
     // Call our request helper (see 'utils/request')
     const data = yield call(request, requestUrl, {
@@ -45,7 +45,7 @@ export function* editRecord() {
   const id = isCreating ? '' : recordJSON.id;
 
   try {
-    const requestUrl = `http://localhost:1337/content-manager/explorer/${currentModelName}/${id}`;
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
@@ -71,7 +71,7 @@ export function* deleteRecord() {
   const recordJSON = record.toJSON();
 
   try {
-    const requestUrl = `http://localhost:1337/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {

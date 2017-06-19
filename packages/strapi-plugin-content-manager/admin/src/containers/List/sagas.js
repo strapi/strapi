@@ -30,7 +30,7 @@ export function* getRecords() {
   };
 
   try {
-    const requestUrl = `http://localhost:1337/content-manager/explorer/${currentModel}`;
+    const requestUrl = `/content-manager/explorer/${currentModel}`;
 
     // Call our request helper (see 'utils/request')
     const data = yield call(request, requestUrl, {
@@ -54,7 +54,7 @@ export function* getCount() {
       cache: 'default',
     };
     const response = yield fetch(
-      `http://localhost:1337/content-manager/explorer/${currentModel}/count`,
+      `/content-manager/explorer/${currentModel}/count`,
       opts
     );
 
