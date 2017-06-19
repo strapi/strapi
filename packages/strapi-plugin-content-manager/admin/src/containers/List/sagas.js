@@ -30,10 +30,10 @@ export function* getRecords() {
   };
 
   try {
-    const requestURL = `http://localhost:1337/content-manager/explorer/${currentModel}`;
+    const requestUrl = `http://localhost:1337/content-manager/explorer/${currentModel}`;
 
     // Call our request helper (see 'utils/request')
-    const data = yield call(request, requestURL, {
+    const data = yield call(request, requestUrl, {
       method: 'GET',
       params,
     });

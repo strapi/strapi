@@ -40,10 +40,11 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
     }
 
     // Request URL
-    const requestURL = `/content-manager/explorer/${this.props.relation.model}/${this.props.record.get(this.props.relation.attribute)}`;
+    const requestUrlSuffix = query ? '' : this.props.record.get(this.props.relation.attribute);
+    const requestUrl = `/content-manager/explorer/${this.props.relation.model}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
-    return request(requestURL, {
+    return request(requestUrl, {
       method: 'GET',
       params,
     })
