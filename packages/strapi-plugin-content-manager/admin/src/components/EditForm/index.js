@@ -112,8 +112,12 @@ class EditForm extends React.Component {
   }
 
   render() {
+    // Remove `id` field
+    const displayedFields = _.pickBy(this.props.schema[this.props.currentModelName].fields, (value, key) => (key !== 'id'))
+
+    // List fields inputs
     const fields = _.map(
-      this.props.schema[this.props.currentModelName].fields,
+      displayedFields,
       (attributeValue, attributeKey) =>
         this.generateField(attributeValue, attributeKey)
     );
