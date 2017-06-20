@@ -30,6 +30,8 @@ class TableRow extends React.Component {
         return !_.isEmpty(value.toString()) ? value.toString() : '-';
       case 'integer':
         return !_.isEmpty(value.toString()) ? value.toString() : '-';
+      case 'boolean':
+        return value.toString();
       default:
         return '-';
     }
