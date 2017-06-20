@@ -28,7 +28,7 @@ export function* getModels() {
 
 export function* schemaUpdated(action) {
   // Display the links only if the `displayed` attribute is not set to false
-  const displayedModels = _.filter(action.schema, model => (model.displayed !== false));
+  const displayedModels = _.pickBy(action.schema, model => (model.displayed !== false));
 
   // Map links to format them
   const leftMenuLinks = _.map(displayedModels, (model, key) => ({
