@@ -64,9 +64,14 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    const description = this.props.relation.description
+      ? <p>{this.props.relation.description}</p>
+      : '';
+
     return (
       <div className="form-group">
         <label htmlFor={this.props.relation.label}>{this.props.relation.label}</label>
+        {description}
         <Select.Async
           onChange={this.onChange}
           loadOptions={this.getOptions}
