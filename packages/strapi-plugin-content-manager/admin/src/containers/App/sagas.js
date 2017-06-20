@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { takeLatest } from 'redux-saga';
-import { fork, put } from 'redux-saga/effects';
+import {takeLatest} from 'redux-saga';
+import {fork, put} from 'redux-saga/effects';
 
-import { loadedModels } from './actions';
-import { LOAD_MODELS, UPDATE_SCHEMA } from './constants';
+import {loadedModels} from './actions';
+import {LOAD_MODELS, UPDATE_SCHEMA} from './constants';
 
 export function* getModels() {
   try {
@@ -27,8 +27,12 @@ export function* getModels() {
 }
 
 export function* schemaUpdated(action) {
-  const leftMenuLinks = _.map(action.schema, (model, key) => ({
-    label: model.labelPlural ||  model.label || key,
+  // Display the links only if the `displayed` attribute is not set to false
+  const displayedModels = _.filter(action.schema, model => (model.displayed !== false));
+
+  // Map links to format them
+  const leftMenuLinks = _.map(displayedModels, (model, key) => ({
+    label: model.labelPlural || model.label || key,
     to: key,
   }));
 
