@@ -9,6 +9,9 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 import { router } from 'app';
+import messages from './messages.json';
+import { define } from 'i18n';
+define(messages);
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
@@ -75,14 +78,14 @@ export class Edit extends React.Component {
     // Define plugin header actions
     const pluginHeaderActions = [
       {
-        label: 'Cancel',
+        label: messages.cancel,
         class: 'btn-default',
         onClick: () => {
           router.push(`/plugins/content-manager/${this.props.currentModelName}`);
         },
       },
       {
-        label: this.props.editing ? 'Editing...' : 'Submit',
+        label: this.props.editing ? messages.editing : messages.submit,
         class: 'btn-primary',
         onClick: this.props.editRecord,
         disabled: this.props.editing,
@@ -92,7 +95,7 @@ export class Edit extends React.Component {
     // Add the `Delete` button only in edit mode
     if (!this.props.isCreating) {
       pluginHeaderActions.push({
-        label: 'Delete',
+        label: messages.delete,
         class: 'btn-danger',
         onClick: this.props.deleteRecord,
         disabled: this.props.deleting,
@@ -120,7 +123,6 @@ export class Edit extends React.Component {
             actions={pluginHeaderActions}
           />
           <Container>
-            <p />
             <div className="row">
               <div className="col-md-8">
                 {content}

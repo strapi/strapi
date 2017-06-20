@@ -7,8 +7,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import messages from './messages.json';
+import { define } from 'i18n';
+define(messages);
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
@@ -110,7 +112,7 @@ export class List extends React.Component {
     // Define plugin header actions
     const pluginHeaderActions = [
       {
-        label: 'Add an entry',
+        label: messages.addAnEntry,
         class: 'btn-primary',
         onClick: () => this.context.router.push(this.addRoute),
       },
@@ -118,7 +120,9 @@ export class List extends React.Component {
 
     // Plugin header config
     const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
-    const pluginHeaderDescription = `Manage your ${this.props.schema[this.props.currentModelName].labelPlural.toLowerCase()}`;
+    messages.pluginHeaderDescription.values = {
+      label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase()
+    };
 
     return (
       <div>
@@ -128,10 +132,7 @@ export class List extends React.Component {
               id: 'plugin-content-manager-title',
               defaultMessage: `${pluginHeaderTitle}`,
             }}
-            description={{
-              id: 'plugin-content-manager-description',
-              defaultMessage: `${pluginHeaderDescription}`,
-            }}
+            description={messages.pluginHeaderDescription}
             actions={pluginHeaderActions}
           />
           <Container>
@@ -232,4 +233,4 @@ const mapStateToProps = createStructuredSelector({
   schema: makeSelectSchema(),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(List));
+export default connect(mapStateToProps, mapDispatchToProps)(List);

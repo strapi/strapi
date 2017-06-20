@@ -21,7 +21,10 @@ class Container extends React.Component {
 }
 
 Container.propTypes = {
-  children: React.PropTypes.array.isRequired,
+  children: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.array,
+  ]),
 };
 
 export default Container;

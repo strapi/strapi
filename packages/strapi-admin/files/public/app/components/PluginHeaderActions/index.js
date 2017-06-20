@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
@@ -17,7 +18,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
         onClick={action.onClick}
         disabled={action.disabled}
       >
-        {action.label}
+        <FormattedMessage {...action.label} />
       </button>
     ));
 
