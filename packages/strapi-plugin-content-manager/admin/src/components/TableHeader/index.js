@@ -44,7 +44,6 @@ class TableHeader extends React.Component {
       <thead className={styles.tableHeader}>
         <tr className={styles.tableHeader}>
           {headers}
-          <th />
         </tr>
       </thead>
     );

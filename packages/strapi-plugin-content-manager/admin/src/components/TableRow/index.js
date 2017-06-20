@@ -76,14 +76,6 @@ class TableRow extends React.Component {
         onClick={() => this.goEditPage(this.props.destination)}
       >
         {cells}
-        <td className={styles.actions}>
-          <Link to={this.props.destination}>
-            <i className="ion ion-edit" />
-          </Link>
-          <Link to={this.props.destination}>
-            <i className="ion ion-close-round" />
-          </Link>
-        </td>
       </tr>
     );
   }
