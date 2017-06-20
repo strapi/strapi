@@ -12,7 +12,7 @@ import App from 'containers/App'; // eslint-disable-line
 import { selectLocationState } from 'containers/App/selectors'; // eslint-disable-line
 import configureStore from 'store';
 import createRoutes from 'routes';
-// import { translationMessages } from 'i18n';
+import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -52,6 +52,22 @@ Comp.contextTypes = {
   router: React.PropTypes.object.isRequired,
 };
 
+// Hot reloadable translation json files
+if (module.hot) {
+  // modules.hot.accept does not accept dynamic dependencies,
+  // have to be constants at compile-time
+  module.hot.accept('./i18n', () => {
+    if (window.Strapi) {
+      System.import('./i18n').then(result => {
+        const translationMessagesUpdated = result.translationMessages;
+        window.Strapi
+          .refresh(pluginId)
+          .translationMessages(translationMessagesUpdated);
+      });
+    }
+  });
+}
+
 // Register the plugin
 window.Strapi.registerPlugin({
   name: pluginPkg.strapi.name,
@@ -60,7 +76,7 @@ window.Strapi.registerPlugin({
   leftMenuLinks: [],
   mainComponent: Comp,
   routes: createRoutes(store),
-  // translationMessages,
+  translationMessages,
 });
 
 
