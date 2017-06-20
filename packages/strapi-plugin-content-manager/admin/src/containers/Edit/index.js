@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
+import { router } from 'app';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
@@ -76,6 +77,9 @@ export class Edit extends React.Component {
       {
         label: 'Cancel',
         class: 'btn-default',
+        onClick: () => {
+          router.push(`/plugins/content-manager/${this.props.currentModelName}`);
+        },
       },
       {
         label: this.props.editing ? 'Editing...' : 'Submit',
