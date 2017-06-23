@@ -86,13 +86,30 @@ module.exports = function(strapi) {
                 cache &&
                 _.get(connection, 'options.disabledCaching') !== true
               ) {
-                redis.set(serial, cache, 'ex', expired);
+                switch (type) {
+                  case 'json':
+                    redis.set(serial, JSON.stringify(cache), 'ex', expired);
+                    break;
+                  case 'int':
+                  default:
+                    redis.set(serial, cache, 'ex', expired);
+                    break;
+                }
+
               }
             }
 
             switch (type) {
               case 'int':
                 return parseInt(cache);
+              case 'float':
+                return _.toNumber(cache);
+              case 'json':
+                try {
+                  return _.isObject(cache) ? cache : JSON.parse(cache);
+                } catch (e) {
+                  return cache;
+                }
               default:
                 return cache;
             }
