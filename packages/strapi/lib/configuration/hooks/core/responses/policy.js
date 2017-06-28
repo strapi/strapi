@@ -37,30 +37,30 @@ module.exports = async function(ctx, next) {
   });
 
   try {
+    // App logic.
     await next();
-
-    // Set context when no route is matched.
-    if (_.get(ctx.request, 'route') === undefined) {
-      ctx.notFound();
-    }
-
-    if (_.get(ctx.body, 'isBoom') || _.isError(ctx.body)) {
-      ctx.throw();
-    }
   } catch (error) {
-    // Error object could be also in the context body...
-    strapi.log.error(ctx.body || error);
-    // Wrap error into a Boom's response
-    const formattedError = _.get(ctx.body, 'isBoom')
-      ? ctx.body || error.message
-      : Boom.wrap(error, error.status, ctx.body || error.message);
+    // Log error.
+    strapi.log.error(error);
 
-    ctx.status = formattedError.output.statusCode || error.status || 500;
-    ctx.body = formattedError.output.payload;
+    // Wrap error into a Boom's response.
+    ctx.status = error.status || 500;
+    ctx.body = _.get(ctx.body, 'isBoom')
+      ? ctx.body || error && error.message
+      : Boom.wrap(error, ctx.status, ctx.body || error.message);
+  }
 
-    // Call custom responses.
-    if (_.isFunction(_.get(strapi.config, `responses.${ctx.status}`))) {
-      await strapi.config.responses[ctx.status].call(this, ctx);
-    }
+  // Empty body is considered as `notFound` response.
+  if (!ctx.body) {
+    ctx.notFound();
+  }
+
+  // Format `ctx.body` and `ctx.status`.
+  ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
+  ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
+
+  // Call custom responses.
+  if (_.isFunction(_.get(strapi.config, `responses.${ctx.status}`))) {
+    await strapi.config.responses[ctx.status].call(this, ctx);
   }
 };
