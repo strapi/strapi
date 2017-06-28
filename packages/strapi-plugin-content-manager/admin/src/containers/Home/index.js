@@ -5,14 +5,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import messages from './messages.json';
 import { FormattedMessage } from 'react-intl';
+
 import { define } from 'i18n';
-define(messages);
 
 import Container from 'components/Container';
 
+import messages from './messages.json';
 import styles from './styles.scss';
+
+define(messages);
 
 export class Home extends React.Component {
   render() {
@@ -30,7 +32,7 @@ export class Home extends React.Component {
           />
           <Container>
             <p>
-              <FormattedMessage {...messages.introduction}/>
+              <FormattedMessage {...messages.introduction} />
             </p>
           </Container>
         </div>

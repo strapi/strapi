@@ -8,10 +8,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
+
 import { router } from 'app';
-import messages from './messages.json';
 import { define } from 'i18n';
-define(messages);
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
@@ -35,6 +34,10 @@ import {
   makeSelectDeleting,
   makeSelectIsCreating,
 } from './selectors';
+import messages from './messages.json';
+
+define(messages);
+
 
 export class Edit extends React.Component {
   componentWillMount() {

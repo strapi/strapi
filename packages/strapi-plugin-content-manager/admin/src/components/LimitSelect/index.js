@@ -6,12 +6,14 @@
 
 import React from 'react';
 import _ from 'lodash';
-import messages from './messages.json';
-import { define } from 'i18n';
 import { FormattedMessage } from 'react-intl';
-define(messages);
 
+import { define } from 'i18n';
+
+import messages from './messages.json';
 import styles from './styles.scss';
+
+define(messages);
 
 class LimitSelect extends React.Component {
   componentWillMount() {
@@ -45,7 +47,7 @@ class LimitSelect extends React.Component {
       <form className="form-inline">
         <div className="form-group">
           <label className={styles.label} htmlFor={id}>
-            <FormattedMessage {...messages.itemsPerPage}/>:</label>
+            <FormattedMessage {...messages.itemsPerPage} />:</label>
           <div className={styles.selectWrapper}>
             <select
               onChange={this.props.onLimitChange}

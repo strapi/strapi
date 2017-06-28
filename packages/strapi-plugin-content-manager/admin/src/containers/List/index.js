@@ -8,9 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
-import messages from './messages.json';
 import { define } from 'i18n';
-define(messages);
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
@@ -37,6 +35,9 @@ import {
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
+import messages from './messages.json';
+
+define(messages);
 
 export class List extends React.Component {
   componentWillMount() {
@@ -121,7 +122,7 @@ export class List extends React.Component {
     // Plugin header config
     const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
     messages.pluginHeaderDescription.values = {
-      label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase()
+      label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase(),
     };
 
     return (
