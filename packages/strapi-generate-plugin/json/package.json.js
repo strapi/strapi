@@ -21,8 +21,9 @@ module.exports = scope => {
     'version': '0.0.0',
     'description': 'This is the description of the plugin.',
     'strapi': {
-      'name': scope.name,
-      'icon': 'ion-document-text'
+      'name': scope.id,
+      'icon': 'ion-document-text',
+      'description': `Description of ${scope.id} plugin.`
     },
     'scripts': {
       'analyze:clean': 'node_modules/strapi-helper-plugin/node_modules/rimraf/bin.js stats.json',
