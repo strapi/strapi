@@ -18,7 +18,7 @@ const forever = require('forever-monitor');
 const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, cli } = require('strapi-utils');
 
 /**
  * `$ strapi start`
@@ -28,6 +28,11 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = function() {
+  // Check that we're in a valid Strapi project.
+  if (!cli.isStrapiApp()) {
+    return logger.error('This command can only be used inside a Strapi project.');
+  }
+
   try {
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {

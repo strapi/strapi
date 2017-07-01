@@ -5,6 +5,7 @@
  */
 
 module.exports = {
+  cli: require('./cli'),
   commander: require('./commander'),
   dictionary: require('./dictionary'),
   finder: require('./finder'),
