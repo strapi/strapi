@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+
+'use strict';
+
+/**
+ * Module dependencies
+ */
+
+// Node.js core.
+const { exec } = require('child_process');
+const fs = require('fs');
+
+// Logger.
+const { logger, cli } = require('strapi-utils');
+
+/**
+ * `$ strapi install`
+ *
+ * Install a Strapi plugin.
+ */
+
+module.exports = function (plugin, cliArguments) {
+  // Define variables.
+  const pluginPrefix = 'strapi-plugin-';
+  const pluginId = `${pluginPrefix}${plugin}`;
+  const pluginPath = `./plugins/${plugin}`;
+
+  // Check that we're in a valid Strapi project.
+  if (!cli.isStrapiApp()) {
+    return logger.error('This command can only be used inside a Strapi project.');
+  }
+
+  // Check that the plugin is not installed yet.
+  if (fs.existsSync(pluginPath)) {
+    logger.error(`It looks like this plugin is already installed. Please check in \`${pluginPath}\`.`);
+    process.exit(1);
+  }
+
+  // Progress message.
+  logger.debug('Installation in progress...');
+
+  if (cliArguments.dev) {
+    // Run `npm link` to create a symlink between the node module
+    // installed globally and the current Strapi application.
+    exec(`npm link ${pluginId}`, (err) => {
+      if (err) {
+        logger.error('It looks like this plugin is not installed globally.');
+        process.exit(1);
+      }
+
+      try {
+        // Create a symlink between the Strapi application and the node module installed.
+        fs.symlinkSync(`../node_modules/${pluginId}`, pluginPath, 'dir');
+
+        // Success.
+        logger.info('The plugin has been successfully installed.');
+        process.exit(0);
+      } catch (err) {
+        logger.error('An error occurred during plugin installation.');
+        process.exit(1);
+      }
+    });
+  } else {
+    // Debug message.
+    logger.debug('Installing the plugin from npm registry.');
+
+    // Install the plugin from the npm registry.
+    exec(`npm install ${pluginId}`, (err) => {
+      if (err) {
+        logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginId}`);
+        process.exit(1);
+      }
+
+      // Debug message.
+      logger.debug('Plugin successfully installed from npm registry.');
+
+      try {
+        // Debug message.
+        logger.debug(`Moving the \`node_modules/${pluginId}\` folder to the \`./plugins\` folder.`);
+
+        // Move the plugin from the `node_modules` folder to the `./plugins` folder.
+        fs.renameSync(`./node_modules/${pluginId}`, pluginPath);
+
+        // Success.
+        logger.info('The plugin has been successfully installed.');
+        process.exit(0);
+      } catch (err) {
+        logger.error('An error occurred during plugin installation.');
+        process.exit(1);
+      }
+    });
+  }
+};

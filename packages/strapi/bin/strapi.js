@@ -127,6 +127,19 @@ program
   .description('generate a custom generator')
   .action(require('./strapi-generate'));
 
+// `$ strapi install`
+program
+  .command('install <plugin>')
+  .option('-d, --dev', 'Development mode')
+  .description('install a Strapi plugin')
+  .action(require('./strapi-install'));
+
+// `$ strapi uninstall`
+program
+  .command('uninstall <plugin>')
+  .description('uninstall a Strapi plugin')
+  .action(require('./strapi-uninstall'));
+
 // `$ strapi migrate:make`
 program
   .command('migrate:make')
