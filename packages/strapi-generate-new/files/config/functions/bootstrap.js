@@ -8,6 +8,6 @@
  * run jobs, or perform some special logic.
  */
 
-module.exports.bootstrap = cb => {
+module.exports = cb => {
   cb();
 };
