@@ -1,30 +1,24 @@
 {
-  "name": "strapi-knex",
+  "name": "strapi-admin",
   "version": "3.0.0-alpha.3",
-  "description": "Knex hook for the Strapi framework",
+  "description": "Strapi Admin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "hook",
-    "knex",
-    "migrations",
-    "sql",
     "strapi",
-    "transactions"
+    "admin"
   ],
+  "main": "./lib/index.js",
   "directories": {
     "lib": "./lib"
   },
-  "main": "./lib",
   "dependencies": {
-    "knex": "^0.12.9",
+    "fs-extra": "^0.30.0",
     "lodash": "^4.17.4",
-    "sqlite3": "^3.1.8"
-  },
-  "strapi": {
-    "isHook": true
+    "strapi-utils": "^3.0.0-alpha.3"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "test": "cd files/public && npm run test",
+    "prepublish": "cd files && npm run setup"
   },
   "author": {
     "email": "hi@strapi.io",

@@ -17,8 +17,8 @@
   "main": "./lib",
   "dependencies": {
     "bookshelf": "^0.10.3",
-    "lodash": "^4.16.5",
-    "pluralize": "~3.1.0",
+    "lodash": "^4.17.4",
+    "pluralize": "^3.1.0",
     "strapi-utils": "^3.0.0-alpha.3"
   },
   "strapi": {

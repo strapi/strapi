@@ -27,9 +27,9 @@
   ],
   "dependencies": {
     "fs-extra": "^1.0.0",
-    "lodash": "^4.17.2",
+    "lodash": "^4.17.4",
     "semver": "^5.3.0",
-    "validator": "^6.1.0"
+    "validator": "^6.3.0"
   },
   "devDependencies": {}
 }

@@ -10,14 +10,14 @@ const util = require('util');
 // Public node modules.
 const _ = require('lodash');
 const Redis = require('ioredis');
+const stackTrace = require('stack-trace');
 
 /**
  * Redis hook
  */
 
-module.exports = function (strapi) {
+module.exports = function(strapi) {
   const hook = {
-
     /**
      * Default options
      */
@@ -27,7 +27,7 @@ module.exports = function (strapi) {
       host: 'localhost',
       family: 4,
       db: 0,
-      showFriendlyErrorStack: (process.env.NODE_ENV !== 'production')
+      showFriendlyErrorStack: process.env.NODE_ENV !== 'production'
     },
 
     /**
@@ -35,7 +35,9 @@ module.exports = function (strapi) {
      */
 
     initialize: cb => {
-      const connections = _.pickBy(strapi.config.connections, {connector: 'strapi-redis'});
+      const connections = _.pickBy(strapi.config.connections, {
+        connector: 'strapi-redis'
+      });
 
       const done = _.after(_.size(connections), () => {
         cb();
@@ -49,7 +51,7 @@ module.exports = function (strapi) {
         try {
           const redis = new Redis(connection.settings);
 
-          redis.on('error', (err) => {
+          redis.on('error', err => {
             strapi.log.error(err);
             process.exit(0);
             return;
@@ -58,20 +60,56 @@ module.exports = function (strapi) {
           // Utils function.
           // Behavior: Try to retrieve data from Redis, if null
           // execute callback and set the value in Redis for this serial key.
-          redis.cache = async (serial, cb, type) => {
+          redis.cache = async ({ expired = 60 * 60, serial }, cb, type) => {
+            if (_.isEmpty(serial)) {
+              strapi.log.warn(
+                `Be careful, you're using cache() function of strapi-redis without serial`
+              );
+
+              const traces = stackTrace.get();
+
+              strapi.log.warn(
+                `> [${traces[1].getLineNumber()}] ${traces[1]
+                  .getFileName()
+                  .replace(strapi.config.appPath, '')}`
+              );
+
+              return await cb();
+            }
+
             let cache = await redis.get(serial);
 
             if (!cache) {
               cache = await cb();
 
-              if (cache && _.get(connection, 'options.disabledCaching') !== true) {
-                redis.set(serial, cache);
+              if (
+                cache &&
+                _.get(connection, 'options.disabledCaching') !== true
+              ) {
+                switch (type) {
+                  case 'json':
+                    redis.set(serial, JSON.stringify(cache), 'ex', expired);
+                    break;
+                  case 'int':
+                  default:
+                    redis.set(serial, cache, 'ex', expired);
+                    break;
+                }
+
               }
             }
 
             switch (type) {
               case 'int':
                 return parseInt(cache);
+              case 'float':
+                return _.toNumber(cache);
+              case 'json':
+                try {
+                  return _.isObject(cache) ? cache : JSON.parse(cache);
+                } catch (e) {
+                  return cache;
+                }
               default:
                 return cache;
             }

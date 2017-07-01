@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "enpeem": "^2.2.0",
-    "fs-extra": "~1.0.0",
-    "lodash": "^4.16.5",
+    "fs-extra": "^1.0.0",
+    "lodash": "^4.17.4",
     "strapi-utils": "^3.0.0-alpha.3"
   },
   "scripts": {
