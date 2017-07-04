@@ -74,6 +74,10 @@ export class List extends React.Component {
   }
 
   render() {
+    if (!this.props.currentModelName || !this.props.schema) {
+      return <div />;
+    }
+
     const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content;
