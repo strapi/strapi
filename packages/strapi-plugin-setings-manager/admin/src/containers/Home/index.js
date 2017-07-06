@@ -7,22 +7,31 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
+import PluginLeftMenu from 'components/PluginLeftMenu';
 import selectHome from './selectors';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import styles from './styles.scss';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
       <div className={styles.home}>
+          <div className={styles.baseline}></div>
       <Helmet
         title="Home"
         meta={[
           { name: 'description', content: 'Description of Home' },
         ]}
       />
-        <FormattedMessage {...messages.header} />
+        <div className="container-fluid">
+          <div className="row">
+            <div className={`col-3 ${styles.left}`}>
+              <PluginLeftMenu />
+            </div>
+            <div className="col-9">
+
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
