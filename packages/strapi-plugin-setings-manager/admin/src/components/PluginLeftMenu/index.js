@@ -6,14 +6,13 @@
 
 import React from 'react';
 
-
+import PluginLeftMenuHeader from 'components/PluginLeftMenuHeader';
 import styles from './styles.scss';
 
 function PluginLeftMenu() {
-  const sayHi = () => console.log('ok');
   return (
-    <div className={styles.pluginLeftMenu}>
-      <div onClick={sayHi}>kjkjkj</div>
+    <div className={`${styles.pluginLeftMenu} col-md-3`}>
+      <PluginLeftMenuHeader />
     </div>
   );
 }

@@ -12,23 +12,34 @@ import selectHome from './selectors';
 import styles from './styles.scss';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  // constructor(props) {
+  //   super(props);
+  //   // this.leftMenuItems = [
+  //   //   {
+  //   //     header: 'global settings',
+  //   //     items: [
+  //   //       general, 'languages', 'advanced'],
+  //   //   }
+  //   // ]
+  // }
+
+
   render() {
+    
     return (
       <div className={styles.home}>
-          <div className={styles.baseline}></div>
-      <Helmet
-        title="Home"
-        meta={[
-          { name: 'description', content: 'Description of Home' },
-        ]}
-      />
+        <div className={styles.baseline}></div>
+        <Helmet
+          title="Home"
+          meta={[
+            { name: 'description', content: 'Description of Home' },
+          ]}
+        />
         <div className="container-fluid">
           <div className="row">
-            <div className={`col-3 ${styles.left}`}>
-              <PluginLeftMenu />
-            </div>
-            <div className="col-9">
-
+            <PluginLeftMenu />
+            <div className="col-md-9">
+              f
             </div>
           </div>
         </div>
