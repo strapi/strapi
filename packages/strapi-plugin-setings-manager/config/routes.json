@@ -2,8 +2,32 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/",
-      "handler": "SettingsManager.index",
+      "path": "/menu",
+      "handler": "SettingsManager.menu",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/environments",
+      "handler": "SettingsManager.environments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:slug",
+      "handler": "SettingsManager.form",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:slug/:env",
+      "handler": "SettingsManager.form",
       "config": {
         "policies": []
       }

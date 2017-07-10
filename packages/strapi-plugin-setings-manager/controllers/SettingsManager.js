@@ -1,25 +1,29 @@
 'use strict';
 
-/**
- * SettingsManager.js controller
- *
- * @description: A set of functions called "actions" of the `settings-manager` plugin.
- */
-
 module.exports = {
+  menu: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
 
-  /**
-   * Default action.
-   *
-   * @return {Object}
-   */
+    ctx.send(Service.menu);
+  },
 
-  index: async (ctx) => {
-    // Add your own logic here.
-
-    // Send 200 `ok`
-    ctx.send({
-      message: 'ok'
+  environments: async ctx => {
+    let envs = _.map(_.keys(strapi.config.environments), env => {
+      return {
+        name: env,
+        active: (strapi.config.environment === env)
+      }
     });
-  }
+
+    ctx.send({
+      environments: envs
+    });
+  },
+
+  form: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { slug, env } = ctx.params;
+
+    ctx.send(env ? Service[slug](env) : Service[slug]);
+  },
 };
