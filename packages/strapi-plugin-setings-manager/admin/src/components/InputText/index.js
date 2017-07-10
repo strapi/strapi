@@ -27,7 +27,6 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     super(props);
     this.state = {
       errors: false,
-      value: '',
     };
   }
 
