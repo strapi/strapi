@@ -4,41 +4,41 @@ module.exports = {
   menu: {
     sections: [
       {
-        tradKey: 'menu.section.global-settings',
+        name: 'menu.section.global-settings',
         items: [
             {
             slug: 'general',
-            tradKey: 'menu.item.general',
+            name: 'menu.item.general',
             icon: 'globe'
           },
           {
             slug: 'languages',
-            tradKey: 'menu.item.languages',
+            name: 'menu.item.languages',
             icon: 'language'
           },
           {
             slug: 'advenced',
-            tradKey: 'menu.item.advenced',
+            name: 'menu.item.advenced',
             icon: 'cogs'
           }
         ]
       },
       {
-        tradKey: 'menu.section.environments',
+        name: 'menu.section.environments',
         items: [
           {
             slug: 'databases',
-            tradKey: 'menu.item.databases',
+            name: 'menu.item.databases',
             icon: 'databases'
           },
           {
             slug: 'security',
-            tradKey: 'menu.item.security',
+            name: 'menu.item.security',
             icon: 'shield'
           },
           {
             slug: 'server',
-            tradKey: 'menu.item.server',
+            name: 'menu.item.server',
             icon: 'server'
           }
         ]
@@ -47,14 +47,14 @@ module.exports = {
   },
 
   general: {
-    tradKey: 'form.general',
-    tradKeyDesc: 'form.general.desc',
+    name: 'form.general',
+    description: 'form.general.desc',
     sections: [
       {
-        tradKey: '',
+        name: '',
         items: [
           {
-            tradKey: 'form.general.name',
+            name: 'form.general.name',
             target: 'package.name',
             type: 'string',
             value: strapi.config.name,
@@ -64,7 +64,7 @@ module.exports = {
             }
           },
           {
-            tradKey: 'form.general.description',
+            name: 'form.general.description',
             target: 'package.name',
             type: 'string',
             value: strapi.config.description,
@@ -90,20 +90,20 @@ module.exports = {
 
   security: env => {
     return {
-      tradKey: 'form.security',
-      tradKeyDesc: 'form.security.desc',
+      name: 'form.security',
+      description: 'form.security.desc',
       sections: [
         {
-          tradKey: 'form.security.session',
+          name: 'form.security.session',
           items: [
             {
-              tradKey: 'form.security.session.key',
+              name: 'form.security.session.key',
               target: 'security.session.key',
               type: 'string',
               value: strapi.config.environments[env].security.session.key
             },
             {
-              tradKey: 'form.security.session.maxAge',
+              name: 'form.security.session.maxAge',
               target: 'security.session.maxAge',
               type: 'number',
               value: strapi.config.environments[env].security.session.maxAge
@@ -111,30 +111,30 @@ module.exports = {
           ]
         },
         {
-          tradKey: '',
+          name: '',
           items: [
             {
-              tradKey: 'form.security.xframe',
+              name: 'form.security.xframe',
               target: 'security.xframe',
               type: 'enum',
               value: strapi.config.environments[env].security.xframe,
               items: [
                 {
-                  tradKey: 'server.xframe.deny',
+                  name: 'server.xframe.deny',
                   value: 'DENY',
                 },
                 {
-                  tradKey: 'server.xframe.sameorigin',
+                  name: 'server.xframe.sameorigin',
                   value: 'SAMEORIGIN',
                 },
                 {
-                  tradKey: 'server.xframe.allow-from',
+                  name: 'server.xframe.allow-from',
                   value: 'ALLOW-FROM',
                 },
               ]
             },
             {
-              tradKey: 'form.security.xssProtection',
+              name: 'form.security.xssProtection',
               target: 'security.xssProtection',
               type: 'boolean',
               value: strapi.config.environments[env].security.xssProtection
@@ -142,10 +142,10 @@ module.exports = {
           ]
         },
         {
-          tradKey: 'form.security.cors',
+          name: 'form.security.cors',
           items: [
             {
-              tradKey: 'form.security.cors.origin',
+              name: 'form.security.cors.origin',
               target: 'security.cors.origin',
               type: 'string',
               value: strapi.config.environments[env].security.cors.origin,
@@ -158,20 +158,20 @@ module.exports = {
 
   server: env => {
     return {
-      tradKey: 'form.server',
-      tradKeyDesc: 'form.server.desc',
+      name: 'form.server',
+      description: 'form.server.desc',
       sections: [
         {
-          tradKey: '',
+          name: '',
           items: [
             {
-              tradKey: 'form.server.host',
+              name: 'form.server.host',
               target: 'server.host',
               type: 'string',
               value: strapi.config.environments[env].server.host
             },
             {
-              tradKey: 'form.server.port',
+              name: 'form.server.port',
               target: 'server.port',
               type: 'number',
               value: strapi.config.environments[env].server.port
@@ -179,30 +179,30 @@ module.exports = {
           ]
         },
         {
-          tradKey: 'form.server.parser',
+          name: 'form.server.parser',
           items: [
             {
-              tradKey: 'form.server.parser.xframe',
+              name: 'form.server.parser.xframe',
               target: 'server.xframe',
               type: 'enum',
               value: strapi.config.environments[env].server.xframe,
               items: [
                 {
-                  tradKey: 'server.xframe.deny',
+                  name: 'server.xframe.deny',
                   value: 'DENY',
                 },
                 {
-                  tradKey: 'server.xframe.sameorigin',
+                  name: 'server.xframe.sameorigin',
                   value: 'SAMEORIGIN',
                 },
                 {
-                  tradKey: 'server.xframe.allow-from',
+                  name: 'server.xframe.allow-from',
                   value: 'ALLOW-FROM',
                 },
               ]
             },
             {
-              tradKey: 'form.server.xssProtection',
+              name: 'form.server.xssProtection',
               target: 'server.xssProtection',
               type: 'boolean',
               value: strapi.config.environments[env].server.xssProtection
@@ -210,10 +210,10 @@ module.exports = {
           ]
         },
         {
-          tradKey: 'form.server.cors',
+          name: 'form.server.cors',
           items: [
             {
-              tradKey: 'form.server.cors.origin',
+              name: 'form.server.cors.origin',
               target: 'server.cors.origin',
               type: 'string',
               value: strapi.config.environments[env].server.cors.origin
