@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
-import InputText from 'components/InputText';
+import InputNumber from 'components/InputNumber';
 import selectHome from './selectors';
 import styles from './styles.scss';
 
@@ -34,7 +34,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           "type": "text",
           "value": "ExperienceApp",
           "validations" : {
-            "maxLength": 2,
+            "maxLength": 255,
             "required": true,
             "regex": /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
           }
@@ -55,28 +55,29 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             <div className="col-md-9">
               <div className="form-group">
 
-                <InputText
+                <InputNumber
                   validations={test.validations}
                   name={test.name}
                   value={this.state.value}
                   handleChange={this.handleChange}
-                  inputDescription="blabklba bka"
+                  inputDescription="Change..."
+                  handleBlur={this.handleBlur}
+
+                  errors={[]}
                 />
-                <InputText
+              <InputNumber
                   validations={test.validations}
                   name={test.name}
                   value={this.state.value}
                   handleChange={this.handleChange}
-                  inputDescription="blabklba bka"
                   overrideBootstrapCol="4"
                   errors={false}
                 />
-                <InputText
+              <InputNumber
                   validations={test.validations}
                   name={test.name}
                   value={this.state.value}
                   handleChange={this.handleChange}
-                  inputDescription="blabklba bka"
                   overrideBootstrapCol="2"
                 />
               </div>

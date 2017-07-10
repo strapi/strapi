@@ -1,6 +1,6 @@
 /**
 *
-* InputText
+* InputNumber
 *
 */
 
@@ -11,7 +11,7 @@ import messages from './messages';
 import styles from './styles.scss';
 
 /*
-* InputText
+* InputNumber
 * A customizable input
 * Settings :
 * - deactivateErrorHighlight
@@ -23,7 +23,7 @@ import styles from './styles.scss';
 
 
 
-class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
@@ -39,47 +39,13 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   handleBlur = ({ target }) => {
-    // validates basic string validations
-    // add custom logic here such as alerts...
     const errors = this.validate(target.value);
     this.setState({ errors });
   }
 
-  // Basic string validations
   validate = (value) => {
-      let errors = [];
-      const requiredError = 'Field is required';
-    _.mapKeys(this.props.validations, (validationValue, validationKey) => {
-        switch (validationKey) {
-          case 'maxLength':
-            if (value.length > validationValue) {
-              errors.push('Field is too long');
-            }
-            break;
-          case 'minLength':
-            if (value.length < validationValue) {
-              errors.push('Field is too short');
-            }
-            break;
-          case 'required':
-            if (value.length === 0) {
-              errors.push(requiredError);
-            }
-            break;
-          case 'regex':
-            if (!validationValue.test(value)) {
-              errors.push('Field is not valid');
-            }
-            break;
-          default:
-          errors = false;
-        }
-    });
-    if (_.isEmpty(errors)) {
-      errors = false;
-    } else if (_.includes(errors, requiredError)) {
-      errors = _.reject(errors, (value) => value !== requiredError);
-    }
+    const errors = !_.isEmpty(_.pick(this.props.validations, 'required')) && value.length > 0 ?
+      false : ['This field is required'];
     return errors;
   }
 
@@ -89,7 +55,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const handleBlur = this.props.handleBlur || this.handleBlur;
     // override bootStrapClass
     const bootStrapClass = !this.props.noBootstrap ?
-      `col-${this.props.overrideBootstrapGrid || 'md'}-${this.props.overrideBootstrapCol || '6'}`
+      `col-${this.props.overrideBootstrapGrid || 'md'}-${this.props.overrideBootstrapCol || '4'}`
       : '';
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.noBootstrap && !this.props.deactivateErrorHighlight && this.state.errors ? 'has-danger' : '';
@@ -97,15 +63,13 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const formError = !this.props.noBootstrap ? 'form-control-feedback' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
-      <div className={`${styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label>{this.props.name}</label>
+      <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
+        <label></label>
         <input
-          name={this.props.name}
+          type="number"
+          value={this.state.value}
           onBlur={handleBlur}
-          onFocus={this.props.onFocus}
           onChange={this.props.handleChange}
-          value={inputValue}
-          type="text"
           className={`${this.props.noBootstrap? '' : 'form-control'} ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={placeholder}
         />
@@ -118,13 +82,13 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 }
 
-InputText.propTypes = {
+InputNumber.propTypes = {
   errors: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.array,
   ]),
   deactivateErrorHighlight: React.PropTypes.bool,
-  handleBlur: React.PropTypes.func,
+  handleBur: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
@@ -132,8 +96,11 @@ InputText.propTypes = {
   overrideBootstrapGrid: React.PropTypes.string,
   overrideBootstrapCol: React.PropTypes.string,
   placeholder: React.PropTypes.string,
-  value: React.PropTypes.string.isRequired,
+  value: React.PropTypes.oneOfType([
+    React.PropTypes.number.isRequired,
+    React.PropTypes.string.isRequired,
+  ]),
   validations: React.PropTypes.object.isRequired,
 }
 
-export default InputText;
+export default InputNumber;
