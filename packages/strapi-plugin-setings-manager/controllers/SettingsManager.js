@@ -20,10 +20,30 @@ module.exports = {
     });
   },
 
-  form: async ctx => {
+  get: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
 
     ctx.send(env ? Service[slug](env) : Service[slug]);
+  },
+
+  update: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { slug, env } = ctx.params;
+    let params = ctx.request.body;
+    let error = false;
+
+    const model = env ? Service[slug](env) : Service[slug];
+    const items = Service.getItems(model);
+
+    params = Service.cleanParams(params, items);
+
+    let validationErrors = Service.paramsValidation(params, items);
+
+    if (_.isEmpty(validationErrors)) {
+      ctx.send(params);
+    } else {
+      ctx.send(validationErrors);
+    }
   },
 };

@@ -60,12 +60,13 @@ module.exports = {
             value: strapi.config.name,
             validations : {
               maxLength: 255,
+              minLength: 5,
               required: true
             }
           },
           {
             name: 'form.general.description',
-            target: 'package.name',
+            target: 'package.description',
             type: 'string',
             value: strapi.config.description,
             validations : {
@@ -75,7 +76,7 @@ module.exports = {
           },
           {
             name: 'form.general.version',
-            target: 'package.name',
+            target: 'package.version',
             type: 'string',
             value: strapi.config.version,
             validations : {
@@ -222,5 +223,92 @@ module.exports = {
         }
       ]
     };
+  },
+
+  getItems: model => {
+    let items = [];
+    _.forEach(model.sections, section => items = _.concat(items, section.items));
+
+    return items;
+  },
+
+  cleanParams: (params, items) => {
+    const cleanParams = {};
+
+    _.forEach(items, ({ target }) => _.has(params, target) ? _.set(cleanParams, target, _.get(params, target)) : '');
+
+    return cleanParams;
+  },
+
+  paramsValidation: (params, items) => {
+    let errors = [];
+
+    const checkType = (input, { type, target }) => {
+      if ((type === 'string' || type === 'text') && !_.isString(input)) errors.push({
+        target: target,
+        message: 'form.error.string'
+      });
+
+      if (type === 'number' && !_.isNumber(input)) errors.push({
+        target: target,
+        message: 'form.error.number'
+      });
+
+      if (type === 'boolean' && !_.isBoolean(input)) errors.push({
+        target: target,
+        message: 'form.error.number'
+      });
+    };
+
+    const checkValidations = (input, item) => {
+      _.forEach(item.validations, (value, key) => {
+        if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
+          target: item.target,
+          message: 'form.error.required'
+        });
+
+        if (key === 'max' && parseInt(input) > value) errors.push({
+          target: item.target,
+          message: 'form.error.max'
+        });
+
+        if (key === 'min' && parseInt(input) < value) errors.push({
+          target: item.target,
+          message: 'form.error.min'
+        });
+
+        if (key === 'maxLength' && input.length > value) errors.push({
+          target: item.target,
+          message: 'form.error.maxLength'
+        });
+
+        if (key === 'minLength' && input.length  < value) errors.push({
+          target: item.target,
+          message: 'form.error.minLength'
+        });
+      });
+    };
+
+    _.forEach(items, item => {
+      if (_.has(params, item.target)) {
+        const input = _.get(params, item.target, null);
+
+        checkType(input, item)
+        checkValidations(input, item)
+      }
+    });
+
+    if (!_.isEmpty(errors)) {
+      const grpTarget = _.groupBy(errors, 'target');
+
+      errors = _.map(grpTarget, (errs, target) => {
+        return {
+          target,
+          messages: _.map(errs, err => err.message)
+        }
+      });
+    }
+
+    return errors;
   }
 };
