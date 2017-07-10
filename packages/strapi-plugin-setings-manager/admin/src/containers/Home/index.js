@@ -8,24 +8,38 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+import InputText from 'components/InputText';
 import selectHome from './selectors';
 import styles from './styles.scss';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  // constructor(props) {
-  //   super(props);
-  //   // this.leftMenuItems = [
-  //   //   {
-  //   //     header: 'global settings',
-  //   //     items: [
-  //   //       general, 'languages', 'advanced'],
-  //   //   }
-  //   // ]
-  // }
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: '',
+    }
+  }
 
+  handleChange = ({ target }) => {
+    console.log(target.value);
+    this.setState({ value: target.value });
+  }
 
   render() {
-    
+
+    const test = {
+          "name": "bame",
+          "slug": "name",
+          "target": "general.name",
+          "type": "text",
+          "value": "ExperienceApp",
+          "validations" : {
+            "maxLength": 2,
+            "required": true,
+            "regex": /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          }
+    };
+
     return (
       <div className={styles.home}>
         <div className={styles.baseline}></div>
@@ -39,7 +53,33 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           <div className="row">
             <PluginLeftMenu />
             <div className="col-md-9">
-              f
+              <div className="form-group">
+
+                <InputText
+                  validations={test.validations}
+                  name={test.name}
+                  value={this.state.value}
+                  handleChange={this.handleChange}
+                  inputDescription="blabklba bka"
+                />
+                <InputText
+                  validations={test.validations}
+                  name={test.name}
+                  value={this.state.value}
+                  handleChange={this.handleChange}
+                  inputDescription="blabklba bka"
+                  overrideBootstrapCol="4"
+                  errors={false}
+                />
+                <InputText
+                  validations={test.validations}
+                  name={test.name}
+                  value={this.state.value}
+                  handleChange={this.handleChange}
+                  inputDescription="blabklba bka"
+                  overrideBootstrapCol="2"
+                />
+              </div>
             </div>
           </div>
         </div>
