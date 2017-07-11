@@ -9,7 +9,6 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import InputToggle from 'components/InputToggle';
-import InputText from 'components/InputText';
 import selectHome from './selectors';
 import styles from './styles.scss';
 

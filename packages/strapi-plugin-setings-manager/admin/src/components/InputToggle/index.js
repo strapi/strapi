@@ -8,14 +8,8 @@ import React from 'react';
 import styles from './styles.scss';
 
 class InputToggle extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    }
-  }
-
   render() {
+    /* eslint-disable react/jsx-no-duplicate-props */
     const btnClassOff = this.props.isChecked ? 'btn ' : `btn ${styles.gradientOff}`;
     const btnClassOn = this.props.isChecked ? `btn ${styles.gradientOn}` : 'btn';
     const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
