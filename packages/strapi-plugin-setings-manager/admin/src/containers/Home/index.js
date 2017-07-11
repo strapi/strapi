@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import InputToggle from 'components/InputToggle';
-import InputNumber from 'components/InputNumber';
+import InputText from 'components/InputText';
 import selectHome from './selectors';
 import styles from './styles.scss';
 
@@ -17,14 +17,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   constructor(props) {
     super(props);
     this.state = {
-      value: true,
+      value: false,
       value1: null,
     }
   }
 
   handleChange = ({ target }) => {
-
-    this.setState({ value1: target.value });
+    console.log('ok');
+    console.log(target);
+    this.setState({ value: !this.state.value});
   }
 
   render() {
@@ -59,14 +60,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
 
 
-            <InputNumber
+            <InputToggle
                 handleChange={this.handleChange}
-                value={this.state.value1}
+                isChecked={this.state.value}
                 name={test.name}
                 validations={test.validations}
-                customBootstrapClass={'col-lg-4 offset-lg-4'}
-                errors={false}
+                customBootstrapClass={'col-lg-2 offset-lg-4'}
+                errors={[]}
               />
+
               </div>
             </div>
           </div>

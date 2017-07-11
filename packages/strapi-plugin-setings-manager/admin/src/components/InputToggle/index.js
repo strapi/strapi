@@ -5,9 +5,6 @@
 */
 
 import React from 'react';
-
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import styles from './styles.scss';
 
 class InputToggle extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -17,46 +14,45 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
 
     }
   }
-  onChange = ({ target }) => {
-    console.log(target)
-  }
-  render() {
-    const btnClassOff = this.props.value ? 'btn btn-secondary' : 'btn btn-warning';
-    const btnClassOn = this.props.value ? 'btn btn-primary' : 'btn btn-secondary';
-    console.log(this.props.value);
 
+  render() {
+    const btnClassOff = this.props.isChecked ? 'btn ' : `btn ${styles.gradientOff}`;
+    const btnClassOn = this.props.isChecked ? `btn ${styles.gradientOn}` : 'btn';
+    const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
     return (
-      <div className={`${styles.inputRadio} btn-group`} data-toggle="buttons">
-        <label className="btn" className={btnClassOff}>
-          <input
-            type="checkbox"
-            name="options"
-            id="off"
-            autocomplete="off"
-            onChange={this.props.handleChange}
-            value={false}
-            checked={this.props.value}
-          />
-          OFF
-        </label>
-        <label className="btn" className={btnClassOn}>
-          <input
-            type="checkbox"
-            name="options"
-            id="on"
-            autocomplete="off"
-            onChange={this.props.handleChange}
-            value={true}
-            checked={this.props.value}
-          />
-          ON
-        </label>
+      <div className={customBootstrapClass}>
+        <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">
+          <label className={btnClassOff} htmlFor="off">
+            <input
+              type="checkbox"
+              name={this.props.name}
+              id="off"
+              onChange={this.props.handleChange}
+              checked={this.props.isChecked}
+            />
+            OFF
+          </label>
+          <label className="btn" className={btnClassOn} htmlFor="on">
+            <input
+              type="checkbox"
+              name={this.props.name}
+              id="on"
+              onChange={this.props.handleChange}
+              checked={this.props.isChecked}
+            />
+            ON
+          </label>
+        </div>
       </div>
     );
   }
 }
 
+InputToggle.propTypes = {
+  customBootstrapClass: React.PropTypes.string,
+  handleChange: React.PropTypes.func.isRequired,
+  isChecked: React.PropTypes.bool.isRequired,
+  name: React.PropTypes.string.isRequired,
+}
+
 export default InputToggle;
-
-
-// F76B00

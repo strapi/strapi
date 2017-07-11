@@ -1,3 +1,36 @@
-.inputRadio { /* stylelint-disable */
+.inputToggle { /* stylelint-disable */
+  > label {
+    // display and box model
+    width: 5.3rem;
+    height: 3.4rem;
+    padding: 0;
+    line-height: 3.2rem;
+    border: 1px solid #E3E9F3;
+    // color
+    color: #333740;
+    background-color: white;
+    // text
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.07rem;
+    &:first-of-type {
+      border-right: none;
+    }
+    &:nth-of-type(2) {
+      border-left: none;
+    }
+    &:hover {
+      z-index: 0 !important;
+    }
+  }
+}
 
+.gradientOff {
+  background-image: linear-gradient( to bottom right, #F65A1D, #F68E0E );
+  color: white !important;
+}
+
+.gradientOn {
+  background-image: linear-gradient( to bottom right, #005EEA, #0097F6);
+  color: white !important;
 }
