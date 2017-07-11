@@ -8,21 +8,22 @@ module.exports = {
   },
 
   environments: async ctx => {
-    let envs = _.map(_.keys(strapi.config.environments), env => {
-      return {
-        name: env,
-        active: (strapi.config.environment === env)
-      }
-    });
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
 
-    ctx.send({ environments: envs });
+    ctx.send({ environments: Service.getEnvironments() });
   },
 
   get: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
 
-    ctx.send(env ? Service[slug](env) : Service[slug]);
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment');
+
+    const model = env ? Service[slug](env) : Service[slug];
+
+    if (_.isUndefined(model)) return ctx.badData('request.error.config');
+
+    ctx.send(model);
   },
 
   update: async ctx => {
@@ -30,7 +31,12 @@ module.exports = {
     const { slug, env } = ctx.params;
     let params = ctx.request.body;
 
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment');
+
     const model = env ? Service[slug](env) : Service[slug];
+
+    if (_.isUndefined(config)) return ctx.badData('request.error.config');
+
     const items = Service.getItems(model);
 
     params = Service.cleanParams(params, items);

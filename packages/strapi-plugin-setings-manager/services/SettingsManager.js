@@ -227,6 +227,15 @@ module.exports = {
     };
   },
 
+  getEnvironments: () => {
+    return _.map(_.keys(strapi.config.environments), environment => {
+      return {
+        name: environment,
+        active: (strapi.config.environment === environment)
+      }
+    });
+  },
+
   getItems: model => {
     let items = [];
     _.forEach(model.sections, section => items = _.concat(items, section.items));
@@ -248,17 +257,17 @@ module.exports = {
     const checkType = (input, { type, target }) => {
       if ((type === 'string' || type === 'text') && !_.isString(input)) errors.push({
         target: target,
-        message: 'form.error.string'
+        message: 'form.error.type.string'
       });
 
       if (type === 'number' && !_.isNumber(input)) errors.push({
         target: target,
-        message: 'form.error.number'
+        message: 'form.error.type.number'
       });
 
       if (type === 'boolean' && !_.isBoolean(input)) errors.push({
         target: target,
-        message: 'form.error.number'
+        message: 'form.error.type.boolean'
       });
     };
 
@@ -266,27 +275,27 @@ module.exports = {
       _.forEach(item.validations, (value, key) => {
         if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
           target: item.target,
-          message: 'form.error.required'
+          message: 'form.error.validation.required'
         });
 
         if (key === 'max' && parseInt(input) > value) errors.push({
           target: item.target,
-          message: 'form.error.max'
+          message: 'form.error.validation.max'
         });
 
         if (key === 'min' && parseInt(input) < value) errors.push({
           target: item.target,
-          message: 'form.error.min'
+          message: 'form.error.validation.min'
         });
 
         if (key === 'maxLength' && input.length > value) errors.push({
           target: item.target,
-          message: 'form.error.maxLength'
+          message: 'form.error.validation.maxLength'
         });
 
         if (key === 'minLength' && input.length  < value) errors.push({
           target: item.target,
-          message: 'form.error.minLength'
+          message: 'form.error.validation.minLength'
         });
       });
     };
