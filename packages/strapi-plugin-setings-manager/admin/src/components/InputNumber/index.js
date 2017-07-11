@@ -25,9 +25,6 @@
 */
 
 import React from 'react';
-
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import styles from './styles.scss';
 
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -47,7 +44,12 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      const errors = _.isEmpty(nextProps.errors) ? nextProps.errors === true ? [] : false : nextProps.errors;
+      let errors = false;
+      if (_.isEmpty(nextProps.errors)) {
+        errors = nextProps.errors === true ? [] : false;
+      } else {
+        errors = nextProps.errors;
+      }
       this.setState({ errors });
     }
   }
@@ -58,7 +60,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
       // validates basic string validations
       // add custom logic here such as alerts...
       const errors = this.validate(target.value);
-      this.setState({ errors });
+      this.setState({ errors, hasInitialValue: true });
     }
   }
 
@@ -79,9 +81,11 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label>{this.props.name}</label>
+        <label htmlFor={this.props.name}>{this.props.name}</label>
         <input
           type="number"
+          name={this.props.name}
+          id={this.props.name}
           value={inputValue}
           onBlur={handleBlur}
           onChange={this.props.handleChange}
@@ -99,23 +103,23 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
+  customBootstrapClass: React.PropTypes.string,
+  deactivateErrorHighlight: React.PropTypes.bool,
   errors: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.array,
   ]),
-  deactivateErrorHighlight: React.PropTypes.bool,
-  handleBur: React.PropTypes.func,
+  handleBlur: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
-  customBootstrapClass: React.PropTypes.string,
   placeholder: React.PropTypes.string,
+  validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.oneOfType([
     React.PropTypes.number.isRequired,
     React.PropTypes.string.isRequired,
   ]),
-  validations: React.PropTypes.object.isRequired,
 }
 
 export default InputNumber;
