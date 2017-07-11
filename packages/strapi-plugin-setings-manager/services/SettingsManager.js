@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 module.exports = {
   menu: {
     sections: [
@@ -60,7 +63,6 @@ module.exports = {
             value: strapi.config.name,
             validations : {
               maxLength: 255,
-              minLength: 5,
               required: true
             }
           },
@@ -310,5 +312,24 @@ module.exports = {
     }
 
     return errors;
+  },
+
+  updateSettings: (params, items, env = '') => {
+    const appPath = process.cwd();
+
+    _.forEach(items, ({ target }) => {
+      if (_.has(params, target)) {
+        const input = _.get(params, target, null);
+        const [file, ...objPath] = target.split('.');
+
+        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', 'environments', env, `${_.replace(file, '.', '/')}.json`);
+
+        const fileContent = require(filePath);
+
+        _.set(fileContent, objPath, input);
+
+        fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+      }
+    });
   }
 };

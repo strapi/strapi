@@ -15,9 +15,7 @@ module.exports = {
       }
     });
 
-    ctx.send({
-      environments: envs
-    });
+    ctx.send({ environments: envs });
   },
 
   get: async ctx => {
@@ -31,7 +29,6 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
     let params = ctx.request.body;
-    let error = false;
 
     const model = env ? Service[slug](env) : Service[slug];
     const items = Service.getItems(model);
@@ -40,10 +37,12 @@ module.exports = {
 
     let validationErrors = Service.paramsValidation(params, items);
 
-    if (_.isEmpty(validationErrors)) {
-      ctx.send(params);
-    } else {
-      ctx.send(validationErrors);
+    if (!_.isEmpty(validationErrors)) {
+      return ctx.badData(null, validationErrors);
     }
+
+    Service.updateSettings(params, items, env);
+
+    ctx.send();
   },
 };
