@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+import InputToggle from 'components/InputToggle';
 import InputNumber from 'components/InputNumber';
 import selectHome from './selectors';
 import styles from './styles.scss';
@@ -16,13 +17,14 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
+      value: true,
+      value1: null,
     }
   }
 
   handleChange = ({ target }) => {
-    console.log(target.value);
-    this.setState({ value: target.value });
+
+    this.setState({ value1: target.value });
   }
 
   render() {
@@ -34,7 +36,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           "type": "text",
           "value": "ExperienceApp",
           "validations" : {
-            "maxLength": 255,
+            "maxLength": 12,
             "required": true,
             "regex": /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
           }
@@ -55,31 +57,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             <div className="col-md-9">
               <div className="form-group">
 
-                <InputNumber
-                  validations={test.validations}
-                  name={test.name}
-                  value={this.state.value}
-                  handleChange={this.handleChange}
-                  inputDescription="Change..."
-                  handleBlur={this.handleBlur}
 
-                  errors={[]}
-                />
-              <InputNumber
-                  validations={test.validations}
-                  name={test.name}
-                  value={this.state.value}
-                  handleChange={this.handleChange}
-                  overrideBootstrapCol="4"
-                  errors={false}
-                />
-              <InputNumber
-                  validations={test.validations}
-                  name={test.name}
-                  value={this.state.value}
-                  handleChange={this.handleChange}
-                  overrideBootstrapCol="2"
-                />
+
+            <InputNumber
+                handleChange={this.handleChange}
+                value={this.state.value1}
+                name={test.name}
+                validations={test.validations}
+                customBootstrapClass={'col-lg-4 offset-lg-4'}
+                errors={false}
+              />
               </div>
             </div>
           </div>

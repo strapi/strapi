@@ -1,6 +1,26 @@
 /**
 *
 * InputNumber
+* Customization
+*   - deactivateErrorHighlight: bool
+*     allow the user to remove bootstrap class 'has-danger' on the inputText
+*   - customBootstrapClass : string
+*     overrides the default 'col-md-6' on the inputText
+*   - handleBlur: function
+*     overrides the default input validations
+*   - errors : array
+*     custom errors if set to false it deactivate error display
+*
+* Required
+*  - name : string
+*  - handleChange : function
+*  - value : string
+*  - validations : object
+*
+* Optionnal
+* - description : input description
+* - handleFocus : function
+* - placeholder : string if set to "" nothing will display
 *
 */
 
@@ -10,25 +30,19 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import styles from './styles.scss';
 
-/*
-* InputNumber
-* A customizable input
-* Settings :
-* - deactivateErrorHighlight
-* - noBootstrap // remove bootStrapClass
-* - overrideBootstrapGrid
-* - overrideBootstrapCol
-* - handleBur : override default handleBlur function
-*/
-
-
-
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
       errors: false,
+      hasInitialValue: false,
     };
+  }
+
+  componentDidMount() {
+    if (this.props.value && this.props.value.length !== '') {
+      this.setState({ hasInitialValue: true });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -39,8 +53,13 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleBlur = ({ target }) => {
-    const errors = this.validate(target.value);
-    this.setState({ errors });
+    // prevent error display if input is initially empty
+    if (target.value.length > 0 || this.state.hasInitialValue) {
+      // validates basic string validations
+      // add custom logic here such as alerts...
+      const errors = this.validate(target.value);
+      this.setState({ errors });
+    }
   }
 
   validate = (value) => {
@@ -54,28 +73,25 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     // override default onBlur
     const handleBlur = this.props.handleBlur || this.handleBlur;
     // override bootStrapClass
-    const bootStrapClass = !this.props.noBootstrap ?
-      `col-${this.props.overrideBootstrapGrid || 'md'}-${this.props.overrideBootstrapCol || '4'}`
-      : '';
+    const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
     // set error class with override possibility
-    const bootStrapClassDanger = !this.props.noBootstrap && !this.props.deactivateErrorHighlight && this.state.errors ? 'has-danger' : '';
-    // use bootstrap class to display error
-    const formError = !this.props.noBootstrap ? 'form-control-feedback' : '';
+    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && this.state.errors ? 'has-danger' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label></label>
+        <label>{this.props.name}</label>
         <input
           type="number"
-          value={this.state.value}
+          value={inputValue}
           onBlur={handleBlur}
           onChange={this.props.handleChange}
-          className={`${this.props.noBootstrap? '' : 'form-control'} ${this.state.errors? 'form-control-danger' : ''}`}
+          onFocus={this.props.handleFocus}
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={placeholder}
         />
         <small>{this.props.inputDescription}</small>
         {_.map(this.state.errors, (error, key) => (
-          <div key={key} className={formError}>{error}</div>
+          <div key={key} className="form-control-feedback">{error}</div>
         ))}
       </div>
     );
@@ -90,11 +106,10 @@ InputNumber.propTypes = {
   deactivateErrorHighlight: React.PropTypes.bool,
   handleBur: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
+  handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
-  noBootstrap: React.PropTypes.bool,
-  overrideBootstrapGrid: React.PropTypes.string,
-  overrideBootstrapCol: React.PropTypes.string,
+  customBootstrapClass: React.PropTypes.string,
   placeholder: React.PropTypes.string,
   value: React.PropTypes.oneOfType([
     React.PropTypes.number.isRequired,
