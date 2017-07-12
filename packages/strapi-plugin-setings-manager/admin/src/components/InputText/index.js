@@ -24,6 +24,7 @@
 */
 
 import React from 'react';
+import { isEmpty, includes, mapKeys, reject, map } from 'lodash';
 import styles from './styles.scss';
 
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -44,7 +45,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
       let errors = false;
-      if (_.isEmpty(nextProps.errors)) {
+      if (isEmpty(nextProps.errors)) {
         errors = nextProps.errors === true ? [] : false;
       } else {
         errors = nextProps.errors;
@@ -67,7 +68,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   validate = (value) => {
     let errors = [];
     const requiredError = 'Field is required';
-    _.mapKeys(this.props.validations, (validationValue, validationKey) => {
+    mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'maxLength':
           if (value.length > validationValue) {
@@ -94,10 +95,10 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
       }
     });
 
-    if (_.isEmpty(errors)) {
+    if (isEmpty(errors)) {
       errors = false;
-    } else if (_.includes(errors, requiredError)) {
-      errors = _.reject(errors, (error) => error !== requiredError);
+    } else if (includes(errors, requiredError)) {
+      errors = reject(errors, (error) => error !== requiredError);
     }
     return errors;
   }
@@ -126,7 +127,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           placeholder={placeholder}
         />
         <small>{this.props.inputDescription}</small>
-        {_.map(this.state.errors, (error, key) => (
+        {map(this.state.errors, (error, key) => (
           <div key={key} className="form-control-feedback">{error}</div>
         ))}
       </div>

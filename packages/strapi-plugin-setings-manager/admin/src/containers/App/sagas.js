@@ -1,5 +1,4 @@
 import { takeLatest } from 'redux-saga';
-import { LOCATION_CHANGE } from 'react-router-redux';
 import { put, fork } from 'redux-saga/effects';
 
 import { fetchMenuSucceeded } from './actions';

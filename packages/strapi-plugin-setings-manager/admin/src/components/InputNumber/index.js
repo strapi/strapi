@@ -25,6 +25,7 @@
 */
 
 import React from 'react';
+import { isEmpty, map, pick } from 'lodash';
 import styles from './styles.scss';
 
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -45,7 +46,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
       let errors = false;
-      if (_.isEmpty(nextProps.errors)) {
+      if (isEmpty(nextProps.errors)) {
         errors = nextProps.errors === true ? [] : false;
       } else {
         errors = nextProps.errors;
@@ -65,7 +66,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   validate = (value) => {
-    const errors = !_.isEmpty(_.pick(this.props.validations, 'required')) && value.length > 0 ?
+    const errors = !isEmpty(pick(this.props.validations, 'required')) && value.length > 0 ?
       false : ['This field is required'];
     return errors;
   }
@@ -94,7 +95,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           placeholder={placeholder}
         />
         <small>{this.props.inputDescription}</small>
-        {_.map(this.state.errors, (error, key) => (
+        {map(this.state.errors, (error, key) => (
           <div key={key} className="form-control-feedback">{error}</div>
         ))}
       </div>

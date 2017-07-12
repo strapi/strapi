@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-
+import { map } from 'lodash';
 import PluginLeftMenuSection from 'components/PluginLeftMenuSection';
 import styles from './styles.scss';
 
@@ -17,7 +17,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
   render() {
     return (
       <div className={`${styles.pluginLeftMenu} col-md-3`}>
-        {_.map(this.props.sections, (section, index) => (
+        {map(this.props.sections, (section, index) => (
           <PluginLeftMenuSection key={index} section={section} />
         ))}
       </div>
