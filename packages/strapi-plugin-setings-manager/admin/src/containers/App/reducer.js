@@ -16,7 +16,7 @@ const initialState = fromJS({
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case MENU_FETCH_SUCCEEDED:
-      return state.set('menuSections', action.menu.sections);
+      return state.set('sections', List(action.menu.sections));
     default:
       return state;
   }

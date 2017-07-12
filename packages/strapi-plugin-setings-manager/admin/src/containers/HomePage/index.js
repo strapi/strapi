@@ -53,7 +53,7 @@ export class HomePage extends React.Component {
         />
         <div className="row">
           <div className="col-md-12">
-            <p>This is an example of a fake API call.</p>
+            <p>This is an example orrr f a fake API call.</p>
             <p>Loading: {this.props.loading ? 'yes' : 'no'}.</p>
             {dataBlock}
             <Button

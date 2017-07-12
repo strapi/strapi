@@ -12,6 +12,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
   render() {
     return (
       <div className={styles.pluginLeftMenuSection}>
+        {this.props.section.name}
       </div>
     );
   }

@@ -13,7 +13,7 @@ import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
 import { menuFetch } from './actions';
-import selectGlobalDomain from './selectors';
+import { makeSelectSections } from './selectors';
 import styles from './styles.scss';
 
 class App extends React.Component {
@@ -46,10 +46,10 @@ class App extends React.Component {
         <div className={styles.baseline}></div>
         <div className="container-fluid">
           <div className="row">
-            <PluginLeftMenu sections={this.props.app.sections} />
+            <PluginLeftMenu sections={this.props.sections} />
+            {React.Children.toArray(content)}
           </div>
         </div>
-        {React.Children.toArray(content)}
       </div>
     );
   }
@@ -60,7 +60,7 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  children: React.PropTypes.node,
+  children: React.PropTypes.node.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
 };
 
@@ -74,7 +74,7 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  app: selectGlobalDomain(),
+  sections: makeSelectSections(),
 });
 
 // Wrap the component to inject dispatch and state into it

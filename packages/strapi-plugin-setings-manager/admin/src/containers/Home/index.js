@@ -53,21 +53,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         />
         <div className="container-fluid">
           <div className="row">
-            <PluginLeftMenu />
+
             <div className="col-md-9">
               <div className="form-group">
-
-
-
-            <InputToggle
-                handleChange={this.handleChange}
-                isChecked={this.state.value}
-                name={test.name}
-                validations={test.validations}
-                customBootstrapClass={'col-lg-2 offset-lg-4'}
-                errors={[]}
-              />
-
               </div>
             </div>
           </div>

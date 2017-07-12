@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import PluginLeftMenuHeader from 'components/PluginLeftMenuHeader';
+import PluginLeftMenuSection from 'components/PluginLeftMenuSection';
 import styles from './styles.scss';
 
 class PluginLeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -17,20 +17,12 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
   render() {
     return (
       <div className={`${styles.pluginLeftMenu} col-md-3`}>
-        <PluginLeftMenuHeader />
+        {_.map(this.props.sections, (section, index) => (
+          <PluginLeftMenuSection key={index} section={section} />
+        ))}
       </div>
     );
   }
 }
-
-
-
-// function PluginLeftMenu() {
-//   return (
-//     <div className={`${styles.pluginLeftMenu} col-md-3`}>
-//       <PluginLeftMenuHeader />
-//     </div>
-//   );
-// }
 
 export default PluginLeftMenu;

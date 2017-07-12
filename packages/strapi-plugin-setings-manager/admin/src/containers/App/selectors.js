@@ -22,5 +22,10 @@ const selectLocationState = () => {
   };
 };
 
-export { selectLocationState };
+const makeSelectSections = () => createSelector(
+  selectGlobalDomain(),
+  (globalSate) => globalSate.get('sections').toJS(),
+);
+
+export { selectLocationState, makeSelectSections };
 export default selectGlobalDomain;
