@@ -17,11 +17,12 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment');
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment.unknow');
 
     const model = env ? Service[slug](env) : Service[slug];
 
     if (_.isUndefined(model)) return ctx.badData('request.error.config');
+    if (_.isFunction(model)) return ctx.badData('request.error.environment.required');
 
     ctx.send(model);
   },
@@ -31,11 +32,12 @@ module.exports = {
     const { slug, env } = ctx.params;
     let params = ctx.request.body;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment');
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData('request.error.environment.unknow');
 
     const model = env ? Service[slug](env) : Service[slug];
 
-    if (_.isUndefined(config)) return ctx.badData('request.error.config');
+    if (_.isUndefined(model)) return ctx.badData('request.error.config');
+    if (_.isFunction(model)) return ctx.badData('request.error.environment.required');
 
     const items = Service.getItems(model);
 

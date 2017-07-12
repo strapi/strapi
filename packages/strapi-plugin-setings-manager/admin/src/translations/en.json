@@ -1,4 +1,45 @@
 {
   "menu.section.global-settings": "Global settings",
-  "menu.section.environments": "Environments"
+  "menu.item.general": "General",
+  "menu.item.languages": "Languages",
+  "menu.item.advanced": "Advanced",
+
+  "menu.section.environments": "Environments",
+  "menu.item.databases": "Databases",
+  "menu.item.security": "Security",
+  "menu.item.server": "Server",
+
+  "form.general": "General",
+  "form.general.description": "Configure your general settings.",
+
+  "form.general.name": "Name",
+  "form.general.description": "Description",
+  "form.general.version": "Version",
+
+  "form.security": "Security",
+  "form.security.description": "Configure your security settings.",
+
+  "form.security.session": "Session",
+  "form.security.session.key": "Secret key",
+  "form.security.session.maxAge": "Maximum age",
+
+  "form.security.xframe": "Xframe",
+  "form.security.xframe.deny": "DENY",
+  "form.security.xframe.sameorigin": "SAMEORIGIN",
+  "form.security.xframe.allow-from": "ALLOW-FROM",
+
+  "form.security.xssProtection": "xss Protection",
+
+  "form.security.cors": "Cors",
+  "form.security.cors.origin": "Origin",
+
+  "form.server": "Server",
+  "form.server.description": "Configure your server settings.",
+
+  "form.server.host": "Host",
+  "form.server.port": "Port",
+
+  "request.error.config": "Config file doesn't exist.",
+  "request.error.environment.required": "Environment is required.",
+  "request.error.environment.required": "Environment is unknow."
 }

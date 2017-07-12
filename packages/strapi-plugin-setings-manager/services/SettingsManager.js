@@ -20,8 +20,8 @@ module.exports = {
             icon: 'language'
           },
           {
-            slug: 'advenced',
-            name: 'menu.item.advenced',
+            slug: 'advanced',
+            name: 'menu.item.advanced',
             icon: 'cogs'
           }
         ]
@@ -51,7 +51,7 @@ module.exports = {
 
   general: {
     name: 'form.general',
-    description: 'form.general.desc',
+    description: 'form.general.description',
     sections: [
       {
         name: '',
@@ -60,7 +60,7 @@ module.exports = {
             name: 'form.general.name',
             target: 'package.name',
             type: 'string',
-            value: strapi.config.name,
+            value: _.get(strapi.config, 'name', null),
             validations : {
               maxLength: 255,
               required: true
@@ -70,7 +70,7 @@ module.exports = {
             name: 'form.general.description',
             target: 'package.description',
             type: 'string',
-            value: strapi.config.description,
+            value: _.get(strapi.config, 'description', null),
             validations : {
               maxLength: 255,
               required: true
@@ -80,9 +80,9 @@ module.exports = {
             name: 'form.general.version',
             target: 'package.version',
             type: 'string',
-            value: strapi.config.version,
+            value: _.get(strapi.config, 'version', null),
             validations : {
-              maxLength: 255,
+              regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
               required: true
             }
           }
@@ -94,7 +94,7 @@ module.exports = {
   security: env => {
     return {
       name: 'form.security',
-      description: 'form.security.desc',
+      description: 'form.security.description',
       sections: [
         {
           name: 'form.security.session',
@@ -103,13 +103,16 @@ module.exports = {
               name: 'form.security.session.key',
               target: 'security.session.key',
               type: 'string',
-              value: strapi.config.environments[env].security.session.key
+              value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
+              validations: {
+                required: true
+              }
             },
             {
               name: 'form.security.session.maxAge',
               target: 'security.session.maxAge',
               type: 'number',
-              value: strapi.config.environments[env].security.session.maxAge
+              value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null)
             }
           ]
         },
@@ -120,18 +123,18 @@ module.exports = {
               name: 'form.security.xframe',
               target: 'security.xframe',
               type: 'enum',
-              value: strapi.config.environments[env].security.xframe,
+              value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
               items: [
                 {
-                  name: 'server.xframe.deny',
+                  name: 'form.security.xframe.deny',
                   value: 'DENY',
                 },
                 {
-                  name: 'server.xframe.sameorigin',
+                  name: 'form.security.xframe.sameorigin',
                   value: 'SAMEORIGIN',
                 },
                 {
-                  name: 'server.xframe.allow-from',
+                  name: 'form.security.xframe.allow-from',
                   value: 'ALLOW-FROM',
                 },
               ]
@@ -140,7 +143,7 @@ module.exports = {
               name: 'form.security.xssProtection',
               target: 'security.xssProtection',
               type: 'boolean',
-              value: strapi.config.environments[env].security.xssProtection
+              value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null)
             }
           ]
         },
@@ -151,7 +154,7 @@ module.exports = {
               name: 'form.security.cors.origin',
               target: 'security.cors.origin',
               type: 'string',
-              value: strapi.config.environments[env].security.cors.origin,
+              value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null)
             }
           ]
         }
@@ -162,7 +165,7 @@ module.exports = {
   server: env => {
     return {
       name: 'form.server',
-      description: 'form.server.desc',
+      description: 'form.server.description',
       sections: [
         {
           name: '',
@@ -171,55 +174,13 @@ module.exports = {
               name: 'form.server.host',
               target: 'server.host',
               type: 'string',
-              value: strapi.config.environments[env].server.host
+              value: _.get(strapi.config, `environments.${env}.server.host`, null)
             },
             {
               name: 'form.server.port',
               target: 'server.port',
               type: 'number',
-              value: strapi.config.environments[env].server.port
-            }
-          ]
-        },
-        {
-          name: 'form.server.parser',
-          items: [
-            {
-              name: 'form.server.parser.xframe',
-              target: 'server.xframe',
-              type: 'enum',
-              value: strapi.config.environments[env].server.xframe,
-              items: [
-                {
-                  name: 'server.xframe.deny',
-                  value: 'DENY',
-                },
-                {
-                  name: 'server.xframe.sameorigin',
-                  value: 'SAMEORIGIN',
-                },
-                {
-                  name: 'server.xframe.allow-from',
-                  value: 'ALLOW-FROM',
-                },
-              ]
-            },
-            {
-              name: 'form.server.xssProtection',
-              target: 'server.xssProtection',
-              type: 'boolean',
-              value: strapi.config.environments[env].server.xssProtection
-            }
-          ]
-        },
-        {
-          name: 'form.server.cors',
-          items: [
-            {
-              name: 'form.server.cors.origin',
-              target: 'server.cors.origin',
-              type: 'string',
-              value: strapi.config.environments[env].server.cors.origin
+              value: _.get(strapi.config, `environments.${env}.server.port`, null)
             }
           ]
         }
@@ -276,6 +237,11 @@ module.exports = {
         if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
           target: item.target,
           message: 'form.error.validation.required'
+        });
+
+        if (key === 'regex' && !new RegExp(value).test(input)) errors.push({
+          target: item.target,
+          message: 'form.error.validation.regex'
         });
 
         if (key === 'max' && parseInt(input) > value) errors.push({
