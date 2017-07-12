@@ -41,13 +41,12 @@ class App extends React.Component {
         exposedComponents: this.props.exposedComponents,
       })
     );
-    console.log(this.props.app)
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <div className={styles.baseline}></div>
         <div className="container-fluid">
           <div className="row">
-            <PluginLeftMenu />
+            <PluginLeftMenu sections={this.props.app.sections} />
           </div>
         </div>
         {React.Children.toArray(content)}
@@ -61,7 +60,7 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  children: React.PropTypes.node.isRequired,
+  children: React.PropTypes.node,
   exposedComponents: React.PropTypes.object.isRequired,
 };
 

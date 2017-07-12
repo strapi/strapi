@@ -10,7 +10,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  sections: List()
+  sections: List(),
 });
 
 function appReducer(state = initialState, action) {
