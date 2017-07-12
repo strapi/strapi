@@ -20,8 +20,8 @@ module.exports = {
             icon: 'language'
           },
           {
-            slug: 'advenced',
-            name: 'menu.item.advenced',
+            slug: 'advanced',
+            name: 'menu.item.advanced',
             icon: 'cogs'
           }
         ]
@@ -51,7 +51,7 @@ module.exports = {
 
   general: {
     name: 'form.general',
-    description: 'form.general.desc',
+    description: 'form.general.description',
     sections: [
       {
         name: '',
@@ -94,7 +94,7 @@ module.exports = {
   security: env => {
     return {
       name: 'form.security',
-      description: 'form.security.desc',
+      description: 'form.security.description',
       sections: [
         {
           name: 'form.security.session',
@@ -126,15 +126,15 @@ module.exports = {
               value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
               items: [
                 {
-                  name: 'server.xframe.deny',
+                  name: 'form.security.xframe.deny',
                   value: 'DENY',
                 },
                 {
-                  name: 'server.xframe.sameorigin',
+                  name: 'form.security.xframe.sameorigin',
                   value: 'SAMEORIGIN',
                 },
                 {
-                  name: 'server.xframe.allow-from',
+                  name: 'form.security.xframe.allow-from',
                   value: 'ALLOW-FROM',
                 },
               ]
@@ -165,7 +165,7 @@ module.exports = {
   server: env => {
     return {
       name: 'form.server',
-      description: 'form.server.desc',
+      description: 'form.server.description',
       sections: [
         {
           name: '',
@@ -181,48 +181,6 @@ module.exports = {
               target: 'server.port',
               type: 'number',
               value: _.get(strapi.config, `environments.${env}.server.port`, null)
-            }
-          ]
-        },
-        {
-          name: 'form.server.parser',
-          items: [
-            {
-              name: 'form.server.parser.xframe',
-              target: 'server.xframe',
-              type: 'enum',
-              value: _.get(strapi.config, `environments.${env}.server.xframe`, null),
-              items: [
-                {
-                  name: 'server.xframe.deny',
-                  value: 'DENY',
-                },
-                {
-                  name: 'server.xframe.sameorigin',
-                  value: 'SAMEORIGIN',
-                },
-                {
-                  name: 'server.xframe.allow-from',
-                  value: 'ALLOW-FROM',
-                },
-              ]
-            },
-            {
-              name: 'form.server.xssProtection',
-              target: 'server.xssProtection',
-              type: 'boolean',
-              value: _.get(strapi.config, `environments.${env}.server.xssProtection`, null)
-            }
-          ]
-        },
-        {
-          name: 'form.server.cors',
-          items: [
-            {
-              name: 'form.server.cors.origin',
-              target: 'server.cors.origin',
-              type: 'string',
-              value: _.get(strapi.config, `environments.${env}.server.cors.origin`, null)
             }
           ]
         }

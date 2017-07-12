@@ -1,1 +1,41 @@
-{}
+{
+  "menu.section.global-settings": "Configuration général",
+  "menu.item.general": "Général",
+  "menu.item.languages": "Langues",
+  "menu.item.advanced": "Avancé",
+
+  "menu.section.environments": "Environnements",
+  "menu.item.databases": "Base de donnée",
+  "menu.item.security": "Sécurité",
+  "menu.item.server": "Serveur",
+
+  "form.general": "Général",
+  "form.general.description": "Modification des configurations général.",
+
+  "form.general.name": "Nom",
+  "form.general.description": "Description",
+  "form.general.version": "Version",
+
+  "form.security": "Sécurité",
+  "form.security.description": "Modification des configurations de sécurité.",
+
+  "form.security.session": "Session",
+  "form.security.session.key": "Clé secrète",
+  "form.security.session.maxAge": "Durée de vie ",
+
+  "form.security.xframe": "Xframe",
+  "form.security.xframe.deny": "DENY",
+  "form.security.xframe.sameorigin": "SAMEORIGIN",
+  "form.security.xframe.allow-from": "ALLOW-FROM",
+
+  "form.security.xssProtection": "Protection xss",
+
+  "form.security.cors": "Cors",
+  "form.security.cors.origin": "Origin",
+
+  "form.server": "Serveur",
+  "form.server.description": "Modification des configurations du serveur",
+
+  "form.server.host": "Host",
+  "form.server.port": "Port"
+}
