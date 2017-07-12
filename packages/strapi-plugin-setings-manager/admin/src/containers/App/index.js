@@ -9,8 +9,23 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { pluginId } from 'app';
+import PluginLeftMenu from 'components/PluginLeftMenu';
+import styles from './styles.scss';
 
 class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: false,
+      value1: null,
+    }
+  }
+
+  handleChange = ({ target }) => {
+    this.setState({ value: target.value});
+  }
+
   render() {
     // Assign plugin component to children
     const content = React.Children.map(this.props.children, child =>
@@ -18,9 +33,14 @@ class App extends React.Component {
         exposedComponents: this.props.exposedComponents,
       })
     );
-
     return (
-      <div className={pluginId}>
+      <div className={`${pluginId} ${styles.app}`}>
+        <div className={styles.baseline}></div>
+        <div className="container-fluid">
+          <div className="row">
+            <PluginLeftMenu />
+          </div>
+        </div>
         {React.Children.toArray(content)}
       </div>
     );
