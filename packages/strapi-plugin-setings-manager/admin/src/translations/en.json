@@ -37,5 +37,9 @@
   "form.server.description": "Configure your server settings.",
 
   "form.server.host": "Host",
-  "form.server.port": "Port"
+  "form.server.port": "Port",
+
+  "request.error.config": "Config file doesn't exist.",
+  "request.error.environment.required": "Environment is required.",
+  "request.error.environment.required": "Environment is unknow."
 }

@@ -37,5 +37,9 @@
   "form.server.description": "Modification des configurations du serveur",
 
   "form.server.host": "Host",
-  "form.server.port": "Port"
+  "form.server.port": "Port",
+
+  "request.error.config": "Le fichier de configuration n'éxiste pas.",
+  "request.error.environment.required": "L'environnement est obligatoire.",
+  "request.error.environment.required": "L'environnement est inconnu."
 }
