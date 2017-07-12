@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "0.0.0",
-  "description": "This is the description of the plugin.",
+  "version": "0.1.0",
+  "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "settings-manager",
     "icon": "ion-document-text",
@@ -24,20 +24,21 @@
     "test": "echo Tests are not implemented.",
     "prepublish": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.3"
   },
   "author": {
-    "name": "A Strapi developer",
-    "email": "",
-    "url": ""
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer",
-      "email": "",
-      "url": ""
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
     }
   ],
   "engines": {

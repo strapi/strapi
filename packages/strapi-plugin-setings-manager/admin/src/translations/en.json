@@ -1,1 +1,4 @@
-{}
+{
+  "menu.section.global-settings": "Global settings",
+  "menu.section.environments": "Environments"
+}

@@ -2,8 +2,48 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/",
-      "handler": "SettingsManager.index",
+      "path": "/menu",
+      "handler": "SettingsManager.menu",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/environments",
+      "handler": "SettingsManager.environments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:slug",
+      "handler": "SettingsManager.get",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:slug/:env",
+      "handler": "SettingsManager.get",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:slug",
+      "handler": "SettingsManager.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:slug/:env",
+      "handler": "SettingsManager.update",
       "config": {
         "policies": []
       }
