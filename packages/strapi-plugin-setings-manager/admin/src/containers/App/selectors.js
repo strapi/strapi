@@ -1,10 +1,10 @@
-// import { createSelector } from 'reselect';
+import { createSelector } from 'reselect';
 
 /**
  * Direct selector to the list state domain
  */
 
-// const selectGlobalDomain = () => state => state.get('global');
+const selectGlobalDomain = () => state => state.get('global');
 
 const selectLocationState = () => {
   let prevRoutingState;
@@ -23,3 +23,4 @@ const selectLocationState = () => {
 };
 
 export { selectLocationState };
+export default selectGlobalDomain;

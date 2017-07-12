@@ -4,5 +4,5 @@
  *
  */
 
-export const LOAD_DATA = 'SettingsManager/App/LOAD_DATA';
-export const DATA_LOADED = 'SettingsManager/App/DATA_LOADED';
+export const MENU_FETCH = 'SettingsManager/App/MENU_FETCH';
+export const MENU_FETCH_SUCCEEDED = 'SettingsManager/App/MENU_FETCH_SUCCEEDED';
