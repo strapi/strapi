@@ -35,7 +35,7 @@ module.exports = {
 
     const model = env ? Service[slug](env) : Service[slug];
 
-    if (_.isUndefined(config)) return ctx.badData('request.error.config');
+    if (_.isUndefined(model)) return ctx.badData('request.error.config');
 
     const items = Service.getItems(model);
 
