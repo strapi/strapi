@@ -8,24 +8,40 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+import InputToggle from 'components/InputToggle';
 import selectHome from './selectors';
 import styles from './styles.scss';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  // constructor(props) {
-  //   super(props);
-  //   // this.leftMenuItems = [
-  //   //   {
-  //   //     header: 'global settings',
-  //   //     items: [
-  //   //       general, 'languages', 'advanced'],
-  //   //   }
-  //   // ]
-  // }
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: false,
+      value1: null,
+    }
+  }
 
+  handleChange = ({ target }) => {
+    console.log('ok');
+    console.log(target);
+    this.setState({ value: !this.state.value});
+  }
 
   render() {
-    
+
+    const test = {
+          "name": "bame",
+          "slug": "name",
+          "target": "general.name",
+          "type": "text",
+          "value": "ExperienceApp",
+          "validations" : {
+            "maxLength": 12,
+            "required": true,
+            "regex": /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          }
+    };
+
     return (
       <div className={styles.home}>
         <div className={styles.baseline}></div>
@@ -39,7 +55,20 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           <div className="row">
             <PluginLeftMenu />
             <div className="col-md-9">
-              f
+              <div className="form-group">
+
+
+
+            <InputToggle
+                handleChange={this.handleChange}
+                isChecked={this.state.value}
+                name={test.name}
+                validations={test.validations}
+                customBootstrapClass={'col-lg-2 offset-lg-4'}
+                errors={[]}
+              />
+
+              </div>
             </div>
           </div>
         </div>

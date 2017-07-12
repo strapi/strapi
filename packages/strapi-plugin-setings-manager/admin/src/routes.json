@@ -1,6 +1,6 @@
 {
   "/": {
-    "name": "home",
-    "container": "Home"
+    "name": "app",
+    "container": "App"
   }
 }
