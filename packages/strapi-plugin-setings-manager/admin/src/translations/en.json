@@ -9,37 +9,54 @@
   "menu.item.security": "Security",
   "menu.item.server": "Server",
 
-  "form.general": "General",
+  "form.general.name": "General",
   "form.general.description": "Configure your general settings.",
 
-  "form.general.name": "Name",
-  "form.general.description": "Description",
-  "form.general.version": "Version",
+  "form.general.item.name": "Name",
+  "form.general.item.description": "Description",
+  "form.general.item.version": "Version",
 
-  "form.security": "Security",
+  "form.advanced.name": "Advanced",
+  "form.advanced.description": "Configure your advanced settings.",
+
+  "form.advanced.item.admin": "Admin dashboard url",
+  "form.advanced.item.prefix": "Prefix API",
+
+  "form.security.name": "Security",
   "form.security.description": "Configure your security settings.",
 
-  "form.security.session": "Session",
-  "form.security.session.key": "Secret key",
-  "form.security.session.maxAge": "Maximum age",
+  "form.security.item.session": "Session",
+  "form.security.item.session.key": "Secret key",
+  "form.security.item.session.maxAge": "Maximum age",
 
-  "form.security.xframe": "Xframe",
-  "form.security.xframe.deny": "DENY",
-  "form.security.xframe.sameorigin": "SAMEORIGIN",
-  "form.security.xframe.allow-from": "ALLOW-FROM",
+  "form.security.item.xframe": "Xframe",
+  "form.security.item.xframe.deny": "DENY",
+  "form.security.item.xframe.sameorigin": "SAMEORIGIN",
+  "form.security.item.xframe.allow-from": "ALLOW-FROM",
 
-  "form.security.xssProtection": "xss Protection",
+  "form.security.item.xssProtection": "xss Protection",
 
-  "form.security.cors": "Cors",
-  "form.security.cors.origin": "Origin",
+  "form.security.item.cors": "Cors",
+  "form.security.item.cors.origin": "Origin",
 
-  "form.server": "Server",
+  "form.server.name": "Server",
   "form.server.description": "Configure your server settings.",
 
-  "form.server.host": "Host",
-  "form.server.port": "Port",
+  "form.server.item.host": "Host",
+  "form.server.item.port": "Port",
+
+  "request.error.type.string": "A text is required.",
+  "request.error.type.number": "A number is required.",
+  "request.error.type.boolean": "A boolean is required.",
+
+  "request.error.validation.required": "This value input is required.",
+  "request.error.validation.regex": "The value not match the regex.",
+  "request.error.validation.max": "The value is too high.",
+  "request.error.validation.min": "The value is too low.",
+  "request.error.validation.maxLength": "The value is too long.",
+  "request.error.validation.minLength": "The value is too shot.",
 
   "request.error.config": "Config file doesn't exist.",
   "request.error.environment.required": "Environment is required.",
-  "request.error.environment.required": "Environment is unknow."
+  "request.error.environment.unknow": "Environment is unknow."
 }

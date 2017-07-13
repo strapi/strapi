@@ -9,37 +9,54 @@
   "menu.item.security": "Sécurité",
   "menu.item.server": "Serveur",
 
-  "form.general": "Général",
+  "form.general.name": "Général",
   "form.general.description": "Modification des configurations général.",
 
-  "form.general.name": "Nom",
-  "form.general.description": "Description",
-  "form.general.version": "Version",
+  "form.general.item.name": "Nom",
+  "form.general.item.description": "Description",
+  "form.general.item.version": "Version",
 
-  "form.security": "Sécurité",
+  "form.advanced.name": "Anvancé",
+  "form.advanced.description": "Modification des configurations avancé.",
+
+  "form.advanced.item.admin": "Url du panel d'administration",
+  "form.advanced.item.prefix": "Prefix de l'API",
+
+  "form.security.name": "Sécurité",
   "form.security.description": "Modification des configurations de sécurité.",
 
-  "form.security.session": "Session",
-  "form.security.session.key": "Clé secrète",
-  "form.security.session.maxAge": "Durée de vie ",
+  "form.security.item.session": "Session",
+  "form.security.item.session.key": "Clé secrète",
+  "form.security.item.session.maxAge": "Durée de vie ",
 
-  "form.security.xframe": "Xframe",
-  "form.security.xframe.deny": "DENY",
-  "form.security.xframe.sameorigin": "SAMEORIGIN",
-  "form.security.xframe.allow-from": "ALLOW-FROM",
+  "form.security.item.xframe": "Xframe",
+  "form.security.item.xframe.deny": "DENY",
+  "form.security.item.xframe.sameorigin": "SAMEORIGIN",
+  "form.security.item.xframe.allow-from": "ALLOW-FROM",
 
-  "form.security.xssProtection": "Protection xss",
+  "form.security.item.xssProtection": "Protection xss",
 
-  "form.security.cors": "Cors",
-  "form.security.cors.origin": "Origin",
+  "form.security.item.cors": "Cors",
+  "form.security.item.cors.origin": "Origin",
 
-  "form.server": "Serveur",
-  "form.server.description": "Modification des configurations du serveur",
+  "form.server.name": "Serveur",
+  "form.server.description": "Modification des configurations serveur",
 
-  "form.server.host": "Host",
-  "form.server.port": "Port",
+  "form.server.item.host": "Host",
+  "form.server.item.port": "Port",
+
+  "request.error.type.string": "Un texte est demandé.",
+  "request.error.type.number": "Un nombre est demandé.",
+  "request.error.type.boolean": "Un boolean est demandé.",
+
+  "request.error.validation.required": "Ce champ est obligatoire.",
+  "request.error.validation.regex": "La valeur ne correspond pas au format attendu.",
+  "request.error.validation.max": "La valeur est trop grande.",
+  "request.error.validation.min": "La valeur est trop basse.",
+  "request.error.validation.maxLength": "La valeur est trop longue.",
+  "request.error.validation.minLength": "La valeur est trop courte.",
 
   "request.error.config": "Le fichier de configuration n'éxiste pas.",
   "request.error.environment.required": "L'environnement est obligatoire.",
-  "request.error.environment.required": "L'environnement est inconnu."
+  "request.error.environment.unknow": "L'environnement est inconnu."
 }
