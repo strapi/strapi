@@ -17,7 +17,6 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
       <PluginLeftMenuLink
         key={index}
         link={item}
-
       />
     ));
 
