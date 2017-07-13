@@ -50,14 +50,14 @@ module.exports = {
   },
 
   general: {
-    name: 'form.general',
+    name: 'form.general.name',
     description: 'form.general.description',
     sections: [
       {
         name: '',
         items: [
           {
-            name: 'form.general.name',
+            name: 'form.general.item.name',
             target: 'package.name',
             type: 'string',
             value: _.get(strapi.config, 'name', null),
@@ -67,7 +67,7 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.description',
+            name: 'form.general.item.description',
             target: 'package.description',
             type: 'string',
             value: _.get(strapi.config, 'description', null),
@@ -77,7 +77,7 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.version',
+            name: 'form.general.item.version',
             target: 'package.version',
             type: 'string',
             value: _.get(strapi.config, 'version', null),
@@ -91,16 +91,47 @@ module.exports = {
     ]
   },
 
+  advanced: {
+    name: 'form.advanced.name',
+    description: 'form.advanced.description',
+    sections: [
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.advanced.item.admin',
+            target: 'general.admin',
+            type: 'string',
+            value: _.get(strapi.config, 'general.admin', null),
+            validations : {
+              maxLength: 255,
+              required: true
+            }
+          },
+          {
+            name: 'form.advanced.item.prefix',
+            target: 'general.prefix',
+            type: 'string',
+            value: _.get(strapi.config, 'general.prefix', null),
+            validations : {
+              maxLength: 255
+            }
+          }
+        ]
+      }
+    ]
+  },
+
   security: env => {
     return {
-      name: 'form.security',
+      name: 'form.security.name',
       description: 'form.security.description',
       sections: [
         {
-          name: 'form.security.session',
+          name: 'form.security.item.session',
           items: [
             {
-              name: 'form.security.session.key',
+              name: 'form.security.item.session.key',
               target: 'security.session.key',
               type: 'string',
               value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
@@ -109,7 +140,7 @@ module.exports = {
               }
             },
             {
-              name: 'form.security.session.maxAge',
+              name: 'form.security.item.session.maxAge',
               target: 'security.session.maxAge',
               type: 'number',
               value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null)
@@ -120,27 +151,27 @@ module.exports = {
           name: '',
           items: [
             {
-              name: 'form.security.xframe',
+              name: 'form.security.item.xframe',
               target: 'security.xframe',
               type: 'enum',
               value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
               items: [
                 {
-                  name: 'form.security.xframe.deny',
+                  name: 'form.security.item.xframe.deny',
                   value: 'DENY',
                 },
                 {
-                  name: 'form.security.xframe.sameorigin',
+                  name: 'form.security.item.xframe.sameorigin',
                   value: 'SAMEORIGIN',
                 },
                 {
-                  name: 'form.security.xframe.allow-from',
+                  name: 'form.security.item.xframe.allow-from',
                   value: 'ALLOW-FROM',
                 },
               ]
             },
             {
-              name: 'form.security.xssProtection',
+              name: 'form.security.item.xssProtection',
               target: 'security.xssProtection',
               type: 'boolean',
               value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null)
@@ -148,10 +179,10 @@ module.exports = {
           ]
         },
         {
-          name: 'form.security.cors',
+          name: 'form.security.item.cors',
           items: [
             {
-              name: 'form.security.cors.origin',
+              name: 'form.security.item.cors.origin',
               target: 'security.cors.origin',
               type: 'string',
               value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null)
@@ -164,20 +195,20 @@ module.exports = {
 
   server: env => {
     return {
-      name: 'form.server',
+      name: 'form.server.name',
       description: 'form.server.description',
       sections: [
         {
           name: '',
           items: [
             {
-              name: 'form.server.host',
+              name: 'form.server.item.host',
               target: 'server.host',
               type: 'string',
               value: _.get(strapi.config, `environments.${env}.server.host`, null)
             },
             {
-              name: 'form.server.port',
+              name: 'form.server.item.port',
               target: 'server.port',
               type: 'number',
               value: _.get(strapi.config, `environments.${env}.server.port`, null)
@@ -218,17 +249,17 @@ module.exports = {
     const checkType = (input, { type, target }) => {
       if ((type === 'string' || type === 'text') && !_.isString(input)) errors.push({
         target: target,
-        message: 'form.error.type.string'
+        message: 'request.error.type.string'
       });
 
       if (type === 'number' && !_.isNumber(input)) errors.push({
         target: target,
-        message: 'form.error.type.number'
+        message: 'request.error.type.number'
       });
 
       if (type === 'boolean' && !_.isBoolean(input)) errors.push({
         target: target,
-        message: 'form.error.type.boolean'
+        message: 'request.error.type.boolean'
       });
     };
 
@@ -236,32 +267,32 @@ module.exports = {
       _.forEach(item.validations, (value, key) => {
         if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
           target: item.target,
-          message: 'form.error.validation.required'
+          message: 'request.error.validation.required'
         });
 
         if (key === 'regex' && !new RegExp(value).test(input)) errors.push({
           target: item.target,
-          message: 'form.error.validation.regex'
+          message: 'request.error.validation.regex'
         });
 
         if (key === 'max' && parseInt(input) > value) errors.push({
           target: item.target,
-          message: 'form.error.validation.max'
+          message: 'request.error.validation.max'
         });
 
         if (key === 'min' && parseInt(input) < value) errors.push({
           target: item.target,
-          message: 'form.error.validation.min'
+          message: 'request.error.validation.min'
         });
 
         if (key === 'maxLength' && input.length > value) errors.push({
           target: item.target,
-          message: 'form.error.validation.maxLength'
+          message: 'request.error.validation.maxLength'
         });
 
         if (key === 'minLength' && input.length  < value) errors.push({
           target: item.target,
-          message: 'form.error.validation.minLength'
+          message: 'request.error.validation.minLength'
         });
       });
     };
@@ -297,7 +328,7 @@ module.exports = {
         const input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
 
-        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', 'environments', env, `${_.replace(file, '.', '/')}.json`);
+        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 
         const fileContent = require(filePath);
 
