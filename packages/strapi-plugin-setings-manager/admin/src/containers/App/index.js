@@ -16,6 +16,13 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 import { menuFetch } from './actions';
 import { makeSelectSections } from './selectors';
 import styles from './styles.scss';
+import messages from '../../translations/en.json';
+import { define } from 'i18n';
+define(_.map(messages, (message, id) => ({
+    id,
+    defaultMessage: message,
+  }
+)));
 
 class App extends React.Component {
   componentDidMount() {

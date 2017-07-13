@@ -6,8 +6,10 @@
 
 import React from 'react';
 import { map } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
 import styles from './styles.scss';
+
 
 class PluginLeftMenuSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -21,7 +23,9 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 
     return (
       <div className={styles.pluginLeftMenuSection}>
-        <p>{this.props.section.name}</p>
+        <p>
+          <FormattedMessage {...{id: this.props.section.name}} />
+        </p>
         <ul>
           {links}
         </ul>

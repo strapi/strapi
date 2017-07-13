@@ -37,7 +37,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   componentDidMount() {
-    if (this.props.value && this.props.value.length > 0) {
+    if (this.props.value && !isEmpty(this.props.value)) {
       this.setState({ hasInitialValue: true });
     }
   }

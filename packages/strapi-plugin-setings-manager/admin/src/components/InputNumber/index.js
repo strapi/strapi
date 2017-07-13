@@ -38,7 +38,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   componentDidMount() {
-    if (this.props.value && this.props.value.length !== '') {
+    if (this.props.value && this.props.value !== '') {
       this.setState({ hasInitialValue: true });
     }
   }
@@ -66,7 +66,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   validate = (value) => {
-    const errors = !isEmpty(pick(this.props.validations, 'required')) && value.length > 0 ?
+    const errors = !isEmpty(pick(this.props.validations, 'required')) && !isEmpty(value) ?
       false : ['This field is required'];
     return errors;
   }

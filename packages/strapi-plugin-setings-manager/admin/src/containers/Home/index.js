@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import selectHome from './selectors';
+import InputNumber from 'components/InputNumber'
 import styles from './styles.scss';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
