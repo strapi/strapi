@@ -43,6 +43,7 @@ class App extends React.Component {
         exposedComponents: this.props.exposedComponents,
       })
     );
+    console.log(this.props.sections)
     return (
       <div className={`${pluginId} ${styles.app}`}>
         {/*

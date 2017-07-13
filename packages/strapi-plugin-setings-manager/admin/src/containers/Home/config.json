@@ -1,0 +1,3 @@
+{
+  "environmentsRequired": [ "databases", "security", "server"]
+}
