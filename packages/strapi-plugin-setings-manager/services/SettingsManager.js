@@ -91,6 +91,37 @@ module.exports = {
     ]
   },
 
+  advanced: {
+    name: 'form.advanced',
+    description: 'form.advanced.description',
+    sections: [
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.advanced.admin',
+            target: 'general.admin',
+            type: 'string',
+            value: _.get(strapi.config, 'general.admin', null),
+            validations : {
+              maxLength: 255,
+              required: true
+            }
+          },
+          {
+            name: 'form.advanced.prefix',
+            target: 'general.prefix',
+            type: 'string',
+            value: _.get(strapi.config, 'general.prefix', null),
+            validations : {
+              maxLength: 255
+            }
+          }
+        ]
+      }
+    ]
+  },
+
   security: env => {
     return {
       name: 'form.security',
@@ -297,7 +328,7 @@ module.exports = {
         const input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
 
-        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', 'environments', env, `${_.replace(file, '.', '/')}.json`);
+        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 
         const fileContent = require(filePath);
 
