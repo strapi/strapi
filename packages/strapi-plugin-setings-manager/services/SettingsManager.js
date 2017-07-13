@@ -122,102 +122,98 @@ module.exports = {
     ]
   },
 
-  security: env => {
-    return {
-      name: 'form.security.name',
-      description: 'form.security.description',
-      sections: [
-        {
-          name: 'form.security.item.session',
-          items: [
-            {
-              name: 'form.security.item.session.key',
-              target: 'security.session.key',
-              type: 'string',
-              value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
-              validations: {
-                required: true
-              }
-            },
-            {
-              name: 'form.security.item.session.maxAge',
-              target: 'security.session.maxAge',
-              type: 'number',
-              value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null)
+  security: env => ({
+    name: 'form.security.name',
+    description: 'form.security.description',
+    sections: [
+      {
+        name: 'form.security.item.session',
+        items: [
+          {
+            name: 'form.security.item.session.key',
+            target: 'security.session.key',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
+            validations: {
+              required: true
             }
-          ]
-        },
-        {
-          name: '',
-          items: [
-            {
-              name: 'form.security.item.xframe',
-              target: 'security.xframe',
-              type: 'enum',
-              value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
-              items: [
-                {
-                  name: 'form.security.item.xframe.deny',
-                  value: 'DENY',
-                },
-                {
-                  name: 'form.security.item.xframe.sameorigin',
-                  value: 'SAMEORIGIN',
-                },
-                {
-                  name: 'form.security.item.xframe.allow-from',
-                  value: 'ALLOW-FROM',
-                },
-              ]
-            },
-            {
-              name: 'form.security.item.xssProtection',
-              target: 'security.xssProtection',
-              type: 'boolean',
-              value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null)
-            }
-          ]
-        },
-        {
-          name: 'form.security.item.cors',
-          items: [
-            {
-              name: 'form.security.item.cors.origin',
-              target: 'security.cors.origin',
-              type: 'string',
-              value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null)
-            }
-          ]
-        }
-      ]
-    };
-  },
+          },
+          {
+            name: 'form.security.item.session.maxAge',
+            target: 'security.session.maxAge',
+            type: 'number',
+            value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null)
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.security.item.xframe',
+            target: 'security.xframe',
+            type: 'enum',
+            value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
+            items: [
+              {
+                name: 'form.security.item.xframe.deny',
+                value: 'DENY',
+              },
+              {
+                name: 'form.security.item.xframe.sameorigin',
+                value: 'SAMEORIGIN',
+              },
+              {
+                name: 'form.security.item.xframe.allow-from',
+                value: 'ALLOW-FROM',
+              },
+            ]
+          },
+          {
+            name: 'form.security.item.xssProtection',
+            target: 'security.xssProtection',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null)
+          }
+        ]
+      },
+      {
+        name: 'form.security.item.cors',
+        items: [
+          {
+            name: 'form.security.item.cors.origin',
+            target: 'security.cors.origin',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null)
+          }
+        ]
+      }
+    ]
+  }),
 
-  server: env => {
-    return {
-      name: 'form.server.name',
-      description: 'form.server.description',
-      sections: [
-        {
-          name: '',
-          items: [
-            {
-              name: 'form.server.item.host',
-              target: 'server.host',
-              type: 'string',
-              value: _.get(strapi.config, `environments.${env}.server.host`, null)
-            },
-            {
-              name: 'form.server.item.port',
-              target: 'server.port',
-              type: 'number',
-              value: _.get(strapi.config, `environments.${env}.server.port`, null)
-            }
-          ]
-        }
-      ]
-    };
-  },
+  server: env => ({
+    name: 'form.server.name',
+    description: 'form.server.description',
+    sections: [
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.server.item.host',
+            target: 'server.host',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.server.host`, null)
+          },
+          {
+            name: 'form.server.item.port',
+            target: 'server.port',
+            type: 'number',
+            value: _.get(strapi.config, `environments.${env}.server.port`, null)
+          }
+        ]
+      }
+    ]
+  }),
 
   getEnvironments: () => {
     return _.map(_.keys(strapi.config.environments), environment => {
@@ -228,12 +224,7 @@ module.exports = {
     });
   },
 
-  getItems: model => {
-    let items = [];
-    _.forEach(model.sections, section => items = _.concat(items, section.items));
-
-    return items;
-  },
+  getItems: model => _.flatten(_.map(model.sections, section => section.items)),
 
   cleanParams: (params, items) => {
     const cleanParams = {};
@@ -242,6 +233,18 @@ module.exports = {
 
     return cleanParams;
   },
+
+  formatErrors: errors => _.map(_.groupBy(errors, 'target'), (errs, target) => {
+    return {
+      target,
+      messages: _.map(errs, err => {
+        return {
+          id: err.message,
+          params: _.get(err, 'params', undefined)
+        }
+      })
+    }
+  }),
 
   paramsValidation: (params, items) => {
     let errors = [];
@@ -306,36 +309,38 @@ module.exports = {
       }
     });
 
-    if (!_.isEmpty(errors)) {
-      const grpTarget = _.groupBy(errors, 'target');
-
-      errors = _.map(grpTarget, (errs, target) => {
-        return {
-          target,
-          messages: _.map(errs, err => err.message)
-        }
-      });
-    }
-
     return errors;
   },
 
   updateSettings: (params, items, env = '') => {
-    const appPath = process.cwd();
+    const appPath = strapi.config.appPath;
+    const errors = [];
 
     _.forEach(items, ({ target }) => {
       if (_.has(params, target)) {
         const input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
 
-        let filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
+        const filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 
-        const fileContent = require(filePath);
+        try {
+          const fileContent = require('coucou');
 
-        _.set(fileContent, objPath, input);
+          _.set(fileContent, objPath, input);
 
-        fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+        } catch (e) {
+          errors.push({
+            target,
+            message: 'coucou',
+            params: {
+              filePath: filePath
+            }
+          });
+        }
       }
     });
+
+    return errors;
   }
 };

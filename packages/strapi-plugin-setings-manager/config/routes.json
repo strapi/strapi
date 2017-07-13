@@ -18,15 +18,7 @@
     },
     {
       "method": "GET",
-      "path": "/configs/:slug",
-      "handler": "SettingsManager.get",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/configs/:slug/:env",
+      "path": "/configurations/:slug/:env?",
       "handler": "SettingsManager.get",
       "config": {
         "policies": []
@@ -34,15 +26,7 @@
     },
     {
       "method": "PUT",
-      "path": "/configs/:slug",
-      "handler": "SettingsManager.update",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "PUT",
-      "path": "/configs/:slug/:env",
+      "path": "/configurations/:slug/:env?",
       "handler": "SettingsManager.update",
       "config": {
         "policies": []
