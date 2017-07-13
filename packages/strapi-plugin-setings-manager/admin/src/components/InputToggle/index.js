@@ -41,7 +41,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
       value: isChecked,
     };
     this.setState({ isChecked });
-    this.props.handleChange({target});
+    this.props.handleChange({ target });
   }
 
   render() {

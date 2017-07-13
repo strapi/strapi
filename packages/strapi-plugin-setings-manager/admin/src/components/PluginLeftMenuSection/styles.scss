@@ -1,3 +1,9 @@
 .pluginLeftMenuSection { /* stylelint-disable */
-
+  > p {
+    padding-left: 2.4rem;
+  }
+  > ul {
+    list-style: none;
+    padding: 0;
+  }
 }
