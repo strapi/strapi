@@ -9,7 +9,8 @@
 *   - handleBlur: function
 *     overrides the default input validations
 *   - errors : array
-*     custom errors if set to false it deactivate error display
+*   - noErrorsDescription : bool
+*     prevent from siplaying errors messages
 *
 * Required
 *  - name : string
@@ -24,33 +25,28 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, mapKeys, reject, map } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
-      errors: false,
+      errors: [],
       hasInitialValue: false,
     };
   }
 
   componentDidMount() {
-    if (this.props.value && this.props.value.length > 0) {
+    if (this.props.value && !isEmpty(this.props.value)) {
       this.setState({ hasInitialValue: true });
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      let errors = false;
-      if (isEmpty(nextProps.errors)) {
-        errors = nextProps.errors === true ? [] : false;
-      } else {
-        errors = nextProps.errors;
-      }
-      this.setState({ errors });
+      this.setState({ errors: nextProps.errors });
     }
   }
 
@@ -67,40 +63,53 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   // Basic string validations
   validate = (value) => {
     let errors = [];
-    const requiredError = 'Field is required';
+    // handle i18n
+    const requiredError = { id: 'request.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push('Field is too long');
+            errors.push({ id: 'request.error.validation.maxLength' });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push('Field is too short');
+            errors.push({ id: 'request.error.validation.minLength' });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push(requiredError);
+            errors.push({ id: 'request.error.validation.required' });
           }
           break;
         case 'regex':
           if (!validationValue.test(value)) {
-            errors.push('Field is not valid');
+            errors.push({ id: 'request.error.validation.regex' });
           }
           break;
         default:
-          errors = false;
+          errors = [];
       }
     });
 
-    if (isEmpty(errors)) {
-      errors = false;
-    } else if (includes(errors, requiredError)) {
+    if (includes(errors, requiredError)) {
       errors = reject(errors, (error) => error !== requiredError);
     }
     return errors;
+  }
+
+  renderErrors = () => { // eslint-disable-line consistent-return
+    if (!this.props.noErrorsDescription) {
+      return (
+        map(this.state.errors, (error, key) => {
+          const displayError = isObject(error) && error.id ?
+            <FormattedMessage {...error} /> : error;
+          return (
+            <div key={key} className="form-control-feedback">{displayError}</div>
+          );
+        })
+      );
+    }
   }
 
   render() {
@@ -110,7 +119,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     // override bootStrapClass
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
-    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && this.state.errors ? 'has-danger' : '';
+    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
@@ -127,9 +136,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           placeholder={placeholder}
         />
         <small>{this.props.inputDescription}</small>
-        {map(this.state.errors, (error, key) => (
-          <div key={key} className="form-control-feedback">{error}</div>
-        ))}
+        {this.renderErrors()}
       </div>
     );
   }
@@ -138,15 +145,13 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 InputText.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.array,
-  ]),
+  errors: React.PropTypes.array,
   handleBlur: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
+  noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string.isRequired,
