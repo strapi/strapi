@@ -9,7 +9,8 @@
 *   - handleBlur: function
 *     overrides the default input validations
 *   - errors : array
-*     custom errors if set to false it deactivate error display
+*   - noErrorsDescription : bool
+*     prevent from siplaying errors messages
 *
 * Required
 *  - name : string
@@ -31,7 +32,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   constructor(props) {
     super(props);
     this.state = {
-      errors: false,
+      errors: [],
       hasInitialValue: false,
     };
   }
@@ -91,16 +92,24 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           }
           break;
         default:
-          errors = false;
+          errors = [];
       }
     });
 
-    if (isEmpty(errors)) {
-      errors = false;
-    } else if (includes(errors, requiredError)) {
+    if (includes(errors, requiredError)) {
       errors = reject(errors, (error) => error !== requiredError);
     }
     return errors;
+  }
+
+  renderErrors = () => {
+    if (!this.props.noErrorsDescription) {
+      return (
+        map(this.state.errors, (error, key) => (
+          <div key={key} className="form-control-feedback">{error}</div>
+        ))
+      );
+    }
   }
 
   render() {
@@ -110,7 +119,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     // override bootStrapClass
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
-    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && this.state.errors ? 'has-danger' : '';
+    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
@@ -127,9 +136,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           placeholder={placeholder}
         />
         <small>{this.props.inputDescription}</small>
-        {map(this.state.errors, (error, key) => (
-          <div key={key} className="form-control-feedback">{error}</div>
-        ))}
+        {this.renderErrors()}
       </div>
     );
   }
@@ -138,15 +145,13 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 InputText.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.array,
-  ]),
+  errors: React.PropTypes.array,
   handleBlur: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
+  noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string.isRequired,
