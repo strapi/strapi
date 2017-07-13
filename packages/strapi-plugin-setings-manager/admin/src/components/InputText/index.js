@@ -25,7 +25,8 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, mapKeys, reject, map } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -45,13 +46,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      let errors = false;
-      if (isEmpty(nextProps.errors)) {
-        errors = nextProps.errors === true ? [] : false;
-      } else {
-        errors = nextProps.errors;
-      }
-      this.setState({ errors });
+      this.setState({ errors: nextProps.errors });
     }
   }
 
@@ -68,27 +63,28 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   // Basic string validations
   validate = (value) => {
     let errors = [];
-    const requiredError = 'Field is required';
+    // handle i18n
+    const requiredError = { id: 'request.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push('Field is too long');
+            errors.push({ id: 'request.error.validation.maxLength' });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push('Field is too short');
+            errors.push({ id: 'request.error.validation.minLength' });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push(requiredError);
+            errors.push({ id: 'request.error.validation.required' });
           }
           break;
         case 'regex':
           if (!validationValue.test(value)) {
-            errors.push('Field is not valid');
+            errors.push({ id: 'request.error.validation.regex' });
           }
           break;
         default:
@@ -102,12 +98,16 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     return errors;
   }
 
-  renderErrors = () => {
+  renderErrors = () => { // eslint-disable-line consistent-return
     if (!this.props.noErrorsDescription) {
       return (
-        map(this.state.errors, (error, key) => (
-          <div key={key} className="form-control-feedback">{error}</div>
-        ))
+        map(this.state.errors, (error, key) => {
+          const displayError = isObject(error) && error.id ?
+            <FormattedMessage {...error} /> : error;
+          return (
+            <div key={key} className="form-control-feedback">{displayError}</div>
+          );
+        })
       );
     }
   }
