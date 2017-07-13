@@ -52,7 +52,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 
   handleBlur = ({ target }) => {
     // prevent error display if input is initially empty
-    if (target.value.length > 0 || this.state.hasInitialValue) {
+    if (!isempty(target.value) || this.state.hasInitialValue) {
       // validates basic string validations
       // add custom logic here such as alerts...
       const errors = this.validate(target.value);

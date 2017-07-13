@@ -52,7 +52,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
   handleBlur = ({ target }) => {
     // prevent error display if input is initially empty
-    if (target.value.length > 0 || this.state.hasInitialValue) {
+    if (!isEmpty(target.value) || this.state.hasInitialValue) {
       // validates basic string validations
       // add custom logic here such as alerts...
       const errors = this.validate(target.value);
