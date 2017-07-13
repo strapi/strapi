@@ -5,17 +5,33 @@
 */
 
 import React from 'react';
-
+import { map } from 'lodash';
+import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
 import styles from './styles.scss';
 
 class PluginLeftMenuSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const links = map(this.props.section.items, (item, index) => (
+      <PluginLeftMenuLink
+        key={index}
+        link={item}
+
+      />
+    ));
+
     return (
       <div className={styles.pluginLeftMenuSection}>
-        {this.props.section.name}
+        <p>{this.props.section.name}</p>
+        <ul>
+          {links}
+        </ul>
       </div>
     );
   }
 }
+
+PluginLeftMenuSection.propTypes = {
+  section: React.PropTypes.object.isRequired,
+};
 
 export default PluginLeftMenuSection;

@@ -10,13 +10,13 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  sections: List(),
+  sections: List(), // eslint-disable-line new-cap
 });
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case MENU_FETCH_SUCCEEDED:
-      return state.set('sections', List(action.menu.sections));
+      return state.set('sections', List(action.menu.sections)); // eslint-disable-line new-cap
     default:
       return state;
   }

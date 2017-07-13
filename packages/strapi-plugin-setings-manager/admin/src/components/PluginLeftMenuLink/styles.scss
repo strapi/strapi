@@ -1,0 +1,29 @@
+
+.pluginLeftMenuLink { /* stylelint-disable */
+
+}
+
+.link {
+  padding-top: 0.5rem;
+  padding-bottom: 0.2rem;
+  min-height: 4rem;
+  border-left: 0.4rem solid transparent;
+  cursor: pointer;
+  color: #7E8AAA;
+  padding-left: 2.4rem;
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    background: #151C2E;
+    border-left: 0.4rem solid #1C5DE7;
+  }
+
+  &:hover {
+    color: #7E8AAA;
+    text-decoration: none;
+  }
+}
+.linkActive {
+  border-left: 0.4rem solid #1C5DE7;
+}
