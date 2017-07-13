@@ -16,7 +16,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "commander": "^2.9.0",
+    "commander": "^2.11.0",
     "include-all": "^2.0.0",
     "joi-json": "^2.0.1",
     "knex": "^0.12.9",

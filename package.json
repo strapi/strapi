@@ -48,5 +48,7 @@
     "npm": ">= 3.0.0"
   },
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "strapi-utils": "file:packages/strapi-utils"
+  }
 }
