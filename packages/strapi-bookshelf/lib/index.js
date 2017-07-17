@@ -202,7 +202,9 @@ module.exports = function(strapi) {
                     updating: 'beforeUpdate',
                     updated: 'afterUpdate',
                     fetching: 'beforeFetch',
+                    'fetching:collection': 'beforeFetchCollection',
                     fetched: 'afterFetch',
+                    'fetched:collection': 'afterFetchCollection',
                     saving: 'beforeSave',
                     saved: 'afterSave'
                   };
