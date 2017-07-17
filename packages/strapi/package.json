@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4",
   "description": "Build powerful back-end with no effort",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -63,14 +63,14 @@
     "node-schedule": "^1.2.3",
     "semver": "^5.3.0",
     "socket.io": "^1.7.4",
-    "strapi-generate": "^3.0.0-alpha.3",
-    "strapi-generate-admin": "^3.0.0-alpha.3",
-    "strapi-generate-api": "^3.0.0-alpha.3",
-    "strapi-generate-new": "^3.0.0-alpha.3",
-    "strapi-generate-policy": "^3.0.0-alpha.3",
-    "strapi-generate-service": "^3.0.0-alpha.3",
-    "strapi-mongoose": "^3.0.0-alpha.3",
-    "strapi-utils": "^3.0.0-alpha.3"
+    "strapi-generate": "^3.0.0-alpha.4",
+    "strapi-generate-admin": "^3.0.0-alpha.4",
+    "strapi-generate-api": "^3.0.0-alpha.4",
+    "strapi-generate-new": "^3.0.0-alpha.4",
+    "strapi-generate-policy": "^3.0.0-alpha.4",
+    "strapi-generate-service": "^3.0.0-alpha.4",
+    "strapi-mongoose": "^3.0.0-alpha.4",
+    "strapi-utils": "^3.0.0-alpha.4"
   },
   "author": {
     "email": "hi@strapi.io",
