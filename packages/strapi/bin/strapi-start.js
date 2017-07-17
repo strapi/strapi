@@ -13,6 +13,7 @@ const path = require('path');
 // Public dependencies
 const _ = require('lodash');
 const forever = require('forever-monitor');
+const semver = require('semver')
 
 // Local Strapi dependencies.
 const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
@@ -92,11 +93,14 @@ module.exports = function() {
       return child.start();
     }
 
-    // Run app as a child_process
-    // when harmony flag is not detected.
+    // Run app as a child_process when harmony flag is not detected.
     if (!~process.execArgv.indexOf('--harmony')) {
       const opts = Object.create(process.env);
-      opts.execArgv = ['--harmony-async-await'];
+
+      // Apply harmony flag only when we are able to.
+      if (semver.lt(process.version, '8.0.0') && semver.gt(process.version, '7.0.0')) {
+        opts.execArgv = ['--harmony-async-await'];
+      }
 
       return cp.fork(path.resolve(process.cwd(), 'server.js'), opts);
     }
