@@ -16,6 +16,7 @@ import {
 const initialState = fromJS({
   loading: false,
   configsDisplay: OrderedMap(),
+  initialData: Map(),
   modifiedData: Map(),
   environments: List(),
 });
@@ -27,7 +28,9 @@ function homeReducer(state = initialState, action) {
     case CONFIG_FETCH_SUCCEEDED:
       return state
         .set('loading', false)
-        .set('configsDisplay', OrderedMap(action.configs));
+        .set('configsDisplay', OrderedMap(action.configs))
+        .set('initialData', Map(action.data))
+        .set('modifiedData', Map(action.data));
     case ENVIRONMENTS_FETCH:
       return state.set('loading', true);
     case ENVIRONMENTS_FETCH_SUCCEEDED:

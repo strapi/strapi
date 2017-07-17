@@ -3,6 +3,7 @@
  * Home actions
  *
  */
+ import { forEach } from 'lodash';
 import {
   CONFIG_FETCH,
   ENVIRONMENTS_FETCH,
@@ -38,8 +39,16 @@ export function environmentsFetchSucceeded(environments) {
 }
 
 export function configFetchSucceded(configs) {
+  const data = {};
+  forEach(configs.sections, (section) => {
+    forEach(section.items, (item) => {
+      data[item.target] = item.value;
+    });
+  });
+
   return {
     type: CONFIG_FETCH_SUCCEEDED,
     configs,
+    data,
   };
 }
