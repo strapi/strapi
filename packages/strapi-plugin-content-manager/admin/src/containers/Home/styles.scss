@@ -1,0 +1,19 @@
+/**
+ * styles.scss
+ *
+ * Home container styles
+ */
+
+.containerFluid{
+
+  .container { /* stylelint-disable */
+    border: 0;
+  }
+
+  p {
+    display: block;
+    margin: 0;
+    padding-bottom: 14px;
+    line-height: 18px;
+  }
+}

@@ -245,6 +245,9 @@ module.exports = function(strapi) {
                   model: global[globalName]
                 });
 
+                // Expose ORM functions through the `strapi.models` object.
+                strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
+
                 // Push model to strapi global variables.
                 strapi.bookshelf.collections[globalName.toLowerCase()] = global[
                   globalName

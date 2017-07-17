@@ -154,7 +154,7 @@ module.exports = strapi => {
         // Exclude routes with prefix.
         const excludedRoutes = _.omitBy(
           value,
-          o => !o.hasOwnProperty('prefix')
+          o => o.prefix !== true
         );
 
         // Add others routes to the plugin's router.

@@ -181,7 +181,7 @@ module.exports = strapi => {
                   strapi.config.appPath,
                   strapi.config.paths.plugins
                 ),
-                excludeDirs: /(public)$/,
+                excludeDirs: /(public|admin|node_modules)$/,
                 filter: /(.+)\.(js|json)$/,
                 depth: 4
               },
@@ -206,7 +206,7 @@ module.exports = strapi => {
           // Remove cache.
           delete require.cache[
             path.resolve(strapi.config.appPath, 'package.json')
-          ];
+            ];
 
           // Local `package.json`.
           const packageJSON = require(path.resolve(

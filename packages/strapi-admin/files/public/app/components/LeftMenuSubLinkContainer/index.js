@@ -14,9 +14,8 @@ class LeftMenuSubLinkContainer extends React.Component { // eslint-disable-line 
     let links = this.props.subLinks.map((subLink, i) => (
       <LeftMenuSubLink
         key={i}
-        label={subLink.label}
-        destination={`/plugins/${subLink.to}`}
-        isActive={false}
+        label={subLink.get('label')}
+        destination={`${this.props.destinationPrefix}/${subLink.get('to')}`}
       />
     ));
 
@@ -29,7 +28,8 @@ class LeftMenuSubLinkContainer extends React.Component { // eslint-disable-line 
 }
 
 LeftMenuSubLinkContainer.propTypes = {
-  subLinks: React.PropTypes.array,
+  subLinks: React.PropTypes.object,
+  destinationPrefix: React.PropTypes.string,
 };
 
 export default LeftMenuSubLinkContainer;

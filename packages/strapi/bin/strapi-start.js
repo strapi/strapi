@@ -74,10 +74,10 @@ module.exports = function() {
       child.on('watch:restart', info => {
         logger.verbose(
           'Restarting due to ' +
-            info.file +
-            '... (' +
-            info.stat.replace(child.cwd, '.') +
-            ')'
+          info.file +
+          '... (' +
+          info.stat.replace(child.cwd, '.') +
+          ')'
         );
         console.log();
       });

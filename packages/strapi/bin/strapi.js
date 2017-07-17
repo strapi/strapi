@@ -111,7 +111,8 @@ program
 // `$ strapi generate:plugin`
 program
   .command('generate:plugin <id>')
-    .description('generate a basic plugin')
+  .option('-n, --name <name>', 'Plugin name')
+  .description('generate a basic plugin')
     .action(require('./strapi-generate'));
 
 // `$ strapi generate:hook`

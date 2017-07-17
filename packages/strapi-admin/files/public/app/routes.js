@@ -52,6 +52,57 @@ export default function createRoutes(store) {
           },
           childRoutes: [],
         },
+        {
+          path: '/list-plugins',
+          name: 'pluginsList',
+          getComponent(nextState, cb) {
+            const importModules = Promise.all([
+              System.import('containers/ComingSoonPage'),
+            ]);
+
+            const renderRoute = loadModule(cb);
+
+            importModules.then(([component]) => {
+              renderRoute(component);
+            });
+
+            importModules.catch(errorLoading);
+          },
+        },
+        {
+          path: '/install-plugin',
+          name: 'pluginsList',
+          getComponent(nextState, cb) {
+            const importModules = Promise.all([
+              System.import('containers/ComingSoonPage'),
+            ]);
+
+            const renderRoute = loadModule(cb);
+
+            importModules.then(([component]) => {
+              renderRoute(component);
+            });
+
+            importModules.catch(errorLoading);
+          },
+        },
+        {
+          path: '/configuration',
+          name: 'pluginsList',
+          getComponent(nextState, cb) {
+            const importModules = Promise.all([
+              System.import('containers/ComingSoonPage'),
+            ]);
+
+            const renderRoute = loadModule(cb);
+
+            importModules.then(([component]) => {
+              renderRoute(component);
+            });
+
+            importModules.catch(errorLoading);
+          },
+        },
       ],
     }, {
       path: '*',

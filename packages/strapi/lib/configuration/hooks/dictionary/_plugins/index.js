@@ -105,13 +105,20 @@ module.exports = strapi => {
                   filter: /(.+)\.(js|json)$/,
                   depth: 1
                 }, cb);
+              },
+              queries: cb => {
+                dictionary.optional({
+                  dirname: path.resolve(strapi.config.appPath, strapi.config.paths.plugins, plugin, strapi.config.paths.config, 'queries'),
+                  filter: /(.+)\.js$/,
+                  depth: 2
+                }, cb);
               }
             }, (err, config) => {
               if (err) {
                 return cb(err);
               }
 
-              return cb(null, _.merge(config.common, config.specific));
+              return cb(null, _.merge(config.common, config.specific, { queries: config.queries}));
             });
           }
         },

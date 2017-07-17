@@ -8,6 +8,7 @@
 const path = require('path');
 
 // Local dependencies.
+const packageJSON = require('../json/package.json.js');
 const routesJSON = require('../json/routes.json.js');
 
 /**
@@ -35,6 +36,11 @@ module.exports = {
     // Generate routes.
     'plugins/:humanizeId/config/routes.json': {
       jsonfile: routesJSON
-    }
+    },
+
+    // Main package.
+    'plugins/:humanizeId/package.json': {
+      jsonfile: packageJSON
+    },
   }
 };

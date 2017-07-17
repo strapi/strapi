@@ -16,14 +16,9 @@ const exposedComponents = {
 };
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
-  static propTypes = {
-    children: React.PropTypes.node,
-  };
-
   render() {
     const containers = this.props.plugins.valueSeq().map((plugin, i) => {
-      const Elem = plugin.mainComponent;
+      const Elem = plugin.get('mainComponent');
       return <Elem key={i} {...this.props} exposedComponents={exposedComponents}></Elem>;
     });
 
@@ -40,6 +35,10 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
     );
   }
 }
+
+PluginPage.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
 
 PluginPage.propTypes = {
   plugins: React.PropTypes.object,

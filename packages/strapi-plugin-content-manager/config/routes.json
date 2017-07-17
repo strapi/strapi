@@ -1,3 +1,59 @@
 {
-  "routes": []
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/models",
+      "handler": "ContentManager.models",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model",
+      "handler": "ContentManager.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model/count",
+      "handler": "ContentManager.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.findOne",
+      "config": {
+        "policies": []
+      }
+    },{
+      "method": "POST",
+      "path": "/explorer/:model",
+      "handler": "ContentManager.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
 }

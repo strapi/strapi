@@ -1,8 +1,8 @@
 /**
-*
-* LeftMenuLink
-*
-*/
+ *
+ * LeftMenuLink
+ *
+ */
 
 import React from 'react';
 import styles from './styles.scss';
@@ -12,14 +12,19 @@ import LeftMenuSubLinkContainer from 'components/LeftMenuSubLinkContainer';
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     let subLinksContainer;
-    if (this.props.leftMenuLinks && this.props.leftMenuLinks.length) {
-      subLinksContainer = <LeftMenuSubLinkContainer subLinks={this.props.leftMenuLinks} />;
+    if (this.props.leftMenuLinks && this.props.leftMenuLinks.size) {
+      subLinksContainer = (
+        <LeftMenuSubLinkContainer
+          subLinks={this.props.leftMenuLinks}
+          destinationPrefix={this.props.destination}
+        />
+      );
     }
 
     return (
       <li>
-        <Link className={`${styles.link} ${this.props.isActive ? styles.linkActive : ''}`} to={this.props.destination}>
-          <i className={`${styles.linkIcon} ${this.props.icon} ion`}></i>
+        <Link className={styles.link} activeClassName={styles.linkActive} to={this.props.destination}>
+          <i className={`${styles.linkIcon} ${this.props.icon} fa`}></i>
           <span className={styles.linkLabel}>{this.props.label}</span>
         </Link>
         {subLinksContainer}
@@ -33,7 +38,7 @@ LeftMenuLink.propTypes = {
   label: React.PropTypes.string,
   destination: React.PropTypes.string,
   isActive: React.PropTypes.bool,
-  leftMenuLinks: React.PropTypes.array,
+  leftMenuLinks: React.PropTypes.object,
 };
 
 export default LeftMenuLink;
