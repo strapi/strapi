@@ -1,8 +1,7 @@
-import { take, call, put, fork, select, cancel } from 'redux-saga/effects';
 import { takeLatest } from 'redux-saga';
-import { LOCATION_CHANGE } from 'react-router-redux';
-import { FormattedMessage } from 'react-intl';
-import { CONFIG_FETCH, ENVIRONMENTS_FETCH } from './constants';
+import { take, put, fork, cancel } from 'redux-saga/effects';
+// import { FormattedMessage } from 'react-intl';
+import { CONFIG_FETCH, ENVIRONMENTS_FETCH, CONFIG_FETCH_SUCCEEDED, ENVIRONMENTS_FETCH_SUCCEEDED } from './constants';
 import { configFetchSucceded, environmentsFetchSucceeded } from './actions';
 
 export function* fetchConfig(action) {
@@ -29,7 +28,7 @@ export function* fetchEnvironments() {
       method: 'GET',
     };
 
-    const response = yield fetch('/settings-manager/environments');
+    const response = yield fetch('/settings-manager/environments', opts);
     const data = yield response.json();
 
     yield put(environmentsFetchSucceeded(data));
@@ -44,8 +43,9 @@ export function* fetchEnvironments() {
 export function* defaultSaga() {
   const loadConfig = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
   const loadEnvironments = yield fork(takeLatest, ENVIRONMENTS_FETCH, fetchEnvironments);
-  yield take(LOCATION_CHANGE);
+  yield take(CONFIG_FETCH_SUCCEEDED);
   yield cancel(loadConfig);
+  yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
   yield cancel(loadEnvironments);
 }
 

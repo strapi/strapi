@@ -4,17 +4,36 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, List, Map, OrderedMap } from 'immutable';
 import {
-  DEFAULT_ACTION,
+  CONFIG_FETCH,
+  ENVIRONMENTS_FETCH,
+  CONFIG_FETCH_SUCCEEDED,
+  ENVIRONMENTS_FETCH_SUCCEEDED,
 } from './constants';
 
-const initialState = fromJS({});
+/* eslint-disable new-cap */
+const initialState = fromJS({
+  loading: false,
+  configsDisplay: OrderedMap(),
+  modifiedData: Map(),
+  environments: List(),
+});
 
 function homeReducer(state = initialState, action) {
   switch (action.type) {
-    case DEFAULT_ACTION:
-      return state;
+    case CONFIG_FETCH:
+      return state.set('loading', true);
+    case CONFIG_FETCH_SUCCEEDED:
+      return state
+        .set('loading', false)
+        .set('configsDisplay', OrderedMap(action.configs));
+    case ENVIRONMENTS_FETCH:
+      return state.set('loading', true);
+    case ENVIRONMENTS_FETCH_SUCCEEDED:
+      return state
+        .set('loading', false)
+        .set('environments', List(action.environments.environments));
     default:
       return state;
   }

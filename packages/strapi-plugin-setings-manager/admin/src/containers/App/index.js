@@ -9,19 +9,19 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { isEmpty } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+import { define } from 'i18n';
+import messages from '../../translations/en.json';
 
 import { menuFetch } from './actions';
 import { makeSelectSections } from './selectors';
 import styles from './styles.scss';
-import messages from '../../translations/en.json';
-import { define } from 'i18n';
-define(_.map(messages, (message, id) => ({
-    id,
-    defaultMessage: message,
-  }
+define(map(messages, (message, id) => ({
+  id,
+  defaultMessage: message,
+}
 )));
 
 class App extends React.Component {
@@ -43,7 +43,6 @@ class App extends React.Component {
         exposedComponents: this.props.exposedComponents,
       })
     );
-    console.log(this.props.sections)
     return (
       <div className={`${pluginId} ${styles.app}`}>
         {/*

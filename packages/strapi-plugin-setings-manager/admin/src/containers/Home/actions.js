@@ -3,12 +3,12 @@
  * Home actions
  *
  */
-
 import {
   CONFIG_FETCH,
   ENVIRONMENTS_FETCH,
   CONFIG_FETCH_SUCCEEDED,
   ENVIRONMENTS_FETCH_SUCCEEDED,
+  DEFAULT_ACTION,
 } from './constants';
 
 export function defaultAction() {
@@ -31,16 +31,15 @@ export function environmentsFetch() {
 }
 
 export function environmentsFetchSucceeded(environments) {
-  console.log(environments);
   return {
     type: ENVIRONMENTS_FETCH_SUCCEEDED,
     environments,
   };
 }
 
-export function configFetchSucceded(config) {
+export function configFetchSucceded(configs) {
   return {
     type: CONFIG_FETCH_SUCCEEDED,
-    config,
+    configs,
   };
 }

@@ -15,37 +15,47 @@ import styles from './styles.scss';
 import config from './config.json';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
   componentDidMount() {
+    // always fetch environments
+    this.props.environmentsFetch();
+
     if (this.props.params.slug) {
-      const isEnvironemntsRequired = includes(config.environmentsRequired, this.props.params.slug);
-      // TODO handle specific url for environments
-      if (!isEnvironemntsRequired) {
+      const isEnvironmentsRequired = includes(config.environmentsRequired, this.props.params.slug);
+
+      if (!isEnvironmentsRequired) {
         this.props.configFetch(this.props.params.slug);
-      } else {
-        this.props.environmentsFetch();
+      } else if (this.props.params.env){
+        this.props.configFetch(`${this.props.params.slug}/${this.props.params.env}`);
       }
     }
   }
 
+
   componentWillReceiveProps(nextProps) {
+
+    const isEnvironmentsRequired = nextProps.params.slug ?  includes(config.environmentsRequired, nextProps.params.slug) : false;
+
+    // check if params slug updated
     if (this.props.params.slug !== nextProps.params.slug && nextProps.params.slug) {
-      // TODO add condition to check if environments has already been fetched
-      const isEnvironemntsRequired = includes(config.environmentsRequired, nextProps.params.slug);
 
-      if (!isEnvironemntsRequired) {
-        this.props.configFetch(nextProps.params.slug);
-      } else { // TODO change to else if (isEmpty(this.props.environments))
-        this.props.environmentsFetch();
-      } // else { ... }
+      // redirect user if environnemnt is required and params environment not provided
+      if (isEnvironmentsRequired && !nextProps.params.env) {
+        this.props.history.push(`${nextProps.location.pathname}/${nextProps.environments[0].name}`)
+      }
 
+      // get data from api if params slug updated
+      const apiUrl = isEnvironmentsRequired ? `${nextProps.params.slug}/${nextProps.environments[0].name}` : nextProps.params.slug;
+
+      this.props.configFetch(apiUrl);
     } else if (this.props.params.env !== nextProps.params.env) {
-      // TODO handle environments
-      this.props.configFetch(`${nextProps.params.slug}/${nextProps.params.env}`);
+
+      // get data if params env updated
+      this.props.configFetch(`${this.props.params.slug}/${nextProps.params.env}`);
     }
   }
 
   render() {
-    console.log(config);
     return (
       <div className={styles.home}>
         <Helmet
@@ -70,5 +80,12 @@ function mapDispatchToProps(dispatch) {
     dispatch
   )
 }
+
+Home.propTypes = {
+  configFetch: React.PropTypes.func.isRequired,
+  environmentsFetch: React.PropTypes.func.isRequired,
+  history: React.PropTypes.object.isRequired,
+  params: React.PropTypes.object.isRequired,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
