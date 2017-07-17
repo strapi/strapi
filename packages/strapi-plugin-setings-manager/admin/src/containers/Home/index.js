@@ -14,6 +14,7 @@ import { makeSelectSections } from 'containers/App/selectors';
 import selectHome from './selectors';
 import { configFetch } from './actions'
 import styles from './styles.scss';
+import config from './config.json';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
