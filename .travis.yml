@@ -16,13 +16,11 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 
 install:
-  - npm install
+  - npm install --unsafe-perm
 
 node_js:
   - "7"
   - "8"
-
-sudo: false
 
 script:
   - npm run test
