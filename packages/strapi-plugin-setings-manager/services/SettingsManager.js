@@ -324,7 +324,7 @@ module.exports = {
         const filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 
         try {
-          const fileContent = require('coucou');
+          const fileContent = require(filePath);
 
           _.set(fileContent, objPath, input);
 
@@ -332,7 +332,7 @@ module.exports = {
         } catch (e) {
           errors.push({
             target,
-            message: 'coucou',
+            message: 'request.error.config',
             params: {
               filePath: filePath
             }
