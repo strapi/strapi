@@ -15,8 +15,8 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 import { define } from 'i18n';
 import messages from '../../translations/en.json';
 
-import { menuFetch } from './actions';
-import { makeSelectSections } from './selectors';
+import { menuFetch, environmentsFetch } from './actions';
+import { makeSelectSections, makeSelectEnvironments } from './selectors';
 import styles from './styles.scss';
 define(map(messages, (message, id) => ({
   id,
@@ -27,12 +27,13 @@ define(map(messages, (message, id) => ({
 class App extends React.Component {
   componentDidMount() {
     this.props.menuFetch();
+    this.props.environmentsFetch();
   }
 
   componentWillReceiveProps(nextProps) {
     // redirect the user to the first general section
     if (!this.props.params.slug && !isEmpty(nextProps.sections)) {
-      this.props.history.push(`${this.props.location.pathname}/${nextProps.sections[0].items[0].slug}`)
+      this.props.history.push(`${this.props.location.pathname}/${nextProps.sections[0].items[0].slug}`);
     }
   }
 
@@ -51,7 +52,7 @@ class App extends React.Component {
         */}
         <div className={`container-fluid ${styles.noPadding}`}>
           <div className="row">
-            <PluginLeftMenu sections={this.props.sections} />
+            <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} />
             {React.Children.toArray(content)}
           </div>
         </div>
@@ -66,6 +67,8 @@ App.contextTypes = {
 
 App.propTypes = {
   children: React.PropTypes.node.isRequired,
+  environments: React.PropTypes.array,
+  environmentsFetch: React.PropTypes.func,
   exposedComponents: React.PropTypes.object.isRequired,
   history: React.PropTypes.object,
   location: React.PropTypes.object,
@@ -78,6 +81,7 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       menuFetch,
+      environmentsFetch,
     },
     dispatch
   );
@@ -85,6 +89,7 @@ export function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   sections: makeSelectSections(),
+  environments: makeSelectEnvironments(),
 });
 
 // Wrap the component to inject dispatch and state into it

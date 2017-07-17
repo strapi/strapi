@@ -1,8 +1,8 @@
 import { takeLatest } from 'redux-saga';
-import { put, fork } from 'redux-saga/effects';
+import { put, fork, take, cancel } from 'redux-saga/effects';
 
-import { fetchMenuSucceeded } from './actions';
-import { MENU_FETCH } from './constants';
+import { fetchMenuSucceeded, environmentsFetchSucceeded } from './actions';
+import { MENU_FETCH, MENU_FETCH_SUCCEEDED, ENVIRONMENTS_FETCH, ENVIRONMENTS_FETCH_SUCCEEDED } from './constants';
 
 export function* fetchMenu() {
   try {
@@ -21,9 +21,31 @@ export function* fetchMenu() {
   }
 }
 
+export function* fetchEnvironments() {
+  try {
+    const opts = {
+      method: 'GET',
+    };
+
+    const response = yield fetch('/settings-manager/environments', opts);
+    const data = yield response.json();
+
+    yield put(environmentsFetchSucceeded(data));
+
+  } catch(error) {
+    console.log(error);
+  }
+}
+
 
 function* defaultSaga() {
-  yield fork(takeLatest, MENU_FETCH, fetchMenu);
+  const loadMenu = yield fork(takeLatest, MENU_FETCH, fetchMenu);
+  const loadEnvironments = yield fork(takeLatest, ENVIRONMENTS_FETCH, fetchEnvironments);
+  yield take(MENU_FETCH_SUCCEEDED);
+  yield cancel(loadMenu);
+  yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
+  yield cancel(loadEnvironments)
+
 }
 
 export default [defaultSaga];

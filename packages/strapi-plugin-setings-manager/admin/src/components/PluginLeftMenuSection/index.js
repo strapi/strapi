@@ -17,6 +17,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
       <PluginLeftMenuLink
         key={index}
         link={item}
+        environments={this.props.environments}
       />
     ));
 
@@ -34,6 +35,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
+  environments: React.PropTypes.array,
   section: React.PropTypes.object.isRequired,
 };
 
