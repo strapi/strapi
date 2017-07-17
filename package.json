@@ -22,7 +22,8 @@
   },
   "scripts": {
     "test": "make test",
-    "postinstall": "lerna bootstrap --stream && node ./scripts/setup.js"
+    "removefiledependencies": "node ./scripts/removefiledependencies.js",
+    "postinstall": "lerna bootstrap --stream && node ./scripts/setup.js && node ./scripts/removefiledependencies.js"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -35,6 +36,10 @@
       "email": "hi@strapi.io",
       "url": "http://strapi.io"
     }
+  ],
+  "pre-commit": [
+    "removefiledependencies",
+    "test"
   ],
   "repository": {
     "type": "git",
