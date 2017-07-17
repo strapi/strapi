@@ -23,7 +23,7 @@
   "scripts": {
     "test": "make test",
     "removefiledependencies": "node ./scripts/removefiledependencies.js",
-    "postinstall": "lerna bootstrap --stream && node ./scripts/setup.js && node ./scripts/removefiledependencies.js"
+    "postinstall": "lerna bootstrap --stream --hoist && node ./scripts/setup.js && node ./scripts/removefiledependencies.js"
   },
   "author": {
     "email": "hi@strapi.io",
