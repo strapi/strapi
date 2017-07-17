@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -13,7 +13,7 @@
     "eslint-plugin-react": "^6.8.0",
     "eslint-plugin-redux-saga": "^0.3.0",
     "istanbul": "~0.4.2",
-    "lerna": "2.0.0-beta.36",
+    "lerna": "^2.0.0",
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
@@ -22,7 +22,8 @@
   },
   "scripts": {
     "test": "make test",
-    "setup": "npm install && node ./scripts/setup.js"
+    "removefiledependencies": "node ./scripts/removefiledependencies.js",
+    "postinstall": "lerna bootstrap --stream --hoist && node ./scripts/setup.js && node ./scripts/removefiledependencies.js"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -36,6 +37,10 @@
       "url": "http://strapi.io"
     }
   ],
+  "pre-commit": [
+    "removefiledependencies",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
@@ -48,5 +53,7 @@
     "npm": ">= 3.0.0"
   },
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "strapi-utils": "file:packages/strapi-utils"
+  }
 }

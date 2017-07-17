@@ -8,21 +8,33 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import _ from 'lodash';
 
-import config from '../../../../config/admin.json';
 import { loadModels, updateSchema } from './actions';
-import { makeSelectModels, makeSelectLoading } from './selectors';
+import { makeSelectLoading } from './selectors';
+
+const tryRequire = (path) => {
+  try {
+    return require(`containers/${path}.js`); // eslint-disable-line global-require
+  } catch (err) {
+    return null;
+  }
+};
 
 class App extends React.Component {
   componentWillMount() {
-    this.props.loadModels();
-    this.props.updateSchema(config.admin.schema);
+    const config = tryRequire('../../../../config/admin.json');
+    if (!_.isEmpty(_.get(config, 'admin.schema'))) {
+      this.props.updateSchema(config.admin.schema);
+    } else {
+      this.props.loadModels();
+    }
   }
 
   render() {
     let content = <div />;
 
-    if (this.props.models) {
+    if (!this.props.loading) {
       // Assign plugin component to children
       content = React.Children.map(this.props.children, child =>
         React.cloneElement(child, {
@@ -46,11 +58,8 @@ App.contextTypes = {
 App.propTypes = {
   children: React.PropTypes.node.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
+  loading: React.PropTypes.bool,
   loadModels: React.PropTypes.func.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
   updateSchema: React.PropTypes.func.isRequired,
 };
 
@@ -63,7 +72,6 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  models: makeSelectModels(),
   loading: makeSelectLoading(),
 });
 

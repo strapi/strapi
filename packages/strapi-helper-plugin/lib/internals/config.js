@@ -34,7 +34,7 @@ const StrapiPlugin = {
       include: ['core-js', 'eventsource-polyfill', 'babel-polyfill', 'lodash'],
 
       // The path where the DLL manifest and bundle will get built
-      path: resolve('../node_modules/strapi-plugin-dlls'),
+      path: resolve('node_modules', 'strapi-plugin-dlls'),
     },
 
     entry(helperPkg, pluginPkg) {

@@ -19,7 +19,7 @@ const helperPkg = require(join(__dirname, '..', '..', '..', 'package.json'));
 const pluginPkg = require(join(process.cwd(), 'package.json'));
 if (!pluginPkg.dllPlugin) { pluginPkg.dllPlugin = {}; }
 const dllConfig = defaults(pluginPkg.dllPlugin, dllPlugin.defaults);
-const outputPath = join(process.cwd(), dllConfig.path);
+const outputPath = dllConfig.path;
 
 module.exports = {
   context: process.cwd(),

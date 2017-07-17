@@ -23,7 +23,7 @@ module.exports = {
 
   find: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
     const {limit, skip = 0, sort = primaryKey, query, queryAttribute} = ctx.request.query;
@@ -44,7 +44,7 @@ module.exports = {
 
   count: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
 
     // Count using `queries` system
@@ -57,7 +57,7 @@ module.exports = {
 
   findOne: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
     const id = ctx.params.id;
@@ -79,7 +79,7 @@ module.exports = {
 
   create: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const values = ctx.request.body;
 
@@ -94,7 +94,7 @@ module.exports = {
 
   update: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
     const id = ctx.params.id;
@@ -113,7 +113,7 @@ module.exports = {
 
   delete: async ctx => {
     const model = strapi.models[ctx.params.model];
-    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']);
+    const orm = _.get(strapi.plugins, ['content-manager', 'config', 'admin', 'schema', ctx.params.model, 'orm']) || model.orm;
     const queries = _.get(strapi.plugins, ['content-manager', 'config', 'queries', orm]);
     const primaryKey = model.primaryKey;
     const id = ctx.params.id;

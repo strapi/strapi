@@ -40,7 +40,7 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
     }
 
     // Request URL
-    const requestUrlSuffix = query ? '' : this.props.record.get(this.props.relation.attribute);
+    const requestUrlSuffix = query && this.props.record.get(this.props.relation.attribute) ? this.props.record.get(this.props.relation.attribute) : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
@@ -51,11 +51,11 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
       .then(response => {
         const options = _.isArray(response)
           ? _.map(response, item => ({
-            value: Number(item.id),
+            value: item.id,
             label: item[this.props.relation.displayedAttribute],
           }))
           : [{
-            value: Number(response.id),
+            value: response.id,
             label: response[this.props.relation.displayedAttribute],
           }];
 

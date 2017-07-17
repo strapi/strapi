@@ -10,17 +10,6 @@
   display: block;
 }
 
-@font-face {
-  font-family: 'ionicons';
-  src:url("../../styles/fonts/ionicfont/ionicons.eot?v=2.0.0");
-  src:url("../../styles/fonts/ionicfont/ionicons.eot?v=2.0.0#iefix") format("embedded-opentype"),
-  url("../../styles/fonts/ionicfont/ionicons.ttf?v=2.0.0") format("truetype"),
-  url("../../styles/fonts/ionicfont/ionicons.woff?v=2.0.0") format("woff"),
-  url("../../styles/fonts/ionicfont/ionicons.svg?v=2.0.0#Ionicons") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
-
 .baseline {
   display: none;
   z-index: 100001;

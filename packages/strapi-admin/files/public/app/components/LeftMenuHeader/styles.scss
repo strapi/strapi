@@ -4,6 +4,7 @@
 .leftMenuHeader { /* stylelint-ignore */
   background: $left-menu-link-hover;
   height: $header-height;
+  background: linear-gradient(100deg , #1C5DE7, #1C91E7);
 }
 
 .projectName {
@@ -21,7 +22,7 @@
   background-image: url('../../assets/images/logo-strapi.png');
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: 12rem auto;
+  background-size: auto 2.5rem;
 }
 
 .leftMenuHeaderLink {

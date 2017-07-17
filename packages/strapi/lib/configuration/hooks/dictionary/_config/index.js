@@ -181,7 +181,7 @@ module.exports = strapi => {
                   strapi.config.appPath,
                   strapi.config.paths.plugins
                 ),
-                excludeDirs: /(public|admin)$/,
+                excludeDirs: /(public|admin|node_modules)$/,
                 filter: /(.+)\.(js|json)$/,
                 depth: 4
               },

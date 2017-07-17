@@ -236,6 +236,7 @@
     "exports-loader": "0.6.3",
     "extract-text-webpack-plugin": "1.0.1",
     "file-loader": "0.9.0",
+    "glob": "^7.1.2",
     "html-loader": "0.4.3",
     "html-webpack-plugin": "2.22.0",
     "image-webpack-loader": "2.0.0",

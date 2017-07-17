@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,11 +13,11 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "async": "^2.4.1",
+    "async": "^2.5.0",
     "fs-extra": "^1.0.0",
     "lodash": "^4.17.4",
     "reportback": "^2.0.1",
-    "strapi-utils": "^3.0.0-alpha.3"
+    "strapi-utils": "^3.0.0-alpha.4"
   },
   "scripts": {
     "prepublish": "npm prune"
