@@ -10,6 +10,10 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import Helmet from 'react-helmet';
 import { router } from 'app';
+
+// design
+import ContentHeader from 'components/ContentHeader';
+
 import { makeSelectSections } from 'containers/App/selectors';
 import selectHome from './selectors';
 import { configFetch } from './actions'
@@ -47,6 +51,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
+    if (this.props.home.loading) {
+      return <div />;
+    }
     return (
       <div className={styles.home}>
         <Helmet
@@ -54,6 +61,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           meta={[
             { name: 'description', content: 'Description of Home' },
           ]}
+        />
+        <ContentHeader
+          content={this.props.home.configsDisplay}
         />
       </div>
     );
