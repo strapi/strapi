@@ -9,14 +9,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { isEmpty, map } from 'lodash';
+import { map } from 'lodash';
 import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import { define } from 'i18n';
 import messages from '../../translations/en.json';
 
 import { menuFetch, environmentsFetch } from './actions';
-import { makeSelectSections, makeSelectEnvironments } from './selectors';
+import { makeSelectSections, makeSelectEnvironments, makeSelectLoading } from './selectors';
 import styles from './styles.scss';
 define(map(messages, (message, id) => ({
   id,
@@ -30,14 +30,10 @@ class App extends React.Component {
     this.props.environmentsFetch();
   }
 
-  componentWillReceiveProps(nextProps) {
-    // redirect the user to the first general section
-    if (!this.props.params.slug && !isEmpty(nextProps.sections)) {
-      this.props.history.push(`${this.props.location.pathname}/${nextProps.sections[0].items[0].slug}`);
-    }
-  }
-
   render() {
+    if (this.props.loading) {
+      return <div />;
+    }
     // Assign plugin component to children
     const content = React.Children.map(this.props.children, child =>
       React.cloneElement(child, {
@@ -70,10 +66,8 @@ App.propTypes = {
   environments: React.PropTypes.array,
   environmentsFetch: React.PropTypes.func,
   exposedComponents: React.PropTypes.object.isRequired,
-  history: React.PropTypes.object,
-  location: React.PropTypes.object,
+  loading: React.PropTypes.bool,
   menuFetch: React.PropTypes.func,
-  params: React.PropTypes.object,
   sections: React.PropTypes.array.isRequired,
 };
 
@@ -90,6 +84,7 @@ export function mapDispatchToProps(dispatch) {
 const mapStateToProps = createStructuredSelector({
   sections: makeSelectSections(),
   environments: makeSelectEnvironments(),
+  loading: makeSelectLoading(),
 });
 
 // Wrap the component to inject dispatch and state into it
