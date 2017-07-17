@@ -16,10 +16,11 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 
 install:
-  - npm run setup
+  - npm install
 
 node_js:
   - "7"
+  - "8"
 
 sudo: false
 
