@@ -1,3 +1,5 @@
 {
-  "itemsWithoutPopForm": ["general"]
+  "customComponents": {
+    "editForm": ["general", "security"]
+  }
 }

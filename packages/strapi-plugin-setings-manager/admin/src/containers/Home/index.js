@@ -8,11 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { findKey, isUndefined } from 'lodash';
+
 import Helmet from 'react-helmet';
 import { router } from 'app';
 
 // design
 import ContentHeader from 'components/ContentHeader';
+import EditForm from 'components/EditForm';
 
 import { makeSelectSections } from 'containers/App/selectors';
 import selectHome from './selectors';
@@ -21,6 +24,14 @@ import styles from './styles.scss';
 import config from './config.json';
 
 export class Home extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
+  constructor(props) {
+    super(props);
+    this.customComponents = config.customComponents;
+    this.components = {
+      editForm: EditForm,
+    };
+  }
 
   componentDidMount() {
     if (this.props.params.slug) {
@@ -54,6 +65,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (this.props.home.loading) {
       return <div />;
     }
+
+    // check if  settingName (params.slug) has a custon view display
+    const component = findKey(this.customComponents, (value) => _.includes(value, this.props.params.slug)) ?
+      findKey(this.customComponents, (value) => _.includes(value, this.props.params.slug)) : 'div'; // TODO change div to defaultComponent
+    // if custom view display render specificComponent
+    const Form = this.components[component];
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet
@@ -66,6 +83,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
+      <Form sections={this.props.home.configsDisplay.sections} />
       </div>
     );
   }
