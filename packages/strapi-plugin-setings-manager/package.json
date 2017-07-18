@@ -24,8 +24,7 @@
     "test": "echo Tests are not implemented.",
     "prepublish": "npm run build"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.3"
   },
