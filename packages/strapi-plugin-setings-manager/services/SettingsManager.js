@@ -32,7 +32,7 @@ module.exports = {
           {
             slug: 'databases',
             name: 'menu.item.databases',
-            icon: 'databases'
+            icon: 'database'
           },
           {
             slug: 'security',

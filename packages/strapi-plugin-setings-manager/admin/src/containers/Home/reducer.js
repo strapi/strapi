@@ -12,7 +12,7 @@ import {
 
 /* eslint-disable new-cap */
 const initialState = fromJS({
-  loading: false,
+  loading: true,
   configsDisplay: OrderedMap(),
   initialData: Map(),
   modifiedData: Map(),

@@ -1,9 +1,21 @@
 .pluginLeftMenuSection { /* stylelint-disable */
+  margin-top: 4rem;
   > p {
-    padding-left: 2.4rem;
+    margin: 0;
+    margin-bottom: 0.8rem;
+    padding-left: 3rem;
+    line-height: 1.3rem;
+    color: #919BAE;
+    letter-spacing: 0.1rem;
+    font-family: Lato;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
   }
   > ul {
-    list-style: none;
+    margin: 0;
     padding: 0;
+    list-style: none;
+    font-size: 1.3rem;
   }
 }

@@ -1,4 +1,6 @@
 .pluginLeftMenu { /* stylelint-disable */
-  background: rgba(14,22,34,0.03);
-  min-height: calc(100vh - 6rem);
+  min-height: calc(100vh - 6rem); // TODO variable
+  border-radius: 1px;
+  background-color: rgba(14,22,34,0.03);
+  box-shadow: inset 0 0 0.2rem 0 rgba(0,0,0,0.05);
 }

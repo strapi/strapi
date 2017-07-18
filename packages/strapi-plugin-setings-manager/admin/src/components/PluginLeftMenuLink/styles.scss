@@ -1,29 +1,27 @@
 
 .pluginLeftMenuLink { /* stylelint-disable */
-
+  color: #2D3138;
 }
 
 .link {
-  padding-top: 0.5rem;
-  padding-bottom: 0.2rem;
-  min-height: 4rem;
-  border-left: 0.4rem solid transparent;
-  cursor: pointer;
-  color: #7E8AAA;
-  padding-left: 2.4rem;
-  text-decoration: none;
   display: block;
-
-  &:hover {
-    background: #151C2E;
-    border-left: 0.4rem solid #1C5DE7;
-  }
-
-  &:hover {
-    color: #7E8AAA;
-    text-decoration: none;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  padding-top: 1rem;
+  padding-left: 1rem;
+  min-height: 3.4rem;
+  border-left: 0.4rem solid transparent;
+  color: #2C3138 !important;
+  text-decoration: none !important;
+  line-height: 1.6rem;
+  > i {
+    margin-right: 1rem;
   }
 }
 .linkActive {
-  border-left: 0.4rem solid #1C5DE7;
+  border-radius: 0.2rem;
+  background-color: #E9EAEB;;
+  font-weight: bold;
+  text-decoration: none;
+  color: #2D3138 !important;
 }

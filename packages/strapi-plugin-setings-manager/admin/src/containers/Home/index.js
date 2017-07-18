@@ -8,9 +8,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { map } from 'lodash';
 import Helmet from 'react-helmet';
 import { router } from 'app';
-
+import { FormattedMessage } from 'react-intl';
 // design
 import ContentHeader from 'components/ContentHeader';
 
@@ -62,13 +63,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             { name: 'description', content: 'Description of Home' },
           ]}
         />
-        <ContentHeader
-          content={this.props.home.configsDisplay}
-        />
+        <FormattedMessage {...{id: this.props.home.configsDisplay.name}} />
       </div>
     );
   }
 }
+
 
 const mapStateToProps = createStructuredSelector({
   home: selectHome(),

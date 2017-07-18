@@ -20,7 +20,6 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
         environments={this.props.environments}
       />
     ));
-
     return (
       <div className={styles.pluginLeftMenuSection}>
         <p>
