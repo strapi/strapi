@@ -8,6 +8,7 @@ import { forEach } from 'lodash';
 import {
   CONFIG_FETCH,
   CONFIG_FETCH_SUCCEEDED,
+  CHANGE_INPUT,
   DEFAULT_ACTION,
 } from './constants';
 
@@ -36,5 +37,13 @@ export function configFetchSucceded(configs) {
     type: CONFIG_FETCH_SUCCEEDED,
     configs,
     data,
+  };
+}
+
+export function changeInput(key, value) {
+  return {
+    type: CHANGE_INPUT,
+    key,
+    value,
   };
 }

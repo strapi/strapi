@@ -19,7 +19,7 @@ import EditForm from 'components/EditForm';
 
 import { makeSelectSections } from 'containers/App/selectors';
 import selectHome from './selectors';
-import { configFetch } from './actions'
+import { configFetch, changeInput } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -62,7 +62,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    console.log(target);
+    this.props.changeInput(target.name, target.value);
   }
 
   render() {
@@ -87,7 +87,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-        <Form sections={this.props.home.configsDisplay.sections} handleChange={this.handleChange} />
+        <Form sections={this.props.home.configsDisplay.sections} values={this.props.home.modifiedData} handleChange={this.handleChange} />
       </div>
     );
   }
@@ -102,6 +102,7 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      changeInput,
       configFetch,
     },
     dispatch
@@ -109,6 +110,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 Home.propTypes = {
+  changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
   home: React.PropTypes.object,
   params: React.PropTypes.object.isRequired,

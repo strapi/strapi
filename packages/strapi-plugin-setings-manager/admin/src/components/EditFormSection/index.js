@@ -23,7 +23,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
     };
     const Input = inputs[props.type];
     const customBootstrapClass = config[props.target] || "";
-
+    const inputValue = this.props.values[props.target];
     return (
       <Input
         customBootstrapClass={customBootstrapClass}
@@ -31,7 +31,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
         handleChange={this.props.handleChange}
         name={props.name}
         target={props.target} validations={props.validations}
-        value={props.value}
+        value={inputValue}
       />
     );
   }
@@ -59,6 +59,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 EditFormSection.propTypes = {
   handleChange: React.PropTypes.func.isRequired,
   section: React.PropTypes.object,
+  values: React.PropTypes.object,
 };
 
 export default EditFormSection;

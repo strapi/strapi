@@ -84,7 +84,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           }
           break;
         case 'regex':
-          if (!validationValue.test(value)) {
+          if (!new RegExp(validationValue).test(value)) {
             errors.push({ id: 'request.error.validation.regex' });
           }
           break;

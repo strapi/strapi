@@ -22,7 +22,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             }
             return (
               <div key={key}>
-                <EditFormSection section={section} handleChange={this.props.handleChange} />
+                <EditFormSection section={section} values={this.props.values} handleChange={this.props.handleChange} />
                 {line}
               </div>
             )
@@ -36,6 +36,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 EditForm.propTypes = {
   handleChange: React.PropTypes.func.isRequired,
   sections: React.PropTypes.array,
+  values: React.PropTypes.object,
 };
 
 export default EditForm;
