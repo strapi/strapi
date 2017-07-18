@@ -14,7 +14,7 @@ We've been working on a major update to Strapi for several months now, rewriting
 
 For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
 
-![Content Manager Plugin - Screenshot](http://blog.strapi.io/content/images/2016/10/export_cm.png)
+![Content Manager Plugin - Screenshot](http://blog.strapi.io/content/images/2017/07/preview-readme-8.png)
 
 ## Why Strapi ?
 

@@ -5,23 +5,20 @@ git:
 
 language: node_js
 
-cache:
-  yarn: true
-  directories:
-    - node_modules
+node_js:
+  - "7"
+  - "8"
 
 before_install:
   - export CHROME_BIN=chromium-browser
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
+  - npm i -g npm@latest
+  - npm -v
+  - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
 
 install:
-  - npm run setup
-
-node_js:
-  - "7"
-
-sudo: false
+  - npm install
 
 script:
   - npm run test

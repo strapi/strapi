@@ -3,8 +3,8 @@
   "version": "3.0.0-alpha.4",
   "description": "Helper for Strapi plugins development",
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -99,7 +99,7 @@
     "json-loader": "^0.5.4",
     "lint-staged": "^3.2.0",
     "mocha": "^3.1.2",
-    "node-sass": "^3.13.1",
+    "node-sass": "^4.5.3",
     "null-loader": "^0.1.1",
     "plop": "^1.5.0",
     "postcss-cssnext": "^2.11.0",

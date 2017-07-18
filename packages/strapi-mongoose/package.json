@@ -48,8 +48,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
   },
   "license": "MIT"
 }

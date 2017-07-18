@@ -72,6 +72,9 @@
     "strapi-mongoose": "^3.0.0-alpha.4",
     "strapi-utils": "^3.0.0-alpha.4"
   },
+  "devDependencies": {
+    "forever-monitor": "^1.7.1"
+  },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
@@ -92,12 +95,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
   },
   "preferGlobal": true,
-  "license": "MIT",
-  "devDependencies": {
-    "forever-monitor": "^1.7.1"
-  }
+  "license": "MIT"
 }
