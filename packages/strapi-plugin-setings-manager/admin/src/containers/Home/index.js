@@ -61,6 +61,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   }
 
+  handleChange = ({ target }) => {
+    console.log(target);
+  }
+
   render() {
     if (this.props.home.loading) {
       return <div />;
@@ -83,7 +87,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-      <Form sections={this.props.home.configsDisplay.sections} />
+      <Form sections={this.props.home.configsDisplay.sections} handleChange={this.handleChange} />
       </div>
     );
   }

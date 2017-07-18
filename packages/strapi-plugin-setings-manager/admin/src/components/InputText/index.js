@@ -17,6 +17,7 @@
 *  - handleChange : function
 *  - value : string
 *  - validations : object
+*  - target : string
 *
 * Optionnal
 * - description : input description
@@ -123,9 +124,9 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}>{this.props.name}</label>
+        <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
         <input
-          name={this.props.name}
+          name={this.props.target}
           id={this.props.name}
           onBlur={handleBlur}
           onFocus={this.props.handleFocus}
@@ -151,6 +152,7 @@ InputText.propTypes = {
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
+  target: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   validations: React.PropTypes.object.isRequired,
