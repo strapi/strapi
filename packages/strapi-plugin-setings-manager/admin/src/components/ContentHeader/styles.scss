@@ -1,3 +1,16 @@
 .contentHeader { /* stylelint-disable */
+  padding: 3rem 4rem;
+  font-family: Lato;
+  > span {
+    color: #787E8F;
+    font-size: 1.3rem;
+    line-height: 1.5rem;
+  }
+}
 
+.title {
+  color: #333740;
+  font-family: Lato;
+  font-size: 2.4rem;
+  line-height: 2.9rem;
 }

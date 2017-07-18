@@ -8,10 +8,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { map } from 'lodash';
 import Helmet from 'react-helmet';
 import { router } from 'app';
-import { FormattedMessage } from 'react-intl';
+
 // design
 import ContentHeader from 'components/ContentHeader';
 
@@ -56,14 +55,17 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       return <div />;
     }
     return (
-      <div className={styles.home}>
+      <div className={`${styles.home} col-md-9`}>
         <Helmet
           title="Home"
           meta={[
             { name: 'description', content: 'Description of Home' },
           ]}
         />
-        <FormattedMessage {...{id: this.props.home.configsDisplay.name}} />
+        <ContentHeader
+          name={this.props.home.configsDisplay.name}
+          description={this.props.home.configsDisplay.description}
+        />
       </div>
     );
   }

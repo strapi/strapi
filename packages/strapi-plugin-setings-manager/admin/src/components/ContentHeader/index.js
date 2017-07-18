@@ -12,10 +12,10 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
   render() {
     return (
       <div className={styles.contentHeader}>
-        <div>
-          <FormattedMessage {...{id: this.props.content.name}} />
+        <div className={styles.title}>
+          <FormattedMessage {...{id: this.props.name }} />
         </div>
-        <FormattedMessage {...{id: this.props.content.description}} />
+        <span><FormattedMessage {...{id: this.props.description}} /></span>
       </div>
     );
   }
