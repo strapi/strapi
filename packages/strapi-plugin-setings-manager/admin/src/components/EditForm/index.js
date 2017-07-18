@@ -34,7 +34,8 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 EditForm.propTypes = {
-  formData: React.PropTypes.array
-}
+  handleChange: React.PropTypes.func.isRequired,
+  sections: React.PropTypes.array,
+};
 
 export default EditForm;

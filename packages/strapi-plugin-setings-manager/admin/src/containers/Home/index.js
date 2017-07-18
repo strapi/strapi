@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, isUndefined } from 'lodash';
+import { findKey, includes } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -71,8 +71,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     }
 
     // check if  settingName (params.slug) has a custon view display
-    const component = findKey(this.customComponents, (value) => _.includes(value, this.props.params.slug)) ?
-      findKey(this.customComponents, (value) => _.includes(value, this.props.params.slug)) : 'div'; // TODO change div to defaultComponent
+    const component = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
+      findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'div'; // TODO change div to defaultComponent
     // if custom view display render specificComponent
     const Form = this.components[component];
     return (
@@ -87,7 +87,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-      <Form sections={this.props.home.configsDisplay.sections} handleChange={this.handleChange} />
+        <Form sections={this.props.home.configsDisplay.sections} handleChange={this.handleChange} />
       </div>
     );
   }
@@ -110,6 +110,7 @@ function mapDispatchToProps(dispatch) {
 
 Home.propTypes = {
   configFetch: React.PropTypes.func.isRequired,
+  home: React.PropTypes.object,
   params: React.PropTypes.object.isRequired,
   sections: React.PropTypes.array,
 };

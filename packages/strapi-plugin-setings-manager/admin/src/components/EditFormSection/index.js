@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { includes, map } from 'lodash';
+import { map } from 'lodash';
 // design
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
@@ -24,11 +24,19 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
     const Input = inputs[props.type];
     const customBootstrapClass = config[props.target] || "";
 
-    return <Input name={props.name}  target={props.target} validations={props.validations} customBootstrapClass={customBootstrapClass} handleChange={this.props.handleChange} value={props.value} key={key} />;
+    return (
+      <Input
+        customBootstrapClass={customBootstrapClass}
+        key={key}
+        handleChange={this.props.handleChange}
+        name={props.name}
+        target={props.target} validations={props.validations}
+        value={props.value}
+      />
+    );
   }
 
   render() {
-    console.log(this.props)
     return (
       <div className={styles.editFormSection}>
         <div className="container">
@@ -37,15 +45,9 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
               {this.props.section.name}
             </span>
             <form>
-              {map(this.props.section.items, (item, key) => {
-                const inputs = {
-                  string: InputText,
-                  number: InputNumber,
-                  boolean: InputToggle,
-                };
-                return this.renderInput(item, key)
-              })}
-
+              {map(this.props.section.items, (item, key) => (
+                this.renderInput(item, key)
+              ))}
             </form>
           </div>
         </div>
@@ -53,5 +55,10 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
     );
   }
 }
+
+EditFormSection.propTypes = {
+  handleChange: React.PropTypes.func.isRequired,
+  section: React.PropTypes.object,
+};
 
 export default EditFormSection;

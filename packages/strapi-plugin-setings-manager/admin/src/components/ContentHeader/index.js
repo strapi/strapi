@@ -22,7 +22,8 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 }
 
 ContentHeader.propTypes = {
-  content: React.PropTypes.object,
+  description: React.PropTypes.string,
+  name: React.PropTypes.string,
 };
 
 export default ContentHeader;

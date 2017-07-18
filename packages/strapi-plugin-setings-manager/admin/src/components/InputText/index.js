@@ -152,9 +152,9 @@ InputText.propTypes = {
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   name: React.PropTypes.string.isRequired,
-  target: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
+  target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string.isRequired,
 }
