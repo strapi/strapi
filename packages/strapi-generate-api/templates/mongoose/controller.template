@@ -9,104 +9,104 @@
 module.exports = {
 
   /**
-   * Retrieve <%= subId || id %> records.
+   * Retrieve <%= id %> records.
    *
    * @return {Object|Array}
    */
 
   find: async (ctx) => {
-    const data = await strapi.services.<%= subId || id %>.fetchAll(ctx.query);
+    const data = await strapi.services.<%= id %>.fetchAll(ctx.query);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Retrieve a <%= subId || id %> record.
+   * Retrieve a <%= id %> record.
    *
    * @return {Object}
    */
 
   findOne: async (ctx) => {
-    const data = await strapi.services.<%= subId || id %>.fetch(ctx.params);
+    const data = await strapi.services.<%= id %>.fetch(ctx.params);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Create a/an <%= subId || id %> record.
+   * Create a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   create: async (ctx) => {
-    const data = await strapi.services.<%= subId || id %>.add(ctx.request.body);
+    const data = await strapi.services.<%= id %>.add(ctx.request.body);
 
     // Send 201 `created`
     ctx.created(data);
   },
 
   /**
-   * Update a/an <%= subId || id %> record.
+   * Update a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   update: async (ctx, next) => {
-    const data = await strapi.services.<%= subId || id %>.edit(ctx.params, ctx.request.body) ;
+    const data = await strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Destroy a/an <%= subId || id %> record.
+   * Destroy a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   destroy: async (ctx, next) => {
-    const data = await strapi.services.<%= subId || id %>.remove(ctx.params);
+    const data = await strapi.services.<%= id %>.remove(ctx.params);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Add relation to a/an <%= subId || id %> record.
+   * Add relation to a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   createRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= subId || id %>.addRelation(ctx.params, ctx.request.body);
+    const data = await strapi.services.<%= id %>.addRelation(ctx.params, ctx.request.body);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Update relation to a/an <%= subId || id %> record.
+   * Update relation to a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   updateRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= subId || id %>.editRelation(ctx.params, ctx.request.body);
+    const data = await strapi.services.<%= id %>.editRelation(ctx.params, ctx.request.body);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
-   * Destroy relation to a/an <%= subId || id %> record.
+   * Destroy relation to a/an <%= id %> record.
    *
    * @return {Object}
    */
 
   destroyRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= subId || id %>.removeRelation(ctx.params, ctx.request.body);
+    const data = await strapi.services.<%= id %>.removeRelation(ctx.params, ctx.request.body);
 
     // Send 200 `ok`
     ctx.send(data);

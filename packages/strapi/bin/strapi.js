@@ -15,10 +15,6 @@ const packageJSON = require('../package.json');
 // Strapi utilities.
 const program = require('strapi-utils').commander;
 
-// Needed.
-const NOOP = () => {};
-let cmd;
-
 /**
  * Normalize version argument
  *
@@ -39,120 +35,158 @@ process.argv = _.map(process.argv, arg => {
 });
 
 // `$ strapi version` (--version synonym)
-cmd = program.command('version');
-cmd.description('output your version of Strapi');
-cmd.action(program.versionInformation);
+program
+  .command('version')
+  .description('output your version of Strapi')
+  .action(program.versionInformation);
 
 // `$ strapi new`
-cmd = program.command('new');
-cmd.unknownOption = NOOP;
-cmd.description('create a new application ');
-cmd.action(require('./strapi-new'));
+program
+  .command('new')
+  .description('create a new application ')
+  .action(require('./strapi-new'));
 
 // `$ strapi start`
-cmd = program.command('start');
-cmd.unknownOption = NOOP;
-cmd.description('start your Strapi application');
-cmd.action(require('./strapi-start'));
+program
+  .command('start')
+  .description('start your Strapi application')
+  .action(require('./strapi-start'));
 
 // `$ strapi console`
-// cmd = program.command('console');
-// cmd.unknownOption = NOOP;
-// cmd.description('open the Strapi framework console');
-// cmd.action(require('./strapi-console'));
+// program
+//   .command('console')
+//   .description('open the Strapi framework console')
+//   .action(require('./strapi-console'));
 
 // `$ strapi generate:api`
-cmd = program.command('generate:api');
-cmd.unknownOption = true;
-cmd.option('-t, --tpl <template>', 'template name');
-cmd.description('generate a basic API');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:api <id> [attributes...]')
+  .option('-t, --tpl <template>', 'template name')
+  .option('-a, --api <api>', 'API name to generate a sub API')
+  .option('-p, --plugin <plugin>', 'plugin name to generate a sub API')
+  .description('generate a basic API')
+  .action((id, attributes, cliArguments) => {
+    cliArguments.attributes = attributes;
+    require('./strapi-generate')(id, cliArguments);
+  });
 
 // `$ strapi generate:controller`
-cmd = program.command('generate:controller');
-cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name');
-cmd.description('generate a controller for an API');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:controller <id>')
+  .option('-a, --api <api>', 'API name to generate a sub API')
+  .option('-p, --plugin <api>', 'plugin name')
+  .option('-t, --tpl <template>', 'template name')
+  .description('generate a controller for an API')
+  .action(require('./strapi-generate'));
 
 // `$ strapi generate:model`
-cmd = program.command('generate:model');
-cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name');
-cmd.description('generate a model for an API');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:model <id> [attributes...]')
+  .option('-a, --api <api>', 'API name to generate a sub API')
+  .option('-p, --plugin <api>', 'plugin name')
+  .option('-t, --tpl <template>', 'template name')
+  .description('generate a model for an API')
+  .action((id, attributes, cliArguments) => {
+    cliArguments.attributes = attributes;
+    require('./strapi-generate')(id, cliArguments);
+  });
 
 // `$ strapi generate:policy`
-cmd = program.command('generate:policy');
-cmd.unknownOption = NOOP;
-cmd.description('generate a policy for an API');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:policy <id>')
+  .option('-a, --api <api>', 'API name')
+  .option('-p, --plugin <api>', 'plugin name')
+  .description('generate a policy for an API')
+  .action(require('./strapi-generate'));
 
 // `$ strapi generate:service`
-cmd = program.command('generate:service');
-cmd.unknownOption = NOOP;
-cmd.option('-t, --tpl <template>', 'template name');
-cmd.description('generate a service for an API');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:service <id>')
+  .option('-a, --api <api>', 'API name')
+  .option('-p, --plugin <api>', 'plugin name')
+  .option('-t, --tpl <template>', 'template name')
+  .description('generate a service for an API')
+  .action(require('./strapi-generate'));
+
+// `$ strapi generate:plugin`
+program
+  .command('generate:plugin <id>')
+  .option('-n, --name <name>', 'Plugin name')
+  .description('generate a basic plugin')
+    .action(require('./strapi-generate'));
 
 // `$ strapi generate:hook`
-cmd = program.command('generate:hook');
-cmd.unknownOption = NOOP;
-cmd.description('generate an installable hook');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:hook <id>')
+  .description('generate an installable hook')
+  .action(require('./strapi-generate'));
 
 // `$ strapi generate:generator`
-cmd = program.command('generate:generator');
-cmd.unknownOption = NOOP;
-cmd.description('generate a custom generator');
-cmd.action(require('./strapi-generate'));
+program
+  .command('generate:generator <id>')
+  .description('generate a custom generator')
+  .action(require('./strapi-generate'));
+
+// `$ strapi install`
+program
+  .command('install <plugin>')
+  .option('-d, --dev', 'Development mode')
+  .description('install a Strapi plugin')
+  .action(require('./strapi-install'));
+
+// `$ strapi uninstall`
+program
+  .command('uninstall <plugin>')
+  .description('uninstall a Strapi plugin')
+  .action(require('./strapi-uninstall'));
 
 // `$ strapi migrate:make`
-cmd = program.command('migrate:make');
-cmd.unknownOption = NOOP;
-cmd.description('make migrations for a connection');
-cmd.action(require('./strapi-migrate-make'));
+program
+  .command('migrate:make')
+  .description('make migrations for a connection')
+  .action(require('./strapi-migrate-make'));
 
 // `$ strapi migrate:run`
-cmd = program.command('migrate:run');
-cmd.unknownOption = NOOP;
-cmd.description('run migrations for a connection');
-cmd.action(require('./strapi-migrate-run'));
+program
+  .command('migrate:run')
+  .description('run migrations for a connection')
+  .action(require('./strapi-migrate-run'));
 
 // `$ strapi migrate:rollback`
-cmd = program.command('migrate:rollback');
-cmd.unknownOption = NOOP;
-cmd.description('rollback the latest batch of migrations for a connection');
-cmd.action(require('./strapi-migrate-rollback'));
+program
+  .command('migrate:rollback')
+  .description('rollback the latest batch of migrations for a connection')
+  .action(require('./strapi-migrate-rollback'));
 
 // `$ strapi config`
-cmd = program.command('config');
-cmd.unknownOption = NOOP;
-cmd.description('extend the Strapi framework with custom generators');
-cmd.action(require('./strapi-config'));
+program
+  .command('config')
+  .description('extend the Strapi framework with custom generators')
+  .action(require('./strapi-config'));
 
 // `$ strapi update`
-cmd = program.command('update');
-cmd.unknownOption = NOOP;
-cmd.description('pull the latest updates of your custom generators');
-cmd.action(require('./strapi-update'));
+program
+  .command('update')
+  .description('pull the latest updates of your custom generators')
+  .action(require('./strapi-update'));
 
 /**
  * Normalize help argument
  */
 
 // `$ strapi help` (--help synonym)
-cmd = program.command('help');
-cmd.description('output the help');
-cmd.action(program.usageMinusWildcard);
+program
+  .command('help')
+  .description('output the help')
+  .action(program.usageMinusWildcard);
 
 // `$ strapi <unrecognized_cmd>`
 // Mask the '*' in `help`.
-cmd = program.command('*');
-cmd.action(program.usageMinusWildcard);
+program
+  .command('*')
+  .action(program.usageMinusWildcard);
 
 // Don't balk at unknown options.
-program.unknownOption = NOOP;
 
 /**
  * `$ strapi`

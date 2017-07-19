@@ -1,0 +1,44 @@
+.tableRow { /* stylelint-disable */
+  background: #ffffff;
+  border-bottom: 1px solid #D4DDE3;
+
+  td:first-child {
+    border-left: 3px solid transparent;
+  }
+
+  &:hover {
+    background: #F8FAFB;
+    cursor: pointer;
+
+    td:first-child {
+      border-left: 3px solid #1C5DE7;
+    }
+  }
+}
+
+.tableRowCell {
+  border: none;
+  font-weight: 400;
+  color: #465373;
+  padding-top: 1.6rem !important;
+  padding-bottom: 1.6rem !important;
+}
+
+.actions {
+  i {
+    font-size: 1.2rem;
+    color: #8B96B3;
+    color: #CDD3E4;
+    margin-left: 1rem;
+
+    &:hover {
+      color: #1C5DE7;
+    }
+  }
+}
+
+.idLink {
+  &:hover {
+    text-decoration: none;
+  }
+}

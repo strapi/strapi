@@ -1,0 +1,10 @@
+{
+  "addAnEntry": {
+    "id": "contentManager.containers.List.addAnEntry",
+    "defaultMessage": "Add an entry"
+  },
+  "pluginHeaderDescription": {
+    "id": "contentManager.containers.List.pluginHeaderDescription",
+    "defaultMessage": "Manage your {label}"
+  }
+}

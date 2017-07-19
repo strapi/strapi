@@ -24,7 +24,7 @@ module.exports = strapi => {
     defaults: {
       key: 'strapi.sid',
       prefix: 'strapi:sess:',
-      ttl: null,
+      ttl: 24 * 60 * 60 * 1000, // One day in ms
       rolling: false,
       secretKeys: ['mySecretKey1', 'mySecretKey2'],
       cookie: {
@@ -59,6 +59,12 @@ module.exports = strapi => {
               );
 
               strapi.app.use(strapi.middlewares.convert(strapi.middlewares.genericSession(options)));
+              strapi.app.use((ctx, next) => {
+                ctx.state = ctx.state || {};
+                ctx.state.session = ctx.session || {};
+
+                return next();
+              });
             } catch (err) {
               return cb(err);
             }

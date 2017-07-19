@@ -6,22 +6,13 @@
 
 module.exports = strapi => {
   return {
-
     /**
      * Default options
      */
 
     defaults: {
       parser: {
-        encode: 'utf-8',
-        formLimit: '56kb',
-        jsonLimit: '1mb',
-        strict: true,
-        extendTypes: {
-          json: [
-            'application/x-javascript'
-          ]
-        }
+        multipart: true
       }
     },
 
@@ -30,13 +21,11 @@ module.exports = strapi => {
      */
 
     initialize: cb => {
-      strapi.app.use(strapi.middlewares.bodyparser({
-        encode: strapi.config.parser.encode,
-        formLimit: strapi.config.parser.formLimit,
-        jsonLimit: strapi.config.parser.jsonLimit,
-        strict: strapi.config.parser.strict,
-        extendTypes: strapi.config.parser.extendTypes
-      }));
+      strapi.app.use(
+        strapi.middlewares.convert(
+          strapi.middlewares.body(strapi.config.parser)
+        )
+      );
 
       cb();
     }

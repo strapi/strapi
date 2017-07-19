@@ -41,7 +41,7 @@ module.exports = function (strapi) {
       let globalName;
 
       // Return callback if there is no model
-      if (_.isEmpty(strapi.models) || _.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'})) {
+      if (_.isEmpty(strapi.models) || !_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'})) {
         return cb();
       }
 
@@ -79,6 +79,11 @@ module.exports = function (strapi) {
             _.forEach(models, (definition, model) => {
               try {
                 let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
+
+                // Set the default values to model settings.
+                _.defaults(definition, {
+                  primaryKey: '_id'
+                });
 
                 // Initialize lifecycle callbacks.
                 const preLifecycle = {
@@ -130,6 +135,9 @@ module.exports = function (strapi) {
                 });
 
                 global[definition.globalName] = mongoose.model(definition.globalName, collection.schema);
+
+                // Expose ORM functions through the `strapi.models` object.
+                strapi.models[model] = _.assign(mongoose.model(definition.globalName), strapi.models[model]);
 
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];

@@ -10,6 +10,10 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
+const pluralize = require('pluralize');
+
+// Fetch stub attribute template on initial load.
+const attributeTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'templates', 'attribute.template'), 'utf8');
 
 /**
  * This `before` function is run before generating targets.
@@ -20,15 +24,14 @@ const _ = require('lodash');
  */
 
 module.exports = (scope, cb) => {
-  if (!scope.rootPath || !scope.args[0]) {
-    return cb.invalid('Usage: `$ strapi generate:model modelName apiName`');
+  if (!scope.rootPath || !scope.id) {
+    return cb.invalid('Usage: `$ strapi generate:model modelName --api apiName --plugin pluginName`');
   }
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.args[0])),
-    attributes: _.takeRight(scope.args, _.size(scope.args) - 1),
-    api: {},
+    id: _.trim(_.deburr(scope.id)),
+    idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
     environment: process.NODE_ENV || 'development'
   });
 
@@ -38,9 +41,20 @@ module.exports = (scope, cb) => {
     ext: '.js'
   });
 
+  // Determine the destination path.
+  let filePath;
+  if (scope.args.api) {
+    filePath = `./api/${scope.args.api}/models`;
+  } else if (scope.args.plugin) {
+    filePath = `./plugins/${scope.args.plugin}/models`;
+  } else {
+    filePath = `./api/${scope.id}/models`;
+  }
+
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
+    filePath,
     filename: scope.globalID + scope.ext,
     filenameSettings: scope.globalID + '.settings.json'
   });
@@ -48,18 +62,50 @@ module.exports = (scope, cb) => {
   // Humanize output.
   _.defaults(scope, {
     humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: '`./api/' + scope.id + '/models`'
+    humanizedPath: '`' + scope.filePath + '`'
   });
 
-  _.forEach(scope.attributes, attribute => {
-    const object = attribute.split(':');
+  // Validate optional attribute arguments.
+  const invalidAttributes = [];
 
-    if (_.size(object) === 2) {
-      scope.api[_.trim(_.deburr(_.camelCase(_.first(object)).toLowerCase()))] = {
-        type: _.trim(_.deburr(_.camelCase(_.last(object).toLowerCase())))
-      };
+  // Map attributes and split them.
+  scope.attributes = scope.args.attributes.map((attribute) => {
+    const parts = attribute.split(':');
+
+    parts[1] = parts[1] ? parts[1] : 'string';
+
+    // Handle invalid attributes.
+    if (!parts[1] || !parts[0]) {
+      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+      return;
     }
+
+    return {
+      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
+      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
+    };
   });
+
+  // Handle invalid action arguments.
+  // Send back invalidActions.
+  if (invalidAttributes.length) {
+    return cb.invalid(invalidAttributes);
+  }
+
+  // Make sure there aren't duplicates.
+  if (_(scope.attributes.map(attribute => (attribute.name))).uniq().valueOf().length !== scope.attributes.length) {
+    return cb.invalid('Duplicate attributes not allowed!');
+  }
+
+  // Render some stringified code from the action template
+  // and make it available in our scope for use later on.
+  scope.attributes = scope.attributes.map((attribute) => {
+    const compiled = _.template(attributeTemplate);
+    return _.trimEnd(_.unescape(compiled({
+      name: attribute.name,
+      type: attribute.type
+    })));
+  }).join(',\n');
 
   // Get default connection
   try {

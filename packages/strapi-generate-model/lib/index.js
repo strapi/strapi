@@ -16,9 +16,9 @@ module.exports = {
   templatesDirectory: scope => {
     try {
       // Try to reach the path. If it fail, throw an error.
-      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.template), fs.constants.R_OK | fs.constants.W_OK);
+      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args.tpl), fs.constants.R_OK | fs.constants.W_OK);
 
-      return path.resolve(__dirname, '..', 'templates', scope.template);
+      return path.resolve(__dirname, '..', 'templates', scope.args.tpl);
     } catch (e) {
       // Default template is Mongoose
       return path.resolve(__dirname, '..', 'templates', 'mongoose');
@@ -26,10 +26,10 @@ module.exports = {
   },
   before: require('./before'),
   targets: {
-    'api/:humanizeId/models/:filename': {
+    ':filePath/models/:filename': {
       template: 'model.template'
     },
-    'api/:humanizeId/models/:filenameSettings': {
+    ':filePath/models/:filenameSettings': {
       template: 'model.settings.template'
     }
   }

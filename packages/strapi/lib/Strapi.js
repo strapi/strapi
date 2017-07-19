@@ -19,11 +19,10 @@ const mixinAfter = require('./private/after');
  * @constructor
  */
 
- // Private properties
+// Private properties
 let _instance = null;
 
 class Strapi extends EventEmitter {
-
   constructor() {
     super();
 
@@ -53,6 +52,8 @@ class Strapi extends EventEmitter {
       camelize: true,
       lazy: false
     });
+
+    this.connections = {};
 
     // New Winston logger.
     this.log = require('strapi-utils').logger;

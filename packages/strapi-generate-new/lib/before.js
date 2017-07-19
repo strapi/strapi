@@ -23,14 +23,9 @@ const logger = require('strapi-utils').logger;
  */
 
 module.exports = (scope, cb) => {
-  let defaultName = scope.name;
-  if (defaultName === '.' || !defaultName) {
-    defaultName = path.basename(process.cwd());
-  }
-
   // App info.
   _.defaults(scope, {
-    name: defaultName,
+    name: scope.name === '.' || !scope.name ? scope.name : path.basename(process.cwd()),
     author: process.env.USER || 'A Strapi developer',
     email: process.env.EMAIL || '',
     year: (new Date()).getFullYear(),

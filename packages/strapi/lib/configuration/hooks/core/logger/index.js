@@ -25,7 +25,12 @@ module.exports = strapi => {
           const start = new Date();
           await next();
           const ms = new Date() - start;
-          strapi.log.debug(ctx.method + ' ' + ctx.url + ' (' + ms + 'ms)');
+
+          // Choose logger type depending on the response status.
+          const logger = ctx.status < 400 ? strapi.log.debug : strapi.log.error;
+
+          // Finally, log the string.
+          logger(`${ctx.ip} - [${start.toISOString()}] ${ctx.method} ${ctx.status} ${ctx.url} (${ms}ms)`);
         });
       }
 

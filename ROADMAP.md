@@ -45,19 +45,29 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Update the generated API's files with async/await pattern~~
 
 `strapi@alpha.4`:
-- [Plugin] Content Manager
-- Update React-Boilerplate to the latest version.
-- Implement Jest instead of Mocha. (only if we could see performances improvements)
-- Give the ability to create a log file (thanks to Winston).
+- ~~Improve `strapi-bookshelf` and `strapi-mongoose` adapters.~~
+- ~~Improve the way we are injecting plugins into the dashboard.~~
+- ~~Create plugin helper to share utils between plugins (`strapi-helper-plugin`).~~
+- ~~Prototype the plugins queries process to be able to use different ORMs.~~
+- ~~Prototype the CLI to create, install and uninstall plugins.~~
+
+`strapi@alpha.5` *(expected release date: 10/08/2017)*:
+- [Plugin] Content Manager.
+- [Plugin] Settings Manager.
+- Update React-Boilerplate dependencies to the latest version.
+- Update layout design.
+- Create a draft of the guidelines to follow of how to create a plugin.
+- Finalize the plugins queries process to be able to use different ORMs.
+- Initialize the `strapi-docs` package.
+- Use [lerna](http://lernajs.io) to run tests.
+
+`strapi@alpha.6` *(expected release date: 21/09/2017)*:
+- [Plugin] Content Type Builder.
+- [Plugin] Users & groups (with full authentication process).
+- Synchronize the ORM adapters to set the same properties in the AST.
+- Freeze (make immutable) the AST.
+- Remove global variable `strapi` and use the module pattern instead.
+- Give the ability to create a log file.
 - Write better tests.
-- Improve `strapi-bookshelf` thanks to the work done by @dj-hedgehog and his team.
-
-
-### β beta
-**Expected release date: 01/04/2017**
-
-* Remove harmony flag.
-* Load custom hooks.
-* Create plugin generator.
-* [Plugin] Users & groups.
-* [Plugin] Permissions Manager.
+- Ensure that we are compatible with Node 8.
+- Rewrite the Strapi core to improve performances and startup time.

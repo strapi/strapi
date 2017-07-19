@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-api",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4",
   "description": "Generate an API for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,8 +13,8 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "^4.16.5",
-    "pluralize": "~3.1.0"
+    "lodash": "^4.17.4",
+    "pluralize": "^3.1.0"
   },
   "scripts": {
     "prepublish": "npm prune"
@@ -39,8 +39,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }
