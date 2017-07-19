@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { map } from 'lodash';
+import Button from 'components/Button';
 import EditFormSection from 'components/EditFormSection';
 import styles from './styles.scss';
 
@@ -28,13 +29,19 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             )
           })}
         </div>
+        <div className={styles.buttonContainer}>
+          <Button label={"cancel"} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
+          <Button label={"save"} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+        </div>
       </div>
     );
   }
 }
 
 EditForm.propTypes = {
+  handleCancel: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
+  handleSubmit: React.PropTypes.func,
   sections: React.PropTypes.array,
   values: React.PropTypes.object,
 };

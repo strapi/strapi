@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes } from 'lodash';
+import { findKey, includes, get, toNumber } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -16,10 +16,11 @@ import { router } from 'app';
 // design
 import ContentHeader from 'components/ContentHeader';
 import EditForm from 'components/EditForm';
+import HeaderNav from 'components/HeaderNav';
 
-import { makeSelectSections } from 'containers/App/selectors';
+import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
-import { configFetch, changeInput } from './actions'
+import { configFetch, changeInput, cancelChanges, submitChanges } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -30,6 +31,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.customComponents = config.customComponents;
     this.components = {
       editForm: EditForm,
+      defaultComponent: HeaderNav, // TODO change to default
     };
   }
 
@@ -38,7 +40,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
       this.props.configFetch(apiUrl);
     } else {
-      router.push(`/plugins/settings-manager/${this.props.sections[0].items[0].slug}`);
+      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
     }
   }
 
@@ -52,9 +54,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         this.props.configFetch(apiUrl);
       } else {
         // redirect user if no params slug provided
-        router.push(`/plugins/settings-manager/${this.props.sections[0].items[0].slug}`);
+        router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
       }
-    } else if (this.props.params.env !== nextProps.params.env && nextProps.params.env) {
+    } else if (this.props.params.env !== nextProps.params.env && nextProps.params.env && this.props.params.env) {
       // get data if params env updated
       this.props.configFetch(`${this.props.params.slug}/${nextProps.params.env}`);
     }
@@ -62,7 +64,37 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    this.props.changeInput(target.name, target.value);
+    const value = target.type === 'number' ? toNumber(target.value) : target.value;
+    this.props.changeInput(target.name, value);
+  }
+
+  handleCancel = () => {
+    this.props.cancelChanges();
+  }
+
+  handleSubmit = () => {
+    this.props.submitChanges();
+  }
+
+  renderComponent = () => {
+    // check if  settingName (params.slug) has a custom view display
+    const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
+      findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'defaultComponent';
+    // if custom view display render specificComponent
+    const Component = this.components[specificComponent];
+
+    return (
+      <Component
+        sections={this.props.home.configsDisplay.sections}
+        values={this.props.home.modifiedData}
+        handleChange={this.handleChange}
+        handleCancel={this.handleCancel}
+        handleSubmit={this.handleSubmit}
+        links={this.props.environments}
+        path={this.props.location.pathname}
+      />
+    );
+    // TODO remove environments
   }
 
   render() {
@@ -70,11 +102,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       return <div />;
     }
 
-    // check if  settingName (params.slug) has a custon view display
-    const component = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
-      findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'div'; // TODO change div to defaultComponent
-    // if custom view display render specificComponent
-    const Form = this.components[component];
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet
@@ -87,7 +114,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-        <Form sections={this.props.home.configsDisplay.sections} values={this.props.home.modifiedData} handleChange={this.handleChange} />
+        {this.renderComponent()}
       </div>
     );
   }
@@ -95,26 +122,33 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
 
 const mapStateToProps = createStructuredSelector({
+  environments: makeSelectEnvironments(),
   home: selectHome(),
-  sections: makeSelectSections(),
+  menuSections: makeSelectSections(),
 })
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelChanges,
       changeInput,
       configFetch,
+      submitChanges,
     },
     dispatch
   )
 }
 
 Home.propTypes = {
+  cancelChanges: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
+  environments: React.PropTypes.array,
   home: React.PropTypes.object,
+  location: React.PropTypes.object,
+  menuSections: React.PropTypes.array,
   params: React.PropTypes.object.isRequired,
-  sections: React.PropTypes.array,
+  submitChanges: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
