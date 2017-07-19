@@ -48,6 +48,7 @@
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",
   "request.error.type.boolean": "A boolean is required.",
+  "request.error.type.select": "The value must be in predefined list.",
 
   "request.error.validation.required": "This value input is required.",
   "request.error.validation.regex": "The value not match the regex.",

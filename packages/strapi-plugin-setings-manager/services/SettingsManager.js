@@ -285,7 +285,7 @@ module.exports = {
   paramsValidation: (params, items) => {
     let errors = [];
 
-    const checkType = (input, { type, target }) => {
+    const checkType = (input, { type, target, items }) => {
       if ((type === 'string' || type === 'text') && !_.isString(input)) errors.push({
         target: target,
         message: 'request.error.type.string'
@@ -299,6 +299,11 @@ module.exports = {
       if (type === 'boolean' && !_.isBoolean(input)) errors.push({
         target: target,
         message: 'request.error.type.boolean'
+      });
+
+      if (type === 'select' && !_.find(items, { value: input })) errors.push({
+        target: target,
+        message: 'request.error.type.select'
       });
     };
 
