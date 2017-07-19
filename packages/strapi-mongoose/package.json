@@ -20,7 +20,7 @@
     "mongoose-double": "0.0.1",
     "mongoose-float": "^1.0.2",
     "pluralize": "^3.1.0",
-    "strapi-utils": "^3.0.0-alpha.4"
+    "strapi-utils": "file:../strapi-utils"
   },
   "strapi": {
     "isHook": true
@@ -49,7 +49,7 @@
   },
   "engines": {
     "node": ">= 8.0.0",
-    "npm": ">= 5.0.0"
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }

@@ -4,7 +4,7 @@
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 8.0.0",
-    "npm": ">= 5.0.0"
+    "npm": ">= 5.3.0"
   },
   "author": {
     "email": "hi@strapi.io",

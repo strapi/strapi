@@ -18,7 +18,7 @@
     "ioredis": "^2.5.0",
     "lodash": "^4.17.4",
     "stack-trace": "0.0.9",
-    "strapi-utils": "^3.0.0-alpha.4"
+    "strapi-utils": "file:../strapi-utils"
   },
   "strapi": {
     "isHook": true
@@ -47,7 +47,7 @@
   },
   "engines": {
     "node": ">= 8.0.0",
-    "npm": ">= 5.0.0"
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }
