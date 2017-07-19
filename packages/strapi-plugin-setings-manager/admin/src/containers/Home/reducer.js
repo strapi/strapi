@@ -23,7 +23,10 @@ const initialState = fromJS({
 function homeReducer(state = initialState, action) {
   switch (action.type) {
     case CONFIG_FETCH:
-      return state.set('loading', true).set('modifiedData', Map()).set('configsDisplay', OrderedMap());
+      return state;
+      // TODO uncomment if error FormattedMessage
+      // .set('loading', true)
+      // .set('modifiedData', Map()).set('configsDisplay', OrderedMap());
     case CONFIG_FETCH_SUCCEEDED:
       return state
         .set('loading', false)

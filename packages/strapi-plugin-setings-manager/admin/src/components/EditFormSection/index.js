@@ -12,6 +12,7 @@ import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
 import InputToggle from 'components/InputToggle';
 import InputSelect from 'components/InputSelect';
+import InputEnum from 'components/InputEnum';
 import config from './config.json';
 import styles from './styles.scss';
 
@@ -22,7 +23,8 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
       string: InputText,
       number: InputNumber,
       boolean: InputToggle,
-      enum: InputSelect, // TODO change to radio
+      enum: InputEnum,
+      select: InputSelect,
     };
     const Input = inputs[props.type];
     const customBootstrapClass = config[props.target] || "";
