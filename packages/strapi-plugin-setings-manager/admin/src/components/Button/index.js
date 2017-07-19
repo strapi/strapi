@@ -12,7 +12,7 @@ class Button extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <button className={`btn btn-primary ${styles.button}`} {...this.props}>
+      <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...this.props}>
         {this.props.label}
       </button>
     );
@@ -20,6 +20,8 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
+  buttonBackground: React.PropTypes.string,
+  buttonSize: React.PropTypes.string,
   label: React.PropTypes.string.isRequired,
 };
 

@@ -19,7 +19,7 @@ import EditForm from 'components/EditForm';
 
 import { makeSelectSections } from 'containers/App/selectors';
 import selectHome from './selectors';
-import { configFetch, changeInput } from './actions'
+import { configFetch, changeInput, cancelChanges, submitChanges } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -66,6 +66,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.changeInput(target.name, target.value);
   }
 
+  handleCancel = () => {
+    console.log('click');
+    this.props.cancelChanges();
+  }
+
+  handleSubmit = () => {
+    this.props.submitChanges();
+  }
+
   render() {
     if (this.props.home.loading) {
       return <div />;
@@ -88,7 +97,13 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-        <Form sections={this.props.home.configsDisplay.sections} values={this.props.home.modifiedData} handleChange={this.handleChange} />
+        <Form
+          sections={this.props.home.configsDisplay.sections}
+          values={this.props.home.modifiedData}
+          handleChange={this.handleChange}
+          handleCancel={this.handleCancel}
+          handleSubmit={this.handleSubmit}
+        />
       </div>
     );
   }
@@ -103,19 +118,23 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelChanges,
       changeInput,
       configFetch,
+      submitChanges,
     },
     dispatch
   )
 }
 
 Home.propTypes = {
+  cancelChanges: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
   home: React.PropTypes.object,
   params: React.PropTypes.object.isRequired,
   sections: React.PropTypes.array,
+  submitChanges: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

@@ -9,6 +9,7 @@ import {
   CONFIG_FETCH,
   CONFIG_FETCH_SUCCEEDED,
   CHANGE_INPUT,
+  CANCEL_CHANGES,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -31,6 +32,8 @@ function homeReducer(state = initialState, action) {
         .set('modifiedData', Map(action.data));
     case CHANGE_INPUT:
       return state.updateIn(['modifiedData', action.key], value => action.value); // eslint-disable-line no-unused-vars
+    case CANCEL_CHANGES:
+      return state.set('modifiedData', state.get('initialData'));
     default:
       return state;
   }
