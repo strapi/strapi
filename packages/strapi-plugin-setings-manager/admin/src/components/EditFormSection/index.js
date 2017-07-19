@@ -54,9 +54,11 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
       <div className={styles.editFormSection}>
         <div className="container">
           <div className="row">
-            <span>
-              {sectionName}
-            </span>
+            <div className="col-md-12">
+              <span className={styles.sectionHeader}>
+                {sectionName}
+              </span>
+            </div>
             <form>
               {map(this.props.section.items, (item, key) => (
                 this.renderInput(item, key)
