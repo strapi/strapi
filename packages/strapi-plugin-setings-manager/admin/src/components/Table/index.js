@@ -10,7 +10,7 @@ import styles from './styles.scss';
 
 class Table extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    console.log(this.props)
+    console.log(this.props);
     return (
       <div className={styles.table}>
       </div>
