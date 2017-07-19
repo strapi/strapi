@@ -49,7 +49,7 @@ module.exports = {
     ]
   },
 
-  general: {
+  general: () => ({
     name: 'form.general.name',
     description: 'form.general.description',
     sections: [
@@ -89,9 +89,9 @@ module.exports = {
         ]
       }
     ]
-  },
+  }),
 
-  advanced: {
+  advanced: () => ({
     name: 'form.advanced.name',
     description: 'form.advanced.description',
     sections: [
@@ -120,7 +120,7 @@ module.exports = {
         ]
       }
     ]
-  },
+  }),
 
   security: env => ({
     name: 'form.security.name',
@@ -225,7 +225,7 @@ module.exports = {
     ]
   }),
 
-  i18n: {
+  i18n: env => ({
     name: '',
     description: '',
     sections: [
@@ -234,12 +234,13 @@ module.exports = {
         items: [
           {
             target: 'i18n.i18n.defaultLocale',
-            type: 'string'
+            type: 'select',
+            items: strapi.plugins['settings-manager'].services.languages
           }
         ]
       }
     ]
-  },
+  }),
 
   getEnvironments: () => {
     return _.map(_.keys(strapi.config.environments), environment => {
