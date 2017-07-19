@@ -23,13 +23,14 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
             const isChecked = this.props.value === option.value;
             const active = isChecked ? styles.active : "";
             return (
-              <label className={`btn ${styles.button} ${active}`} key={key} htmlFor={this.props.name}>
+              <label className={`btn ${styles.button} ${active}`} key={key} htmlFor={option.name}>
                 <FormattedMessage {...{id: option.name}} />
                 <input
                   type="radio"
                   name={this.props.target}
-                  id={this.props.name}
+                  id={option.name}
                   checked={isChecked}
+                  autoComplete="off"
                   value={option.value}
                   onChange={this.props.handleChange}
                 />
