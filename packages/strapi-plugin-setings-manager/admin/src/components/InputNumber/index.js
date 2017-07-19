@@ -9,11 +9,12 @@
 *   - handleBlur: function
 *     overrides the default input validations
 *   - errors : array
-*     prevent from siplaying errors messages
+*     prevent from displaying errors messages
 *
 * Required
 *  - name : string
 *  - handleChange : function
+*  - target : string
 *  - value : string
 *  - validations : object
 *
@@ -94,7 +95,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
         <label htmlFor={this.props.name}>{this.props.name}</label>
         <input
           type="number"
-          name={this.props.name}
+          name={this.props.target}
           id={this.props.name}
           value={inputValue}
           onBlur={handleBlur}
@@ -124,6 +125,7 @@ InputNumber.propTypes = {
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
+  target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.oneOfType([
     React.PropTypes.number.isRequired,

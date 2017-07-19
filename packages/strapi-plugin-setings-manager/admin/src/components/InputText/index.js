@@ -10,14 +10,14 @@
 *     overrides the default input validations
 *   - errors : array
 *   - noErrorsDescription : bool
-*     prevent from siplaying errors messages
+*     prevent from displaying errors messages
 *
 * Required
 *  - name : string
 *  - handleChange : function
 *  - value : string
-*  - validations : object
 *  - target : string
+*  - validations : object
 *
 * Optionnal
 * - description : input description

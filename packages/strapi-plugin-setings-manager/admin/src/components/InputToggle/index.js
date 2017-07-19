@@ -7,7 +7,7 @@
 *
 * Required
 *  - handleChange: function
-*  - name: string
+*  - target: string
 *  - isChecked: bool
 */
 
@@ -37,7 +37,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
       isChecked  = false;
     }
     const target = {
-      name: this.props.name,
+      name: this.props.target,
       value: isChecked,
     };
     this.setState({ isChecked });
@@ -63,7 +63,7 @@ InputToggle.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   handleChange: React.PropTypes.func.isRequired,
   isChecked: React.PropTypes.bool.isRequired,
-  name: React.PropTypes.string.isRequired,
+  target: React.PropTypes.string.isRequired,
 }
 
 export default InputToggle;

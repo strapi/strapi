@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes } from 'lodash';
+import { findKey, includes, get } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -30,6 +30,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.customComponents = config.customComponents;
     this.components = {
       editForm: EditForm,
+      div: EditForm, // TODO change to default
     };
   }
 
@@ -38,7 +39,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
       this.props.configFetch(apiUrl);
     } else {
-      router.push(`/plugins/settings-manager/${this.props.sections[0].items[0].slug}`);
+      router.push(`/plugins/settings-manager/${get(this.props.sections, ['0', 'items', '0', 'slug'])}`);
     }
   }
 
@@ -52,7 +53,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         this.props.configFetch(apiUrl);
       } else {
         // redirect user if no params slug provided
-        router.push(`/plugins/settings-manager/${this.props.sections[0].items[0].slug}`);
+        router.push(`/plugins/settings-manager/${get(this.props.sections, ['0', 'items', '0', 'slug'])}`);
       }
     } else if (this.props.params.env !== nextProps.params.env && nextProps.params.env) {
       // get data if params env updated
