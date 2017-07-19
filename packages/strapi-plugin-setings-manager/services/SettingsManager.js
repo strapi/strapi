@@ -221,6 +221,22 @@ module.exports = {
     ]
   }),
 
+  i18n: {
+    name: '',
+    description: '',
+    sections: [
+      {
+        name: '',
+        items: [
+          {
+            target: 'i18n.i18n.defaultLocale',
+            type: 'string'
+          }
+        ]
+      }
+    ]
+  },
+
   getEnvironments: () => {
     return _.map(_.keys(strapi.config.environments), environment => {
       return {
