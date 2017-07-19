@@ -241,9 +241,9 @@ module.exports = {
         return {
           id: err.message,
           params: _.get(err, 'params', undefined)
-        }
+        };
       })
-    }
+    };
   }),
 
   paramsValidation: (params, items) => {
@@ -304,8 +304,8 @@ module.exports = {
       if (_.has(params, item.target)) {
         const input = _.get(params, item.target, null);
 
-        checkType(input, item)
-        checkValidations(input, item)
+        checkType(input, item);
+        checkValidations(input, item);
       }
     });
 

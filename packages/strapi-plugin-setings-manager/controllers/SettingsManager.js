@@ -45,15 +45,11 @@ module.exports = {
 
     const validationErrors = Service.paramsValidation(params, items);
 
-    if (!_.isEmpty(validationErrors)) {
-      return ctx.badData(null, Service.formatErrors(validationErrors));
-    }
+    if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
     const updateErrors = Service.updateSettings(params, items, env);
 
-    if (!_.isEmpty(updateErrors)) {
-      return ctx.badData(null, Service.formatErrors(updateErrors));
-    }
+    if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
 
     ctx.send();
   },
