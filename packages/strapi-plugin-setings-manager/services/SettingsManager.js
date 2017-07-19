@@ -166,14 +166,20 @@ module.exports = {
               {
                 name: 'form.security.item.xframe.allow-from',
                 value: 'ALLOW-FROM',
-              },
-            ]
+              }
+            ],
+            validations: {
+              required: true
+            }
           },
           {
             name: 'form.security.item.xssProtection',
             target: 'security.xssProtection',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null)
+            value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null),
+            validations: {
+              required: true
+            }
           }
         ]
       },
