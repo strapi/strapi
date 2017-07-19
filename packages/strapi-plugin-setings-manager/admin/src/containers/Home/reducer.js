@@ -31,7 +31,7 @@ function homeReducer(state = initialState, action) {
         .set('initialData', Map(action.data))
         .set('modifiedData', Map(action.data));
     case CHANGE_INPUT:
-      return state.updateIn(['modifiedData', action.key], value => action.value); // eslint-disable-line no-unused-vars
+      return state.updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state.set('modifiedData', state.get('initialData'));
     default:

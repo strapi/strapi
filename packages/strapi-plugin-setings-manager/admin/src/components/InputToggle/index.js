@@ -57,8 +57,8 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     const btnClassOn = this.state.isChecked ? `btn ${styles.gradientOn}` : 'btn';
     const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
     return (
-      <div className={customBootstrapClass}>
-        <div>
+      <div className={`${customBootstrapClass} ${styles.container}`}>
+        <div className={styles.toggleLabel}>
           <FormattedMessage {...{id: this.props.name}} />
         </div>
         <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">

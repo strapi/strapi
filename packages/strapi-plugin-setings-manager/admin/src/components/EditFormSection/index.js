@@ -11,6 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
 import InputToggle from 'components/InputToggle';
+import InputSelect from 'components/InputSelect';
 import config from './config.json';
 import styles from './styles.scss';
 
@@ -21,11 +22,13 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
       string: InputText,
       number: InputNumber,
       boolean: InputToggle,
-      enum: 'div', // TODO remove when compo enum finished
+      enum: InputSelect, // TODO change to radio
     };
     const Input = inputs[props.type];
     const customBootstrapClass = config[props.target] || "";
     const inputValue = this.props.values[props.target];
+    // retrieve options for the select input
+    const selectOptions = props.type === 'enum' ? props.items : [];
     return (
       // <div />
       <Input
@@ -35,6 +38,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
         name={props.name}
         target={props.target}
         isChecked={inputValue}
+        selectOptions={selectOptions}
         validations={props.validations}
         value={inputValue}
       />
@@ -43,6 +47,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 
   render() {
     const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage {...{id: this.props.section.name}} />;
+
     return (
       <div className={styles.editFormSection}>
         <div className="container">

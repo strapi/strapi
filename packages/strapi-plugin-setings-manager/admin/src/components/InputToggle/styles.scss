@@ -1,3 +1,7 @@
+.container {
+  margin-top: 1.8rem;
+}
+
 .inputToggle { /* stylelint-disable */
   > button {
     // display and box model
@@ -33,4 +37,8 @@
 .gradientOn {
   background-image: linear-gradient( to bottom right, #005EEA, #0097F6);
   color: white !important;
+}
+
+.toggleLabel {
+  margin-bottom: 0.5rem;
 }
