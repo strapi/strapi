@@ -126,7 +126,7 @@ InputNumber.propTypes = {
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
+  validations: React.PropTypes.object, // TODO add validations required
   value: React.PropTypes.oneOfType([
     React.PropTypes.number.isRequired,
     React.PropTypes.string.isRequired,

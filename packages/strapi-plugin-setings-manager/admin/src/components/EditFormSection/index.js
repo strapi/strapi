@@ -20,17 +20,21 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
       string: InputText,
       number: InputNumber,
       boolean: InputToggle,
+      enum: 'div', // TODO remove when compo enum finished
     };
     const Input = inputs[props.type];
     const customBootstrapClass = config[props.target] || "";
     const inputValue = this.props.values[props.target];
     return (
+      // <div />
       <Input
         customBootstrapClass={customBootstrapClass}
         key={key}
         handleChange={this.props.handleChange}
         name={props.name}
-        target={props.target} validations={props.validations}
+        target={props.target}
+        isChecked={inputValue}
+        validations={props.validations}
         value={inputValue}
       />
     );

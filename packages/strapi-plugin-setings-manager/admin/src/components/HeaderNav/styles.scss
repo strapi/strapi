@@ -1,0 +1,42 @@
+.headerNav { /* stylelint-disable */
+  margin-right: 15px; // according to bootstrap left-margin 15px TODO remove
+}
+
+.headerContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.headerLink {
+  display: flex;
+  flex: 1 100%;
+  height: 4rem;
+  border-radius: 1px 0 0 0;
+  background-color: rgba(14,22,34,0.05);
+  text-decoration: none !important;
+  font-family: Lato;
+  font-size: 1.3rem;
+  color: #333740 !important;
+  line-height: 1.6rem;
+}
+
+.linkActive {
+
+  background-color: #FFFFFF;
+  font-weight: bold;
+  text-decoration: none !important;
+}
+
+.linkText {
+  display: flex;
+  margin: auto;
+  text-transform: capitalize;
+}
+
+.notifPoint {
+	height: 0.4rem;
+  width: 0.4rem;
+  margin: auto 0.7rem;
+  border-radius: 0.5rem;
+  background-color: #27B70F;
+}

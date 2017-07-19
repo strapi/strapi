@@ -57,7 +57,6 @@ export function cancelChanges() {
 }
 
 export function submitChanges() {
-  console.log('ok');
   return {
     type: SUBMIT_CHANGES,
   };
