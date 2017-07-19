@@ -74,5 +74,18 @@ module.exports = {
     fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
 
     ctx.send();
+  },
+
+  deleteLanguage: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { name } = ctx.params;
+
+    const languages = Service.getLanguages();
+
+    if (!_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.notExist' }] }]);
+
+    fs.unlinkSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`));
+
+    ctx.send();
   }
 };

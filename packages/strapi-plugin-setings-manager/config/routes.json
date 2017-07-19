@@ -33,6 +33,14 @@
       }
     },
     {
+      "method": "DELETE",
+      "path": "/configurations/languages/:name",
+      "handler": "SettingsManager.deleteLanguage",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/configurations/:slug/:env?",
       "handler": "SettingsManager.get",
