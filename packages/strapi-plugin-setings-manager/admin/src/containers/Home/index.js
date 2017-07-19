@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes, get } from 'lodash';
+import { findKey, includes, get, toNumber } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -64,11 +64,11 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    this.props.changeInput(target.name, target.value);
+    const value = target.type === 'number' ? toNumber(target.value) : target.value;
+    this.props.changeInput(target.name, value);
   }
 
   handleCancel = () => {
-    console.log('click');
     this.props.cancelChanges();
   }
 
@@ -102,11 +102,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       return <div />;
     }
 
-    // check if  settingName (params.slug) has a custom view display
-    const component = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
-      findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'div'; // TODO change div to defaultComponent
-    // if custom view display render specificComponent
-    const Form = this.components[component];
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet
@@ -119,7 +114,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
-      {this.renderComponent()}
+        {this.renderComponent()}
       </div>
     );
   }
@@ -150,8 +145,9 @@ Home.propTypes = {
   configFetch: React.PropTypes.func.isRequired,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,
-  params: React.PropTypes.object.isRequired,
+  location: React.PropTypes.object,
   menuSections: React.PropTypes.array,
+  params: React.PropTypes.object.isRequired,
   submitChanges: React.PropTypes.func,
 };
 

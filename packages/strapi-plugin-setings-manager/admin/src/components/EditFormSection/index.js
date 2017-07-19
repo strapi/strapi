@@ -5,7 +5,8 @@
 */
 
 import React from 'react';
-import { map } from 'lodash';
+import { map, isEmpty } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 // design
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
@@ -41,12 +42,13 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
   }
 
   render() {
+    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage {...{id: this.props.section.name}} />;
     return (
       <div className={styles.editFormSection}>
         <div className="container">
           <div className="row">
             <span>
-              {this.props.section.name}
+              {sectionName}
             </span>
             <form>
               {map(this.props.section.items, (item, key) => (

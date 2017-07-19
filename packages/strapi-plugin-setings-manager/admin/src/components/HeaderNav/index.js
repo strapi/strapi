@@ -7,6 +7,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { join, map, take } from 'lodash';
+import EditForm from 'components/EditForm';
 import styles from './styles.scss';
 
 class HeaderNav extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -14,7 +15,7 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
     const baseUrl = join(take(this.props.path.split('/'), 4), '/');
     return (
       <div className={styles.headerNav}>
-        <div className="container">
+        <div className={`${styles.noPaddingLeft} container-fluid `}>
           <div className="row">
             <div className="col-md-12">
               <div className={styles.headerContainer}>
@@ -33,6 +34,7 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
             </div>
           </div>
         </div>
+        <EditForm {...this.props} />
       </div>
     );
   }

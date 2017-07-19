@@ -26,7 +26,7 @@
 */
 
 import React from 'react';
-import { isEmpty, map, pick, isObject } from 'lodash';
+import { isEmpty, includes, map, mapKeys, isObject, reject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -62,8 +62,24 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   validate = (value) => {
-    const errors = !isEmpty(pick(this.props.validations, 'required')) && !isEmpty(value) ?
-      [] : [{ id: 'request.error.validation.required' }];
+    let errors = [];
+
+    const requiredError = { id: 'request.error.validation.required' };
+    mapKeys(this.props.validations, (validationValue, validationKey) => {
+      switch (validationKey) {
+        case 'required':
+          if (value.length === 0) {
+            errors.push({ id: 'request.error.validation.required' });
+          }
+          break;
+        default:
+          errors = [];
+      }
+    });
+
+    if (includes(errors, requiredError)) {
+      errors = reject(errors, (error) => error !== requiredError);
+    }
     return errors;
   }
 
@@ -92,7 +108,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
     return (
       <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}>{this.props.name}</label>
+        <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
         <input
           type="number"
           name={this.props.target}
@@ -126,7 +142,7 @@ InputNumber.propTypes = {
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object, // TODO add validations required
+  validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.oneOfType([
     React.PropTypes.number.isRequired,
     React.PropTypes.string.isRequired,

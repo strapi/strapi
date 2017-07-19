@@ -1,10 +1,11 @@
 .headerNav { /* stylelint-disable */
-  margin-right: 15px; // according to bootstrap left-margin 15px TODO remove
+  // margin-right: 15px; // according to bootstrap left-margin 15px TODO remove
 }
 
 .headerContainer {
   display: flex;
   flex-direction: row;
+  margin: 0 3.3rem;
 }
 
 .headerLink {
@@ -39,4 +40,8 @@
   margin: auto 0.7rem;
   border-radius: 0.5rem;
   background-color: #27B70F;
+}
+
+.noPaddingLeft {
+  padding-left: 0;
 }
