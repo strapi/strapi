@@ -48,6 +48,6 @@
     "react-select": "^1.0.0-rc.5"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.4"
+    "strapi-helper-plugin": "^3.0.0-alpha.4"
   }
 }
