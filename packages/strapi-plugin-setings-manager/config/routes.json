@@ -10,8 +10,16 @@
     },
     {
       "method": "GET",
-      "path": "/environments",
+      "path": "/configurations/environments",
       "handler": "SettingsManager.environments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/languages",
+      "handler": "SettingsManager.languages",
       "config": {
         "policies": []
       }

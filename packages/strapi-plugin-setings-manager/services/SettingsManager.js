@@ -230,6 +230,15 @@ module.exports = {
     });
   },
 
+  getLanguages: () => {
+    return _.map(strapi.config.i18n.locales, language => {
+      return {
+        name: language,
+        active: (strapi.config.i18n.defaultLocale === language)
+      }
+    });
+  },
+
   getItems: model => _.flatten(_.map(model.sections, section => section.items)),
 
   cleanParams: (params, items) => {
