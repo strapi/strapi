@@ -142,7 +142,8 @@ module.exports = {
             name: 'form.security.item.session.maxAge',
             target: 'security.session.maxAge',
             type: 'number',
-            value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null)
+            value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null),
+            validations: {}
           }
         ]
       },
@@ -190,7 +191,8 @@ module.exports = {
             name: 'form.security.item.cors.origin',
             target: 'security.cors.origin',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null)
+            value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null),
+            validations: {}
           }
         ]
       }
@@ -208,13 +210,15 @@ module.exports = {
             name: 'form.server.item.host',
             target: 'server.host',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.server.host`, null)
+            value: _.get(strapi.config, `environments.${env}.server.host`, null),
+            validations: {}
           },
           {
             name: 'form.server.item.port',
             target: 'server.port',
             type: 'number',
-            value: _.get(strapi.config, `environments.${env}.server.port`, null)
+            value: _.get(strapi.config, `environments.${env}.server.port`, null),
+            validations: {}
           }
         ]
       }

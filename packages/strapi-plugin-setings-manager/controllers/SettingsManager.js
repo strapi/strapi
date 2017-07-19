@@ -1,5 +1,8 @@
 'use strict';
 
+const path = require('path');
+const fs = require('fs');
+
 module.exports = {
   menu: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
@@ -11,6 +14,12 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
 
     ctx.send({ environments: Service.getEnvironments() });
+  },
+
+  languages: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+
+    ctx.send({ environments: Service.getLanguages() });
   },
 
   get: async ctx => {
@@ -54,9 +63,16 @@ module.exports = {
     ctx.send();
   },
 
-  languages: async ctx => {
+  createLanguage: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { name } = ctx.request.body;
 
-    ctx.send({ environments: Service.getLanguages() });
+    const languages = Service.getLanguages();
+
+    if (_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
+
+    fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
+
+    ctx.send();
   }
 };

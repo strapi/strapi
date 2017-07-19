@@ -58,5 +58,6 @@
 
   "request.error.config": "Config file doesn't exist.",
   "request.error.environment.required": "Environment is required.",
-  "request.error.environment.unknow": "Environment is unknow."
+  "request.error.environment.unknow": "Environment is unknow.",
+  "request.error.languages.exist": ""
 }
