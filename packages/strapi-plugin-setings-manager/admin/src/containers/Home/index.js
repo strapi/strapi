@@ -87,7 +87,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.submitChanges();
   }
 
-  // custom Row rendering for the component List
+  // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key) => {
     const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
     const languageLabel = props.active ? 'default language' : 'set to default';

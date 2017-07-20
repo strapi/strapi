@@ -143,7 +143,9 @@ module.exports = {
             target: 'security.session.maxAge',
             type: 'number',
             value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null),
-            validations: {}
+            validations: {
+              required: true
+            }
           }
         ]
       },
@@ -167,6 +169,12 @@ module.exports = {
               {
                 name: 'form.security.item.xframe.allow-from',
                 value: 'ALLOW-FROM',
+                items: [{
+                  type: 'string',
+                  validations: {
+                    required: true
+                  }
+                }]
               }
             ],
             validations: {
@@ -192,7 +200,9 @@ module.exports = {
             target: 'security.cors.origin',
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null),
-            validations: {}
+            validations: {
+              required: true
+            }
           }
         ]
       }
@@ -233,6 +243,7 @@ module.exports = {
         name: '',
         items: [
           {
+            name: 'form.i18n.chose',
             target: 'i18n.i18n.defaultLocale',
             type: 'select',
             items: strapi.plugins['settings-manager'].services.languages
@@ -285,26 +296,60 @@ module.exports = {
   paramsValidation: (params, items) => {
     let errors = [];
 
+    const reformat = (value, format) => {
+      if (format === 'number') try { return parseFloat(number) } catch (e) { return null };
+      if (format === 'boolean') return value === 'true';
+
+      return value;
+    };
+
     const checkType = (input, { type, target, items }) => {
-      if ((type === 'string' || type === 'text') && !_.isString(input)) errors.push({
+      if ((type === 'string' || type === 'text') && !_.isString(input)) return errors.push({
         target: target,
         message: 'request.error.type.string'
       });
 
-      if (type === 'number' && !_.isNumber(input)) errors.push({
+      if (type === 'number' && !_.isNumber(input)) return errors.push({
         target: target,
         message: 'request.error.type.number'
       });
 
-      if (type === 'boolean' && !_.isBoolean(input)) errors.push({
+      if (type === 'boolean' && !_.isBoolean(input)) return errors.push({
         target: target,
         message: 'request.error.type.boolean'
       });
 
-      if (type === 'select' && !_.find(items, { value: input })) errors.push({
+      if (type === 'select' && !_.find(items, { value: input })) return errors.push({
         target: target,
         message: 'request.error.type.select'
       });
+
+      if (type === 'enum') {
+        if (!_.find(items, { value: input })) {
+          const key = input.split('.')[0];
+          input = _.drop(input.split('.')).join('.');
+
+          const item = _.find(items, { value: key });
+
+          if (!item) return errors.push({
+            target: target,
+            message: 'request.error.type.enum'
+          });
+
+          input = reformat(input, item.type);
+          params[target] = input;
+
+          _.forEach(item.items, subItem => {
+            subItem.target = target;
+            if (_.has(params, subItem.target)) {
+              const input = _.get(params, subItem.target, null);
+
+              checkType(input, subItem);
+              checkValidations(input, subItem);
+            }
+          });
+        }
+      }
     };
 
     const checkValidations = (input, item) => {
@@ -350,7 +395,7 @@ module.exports = {
       }
     });
 
-    return errors;
+    return [params, errors];
   },
 
   updateSettings: (params, items, env = '') => {

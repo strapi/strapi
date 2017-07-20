@@ -52,7 +52,8 @@ module.exports = {
 
     params = Service.cleanParams(params, items);
 
-    const validationErrors = Service.paramsValidation(params, items);
+    let validationErrors
+    [params, validationErrors] = Service.paramsValidation(params, items);
 
     if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
@@ -68,8 +69,10 @@ module.exports = {
     const { name } = ctx.request.body;
 
     const languages = Service.getLanguages();
+    const availableLanguages = strapi.plugins['settings-manager'].services.languages;
 
     if (_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
+    if (!_.find(availableLanguages, { value: name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.incorrect' }] }]);
 
     fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
 
