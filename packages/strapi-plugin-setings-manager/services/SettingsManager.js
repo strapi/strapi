@@ -226,8 +226,8 @@ module.exports = {
   }),
 
   i18n: env => ({
-    name: '',
-    description: '',
+    name: 'form.i18n.name',
+    description: 'form.i18n.description',
     sections: [
       {
         name: '',

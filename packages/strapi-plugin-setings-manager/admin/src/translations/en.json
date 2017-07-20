@@ -45,6 +45,9 @@
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
 
+  "form.i18n.name": "Languages",
+  "form.i18n.description": "Configure your languages.",
+
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",
   "request.error.type.boolean": "A boolean is required.",
@@ -62,6 +65,10 @@
   "request.error.environment.unknow": "Environment is unknow.",
   "request.error.languages.exist": "This language already exit.",
   "request.error.languages.notExist": "This language doesn't exit.",
+
+  "table.languages.button.label": "Add a new language",
+  "table.languages.title.singular": "language is available",
+  "table.languages.title.plural": "languages are available",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",

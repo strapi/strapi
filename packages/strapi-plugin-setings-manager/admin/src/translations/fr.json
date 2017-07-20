@@ -45,6 +45,9 @@
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
 
+  "form.i18n.name": "Langages",
+  "form.i18n.description": "Modification des langues.",
+
   "request.error.type.string": "Un texte est demandé.",
   "request.error.type.number": "Un nombre est demandé.",
   "request.error.type.boolean": "Un boolean est demandé.",
@@ -62,6 +65,10 @@
   "request.error.environment.unknow": "L'environnement est inconnu.",
   "request.error.languages.exist": "Cette langue éxiste déjà.",
   "request.error.languages.notExist": "Cette langue n'éxiste pas.",
+
+  "table.languages.button.label": "Ajouter une nouvelle langue",
+  "table.languages.title.singular": "langage est disponible",
+  "table.languages.title.plural": "langages sont disponibles",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",

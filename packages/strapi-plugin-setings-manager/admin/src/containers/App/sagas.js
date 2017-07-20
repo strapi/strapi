@@ -27,7 +27,7 @@ export function* fetchEnvironments() {
       method: 'GET',
     };
 
-    const response = yield fetch('/settings-manager/environments', opts);
+    const response = yield fetch('/settings-manager/configurations/environments', opts);
     const data = yield response.json();
 
     yield put(environmentsFetchSucceeded(data));

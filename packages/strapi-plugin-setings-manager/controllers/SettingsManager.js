@@ -19,7 +19,7 @@ module.exports = {
   languages: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
 
-    ctx.send({ environments: Service.getLanguages() });
+    ctx.send({ languages: Service.getLanguages() });
   },
 
   get: async ctx => {
