@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.4.3",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -22,6 +22,7 @@
   },
   "scripts": {
     "test": "make test",
+    "clean": "node ./scripts/removefiledependencies.js && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
     "removefiledependencies": "node ./scripts/removefiledependencies.js",
     "postinstall": "rm -rf packages/*/node_modules && node ./scripts/setup.js"
   },
@@ -38,7 +39,7 @@
     }
   ],
   "pre-commit": [
-    "removefiledependencies",
+    "clean",
     "test"
   ],
   "repository": {
