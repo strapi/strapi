@@ -52,7 +52,8 @@ module.exports = {
 
     params = Service.cleanParams(params, items);
 
-    const validationErrors = Service.paramsValidation(params, items);
+    let validationErrors
+    [params, validationErrors] = Service.paramsValidation(params, items);
 
     if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
