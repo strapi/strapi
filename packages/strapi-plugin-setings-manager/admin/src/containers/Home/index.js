@@ -87,17 +87,48 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.submitChanges();
   }
 
+
+  addLanguage = () => {
+    console.log('fuck');
+  }
+
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key) => {
+    // custom style
+    const rowStyle = {
+      defaultSpanStyle: {
+        color: '#49515A',
+        fontStyle: 'italic',
+      },
+      normalSpanStyle: {
+        color: '#1C5DE7',
+      },
+      tdNameStyle: {
+        color: '#333740',
+      },
+      tdLangDisplayStyle: {
+        color: '#333740',
+        fontWeight: '600',
+      },
+    };
     const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
-    const languageLabel = props.active ? 'default language' : 'set to default';
+    const languageLabel = props.active ?
+      <span style={rowStyle.defaultSpanStyle}>
+        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
+      </span> :
+      <span style={rowStyle.normalSpanStyle}>
+        <FormattedMessage {...{id: 'list.languages.set.languages'}} />
+      </span>;
+
+    // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.allLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
+    // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
     return (
       <tr key={key}>
         <th>{key}</th>
-        <td>{languageDisplay}</td>
-        <td>{props.name}</td>
+        <td style={rowStyle.tdLangDisplayStyle}>{languageDisplay}</td>
+        <td style={rowStyle.tdNameStyle}>{props.name}</td>
         <td>{languageLabel}</td>
         <td>{deleteIcon}</td>
       </tr>
@@ -137,6 +168,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         listTitle={listTitle}
         listButtonLabel={listButtonLabel}
         handlei18n
+        handleListPopButtonSave={this.addLanguage}
       />
     );
   }
@@ -145,7 +177,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (this.props.home.loading) {
       return <div />;
     }
-
+    console.log(this.props.home)
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet

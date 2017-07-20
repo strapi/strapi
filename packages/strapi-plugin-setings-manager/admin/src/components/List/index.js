@@ -6,9 +6,12 @@
 *   used for the buttonComponent to render label with FormattedMessage
 *  - listButtonLabel: string
 *  - listTitle: string
+*  - noListButtonPopUp: bool
+*     prevent from displaying the List button
 *  - renderRow: function
-*    overrides the default rendering of the List tr (we can pass customs components there)
+*     overrides the default rendering of the List tr (we can pass customs components there)
 *  - sections: array the elements to display
+*  - handleListPopButtonSave: func
 *
 */
 
@@ -19,6 +22,13 @@ import styles from './styles.scss';
 
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const button = this.props.noListButtonPopUp ? '' :
+      <Button
+        buttonBackground={'secondaryAddType'}
+        label={this.props.listButtonLabel}
+        handlei18n={this.props.handlei18n}
+        addShape
+      />;
     return (
       <div className={styles.listContainer}>
         <div className={styles.listComponent}>
@@ -29,7 +39,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                   {this.props.listTitle}
                 </div>
                 <div className={styles.buttonContainer}>
-                  <Button  buttonBackground={'secondaryAddType'} label={this.props.listButtonLabel} handlei18n={this.props.handlei18n} addShape />
+                  {button}
                 </div>
               </div>
             </div>
@@ -52,8 +62,6 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                   </tbody>
                 </table>
               </div>
-              <div className={styles.flex}>
-              </div>
             </div>
           </div>
         </div>
@@ -65,11 +73,13 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
 List.propTypes = {
   handlei18n: React.PropTypes.bool,
+  handleListPopButtonSave: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,
   listTitle: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.object,
   ]),
+  noListButtonPopUp: React.PropTypes.bool,
   renderRow: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.func,

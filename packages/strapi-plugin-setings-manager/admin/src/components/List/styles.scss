@@ -32,13 +32,13 @@ line-height: 2.2rem;
 .listNoBorder {
   > tbody {
     tr {
+      font-size: 1.3rem;
+      line-height: 1.6rem;
+      font-family: Lato;
       &:first-of-type {
         > td, th {
           border-top: none !important;
         }
-      }
-      > th {
-
       }
     }
   }

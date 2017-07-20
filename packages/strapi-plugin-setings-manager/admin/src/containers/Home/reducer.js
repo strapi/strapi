@@ -37,8 +37,8 @@ function homeReducer(state = initialState, action) {
       return state
         .set('loading', false)
         .set('configsDisplay', OrderedMap(action.configs))
-        .set('initialData', Map(action.data))
-        .set('modifiedData', Map(action.data))
+        .set('initialData', Map())
+        .set('modifiedData', Map())
         .set('allLanguages', Map(action.allLanguages));
     default:
       return state;

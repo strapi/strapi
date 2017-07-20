@@ -73,23 +73,14 @@ export function languagesFetch() {
 }
 
 export function languagesFetchSucceeded(appLanguages, allLanguages) {
-  const data = {};
   const configs = {
     name: allLanguages.name,
     description: allLanguages.description,
     sections: appLanguages.languages,
   };
-
-  forEach(configs.sections, (section) => {
-    forEach(section.items, (item) => {
-      data[item.target] = item.value;
-    });
-  });
-
   return {
     type: LANGUAGES_FETCH_SUCCEEDED,
     configs,
-    data,
     allLanguages,
   };
 }
