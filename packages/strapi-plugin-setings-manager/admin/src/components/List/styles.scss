@@ -1,0 +1,45 @@
+.listComponent { /* stylelint-disable */
+  margin: 0 3.3rem;
+  padding: 0.5rem 2.8rem 5.8rem 2.8rem;
+  border-radius: 0.2rem;
+  background-color: #FFFFFF;
+  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
+}
+
+.listContainer {
+  margin-right: 15px;
+}
+
+.flex {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.8rem;
+  margin-bottom: 3.8rem;
+}
+
+.titleContainer {
+color: #333740;
+font-family: Lato;
+font-size: 1.8rem;
+font-weight: bold;
+line-height: 2.2rem;
+}
+
+.buttonContainer {
+
+}
+
+.listNoBorder {
+  > tbody {
+    tr {
+      &:first-of-type {
+        > td, th {
+          border-top: none !important;
+        }
+      }
+      > th {
+
+      }
+    }
+  }
+}

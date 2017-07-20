@@ -66,9 +66,11 @@
   "request.error.languages.exist": "Cette langue éxiste déjà.",
   "request.error.languages.notExist": "Cette langue n'éxiste pas.",
 
-  "table.languages.button.label": "Ajouter une nouvelle langue",
-  "table.languages.title.singular": "langage est disponible",
-  "table.languages.title.plural": "langages sont disponibles",
+  "list.languages.button.label": "Ajouter une nouvelle langue",
+  "list.languages.title.singular": "langage est disponible",
+  "list.languages.title.plural": "langages sont disponibles",
+  "list.languages.default.languages": "Langue par défault",
+  "list.languages.set.languages": "Appliquer par défault",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",

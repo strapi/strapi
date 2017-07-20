@@ -66,9 +66,11 @@
   "request.error.languages.exist": "This language already exit.",
   "request.error.languages.notExist": "This language doesn't exit.",
 
-  "table.languages.button.label": "Add a new language",
-  "table.languages.title.singular": "language is available",
-  "table.languages.title.plural": "languages are available",
+  "list.languages.button.label": "Add a new language",
+  "list.languages.title.singular": "language is available",
+  "list.languages.title.plural": "languages are available",
+  "list.languages.default.languages": "Default language",
+  "list.languages.set.languages": "Set to default",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",

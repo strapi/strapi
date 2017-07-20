@@ -8,8 +8,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes, get, toNumber } from 'lodash';
-
+import { findKey, includes, get, toNumber, isObject, find } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
 
@@ -17,7 +17,7 @@ import { router } from 'app';
 import ContentHeader from 'components/ContentHeader';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
-import Table from 'components/Table';
+import List from 'components/List';
 
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
@@ -32,7 +32,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.customComponents = config.customComponents;
     this.components = {
       editForm: EditForm,
-      table: Table,
+      list: List,
       defaultComponent: HeaderNav, // TODO change to default
     };
   }
@@ -87,12 +87,42 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.submitChanges();
   }
 
+  // custom Row rendering for the component List
+  renderRowLanguage = (props, key) => {
+    const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
+    const languageLabel = props.active ? 'default language' : 'set to default';
+    const languageObject = find(get(this.props.home.allLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
+    const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
+    return (
+      <tr key={key}>
+        <th>{key}</th>
+        <td>{languageDisplay}</td>
+        <td>{props.name}</td>
+        <td>{languageLabel}</td>
+        <td>{deleteIcon}</td>
+      </tr>
+    );
+  }
+
+  renderListTitle = () => {
+    const availableContentNumber = this.props.home.configsDisplay.sections.length;
+    const title = availableContentNumber > 1 ? `list.${this.props.params.slug}.title.plural` : `list.${this.props.params.slug}.title.singular`;
+    const titleDisplay = title ? <FormattedMessage {...{id: title}} /> : '';
+    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
+  }
+
+  renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
+
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
       findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
+    const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
+    const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
+    const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
+
     return (
       <Component
         sections={this.props.home.configsDisplay.sections}
@@ -103,7 +133,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         links={this.props.environments}
         path={this.props.location.pathname}
         slug={this.props.params.slug}
-        allLanguages={this.props.home.allLanguages}
+        renderRow={renderRow}
+        listTitle={listTitle}
+        listButtonLabel={listButtonLabel}
+        handlei18n
       />
     );
   }
