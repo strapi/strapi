@@ -68,8 +68,10 @@ module.exports = {
     const { name } = ctx.request.body;
 
     const languages = Service.getLanguages();
+    const availableLanguages = strapi.plugins['settings-manager'].services.languages;
 
     if (_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
+    if (!_.find(availableLanguages, { value: name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.incorrect' }] }]);
 
     fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
 

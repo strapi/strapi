@@ -62,6 +62,7 @@
   "request.error.environment.unknow": "Environment is unknow.",
   "request.error.languages.exist": "This language already exit.",
   "request.error.languages.notExist": "This language doesn't exit.",
+  "request.error.languages.incorrect": "This language is incorrect.",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",
