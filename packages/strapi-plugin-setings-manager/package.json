@@ -24,7 +24,13 @@
     "test": "echo Tests are not implemented.",
     "prepublish": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-transition-group": "^1.2.0",
+    "reactstrap": "^4.8.0"
+  },
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.3"
   },
