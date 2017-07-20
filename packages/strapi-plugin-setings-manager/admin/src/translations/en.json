@@ -45,6 +45,8 @@
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
 
+  "form.i18n.chose": "Choose your language",
+
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",
   "request.error.type.boolean": "A boolean is required.",

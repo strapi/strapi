@@ -233,6 +233,7 @@ module.exports = {
         name: '',
         items: [
           {
+            name: 'form.i18n.chose',
             target: 'i18n.i18n.defaultLocale',
             type: 'select',
             items: strapi.plugins['settings-manager'].services.languages
