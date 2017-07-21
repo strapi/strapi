@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-migrations",
-  "version": "3.0.0-alpha.4.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Generate migration files for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -23,8 +23,8 @@
     "knex": "^0.12.9",
     "lodash": "^4.17.4",
     "pluralize": "^3.1.0",
-    "strapi-bookshelf": "^3.0.0-alpha.4.3",
-    "strapi-utils": "^3.0.0-alpha.4.3"
+    "strapi-bookshelf": "^3.0.0-alpha.4.8",
+    "strapi-utils": "^3.0.0-alpha.4.8"
   },
   "scripts": {
     "prepublish": "npm prune"

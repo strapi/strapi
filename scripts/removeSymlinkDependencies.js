@@ -8,6 +8,8 @@ try {
   packages.filter(pkg => pkg.indexOf('strapi') !== -1).forEach(pkg => {
     const packageJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), 'utf8'));
 
+    packageJSON.version = pkgJSON.version;
+
     Object.keys(packageJSON.dependencies).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
       if (packageJSON.dependencies[dependency].indexOf('file:') !== -1) {
         packageJSON.dependencies[dependency] = '^' + pkgJSON.version;
