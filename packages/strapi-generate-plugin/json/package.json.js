@@ -43,7 +43,7 @@ module.exports = scope => {
     },
     'dependencies': {},
     'devDependencies': {
-      'strapi-helper-plugin': '3.0.0-alpha.4'
+      'strapi-helper-plugin': '3.0.0-alpha.4.8'
     },
     'author': {
       'name': scope.author || 'A Strapi developer',
