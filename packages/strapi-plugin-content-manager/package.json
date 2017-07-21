@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.4.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "A powerful UI to easily manage your data.",
   "engines": {
     "node": ">= 8.0.0",
@@ -47,6 +47,6 @@
     "react-select": "^1.0.0-rc.5"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "^3.0.0-alpha.4.4"
+    "strapi-helper-plugin": "^3.0.0-alpha.4.5"
   }
 }
