@@ -18,25 +18,25 @@ module.exports = (options) => ({
       use: {
         loader: 'babel',
         options: {
-          "presets": options.babelPresets,
-          "env": {
-            "production": {
-              "only": [
-                "src",
+          presets: options.babelPresets,
+          env: {
+            production: {
+              only: [
+                'src',
               ],
-              "plugins": [
+              plugins: [
                 require.resolve('babel-plugin-transform-react-remove-prop-types'),
                 require.resolve('babel-plugin-transform-react-constant-elements'),
                 require.resolve('babel-plugin-transform-react-inline-elements'),
               ],
             },
-            "test": {
-              "plugins": [
-                "istanbul",
+            test: {
+              plugins: [
+                'istanbul',
               ],
             },
           },
-        }
+        },
       },
       include: [
         path.join(process.cwd(), 'admin', 'src'),
