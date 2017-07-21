@@ -22,7 +22,7 @@ module.exports = scope => {
     'description': 'This is the description of the plugin.',
     'strapi': {
       'name': scope.id,
-      'icon': 'ion-document-text',
+      'icon': 'plug',
       'description': `Description of ${scope.id} plugin.`
     },
     'scripts': {

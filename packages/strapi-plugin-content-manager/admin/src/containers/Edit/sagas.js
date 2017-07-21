@@ -23,14 +23,14 @@ export function* getRecord(params) {
   const currentModelName = yield select(makeSelectCurrentModelName());
 
   try {
-    const requestUrl = `/content-manager/explorer/${currentModelName}/${params.id}`;
+    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${params.id}`;
 
     // Call our request helper (see 'utils/request')
-    const data = yield call(request, requestUrl, {
+    const response = yield call(request, requestUrl, {
       method: 'GET',
     });
 
-    yield put(recordLoaded(data));
+    yield put(recordLoaded(response));
   } catch (err) {
     window.Strapi.notification.error('An error occurred during record fetch.');
   }
@@ -45,7 +45,7 @@ export function* editRecord() {
   const id = isCreating ? '' : recordJSON.id;
 
   try {
-    const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
+    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
@@ -71,7 +71,7 @@ export function* deleteRecord() {
   const recordJSON = record.toJSON();
 
   try {
-    const requestUrl = `/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
+    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
