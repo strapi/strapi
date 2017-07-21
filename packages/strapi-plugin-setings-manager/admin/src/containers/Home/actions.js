@@ -72,15 +72,15 @@ export function languagesFetch() {
   };
 }
 
-export function languagesFetchSucceeded(appLanguages, allLanguages) {
+export function languagesFetchSucceeded(appLanguages, listLanguages) {
   const configs = {
-    name: allLanguages.name,
-    description: allLanguages.description,
+    name: listLanguages.name,
+    description: listLanguages.description,
     sections: appLanguages.languages,
   };
   return {
     type: LANGUAGES_FETCH_SUCCEEDED,
     configs,
-    allLanguages,
+    listLanguages,
   };
 }

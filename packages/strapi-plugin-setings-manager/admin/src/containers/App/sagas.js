@@ -1,5 +1,7 @@
 import { takeLatest } from 'redux-saga';
-import { put, fork, take, cancel } from 'redux-saga/effects';
+import { call, put, fork, take, cancel } from 'redux-saga/effects';
+
+import request from 'utils/request';
 
 import { fetchMenuSucceeded, environmentsFetchSucceeded } from './actions';
 import { MENU_FETCH, MENU_FETCH_SUCCEEDED, ENVIRONMENTS_FETCH, ENVIRONMENTS_FETCH_SUCCEEDED } from './constants';
@@ -9,8 +11,9 @@ export function* fetchMenu() {
     const opts = {
       method: 'GET',
     };
-    const response = yield fetch('/settings-manager/menu', opts);
-    const data = yield response.json();
+
+    const requestUrl = '/settings-manager/menu';
+    const data = yield call(request, requestUrl, opts);
 
     yield put(fetchMenuSucceeded(data));
 
@@ -27,13 +30,15 @@ export function* fetchEnvironments() {
       method: 'GET',
     };
 
-    const response = yield fetch('/settings-manager/configurations/environments', opts);
-    const data = yield response.json();
+    const requestUrl = '/settings-manager/configurations/environments';
+    const data  = yield call(request, requestUrl, opts);
 
     yield put(environmentsFetchSucceeded(data));
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error(
+      'An error occured.'
+    );
   }
 }
 
@@ -44,7 +49,7 @@ function* defaultSaga() {
   yield take(MENU_FETCH_SUCCEEDED);
   yield cancel(loadMenu);
   yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
-  yield cancel(loadEnvironments)
+  yield cancel(loadEnvironments);
 
 }
 

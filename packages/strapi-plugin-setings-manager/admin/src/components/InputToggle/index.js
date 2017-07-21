@@ -39,9 +39,9 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     let isChecked = this.state.isChecked;
 
     // prevent the toggle if the user clicks on the already selected input
-    if (e.target.id === "on" && !this.state.isChecked) {
+    if (e.target.id === 'on' && !this.state.isChecked) {
       isChecked = true;
-    } else if (e.target.id === "off" && this.state.isChecked) {
+    } else if (e.target.id === 'off' && this.state.isChecked) {
       isChecked  = false;
     }
     const target = {

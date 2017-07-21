@@ -39,12 +39,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   componentDidMount() {
     if (this.props.params.slug) {
-      if (this.props.params.slug !== 'languages') {
-        const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
-        this.props.configFetch(apiUrl);
-      } else {
-        this.props.languagesFetch();
-      }
+      this.handleFetch(this.props);
     } else {
       router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
     }
@@ -56,13 +51,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (this.props.params.slug !== nextProps.params.slug && nextProps.params.slug) {
       if (nextProps.params.slug) {
         // get data from api if params slug updated
-        if (nextProps.params.slug !== 'languages') {
-          const apiUrl = nextProps.params.env ? `${nextProps.params.slug}/${nextProps.params.env}` : nextProps.params.slug;
-          this.props.configFetch(apiUrl);
-        } else {
-          this.props.languagesFetch();
-        }
-
+        this.handleFetch(nextProps);
       } else {
         // redirect user if no params slug provided
         router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
@@ -71,7 +60,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       // get data if params env updated
       this.props.configFetch(`${this.props.params.slug}/${nextProps.params.env}`);
     }
+  }
 
+  handleFetch(props) {
+    if (props.params.slug !== 'languages') {
+      const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
+      this.props.configFetch(apiUrl);
+    } else {
+      this.props.languagesFetch();
+    }
   }
 
   handleChange = ({ target }) => {
@@ -89,7 +86,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
 
   addLanguage = () => {
-    console.log('fuck');
+    console.log('click Add Language');
   }
 
   // custom Row rendering for the component List with params slug === languages
@@ -116,12 +113,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       <span style={rowStyle.defaultSpanStyle}>
         <FormattedMessage {...{id: 'list.languages.default.languages'}} />
       </span> :
-      <span style={rowStyle.normalSpanStyle}>
-        <FormattedMessage {...{id: 'list.languages.set.languages'}} />
-      </span>;
+        <span style={rowStyle.normalSpanStyle}>
+          <FormattedMessage {...{id: 'list.languages.set.languages'}} />
+        </span>;
 
     // retrieve language name from i18n translation
-    const languageObject = find(get(this.props.home.allLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
+    const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
     return (
@@ -168,7 +165,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         listTitle={listTitle}
         listButtonLabel={listButtonLabel}
         handlei18n
-        handleListPopButtonSave={this.addLanguage}
+        handleListPopUpSubmit={this.addLanguage}
       />
     );
   }
@@ -177,13 +174,13 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (this.props.home.loading) {
       return <div />;
     }
-    console.log(this.props.home)
+
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet
-          title="Home"
+          title="Settings Manager"
           meta={[
-            { name: 'description', content: 'Description of Home' },
+            { name: 'Settings Manager Plugin', content: 'Modify your app settings' },
           ]}
         />
         <ContentHeader

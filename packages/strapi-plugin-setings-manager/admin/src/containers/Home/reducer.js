@@ -18,7 +18,7 @@ const initialState = fromJS({
   configsDisplay: OrderedMap(),
   initialData: Map(),
   modifiedData: Map(),
-  allLanguages: Map(),
+  listLanguages: Map(),
 });
 
 function homeReducer(state = initialState, action) {
@@ -39,7 +39,7 @@ function homeReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.configs))
         .set('initialData', Map())
         .set('modifiedData', Map())
-        .set('allLanguages', Map(action.allLanguages));
+        .set('listLanguages', Map(action.listLanguages));
     default:
       return state;
   }

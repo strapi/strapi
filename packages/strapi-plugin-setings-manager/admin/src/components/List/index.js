@@ -34,6 +34,11 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     this.setState({ modal: !this.state.modal });
   }
 
+  handleSubmit = () => {
+    this.setState({ modal: !this.state.modal });
+    this.props.handleListPopUpSubmit();
+  }
+
   render() {
     const button = this.props.noListButtonPopUp ? '' :
       <StrapiButton
@@ -43,7 +48,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         addShape
         onClick={this.toggle}
       />;
-    console.log(this.state.modal)
+
     return (
       <div className={styles.listContainer}>
         <div className={styles.listComponent}>
@@ -82,7 +87,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         </div>
 
         <div>
-          <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
+          <Modal isOpen={this.state.modal} toggle={this.toggle}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder}`}>
               <FormattedMessage {...{id: this.props.listButtonLabel}} />
             </ModalHeader>
@@ -91,7 +96,8 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
             </ModalBody>
             <ModalFooter className={`${styles.noBorder} ${styles.flexStart}`}>
-              <Button onClick={this.toggle} className={styles.primary}>Save</Button>{' '}
+              {/* TODO change tthis.toggle => this.props.addLanguage */}
+              <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
               <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
             </ModalFooter>
           </Modal>
@@ -104,7 +110,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
 List.propTypes = {
   handlei18n: React.PropTypes.bool,
-  handleListPopButtonSave: React.PropTypes.func,
+  handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,
   listTitle: React.PropTypes.oneOfType([
     React.PropTypes.string,
