@@ -25,10 +25,6 @@ font-weight: bold;
 line-height: 2.2rem;
 }
 
-.buttonContainer {
-
-}
-
 .listNoBorder {
   > tbody {
     tr {
@@ -42,4 +38,32 @@ line-height: 2.2rem;
       }
     }
   }
+}
+
+
+.primary {
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  color: white;
+  width: 15rem;
+}
+
+.secondary {
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  margin-left: 1.9rem!important;
+}
+
+.bordered {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  border: 1px solid #F6F6F6;
+
+}
+
+.noBorder {
+  border: none!important;
+}
+
+.flexStart {
+  justify-content: flex-start!important;
 }

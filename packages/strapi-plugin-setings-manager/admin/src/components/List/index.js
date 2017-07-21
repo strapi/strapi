@@ -17,11 +17,9 @@
 
 import React from 'react';
 import { map } from 'lodash';
-import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import Button from 'components/Button';
-// import 'bootstrap/dist/css/bootstrap.css';
-
-// import Button from 'components/Button';
+import { FormattedMessage } from 'react-intl';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import StrapiButton from 'components/Button';
 import styles from './styles.scss';
 
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -38,7 +36,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   render() {
     const button = this.props.noListButtonPopUp ? '' :
-      <Button
+      <StrapiButton
         buttonBackground={'secondaryAddType'}
         label={this.props.listButtonLabel}
         handlei18n={this.props.handlei18n}
@@ -55,7 +53,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                 <div className={styles.titleContainer}>
                   {this.props.listTitle}
                 </div>
-                <div className={styles.buttonContainer}>
+                <div>
                   {button}
                 </div>
               </div>
@@ -85,13 +83,16 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-            <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+            <ModalHeader toggle={this.toggle} className={`${styles.noBorder}`}>
+              <FormattedMessage {...{id: this.props.listButtonLabel}} />
+            </ModalHeader>
+            <div className={styles.bordered} />
             <ModalBody>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
             </ModalBody>
-            <ModalFooter>
-              <Button color="primary" onClick={this.toggle}>Do Something</Button>{' '}
-              <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+            <ModalFooter className={`${styles.noBorder} ${styles.flexStart}`}>
+              <Button onClick={this.toggle} className={styles.primary}>Save</Button>{' '}
+              <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
             </ModalFooter>
           </Modal>
         </div>
