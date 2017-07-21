@@ -31,7 +31,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
         </div>
         <div className={styles.buttonContainer}>
           <Button label={"cancel"} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
-          <Button label={"save"} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+          <Button type="submit" label={"save"} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
         </div>
       </div>
     );

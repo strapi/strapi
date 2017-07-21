@@ -20,6 +20,7 @@ import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import StrapiButton from 'components/Button';
+import PopUpForm from 'components/PopUpForm';
 import styles from './styles.scss';
 
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -93,7 +94,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
             </ModalHeader>
             <div className={styles.bordered} />
             <ModalBody>
-
+              <PopUpForm {...this.props} />
             </ModalBody>
             <ModalFooter className={`${styles.noBorder} ${styles.flexStart}`}>
               {/* TODO change tthis.toggle => this.props.addLanguage */}

@@ -81,6 +81,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleSubmit = () => {
+    console.log('submit');
     this.props.submitChanges();
   }
 
