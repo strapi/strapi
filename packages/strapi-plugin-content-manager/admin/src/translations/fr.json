@@ -1,0 +1,12 @@
+{
+  "contentManager.containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
+  "contentManager.containers.Home.pluginHeaderDescription": "Un outil complet pour gérer facilement vos données.",
+  "contentManager.containers.Edit.submit": "Valider",
+  "contentManager.containers.Edit.editing": "Édition en cours...",
+  "contentManager.containers.Edit.delete": "Supprimer",
+  "contentManager.containers.Edit.cancel": "Annuler",
+  "contentManager.containers.List.addAnEntry": "Ajouter une entrée",
+  "contentManager.containers.List.pluginHeaderDescription": "Gérér vos {label}",
+  "contentManager.components.LimitSelect.itemsPerPage": "Nombre d'éléments par page",
+  "contentManager.containers.List.errorFetchRecords": "Erreur"
+}

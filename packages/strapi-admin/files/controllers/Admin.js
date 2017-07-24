@@ -9,12 +9,21 @@ const path = require('path');
 
 module.exports = {
 
-  index: async (ctx) => {
+  index: async(ctx) => {
     try {
       // Send the HTML file with injected scripts
       ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
     } catch (err) {
       ctx.body = err;
+    }
+  },
+
+  pluginFile: async ctx => {
+    try {
+      const file = fs.readFileSync(path.resolve(process.cwd(), 'plugins', ctx.params.plugin, 'admin', 'build', 'main.js'));
+      ctx.body = file;
+    } catch (err) {
+      ctx.body = ctx.notFound();
     }
   },
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,15 +16,12 @@
   },
   "main": "./lib",
   "dependencies": {
-    "commander": "~2.9.0",
+    "commander": "^2.11.0",
     "include-all": "^2.0.0",
     "joi-json": "^2.0.1",
-    "knex": "^0.12.6",
-    "lodash": "^4.16.5",
-    "winston": "~2.3.0"
-  },
-  "scripts": {
-    "prepublish": "npm prune"
+    "knex": "^0.12.9",
+    "lodash": "^4.17.4",
+    "winston": "^2.3.1"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -46,8 +43,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }

@@ -117,7 +117,7 @@ module.exports = strapi => {
         // applications to have `knex` as a dependency.
         try {
           // Try to require from local dependency.
-          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options);
+          _.set(strapi, `connections.${name}`, require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options));
         } catch (err) {
           strapi.log.error('Impossible to use the `' + name + '` connection...');
           strapi.log.warn('Be sure that your client `' + name + '` are in the same node_modules directory');

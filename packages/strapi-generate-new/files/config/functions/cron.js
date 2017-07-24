@@ -8,7 +8,7 @@
  * [MINUTE] [HOUR] [DAY OF MONTH] [MONTH OF YEAR] [DAY OF WEEK] [YEAR (optional)]
  */
 
-module.exports.cron = {
+module.exports = {
 
   /**
    * Simple example.

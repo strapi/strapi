@@ -1,6 +1,6 @@
 {
   "name": "strapi-redis",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Redis hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,15 +16,12 @@
   "main": "./lib",
   "dependencies": {
     "ioredis": "^2.5.0",
-    "lodash": "^4.16.5",
+    "lodash": "^4.17.4",
     "stack-trace": "0.0.9",
-    "strapi-utils": "^3.0.0-alpha.3"
+    "strapi-utils": "file:../strapi-utils"
   },
   "strapi": {
     "isHook": true
-  },
-  "scripts": {
-    "prepublish": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -46,8 +43,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }

@@ -1,17 +1,15 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Node.js core.
-const path = require('path');
-const http = require('http');
-const EventEmitter = require('events').EventEmitter;
-
-// Local dependencies.
+// Dependencies.
 const Koa = require('koa');
-const mixinAfter = require('./private/after');
+const utils = require('./utils');
+const { nestedConfigurations, appConfigurations, apis, plugins, admin, middlewares, hooks } = require('./core');
+const initializeMiddlewares = require('./middlewares');
+const initializeHooks = require('./hooks');
+const mixinAfter = require('./after');
+const { logger } = require('strapi-utils');
+const { http } = require('uws');
+const { EventEmitter } = require('events');
 
 /**
  * Construct an Strapi instance.
@@ -19,86 +17,95 @@ const mixinAfter = require('./private/after');
  * @constructor
  */
 
-// Private properties
-let _instance = null;
-
 class Strapi extends EventEmitter {
   constructor() {
     super();
 
-    // Singleton
-    if (!_instance) {
-      _instance = this;
-    }
-
-    // Remove memory-leak warning about max listeners.
-    this.setMaxListeners(0);
-
-    // Mixin support for `Strapi.prototype.after()`.
-    mixinAfter(this);
+    this.setMaxListeners(15);
 
     // Expose `koa`.
     this.app = new Koa();
 
     // Mount the HTTP server.
-    this.server = new http.Server(this.app.callback());
+    this.server = http.createServer(this.app.callback());
 
-    // Expose every middleware inside `strapi.middlewares`.
-    this.middlewares = require('koa-load-middlewares')({
-      config: path.resolve(__dirname, '..', 'package.json'),
-      pattern: ['koa-*', 'koa.*', 'k*'],
-      scope: ['dependencies', 'devDependencies'],
-      replaceString: /^koa(-|\.)/,
-      camelize: true,
-      lazy: false
-    });
+    // Winston logger.
+    this.log = logger;
 
-    this.connections = {};
+    // Default configurations.
+    this.config = {
+      appPath: process.cwd(),
+      host: process.env.HOST || process.env.HOSTNAME || 'localhost',
+      port: process.env.PORT || 1337,
+      environment: process.env.NODE_ENV || 'development',
+      paths: {
+        tmp: '.tmp',
+        config: 'config',
+        static: 'public',
+        views: 'views',
+        api: 'api',
+        controllers: 'controllers',
+        services: 'services',
+        policies: 'policies',
+        models: 'models',
+        plugins: 'plugins',
+        validators: 'validators',
+        admin: 'admin'
+      }
+    };
 
-    // New Winston logger.
-    this.log = require('strapi-utils').logger;
-
-    return _instance;
+    // Bind context functions.
+    this.loadFile = utils.loadFile.bind(this);
   }
 
-  // Method to initialize instance
-  initialize(cb) {
-    require('./private/initialize').apply(this, [cb]);
+  async start() {
+    try {
+      global.startedAt = Date.now();
+
+      await this.load();
+
+
+      this.server.listen(1337, err => {
+        if (err) {
+          console.log(err);
+        }
+
+        this.log.info('Server started in ' + this.config.appPath);
+        this.log.info('Your server is running at ' + this.config.url);
+        this.log.debug('Time: ' + new Date());
+        this.log.debug(
+          'Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds'
+        );
+        this.log.debug('Environment: ' + this.config.environment);
+        this.log.debug('Process PID: ' + process.pid);
+        this.log.info('To shut down your server, press <CTRL> + C at any time');
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  // Method to load instance
-  load(configOverride, cb) {
-    require('./load').apply(this, [configOverride, cb]);
-  }
-
-  // Method to start instance
-  start(configOverride, cb) {
-    require('./start').apply(this, [configOverride, cb]);
-  }
-
-  // Method to stop instance
   stop() {
-    require('./stop').apply(this);
+    this.server.destroy();
   }
 
-  // Method to expose instance globals
-  exposeGlobals(cb) {
-    require('./private/exposeGlobals').apply(this, [cb]);
-  }
+  async load() {
+    // Create AST.
+    await Promise.all([
+      nestedConfigurations.call(this),
+      apis.call(this),
+      plugins.call(this),
+      admin.call(this),
+      middlewares.call(this),
+      hooks.call(this)
+    ]);
 
-  // Method to run instance bootstrap
-  runBootstrap(cb) {
-    require('./private/bootstrap').apply(this, [cb]);
-  }
+    await appConfigurations.call(this);
 
-  // Method to verify strapi dependency
-  isLocalStrapiValid(strapiPath, appPath) {
-    require('./private/isLocalStrapiValid').apply(this, [strapiPath, appPath]);
-  }
-
-  // Method to verify strapi application
-  isStrapiAppSync(appPath) {
-    require('./private/isStrapiAppSync').apply(this, [appPath]);
+    await Promise.all([
+      initializeMiddlewares.call(this),
+      initializeHooks.call(this)
+    ]);
   }
 }
 

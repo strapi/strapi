@@ -1,10 +1,10 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.3",
-  "description": "Strapi Plugin - Content Manager",
+  "version": "3.0.0-alpha.4.8",
+  "description": "A powerful UI to easily manage your data.",
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -18,18 +18,36 @@
       "url": "http://strapi.io"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
   "license": "MIT",
+  "strapi": {
+    "name": "Content Manager",
+    "icon": "fa-plug"
+  },
   "scripts": {
-    "setup": "npm i && cd public && npm i && npm run build"
+    "analyze:clean": "node_modules/rimraf/bin.js stats.json",
+    "preanalyze": "npm run analyze:clean",
+    "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "postinstall": "npm run build:dll",
+    "prebuild": "npm run build:clean && npm run test",
+    "build": "node_modules/cross-env/bin/cross-env.js NODE_ENV=production node_modules/webpack/bin/webpack.js --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "node_modules/rimraf/bin.js admin/build",
+    "build:dll": "node node_modules/strapi-helper-plugin/lib/internals/scripts/dependencies.js",
+    "start": "node_modules/cross-env/bin/cross-env.js NODE_ENV=development node lib/server",
+    "generate": "node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "pretest": "npm run lint",
+    "prettier": "node_modules/prettier/bin/prettier.js --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
+    "test": "echo Tests are not implemented.",
+    "prepublish": "npm run build"
   },
-  "pre-commit": [
-    "lint:admin"
-  ],
   "dependencies": {
-    "fs-extra": "^1.0.0",
-    "lodash": "^4.17.2",
-    "semver": "^5.3.0",
-    "validator": "^6.1.0"
+    "react-select": "^1.0.0-rc.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "strapi-helper-plugin": "^3.0.0-alpha.4.5"
+  }
 }

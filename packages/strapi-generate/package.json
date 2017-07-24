@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,14 +13,11 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "async": "^2.1.2",
-    "fs-extra": "~1.0.0",
-    "lodash": "^4.16.5",
+    "async": "^2.5.0",
+    "fs-extra": "^1.0.0",
+    "lodash": "^4.17.4",
     "reportback": "^2.0.1",
-    "strapi-utils": "^3.0.0-alpha.3"
-  },
-  "scripts": {
-    "prepublish": "npm prune"
+    "strapi-utils": "file:../strapi-utils"
   },
   "author": {
     "name": "Strapi team",
@@ -42,8 +39,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }

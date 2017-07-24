@@ -10,6 +10,7 @@ const path = require('path');
 // Externals
 const co = require('co');
 const render = require('koa-ejs');
+const _ = require('lodash');
 
 /**
  * EJS hook
@@ -40,7 +41,9 @@ module.exports = function (strapi) {
         strapi.config.hooks.ejs.cache = true;
       }
 
-      render(strapi.app, strapi.config.hooks.ejs);
+      _.defaults(strapi.config.hooks.settings.ejs, hook.defaults);
+
+      render(strapi.app, strapi.config.hooks.settings.ejs);
 
       strapi.app.context.render = co.wrap(strapi.app.context.render);
 

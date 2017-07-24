@@ -8,4 +8,6 @@ global.startedAt = Date.now();
  * (maintains legacy support).
  */
 
-module.exports = require('./Strapi'); // Strapi instance instanciated
+module.exports = function(global) {
+  return global.strapi = require('./Strapi'); // Strapi instance instanciated
+}.call(this, global);

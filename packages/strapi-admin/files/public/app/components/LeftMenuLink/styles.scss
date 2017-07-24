@@ -2,13 +2,13 @@
 @import "../../styles/variables/variables";
 
 .link {
-  padding-top: 0.5rem;
+  padding-top: 1rem;
   padding-bottom: 0.2rem;
+  padding-left: 1.6rem;
   min-height: 4rem;
   border-left: 0.4rem solid transparent;
   cursor: pointer;
   color: $left-menu-link-color;
-  padding-left: 2.4rem;
   text-decoration: none;
   display: block;
 
@@ -29,15 +29,12 @@
 
 .linkIcon {
   position: relative;
-  width: 2rem;
-  height: 2rem;
-  margin-right: 1rem;
-  font-size: 1.8rem;
-
-  &:before {
-    position: absolute;
-    top: 0.5rem;
-  }
+  margin-right: 1.2rem;
+  vertical-align: middle;
+  font-size: 1.2rem;
+  width: 1.2rem;
+  padding-bottom: 0.4rem;
+  text-align: center;
 }
 
 .linkLabel {

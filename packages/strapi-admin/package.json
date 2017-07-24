@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Strapi Admin",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -12,9 +12,9 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "fs-extra": "~0.30.0",
-    "lodash": "^4.16.5",
-    "strapi-utils": "^3.0.0-alpha.3"
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.17.4",
+    "strapi-utils": "file:../strapi-utils"
   },
   "scripts": {
     "test": "cd files/public && npm run test",
@@ -40,8 +40,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }
