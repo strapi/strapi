@@ -139,7 +139,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   // custom Row rendering for the component List with params slug === languages
-  renderRowLanguage = (props, key, styles) => {
+  renderRowLanguage = (props, key, rowStyles) => {
     const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
@@ -147,15 +147,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
     const languageLabel = props.active ?
-      <span className={styles.italicText}>
+      <span className={rowStyles.italicText}>
         <FormattedMessage {...{id: 'list.languages.default.languages'}} />
       </span> :
       // set the span's id with the language name to retrieve it
         <FormattedMessage {...{id: 'list.languages.set.languages'}}>
           {(message) => (
-            <span className={styles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
+            <button className={rowStyles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
               {message}
-            </span>
+            </button>
           )}
         </FormattedMessage>;
 

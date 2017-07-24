@@ -15,7 +15,7 @@
   "dependencies": {
     "fs-extra": "^0.30.0",
     "lodash": "^4.17.4",
-    "strapi-admin": "^3.0.0-alpha.4.8"
+    "strapi-admin": "file:../strapi-admin"
   },
   "author": {
     "email": "hi@strapi.io",

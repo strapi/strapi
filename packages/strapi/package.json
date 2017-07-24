@@ -64,14 +64,14 @@
     "node-schedule": "^1.2.3",
     "semver": "^5.3.0",
     "socket.io": "^1.7.4",
-    "strapi-generate": "^3.0.0-alpha.4.8",
-    "strapi-generate-admin": "^3.0.0-alpha.4.8",
-    "strapi-generate-api": "^3.0.0-alpha.4.8",
-    "strapi-generate-new": "^3.0.0-alpha.4.8",
-    "strapi-generate-policy": "^3.0.0-alpha.4.8",
-    "strapi-generate-service": "^3.0.0-alpha.4.8",
-    "strapi-mongoose": "^3.0.0-alpha.4.8",
-    "strapi-utils": "^3.0.0-alpha.4.8"
+    "strapi-generate": "file:../strapi-generate",
+    "strapi-generate-admin": "file:../strapi-generate-admin",
+    "strapi-generate-api": "file:../strapi-generate-api",
+    "strapi-generate-new": "file:../strapi-generate-new",
+    "strapi-generate-policy": "file:../strapi-generate-policy",
+    "strapi-generate-service": "file:../strapi-generate-service",
+    "strapi-mongoose": "file:../strapi-mongoose",
+    "strapi-utils": "file:../strapi-utils"
   },
   "author": {
     "email": "hi@strapi.io",

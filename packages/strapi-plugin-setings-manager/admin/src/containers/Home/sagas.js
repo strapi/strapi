@@ -45,7 +45,7 @@ export function* fetchLanguages() {
 
     const [appLanguagesData, listLanguagesData] = yield [
       call(request, requestUrlappLanguages, opts),
-      call(request, requestUrlListLanguages, opts)
+      call(request, requestUrlListLanguages, opts),
     ];
 
     yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
