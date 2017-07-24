@@ -27,12 +27,11 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
       select: InputSelect,
     };
     const Input = inputs[props.type];
-    const customBootstrapClass = config[props.target] || "";
+    const customBootstrapClass = config[props.target] || '';
     const inputValue = this.props.values[props.target];
     // retrieve options for the select input
     const selectOptions = props.type === 'enum' ? props.items : [];
     return (
-      // <div />
       <Input
         customBootstrapClass={customBootstrapClass}
         key={key}
@@ -52,7 +51,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 
     return (
       <div className={styles.editFormSection}>
-        <div className="container">
+        <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
               <span className={styles.sectionHeader}>

@@ -40,12 +40,9 @@ class App extends React.Component {
         exposedComponents: this.props.exposedComponents,
       })
     );
+
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        {/*
-
-          <div className={styles.baseline}></div>
-        */}
         <div className={`container-fluid ${styles.noPadding}`}>
           <div className="row">
             <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} />
@@ -79,7 +76,7 @@ export function mapDispatchToProps(dispatch) {
     },
     dispatch
   );
-}
+};
 
 const mapStateToProps = createStructuredSelector({
   sections: makeSelectSections(),

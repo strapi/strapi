@@ -1,8 +1,12 @@
+import { LOCATION_CHANGE } from 'react-router-redux';
+
 import { takeLatest } from 'redux-saga';
-import { take, put, fork, cancel } from 'redux-saga/effects';
-// import { FormattedMessage } from 'react-intl';
-import { CONFIG_FETCH, CONFIG_FETCH_SUCCEEDED } from './constants';
-import { configFetchSucceded } from './actions';
+import { call, take, put, fork, cancel } from 'redux-saga/effects';
+
+import request from 'utils/request';
+
+import { CONFIG_FETCH, LANGUAGES_FETCH } from './constants';
+import { configFetchSucceded, languagesFetchSucceeded } from './actions';
 
 export function* fetchConfig(action) {
   try {
@@ -10,23 +14,45 @@ export function* fetchConfig(action) {
       method: 'GET',
     };
 
-    const response = yield fetch(`/settings-manager/configurations/${action.endPoint}`, opts);
-    const data = yield response.json();
+    const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
+    const data = yield call(request, requestUrl, opts);
 
-    // TODO handle error
     yield put(configFetchSucceded(data));
 
   } catch(error) {
-
     window.Strapi.notification.error('An error occurred ');
   }
 }
 
+
+export function* fetchLanguages() {
+  try {
+    const opts = {
+      method: 'GET',
+    };
+
+    const requestUrlappLanguages = '/settings-manager/configurations/languages';
+    const requestUrlListLanguages = '/settings-manager/configurations/i18n';
+
+    const appLanguagesData = yield call(request, requestUrlappLanguages, opts);
+    const listLanguagesData = yield call(request, requestUrlListLanguages, opts);
+
+    yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
+
+  } catch(error) {
+    window.Strapi.notification.error('An error occurred');
+  }
+}
+
+
 // Individual exports for testing
 export function* defaultSaga() {
   const loadConfig = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
-  yield take(CONFIG_FETCH_SUCCEEDED);
+  const loadLanguages = yield fork(takeLatest, LANGUAGES_FETCH, fetchLanguages);
+
+  yield take(LOCATION_CHANGE);
   yield cancel(loadConfig);
+  yield cancel(loadLanguages);
 }
 
 // All sagas to be loaded

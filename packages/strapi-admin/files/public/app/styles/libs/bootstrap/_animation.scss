@@ -2,7 +2,7 @@
   opacity: 0;
   transition: opacity .15s linear;
 
-  &.in {
+  &.in, &.show {
     opacity: 1;
   }
 }

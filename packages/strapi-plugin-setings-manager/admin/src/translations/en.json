@@ -45,6 +45,8 @@
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
 
+  "form.i18n.name": "Languages",
+  "form.i18n.description": "Configure your languages.",
   "form.i18n.choose": "Choose your language",
 
   "request.error.type.string": "A text is required.",
@@ -65,6 +67,12 @@
   "request.error.languages.exist": "This language already exit.",
   "request.error.languages.notExist": "This language doesn't exit.",
   "request.error.languages.incorrect": "This language is incorrect.",
+
+  "list.languages.button.label": "Add a new language",
+  "list.languages.title.singular": "language is available",
+  "list.languages.title.plural": "languages are available",
+  "list.languages.default.languages": "Default language",
+  "list.languages.set.languages": "Set to default",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",

@@ -7,7 +7,9 @@
 import { forEach } from 'lodash';
 import {
   CONFIG_FETCH,
+  LANGUAGES_FETCH,
   CONFIG_FETCH_SUCCEEDED,
+  LANGUAGES_FETCH_SUCCEEDED,
   CHANGE_INPUT,
   CANCEL_CHANGES,
   SUBMIT_CHANGES,
@@ -29,6 +31,7 @@ export function configFetch(endPoint) {
 
 export function configFetchSucceded(configs) {
   const data = {};
+
   forEach(configs.sections, (section) => {
     forEach(section.items, (item) => {
       data[item.target] = item.value;
@@ -59,5 +62,25 @@ export function cancelChanges() {
 export function submitChanges() {
   return {
     type: SUBMIT_CHANGES,
+  };
+}
+
+
+export function languagesFetch() {
+  return {
+    type: LANGUAGES_FETCH,
+  };
+}
+
+export function languagesFetchSucceeded(appLanguages, listLanguages) {
+  const configs = {
+    name: listLanguages.name,
+    description: listLanguages.description,
+    sections: appLanguages.languages,
+  };
+  return {
+    type: LANGUAGES_FETCH_SUCCEEDED,
+    configs,
+    listLanguages,
   };
 }

@@ -8,8 +8,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes, get, toNumber } from 'lodash';
-
+import { findKey, includes, get, toNumber, isObject, find } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
 
@@ -17,10 +17,11 @@ import { router } from 'app';
 import ContentHeader from 'components/ContentHeader';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
+import List from 'components/List';
 
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
-import { configFetch, changeInput, cancelChanges, submitChanges } from './actions'
+import { configFetch, changeInput, cancelChanges, submitChanges, languagesFetch } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -31,14 +32,14 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.customComponents = config.customComponents;
     this.components = {
       editForm: EditForm,
+      list: List,
       defaultComponent: HeaderNav, // TODO change to default
     };
   }
 
   componentDidMount() {
     if (this.props.params.slug) {
-      const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
-      this.props.configFetch(apiUrl);
+      this.handleFetch(this.props);
     } else {
       router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
     }
@@ -47,11 +48,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
-    if (this.props.params.slug !== nextProps.params.slug) {
+    if (this.props.params.slug !== nextProps.params.slug && nextProps.params.slug) {
       if (nextProps.params.slug) {
         // get data from api if params slug updated
-        const apiUrl = nextProps.params.env ? `${nextProps.params.slug}/${nextProps.params.env}` : nextProps.params.slug;
-        this.props.configFetch(apiUrl);
+        this.handleFetch(nextProps);
       } else {
         // redirect user if no params slug provided
         router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
@@ -60,7 +60,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       // get data if params env updated
       this.props.configFetch(`${this.props.params.slug}/${nextProps.params.env}`);
     }
+  }
 
+  handleFetch(props) {
+    if (props.params.slug !== 'languages') {
+      const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
+      this.props.configFetch(apiUrl);
+    } else {
+      this.props.languagesFetch();
+    }
   }
 
   handleChange = ({ target }) => {
@@ -73,8 +81,66 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleSubmit = () => {
+    console.log('submit');
     this.props.submitChanges();
   }
+
+
+  addLanguage = () => {
+    console.log('click Add Language');
+  }
+
+  // custom Row rendering for the component List with params slug === languages
+  renderRowLanguage = (props, key) => {
+    // custom style
+    const rowStyle = {
+      defaultSpanStyle: {
+        color: '#49515A',
+        fontStyle: 'italic',
+      },
+      normalSpanStyle: {
+        color: '#1C5DE7',
+      },
+      tdNameStyle: {
+        color: '#333740',
+      },
+      tdLangDisplayStyle: {
+        color: '#333740',
+        fontWeight: '600',
+      },
+    };
+    const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
+    const languageLabel = props.active ?
+      <span style={rowStyle.defaultSpanStyle}>
+        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
+      </span> :
+        <span style={rowStyle.normalSpanStyle}>
+          <FormattedMessage {...{id: 'list.languages.set.languages'}} />
+        </span>;
+
+    // retrieve language name from i18n translation
+    const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
+    // apply i18n
+    const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
+    return (
+      <tr key={key}>
+        <th>{key}</th>
+        <td style={rowStyle.tdLangDisplayStyle}>{languageDisplay}</td>
+        <td style={rowStyle.tdNameStyle}>{props.name}</td>
+        <td>{languageLabel}</td>
+        <td>{deleteIcon}</td>
+      </tr>
+    );
+  }
+
+  renderListTitle = () => {
+    const availableContentNumber = this.props.home.configsDisplay.sections.length;
+    const title = availableContentNumber > 1 ? `list.${this.props.params.slug}.title.plural` : `list.${this.props.params.slug}.title.singular`;
+    const titleDisplay = title ? <FormattedMessage {...{id: title}} /> : '';
+    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
+  }
+
+  renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
@@ -82,6 +148,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
+    const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
+    const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
+    const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
 
     return (
       <Component
@@ -92,9 +161,14 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         handleSubmit={this.handleSubmit}
         links={this.props.environments}
         path={this.props.location.pathname}
+        slug={this.props.params.slug}
+        renderRow={renderRow}
+        listTitle={listTitle}
+        listButtonLabel={listButtonLabel}
+        handlei18n
+        handleListPopUpSubmit={this.addLanguage}
       />
     );
-    // TODO remove environments
   }
 
   render() {
@@ -105,9 +179,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     return (
       <div className={`${styles.home} col-md-9`}>
         <Helmet
-          title="Home"
+          title="Settings Manager"
           meta={[
-            { name: 'description', content: 'Description of Home' },
+            { name: 'Settings Manager Plugin', content: 'Modify your app settings' },
           ]}
         />
         <ContentHeader
@@ -133,6 +207,7 @@ function mapDispatchToProps(dispatch) {
       cancelChanges,
       changeInput,
       configFetch,
+      languagesFetch,
       submitChanges,
     },
     dispatch
@@ -145,6 +220,7 @@ Home.propTypes = {
   configFetch: React.PropTypes.func.isRequired,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,
+  languagesFetch: React.PropTypes.func,
   location: React.PropTypes.object,
   menuSections: React.PropTypes.array,
   params: React.PropTypes.object.isRequired,
