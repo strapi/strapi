@@ -10,5 +10,6 @@ export const CONFIG_FETCH_SUCCEEDED = 'SettingsManager/Home/CONFIG_FETCH_SUCCEED
 export const LANGUAGES_FETCH_SUCCEEDED = 'SettingsManager/Home/LANGUAGES_FETCH_SUCCEEDED';
 export const CHANGE_INPUT = 'SettingsManager/Home/CHANGE_INPUT';
 export const CANCEL_CHANGES = 'SettingsManager/Home/CANCEL_CHANGES';
-export const SUBMIT_CHANGES = 'SettingsManager/Home/SUBMIT_CHANGES';
 export const DEFAULT_ACTION = 'SettingsManager/Home/DEFAULT_ACTION';
+export const EDIT_SETTINGS = 'SettingsManager/Home/EDIT_SETTINGS';
+export const EDIT_SETTINGS_SUCCEEDED = 'SettingsManager/Home/EDIT_SETTINGS_SUCCEEDED';

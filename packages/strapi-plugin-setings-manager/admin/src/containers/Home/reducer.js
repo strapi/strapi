@@ -10,6 +10,7 @@ import {
   CHANGE_INPUT,
   CANCEL_CHANGES,
   LANGUAGES_FETCH_SUCCEEDED,
+  EDIT_SETTINGS_SUCCEEDED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -40,6 +41,11 @@ function homeReducer(state = initialState, action) {
         .set('initialData', Map())
         .set('modifiedData', Map())
         .set('listLanguages', Map(action.listLanguages));
+    case EDIT_SETTINGS_SUCCEEDED:
+      return state
+        .set('configsDisplay', OrderedMap(action.optimisticResponse))
+        .set('initialData', Map(action.data))
+        .set('modifiedData', Map(action.data));
     default:
       return state;
   }

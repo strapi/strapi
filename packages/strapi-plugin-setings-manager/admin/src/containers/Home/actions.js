@@ -12,8 +12,9 @@ import {
   LANGUAGES_FETCH_SUCCEEDED,
   CHANGE_INPUT,
   CANCEL_CHANGES,
-  SUBMIT_CHANGES,
   DEFAULT_ACTION,
+  EDIT_SETTINGS,
+  EDIT_SETTINGS_SUCCEEDED,
 } from './constants';
 
 export function defaultAction() {
@@ -30,13 +31,7 @@ export function configFetch(endPoint) {
 }
 
 export function configFetchSucceded(configs) {
-  const data = {};
-
-  forEach(configs.sections, (section) => {
-    forEach(section.items, (item) => {
-      data[item.target] = item.value;
-    });
-  });
+  const data = getDataFromConfigs(configs);
 
   return {
     type: CONFIG_FETCH_SUCCEEDED,
@@ -59,12 +54,6 @@ export function cancelChanges() {
   };
 }
 
-export function submitChanges() {
-  return {
-    type: SUBMIT_CHANGES,
-  };
-}
-
 
 export function languagesFetch() {
   return {
@@ -78,9 +67,44 @@ export function languagesFetchSucceeded(appLanguages, listLanguages) {
     description: listLanguages.description,
     sections: appLanguages.languages,
   };
+
   return {
     type: LANGUAGES_FETCH_SUCCEEDED,
     configs,
     listLanguages,
   };
+}
+
+
+export function editSettings(newSettings, endPoint) {
+  return {
+    type: EDIT_SETTINGS,
+    newSettings,
+    endPoint
+  };
+}
+
+export function editSettingsSucceeded(optimisticResponse) {
+  const data = getDataFromConfigs(optimisticResponse);
+
+  console.log('optimisticResponse', optimisticResponse);
+
+  return {
+    type: EDIT_SETTINGS_SUCCEEDED,
+    optimisticResponse,
+    data,
+  };
+}
+
+
+function getDataFromConfigs(configs) {
+  const data = {};
+
+  forEach(configs.sections, (section) => {
+    forEach(section.items, (item) => {
+      data[item.target] = item.value;
+    });
+  });
+
+  return data;
 }
