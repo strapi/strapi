@@ -13,3 +13,4 @@ export const CANCEL_CHANGES = 'SettingsManager/Home/CANCEL_CHANGES';
 export const DEFAULT_ACTION = 'SettingsManager/Home/DEFAULT_ACTION';
 export const EDIT_SETTINGS = 'SettingsManager/Home/EDIT_SETTINGS';
 export const EDIT_SETTINGS_SUCCEEDED = 'SettingsManager/Home/EDIT_SETTINGS_SUCCEEDED';
+export const CHANGE_DEFAULT_LANGUAGE = 'SettingsManager/Home/CHANGE_DEFAULT_LANGUAGE';

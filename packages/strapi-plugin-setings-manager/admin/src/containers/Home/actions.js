@@ -15,6 +15,7 @@ import {
   DEFAULT_ACTION,
   EDIT_SETTINGS,
   EDIT_SETTINGS_SUCCEEDED,
+  CHANGE_DEFAULT_LANGUAGE,
 } from './constants';
 
 export function defaultAction() {
@@ -80,14 +81,12 @@ export function editSettings(newSettings, endPoint) {
   return {
     type: EDIT_SETTINGS,
     newSettings,
-    endPoint
+    endPoint,
   };
 }
 
 export function editSettingsSucceeded(optimisticResponse) {
   const data = getDataFromConfigs(optimisticResponse);
-
-  console.log('optimisticResponse', optimisticResponse);
 
   return {
     type: EDIT_SETTINGS_SUCCEEDED,
@@ -107,4 +106,12 @@ function getDataFromConfigs(configs) {
   });
 
   return data;
+}
+
+export function changeDefaultLanguage(configsDisplay, newLanguage) {
+  return {
+    type: CHANGE_DEFAULT_LANGUAGE,
+    configsDisplay,
+    newLanguage,
+  };
 }

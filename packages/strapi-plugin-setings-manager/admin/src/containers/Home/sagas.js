@@ -14,7 +14,7 @@ import {
 import {
   configFetchSucceded,
   languagesFetchSucceeded,
-  editSettingsSucceeded,
+  // editSettingsSucceeded,
 } from './actions';
 
 export function* fetchConfig(action) {
@@ -76,7 +76,6 @@ export function* settingsEdit(action) {
     // yield put(editSettingsSucceeded(data));
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An error occured');
   }
 }

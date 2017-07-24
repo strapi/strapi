@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { map, findKey, includes, get, toNumber, isObject, find, forEach } from 'lodash';
+import { isEmpty, findKey, includes, get, toNumber, isObject, find, forEach, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -27,6 +27,7 @@ import {
   cancelChanges,
   languagesFetch,
   editSettings,
+  changeDefaultLanguage,
 } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
@@ -87,19 +88,59 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleSubmit = () => {
-    console.log('submit');
+    const prevSettings = this.props.home.initialData;
+    const body = {};
     const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
-    this.props.editSettings(this.props.home.modifiedData, apiUrl);
+
+    // send only updated settings
+    forEach(this.props.home.modifiedData, (value, key) => {
+      if (value !== prevSettings[key]) {
+        body[key] = value;
+      }
+    });
+
+    if (!isEmpty(body)) {
+      this.props.editSettings(body, apiUrl);
+    } else {
+      window.Strapi.notification.error('Settings are equals');
+    }
   }
 
 
   addLanguage = () => {
-    console.log('click Add Language');
+    // console.log('click Add Language');
+  }
+
+  changeDefaultLanguage = ({ target }) => {
+    // create new object configsDisplay based on store property configsDisplay
+    const configsDisplay = {
+      name: this.props.home.configsDisplay.name,
+      description: this.props.home.configsDisplay.description,
+      sections: [],
+    };
+
+    // Find the index of the new setted language
+    const activeLanguageIndex = findIndex(this.props.home.configsDisplay.sections, ['name', target.id]);
+
+    forEach(this.props.home.configsDisplay.sections, (section, key) => {
+      // set all Language active state to false
+      if (key !== activeLanguageIndex) {
+        configsDisplay.sections.push({ name: section.name, active: false });
+      } else {
+        // set the new language active state to true
+        configsDisplay.sections.push({ name: section.name, active: true });
+      }
+    });
+
+    // reset all the configs to ensure component is updated
+    this.props.changeDefaultLanguage(configsDisplay, target.id);
+    // Edit the new config
+    this.props.editSettings({ 'i18n.i18n.defaultLocale': target.id }, 'i18n');
   }
 
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key) => {
-    // custom style
+    // custom style must be inline
     const rowStyle = {
       defaultSpanStyle: {
         color: '#49515A',
@@ -117,18 +158,25 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       },
     };
     const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
-    const languageLabel = props.active ?
-      <span style={rowStyle.defaultSpanStyle}>
-        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
-      </span> :
-        <span style={rowStyle.normalSpanStyle}>
-          <FormattedMessage {...{id: 'list.languages.set.languages'}} />
-        </span>;
-
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
+
+    /* eslint-disable jsx-a11y/no-static-element-interactions */
+    const languageLabel = props.active ?
+      <span style={rowStyle.defaultSpanStyle}>
+        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
+      </span> :
+      // set the span's id with the language name to retrieve it
+        <FormattedMessage {...{id: 'list.languages.set.languages'}}>
+          {(message) => (
+            <span style={rowStyle.normalSpanStyle} onClick={this.changeDefaultLanguage} id={props.name}>
+              {message}
+            </span>
+          )}
+        </FormattedMessage>;
+
     return (
       <tr key={key}>
         <th>{key}</th>
@@ -213,6 +261,7 @@ function mapDispatchToProps(dispatch) {
     {
       editSettings,
       cancelChanges,
+      changeDefaultLanguage,
       changeInput,
       configFetch,
       languagesFetch,
@@ -223,6 +272,7 @@ function mapDispatchToProps(dispatch) {
 
 Home.propTypes = {
   cancelChanges: React.PropTypes.func,
+  changeDefaultLanguage: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
   editSettings: React.PropTypes.func,
