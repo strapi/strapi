@@ -6,7 +6,6 @@ const utils = require('./utils');
 const { nestedConfigurations, appConfigurations, apis, plugins, admin, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
-const mixinAfter = require('./after');
 const { logger } = require('strapi-utils');
 const { http } = require('uws');
 const { EventEmitter } = require('events');
