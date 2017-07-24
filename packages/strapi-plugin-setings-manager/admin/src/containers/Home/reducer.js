@@ -7,6 +7,7 @@
 import { fromJS, Map, OrderedMap } from 'immutable';
 import {
   CONFIG_FETCH_SUCCEEDED,
+  CHANGE_DEFAULT_LANGUAGE,
   CHANGE_INPUT,
   CANCEL_CHANGES,
   LANGUAGES_FETCH_SUCCEEDED,
@@ -46,6 +47,10 @@ function homeReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.optimisticResponse))
         .set('initialData', Map(action.data))
         .set('modifiedData', Map(action.data));
+    case CHANGE_DEFAULT_LANGUAGE:
+      return state
+        .set('configsDisplay', OrderedMap(action.configsDisplay))
+        .updateIn(['modifiedData', 'i18n.i18n.defaultLocale'], () => action.newLanguage);
     default:
       return state;
   }
