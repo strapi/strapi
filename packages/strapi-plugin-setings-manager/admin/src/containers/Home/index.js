@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findKey, includes, get, toNumber, isObject, find } from 'lodash';
+import { map, findKey, includes, get, toNumber, isObject, find, forEach } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -21,7 +21,13 @@ import List from 'components/List';
 
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
-import { configFetch, changeInput, cancelChanges, submitChanges, languagesFetch } from './actions'
+import {
+  configFetch,
+  changeInput,
+  cancelChanges,
+  languagesFetch,
+  editSettings,
+} from './actions'
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -82,7 +88,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   handleSubmit = () => {
     console.log('submit');
-    this.props.submitChanges();
+    const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
+    this.props.editSettings(this.props.home.modifiedData, apiUrl);
   }
 
 
@@ -204,11 +211,11 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      editSettings,
       cancelChanges,
       changeInput,
       configFetch,
       languagesFetch,
-      submitChanges,
     },
     dispatch
   )
@@ -218,13 +225,13 @@ Home.propTypes = {
   cancelChanges: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
+  editSettings: React.PropTypes.func,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,
   languagesFetch: React.PropTypes.func,
   location: React.PropTypes.object,
   menuSections: React.PropTypes.array,
   params: React.PropTypes.object.isRequired,
-  submitChanges: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

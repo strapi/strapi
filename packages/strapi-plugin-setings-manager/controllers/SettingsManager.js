@@ -61,7 +61,7 @@ module.exports = {
 
     if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
 
-    ctx.send();
+    ctx.send({ ok: true });
   },
 
   createLanguage: async ctx => {
@@ -76,7 +76,7 @@ module.exports = {
 
     fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
 
-    ctx.send();
+    ctx.send({ ok: true });
   },
 
   deleteLanguage: async ctx => {
@@ -89,6 +89,6 @@ module.exports = {
 
     fs.unlinkSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`));
 
-    ctx.send();
+    ctx.send({ ok: true });
   }
 };
