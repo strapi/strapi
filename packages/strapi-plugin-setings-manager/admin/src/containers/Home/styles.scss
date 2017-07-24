@@ -1,0 +1,22 @@
+.home { /* stylelint-disable */
+  background: rgba(14,22,34,0.02);
+  min-height: calc(100vh - 6rem); // TODO shoukd be variable
+  padding: 0;
+}
+.baseline {
+  // display: none;
+  z-index: 100001;
+  opacity: .2;
+  position: absolute;
+  top:0; left:0;
+  width: 100%;
+  height: 500%;
+  min-height: 100%;
+  background: url('../../assets/images/baseline-18.png');
+  // background: url('../../assets/images/baseline-20.png');
+  pointer-events: none;
+}
+
+.left {
+  opacity: 0.3;
+}

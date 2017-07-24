@@ -51,13 +51,19 @@ module.exports = async function(ctx, next) {
   }
 
   // Empty body is considered as `notFound` response.
-  if (!ctx.body) {
-    ctx.notFound();
+  if (_.isUndefined(ctx.body) && _.isUndefined(ctx.status)) {
+    return ctx.notFound();
   }
 
-  // Format `ctx.body` and `ctx.status`.
-  ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
-  ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
+  if (_.isObject(ctx.body)) {
+    if (ctx.body.isBoom && ctx.body.data) {
+      ctx.body.output.payload.data = ctx.body.data;
+    }
+
+    // Format `ctx.body` and `ctx.status`.
+    ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
+    ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
+  }
 
   // Call custom responses.
   if (_.isFunction(_.get(strapi.config, `responses.${ctx.status}`))) {

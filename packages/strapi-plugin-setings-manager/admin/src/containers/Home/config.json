@@ -1,0 +1,6 @@
+{
+  "customComponents": {
+    "editForm": ["general"],
+    "list": ["languages"]
+  }
+}
