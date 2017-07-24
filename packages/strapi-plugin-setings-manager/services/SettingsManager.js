@@ -243,7 +243,7 @@ module.exports = {
         name: '',
         items: [
           {
-            name: 'form.i18n.chose',
+            name: 'form.i18n.choose',
             target: 'i18n.i18n.defaultLocale',
             type: 'select',
             items: strapi.plugins['settings-manager'].services.languages
@@ -354,7 +354,7 @@ module.exports = {
 
     const checkValidations = (input, item) => {
       _.forEach(item.validations, (value, key) => {
-        if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
+        if (key === 'required' && (_.isNull(input) || (_.isString(input) && _.isEmpty(input)) || _.isUndefined(input))) errors.push({
           target: item.target,
           message: 'request.error.validation.required'
         });

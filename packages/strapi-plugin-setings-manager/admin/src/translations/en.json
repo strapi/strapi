@@ -47,7 +47,7 @@
 
   "form.i18n.name": "Languages",
   "form.i18n.description": "Configure your languages.",
-  "form.i18n.chose": "Choose your language",
+  "form.i18n.choose": "Choose your language",
 
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",

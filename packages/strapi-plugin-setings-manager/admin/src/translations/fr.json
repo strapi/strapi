@@ -47,7 +47,7 @@
 
   "form.i18n.name": "Langages",
   "form.i18n.description": "Modification des langues.",
-  "form.i18n.chose": "Choisissez votre mangue",
+  "form.i18n.choose": "Choisissez votre langue",
 
   "request.error.type.string": "Un texte est demandé.",
   "request.error.type.number": "Un nombre est demandé.",
