@@ -3,8 +3,8 @@
   "version": "3.0.0-alpha.4",
   "description": "A powerful UI to easily manage your data.",
   "engines": {
-    "npm": ">=3",
-    "node": ">=5"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -48,6 +48,6 @@
     "react-select": "^1.0.0-rc.5"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.4"
+    "strapi-helper-plugin": "^3.0.0-alpha.4"
   }
 }
