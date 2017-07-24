@@ -87,7 +87,7 @@
   "settings": {
     "import/resolver": {
       "webpack": {
-        "config": "./node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.test.babel.js"
+        "config": "node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.test.babel.js"
       }
     }
   }

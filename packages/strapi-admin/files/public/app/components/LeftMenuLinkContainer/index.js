@@ -14,7 +14,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
     let links = this.props.plugins.valueSeq().map((plugin) => (
       <LeftMenuLink
         key={plugin.get('id')}
-        icon={plugin.get('icon') || 'fa-plug'}
+        icon={plugin.get('icon') || 'plug'}
         label={plugin.get('name')}
         destination={`/plugins/${plugin.get('id')}`}
         leftMenuLinks={plugin.get('leftMenuLinks')}
@@ -35,17 +35,17 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
         <p className={styles.title}>General</p>
         <ul className={styles.list}>
           <LeftMenuLink
-            icon="fa-cubes"
+            icon="cubes"
             label="List plugins"
             destination="/list-plugins"
           />
           <LeftMenuLink
-            icon="fa-download"
+            icon="download"
             label="Install new plugin"
             destination="/install-plugin"
           />
           <LeftMenuLink
-            icon="fa-gear"
+            icon="gear"
             label="Configuration"
             destination="/configuration"
           />

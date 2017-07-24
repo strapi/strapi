@@ -8,6 +8,7 @@ import React from 'react';
 import styles from './styles.scss';
 import { Link } from 'react-router';
 import LeftMenuSubLinkContainer from 'components/LeftMenuSubLinkContainer';
+import _ from 'lodash';
 
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -21,10 +22,14 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
       );
     }
 
+    // We need to create our own active url checker,
+    // because of the two levels router.
+    const isLinkActive = _.startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
+
     return (
       <li>
-        <Link className={styles.link} activeClassName={styles.linkActive} to={this.props.destination}>
-          <i className={`${styles.linkIcon} ${this.props.icon} fa`}></i>
+        <Link className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`} to={this.props.destination}>
+          <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
           <span className={styles.linkLabel}>{this.props.label}</span>
         </Link>
         {subLinksContainer}
