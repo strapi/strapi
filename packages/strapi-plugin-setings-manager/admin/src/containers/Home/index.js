@@ -139,39 +139,21 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   // custom Row rendering for the component List with params slug === languages
-  renderRowLanguage = (props, key) => {
-    // custom style must be inline
-    const rowStyle = {
-      defaultSpanStyle: {
-        color: '#49515A',
-        fontStyle: 'italic',
-      },
-      normalSpanStyle: {
-        color: '#1C5DE7',
-      },
-      tdNameStyle: {
-        color: '#333740',
-      },
-      tdLangDisplayStyle: {
-        color: '#333740',
-        fontWeight: '600',
-      },
-    };
+  renderRowLanguage = (props, key, styles) => {
     const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
-    /* eslint-disable jsx-a11y/no-static-element-interactions */
     const languageLabel = props.active ?
-      <span style={rowStyle.defaultSpanStyle}>
+      <span className={styles.italicText}>
         <FormattedMessage {...{id: 'list.languages.default.languages'}} />
       </span> :
       // set the span's id with the language name to retrieve it
         <FormattedMessage {...{id: 'list.languages.set.languages'}}>
           {(message) => (
-            <span style={rowStyle.normalSpanStyle} onClick={this.changeDefaultLanguage} id={props.name}>
+            <span className={styles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
               {message}
             </span>
           )}
@@ -180,8 +162,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     return (
       <tr key={key}>
         <th>{key}</th>
-        <td style={rowStyle.tdLangDisplayStyle}>{languageDisplay}</td>
-        <td style={rowStyle.tdNameStyle}>{props.name}</td>
+        <td className={styles.label}>{languageDisplay}</td>
+        <td className={styles.lighter}>{props.name}</td>
         <td>{languageLabel}</td>
         <td>{deleteIcon}</td>
       </tr>
@@ -199,8 +181,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
-    const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) ?
-      findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) : 'defaultComponent';
+    const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
     const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;

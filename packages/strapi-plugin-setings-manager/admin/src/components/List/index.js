@@ -19,7 +19,7 @@ import React from 'react';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import StrapiButton from 'components/Button';
+import ButtonPrimaryHotline from 'components/Button';
 import PopUpForm from 'components/PopUpForm';
 import styles from './styles.scss';
 
@@ -42,7 +42,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   render() {
     const button = this.props.noListButtonPopUp ? '' :
-      <StrapiButton
+      <ButtonPrimaryHotline
         buttonBackground={'secondaryAddType'}
         label={this.props.listButtonLabel}
         handlei18n={this.props.handlei18n}
@@ -71,7 +71,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                     {map(this.props.sections, (value, key) => {
                       // handle custom row displaying
                       if (this.props.renderRow) {
-                        return this.props.renderRow(value, key);
+                        return this.props.renderRow(value, key, styles);
                       }
                       return (
                         <tr key={key}>

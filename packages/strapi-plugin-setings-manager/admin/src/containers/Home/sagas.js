@@ -43,8 +43,10 @@ export function* fetchLanguages() {
     const requestUrlappLanguages = '/settings-manager/configurations/languages';
     const requestUrlListLanguages = '/settings-manager/configurations/i18n';
 
-    const appLanguagesData = yield call(request, requestUrlappLanguages, opts);
-    const listLanguagesData = yield call(request, requestUrlListLanguages, opts);
+    const [appLanguagesData, listLanguagesData] = yield [
+      call(request, requestUrlappLanguages, opts),
+      call(request, requestUrlListLanguages, opts)
+    ];
 
     yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
 
@@ -54,7 +56,6 @@ export function* fetchLanguages() {
 }
 
 export function* settingsEdit(action) {
-  // const body = action.newSettings.toJSON();
   try {
     const opts = {
       body: action.newSettings,
