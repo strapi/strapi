@@ -38,7 +38,8 @@ const installNecessaryDeps = () => {
   process.stdout.write('\nInstalling necessary dependencies');
   interval = animateProgress('Installing necessary dependencies');
 
-  exec(`npm install ${necessaryDependencies.join(' ')} --no-save`, addCheckMark.bind(null, installDepsCallback));
+  // Exec installation.
+  exec(`npm install ${necessaryDependencies.join(' ')} --save-dev`, addCheckMark.bind(null, installDepsCallback));
 };
 
 /**
