@@ -354,7 +354,7 @@ module.exports = {
 
     const checkValidations = (input, item) => {
       _.forEach(item.validations, (value, key) => {
-        if (key === 'required' && (_.isNull(input) || _.isEmpty(input) || _.isUndefined(input))) errors.push({
+        if (key === 'required' && (_.isNull(input) || (_.isString(input) && _.isEmpty(input)) || _.isUndefined(input))) errors.push({
           target: item.target,
           message: 'request.error.validation.required'
         });
