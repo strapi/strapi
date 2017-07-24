@@ -258,7 +258,7 @@
     "minimist": "1.2.0",
     "mocha": "3.0.2",
     "ngrok": "2.2.2",
-    "node-sass": "^3.8.0",
+    "node-sass": "^4.5.3",
     "null-loader": "0.1.1",
     "offline-plugin": "3.4.2",
     "plop": "1.5.0",

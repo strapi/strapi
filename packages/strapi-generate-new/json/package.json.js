@@ -35,7 +35,7 @@ module.exports = scope => {
     },
     'main': './server.js',
     'scripts': {
-      'start': 'node --harmony-async-await server.js',
+      'start': 'node server.js',
       'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
       'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js'
     },

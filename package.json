@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.4.8",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -21,9 +21,13 @@
     "shelljs": "^0.7.7"
   },
   "scripts": {
-    "test": "make test",
-    "removefiledependencies": "node ./scripts/removefiledependencies.js",
-    "postinstall": "lerna bootstrap --stream --hoist && node ./scripts/setup.js && node ./scripts/removefiledependencies.js"
+    "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
+    "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
+    "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
+    "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
+    "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
+    "setup": "npm run clean:all && npm install && node ./scripts/setup.js",
+    "test": "make test"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -38,7 +42,7 @@
     }
   ],
   "pre-commit": [
-    "removefiledependencies",
+    "clean",
     "test"
   ],
   "repository": {
@@ -52,8 +56,5 @@
     "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "MIT",
-  "dependencies": {
-    "strapi-utils": "file:packages/strapi-utils"
-  }
+  "license": "MIT"
 }

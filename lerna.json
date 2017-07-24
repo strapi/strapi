@@ -1,7 +1,9 @@
 {
   "lerna": "2.0.0",
-  "version": "3.0.0-alpha.4",
-  "packages": ["packages/*"],
+  "version": "3.0.0-alpha.4.8",
+  "packages": [
+    "packages/*"
+  ],
   "commands": {
     "bootstrap": {
       "ignore": "strapi-plugin-*"
