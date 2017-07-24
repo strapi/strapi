@@ -71,7 +71,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                     {map(this.props.sections, (value, key) => {
                       // handle custom row displaying
                       if (this.props.renderRow) {
-                        return this.props.renderRow(value, key);
+                        return this.props.renderRow(value, key, styles);
                       }
                       return (
                         <tr key={key}>
