@@ -1,7 +1,7 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.4",
-  "description": "Build powerful back-end with no effort",
+  "version": "3.0.0-alpha.4.8",
+  "description": "An open source solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier.",
   "homepage": "http://strapi.io",
   "keywords": [
     "api",
@@ -38,6 +38,7 @@
     "boom": "^4.3.1",
     "consolidate": "^0.14.5",
     "delegates": "^1.0.0",
+    "forever-monitor": "^1.7.1",
     "kcors": "^2.2.1",
     "koa": "^2.3.0",
     "koa-better-static": "^1.0.5",
@@ -63,17 +64,14 @@
     "node-schedule": "^1.2.3",
     "semver": "^5.3.0",
     "socket.io": "^1.7.4",
-    "strapi-generate": "^3.0.0-alpha.4",
-    "strapi-generate-admin": "^3.0.0-alpha.4",
-    "strapi-generate-api": "^3.0.0-alpha.4",
-    "strapi-generate-new": "^3.0.0-alpha.4",
-    "strapi-generate-policy": "^3.0.0-alpha.4",
-    "strapi-generate-service": "^3.0.0-alpha.4",
-    "strapi-mongoose": "^3.0.0-alpha.4",
-    "strapi-utils": "^3.0.0-alpha.4"
-  },
-  "devDependencies": {
-    "forever-monitor": "^1.7.1"
+    "strapi-generate": "^3.0.0-alpha.4.8",
+    "strapi-generate-admin": "^3.0.0-alpha.4.8",
+    "strapi-generate-api": "^3.0.0-alpha.4.8",
+    "strapi-generate-new": "^3.0.0-alpha.4.8",
+    "strapi-generate-policy": "^3.0.0-alpha.4.8",
+    "strapi-generate-service": "^3.0.0-alpha.4.8",
+    "strapi-mongoose": "^3.0.0-alpha.4.8",
+    "strapi-utils": "^3.0.0-alpha.4.8"
   },
   "author": {
     "email": "hi@strapi.io",
