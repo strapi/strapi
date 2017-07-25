@@ -11,7 +11,7 @@ import InputToggle from 'components/InputToggle';
 import InputSelect from 'components/InputSelect';
 import InputEnum from 'components/InputEnum';
 import config from './config.json';
-
+import styles from './styles.scss';
 
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
@@ -32,7 +32,8 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     const customBootstrapClass = config[props.target] || '';
     const inputValue = this.props.values[props.target];
     // retrieve options for the select input
-    const selectOptions = props.type === 'enum' ? props.items : [];
+    const selectOptions = props.type === 'enum' || props.type === 'select' ? props.items : [];
+
     return (
       <Input
         customBootstrapClass={customBootstrapClass}
@@ -53,6 +54,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       <InnerComponent
         {...this.props}
         renderInput={this.renderInput}
+        styles={styles}
       />
     );
   }

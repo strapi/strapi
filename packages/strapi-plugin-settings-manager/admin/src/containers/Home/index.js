@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { isEmpty, findKey, includes, get, toNumber, isObject, find, forEach, findIndex } from 'lodash';
+import { isEmpty, findKey, includes, get, toNumber, isObject, find, forEach, findIndex, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -179,6 +179,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
+  renderPopUpFormLanguage = (section, props) => (
+    map(section.items, (item, key) => (
+      <div key={key}>
+        <form>
+          {props.renderInput(item, key)}
+        </form>
+      </div>
+    ))
+  )
+
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
@@ -187,8 +197,14 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
     const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
     // sections is the props used by EditForm in case of list of table rendering we need to change its value
-    const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages : this.props.home.configsDisplay.sections;
+    const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages.sections : this.props.home.configsDisplay.sections;
     const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
+
+    // custom selectOptions for languages
+    const selectOptions = this.props.params.slug === 'languages' ? this.props.home.listLanguages : [];
+
+    // custom rendering for PopUpForm
+    const renderPopUpForm = this.props.params.slug === 'languages' ? this.renderPopUpFormLanguage : false;
 
     return (
       <Component
@@ -206,6 +222,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         listButtonLabel={listButtonLabel}
         handlei18n
         handleListPopUpSubmit={this.addLanguage}
+        selectOptions={selectOptions}
+        renderPopUpForm={renderPopUpForm}
       />
     );
   }
