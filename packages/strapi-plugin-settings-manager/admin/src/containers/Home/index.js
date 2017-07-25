@@ -186,11 +186,14 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const Component = this.components[specificComponent];
     const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
     const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
+    // sections is the props used by EditForm in case of list of table rendering we need to change its value
+    const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages : this.props.home.configsDisplay.sections;
     const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
 
     return (
       <Component
-        sections={this.props.home.configsDisplay.sections}
+        sections={sections}
+        listItems={this.props.home.configsDisplay.sections}
         values={this.props.home.modifiedData}
         handleChange={this.handleChange}
         handleCancel={this.handleCancel}
