@@ -271,6 +271,22 @@ module.exports = {
     });
   },
 
+  getDatabases: env => {
+    const databases = [];
+
+    _.forEach(strapi.config.environments[env].databases.connections, (connection, name) => {
+      databases.push({
+        provider: connection.connector,
+        name,
+        host: connection.settings.host,
+        database: connection.settings.database,
+        active: (strapi.config.environments[env].databases.defaultConnection = name)
+      });
+    });
+
+    return databases;
+  },
+
   getItems: model => _.flatten(_.map(model.sections, section => section.items)),
 
   cleanParams: (params, items) => {

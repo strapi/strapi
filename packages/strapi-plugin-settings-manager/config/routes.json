@@ -42,6 +42,14 @@
     },
     {
       "method": "GET",
+      "path": "/configurations/databases/:env",
+      "handler": "SettingsManager.databases",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/configurations/:slug/:env?",
       "handler": "SettingsManager.get",
       "config": {

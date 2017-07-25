@@ -22,6 +22,15 @@ module.exports = {
     ctx.send({ languages: Service.getLanguages() });
   },
 
+  databases: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { env } = ctx.params;
+
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+
+    ctx.send({ databases: Service.getDatabases(env) });
+  },
+
   get: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
