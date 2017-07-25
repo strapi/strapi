@@ -14,7 +14,7 @@ module.exports = function() {
   return Promise.all([
     new Promise((resolve, reject) => {
       glob(
-        './node_modules/koa-*',
+        './node_modules/*(koa-*|kcors)',
         {
           cwd: path.resolve(__dirname, '..', '..')
         },

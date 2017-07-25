@@ -33,14 +33,14 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.favicon) &&
-        !_.isEmpty(strapi.config.favicon)
+        _.isPlainObject(strapi.config.middlewares.settings.favicon) &&
+        !_.isEmpty(strapi.config.middlewares.settings.favicon)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.favicon(
-            path.resolve(strapi.config.appPath, strapi.config.favicon.path),
+            path.resolve(strapi.config.appPath, strapi.config.middlewares.settings.favicon.path),
             {
-              maxAge: strapi.config.favicon.maxAge
+              maxAge: strapi.config.middlewares.settings.favicon.maxAge
             }
           )
         );

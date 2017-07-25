@@ -34,8 +34,8 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.i18n) &&
-        !_.isEmpty(strapi.config.i18n) &&
+        _.isPlainObject(strapi.config.middlewares.settings.i18n) &&
+        !_.isEmpty(strapi.config.middlewares.settings.i18n) &&
         _.get(strapi.config, 'i18n.enabled') !== false
       ) {
         strapi.koaMiddlewares.locale(strapi.app);
@@ -47,10 +47,10 @@ module.exports = strapi => {
                 strapi.config.paths.config,
                 'locales'
               ),
-              locales: strapi.config.i18n.locales,
-              defaultLocale: strapi.config.i18n.defaultLocale,
-              modes: strapi.config.i18n.modes,
-              cookieName: strapi.config.i18n.cookieName,
+              locales: strapi.config.middlewares.settings.i18n.locales,
+              defaultLocale: strapi.config.middlewares.settings.i18n.defaultLocale,
+              modes: strapi.config.middlewares.settings.i18n.modes,
+              cookieName: strapi.config.middlewares.settings.i18n.cookieName,
               extension: '.json'
             })
           )

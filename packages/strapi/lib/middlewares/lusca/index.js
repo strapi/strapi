@@ -35,70 +35,70 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.csrf) &&
-        !_.isEmpty(strapi.config.csrf)
+        _.isPlainObject(strapi.config.middlewares.settings.csrf) &&
+        !_.isEmpty(strapi.config.middlewares.settings.csrf)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.csrf({
-              key: strapi.config.csrf.key,
-              secret: strapi.config.csrf.secret
+              key: strapi.config.middlewares.settings.csrf.key,
+              secret: strapi.config.middlewares.settings.csrf.secret
             })
           )
         );
       }
 
-      if (_.isPlainObject(strapi.config.csp) && !_.isEmpty(strapi.config.csp)) {
+      if (_.isPlainObject(strapi.config.middlewares.settings.csp) && !_.isEmpty(strapi.config.middlewares.settings.csp)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.lusca.csp(strapi.config.csp)
+            strapi.koaMiddlewares.lusca.csp(strapi.config.middlewares.settings.csp)
           )
         );
       }
 
-      if (_.isString(strapi.config.xframe)) {
+      if (_.isString(strapi.config.middlewares.settings.xframe)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.xframe({
-              value: strapi.config.xframe
+              value: strapi.config.middlewares.settings.xframe
             })
           )
         );
       }
 
-      if (_.isString(strapi.config.p3p)) {
+      if (_.isString(strapi.config.middlewares.settings.p3p)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.p3p({
-              value: strapi.config.p3p
+              value: strapi.config.middlewares.settings.p3p
             })
           )
         );
       }
 
       if (
-        _.isPlainObject(strapi.config.hsts) &&
-        !_.isEmpty(strapi.config.hsts)
+        _.isPlainObject(strapi.config.middlewares.settings.hsts) &&
+        !_.isEmpty(strapi.config.middlewares.settings.hsts)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.hsts({
-              maxAge: strapi.config.hsts.maxAge,
-              includeSubDomains: strapi.config.hsts.includeSubDomains
+              maxAge: strapi.config.middlewares.settings.hsts.maxAge,
+              includeSubDomains: strapi.config.middlewares.settings.hsts.includeSubDomains
             })
           )
         );
       }
 
       if (
-        _.isPlainObject(strapi.config.xssProtection) &&
-        !_.isEmpty(strapi.config.xssProtection)
+        _.isPlainObject(strapi.config.middlewares.settings.xssProtection) &&
+        !_.isEmpty(strapi.config.middlewares.settings.xssProtection)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.xssProtection({
-              enabled: strapi.config.xssProtection.enabled,
-              mode: strapi.config.xssProtection.mode
+              enabled: strapi.config.middlewares.settings.xssProtection.enabled,
+              mode: strapi.config.middlewares.settings.xssProtection.mode
             })
           )
         );

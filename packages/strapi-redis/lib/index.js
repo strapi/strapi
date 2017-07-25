@@ -39,6 +39,10 @@ module.exports = function(strapi) {
         connector: 'strapi-redis'
       });
 
+      if(_.size(connections) === 0) {
+        cb();
+      }
+
       const done = _.after(_.size(connections), () => {
         cb();
       });

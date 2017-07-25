@@ -19,7 +19,7 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (strapi.config.responseTime === true) {
+      if (strapi.config.middlewares.settings.responseTime === true) {
         strapi.app.use(strapi.koaMiddlewares.responseTime());
       }
 

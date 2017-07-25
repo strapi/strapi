@@ -28,11 +28,11 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.cron) &&
-        !_.isEmpty(strapi.config.cron)
+        _.isPlainObject(strapi.config.middlewares.settings.cron) &&
+        !_.isEmpty(strapi.config.middlewares.settings.cron)
       ) {
-        _.forEach(_.keys(strapi.config.cron), task => {
-          cron.scheduleJob(task, strapi.config.cron[task]);
+        _.forEach(_.keys(strapi.config.middlewares.settings.cron), task => {
+          cron.scheduleJob(task, strapi.config.middlewares.settings.cron[task]);
         });
       }
 

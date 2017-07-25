@@ -3,12 +3,22 @@
 const glob = require('glob');
 const path = require('path');
 const { parallel } = require('async');
-const { after, includes, indexOf, dropRight, uniq } = require('lodash');
+const { after, includes, indexOf, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined } = require('lodash');
 
 module.exports = function() {
   // Method to initialize middlewares and emit an event.
   const initialize = (module, middleware) => (resolve, reject) => {
+    let timeout = true;
+
+    setTimeout(() => {
+      if (timeout) {
+        reject(`The middleware ${middleware} takes too long to load!`);
+      }
+    }, this.config.middlewares.timeout || 1000);
+
     module.initialize.call(module, err => {
+      timeout = false;
+
       if (err) {
         this.emit('middleware:' + middleware + ':error');
 
@@ -32,7 +42,16 @@ module.exports = function() {
           }
 
           const module = this.middlewares[middleware].load;
-          const middlewaresOrder = this.config.middlewares.order.filter(middleware => this.config.middlewares.settings[middleware] !== false);
+          const middlewaresOrder = get(this.config.middlewares, 'loadOrder', []).filter(middleware => this.config.middlewares.settings[middleware] !== false);
+
+          // Apply default configurations to middleware.
+          if (isUndefined(get(this.config.middlewares, `settings.${middleware}`))) {
+            set(this.config.middlewares, `settings.${middleware}`, {});
+          }
+
+          if (module.defaults && this.config.middlewares.settings[middleware] !== false) {
+            defaultsDeep(this.config.middlewares.settings[middleware], module.defaults[middleware] || module.defaults);
+          }
 
           if (includes(middlewaresOrder, middleware)) {
             const position = indexOf(middlewaresOrder, middleware);

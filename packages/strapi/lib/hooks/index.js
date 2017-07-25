@@ -2,13 +2,23 @@
 
 const glob = require('glob');
 const path = require('path');
-const { after, includes, indexOf, dropRight, uniq } = require('lodash');
+const { after, includes, indexOf, dropRight, uniq, isUndefined, get, defaultsDeep, set } = require('lodash');
 
 module.exports = function() {
   // Method to initialize hooks and emit an event.
   const initialize = (module, hook) => (resolve, reject) => {
     if (typeof module === 'function') {
+      let timeout = true;
+
+      setTimeout(() => {
+        if (timeout) {
+          reject(`The hook ${hook} takes too long to load!`);
+        }
+      }, this.config.hooks.timeout || 1000);
+
       module(this).initialize.call(module, err => {
+        timeout = false;
+
         if (err) {
           this.emit('hook:' + hook + ':error');
 
@@ -17,8 +27,6 @@ module.exports = function() {
 
         this.hooks[hook].loaded = true;
         this.emit('hook:' + hook + ':loaded');
-
-        // console.log('Hook ', hook, Date.now() - global.startedAt, 'ms');
 
         resolve();
       });
@@ -39,10 +47,19 @@ module.exports = function() {
           const module = this.hooks[hook].load;
           let dependencies =  this.hooks[hook].dependencies || [];
 
+          // Apply default configurations to middleware.
+          if (isUndefined(get(this.config.hooks, `settings.${hook}`))) {
+            set(this.config.hooks, `settings.${hook}`, {});
+          }
+
+          if (module(this).defaults && this.config.hooks.settings[hook] !== false) {
+            defaultsDeep(this.config.hooks.settings[hook], module(this).defaults[hook] || module(this).defaults);
+          }
+
           // Take care of hooks internals dependencies.
-          if (dependencies.length > 0 || includes(this.config.hooks.order, hook)) {
-            const position = indexOf(this.config.hooks.order, hook);
-            const previousDependencies = dropRight(this.config.hooks.order, this.config.hooks.order.length - (position + 1));
+          if (dependencies.length > 0 || includes(this.config.hooks.loadOrder, hook)) {
+            const position = indexOf(this.config.hooks.loadOrder, hook);
+            const previousDependencies = dropRight(this.config.hooks.loadOrder, this.config.hooks.loadOrder.length - (position + 1));
 
             // Remove current hook.
             previousDependencies.splice(position, 1);
@@ -56,7 +73,7 @@ module.exports = function() {
             } else {
               // Wait until the dependencies have been loaded.
               const queue = after(dependencies.length, () => {
-                initialize(module, hook)(resolve, reject)
+                initialize(module, hook)(resolve, reject);
               });
 
               dependencies.forEach(dependency => {

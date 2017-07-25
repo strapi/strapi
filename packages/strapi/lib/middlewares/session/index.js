@@ -21,17 +21,19 @@ module.exports = strapi => {
      */
 
     defaults: {
-      key: 'strapi.sid',
-      prefix: 'strapi:sess:',
-      ttl: 24 * 60 * 60 * 1000, // One day in ms
-      rolling: false,
-      secretKeys: ['mySecretKey1', 'mySecretKey2'],
-      cookie: {
-        path: '/',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // One day in ms
-        rewrite: true,
-        signed: false
+      session: {
+        key: 'strapi.sid',
+        prefix: 'strapi:sess:',
+        ttl: 24 * 60 * 60 * 1000, // One day in ms
+        rolling: false,
+        secretKeys: ['mySecretKey1', 'mySecretKey2'],
+        cookie: {
+          path: '/',
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000, // One day in ms
+          rewrite: true,
+          signed: false
+        }
       }
     },
 
@@ -41,18 +43,18 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.session) &&
-        !_.isEmpty(strapi.config.session)
+        _.isPlainObject(strapi.config.middlewares.settings.session) &&
+        !_.isEmpty(strapi.config.middlewares.settings.session)
       ) {
         strapi.app.keys =
-          _.get(strapi.config.session, 'secretKeys') ||
+          _.get(strapi.config.middlewares.settings.session, 'secretKeys') ||
           strapi.config.hooks.session.secretKeys;
 
         if (
-          strapi.config.session.hasOwnProperty('store') &&
-          _.isString(strapi.config.session.store)
+          strapi.config.middlewares.settings.session.hasOwnProperty('store') &&
+          _.isString(strapi.config.middlewares.settings.session.store)
         ) {
-          const store = hook.defineStore(strapi.config.session);
+          const store = hook.defineStore(strapi.config.middlewares.settings.session);
 
           if (!_.isEmpty(store)) {
             try {
@@ -63,7 +65,7 @@ module.exports = strapi => {
                   store
                 },
                 strapi.config.hooks.session,
-                _.pick(strapi.config.session, [
+                _.pick(strapi.config.middlewares.settings.session, [
                   'genSid',
                   'errorHandler',
                   'valid',

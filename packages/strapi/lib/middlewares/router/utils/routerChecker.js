@@ -39,6 +39,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
     ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()]
     : strapi.controllers[handler[0].toLowerCase()] ||
         strapi.admin.controllers[handler[0].toLowerCase()];
+
   const action = controller[handler[1]];
 
   // Retrieve the API's name where the controller is located

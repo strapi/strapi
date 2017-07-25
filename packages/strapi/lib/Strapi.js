@@ -3,11 +3,12 @@
 // Dependencies.
 const Koa = require('koa');
 const utils = require('./utils');
+const http = require('http');
+const path = require('path');
 const { nestedConfigurations, appConfigurations, apis, plugins, admin, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { logger } = require('strapi-utils');
-const { http } = require('uws');
 const { EventEmitter } = require('events');
 
 /**
@@ -37,55 +38,93 @@ class Strapi extends EventEmitter {
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
       environment: process.env.NODE_ENV || 'development',
+      environments: {},
       paths: {
-        tmp: '.tmp',
-        config: 'config',
-        static: 'public',
-        views: 'views',
+        admin: 'admin',
         api: 'api',
+        config: 'config',
         controllers: 'controllers',
-        services: 'services',
-        policies: 'policies',
         models: 'models',
         plugins: 'plugins',
+        policies: 'policies',
+        tmp: '.tmp',
+        services: 'services',
+        static: 'public',
         validators: 'validators',
-        admin: 'admin'
-      }
+        views: 'views'
+      },
+      middlewares: {},
+      hooks: {},
+      functions: {}
     };
 
     // Bind context functions.
     this.loadFile = utils.loadFile.bind(this);
   }
 
-  async start() {
+  async start(cb) {
     try {
       global.startedAt = Date.now();
-
+      // Enhance app.
+      await this.enhancer();
+      // Load the app.
       await this.load();
-
-
-      this.server.listen(1337, err => {
+      // Run bootstrap function.
+      await this.bootstrap();
+      // Launch server.
+      this.server.listen(this.config.port || 1337, err => {
         if (err) {
           console.log(err);
         }
 
-        this.log.info('Server started in ' + this.config.appPath);
-        this.log.info('Your server is running at ' + this.config.url);
-        this.log.debug('Time: ' + new Date());
-        this.log.debug(
-          'Launched in: ' + (Date.now() - global.startedAt) + ' milliseconds'
-        );
-        this.log.debug('Environment: ' + this.config.environment);
-        this.log.debug('Process PID: ' + process.pid);
-        this.log.info('To shut down your server, press <CTRL> + C at any time');
+        if (this.config.environment !== 'test') {
+          this.log.info(`Strapi v`);
+          this.log.info('Server started in ' + this.config.appPath);
+          this.log.info('Your server is running at ' + this.config.url);
+          this.log.debug('Time: ' + new Date());
+          this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' ms');
+          this.log.debug('Environment: ' + this.config.environment);
+          this.log.debug('Process PID: ' + process.pid);
+          this.log.info('To shut down your server, press <CTRL> + C at any time');
+        }
+
+        if (cb && typeof cb === 'function') {
+          cb();
+        }
       });
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      this.log.debug(`Server wasn't able to start properly.`);
+      this.log.error(e);
+      this.stop();
     }
   }
 
+  async enhancer() {
+    const connections = {};
+
+    this.server.on('connection', conn => {
+      const key = conn.remoteAddress + ':' + conn.remotePort;
+      connections[key] = conn;
+
+      conn.on('close', function() {
+       delete connections[key];
+      });
+    });
+
+    this.server.destroy = cb => {
+      this.server.close(cb);
+
+      for (let key in connections) {
+        connections[key].destroy();
+      };
+    };
+  }
+
   stop() {
+    // Destroy server and available connections.
     this.server.destroy();
+    // Kill process.
+    process.exit(0);
   }
 
   async load() {
@@ -99,12 +138,56 @@ class Strapi extends EventEmitter {
       hooks.call(this)
     ]);
 
+    // Populate AST with configurations.
     await appConfigurations.call(this);
 
+    // Initialize hooks and middlewares.
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
+  }
+
+  async bootstrap() {
+    if (!this.config.functions.bootstrap) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const timeoutMs = this.config.bootstrapTimeout || 3500;
+      const timer = setTimeout(() => {
+        this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
+        this.log.warn('Perhaps you forgot to call it?');
+      }, timeoutMs);
+
+      let ranBootstrapFn = false;
+
+      try {
+        this.config.functions.bootstrap(err => {
+          if (ranBootstrapFn) {
+            this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+
+            return reject();
+          }
+
+          ranBootstrapFn = true;
+          clearTimeout(timer);
+
+          return resolve(err);
+        });
+      } catch (e) {
+        if (ranBootstrapFn) {
+          this.log.error('The bootstrap function threw an error after its callback was called.');
+
+          return reject(e);
+        }
+
+        ranBootstrapFn = true;
+        clearTimeout(timer);
+
+        return resolve(e);
+      }
+    });
   }
 }
 

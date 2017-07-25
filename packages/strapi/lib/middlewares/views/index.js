@@ -31,10 +31,10 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.views) &&
-        !_.isEmpty(strapi.config.views)
+        _.isPlainObject(strapi.config.middlewares.settings.views) &&
+        !_.isEmpty(strapi.config.middlewares.settings.views)
       ) {
-        const opts = _.clone(strapi.config.views);
+        const opts = _.clone(strapi.config.middlewares.settings.views);
 
         if (opts.hasOwnProperty('default')) {
           opts.extension = opts.default;

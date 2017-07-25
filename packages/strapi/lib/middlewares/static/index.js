@@ -30,7 +30,7 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (strapi.config.static === true) {
+      if (strapi.config.middlewares.settings.static === true) {
         const isIndexRoute = _.isEmpty(strapi.config.routes)
           ? false
           : strapi.config.routes.find(route => route.path === '/');

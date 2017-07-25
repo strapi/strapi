@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, upperFirst, isString, isEmpty } = require('lodash');
+const { difference, merge, setWith, get, upperFirst, isString, isEmpty, orderBy, isBoolean } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -53,15 +53,38 @@ module.exports.nested = function() {
 };
 
 module.exports.app = async function() {
+    // Retrieve Strapi version.
+    this.config.info.strapi = (get(this.config, 'info.dependencies.strapi') || '').replace(/(\^|~)/g, ''),
+    this.config.info.node = process.versions.node;
+
     // Set connections.
     this.connections = {};
 
-    this.config.connections = this.config.environments[
-      this.config.environment
-    ].databases.connections;
+    // Preset config in alphabetical order.
+    this.config.middlewares.settings = Object.keys(this.middlewares).reduce((acc, current) => {
+      const currentSettings = get(this.config.middlewares, `settings.${current}`);
+      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+
+      return acc;
+    }, {});
+
+    this.config.hooks.settings = Object.keys(this.hooks).reduce((acc, current) => {
+      const currentSettings = get(this.config.hooks, `settings.${current}`);
+      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+
+      return acc;
+    }, {});
+
+    // Set current environment config.
+    this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
+
+    // Set current connections.
+    this.config.connections = get(this.config.currentEnvironment, `databases.connections`, {});
+
+    // this.config = merge(this.config, this.config.currentEnvironment.security, this.config.currentEnvironment.server);
 
     // Set controllers.
-    this.controllers = Object.keys(this.api).reduce((acc, key) => {
+    this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
       for (let index in this.api[key].controllers) {
         if (!this.api[key].controllers[index].identity) {
           this.api[key].controllers[index].identity = upperFirst(index);
@@ -74,7 +97,7 @@ module.exports.app = async function() {
     }, {});
 
     // Set models.
-    this.models = Object.keys(this.api).reduce((acc, key) => {
+    this.models = Object.keys(this.api || []).reduce((acc, key) => {
       for (let index in this.api[key].models) {
         if (!this.api[key].models[index].globalId) {
           this.api[key].models[index].globalId = upperFirst(index);
@@ -86,7 +109,7 @@ module.exports.app = async function() {
     }, {});
 
     // Set services.
-    this.services = Object.keys(this.api).reduce((acc, key) => {
+    this.services = Object.keys(this.api || []).reduce((acc, key) => {
       for (let index in this.api[key].services) {
         acc[index] = this.api[key].services[index];
       }
@@ -95,7 +118,7 @@ module.exports.app = async function() {
     }, {});
 
     // Set routes.
-    this.config.routes = Object.keys(this.api).reduce((acc, key) => {
+    this.config.routes = Object.keys(this.api || []).reduce((acc, key) => {
       return acc.concat(get(this.api[key], 'config.routes') || {});
     }, []);
 

@@ -35,18 +35,18 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.cors) &&
-        !_.isEmpty(strapi.config.cors)
+        _.isPlainObject(strapi.config.middlewares.settings.cors) &&
+        !_.isEmpty(strapi.config.middlewares.settings.cors)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.kcors({
-            origin: strapi.config.cors.origin,
-            exposeHeaders: strapi.config.cors.expose,
-            maxAge: strapi.config.cors.maxAge,
-            credentials: strapi.config.cors.credentials,
-            allowMethods: strapi.config.cors.methods,
-            allowHeaders: strapi.config.cors.headers,
-            keepHeadersOnError: strapi.config.cors.keepHeadersOnError
+            origin: strapi.config.middlewares.settings.cors.origin,
+            exposeHeaders: strapi.config.middlewares.settings.cors.expose,
+            maxAge: strapi.config.middlewares.settings.cors.maxAge,
+            credentials: strapi.config.middlewares.settings.cors.credentials,
+            allowMethods: strapi.config.middlewares.settings.cors.methods,
+            allowHeaders: strapi.config.middlewares.settings.cors.headers,
+            keepHeadersOnError: strapi.config.middlewares.settings.cors.keepHeadersOnError
           })
         );
       }

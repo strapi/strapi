@@ -41,8 +41,6 @@ module.exports = function (strapi) {
         strapi.config.hooks.ejs.cache = true;
       }
 
-      _.defaults(strapi.config.hooks.settings.ejs, hook.defaults);
-
       render(strapi.app, strapi.config.hooks.settings.ejs);
 
       strapi.app.context.render = co.wrap(strapi.app.context.render);

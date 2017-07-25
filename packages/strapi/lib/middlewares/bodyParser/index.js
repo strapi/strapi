@@ -23,7 +23,7 @@ module.exports = strapi => {
     initialize: function(cb) {
       strapi.app.use(
         strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.body(strapi.config.parser)
+          strapi.koaMiddlewares.body(strapi.config.middlewares.settings.parser)
         )
       );
 

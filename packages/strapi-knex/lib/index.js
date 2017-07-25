@@ -34,7 +34,7 @@ module.exports = strapi => {
 
     defaults: {
       connection: {
-        host: 'locahost',
+        host: 'localhost',
         charset: 'utf8'
       }
     },

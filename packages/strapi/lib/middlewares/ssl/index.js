@@ -35,8 +35,8 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (_.isPlainObject(strapi.config.ssl) && !_.isEmpty(strapi.config.ssl)) {
-        strapi.app.use(strapi.koaMiddlewares.sslify(strapi.config.ssl));
+      if (_.isPlainObject(strapi.config.middlewares.settings.ssl) && !_.isEmpty(strapi.config.middlewares.settings.ssl)) {
+        strapi.app.use(strapi.koaMiddlewares.sslify(strapi.config.middlewares.settings.ssl));
       }
 
       cb();
