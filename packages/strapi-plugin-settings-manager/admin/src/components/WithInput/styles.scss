@@ -9,3 +9,15 @@
     color: #ABAFBB;
   }
 }
+
+.inputText { /* stylelint-disable */
+  margin-top: 1.8rem;
+  > label {
+    text-transform: capitalize;
+  }
+  > small {
+    margin-top: .5rem;
+    display: block;
+    color: #ABAFBB;
+  }
+}
