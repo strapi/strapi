@@ -42,6 +42,14 @@
     },
     {
       "method": "GET",
+      "path": "/configurations/database/model",
+      "handler": "SettingsManager.databaseModel",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/configurations/databases/:env",
       "handler": "SettingsManager.databases",
       "config": {
@@ -50,7 +58,7 @@
     },
     {
       "method": "GET",
-      "path": "/configurations/databases/:name/:env",
+      "path": "/configurations/databases/:name?/:env?",
       "handler": "SettingsManager.database",
       "config": {
         "policies": []
@@ -60,6 +68,14 @@
       "method": "PUT",
       "path": "/configurations/databases/:name/:env",
       "handler": "SettingsManager.updateDatabase",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/configurations/databases/:env",
+      "handler": "SettingsManager.createDatabase",
       "config": {
         "policies": []
       }

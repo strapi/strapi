@@ -273,7 +273,7 @@ module.exports = {
     ]
   }),
 
-  database: (name, env) => ({
+  databases: (name, env) => ({
     name: 'form.databases.name',
     description: 'form.databases.description',
     sections: [
@@ -374,11 +374,11 @@ module.exports = {
 
     _.forEach(strapi.config.environments[env].databases.connections, (connection, name) => {
       databases.push({
-        provider: connection.connector,
+        provider: _.get(connection, 'connector'),
         name,
-        host: connection.settings.host,
-        database: connection.settings.database,
-        active: (strapi.config.environments[env].databases.defaultConnection = name)
+        host: _.get(connection, 'settings.host'),
+        database: _.get(connection, 'settings.database'),
+        active: (_.get(strapi.config, `environments.${env}.databases.defaultConnection`) === name)
       });
     });
 
