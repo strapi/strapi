@@ -50,8 +50,16 @@
     },
     {
       "method": "GET",
-      "path": "/configurations/databases/:slug/:env",
+      "path": "/configurations/databases/:name/:env",
       "handler": "SettingsManager.database",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/configurations/databases/:name/:env",
+      "handler": "SettingsManager.updateDatabase",
       "config": {
         "policies": []
       }

@@ -263,6 +263,15 @@ module.exports = {
         name: '',
         items: [
           {
+            name: 'form.databases.item.name',
+            target: `databases.connections.${name}.name`,
+            type: 'string',
+            value: name,
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.databases.item.provider',
             target: `databases.connections.${name}.connector`,
             type: 'string',
