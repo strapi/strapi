@@ -28,7 +28,7 @@
 import React from 'react';
 import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import styles from './styles.scss';
+import WithInput from 'components/WithInput';
 
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -122,6 +122,10 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
+
+    // retrieve styles from WhitInput HOC
+    const styles = this.props.styles;
+
     return (
       <div className={`${styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
@@ -154,9 +158,10 @@ InputText.propTypes = {
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
+  styles: React.PropTypes.object,
   target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string.isRequired,
 }
 
-export default InputText;
+export default WithInput(InputText); // eslint-disable-line new-cap

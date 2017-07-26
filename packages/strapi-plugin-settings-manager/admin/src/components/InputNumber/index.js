@@ -28,7 +28,7 @@
 import React from 'react';
 import { isEmpty, includes, map, mapKeys, isObject, reject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import styles from './styles.scss';
+import WithInput from 'components/WithInput';
 
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -106,6 +106,9 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
+
+    // retrieve styles from WithInput HOC
+    const styles = this.props.styles;
     return (
       <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
@@ -141,6 +144,7 @@ InputNumber.propTypes = {
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
+  styles: React.PropTypes.object,
   target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.oneOfType([
@@ -149,4 +153,4 @@ InputNumber.propTypes = {
   ]),
 }
 
-export default InputNumber;
+export default WithInput(InputNumber); // eslint-disable-line new-cap
