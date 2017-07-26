@@ -1,8 +1,5 @@
 .inputNumber { /* stylelint-disable */
   margin-top: 1.8rem;
-  &:not(:first-child) {
-    margin-top: 0.8rem;
-  }
   > label {
     text-transform: capitalize;
   }
@@ -10,14 +7,14 @@
     margin-top: .5rem;
     display: block;
     color: #ABAFBB;
+  }
+  > input {
+    margin-bottom: 1.3rem;
   }
 }
 
 .inputText { /* stylelint-disable */
   margin-top: 1.8rem;
-  &:not(:first-child) {
-    margin-top: 0.8rem;
-  }
   > label {
     text-transform: capitalize;
   }
@@ -25,5 +22,8 @@
     margin-top: .5rem;
     display: block;
     color: #ABAFBB;
+  }
+  > input {
+    margin-bottom: 1.3rem;
   }
 }
