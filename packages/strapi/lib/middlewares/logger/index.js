@@ -19,7 +19,7 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (strapi.config.middlewares.settings.logger === true) {
+      if (strapi.config.middleware.settings.logger === true) {
         strapi.app.use(async function(ctx, next) {
           const start = new Date();
           await next();

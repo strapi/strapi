@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, upperFirst, isString, isEmpty, orderBy, isBoolean } = require('lodash');
+const { difference, merge, setWith, get, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -60,28 +60,61 @@ module.exports.app = async function() {
     // Set connections.
     this.connections = {};
 
-    // Preset config in alphabetical order.
-    this.config.middlewares.settings = Object.keys(this.middlewares).reduce((acc, current) => {
-      const currentSettings = get(this.config.middlewares, `settings.${current}`);
-      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
-
-      return acc;
-    }, {});
-
-    this.config.hooks.settings = Object.keys(this.hooks).reduce((acc, current) => {
-      const currentSettings = get(this.config.hooks, `settings.${current}`);
-      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
-
-      return acc;
-    }, {});
-
     // Set current environment config.
     this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
 
     // Set current connections.
-    this.config.connections = get(this.config.currentEnvironment, `databases.connections`, {});
+    this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
 
-    // this.config = merge(this.config, this.config.currentEnvironment.security, this.config.currentEnvironment.server);
+    // Define required middlewares categories.
+    const middlewareCategories = ['request', 'response', 'security', 'server'];
+
+    // Flatten middlewares configurations.
+    const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
+      const current = this.config.currentEnvironment[index];
+
+      if (isObject(current)) {
+        acc = merge(acc, current);
+      } else {
+        acc[index] = current;
+      }
+
+      return acc;
+    }, {});
+
+    middlewareCategories.push('database');
+
+    // Flatten hooks configurations.
+    const flattenHooksConfig = pullAll(Object.keys(this.config.currentEnvironment), middlewareCategories).reduce((acc, index) => {
+      const current = this.config.currentEnvironment[index];
+
+      if (isObject(current)) {
+        acc = merge(acc, {
+          [index]: current
+        });
+      } else {
+        acc[index] = current;
+      }
+
+      return acc;
+    }, {});
+
+    // Preset config in alphabetical order.
+    this.config.middleware.settings = Object.keys(this.middlewares).reduce((acc, current) => {
+      // Try to find the settings in the current environment, then in the main configurations.
+      const currentSettings = flattenMiddlewaresConfig[current] || this.config[current];
+      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+
+      return acc;
+    }, {});
+
+    this.config.hook.settings = Object.keys(this.hooks).reduce((acc, current) => {
+      // Try to find the settings in the current environment, then in the main configurations.
+      const currentSettings = flattenHooksConfig[current] || this.config[current];
+      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+
+      return acc;
+    }, {});
 
     // Set controllers.
     this.controllers = Object.keys(this.api || []).reduce((acc, key) => {

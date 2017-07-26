@@ -11,7 +11,7 @@ const path = require('path');
 const _ = require('lodash');
 
 /**
- * i18n hook
+ * Language hook
  */
 
 module.exports = strapi => {
@@ -21,7 +21,7 @@ module.exports = strapi => {
      */
 
     defaults: {
-      i18n: {
+      language: {
         defaultLocale: 'en_US',
         modes: ['query', 'subdomain', 'cookie', 'header', 'url', 'tld'],
         cookieName: 'locale'
@@ -34,9 +34,9 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.middlewares.settings.i18n) &&
-        !_.isEmpty(strapi.config.middlewares.settings.i18n) &&
-        _.get(strapi.config, 'i18n.enabled') !== false
+        _.isPlainObject(strapi.config.middleware.settings.language) &&
+        !_.isEmpty(strapi.config.middleware.settings.language) &&
+        _.get(strapi.config, 'language.enabled') !== false
       ) {
         strapi.koaMiddlewares.locale(strapi.app);
         strapi.app.use(
@@ -47,10 +47,10 @@ module.exports = strapi => {
                 strapi.config.paths.config,
                 'locales'
               ),
-              locales: strapi.config.middlewares.settings.i18n.locales,
-              defaultLocale: strapi.config.middlewares.settings.i18n.defaultLocale,
-              modes: strapi.config.middlewares.settings.i18n.modes,
-              cookieName: strapi.config.middlewares.settings.i18n.cookieName,
+              locales: strapi.config.middleware.settings.language.locales,
+              defaultLocale: strapi.config.middleware.settings.language.defaultLocale,
+              modes: strapi.config.middleware.settings.language.modes,
+              cookieName: strapi.config.middleware.settings.language.cookieName,
               extension: '.json'
             })
           )

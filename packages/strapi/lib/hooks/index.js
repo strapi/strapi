@@ -14,7 +14,7 @@ module.exports = function() {
         if (timeout) {
           reject(`The hook ${hook} takes too long to load!`);
         }
-      }, this.config.hooks.timeout || 1000);
+      }, this.config.hook.timeout || 1000);
 
       module(this).initialize.call(module, err => {
         timeout = false;
@@ -40,7 +40,7 @@ module.exports = function() {
       hook =>
         new Promise((resolve, reject) => {
           // Don't load disabled hook.
-          if (this.config.hooks.settings[hook] === false) {
+          if (this.config.hook.settings[hook] === false) {
             return resolve();
           }
 
@@ -48,18 +48,18 @@ module.exports = function() {
           let dependencies =  this.hooks[hook].dependencies || [];
 
           // Apply default configurations to middleware.
-          if (isUndefined(get(this.config.hooks, `settings.${hook}`))) {
-            set(this.config.hooks, `settings.${hook}`, {});
+          if (isUndefined(get(this.config.hook, `settings.${hook}`))) {
+            set(this.config.hook, `settings.${hook}`, {});
           }
 
-          if (module(this).defaults && this.config.hooks.settings[hook] !== false) {
-            defaultsDeep(this.config.hooks.settings[hook], module(this).defaults[hook] || module(this).defaults);
+          if (module(this).defaults && this.config.hook.settings[hook] !== false) {
+            defaultsDeep(this.config.hook.settings[hook], module(this).defaults[hook] || module(this).defaults);
           }
 
           // Take care of hooks internals dependencies.
-          if (dependencies.length > 0 || includes(this.config.hooks.loadOrder, hook)) {
-            const position = indexOf(this.config.hooks.loadOrder, hook);
-            const previousDependencies = dropRight(this.config.hooks.loadOrder, this.config.hooks.loadOrder.length - (position + 1));
+          if (dependencies.length > 0 || includes(this.config.hook.loadOrder, hook)) {
+            const position = indexOf(this.config.hook.loadOrder, hook);
+            const previousDependencies = dropRight(this.config.hook.loadOrder, this.config.hook.loadOrder.length - (position + 1));
 
             // Remove current hook.
             previousDependencies.splice(position, 1);

@@ -61,7 +61,7 @@ module.exports = function(strapi) {
 
       _.forEach(connections, (connection, connectionName) => {
         // Apply defaults
-        _.defaults(connection.settings, strapi.hooks.bookshelf.defaults);
+        _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
 
         // Create Bookshelf instance for this connection.
         const ORM = new bookshelf(strapi.connections[connectionName]);

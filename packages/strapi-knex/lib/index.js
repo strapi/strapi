@@ -97,7 +97,7 @@ module.exports = strapi => {
             port: _.get(connection.settings, 'port'),
           },
           debug: _.get(connection, 'debug') || false
-        }, strapi.config.hooks.knex);
+        }, strapi.config.hook.settings.knex);
 
         if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
           options.pool = {

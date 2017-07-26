@@ -19,7 +19,7 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (strapi.config.middlewares.settings.gzip === true) {
+      if (strapi.config.middleware.settings.gzip === true) {
         strapi.app.use(strapi.koaMiddlewares.compress());
       }
 

@@ -26,10 +26,10 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (_.isString(strapi.config.middlewares.settings.proxy)) {
+      if (_.isString(strapi.config.middleware.settings.proxy)) {
         strapi.app.use(
           strapi.koaMiddlewares.proxy({
-            host: strapi.config.middlewares.settings.proxy
+            host: strapi.config.middleware.settings.proxy
           })
         );
       }

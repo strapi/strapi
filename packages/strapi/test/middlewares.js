@@ -21,8 +21,8 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares === 'object');
     });
 
-    it('`strapi.middlewares.bodyparser` should be a function', () => {
-      assert(typeof strapi.middlewares.bodyParser.load.initialize === 'function');
+    it('`strapi.middlewares.parser` should be a function', () => {
+      assert(typeof strapi.middlewares.parser.load.initialize === 'function');
     });
 
     it('`strapi.middlewares.compress` should be a function', () => {
@@ -41,8 +41,8 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares.gzip.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.i18n` should be a function', () => {
-      assert(typeof strapi.middlewares.i18n.load.initialize === 'function');
+    it('`strapi.middlewares.language` should be a function', () => {
+      assert(typeof strapi.middlewares.language.load.initialize === 'function');
     });
 
     it('`strapi.middlewares.ip` should be a function', () => {

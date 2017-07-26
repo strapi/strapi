@@ -43,18 +43,18 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.middlewares.settings.session) &&
-        !_.isEmpty(strapi.config.middlewares.settings.session)
+        _.isPlainObject(strapi.config.middleware.settings.session) &&
+        !_.isEmpty(strapi.config.middleware.settings.session)
       ) {
         strapi.app.keys =
-          _.get(strapi.config.middlewares.settings.session, 'secretKeys') ||
+          _.get(strapi.config.middleware.settings.session, 'secretKeys') ||
           strapi.config.hooks.session.secretKeys;
 
         if (
-          strapi.config.middlewares.settings.session.hasOwnProperty('store') &&
-          _.isString(strapi.config.middlewares.settings.session.store)
+          strapi.config.middleware.settings.session.hasOwnProperty('store') &&
+          _.isString(strapi.config.middleware.settings.session.store)
         ) {
-          const store = hook.defineStore(strapi.config.middlewares.settings.session);
+          const store = hook.defineStore(strapi.config.middleware.settings.session);
 
           if (!_.isEmpty(store)) {
             try {
@@ -64,8 +64,8 @@ module.exports = strapi => {
                 {
                   store
                 },
-                strapi.config.hooks.session,
-                _.pick(strapi.config.middlewares.settings.session, [
+                strapi.config.hook.session,
+                _.pick(strapi.config.middleware.settings.session, [
                   'genSid',
                   'errorHandler',
                   'valid',

@@ -29,12 +29,12 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (_.isPlainObject(strapi.config.middlewares.settings.ip) && !_.isEmpty(strapi.config.middlewares.settings.ip)) {
+      if (_.isPlainObject(strapi.config.middleware.settings.ip) && !_.isEmpty(strapi.config.middleware.settings.ip)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.ip({
-              whiteList: strapi.config.middlewares.settings.ip.whiteList,
-              blackList: strapi.config.middlewares.settings.ip.blackList
+              whiteList: strapi.config.middleware.settings.ip.whiteList,
+              blackList: strapi.config.middleware.settings.ip.blackList
             })
           )
         );

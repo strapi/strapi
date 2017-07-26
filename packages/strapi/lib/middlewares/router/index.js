@@ -44,7 +44,7 @@ module.exports = strapi => {
       // Initialize the router.
       if (!strapi.router) {
         strapi.router = strapi.koaMiddlewares.joiRouter();
-        strapi.router.prefix(strapi.config.middlewares.settings.router.prefix);
+        strapi.router.prefix(strapi.config.middleware.settings.router.prefix || '');
       }
 
       // Add response policy to the global variable.
@@ -111,7 +111,7 @@ module.exports = strapi => {
           strapi.app.use(router.middleware());
         });
       }
-      
+
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
       strapi.app.use(

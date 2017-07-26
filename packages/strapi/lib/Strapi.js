@@ -53,8 +53,8 @@ class Strapi extends EventEmitter {
         validators: 'validators',
         views: 'views'
       },
-      middlewares: {},
-      hooks: {},
+      middleware: {},
+      hook: {},
       functions: {}
     };
 
@@ -78,13 +78,13 @@ class Strapi extends EventEmitter {
         }
 
         if (this.config.environment !== 'test') {
-          this.log.info(`Strapi v`);
           this.log.info('Server started in ' + this.config.appPath);
           this.log.info('Your server is running at ' + this.config.url);
           this.log.debug('Time: ' + new Date());
           this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' ms');
           this.log.debug('Environment: ' + this.config.environment);
           this.log.debug('Process PID: ' + process.pid);
+          this.log.debug(`Strapi: v${this.config.info.strapi} (node v${this.config.info.node})`);
           this.log.info('To shut down your server, press <CTRL> + C at any time');
         }
 
@@ -146,6 +146,8 @@ class Strapi extends EventEmitter {
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
+
+    console.log(this.config.hook);
   }
 
   async bootstrap() {

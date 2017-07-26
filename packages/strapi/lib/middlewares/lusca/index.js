@@ -35,70 +35,70 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.middlewares.settings.csrf) &&
-        !_.isEmpty(strapi.config.middlewares.settings.csrf)
+        _.isPlainObject(strapi.config.middleware.settings.csrf) &&
+        !_.isEmpty(strapi.config.middleware.settings.csrf)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.csrf({
-              key: strapi.config.middlewares.settings.csrf.key,
-              secret: strapi.config.middlewares.settings.csrf.secret
+              key: strapi.config.middleware.settings.csrf.key,
+              secret: strapi.config.middleware.settings.csrf.secret
             })
           )
         );
       }
 
-      if (_.isPlainObject(strapi.config.middlewares.settings.csp) && !_.isEmpty(strapi.config.middlewares.settings.csp)) {
+      if (_.isPlainObject(strapi.config.middleware.settings.csp) && !_.isEmpty(strapi.config.middleware.settings.csp)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.lusca.csp(strapi.config.middlewares.settings.csp)
+            strapi.koaMiddlewares.lusca.csp(strapi.config.middleware.settings.csp)
           )
         );
       }
 
-      if (_.isString(strapi.config.middlewares.settings.xframe)) {
+      if (_.isString(strapi.config.middleware.settings.xframe)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.xframe({
-              value: strapi.config.middlewares.settings.xframe
+              value: strapi.config.middleware.settings.xframe
             })
           )
         );
       }
 
-      if (_.isString(strapi.config.middlewares.settings.p3p)) {
+      if (_.isString(strapi.config.middleware.settings.p3p)) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.p3p({
-              value: strapi.config.middlewares.settings.p3p
+              value: strapi.config.middleware.settings.p3p
             })
           )
         );
       }
 
       if (
-        _.isPlainObject(strapi.config.middlewares.settings.hsts) &&
-        !_.isEmpty(strapi.config.middlewares.settings.hsts)
+        _.isPlainObject(strapi.config.middleware.settings.hsts) &&
+        !_.isEmpty(strapi.config.middleware.settings.hsts)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.hsts({
-              maxAge: strapi.config.middlewares.settings.hsts.maxAge,
-              includeSubDomains: strapi.config.middlewares.settings.hsts.includeSubDomains
+              maxAge: strapi.config.middleware.settings.hsts.maxAge,
+              includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains
             })
           )
         );
       }
 
       if (
-        _.isPlainObject(strapi.config.middlewares.settings.xssProtection) &&
-        !_.isEmpty(strapi.config.middlewares.settings.xssProtection)
+        _.isPlainObject(strapi.config.middleware.settings.xssProtection) &&
+        !_.isEmpty(strapi.config.middleware.settings.xssProtection)
       ) {
         strapi.app.use(
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.xssProtection({
-              enabled: strapi.config.middlewares.settings.xssProtection.enabled,
-              mode: strapi.config.middlewares.settings.xssProtection.mode
+              enabled: strapi.config.middleware.settings.xssProtection.enabled,
+              mode: strapi.config.middleware.settings.xssProtection.mode
             })
           )
         );

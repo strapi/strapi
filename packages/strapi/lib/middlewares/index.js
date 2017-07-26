@@ -14,7 +14,7 @@ module.exports = function() {
       if (timeout) {
         reject(`The middleware ${middleware} takes too long to load!`);
       }
-    }, this.config.middlewares.timeout || 1000);
+    }, this.config.middleware.timeout || 1000);
 
     module.initialize.call(module, err => {
       timeout = false;
@@ -37,20 +37,20 @@ module.exports = function() {
       middleware =>
         new Promise((resolve, reject) => {
           // Don't load disabled middleware.
-          if (this.config.middlewares.settings[middleware] === false) {
+          if (this.config.middleware.settings[middleware] === false) {
             return resolve();
           }
 
           const module = this.middlewares[middleware].load;
-          const middlewaresOrder = get(this.config.middlewares, 'loadOrder', []).filter(middleware => this.config.middlewares.settings[middleware] !== false);
+          const middlewaresOrder = get(this.config.middleware, 'loadOrder', []).filter(middleware => this.config.middleware.settings[middleware] !== false);
 
           // Apply default configurations to middleware.
-          if (isUndefined(get(this.config.middlewares, `settings.${middleware}`))) {
-            set(this.config.middlewares, `settings.${middleware}`, {});
+          if (isUndefined(get(this.config.middleware, `settings.${middleware}`))) {
+            set(this.config.middleware, `settings.${middleware}`, {});
           }
 
-          if (module.defaults && this.config.middlewares.settings[middleware] !== false) {
-            defaultsDeep(this.config.middlewares.settings[middleware], module.defaults[middleware] || module.defaults);
+          if (module.defaults && this.config.middleware.settings[middleware] !== false) {
+            defaultsDeep(this.config.middleware.settings[middleware], module.defaults[middleware] || module.defaults);
           }
 
           if (includes(middlewaresOrder, middleware)) {
