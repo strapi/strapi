@@ -5,6 +5,8 @@
 */
 
 import React from 'react';
+import { forEach, has } from 'lodash';
+
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
 import InputToggle from 'components/InputToggle';
@@ -20,7 +22,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     values: React.PropTypes.object,
   }
 
-  renderInput = (props, key) => {
+  renderInput = (section, props, key) => {
     const inputs = {
       string: InputText,
       number: InputNumber,
@@ -29,10 +31,17 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       select: InputSelect,
     };
     const Input = inputs[props.type];
-    const customBootstrapClass = config[props.target] || '';
+    let customBootstrapClass = config[props.target] || '';
     const inputValue = this.props.values[props.target];
     // retrieve options for the select input
     const selectOptions = props.type === 'enum' || props.type === 'select' ? props.items : [];
+
+    // check if there is inside a section an input that requires nested input to display it on the entire line
+    forEach(section, (items) => {
+      forEach(items.items, (item) => {
+        customBootstrapClass = has(item, 'items') && items.type === 'enum' ? 'col-md-6 offset-md-6 pull-md-6' : '';
+      });
+    });
 
     return (
       <Input
