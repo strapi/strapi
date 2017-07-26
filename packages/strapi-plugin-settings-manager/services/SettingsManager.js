@@ -130,6 +130,15 @@ module.exports = {
         name: 'form.security.item.session',
         items: [
           {
+            name: 'form.security.item.session.enabled',
+            target: 'security.session.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.session.enabled`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.security.item.session.key',
             target: 'security.session.key',
             type: 'string',
@@ -197,6 +206,15 @@ module.exports = {
       {
         name: 'form.security.item.cors',
         items: [
+          {
+            name: 'form.security.item.cors.enabled',
+            target: 'security.cors.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.cors.enabled`, null),
+            validations: {
+              required: true
+            }
+          },
           {
             name: 'form.security.item.cors.origin',
             target: 'security.cors.origin',
