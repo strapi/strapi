@@ -65,7 +65,7 @@
   "request.error.environment.required": "Environment is required.",
   "request.error.environment.unknow": "Environment is unknow.",
   "request.error.languages.exist": "This language already exit.",
-  "request.error.languages.notExist": "This language doesn't exit.",
+  "request.error.languages.unknow": "This language doesn't exit.",
   "request.error.languages.incorrect": "This language is incorrect.",
 
   "list.languages.button.label": "Add a new language",

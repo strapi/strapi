@@ -65,7 +65,7 @@
   "request.error.environment.required": "L'environnement est obligatoire.",
   "request.error.environment.unknow": "L'environnement est inconnu.",
   "request.error.languages.exist": "Cette langue éxiste déjà.",
-  "request.error.languages.notExist": "Cette langue n'éxiste pas.",
+  "request.error.languages.unknow": "Cette langue n'éxiste pas.",
   "request.error.languages.incorrect": "Cette langue est incorrecte.",
 
   "list.languages.button.label": "Ajouter une nouvelle langue",
