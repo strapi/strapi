@@ -8,6 +8,9 @@
     display: block;
     color: #ABAFBB;
   }
+  > input {
+    margin-bottom: 1.3rem;
+  }
 }
 
 .inputText { /* stylelint-disable */
@@ -19,5 +22,8 @@
     margin-top: .5rem;
     display: block;
     color: #ABAFBB;
+  }
+  > input {
+    margin-bottom: 1.3rem;
   }
 }

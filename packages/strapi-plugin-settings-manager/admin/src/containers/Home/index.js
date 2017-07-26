@@ -186,8 +186,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     return (
       <tr key={key}>
         <th>{key}</th>
-        <td className={styles.label}>{languageDisplay}</td>
-        <td className={styles.lighter}>{props.name}</td>
+        <td className={rowStyles.label}>{languageDisplay}</td>
+        <td className={rowStyles.lighter}>{props.name}</td>
         <td>{languageLabel}</td>
         <td>{deleteIcon}</td>
       </tr>
