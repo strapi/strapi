@@ -170,7 +170,9 @@ module.exports = {
                 name: 'form.security.item.xframe.allow-from',
                 value: 'ALLOW-FROM',
                 items: [{
+                  name: '',
                   type: 'string',
+                  value: '',
                   validations: {
                     required: true
                   }
