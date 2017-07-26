@@ -1,6 +1,6 @@
 .listComponent { /* stylelint-disable */
   margin: 0 3.3rem;
-  padding: 0.5rem 2.8rem 5.8rem 2.8rem;
+  padding: 2rem 2.8rem 5.8rem 2.8rem;
   border-radius: 0.2rem;
   background-color: #FFFFFF;
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
@@ -14,7 +14,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 0.8rem;
-  margin-bottom: 3.8rem;
+  margin-bottom: 2.5rem;
 }
 
 .titleContainer {
@@ -28,6 +28,7 @@
 .listNoBorder {
   > tbody {
     tr {
+      height: 5.4rem;
       font-size: 1.3rem;
       line-height: 1.6rem;
       font-family: Lato;
@@ -73,6 +74,7 @@
 
 .normal {
   color: #1C5DE7;
+  padding-top: 0rem; 
 }
 
 .lighter {

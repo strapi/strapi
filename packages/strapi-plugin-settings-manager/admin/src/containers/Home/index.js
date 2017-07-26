@@ -126,7 +126,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleLanguageDelete = ({ target }) => {
-    // retirbve the language to delete using the target id
+    // Display notification
+    window.Strapi.notification.success('Deleting language...');
+    // retrieve the language to delete using the target id
     this.props.languageDelete(target.id);
   }
 
