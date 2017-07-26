@@ -98,9 +98,22 @@ module.exports = {
     if (_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
     if (!_.find(availableLanguages, { value: name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.incorrect' }] }]);
 
-    fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
+    const filePath = path.join(process.cwd(), 'config', 'locales', `${name}.json`);
 
-    ctx.send({ ok: true });
+    try {
+      fs.writeFileSync(filePath, '{}');
+
+      ctx.send({ ok: true });
+    } catch (e) {
+      ctx.badData(null, Service.formatErrors([{
+        target: 'name',
+        message: 'request.error.config',
+        params: {
+          filePath: filePath
+        }
+      }]));
+    }
+
   },
 
   deleteLanguage: async ctx => {
@@ -111,7 +124,21 @@ module.exports = {
 
     if (!_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.unknow' }] }]);
 
-    fs.unlinkSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`));
+    const filePath = path.join(process.cwd(), 'config', 'locales', `${name}.json`);
+
+    try {
+      fs.unlinkSync(filePath);
+
+      ctx.send({ ok: true });
+    } catch (e) {
+      ctx.badData(null, Service.formatErrors([{
+        target: 'name',
+        message: 'request.error.config',
+        params: {
+          filePath: filePath
+        }
+      }]));
+    }
 
     ctx.send({ ok: true });
   },

@@ -524,7 +524,17 @@ module.exports = {
 
           _.set(fileContent, objPath, input);
 
-          fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          try {
+            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              target,
+              message: 'request.error.config',
+              params: {
+                filePath: filePath
+              }
+            });
+          }
         } catch (e) {
           errors.push({
             target,
