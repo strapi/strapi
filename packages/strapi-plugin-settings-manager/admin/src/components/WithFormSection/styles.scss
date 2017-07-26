@@ -1,5 +1,6 @@
 .editFormSection { /* stylelint-disable */
   background: #FFFFFF;
+  padding-top: 2.2rem;
 }
 
 .sectionHeader {
@@ -11,3 +12,7 @@
     letter-spacing: 0.1rem;
     text-transform: uppercase;
   }
+
+label:not(:first-child) {
+  margin-top: 11rem;
+}
