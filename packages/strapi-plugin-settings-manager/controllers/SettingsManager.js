@@ -185,5 +185,25 @@ module.exports = {
     if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
 
     ctx.send({ ok: true });
+  },
+
+  deleteDatabase: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { name, env } = ctx.params;
+
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (name && _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
+
+    const connections = _.clone(strapi.config.environments[env].databases.connections);
+    connections[name] = undefined;
+
+    const params = { databases: { connections }};
+    const items = [{ target: 'databases.connections' }];
+
+    const updateErrors = Service.updateSettings(params, items, env);
+
+    if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
+
+    ctx.send({ ok: true });
   }
 };

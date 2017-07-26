@@ -81,6 +81,14 @@
       }
     },
     {
+      "method": "DELETE",
+      "path": "/configurations/databases/:name/:env",
+      "handler": "SettingsManager.deleteDatabase",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/configurations/:slug/:env?",
       "handler": "SettingsManager.get",
