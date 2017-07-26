@@ -170,7 +170,9 @@ module.exports = {
                 name: 'form.security.item.xframe.allow-from',
                 value: 'ALLOW-FROM',
                 items: [{
+                  name: '',
                   type: 'string',
+                  value: '',
                   validations: {
                     required: true
                   }
@@ -253,6 +255,75 @@ module.exports = {
     ]
   }),
 
+  database: (name, env) => ({
+    name: 'form.databases.name',
+    description: 'form.databases.description',
+    sections: [
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.databases.item.provider',
+            target: `databases.connections.${name}.connector`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.connector`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.databases.item.host',
+            target: `databases.connections.${name}.settings.host`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.settings.host`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.databases.item.username',
+            target: `databases.connections.${name}.settings.username`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.settings.username`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.databases.item.password',
+            target: `databases.connections.${name}.settings.password`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.settings.password`, null),
+            validations: {}
+          },
+          {
+            name: 'form.databases.item.database',
+            target: `databases.connections.${name}.settings.database`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.settings.database`, null),
+            validations: {
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.databases.item.default',
+            target: `databases.defaultConnection`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.databases.defaultConnection`, null),
+            validations: {
+              required: true
+            }
+          }
+        ]
+      }
+    ]
+  }),
+
   getEnvironments: () => {
     return _.map(_.keys(strapi.config.environments), environment => {
       return {
@@ -269,6 +340,22 @@ module.exports = {
         active: (strapi.config.i18n.defaultLocale === language)
       }
     });
+  },
+
+  getDatabases: env => {
+    const databases = [];
+
+    _.forEach(strapi.config.environments[env].databases.connections, (connection, name) => {
+      databases.push({
+        provider: connection.connector,
+        name,
+        host: connection.settings.host,
+        database: connection.settings.database,
+        active: (strapi.config.environments[env].databases.defaultConnection = name)
+      });
+    });
+
+    return databases;
   },
 
   getItems: model => _.flatten(_.map(model.sections, section => section.items)),

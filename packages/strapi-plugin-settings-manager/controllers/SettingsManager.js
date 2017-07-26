@@ -22,16 +22,38 @@ module.exports = {
     ctx.send({ languages: Service.getLanguages() });
   },
 
+  databases: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { env } = ctx.params;
+
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+
+    ctx.send({ databases: Service.getDatabases(env) });
+  },
+
+  database: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { slug, env } = ctx.params;
+
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+
+    const model = _.has(Service, slug) ? Service.database(slug, env) : undefined;
+
+    if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
+    if (_.isFunction(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.required' }] }]);
+
+    ctx.send(model);
+  },
+
   get: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
-    const model = Service[slug](env);
+    const model = _.has(Service, slug) ? Service[slug](env) : undefined;
 
     if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
-    if (_.isFunction(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.required' }] }]);
 
     ctx.send(model);
   },
@@ -43,10 +65,18 @@ module.exports = {
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
-    const model = Service[slug](env);
+    let model;
+    if (slug === 'database') {
+      const name = params.database;
+
+      model  = Service.database(name, env);
+
+      if (!_.find(Service.getDatabases(env), { name })) model = undefined;
+
+      delete params.database;
+    } else model = _.has(Service, slug) ? Service[slug](env) : undefined;
 
     if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
-    if (_.isFunction(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.required' }] }]);
 
     const items = Service.getItems(model);
 
