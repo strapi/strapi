@@ -1,21 +1,50 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
 import { takeLatest } from 'redux-saga';
-import { call, take, put, fork, cancel } from 'redux-saga/effects';
+import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
+// selectors
+import { makeSelectModifiedData } from './selectors';
+
 import {
   CONFIG_FETCH,
-  LANGUAGES_FETCH,
   EDIT_SETTINGS,
+  LANGUAGE_DELETE,
+  LANGUAGES_FETCH,
+  NEW_LANGUAGE_POST,
 } from './constants';
 
 import {
   configFetchSucceded,
   languagesFetchSucceeded,
-  // editSettingsSucceeded,
+  languageActiontSucceded,
 } from './actions';
+
+export function* deleteLanguage(action) {
+  try {
+    const opts = {
+      method: 'DELETE',
+    };
+
+    const requestUrl = `/settings-manager/configurations/languages/${action.languageToDelete}`;
+
+    yield call(request, requestUrl, opts);
+
+    // TODO remove counter
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+
+    yield put(languageActiontSucceded());
+
+  } catch(error) {
+    window.Strapi.notification.error('An Error occured');
+  }
+}
 
 export function* fetchConfig(action) {
   try {
@@ -55,6 +84,36 @@ export function* fetchLanguages() {
   }
 }
 
+export function* postLanguage() {
+  try {
+    const newLanguage = yield select(makeSelectModifiedData());
+    const body = {
+      name: newLanguage['i18n.i18n.defaultLocale'],
+    };
+    const opts = {
+      body,
+      method: 'POST',
+    };
+
+    const requestUrl = '/settings-manager/configurations/languages';
+
+    yield call(request, requestUrl, opts);
+
+    // TODO remove counter
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+
+    yield put(languageActiontSucceded());
+
+  } catch(error) {
+    // TODO handle error i18n
+    window.Strapi.notification.error(error);
+  }
+}
+
 export function* settingsEdit(action) {
   try {
     const opts = {
@@ -86,11 +145,15 @@ export function* defaultSaga() {
   const loadConfigWatcher = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
   const loadLanguagesWatcher = yield fork(takeLatest, LANGUAGES_FETCH, fetchLanguages);
   const editConfigWatcher = yield fork(takeLatest, EDIT_SETTINGS, settingsEdit);
+  const postLanguageWatcher = yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
+  const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
   yield cancel(loadLanguagesWatcher);
   yield cancel(editConfigWatcher);
+  yield cancel(postLanguageWatcher);
+  yield cancel(deleteLanguageWatcher);
 
 }
 

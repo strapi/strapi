@@ -8,7 +8,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { isEmpty, findKey, includes, get, toNumber, isObject, find, forEach, findIndex } from 'lodash';
+import {
+  find,
+  findIndex,
+  findKey,
+  forEach,
+  get,
+  isEmpty,
+  includes,
+  isObject,
+  map,
+  toNumber,
+} from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 import { router } from 'app';
@@ -22,12 +33,14 @@ import List from 'components/List';
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
 import {
-  configFetch,
-  changeInput,
   cancelChanges,
-  languagesFetch,
-  editSettings,
   changeDefaultLanguage,
+  changeInput,
+  configFetch,
+  editSettings,
+  languageDelete,
+  languagesFetch,
+  newLanguagePost,
 } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
@@ -69,6 +82,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.home.didCreatedNewLanguage !== this.props.home.didCreatedNewLanguage) {
+      this.handleFetch(this.props);
+    }
+  }
+
   handleFetch(props) {
     if (props.params.slug !== 'languages') {
       const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
@@ -106,9 +125,13 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  handleLanguageDelete = ({ target }) => {
+    // retirbve the language to delete using the target id
+    this.props.languageDelete(target.id);
+  }
 
   addLanguage = () => {
-    // console.log('click Add Language');
+    this.props.newLanguagePost();
   }
 
   changeDefaultLanguage = ({ target }) => {
@@ -140,7 +163,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, rowStyles) => {
-    const deleteIcon = props.active ? '' : <i className="fa fa-trash" />;
+    // assign the target id the language name to prepare for delete
+    const deleteIcon = props.active ? '' : <i className="fa fa-trash"  onClick={this.handleLanguageDelete} id={props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
     // apply i18n
@@ -179,6 +203,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
+  renderPopUpFormLanguage = (section, props) => (
+    map(section.items, (item, key) => (
+      <div key={key}>
+        <form>
+          {props.renderInput(item, key)}
+        </form>
+      </div>
+    ))
+  )
+
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
@@ -186,11 +220,20 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const Component = this.components[specificComponent];
     const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
     const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
+    // sections is the props used by EditForm in case of list of table rendering we need to change its value
+    const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages.sections : this.props.home.configsDisplay.sections;
     const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
+
+    // custom selectOptions for languages
+    const selectOptions = this.props.params.slug === 'languages' ? this.props.home.listLanguages : [];
+
+    // custom rendering for PopUpForm
+    const renderPopUpForm = this.props.params.slug === 'languages' ? this.renderPopUpFormLanguage : false;
 
     return (
       <Component
-        sections={this.props.home.configsDisplay.sections}
+        sections={sections}
+        listItems={this.props.home.configsDisplay.sections}
         values={this.props.home.modifiedData}
         handleChange={this.handleChange}
         handleCancel={this.handleCancel}
@@ -203,6 +246,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         listButtonLabel={listButtonLabel}
         handlei18n
         handleListPopUpSubmit={this.addLanguage}
+        selectOptions={selectOptions}
+        renderPopUpForm={renderPopUpForm}
       />
     );
   }
@@ -240,12 +285,14 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      editSettings,
       cancelChanges,
       changeDefaultLanguage,
       changeInput,
       configFetch,
+      editSettings,
+      languageDelete,
       languagesFetch,
+      newLanguagePost,
     },
     dispatch
   )
@@ -259,9 +306,11 @@ Home.propTypes = {
   editSettings: React.PropTypes.func,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,
+  languageDelete: React.PropTypes.func,
   languagesFetch: React.PropTypes.func,
   location: React.PropTypes.object,
   menuSections: React.PropTypes.array,
+  newLanguagePost: React.PropTypes.func,
   params: React.PropTypes.object.isRequired,
 };
 

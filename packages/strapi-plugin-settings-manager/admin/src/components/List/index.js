@@ -10,7 +10,7 @@
 *     prevent from displaying the List button
 *  - renderRow: function
 *     overrides the default rendering of the List tr (we can pass customs components there)
-*  - sections: array the elements to display
+*  - listItems: array the elements to display
 *  - handleListPopButtonSave: func
 *
 */
@@ -68,7 +68,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               <div className="col-md-12">
                 <table className={` table ${styles.listNoBorder}`}>
                   <tbody>
-                    {map(this.props.sections, (value, key) => {
+                    {map(this.props.listItems, (value, key) => {
                       // handle custom row displaying
                       if (this.props.renderRow) {
                         return this.props.renderRow(value, key, styles);
@@ -113,6 +113,7 @@ List.propTypes = {
   handlei18n: React.PropTypes.bool,
   handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,
+  listItems: React.PropTypes.array,
   listTitle: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.object,
@@ -122,7 +123,6 @@ List.propTypes = {
     React.PropTypes.bool,
     React.PropTypes.func,
   ]),
-  sections: React.PropTypes.array,
 };
 
 export default List;

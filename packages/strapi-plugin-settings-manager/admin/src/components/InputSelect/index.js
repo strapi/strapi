@@ -12,6 +12,7 @@ import styles from './styles.scss';
 class InputSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
+
     return (
       <div className={`${styles.inputSelect} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>
@@ -25,9 +26,13 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
           value={this.props.value}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <option key={key} value={option.value}>
-              <FormattedMessage {...{id: option.name}} />
-            </option>
+            <FormattedMessage {...{id: option.name}} key={key}>
+              {(message) => (
+                <option value={option.value}>
+                  {message}
+                </option>
+              )}
+            </FormattedMessage>
           ))}
         </select>
       </div>

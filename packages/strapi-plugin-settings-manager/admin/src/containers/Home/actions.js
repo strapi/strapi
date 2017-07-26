@@ -16,6 +16,9 @@ import {
   EDIT_SETTINGS,
   EDIT_SETTINGS_SUCCEEDED,
   CHANGE_DEFAULT_LANGUAGE,
+  NEW_LANGUAGE_POST,
+  LANGUAGE_ACTION_SUCCEEDED,
+  LANGUAGE_DELETE,
 } from './constants';
 
 export function defaultAction() {
@@ -113,5 +116,25 @@ export function changeDefaultLanguage(configsDisplay, newLanguage) {
     type: CHANGE_DEFAULT_LANGUAGE,
     configsDisplay,
     newLanguage,
+  };
+}
+
+export function newLanguagePost() {
+  return {
+    type: NEW_LANGUAGE_POST,
+  };
+}
+
+
+export function languageActiontSucceded() {
+  return {
+    type: LANGUAGE_ACTION_SUCCEEDED,
+  };
+}
+
+export function languageDelete(languageToDelete) {
+  return {
+    type: LANGUAGE_DELETE,
+    languageToDelete,
   };
 }

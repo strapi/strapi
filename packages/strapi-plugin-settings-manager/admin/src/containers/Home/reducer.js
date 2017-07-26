@@ -12,6 +12,7 @@ import {
   CANCEL_CHANGES,
   LANGUAGES_FETCH_SUCCEEDED,
   EDIT_SETTINGS_SUCCEEDED,
+  LANGUAGE_ACTION_SUCCEEDED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -21,6 +22,7 @@ const initialState = fromJS({
   initialData: Map(),
   modifiedData: Map(),
   listLanguages: Map(),
+  didCreatedNewLanguage: false,
 });
 
 function homeReducer(state = initialState, action) {
@@ -38,6 +40,7 @@ function homeReducer(state = initialState, action) {
     case LANGUAGES_FETCH_SUCCEEDED:
       return state
         .set('loading', false)
+        .set('didCreatedNewLanguage', false)
         .set('configsDisplay', OrderedMap(action.configs))
         .set('initialData', Map())
         .set('modifiedData', Map())
@@ -51,6 +54,8 @@ function homeReducer(state = initialState, action) {
       return state
         .set('configsDisplay', OrderedMap(action.configsDisplay))
         .updateIn(['modifiedData', 'i18n.i18n.defaultLocale'], () => action.newLanguage);
+    case LANGUAGE_ACTION_SUCCEEDED:
+      return state.set('didCreatedNewLanguage', true);
     default:
       return state;
   }

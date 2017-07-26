@@ -19,7 +19,13 @@ const selectHome = () => createSelector(
   (substate) => substate.toJS()
 );
 
+const makeSelectModifiedData = () => createSelector(
+  selectHomeDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
+);
+
 export default selectHome;
 export {
   selectHomeDomain,
+  makeSelectModifiedData,
 };
