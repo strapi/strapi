@@ -3,6 +3,10 @@
   color: #2D3138;
 }
 
+li:not(:first-child) {
+  margin-top: 0.2rem;
+}
+
 .link {
   display: block;
   margin-left: 2rem;
@@ -14,6 +18,7 @@
   color: #2C3138 !important;
   text-decoration: none !important;
   line-height: 1.6rem;
+
   > i {
     margin-right: 1rem;
   }

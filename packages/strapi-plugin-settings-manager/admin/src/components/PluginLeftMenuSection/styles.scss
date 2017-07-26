@@ -1,8 +1,9 @@
 .pluginLeftMenuSection { /* stylelint-disable */
-  margin-top: 4rem;
+  margin-top: 3.3rem;
+
   > p {
     margin: 0;
-    margin-bottom: 0.8rem;
+    // margin-bottom: 0.8rem;
     padding-left: 3rem;
     line-height: 1.3rem;
     color: #919BAE;
@@ -13,7 +14,7 @@
     text-transform: uppercase;
   }
   > ul {
-    margin: 0;
+    margin: 1rem 0 0 0;
     padding: 0;
     list-style: none;
     font-size: 1.3rem;
