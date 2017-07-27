@@ -12,7 +12,7 @@ module.exports = function() {
 
       setTimeout(() => {
         if (timeout) {
-          reject(`The hook ${hook} takes too long to load!`);
+          reject(`(hook:${hook}) takes too long to load`);
         }
       }, this.config.hook.timeout || 1000);
 
@@ -40,7 +40,7 @@ module.exports = function() {
       hook =>
         new Promise((resolve, reject) => {
           // Don't load disabled hook.
-          if (this.config.hook.settings[hook] === false) {
+          if (this.config.hook.settings[hook].enabled === false) {
             return resolve();
           }
 

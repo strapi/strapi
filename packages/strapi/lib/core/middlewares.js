@@ -58,43 +58,68 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
+      const cwd = path.resolve(__dirname, '..', 'middlewares');
+
       glob(
-        './*/',
+        './*',
         {
-          cwd: path.resolve(__dirname, '..', 'middlewares')
+          cwd
         },
         (err, files) => {
           if (err) {
             return reject(err);
           }
 
-          parallel(
-            files.map(p => cb => {
-              const name = p.split('/')[1];
+          mountMiddlewares.call(this, files, cwd)(resolve, reject);
+        }
+      );
+    }),
+    new Promise((resolve, reject) => {
+      const cwd = path.resolve(process.cwd(), 'middlewares');
 
-              this.middlewares[name] = {
-                loaded: false
-              };
+      glob(
+        './*',
+        {
+          cwd
+        },
+        (err, files) => {
+          if (err) {
+            return reject(err);
+          }
 
-              // Lazy loading.
-              Object.defineProperty(this.middlewares[name], 'load', {
-                configurable: false,
-                enumerable: true,
-                get: () => require(path.resolve(__dirname, '..', 'middlewares', p))(this)
-              });
-
-              cb();
-            }),
-            err => {
-              if (err) {
-                return reject(err);
-              }
-
-              resolve();
-            }
-          );
+          mountMiddlewares.call(this, files, cwd)(resolve, reject);
         }
       );
     })
   ]);
 };
+
+const mountMiddlewares = function (files, cwd) {
+  return (resolve, reject) => {
+    parallel(
+      files.map(p => cb => {
+        const name = p.split('/')[1];
+
+        this.middlewares[name] = {
+          loaded: false
+        };
+
+        // Lazy loading.
+        Object.defineProperty(this.middlewares[name], 'load', {
+          configurable: false,
+          enumerable: true,
+          get: () => require(path.resolve(cwd, p))(this)
+        });
+
+        cb();
+      }),
+      err => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      }
+    );
+  }
+}

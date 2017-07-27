@@ -11,53 +11,76 @@ const { setWith, last, upperFirst, lowerFirst, get } = require('lodash');
 module.exports = function() {
   this.hooks = {};
 
-  return new Promise((resolve, reject) => {
-    // Load configurations.
-    glob('./node_modules/strapi-*', {}, (err, files) => {
-      if (err) {
-        return reject(err);
-      }
+  return Promise.all([
+    new Promise((resolve, reject) => {
+      const cwd = '';
 
-      parallel(
-        files.map(p => cb => {
-          const extractStr = p
-            .split('/')
-            .pop()
-            .replace(/^strapi(-|\.)/, '')
-            .split('-');
+      // Load configurations.
+      glob('./node_modules/strapi-*', {}, (err, files) => {
+        if (err) {
+          return reject(err);
+        }
 
-          const name = lowerFirst(
-            extractStr.length === 1
-              ? extractStr[0]
-              : extractStr.map(p => upperFirst(p)).join('')
-          );
+        mountHooks.call(this, files, cwd)(resolve, reject)
+      });
+    }),
+    new Promise((resolve, reject) => {
+      const cwd = 'hooks';
 
-          fs.readFile(path.resolve(this.config.appPath, p, 'package.json'), (err, content) => {
-            try {
-              const pkg = JSON.parse(content);
+      // Load configurations.
+      glob('./*', {
+        cwd: path.resolve(process.cwd(), 'hooks')
+      }, (err, files) => {
+        if (err) {
+          return reject(err);
+        }
 
-              this.hooks[name] = {
-                loaded: false,
-                identity: name,
-                dependencies: get(pkg, 'strapi.dependencies') || []
-              };
-
-              // Lazy loading.
-              Object.defineProperty(this.hooks[name], 'load', {
-                configurable: false,
-                enumerable: true,
-                get: () => require(path.resolve(this.config.appPath, p))
-              });
-
-              cb();
-            } catch (e) {
-              cb(e);
-            }
-
-          });
-        }),
-        resolve
-      );
-    });
-  });
+        mountHooks.call(this, files, cwd)(resolve, reject);
+      });
+    })
+  ]);
 };
+
+const mountHooks = function (files, cwd) {
+  return (resolve, reject) =>
+    parallel(
+      files.map(p => cb => {
+        const extractStr = p
+          .split('/')
+          .pop()
+          .replace(/^strapi(-|\.)/, '')
+          .split('-');
+
+        const name = lowerFirst(
+          extractStr.length === 1
+            ? extractStr[0]
+            : extractStr.map(p => upperFirst(p)).join('')
+        );
+
+        fs.readFile(path.resolve(this.config.appPath, cwd, p, 'package.json'), (err, content) => {
+          try {
+            const pkg = JSON.parse(content);
+
+            this.hooks[name] = {
+              loaded: false,
+              identity: name,
+              dependencies: get(pkg, 'strapi.dependencies') || []
+            };
+
+            // Lazy loading.
+            Object.defineProperty(this.hooks[name], 'load', {
+              configurable: false,
+              enumerable: true,
+              get: () => require(path.resolve(this.config.appPath, cwd, p))
+            });
+
+            cb();
+          } catch (e) {
+            cb(e);
+          }
+
+        });
+      }),
+      resolve
+    );
+}

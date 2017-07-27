@@ -19,6 +19,8 @@ const { EventEmitter } = require('events');
 
 class Strapi extends EventEmitter {
   constructor() {
+    global.startedAt = Date.now();
+
     super();
 
     this.setMaxListeners(15);
@@ -64,7 +66,13 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      global.startedAt = Date.now();
+      // Disable log when running tests.
+      if (this.config.environment === 'test') {
+        this.log.configure({
+          level: 'silent'
+        });
+      }
+
       // Enhance app.
       await this.enhancer();
       // Load the app.
@@ -77,16 +85,14 @@ class Strapi extends EventEmitter {
           console.log(err);
         }
 
-        if (this.config.environment !== 'test') {
-          this.log.info('Server started in ' + this.config.appPath);
-          this.log.info('Your server is running at ' + this.config.url);
-          this.log.debug('Time: ' + new Date());
-          this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' ms');
-          this.log.debug('Environment: ' + this.config.environment);
-          this.log.debug('Process PID: ' + process.pid);
-          this.log.debug(`Strapi: v${this.config.info.strapi} (node v${this.config.info.node})`);
-          this.log.info('To shut down your server, press <CTRL> + C at any time');
-        }
+        this.log.info('Server started in ' + this.config.appPath);
+        this.log.info('Your server is running at ' + this.config.url);
+        this.log.debug('Time: ' + new Date());
+        this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' ms');
+        this.log.debug('Environment: ' + this.config.environment);
+        this.log.debug('Process PID: ' + process.pid);
+        this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
+        this.log.info('To shut down your server, press <CTRL> + C at any time');
 
         if (cb && typeof cb === 'function') {
           cb();
@@ -146,8 +152,6 @@ class Strapi extends EventEmitter {
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
-
-    console.log(this.config.hook);
   }
 
   async bootstrap() {

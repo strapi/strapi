@@ -25,10 +25,6 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares.parser.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.compress` should be a function', () => {
-      assert(typeof strapi.middlewares.compress.load.initialize === 'function');
-    });
-
     it('`strapi.middlewares.kcors` should be a function', () => {
       assert(typeof strapi.middlewares.cors.load.initialize === 'function');
     });

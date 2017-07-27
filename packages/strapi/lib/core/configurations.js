@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll } = require('lodash');
+const { difference, merge, setWith, get, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -82,6 +82,7 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
+    // Exclude database and custom.
     middlewareCategories.push('database');
 
     // Flatten hooks configurations.
@@ -103,7 +104,14 @@ module.exports.app = async function() {
     this.config.middleware.settings = Object.keys(this.middlewares).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
       const currentSettings = flattenMiddlewaresConfig[current] || this.config[current];
-      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+      acc[current] = !isObject(currentSettings) ? {} : currentSettings;
+
+      if (!acc[current].hasOwnProperty('enabled')) {
+        this.log.warn(`(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
+      }
+
+      // Ensure that enabled key exist by forcing to false.
+      defaults(acc[current], { enabled : false });
 
       return acc;
     }, {});
@@ -111,7 +119,19 @@ module.exports.app = async function() {
     this.config.hook.settings = Object.keys(this.hooks).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
       const currentSettings = flattenHooksConfig[current] || this.config[current];
-      acc[current] = !isEmpty(currentSettings) || isBoolean(currentSettings) ? currentSettings : {};
+
+      if (isString(currentSettings)) {
+        acc[current] = currentSettings;
+      } else {
+        acc[current] = !isObject(currentSettings) ? {} : currentSettings;
+
+        if (!acc[current].hasOwnProperty('enabled')) {
+          this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
+        }
+
+        // Ensure that enabled key exist by forcing to false.
+        defaults(acc[current], { enabled : false });
+      }
 
       return acc;
     }, {});

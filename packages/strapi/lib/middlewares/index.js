@@ -12,7 +12,7 @@ module.exports = function() {
 
     setTimeout(() => {
       if (timeout) {
-        reject(`The middleware ${middleware} takes too long to load!`);
+        reject(`(middleware: ${middleware}) takes too long to load`);
       }
     }, this.config.middleware.timeout || 1000);
 
@@ -37,12 +37,13 @@ module.exports = function() {
       middleware =>
         new Promise((resolve, reject) => {
           // Don't load disabled middleware.
-          if (this.config.middleware.settings[middleware] === false) {
+          if (this.config.middleware.settings[middleware].enabled === false) {
             return resolve();
           }
 
           const module = this.middlewares[middleware].load;
-          const middlewaresOrder = get(this.config.middleware, 'loadOrder', []).filter(middleware => this.config.middleware.settings[middleware] !== false);
+          const middlewaresOrder = get(this.config.middleware, 'loadOrder', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.middleware, `settings.${middleware}`))) {
@@ -56,6 +57,8 @@ module.exports = function() {
           if (includes(middlewaresOrder, middleware)) {
             const position = indexOf(middlewaresOrder, middleware);
             const previousDependencies = dropRight(middlewaresOrder, middlewaresOrder.length - (position + 1));
+
+
 
             // Remove current middleware.
             previousDependencies.splice(position, 1);
