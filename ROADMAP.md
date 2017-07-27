@@ -50,7 +50,7 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Create plugin helper to share utils between plugins (`strapi-helper-plugin`).~~
 - ~~Prototype the plugins queries process to be able to use different ORMs.~~
 - ~~Prototype the CLI to create, install and uninstall plugins.~~
-- Ensure that we are compatible with Node 8.
+- ~~Ensure that we are compatible with Node 8.~~
 
 `strapi@alpha.5` *(expected release date: 10/08/2017)*:
 - [Plugin] Settings Manager.
