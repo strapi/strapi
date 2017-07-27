@@ -26,21 +26,28 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { env } = ctx.params;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
     ctx.send({ databases: Service.getDatabases(env) });
   },
 
   database: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
-    const { slug, env } = ctx.params;
+    const { name, env } = ctx.params;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
 
-    const model = _.has(Service, slug) ? Service.database(slug, env) : undefined;
+    const model = Service.databases(name, env);
 
-    if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
-    if (_.isFunction(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.required' }] }]);
+    ctx.send(model);
+  },
+
+  databaseModel: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { env } = ctx.params;
+
+    const model = Service.databases('${name}', env);
 
     ctx.send(model);
   },
@@ -53,9 +60,7 @@ module.exports = {
 
     const model = _.has(Service, slug) ? Service[slug](env) : undefined;
 
-    if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
-
-    ctx.send(model);
+    _.isUndefined(model) ? ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]) : ctx.send(model);
   },
 
   update: async ctx => {
@@ -65,16 +70,7 @@ module.exports = {
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
-    let model;
-    if (slug === 'database') {
-      const name = params.database;
-
-      model  = Service.database(name, env);
-
-      if (!_.find(Service.getDatabases(env), { name })) model = undefined;
-
-      delete params.database;
-    } else model = _.has(Service, slug) ? Service[slug](env) : undefined;
+    const model = _.has(Service, slug) ? Service[slug](env) : undefined;
 
     if (_.isUndefined(model)) return ctx.badData(null, [{ messages: [{ id: 'request.error.config' }] }]);
 
@@ -82,16 +78,14 @@ module.exports = {
 
     params = Service.cleanParams(params, items);
 
-    let validationErrors
+    let validationErrors;
     [params, validationErrors] = Service.paramsValidation(params, items);
 
     if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
     const updateErrors = Service.updateSettings(params, items, env);
 
-    if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
-
-    ctx.send({ ok: true });
+    !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
   },
 
   createLanguage: async ctx => {
@@ -104,9 +98,22 @@ module.exports = {
     if (_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
     if (!_.find(availableLanguages, { value: name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.incorrect' }] }]);
 
-    fs.writeFileSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`), '{}');
+    const filePath = path.join(process.cwd(), 'config', 'locales', `${name}.json`);
 
-    ctx.send({ ok: true });
+    try {
+      fs.writeFileSync(filePath, '{}');
+
+      ctx.send({ ok: true });
+    } catch (e) {
+      ctx.badData(null, Service.formatErrors([{
+        target: 'name',
+        message: 'request.error.config',
+        params: {
+          filePath: filePath
+        }
+      }]));
+    }
+
   },
 
   deleteLanguage: async ctx => {
@@ -115,10 +122,107 @@ module.exports = {
 
     const languages = Service.getLanguages();
 
-    if (!_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.notExist' }] }]);
+    if (!_.find(languages, { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.languages.unknow' }] }]);
 
-    fs.unlinkSync(path.join(process.cwd(), 'config', 'locales', `${name}.json`));
+    const filePath = path.join(process.cwd(), 'config', 'locales', `${name}.json`);
+
+    try {
+      fs.unlinkSync(filePath);
+
+      ctx.send({ ok: true });
+    } catch (e) {
+      ctx.badData(null, Service.formatErrors([{
+        target: 'name',
+        message: 'request.error.config',
+        params: {
+          filePath: filePath
+        }
+      }]));
+    }
 
     ctx.send({ ok: true });
+  },
+
+  createDatabase: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { env } = ctx.params;
+    let params = ctx.request.body;
+
+    const [name] = _.keys(params.databases.connections);
+
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!name || _.find(Service.getDatabases(env), { name })) return ctx.badData(null, [{ messages: [{ id: 'request.error.database.exist' }] }]);
+
+    const model = Service.databases(name, env);
+    const items = Service.getItems(model);
+
+    params = Service.cleanParams(params, items);
+
+    let validationErrors;
+    [params, validationErrors] = Service.paramsValidation(params, items);
+
+    if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
+
+    const updateErrors = Service.updateSettings(params, items, env);
+
+    if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
+
+    ctx.send({ ok: true });
+  },
+
+  updateDatabase: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { name, env } = ctx.params;
+    let params = ctx.request.body;
+
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
+
+    const model = Service.databases(name, env);
+    let items = Service.getItems(model);
+
+    params = Service.cleanParams(params, items);
+
+    let validationErrors;
+    [params, validationErrors] = Service.paramsValidation(params, items);
+
+    if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
+
+    const newName = _.get(params, `databases.connections.${name}.name`);
+
+    if (newName && newName !== name) {
+      params = _.assign(_.clone(strapi.config.environments[env].databases.connections[name]), params.databases.connections[name]);
+      delete params.name;
+
+      const connections = _.clone(strapi.config.environments[env].databases.connections);
+      connections[newName] = params;
+      connections[name] = undefined;
+
+      params = { databases: { connections }};
+
+      items = [{ target: 'databases.connections' }];
+    }
+
+    const updateErrors = Service.updateSettings(params, items, env);
+
+    !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
+  },
+
+  deleteDatabase: async ctx => {
+    const Service = strapi.plugins['settings-manager'].services.settingsmanager;
+    const { name, env } = ctx.params;
+
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
+    if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badData(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
+
+    const connections = _.clone(strapi.config.environments[env].databases.connections);
+    connections[name] = undefined;
+
+    const params = { databases: { connections }};
+    const items = [{ target: 'databases.connections' }];
+
+    const updateErrors = Service.updateSettings(params, items, env);
+
+    !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
   }
 };

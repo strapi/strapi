@@ -130,6 +130,15 @@ module.exports = {
         name: 'form.security.item.session',
         items: [
           {
+            name: 'form.security.item.session.enabled',
+            target: 'security.session.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.session.enabled`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.security.item.session.key',
             target: 'security.session.key',
             type: 'string',
@@ -198,6 +207,15 @@ module.exports = {
         name: 'form.security.item.cors',
         items: [
           {
+            name: 'form.security.item.cors.enabled',
+            target: 'security.cors.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.cors.enabled`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.security.item.cors.origin',
             target: 'security.cors.origin',
             type: 'string',
@@ -255,13 +273,22 @@ module.exports = {
     ]
   }),
 
-  database: (name, env) => ({
+  databases: (name, env) => ({
     name: 'form.databases.name',
     description: 'form.databases.description',
     sections: [
       {
         name: '',
         items: [
+          {
+            name: 'form.databases.item.name',
+            target: `databases.connections.${name}.name`,
+            type: 'string',
+            value: name,
+            validations: {
+              required: true
+            }
+          },
           {
             name: 'form.databases.item.provider',
             target: `databases.connections.${name}.connector`,
@@ -329,7 +356,7 @@ module.exports = {
       return {
         name: environment,
         active: (strapi.config.environment === environment)
-      }
+      };
     });
   },
 
@@ -338,22 +365,20 @@ module.exports = {
       return {
         name: language,
         active: (strapi.config.i18n.defaultLocale === language)
-      }
+      };
     });
   },
 
   getDatabases: env => {
     const databases = [];
 
-    _.forEach(strapi.config.environments[env].databases.connections, (connection, name) => {
-      databases.push({
-        provider: connection.connector,
-        name,
-        host: connection.settings.host,
-        database: connection.settings.database,
-        active: (strapi.config.environments[env].databases.defaultConnection = name)
-      });
-    });
+    _.forEach(strapi.config.environments[env].databases.connections, (connection, name) =>  databases.push({
+      provider: _.get(connection, 'connector'),
+      name,
+      host: _.get(connection, 'settings.host'),
+      database: _.get(connection, 'settings.database'),
+      active: (_.get(strapi.config, `environments.${env}.databases.defaultConnection`) === name)
+    }));
 
     return databases;
   },
@@ -411,31 +436,29 @@ module.exports = {
         message: 'request.error.type.select'
       });
 
-      if (type === 'enum') {
-        if (!_.find(items, { value: input })) {
-          const key = input.split('.')[0];
-          input = _.drop(input.split('.')).join('.');
+      if (type === 'enum' && !_.find(items, { value: input })) {
+        const key = input.split('.')[0];
+        input = _.drop(input.split('.')).join('.');
 
-          const item = _.find(items, { value: key });
+        const item = _.find(items, { value: key });
 
-          if (!item) return errors.push({
-            target: target,
-            message: 'request.error.type.enum'
-          });
+        if (!item) return errors.push({
+          target: target,
+          message: 'request.error.type.enum'
+        });
 
-          input = reformat(input, item.type);
-          params[target] = input;
+        input = reformat(input, item.type);
+        params[target] = input;
 
-          _.forEach(item.items, subItem => {
-            subItem.target = target;
-            if (_.has(params, subItem.target)) {
-              const input = _.get(params, subItem.target, null);
+        _.forEach(item.items, subItem => {
+          subItem.target = target;
+          if (_.has(params, subItem.target)) {
+            const input = _.get(params, subItem.target, null);
 
-              checkType(input, subItem);
-              checkValidations(input, subItem);
-            }
-          });
-        }
+            checkType(input, subItem);
+            checkValidations(input, subItem);
+          }
+        });
       }
     };
 
@@ -501,7 +524,17 @@ module.exports = {
 
           _.set(fileContent, objPath, input);
 
-          fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          try {
+            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              target,
+              message: 'request.error.config',
+              params: {
+                filePath: filePath
+              }
+            });
+          }
         } catch (e) {
           errors.push({
             target,
