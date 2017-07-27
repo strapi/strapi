@@ -19,10 +19,7 @@
     "realtime",
     "rest",
     "restful",
-    "security",
-    "socket.io",
-    "sockets",
-    "websockets"
+    "security"
   ],
   "directories": {
     "lib": "./lib",

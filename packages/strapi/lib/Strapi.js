@@ -19,8 +19,6 @@ const { EventEmitter } = require('events');
 
 class Strapi extends EventEmitter {
   constructor() {
-    global.startedAt = Date.now();
-
     super();
 
     this.setMaxListeners(15);
@@ -36,6 +34,7 @@ class Strapi extends EventEmitter {
 
     // Default configurations.
     this.config = {
+      launchedAt: Date.now(),
       appPath: process.cwd(),
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
@@ -88,7 +87,7 @@ class Strapi extends EventEmitter {
         this.log.info('Server started in ' + this.config.appPath);
         this.log.info('Your server is running at ' + this.config.url);
         this.log.debug('Time: ' + new Date());
-        this.log.debug('Launched in: ' + (Date.now() - global.startedAt) + ' ms');
+        this.log.debug('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
         this.log.debug('Environment: ' + this.config.environment);
         this.log.debug('Process PID: ' + process.pid);
         this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
