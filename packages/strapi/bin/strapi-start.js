@@ -14,9 +14,6 @@ const path = require('path');
 const _ = require('lodash');
 const forever = require('forever-monitor');
 
-// Local Strapi dependencies.
-const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
-
 // Logger.
 const logger = require('strapi-utils').logger;
 
@@ -43,54 +40,63 @@ module.exports = function() {
       'server.json'
     ));
 
-    // if (process.env.NODE_ENV === 'development' && server.reload === true) {
-    //   const options = _.assign(
-    //     {},
-    //     {
-    //       silent: false,
-    //       watch: true,
-    //       watchDirectory: process.cwd(),
-    //       watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
-    //       watchIgnorePatterns: [
-    //         'node_modules/**/*',
-    //         'public/**/*',
-    //         '.git/**/*',
-    //         '.idea'
-    //       ], // Ignore patterns to use when watching files.
-    //       killTree: true, // Kills the entire child process tree on `exit`,
-    //       spinSleepTime: 0,
-    //       command: 'node --harmony-async-await'
-    //     }
-    //   );
-    //
-    //   const child = new forever.Monitor('server.js', options);
-    //
-    //   // Run listeners
-    //   child.on('watch:restart', info => {
-    //     logger.verbose(
-    //       'Restarting due to ' +
-    //         info.file +
-    //         '... (' +
-    //         info.stat.replace(child.cwd, '.') +
-    //         ')'
-    //     );
-    //     console.log();
-    //   });
-    //
-    //   child.on('exit:code', function(code) {
-    //     if (code) {
-    //       process.exit(code);
-    //     }
-    //   });
-    //
-    //   // Start child process
-    //   return child.start();
-    // }
+    if (process.env.NODE_ENV === 'development' && server.reload === true) {
+      const options = _.assign(
+        {},
+        {
+          silent: false,
+          watch: true,
+          watchDirectory: process.cwd(),
+          watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
+          watchIgnorePatterns: [
+            'node_modules/**/*',
+            'public/**/*',
+            '.git/**/*',
+            '.idea'
+          ], // Ignore patterns to use when watching files.
+          killTree: true, // Kills the entire child process tree on `exit`,
+          spinSleepTime: 0,
+          command: 'node'
+        }
+      );
+
+      const child = new forever.Monitor('server.js', options);
+
+      // Run listeners
+      child.on('watch:restart', info => {
+        logger.verbose(
+          'Restarting due to ' +
+            info.file +
+            '... (' +
+            info.stat.replace(child.cwd, '.') +
+            ')'
+        );
+        console.log();
+      });
+
+      child.on('exit:code', function(code) {
+        if (code) {
+          process.exit(code);
+        }
+      });
+
+      // Start child process
+      return child.start();
+    }
 
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    return require('strapi');
+    const strapi = function () {
+      try {
+        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
+      } catch (e) {
+        return require('strapi');
+      }
+    }();
+    
+    strapi.start();
+
   } catch (e) {
     logger.error(e);
     process.exit(0);
