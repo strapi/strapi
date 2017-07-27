@@ -25,8 +25,9 @@ module.exports = function(strapi) {
     defaults: {
       port: 6379,
       host: 'localhost',
-      family: 4,
-      db: 0,
+      options: {
+        db: 0
+      },
       showFriendlyErrorStack: process.env.NODE_ENV !== 'production'
     },
 
@@ -53,7 +54,13 @@ module.exports = function(strapi) {
         _.defaults(connection.settings, strapi.hooks.redis.defaults);
 
         try {
-          const redis = new Redis(connection.settings);
+          const redis = new Redis(_.defaultsDeep({
+            port: _.get(connection.settings, 'port'),
+            host: _.get(connection.settings, 'host')
+            options:
+              db: _.get(connection.options, 'database') || 0
+            }
+          }, strapi.config.hook.redis.settings);
 
           redis.on('error', err => {
             strapi.log.error(err);

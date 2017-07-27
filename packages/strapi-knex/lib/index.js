@@ -96,13 +96,15 @@ module.exports = strapi => {
             schema: _.get(connection.settings, 'schema'),
             port: _.get(connection.settings, 'port'),
           },
-          debug: _.get(connection, 'debug') || false
+          debug: _.get(connection.options, 'debug') || false,
+          acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),
+          migrations: _.get(connection.options, 'migrations')
         }, strapi.config.hook.settings.knex);
 
-        if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
+        if (options.client === 'pg' || options.client === 'mysql' && _.isString(_.get(options.connection, 'schema'))) {
           options.pool = {
-            min: 0,
-            max: 10,
+            min: _.get(connection.options, 'pool.min') || 0,
+            max: _.get(connection.options, 'pool.max') || 10,
             afterCreate: (conn, cb) => {
               conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
                 cb(err, conn);

@@ -52,7 +52,7 @@ module.exports = strapi => {
 
         if (
           strapi.config.middleware.settings.session.hasOwnProperty('store') &&
-          _.isString(strapi.config.middleware.settings.session.store)
+          _.isString(strapi.config.middleware.settings.session.client)
         ) {
           const store = hook.defineStore(strapi.config.middleware.settings.session);
 
@@ -95,33 +95,46 @@ module.exports = strapi => {
     },
 
     defineStore: session => {
+      if (_.isEmpty(_.get(session, 'client'))) {
+        return strapi.log.error('(middleware:session) please provide a valid client to store session');
+      } else if (_.isEmpty(_.get(session, 'settings'))) {
+        return strapi.log.error('(middleware:session) please provide settings for the session store');
+      }
+
       // Define correct store name to avoid require to failed.
-      switch (session.store.toLowerCase()) {
+      switch (session.client.toLowerCase()) {
         case 'redis': {
           const store = hook.requireStore('redis');
 
-          return store(session.connection);
+          session.settings.db = session.settings.database;
+
+          return store(session.settings);
         }
         case 'mysql': {
           const Store = hook.requireStore('mysql-session');
 
-          return new Store(session.connection);
+          return new Store(session.settings);
         }
         case 'mongo': {
           const Store = hook.requireStore('generic-session-mongo');
 
-          return new Store(session.connection);
+          session.settings.db = session.settings.database;
+
+          return new Store(session.settings);
         }
         case 'postgresql': {
           const Store = hook.requireStore('pg-session');
 
-          return new Store(session.connection, session.options);
+          return new Store(session.settings, session.options);
         }
         case 'rethink': {
           const Store = hook.requireStore('generic-session-rethinkdb');
 
+          session.settings.dbName = session.settings.database;
+          session.settings.tableName = session.settings.table;
+
           const sessionStore = new Store({
-            connection: session.connection
+            connection: session.settings
           });
 
           // Create the DB, tables and indexes to store sessions.
