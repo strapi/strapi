@@ -164,7 +164,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   // custom Row rendering for the component List with params slug === languages
-  renderRowLanguage = (props, key, rowStyles) => {
+  renderRowLanguage = (props, key, liStyles) => {
     // assign the target id the language name to prepare for delete
     const deleteIcon = props.active ? '' : <i className="fa fa-trash"  onClick={this.handleLanguageDelete} id={props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
     // retrieve language name from i18n translation
@@ -173,27 +173,31 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
     const languageLabel = props.active ?
-      <span className={rowStyles.italicText}>
+      <span className={liStyles.italicText}>
         <FormattedMessage {...{id: 'list.languages.default.languages'}} />
       </span> :
       // set the span's id with the language name to retrieve it
         <FormattedMessage {...{id: 'list.languages.set.languages'}}>
           {(message) => (
-            <button className={rowStyles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
+            <button className={liStyles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
               {message}
             </button>
           )}
         </FormattedMessage>;
 
     return (
-      <tr key={key}>
-        <th>{key}</th>
-        <td className={rowStyles.label}>{languageDisplay}</td>
-        <td className={rowStyles.lighter}>{props.name}</td>
-        <td>{languageLabel}</td>
-        <td>{deleteIcon}</td>
-      </tr>
-    );
+      <li key={key}>
+        <div className={liStyles.flexLi}>
+          <div className={liStyles.flexed}>
+            <div>{key}</div>
+            <div className={liStyles.label}>{languageDisplay}</div>
+          </div>
+          <div>{props.name}</div>
+          <div className={liStyles.centered}>{languageLabel}</div>
+          <div>{deleteIcon}</div>
+        </div>
+      </li>
+    )
   }
 
   renderListTitle = () => {
@@ -232,6 +236,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     // custom rendering for PopUpForm
     const renderPopUpForm = this.props.params.slug === 'languages' ? this.renderPopUpFormLanguage : false;
 
+    // TODO remove temporary condition to handle nestedForm rendering
+    const checkForNestedForm = this.props.params.slug !== 'languages'
+
     return (
       <Component
         sections={sections}
@@ -250,6 +257,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         handleListPopUpSubmit={this.addLanguage}
         selectOptions={selectOptions}
         renderPopUpForm={renderPopUpForm}
+        checkForNestedForm={checkForNestedForm}
       />
     );
   }
