@@ -25,7 +25,7 @@ module.exports = function() {
         return reject(err);
       }
 
-      this.middlewares[middleware].loaded = true;
+      this.middleware[middleware].loaded = true;
       this.emit('middleware:' + middleware + ':loaded');
 
       resolve();
@@ -33,7 +33,7 @@ module.exports = function() {
   };
 
   return Promise.all(
-    Object.keys(this.middlewares).map(
+    Object.keys(this.middleware).map(
       middleware =>
         new Promise((resolve, reject) => {
           // Don't load disabled middleware.
@@ -41,14 +41,13 @@ module.exports = function() {
             return resolve();
           }
 
-          const module = this.middlewares[middleware].load;
+          const module = this.middleware[middleware].load;
 
           // Retrieve middlewares configurations order
-          const middlewares = Object.keys(this.middlewares).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
-          const middlewaresBefore = get(this.config.middleware, 'load.before', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
-          const middlewaresOrder = get(this.config.middleware, 'load.order', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
-          const middlewaresAfter = get(this.config.middleware, 'load.after', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
-
+          const middlewares = Object.keys(this.middleware).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresBefore = get(this.config.middleware, 'load.before', []).filter(middleware => !isUndefined(this.middleware[middleware])).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresOrder = get(this.config.middleware, 'load.order', []).filter(middleware => !isUndefined(this.middleware[middleware])).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresAfter = get(this.config.middleware, 'load.after', []).filter(middleware => !isUndefined(this.middleware[middleware])).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.middleware, `settings.${middleware}`))) {
@@ -106,7 +105,7 @@ module.exports = function() {
             previousDependencies.forEach(dependency => {
               // Some hooks are already loaded, we won't receive
               // any events of them, so we have to bypass the emitter.
-              if (this.middlewares[dependency].loaded === true) {
+              if (this.middleware[dependency].loaded === true) {
                 return queue();
               }
 

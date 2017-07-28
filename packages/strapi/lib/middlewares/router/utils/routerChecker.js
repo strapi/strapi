@@ -44,7 +44,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
 
   // Retrieve the API's name where the controller is located
   // to access to the right validators
-  const currentApiName = finder(strapi.api, controller);
+  const currentApiName = finder(strapi.plugins[plugin] || strapi.api || strapi.admin, controller);
 
   // Init policies array.
   const policies = [];

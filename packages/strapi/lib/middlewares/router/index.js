@@ -50,58 +50,47 @@ module.exports = strapi => {
 
       // Add response policy to the global variable.
       _.set(strapi.config.policies, 'responsesPolicy', responsesPolicy);
-      // Parse each route from the user config, load policies if any
-      // and match the controller and action to the desired endpoint.
 
       _.forEach(strapi.config.routes, value => {
-        composeEndpoint(value)(cb);
+        composeEndpoint(value, null, strapi.router)(cb);
       });
 
-
-      if (strapi.admin) {
+      if (!_.isEmpty(_.get(strapi.admin, 'config.routes', false))) {
         // Create router for admin.
         // Prefix router with the admin's name.
-        const routerAdmin = strapi.koaMiddlewares.joiRouter();
+        const router = strapi.koaMiddlewares.joiRouter();
 
         _.forEach(strapi.admin.config.routes, value => {
-          composeEndpoint(value)(cb);
+          composeEndpoint(value, null, router)(cb);
         });
 
-        routerAdmin.prefix(
-          strapi.config.admin || `/${strapi.config.paths.admin}`
-        );
+        router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
 
         // TODO:
         // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
 
         // Mount admin router on Strapi router
-        strapi.app.use(routerAdmin.middleware());
+        strapi.app.use(router.middleware());
       }
 
-      if (strapi.config.plugins) {
+      if (strapi.plugins) {
         // Parse each plugin's routes.
-        _.forEach(strapi.config.plugins.routes, (value, plugin) => {
-          // Create router for each plugin.
-          // Prefix router with the plugin's name.
+        _.forEach(strapi.plugins, (plugin, name) => {
           const router = strapi.koaMiddlewares.joiRouter();
 
           // Exclude routes with prefix.
-          const excludedRoutes = _.omitBy(
-            value,
-            o => !o.hasOwnProperty('prefix')
-          );
+          const excludedRoutes = _.omitBy(plugin.config.routes, o => !o.hasOwnProperty('prefix'));
 
-          // Add others routes to the plugin's router.
-          _.forEach(_.omit(value, _.keys(excludedRoutes)), value => {
-            composeEndpoint(value, plugin)(cb);
+          _.forEach(_.omit(plugin.config.routes, _.keys(excludedRoutes)), value => {
+            composeEndpoint(value, name, router)(cb);
           });
 
-          router.prefix('/' + plugin);
+          router.prefix('/' + name);
 
           // /!\ Could override main router's routes.
           if (!_.isEmpty(excludedRoutes)) {
             _.forEach(excludedRoutes, value => {
-              composeEndpoint(value, plugin)(cb)
+              composeEndpoint(value, name, strapi.router)(cb)
             });
           }
 

@@ -10,7 +10,7 @@ const _ = require('lodash');
 module.exports = strapi => {
   const routerChecker = require('./routerChecker')(strapi);
 
-  return (value, plugin) => cb => {
+  return (value, plugin, router) => cb => {
     if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
       return;
     }
@@ -24,7 +24,7 @@ module.exports = strapi => {
         return strapi.log.warn(`Ignored attempt to bind route '${endpoint}' to unknown controller/action.`);
       }
 
-      strapi.router.route(
+      router.route(
         _.omitBy(
           {
             method: value.method,

@@ -8,7 +8,7 @@ const { parallel } = require('async');
 const { setWith, last, upperFirst, lowerFirst } = require('lodash');
 
 module.exports = function() {
-  this.middlewares = {};
+  this.middleware = {};
   this.koaMiddlewares = {};
 
   return Promise.all([
@@ -100,12 +100,12 @@ const mountMiddlewares = function (files, cwd) {
       files.map(p => cb => {
         const name = p.split('/')[1];
 
-        this.middlewares[name] = {
+        this.middleware[name] = {
           loaded: false
         };
 
         // Lazy loading.
-        Object.defineProperty(this.middlewares[name], 'load', {
+        Object.defineProperty(this.middleware[name], 'load', {
           configurable: false,
           enumerable: true,
           get: () => require(path.resolve(cwd, p))(this)

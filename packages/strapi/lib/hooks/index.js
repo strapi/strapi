@@ -68,6 +68,8 @@ module.exports = function() {
               dependencies = uniq(dependencies.concat(previousDependencies));
             }
 
+            dependencies = dependencies.filter(x => includes(Object.keys(this.hook), x) === true);
+
             if (dependencies.length === 0) {
               initialize(module, hook)(resolve, reject);
             } else {
@@ -77,15 +79,17 @@ module.exports = function() {
               });
 
               dependencies.forEach(dependency => {
+                const name = dependency.replace('strapi-', '');
+
                 // Some hooks are already loaded, we won't receive
                 // any events of them, so we have to bypass the emitter.
-                if (this.hook[dependency.replace('strapi-', '')].loaded === true) {
+                if (this.hook[name].loaded === true) {
                   return queue();
                 }
 
-                this.once('hook:' + dependency.replace('strapi-', '') + ':loaded', () => {
+                this.once('hook:' + name + ':loaded', () => {
                   queue();
-                })
+                });
               });
             }
           } else {

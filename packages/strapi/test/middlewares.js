@@ -5,11 +5,11 @@ const strapi = require('../lib/');
 
 
   /**
-   * No need to test everything about Koa middlewares.
+   * No need to test everything about Koa middleware.
    * We just need need to make sure that they all are
    * correctly required and loaded inside `strapi`.
    */
-  describe('middlewares', () => {
+  describe('middleware', () => {
     before(function(done) {
       // runs before all tests in this block
       strapi.start(() => {
@@ -17,91 +17,91 @@ const strapi = require('../lib/');
       });
     });
 
-    it('`strapi.middlewares` should be an object', () => {
-      assert(typeof strapi.middlewares === 'object');
+    it('`strapi.middleware` should be an object', () => {
+      assert(typeof strapi.middleware === 'object');
     });
 
-    it('`strapi.middlewares.cors` should be a function', () => {
-      assert(typeof strapi.middlewares.cors.load.initialize === 'function');
+    it('`strapi.middleware.cors` should be a function', () => {
+      assert(typeof strapi.middleware.cors.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.cron` should be a function', () => {
-      assert(typeof strapi.middlewares.cron.load.initialize === 'function');
+    it('`strapi.middleware.cron` should be a function', () => {
+      assert(typeof strapi.middleware.cron.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.csp` should be a function', () => {
-      assert(typeof strapi.middlewares.csp.load.initialize === 'function');
+    it('`strapi.middleware.csp` should be a function', () => {
+      assert(typeof strapi.middleware.csp.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.csrf` should be a function', () => {
-      assert(typeof strapi.middlewares.csrf.load.initialize === 'function');
+    it('`strapi.middleware.csrf` should be a function', () => {
+      assert(typeof strapi.middleware.csrf.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.favicon` should be a function', () => {
-      assert(typeof strapi.middlewares.favicon.load.initialize === 'function');
+    it('`strapi.middleware.favicon` should be a function', () => {
+      assert(typeof strapi.middleware.favicon.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.gzip` should be a function', () => {
-      assert(typeof strapi.middlewares.gzip.load.initialize === 'function');
+    it('`strapi.middleware.gzip` should be a function', () => {
+      assert(typeof strapi.middleware.gzip.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.hsts` should be a function', () => {
-      assert(typeof strapi.middlewares.hsts.load.initialize === 'function');
+    it('`strapi.middleware.hsts` should be a function', () => {
+      assert(typeof strapi.middleware.hsts.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.ip` should be a function', () => {
-      assert(typeof strapi.middlewares.ip.load.initialize === 'function');
+    it('`strapi.middleware.ip` should be a function', () => {
+      assert(typeof strapi.middleware.ip.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.language` should be a function', () => {
-      assert(typeof strapi.middlewares.language.load.initialize === 'function');
+    it('`strapi.middleware.language` should be a function', () => {
+      assert(typeof strapi.middleware.language.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.logger` should be a function', () => {
-      assert(typeof strapi.middlewares.logger.load.initialize === 'function');
+    it('`strapi.middleware.logger` should be a function', () => {
+      assert(typeof strapi.middleware.logger.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.p3p` should be a function', () => {
-      assert(typeof strapi.middlewares.p3p.load.initialize === 'function');
+    it('`strapi.middleware.p3p` should be a function', () => {
+      assert(typeof strapi.middleware.p3p.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.parser` should be a function', () => {
-      assert(typeof strapi.middlewares.parser.load.initialize === 'function');
+    it('`strapi.middleware.parser` should be a function', () => {
+      assert(typeof strapi.middleware.parser.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.proxy` should be a function', () => {
-      assert(typeof strapi.middlewares.proxy.load.initialize === 'function');
+    it('`strapi.middleware.proxy` should be a function', () => {
+      assert(typeof strapi.middleware.proxy.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.public` should be a function', () => {
-      assert(typeof strapi.middlewares.public.load.initialize === 'function');
+    it('`strapi.middleware.public` should be a function', () => {
+      assert(typeof strapi.middleware.public.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.responses` should not be a function', () => {
-      assert(typeof strapi.middlewares.responses === "undefined");
+    it('`strapi.middleware.responses` should not be a function', () => {
+      assert(typeof strapi.middleware.responses === "undefined");
     });
 
-    it('`strapi.middlewares.responseTime` should be a function', () => {
-      assert(typeof strapi.middlewares.responseTime.load.initialize === 'function');
+    it('`strapi.middleware.responseTime` should be a function', () => {
+      assert(typeof strapi.middleware.responseTime.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.router` should be a function', () => {
-      assert(typeof strapi.middlewares.router.load.initialize === 'function');
+    it('`strapi.middleware.router` should be a function', () => {
+      assert(typeof strapi.middleware.router.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.session` should be a function', () => {
-      assert(typeof strapi.middlewares.session.load.initialize === 'function');
+    it('`strapi.middleware.session` should be a function', () => {
+      assert(typeof strapi.middleware.session.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.ssl` should be a function', () => {
-      assert(typeof strapi.middlewares.ssl.load.initialize === 'function');
+    it('`strapi.middleware.ssl` should be a function', () => {
+      assert(typeof strapi.middleware.ssl.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.xframe` should be a function', () => {
-      assert(typeof strapi.middlewares.xframe.load.initialize === 'function');
+    it('`strapi.middleware.xframe` should be a function', () => {
+      assert(typeof strapi.middleware.xframe.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.xss` should be a function', () => {
-      assert(typeof strapi.middlewares.xss.load.initialize === 'function');
+    it('`strapi.middleware.xss` should be a function', () => {
+      assert(typeof strapi.middleware.xss.load.initialize === 'function');
     });
   });

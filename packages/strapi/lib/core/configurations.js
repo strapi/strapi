@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, set, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults } = require('lodash');
+const { difference, merge, setWith, get, set, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults, mapValues, isPlainObject, reduce } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -40,6 +40,16 @@ module.exports.nested = function() {
     }),
     // Load plugins configurations.
     new Promise((resolve, reject) => {
+      glob('./admin/config/**/*.*(js|json)', {}, (err, files) => {
+        if (err) {
+          return reject(err);
+        }
+
+        utils.loadConfig.call(this, files).then(resolve).catch(reject);
+      });
+    }),
+    // Load plugins configurations.
+    new Promise((resolve, reject) => {
       setWith(
         this,
         'config.info',
@@ -65,6 +75,9 @@ module.exports.app = async function() {
 
     // Set current connections.
     this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
+
+    // Template literal string.
+    this.config = templateConfigurations(this.config);
 
     // Define required middlewares categories.
     const middlewareCategories = ['request', 'response', 'security', 'server'];
@@ -116,7 +129,7 @@ module.exports.app = async function() {
     }
 
     // Preset config in alphabetical order.
-    this.config.middleware.settings = Object.keys(this.middlewares).reduce((acc, current) => {
+    this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
       const currentSettings = flattenMiddlewaresConfig[current] || this.config[current];
       acc[current] = !isObject(currentSettings) ? {} : currentSettings;
@@ -190,6 +203,44 @@ module.exports.app = async function() {
       return acc.concat(get(this.api[key], 'config.routes') || {});
     }, []);
 
+    // Set admin controllers.
+    this.admin.controllers = Object.keys(this.admin.controllers || []).reduce((acc, key) => {
+      if (!this.admin.controllers[key].identity) {
+        this.admin.controllers[key].identity = key;
+      }
+
+      acc[key] = this.admin.controllers[key];
+
+      return acc;
+    }, {});
+
+    // Set admin models.
+    this.admin.models = Object.keys(this.admin.models || []).reduce((acc, key) => {
+      if (!this.admin.models[key].identity) {
+        this.admin.models[key].identity = upperFirst(key);
+      }
+
+      acc[key] = this.admin.models[key];
+
+      return acc;
+    }, {});
+
+    this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
+      this.plugins[key].controllers = Object.keys(this.plugins[key].controllers || []).reduce((sum, index) => {
+        if (!this.plugins[key].controllers[index].identity) {
+          this.plugins[key].controllers[index].identity = index;
+        }
+
+        sum[index] = this.plugins[key].controllers[index];
+
+        return sum;
+      }, {});
+
+      acc[key] = this.plugins[key];
+
+      return acc;
+    }, {});
+
     // Set URL.
     const ssl = get(this.config, 'ssl') || {};
 
@@ -213,4 +264,36 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig) {
       });
     }
   }
+}
+
+  /**
+ * Allow dynamic config values through
+ * the native ES6 template string function.
+ */
+const templateConfigurations = function (obj) {
+  // Allow values which looks like such as
+  // an ES6 literal string without parenthesis inside (aka function call).
+  const regex = /\$\{[^()]*\}/g;
+
+  return Object.keys(obj).reduce((acc, key) => {
+    if (isPlainObject(obj[key])) {
+      acc[key] = templateConfigurations(obj[key]);
+    } else if (isString(obj[key]) && regex.test(obj[key])) {
+      acc[key] = eval('`' + obj[key] + '`');
+    } else {
+      acc[key] = obj[key];
+    }
+
+    return acc;
+  }, {});
+
+  // return mapValues(object, value => {
+  //   if (isPlainObject(value)) {
+  //     return templateConfigurations(value);
+  //   } else if (isString(value) && regex.test(value)) {
+  //     return eval('`' + value + '`');
+  //   }
+  //
+  //   return value;
+  // });
 }

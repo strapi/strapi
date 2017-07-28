@@ -26,6 +26,12 @@ class Strapi extends EventEmitter {
     // Expose `koa`.
     this.app = new Koa();
 
+    // Expose `admin`.
+    this.admin = {};
+
+    // Expose `plugin`.
+    this.plugins = {};
+
     // Mount the HTTP server.
     this.server = http.createServer(this.app.callback());
 
@@ -56,7 +62,8 @@ class Strapi extends EventEmitter {
       },
       middleware: {},
       hook: {},
-      functions: {}
+      functions: {},
+      routes: {}
     };
 
     // Bind context functions.
@@ -138,7 +145,7 @@ class Strapi extends EventEmitter {
       nestedConfigurations.call(this),
       apis.call(this),
       plugins.call(this),
-      admin.call(this),
+      // admin.call(this),
       middlewares.call(this),
       hooks.call(this)
     ]);
