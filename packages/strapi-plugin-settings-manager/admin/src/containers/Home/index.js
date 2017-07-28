@@ -219,12 +219,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     ))
   )
 
+  // renderRowDatabase = (props, key, listStyles) => {
+  //
+  // }
+
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
-    const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
+
     const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
     // sections is the props used by EditForm in case of list of table rendering we need to change its value
     const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages.sections : this.props.home.configsDisplay.sections;
@@ -238,6 +242,22 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
     // TODO remove temporary condition to handle nestedForm rendering
     const checkForNestedForm = this.props.params.slug !== 'languages'
+
+    let renderRow = false;
+
+    if (this.props.params.slug === 'languages') {
+      renderRow = this.renderRowDatabase;
+    } else if (this.props.params.slug === 'databases') {
+      renderRow = this.renderRowLanguage;
+    }
+
+    // TODO uncomment
+    // if (this.props.params.slug === 'languages') {
+    //   renderRow = this.renderRowLanguage;
+    // } else if (this.props.params.slug === 'databases') {
+    //   renderRow = this.renderRowDatabase;
+    // }
+    // const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
 
     return (
       <Component

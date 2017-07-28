@@ -73,6 +73,9 @@
   "list.languages.title.plural": "langages sont disponibles",
   "list.languages.default.languages": "Langue par défault",
   "list.languages.set.languages": "Appliquer par défault",
+  "list.databases.button.label": "Ajouter une nouvelle connection",
+  "list.databases.title.singular": "connexion dans cet environnement",
+  "list.databases.title.plural": "connexions dans cet environnement",
 
   "i18n.af": "Afrikaans",
   "i18n.af_NA": "Afrikaans (Namibië)",
