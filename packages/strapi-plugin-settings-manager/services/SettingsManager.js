@@ -135,24 +135,26 @@ module.exports = {
             target: 'security.session.enabled',
             type: 'boolean',
             value: _.get(strapi.config, `environments.${env}.security.session.enabled`, null),
-            validations: {
-              required: true
-            }
-          },
-          {
-            name: 'form.security.item.session.key',
-            target: 'security.session.key',
-            type: 'string',
-            value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
-            validations: {
-              required: true
-            }
-          },
-          {
-            name: 'form.security.item.session.maxAge',
-            target: 'security.session.maxAge',
-            type: 'number',
-            value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null),
+            items: [
+              {
+                name: 'form.security.item.session.key',
+                target: 'security.session.key',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.session.key`, null),
+                validations: {
+                  required: true
+                }
+              },
+              {
+                name: 'form.security.item.session.maxAge',
+                target: 'security.session.maxAge',
+                type: 'number',
+                value: _.get(strapi.config, `environments.${env}.security.session.maxAge`, null),
+                validations: {
+                  required: true
+                }
+              }
+            ],
             validations: {
               required: true
             }
@@ -160,44 +162,177 @@ module.exports = {
         ]
       },
       {
-        name: '',
+        name: 'form.security.item.csrf',
         items: [
           {
-            name: 'form.security.item.xframe',
-            target: 'security.xframe',
-            type: 'enum',
-            value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
+            name: 'form.security.item.csrf.enabled',
+            target: 'security.csrf.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.csrf.enabled`, null),
             items: [
               {
-                name: 'form.security.item.xframe.deny',
-                value: 'DENY',
+                name: 'form.security.item.session.key',
+                target: 'security.session.key',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.csrf.key`, null),
+                validations: {}
               },
               {
-                name: 'form.security.item.xframe.sameorigin',
-                value: 'SAMEORIGIN',
+                name: 'form.security.item.csrf.secret',
+                target: 'security.csrf.secret',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.csrf.secret`, null),
+                validations: {}
               },
               {
-                name: 'form.security.item.xframe.allow-from',
-                value: 'ALLOW-FROM',
-                items: [{
-                  name: '',
-                  type: 'string',
-                  value: '',
-                  validations: {
-                    required: true
-                  }
-                }]
+                name: 'form.security.item.csrf.cookie',
+                target: 'security.csrf.cookie',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.csrf.cookie`, null),
+                validations: {}
+              },
+              {
+                name: 'form.security.item.csrf.angular',
+                target: 'security.csrf.angular',
+                type: 'boolean',
+                value: _.get(strapi.config, `environments.${env}.security.csrf.angular`, null),
+                validations: {}
               }
             ],
             validations: {
               required: true
             }
-          },
+          }
+        ]
+      },
+      {
+        name: 'form.security.item.p3p',
+        items: [
           {
-            name: 'form.security.item.xssProtection',
-            target: 'security.xssProtection',
+            name: 'form.security.item.p3p.enabled',
+            target: 'security.p3p.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.xssProtection`, null),
+            value: _.get(strapi.config, `environments.${env}.security.p3p.enabled`, null),
+            items: [
+              {
+                name: 'form.security.item.p3p.value',
+                target: 'security.p3p.value',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.p3p.value`, null),
+                validations: {
+                  required: true
+                }
+              }
+            ],
+            validations: {
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        name: 'form.security.item.hsts',
+        items: [
+          {
+            name: 'form.security.item.hsts.enabled',
+            target: 'security.p3p.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.hsts.enabled`, null),
+            items: [
+              {
+                name: 'form.security.item.p3p.maxAge',
+                target: 'security.p3p.maxAge',
+                type: 'number',
+                value: _.get(strapi.config, `environments.${env}.security.hsts.maxAge`, null),
+                validations: {
+                  required: true
+                }
+              },
+              {
+                name: 'form.security.item.p3p.includeSubDomains',
+                target: 'security.p3p.includeSubDomains',
+                type: 'boolean',
+                value: _.get(strapi.config, `environments.${env}.security.hsts.includeSubDomains`, null),
+                validations: {}
+              },
+              {
+                name: 'form.security.item.p3p.preload',
+                target: 'security.p3p.preload',
+                type: 'boolean',
+                value: _.get(strapi.config, `environments.${env}.security.hsts.preload`, null),
+                validations: {}
+              }
+            ],
+            validations: {
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        name: 'form.security.item.xframe',
+        items: [
+          {
+            name: 'form.security.item.xframe.enabled',
+            target: 'security.xframe.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.xframe.enabled`, null),
+            items: [
+              {
+                name: 'form.security.item.xframe.value',
+                target: 'security.xframe',
+                type: 'enum',
+                value: _.get(strapi.config, `environments.${env}.security.xframe.value`, null),
+                items: [
+                  {
+                    name: 'form.security.item.xframe.deny',
+                    value: 'DENY',
+                  },
+                  {
+                    name: 'form.security.item.xframe.sameorigin',
+                    value: 'SAMEORIGIN',
+                  },
+                  {
+                    name: 'form.security.item.xframe.allow-from',
+                    value: 'ALLOW-FROM',
+                    items: [{
+                      name: '',
+                      type: 'string',
+                      value: '',
+                      validations: {
+                        required: true
+                      }
+                    }]
+                  }
+                ],
+                validations: {
+                  required: true
+                }
+              }
+            ],
+            validations: {
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        name: 'form.security.item.xssProtection',
+        items: [
+          {
+            name: 'form.security.item.xssProtection.enabled',
+            target: 'security.xssProtection.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.security.xssProtection.enabled`, null),
+            items: [
+              {
+                name: 'form.security.item.xssProtection.mode',
+                target: 'security.xssProtection.mode',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.xssProtection.mode`, null),
+                validations: {}
+              }
+            ],
             validations: {
               required: true
             }
@@ -212,15 +347,17 @@ module.exports = {
             target: 'security.cors.enabled',
             type: 'boolean',
             value: _.get(strapi.config, `environments.${env}.security.cors.enabled`, null),
-            validations: {
-              required: true
-            }
-          },
-          {
-            name: 'form.security.item.cors.origin',
-            target: 'security.cors.origin',
-            type: 'string',
-            value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null),
+            items: [
+              {
+                name: 'form.security.item.cors.origin',
+                target: 'security.cors.origin',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null),
+                validations: {
+                  required: true
+                }
+              }
+            ],
             validations: {
               required: true
             }
