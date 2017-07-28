@@ -50,7 +50,6 @@ module.exports = async function(ctx, next) {
       : Boom.wrap(error, ctx.status, ctx.body || error.message);
   }
 
-  console.log(ctx.body, ctx.status);
   // Empty body is considered as `notFound` response.
   if (_.isUndefined(ctx.body) && _.isUndefined(ctx.status)) {
     ctx.notFound();

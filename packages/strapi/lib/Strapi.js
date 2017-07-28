@@ -58,6 +58,8 @@ class Strapi extends EventEmitter {
     // New Winston logger.
     this.log = require('strapi-utils').logger;
 
+    this.reload = require('./reload').apply(this);
+
     return _instance;
   }
 

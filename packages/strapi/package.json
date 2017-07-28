@@ -38,7 +38,6 @@
     "boom": "^4.3.1",
     "consolidate": "^0.14.5",
     "delegates": "^1.0.0",
-    "forever-monitor": "^1.7.1",
     "kcors": "^2.2.1",
     "koa": "^2.3.0",
     "koa-better-static": "^1.0.5",

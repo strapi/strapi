@@ -83,9 +83,13 @@ module.exports = {
 
     if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
+    strapi.reload.isWatching = false;
+
     const updateErrors = Service.updateSettings(params, items, env);
 
     !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
+
+    strapi.reload();
   },
 
   createLanguage: async ctx => {
@@ -163,11 +167,17 @@ module.exports = {
 
     if (!_.isEmpty(validationErrors)) return ctx.badData(null, Service.formatErrors(validationErrors));
 
+    Service.installDependency(params, name);
+
+    strapi.reload.isWatching = false;
+
     const updateErrors = Service.updateSettings(params, items, env);
 
     if (!_.isEmpty(updateErrors)) return ctx.badData(null, Service.formatErrors(updateErrors));
 
     ctx.send({ ok: true });
+
+    strapi.reload();
   },
 
   updateDatabase: async ctx => {
@@ -203,9 +213,13 @@ module.exports = {
       items = [{ target: 'databases.connections' }];
     }
 
+    strapi.reload.isWatching = false;
+
     const updateErrors = Service.updateSettings(params, items, env);
 
     !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
+
+    strapi.reload();
   },
 
   deleteDatabase: async ctx => {

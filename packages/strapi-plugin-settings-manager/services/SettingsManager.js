@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const exec = require('child_process').execSync;
 
 module.exports = {
   menu: {
@@ -292,8 +293,26 @@ module.exports = {
           {
             name: 'form.databases.item.provider',
             target: `databases.connections.${name}.connector`,
-            type: 'string',
+            type: 'select',
             value: _.get(strapi.config, `environments.${env}.databases.connections.${name}.connector`, null),
+            items: [
+              {
+                name: 'form.databases.item.provider.mongo',
+                value: 'strapi-mongoose',
+              },
+              {
+                name: 'form.databases.item.provider.postgres',
+                value: 'strapi-bookshelf',
+              },
+              {
+                name: 'form.databases.item.provider.mysql',
+                value: 'strapi-bookshelf',
+              },
+              {
+                name: 'form.databases.item.provider.sqlite3',
+                value: 'strapi-bookshelf',
+              }
+            ],
             validations: {
               required: true
             }
@@ -548,5 +567,12 @@ module.exports = {
     });
 
     return errors;
+  },
+
+  installDependency: (params, name) => {
+    const module = _.get(params, `databases.connections.${name}.connector`);
+    const installed = _.indexOf(_.keys(strapi.config.dependencies), module) !== -1;
+
+    // if (!installed) exec(`npm install ${module} --save`);
   }
 };
