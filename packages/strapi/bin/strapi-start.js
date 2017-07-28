@@ -13,9 +13,10 @@ const path = require('path');
 // Public dependencies
 const _ = require('lodash');
 const forever = require('forever-monitor');
+const semver = require('semver')
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, cli } = require('strapi-utils');
 
 /**
  * `$ strapi start`

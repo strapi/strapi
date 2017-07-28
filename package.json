@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4.8",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -13,7 +13,7 @@
     "eslint-plugin-react": "^6.8.0",
     "eslint-plugin-redux-saga": "^0.3.0",
     "istanbul": "~0.4.2",
-    "lerna": "2.0.0-beta.36",
+    "lerna": "^2.0.0",
     "mocha": "~2.4.5",
     "mocha-lcov-reporter": "~1.2.0",
     "pre-commit": "~1.1.2",
@@ -21,8 +21,13 @@
     "shelljs": "^0.7.7"
   },
   "scripts": {
-    "test": "make test",
-    "setup": "npm install && node ./scripts/setup.js"
+    "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
+    "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
+    "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
+    "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
+    "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
+    "setup": "npm run clean:all && npm install && node ./scripts/setup.js",
+    "test": "make test"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -36,6 +41,10 @@
       "url": "http://strapi.io"
     }
   ],
+  "pre-commit": [
+    "clean",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
@@ -47,6 +56,5 @@
     "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "MIT",
-  "dependencies": {}
+  "license": "MIT"
 }

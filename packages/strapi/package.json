@@ -1,7 +1,7 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.3",
-  "description": "Build powerful back-end with no effort",
+  "version": "3.0.0-alpha.4.8",
+  "description": "An open source solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier.",
   "homepage": "http://strapi.io",
   "keywords": [
     "api",
@@ -34,23 +34,24 @@
     "boom": "^4.2.0",
     "consolidate": "~0.14.0",
     "delegates": "^1.0.0",
+    "forever-monitor": "^1.7.1",
     "glob": "^7.1.2",
     "kcors": "^2.2.0",
     "koa": "^2.1.0",
     "koa-better-static": "^1.0.5",
-    "koa-body": "^2.0.0",
+    "koa-body": "^2.3.0",
     "koa-compose": "^3.2.1",
     "koa-compress": "^2.0.0",
     "koa-convert": "^1.2.0",
     "koa-favicon": "^2.0.0",
-    "koa-generic-session": "^1.11.4",
-    "koa-i18n": "~1.2.0",
-    "koa-ip": "~0.1.0",
+    "koa-generic-session": "^1.11.6",
+    "koa-i18n": "^1.2.0",
+    "koa-ip": "^0.1.0",
     "koa-joi-router": "^5.0.0",
     "koa-locale": "~1.2.0",
     "koa-lusca": "~2.2.0",
     "koa-mount": "^2.0.0",
-    "koa-proxy": "~0.7.0",
+    "koa-proxy": "^0.7.0",
     "koa-response-time": "^2.0.0",
     "koa-send": "^3.3.0",
     "koa-sslify": "^2.1.0",
@@ -86,12 +87,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
   },
   "preferGlobal": true,
-  "license": "MIT",
-  "devDependencies": {
-    "forever-monitor": "^1.7.0"
-  }
+  "license": "MIT"
 }

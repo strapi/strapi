@@ -207,6 +207,7 @@ module.exports = function(strapi) {
                 });
               };
 
+<<<<<<< HEAD
               loadedModel.hidden = _.keys(
                 _.keyBy(
                   _.filter(definition.attributes, (value, key) => {
@@ -216,6 +217,47 @@ module.exports = function(strapi) {
                       value.columnName !== key
                     ) {
                       return true;
+=======
+            // Initialize the global variable with the
+            // capitalized model name.
+            global[globalName] = {};
+
+            // Call this callback function after we are done parsing
+            // all attributes for relationships-- see below.
+            const done = _.after(_.size(definition.attributes), () => {
+              try {
+                // External function to map key that has been updated with `columnName`
+                const mapper = (params = {}) =>
+                  _.mapKeys(params, (value, key) => {
+                    const attr = definition.attributes[key] || {};
+
+                    return _.isPlainObject(attr) &&
+                      _.isString(attr['columnName'])
+                      ? attr['columnName']
+                      : key;
+                  });
+
+                // Initialize lifecycle callbacks.
+                loadedModel.initialize = function() {
+                  const lifecycle = {
+                    creating: 'beforeCreate',
+                    created: 'afterCreate',
+                    destroying: 'beforeDestroy',
+                    destroyed: 'afterDestroy',
+                    updating: 'beforeUpdate',
+                    updated: 'afterUpdate',
+                    fetching: 'beforeFetch',
+                    'fetching:collection': 'beforeFetchCollection',
+                    fetched: 'afterFetch',
+                    'fetched:collection': 'afterFetchCollection',
+                    saving: 'beforeSave',
+                    saved: 'afterSave'
+                  };
+
+                  _.forEach(lifecycle, (fn, key) => {
+                    if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
+                      this.on(key, strapi.models[model.toLowerCase()][fn]);
+>>>>>>> 74aef739ab1a971f3ff26f018b672577305d21a4
                     }
                   }),
                   'columnName'
@@ -230,10 +272,20 @@ module.exports = function(strapi) {
               // Expose ORM functions through the `strapi.models` object.
               strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
 
+<<<<<<< HEAD
               // Push model to strapi global variables.
               strapi.bookshelf.collections[globalName.toLowerCase()] = global[
                 globalName
               ];
+=======
+                // Expose ORM functions through the `strapi.models` object.
+                strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
+
+                // Push model to strapi global variables.
+                strapi.bookshelf.collections[globalName.toLowerCase()] = global[
+                  globalName
+                ];
+>>>>>>> 74aef739ab1a971f3ff26f018b672577305d21a4
 
               // Push attributes to be aware of model schema.
               strapi.bookshelf.collections[

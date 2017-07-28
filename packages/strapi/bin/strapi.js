@@ -111,7 +111,8 @@ program
 // `$ strapi generate:plugin`
 program
   .command('generate:plugin <id>')
-    .description('generate a basic plugin')
+  .option('-n, --name <name>', 'Plugin name')
+  .description('generate a basic plugin')
     .action(require('./strapi-generate'));
 
 // `$ strapi generate:hook`
@@ -125,6 +126,19 @@ program
   .command('generate:generator <id>')
   .description('generate a custom generator')
   .action(require('./strapi-generate'));
+
+// `$ strapi install`
+program
+  .command('install <plugin>')
+  .option('-d, --dev', 'Development mode')
+  .description('install a Strapi plugin')
+  .action(require('./strapi-install'));
+
+// `$ strapi uninstall`
+program
+  .command('uninstall <plugin>')
+  .description('uninstall a Strapi plugin')
+  .action(require('./strapi-uninstall'));
 
 // `$ strapi migrate:make`
 program

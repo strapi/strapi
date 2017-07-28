@@ -18,7 +18,7 @@
     "ioredis": "^2.5.0",
     "lodash": "^4.17.4",
     "stack-trace": "0.0.9",
-    "strapi-utils": "file:../strapi-utils"
+    "strapi-utils": "^3.0.0-alpha.4.8"
   },
   "strapi": {
     "isHook": true

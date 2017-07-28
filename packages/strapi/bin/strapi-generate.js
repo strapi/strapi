@@ -13,7 +13,7 @@ const path = require('path');
 const generate = require('strapi-generate');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, cli } = require('strapi-utils');
 
 /**
  * `$ strapi generate`
@@ -36,16 +36,7 @@ module.exports = function (id, cliArguments) {
 
   // Check that we're in a valid Strapi project.
   if (scope.generatorType !== 'new' || scope.generatorType !== 'generator' || scope.generatorType !== 'hook') {
-    const pathToPackageJSON = path.resolve(scope.rootPath, 'package.json');
-    let invalidPackageJSON;
-
-    try {
-      require(pathToPackageJSON);
-    } catch (e) {
-      invalidPackageJSON = true;
-    }
-
-    if (invalidPackageJSON) {
+    if (!cli.isStrapiApp()) {
       return logger.error('This command can only be used inside a Strapi project.');
     }
   }
