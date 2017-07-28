@@ -23,6 +23,7 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
                   const notifActive = link.active ? <div className={styles.notifPoint} /> : '';
                   return (
                     <Link key={key} className={styles.headerLink} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
+                      <div></div>
                       <div className={`${styles.linkText} text-center`}>
                         {link.name}
                         {notifActive}
