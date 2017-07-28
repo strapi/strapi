@@ -61,6 +61,9 @@
   margin-left: 5.2rem;
   color: #333740;
   font-weight: 600;
+}
+
+.capitalized {
   text-transform: capitalize;
 }
 
@@ -119,12 +122,6 @@
   color: #333740;
 }
 
-.label {
-  color: #333740;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
 
 .modalPosition {
   margin-top: 48rem ;
@@ -159,4 +156,26 @@
     font-size: 1.8rem!important;
 
   }
+}
+
+
+.squared {
+  height: 2rem;
+  width: 3.5rem;
+  padding-top: .2rem;
+  border-radius: 2px;
+  color: #FFFFFF;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.6rem;
+  text-align: center;
+
+}
+
+.orange {
+  background-color: #FFB500;
+}
+
+.leftSpaced {
+  margin-left: 1rem;
 }

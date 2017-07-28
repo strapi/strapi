@@ -8,6 +8,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+// TODO uncomment for databases
+// modal
+// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import {
   find,
   findIndex,
@@ -53,7 +56,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.components = {
       editForm: EditForm,
       list: List,
-      defaultComponent: HeaderNav, // TODO change to default
+      defaultComponent: HeaderNav,
+    };
+
+    // allowing state only for database modal purpose
+    this.state = {
+      modal: false,
     };
   }
 
@@ -132,8 +140,17 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.languageDelete(target.id);
   }
 
+  handleDatabaseDelete = () => {
+    console.log('database will delete whend I am done coding');
+  }
+
   addLanguage = () => {
     this.props.newLanguagePost();
+  }
+
+  showDatabaseModal = () => {
+    // allow state here just for modal purpose
+    this.setState({ modal: !this.state.modal });
   }
 
   changeDefaultLanguage = ({ target }) => {
@@ -163,6 +180,11 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.editSettings({ 'i18n.i18n.defaultLocale': target.id }, 'i18n');
   }
 
+  // Hide database modal
+  toggle = () => {
+    this.setState({ modal: !this.state.modal });
+  }
+
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => {
     // assign the target id the language name to prepare for delete
@@ -190,7 +212,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         <div className={liStyles.flexLi}>
           <div className={liStyles.flexed}>
             <div>{key}</div>
-            <div className={liStyles.label}>{languageDisplay}</div>
+            <div className={`${liStyles.label} ${liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
           <div>{props.name}</div>
           <div className={liStyles.centered}>{languageLabel}</div>
@@ -220,7 +242,40 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   )
 
   // renderRowDatabase = (props, key, listStyles) => {
+  //   return (
+  //     <li key={key}>
+  //       <div className={listStyles.flexLi}>
+  //         <div className={listStyles.flexed}>
+  //           <div className={`${listStyles.squared} ${listStyles.orange}`}>
+  //             {props.name}
+  //           </div>
+  //           <div className={listStyles.label}>{props.type}</div>
+  //         </div>
+  //         <div>{props.url}</div>
+  //         <div className={listStyles.centered}>{props.log}</div>
+  //         <div className={listStyles.flexed}>
   //
+  //           <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
+  //           <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
+  //         </div>
+  //       </div>
+  //       <div>
+  //         <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
+  //           <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
+  //             Databases
+  //           </ModalHeader>
+  //           <div className={listStyles.bordered} />
+  //           <ModalBody className={listStyles.modalBody}>
+  //           </ModalBody>
+  //           <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
+  //             {/* TODO change tthis.toggle => this.props.addLanguage */}
+  //             <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
+  //             <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
+  //           </ModalFooter>
+  //         </Modal>
+  //       </div>
+  //     </li>
+  //   );
   // }
 
   renderComponent = () => {
@@ -246,18 +301,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     let renderRow = false;
 
     if (this.props.params.slug === 'languages') {
-      renderRow = this.renderRowDatabase;
-    } else if (this.props.params.slug === 'databases') {
       renderRow = this.renderRowLanguage;
+    } else if (this.props.params.slug === 'databases') {
+      renderRow = this.renderRowDatabase;
     }
-
-    // TODO uncomment
-    // if (this.props.params.slug === 'languages') {
-    //   renderRow = this.renderRowLanguage;
-    // } else if (this.props.params.slug === 'databases') {
-    //   renderRow = this.renderRowDatabase;
-    // }
-    // const renderRow = this.props.params.slug === 'languages' ? this.renderRowLanguage : false;
 
     return (
       <Component
