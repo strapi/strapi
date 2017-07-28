@@ -6,9 +6,10 @@
 
 // Public node modules.
 const _ = require('lodash');
+const cron = require('node-schedule');
 
 /**
- * CORS hook
+ * CRON hook
  */
 
 module.exports = strapi => {
@@ -18,15 +19,7 @@ module.exports = strapi => {
      */
 
     defaults: {
-      cors: {
-        origin: true,
-        expose: ['WWW-Authenticate', 'Server-Authorization'],
-        maxAge: 31536000,
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-        headers: ['Content-Type', 'Authorization'],
-        keepHeadersOnError: false
-      }
+      cron: {}
     },
 
     /**
@@ -35,20 +28,12 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       if (
-        _.isPlainObject(strapi.config.middleware.settings.cors) &&
-        !_.isEmpty(strapi.config.middleware.settings.cors)
+        _.isPlainObject(strapi.config.middleware.settings.cron) &&
+        !_.isEmpty(strapi.config.middleware.settings.cron)
       ) {
-        strapi.app.use(
-          strapi.koaMiddlewares.kcors({
-            origin: strapi.config.middleware.settings.cors.origin,
-            exposeHeaders: strapi.config.middleware.settings.cors.expose,
-            maxAge: strapi.config.middleware.settings.cors.maxAge,
-            credentials: strapi.config.middleware.settings.cors.credentials,
-            allowMethods: strapi.config.middleware.settings.cors.methods,
-            allowHeaders: strapi.config.middleware.settings.cors.headers,
-            keepHeadersOnError: strapi.config.middleware.settings.cors.keepHeadersOnError
-          })
-        );
+        _.forEach(_.keys(strapi.config.middleware.settings.cron), task => {
+          cron.scheduleJob(task, strapi.config.middleware.settings.cron[task]);
+        });
       }
 
       cb();

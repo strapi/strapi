@@ -9,7 +9,7 @@ const { parallel } = require('async');
 const { setWith, last, upperFirst, lowerFirst, get } = require('lodash');
 
 module.exports = function() {
-  this.hooks = {};
+  this.hook = {};
 
   return Promise.all([
     new Promise((resolve, reject) => {
@@ -61,14 +61,14 @@ const mountHooks = function (files, cwd) {
           try {
             const pkg = JSON.parse(content);
 
-            this.hooks[name] = {
+            this.hook[name] = {
               loaded: false,
               identity: name,
               dependencies: get(pkg, 'strapi.dependencies') || []
             };
 
             // Lazy loading.
-            Object.defineProperty(this.hooks[name], 'load', {
+            Object.defineProperty(this.hook[name], 'load', {
               configurable: false,
               enumerable: true,
               get: () => require(path.resolve(this.config.appPath, cwd, p))

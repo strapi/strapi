@@ -21,12 +21,20 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares === 'object');
     });
 
-    it('`strapi.middlewares.parser` should be a function', () => {
-      assert(typeof strapi.middlewares.parser.load.initialize === 'function');
+    it('`strapi.middlewares.cors` should be a function', () => {
+      assert(typeof strapi.middlewares.cors.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.kcors` should be a function', () => {
-      assert(typeof strapi.middlewares.cors.load.initialize === 'function');
+    it('`strapi.middlewares.cron` should be a function', () => {
+      assert(typeof strapi.middlewares.cron.load.initialize === 'function');
+    });
+
+    it('`strapi.middlewares.csp` should be a function', () => {
+      assert(typeof strapi.middlewares.csp.load.initialize === 'function');
+    });
+
+    it('`strapi.middlewares.csrf` should be a function', () => {
+      assert(typeof strapi.middlewares.csrf.load.initialize === 'function');
     });
 
     it('`strapi.middlewares.favicon` should be a function', () => {
@@ -37,28 +45,40 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares.gzip.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.language` should be a function', () => {
-      assert(typeof strapi.middlewares.language.load.initialize === 'function');
+    it('`strapi.middlewares.hsts` should be a function', () => {
+      assert(typeof strapi.middlewares.hsts.load.initialize === 'function');
     });
 
     it('`strapi.middlewares.ip` should be a function', () => {
       assert(typeof strapi.middlewares.ip.load.initialize === 'function');
     });
 
+    it('`strapi.middlewares.language` should be a function', () => {
+      assert(typeof strapi.middlewares.language.load.initialize === 'function');
+    });
+
     it('`strapi.middlewares.logger` should be a function', () => {
       assert(typeof strapi.middlewares.logger.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.lusca` should be a function', () => {
-      assert(typeof strapi.middlewares.lusca.load.initialize === 'function');
+    it('`strapi.middlewares.p3p` should be a function', () => {
+      assert(typeof strapi.middlewares.p3p.load.initialize === 'function');
+    });
+
+    it('`strapi.middlewares.parser` should be a function', () => {
+      assert(typeof strapi.middlewares.parser.load.initialize === 'function');
     });
 
     it('`strapi.middlewares.proxy` should be a function', () => {
       assert(typeof strapi.middlewares.proxy.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.responses` should be a function', () => {
-      assert(typeof strapi.middlewares.responses.load.initialize === 'function');
+    it('`strapi.middlewares.public` should be a function', () => {
+      assert(typeof strapi.middlewares.public.load.initialize === 'function');
+    });
+
+    it('`strapi.middlewares.responses` should not be a function', () => {
+      assert(typeof strapi.middlewares.responses === "undefined");
     });
 
     it('`strapi.middlewares.responseTime` should be a function', () => {
@@ -69,19 +89,19 @@ const strapi = require('../lib/');
       assert(typeof strapi.middlewares.router.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.genericSession` should be a function', () => {
+    it('`strapi.middlewares.session` should be a function', () => {
       assert(typeof strapi.middlewares.session.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.sslify` should be a function', () => {
+    it('`strapi.middlewares.ssl` should be a function', () => {
       assert(typeof strapi.middlewares.ssl.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.betterStatic` should be a function', () => {
-      assert(typeof strapi.middlewares.static.load.initialize === 'function');
+    it('`strapi.middlewares.xframe` should be a function', () => {
+      assert(typeof strapi.middlewares.xframe.load.initialize === 'function');
     });
 
-    it('`strapi.middlewares.views` should be a function', () => {
-      assert(typeof strapi.middlewares.views.load.initialize === 'function');
+    it('`strapi.middlewares.xss` should be a function', () => {
+      assert(typeof strapi.middlewares.xss.load.initialize === 'function');
     });
   });

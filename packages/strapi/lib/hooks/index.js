@@ -25,7 +25,7 @@ module.exports = function() {
           return reject(err);
         }
 
-        this.hooks[hook].loaded = true;
+        this.hook[hook].loaded = true;
         this.emit('hook:' + hook + ':loaded');
 
         resolve();
@@ -36,7 +36,7 @@ module.exports = function() {
   };
 
   return Promise.all(
-    Object.keys(this.hooks).map(
+    Object.keys(this.hook).map(
       hook =>
         new Promise((resolve, reject) => {
           // Don't load disabled hook.
@@ -44,8 +44,8 @@ module.exports = function() {
             return resolve();
           }
 
-          const module = this.hooks[hook].load;
-          let dependencies =  this.hooks[hook].dependencies || [];
+          const module = this.hook[hook].load;
+          let dependencies =  this.hook[hook].dependencies || [];
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.hook, `settings.${hook}`))) {
@@ -57,9 +57,9 @@ module.exports = function() {
           }
 
           // Take care of hooks internals dependencies.
-          if (dependencies.length > 0 || includes(this.config.hook.loadOrder, hook)) {
-            const position = indexOf(this.config.hook.loadOrder, hook);
-            const previousDependencies = dropRight(this.config.hook.loadOrder, this.config.hook.loadOrder.length - (position + 1));
+          if (dependencies.length > 0 || includes(get(this.config.hook, 'load.order', []), hook)) {
+            const position = indexOf(get(this.config.hook, 'load.order', []), hook);
+            const previousDependencies = dropRight(get(this.config.hook, 'load.order', []), get(this.config.hook, 'load.order', []).length - (position + 1));
 
             // Remove current hook.
             previousDependencies.splice(position, 1);
@@ -77,6 +77,12 @@ module.exports = function() {
               });
 
               dependencies.forEach(dependency => {
+                // Some hooks are already loaded, we won't receive
+                // any events of them, so we have to bypass the emitter.
+                if (this.hook[dependency.replace('strapi-', '')].loaded === true) {
+                  return queue();
+                }
+
                 this.once('hook:' + dependency.replace('strapi-', '') + ':loaded', () => {
                   queue();
                 })

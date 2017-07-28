@@ -61,7 +61,7 @@ module.exports = function() {
       const cwd = path.resolve(__dirname, '..', 'middlewares');
 
       glob(
-        './*',
+        './!(index.js|responses)',
         {
           cwd
         },

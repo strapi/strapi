@@ -3,7 +3,7 @@
 const glob = require('glob');
 const path = require('path');
 const { parallel } = require('async');
-const { after, includes, indexOf, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined } = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union } = require('lodash');
 
 module.exports = function() {
   // Method to initialize middlewares and emit an event.
@@ -42,7 +42,12 @@ module.exports = function() {
           }
 
           const module = this.middlewares[middleware].load;
-          const middlewaresOrder = get(this.config.middleware, 'loadOrder', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+
+          // Retrieve middlewares configurations order
+          const middlewares = Object.keys(this.middlewares).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresBefore = get(this.config.middleware, 'load.before', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresOrder = get(this.config.middleware, 'load.order', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
+          const middlewaresAfter = get(this.config.middleware, 'load.after', []).filter(middleware => this.config.middleware.settings[middleware].enabled !== false);
 
 
           // Apply default configurations to middleware.
@@ -54,37 +59,61 @@ module.exports = function() {
             defaultsDeep(this.config.middleware.settings[middleware], module.defaults[middleware] || module.defaults);
           }
 
-          if (includes(middlewaresOrder, middleware)) {
-            const position = indexOf(middlewaresOrder, middleware);
-            const previousDependencies = dropRight(middlewaresOrder, middlewaresOrder.length - (position + 1));
+          // Initialize array.
+          let previousDependencies = [];
 
+          // Add BEFORE middlewares to load and remove the current one
+          // to avoid that it waits itself.
+          if (includes(middlewaresBefore, middleware)) {
+            const position = indexOf(middlewaresBefore, middleware);
 
-
-            // Remove current middleware.
-            previousDependencies.splice(position, 1);
-
-            if (previousDependencies.length === 0) {
-              initialize(module, middleware)(resolve, reject);
-            } else {
-              // Wait until the dependencies have been loaded.
-              const queue = after(previousDependencies.length, () => {
-                initialize(module, middleware)(resolve, reject);
-              });
-
-              previousDependencies.forEach(dependency => {
-                // Some hooks are already loaded, we won't receive
-                // any events of them, so we have to bypass the emitter.
-                if (this.middlewares[dependency].loaded === true) {
-                  return queue();
-                }
-
-                this.once('middleware:' + dependency + ':loaded', () => {
-                  queue();
-                })
-              });
-            }
+            previousDependencies = previousDependencies.concat(dropRight(middlewaresBefore, middlewaresBefore.length - position));
           } else {
+            previousDependencies = previousDependencies.concat(middlewaresBefore.filter(x => x !== middleware));
+
+            // Add ORDER dependencies to load and remove the current one
+            // to avoid that it waits itself.
+            if (includes(middlewaresOrder, middleware)) {
+              const position = indexOf(middlewaresOrder, middleware);
+
+              previousDependencies = previousDependencies.concat(dropRight(middlewaresOrder, middlewaresOrder.length - position));
+            } else {
+              // Add AFTER middlewares to load and remove the current one
+              // to avoid that it waits itself.
+              if (includes(middlewaresAfter, middleware)) {
+                const position = indexOf(middlewaresAfter, middleware);
+                const toLoadAfter = drop(middlewaresAfter, position);
+
+                // Wait for every middlewares.
+                previousDependencies = previousDependencies.concat(middlewares);
+                // Exclude middlewares which need to be loaded after this one.
+                previousDependencies = previousDependencies.filter(x => !includes(toLoadAfter, x));
+              }
+            }
+          }
+
+          // Remove duplicates.
+          previousDependencies = uniq(previousDependencies);
+
+          if (previousDependencies.length === 0) {
             initialize(module, middleware)(resolve, reject);
+          } else {
+            // Wait until the dependencies have been loaded.
+            const queue = after(previousDependencies.length, () => {
+              initialize(module, middleware)(resolve, reject);
+            });
+
+            previousDependencies.forEach(dependency => {
+              // Some hooks are already loaded, we won't receive
+              // any events of them, so we have to bypass the emitter.
+              if (this.middlewares[dependency].loaded === true) {
+                return queue();
+              }
+
+              this.once('middleware:' + dependency + ':loaded', () => {
+                queue();
+              })
+            });
           }
         })
     )

@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults } = require('lodash');
+const { difference, merge, setWith, get, set, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -71,7 +71,14 @@ module.exports.app = async function() {
 
     // Flatten middlewares configurations.
     const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
-      const current = this.config.currentEnvironment[index];
+      const current = merge(this.config.currentEnvironment[index], {
+        public: defaults(this.config.public, {
+          enabled: true
+        }),
+        favicon: defaults(this.config.favicon, {
+          enabled: true
+        })
+      });
 
       if (isObject(current)) {
         acc = merge(acc, current);
@@ -100,6 +107,14 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
+    // Enable hooks and dependencies related to the connections.
+    for (let name in this.config.connections) {
+      const connection = this.config.connections[name];
+      const connector = connection.connector.replace('strapi-', '');
+
+      enableHookNestedDependencies.call(this, connector, flattenHooksConfig);
+    }
+
     // Preset config in alphabetical order.
     this.config.middleware.settings = Object.keys(this.middlewares).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
@@ -116,7 +131,7 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
-    this.config.hook.settings = Object.keys(this.hooks).reduce((acc, current) => {
+    this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
       const currentSettings = flattenHooksConfig[current] || this.config[current];
 
@@ -183,3 +198,19 @@ module.exports.app = async function() {
       : `${isEmpty(ssl) || ssl.disabled === true ? 'http' : 'https'}://${this
           .config.host}:${this.config.port}`;
 };
+
+const enableHookNestedDependencies = function (name, flattenHooksConfig) {
+  // Couldn't find configurations for this hook.
+  if (isEmpty(get(flattenHooksConfig, name, true))) {
+    flattenHooksConfig[name] = {
+      enabled: true
+    };
+
+    // Enabled dependencies.
+    if (get(this.hook, `${name}.dependencies`, []).length > 0) {
+      this.hook[name].dependencies.forEach(dependency => {
+        enableHookNestedDependencies.call(this, dependency.replace('strapi-', ''), flattenHooksConfig);
+      });
+    }
+  }
+}

@@ -22,7 +22,9 @@ module.exports = strapi => {
      */
 
     defaults: {
-      views: false
+      views: {
+        enabled: false
+      }
     },
 
     /**

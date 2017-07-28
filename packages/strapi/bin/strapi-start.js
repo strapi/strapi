@@ -40,7 +40,7 @@ module.exports = function() {
       'server.json'
     ));
 
-    if (process.env.NODE_ENV === 'development' && server.reload === true) {
+    if (process.env.NODE_ENV === 'development' && server.autoReload === true) {
       const options = _.assign(
         {},
         {
@@ -94,7 +94,7 @@ module.exports = function() {
         return require('strapi');
       }
     }();
-    
+
     strapi.start();
 
   } catch (e) {
