@@ -710,6 +710,6 @@ module.exports = {
     const module = _.get(params, `databases.connections.${name}.connector`);
     const installed = _.indexOf(_.keys(strapi.config.dependencies), module) !== -1;
 
-    // if (!installed) exec(`npm install ${module} --save`);
+    if (!installed) exec(`npm install ${module} --save`);
   }
 };

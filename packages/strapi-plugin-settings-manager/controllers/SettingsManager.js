@@ -215,6 +215,8 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
+    Service.installDependency(params, newName);
+
     const updateErrors = Service.updateSettings(params, items, env);
 
     !_.isEmpty(updateErrors) ? ctx.badData(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
