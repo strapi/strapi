@@ -18,7 +18,9 @@ module.exports = strapi => {
      */
 
     defaults: {
-      proxy: false
+      proxy: {
+        enabled: false
+      }
     },
 
     /**
@@ -26,13 +28,11 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (_.isString(strapi.config.middleware.settings.proxy)) {
-        strapi.app.use(
-          strapi.koaMiddlewares.proxy({
-            host: strapi.config.middleware.settings.proxy
-          })
-        );
-      }
+      strapi.app.use(
+        strapi.koaMiddlewares.proxy({
+          host: strapi.config.middleware.settings.proxy
+        })
+      );
 
       cb();
     }

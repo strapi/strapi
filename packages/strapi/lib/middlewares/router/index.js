@@ -28,6 +28,7 @@ module.exports = strapi => {
 
     defaults: {
       router: {
+        enabled: true,
         prefix: '',
         routes: {}
       }

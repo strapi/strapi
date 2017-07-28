@@ -11,7 +11,9 @@ module.exports = strapi => {
      */
 
     defaults: {
-      logger: true
+      logger: {
+        enabled: true
+      }
     },
 
     /**
@@ -19,14 +21,12 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      if (strapi.config.middleware.settings.logger === true) {
-        strapi.app.use(async function(ctx, next) {
-          const start = new Date();
-          await next();
-          const ms = new Date() - start;
-          strapi.log.debug(ctx.method + ' ' + ctx.url + ' (' + ms + 'ms)');
-        });
-      }
+      strapi.app.use(async function(ctx, next) {
+        const start = new Date();
+        await next();
+        const ms = new Date() - start;
+        strapi.log.debug(ctx.method + ' ' + ctx.url + ' (' + ms + 'ms)');
+      });
 
       cb();
     }

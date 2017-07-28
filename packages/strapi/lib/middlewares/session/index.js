@@ -22,6 +22,7 @@ module.exports = strapi => {
 
     defaults: {
       session: {
+        enabled: true,
         key: 'strapi.sid',
         prefix: 'strapi:sess:',
         ttl: 24 * 60 * 60 * 1000, // One day in ms
@@ -42,51 +43,46 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
+      strapi.app.keys =
+        _.get(strapi.config.middleware.settings.session, 'secretKeys') ||
+        strapi.config.hooks.session.secretKeys;
+
       if (
-        _.isPlainObject(strapi.config.middleware.settings.session) &&
-        !_.isEmpty(strapi.config.middleware.settings.session)
+        strapi.config.middleware.settings.session.hasOwnProperty('client') &&
+        _.isString(strapi.config.middleware.settings.session.client)
       ) {
-        strapi.app.keys =
-          _.get(strapi.config.middleware.settings.session, 'secretKeys') ||
-          strapi.config.hooks.session.secretKeys;
+        const store = hook.defineStore(strapi.config.middleware.settings.session);
 
-        if (
-          strapi.config.middleware.settings.session.hasOwnProperty('store') &&
-          _.isString(strapi.config.middleware.settings.session.client)
-        ) {
-          const store = hook.defineStore(strapi.config.middleware.settings.session);
+        if (!_.isEmpty(store)) {
+          try {
+            // Options object contains the defined store, the custom hooks configurations
+            // and also the function which are located to `./config/functions/session.js`
+            const options = _.assign(
+              {
+                store
+              },
+              strapi.config.hook.session,
+              _.pick(strapi.config.middleware.settings.session, [
+                'genSid',
+                'errorHandler',
+                'valid',
+                'beforeSave'
+              ])
+            );
 
-          if (!_.isEmpty(store)) {
-            try {
-              // Options object contains the defined store, the custom hooks configurations
-              // and also the function which are located to `./config/functions/session.js`
-              const options = _.assign(
-                {
-                  store
-                },
-                strapi.config.hook.session,
-                _.pick(strapi.config.middleware.settings.session, [
-                  'genSid',
-                  'errorHandler',
-                  'valid',
-                  'beforeSave'
-                ])
-              );
+            strapi.app.use(
+              strapi.koaMiddlewares.convert(
+                strapi.koaMiddlewares.genericSession(options)
+              )
+            );
+            strapi.app.use((ctx, next) => {
+              ctx.state = ctx.state || {};
+              ctx.state.session = ctx.session || {};
 
-              strapi.app.use(
-                strapi.koaMiddlewares.convert(
-                  strapi.koaMiddlewares.genericSession(options)
-                )
-              );
-              strapi.app.use((ctx, next) => {
-                ctx.state = ctx.state || {};
-                ctx.state.session = ctx.session || {};
-
-                return next();
-              });
-            } catch (err) {
-              return cb(err);
-            }
+              return next();
+            });
+          } catch (err) {
+            return cb(err);
           }
         }
       }

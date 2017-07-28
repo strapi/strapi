@@ -107,16 +107,8 @@ module.exports = function(strapi) {
 
           // Make sure the model has a table name.
           // If not, use the model name.
-          if (_.isEmpty(definition.tableName)) {
-            definition.tableName = model;
-          }
-
-          if (!_.isEmpty(definition.collectionName)) {
-            return cb(
-              'Attribute `collectionName` should be `tableName` in ' +
-                globalName +
-                ' model'
-            );
+          if (_.isEmpty(definition.collectionName)) {
+            definition.collectionName = model;
           }
 
           // Add some informations about ORM & client connection
@@ -126,7 +118,7 @@ module.exports = function(strapi) {
           // Register the final model for Bookshelf.
           const loadedModel = _.assign(
             {
-              tableName: definition.tableName,
+              tableName: definition.collectionName,
               hasTimestamps: _.get(definition, 'options.timestamps') === true,
               idAttribute: _.get(definition, 'options.idAttribute') || 'id'
             },
@@ -342,7 +334,7 @@ module.exports = function(strapi) {
                 break;
               }
               case 'belongsToMany': {
-                const tableName = _.get(details, 'tableName') ||
+                const collectionName = _.get(details, 'collectionName') ||
                   _.map(
                     _.sortBy(
                       [
@@ -400,7 +392,7 @@ module.exports = function(strapi) {
                   ) {
                     return this.belongsToMany(
                       global[globalId],
-                      tableName,
+                      collectionName,
                       relationship.attribute + '_' + relationship.column,
                       details.attribute + '_' + details.column
                     ).withPivot(details.withPivot);
@@ -408,7 +400,7 @@ module.exports = function(strapi) {
 
                   return this.belongsToMany(
                     global[globalId],
-                    tableName,
+                    collectionName,
                     relationship.attribute + '_' + relationship.column,
                     details.attribute + '_' + details.column
                   );

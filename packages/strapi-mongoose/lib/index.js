@@ -46,7 +46,7 @@ module.exports = function (strapi) {
       }
 
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
-        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.hooks.mongoose.defaults);
+        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings);
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {

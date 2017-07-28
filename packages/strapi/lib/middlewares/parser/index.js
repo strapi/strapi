@@ -12,6 +12,7 @@ module.exports = strapi => {
 
     defaults: {
       parser: {
+        enabled: true,
         multipart: true
       }
     },
