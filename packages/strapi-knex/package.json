@@ -1,6 +1,6 @@
 {
   "name": "strapi-knex",
-  "version": "3.0.0-alpha.4.3",
+  "version": "3.0.0-alpha.4.8",
   "description": "Knex hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,15 +16,12 @@
   },
   "main": "./lib",
   "dependencies": {
-    "knex": "^0.12.9",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "sqlite3": "^3.1.8"
   },
   "strapi": {
     "isHook": true
-  },
-  "scripts": {
-    "prepublish": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",
