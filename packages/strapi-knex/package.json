@@ -16,7 +16,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "knex": "^0.12.9",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "sqlite3": "^3.1.8"
   },

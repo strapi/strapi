@@ -50,7 +50,7 @@ module.exports = strapi => {
         )
       );
 
-      // Mount static to a specific path (pattern: `/plugins/xXx`)
+      // Mount static to a specific path (pattern: `/plugins/aBc`)
       _.forEach(strapi.plugins, (value, plugin) => {
         // Create koa sub-app
         const app = new Koa();

@@ -4,7 +4,6 @@
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
-    "dictionary",
     "knex",
     "strapi",
     "utilities",
@@ -17,9 +16,8 @@
   "main": "./lib",
   "dependencies": {
     "commander": "^2.11.0",
-    "include-all": "^2.0.0",
     "joi-json": "^2.0.1",
-    "knex": "^0.12.9",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "winston": "^2.3.1"
   },
