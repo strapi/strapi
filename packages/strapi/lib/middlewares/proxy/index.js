@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 /**
  * Proxy hook
  */
@@ -30,7 +27,7 @@ module.exports = strapi => {
     initialize: function(cb) {
       strapi.app.use(
         strapi.koaMiddlewares.proxy({
-          host: strapi.config.middleware.settings.proxy
+          host: strapi.config.middleware.settings.proxy.host
         })
       );
 

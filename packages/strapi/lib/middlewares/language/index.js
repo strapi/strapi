@@ -7,9 +7,6 @@
 // Node.js core.
 const path = require('path');
 
-// Public node modules.
-const _ = require('lodash');
-
 /**
  * Language hook
  */

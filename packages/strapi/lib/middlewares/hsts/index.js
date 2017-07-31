@@ -4,12 +4,8 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-const cron = require('node-schedule');
-
 /**
- * CRON hook
+ * HSTS hook
  */
 
 module.exports = strapi => {

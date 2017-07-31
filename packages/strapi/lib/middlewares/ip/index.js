@@ -4,9 +4,6 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 /**
  * IP filter hook
  */

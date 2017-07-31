@@ -4,12 +4,8 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-const cron = require('node-schedule');
-
 /**
- * CRON hook
+ * P3P hook
  */
 
 module.exports = strapi => {
@@ -29,9 +25,9 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      _.forEach(_.keys(strapi.config.middleware.settings.cron), task => {
-        cron.scheduleJob(task, strapi.config.middleware.settings.cron[task]);
-      });
+      strapi.app.use(strapi.middlewares.convert(strapi.middlewares.lusca.p3p({
+        value: strapi.config.hook.settings.p3p.value
+      })));
 
       cb();
     }
