@@ -6,7 +6,7 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const { includes } = require('lodash');
-const { nestedConfigurations, appConfigurations, apis, plugins, admin, middlewares, hooks } = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { logger } = require('strapi-utils');
@@ -150,8 +150,6 @@ class Strapi extends EventEmitter {
     await Promise.all([
       nestedConfigurations.call(this),
       apis.call(this),
-      plugins.call(this),
-      // admin.call(this),
       middlewares.call(this),
       hooks.call(this)
     ]);
