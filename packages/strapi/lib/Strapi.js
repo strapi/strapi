@@ -5,6 +5,7 @@ const Koa = require('koa');
 const utils = require('./utils');
 const http = require('http');
 const path = require('path');
+const { includes } = require('lodash');
 const { nestedConfigurations, appConfigurations, apis, plugins, admin, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -26,14 +27,17 @@ class Strapi extends EventEmitter {
     // Expose `koa`.
     this.app = new Koa();
 
+    // Mount the HTTP server.
+    this.server = http.createServer(this.app.callback());
+
+    // Exclude EventEmitter, Koa and HTTP server to be freezed.
+    this.propertiesToNotFreeze = Object.keys(this);
+
     // Expose `admin`.
     this.admin = {};
 
     // Expose `plugin`.
     this.plugins = {};
-
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
 
     // Winston logger.
     this.log = logger;
@@ -85,8 +89,10 @@ class Strapi extends EventEmitter {
       await this.load();
       // Run bootstrap function.
       await this.bootstrap();
+      // Freeze object.
+      await this.freeze();
       // Launch server.
-      this.server.listen(this.config.port || 1337, err => {
+      this.server.listen(this.config.port, err => {
         if (err) {
           console.log(err);
         }
@@ -199,6 +205,17 @@ class Strapi extends EventEmitter {
 
         return resolve(e);
       }
+    });
+  }
+
+  async freeze() {
+    const propertiesToNotFreeze = this.propertiesToNotFreeze || [];
+
+    // Remove object from tree.
+    delete this.propertiesToNotFreeze;
+
+    return Object.keys(this).filter(x => !includes(propertiesToNotFreeze, x)).forEach(key => {
+      Object.freeze(this[key]);
     });
   }
 }
