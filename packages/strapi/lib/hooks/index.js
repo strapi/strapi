@@ -27,6 +27,8 @@ module.exports = function() {
 
         this.hook[hook].loaded = true;
         this.emit('hook:' + hook + ':loaded');
+        // Remove listeners.
+        this.removeAllListeners('hook:' + hook + ':loaded');
 
         resolve();
       });

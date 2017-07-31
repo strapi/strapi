@@ -27,6 +27,8 @@ module.exports = function() {
 
       this.middleware[middleware].loaded = true;
       this.emit('middleware:' + middleware + ':loaded');
+      // Remove listeners.
+      this.removeAllListeners('middleware:' + middleware + ':loaded');
 
       resolve();
     });
