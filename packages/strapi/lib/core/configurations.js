@@ -251,6 +251,10 @@ module.exports.app = async function() {
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig) {
+  if (!this.hook[name]) {
+      this.log.warn(`(hook:${name}) \`strapi-${name}\` is missing in your dependencies. Please run \`npm install strapi-${name}\``);
+  }
+
   // Couldn't find configurations for this hook.
   if (isEmpty(get(flattenHooksConfig, name, true))) {
     flattenHooksConfig[name] = {
