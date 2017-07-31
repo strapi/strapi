@@ -154,6 +154,8 @@ class Strapi extends EventEmitter {
       hooks.call(this)
     ]);
 
+
+
     // Populate AST with configurations.
     await appConfigurations.call(this);
 

@@ -5,7 +5,7 @@ const glob = require('glob');
 const path = require('path');
 const utils = require('../utils');
 const { parallel } = require('async');
-const { setWith, last, upperFirst, lowerFirst } = require('lodash');
+const { upperFirst, lowerFirst } = require('lodash');
 
 module.exports = function() {
   this.middleware = {};
@@ -95,7 +95,7 @@ module.exports = function() {
 };
 
 const mountMiddlewares = function (files, cwd) {
-  return (resolve, reject) => {
+  return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
         const name = p.split('/')[1];
@@ -121,5 +121,4 @@ const mountMiddlewares = function (files, cwd) {
         resolve();
       }
     );
-  }
-}
+};

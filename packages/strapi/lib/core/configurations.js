@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const { difference, merge, setWith, get, set, upperFirst, isString, isEmpty, isObject, orderBy, isBoolean, pullAll, defaults, mapValues, isPlainObject, reduce } = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -264,7 +264,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig) {
       });
     }
   }
-}
+};
 
   /**
  * Allow dynamic config values through
@@ -286,14 +286,4 @@ const templateConfigurations = function (obj) {
 
     return acc;
   }, {});
-
-  // return mapValues(object, value => {
-  //   if (isPlainObject(value)) {
-  //     return templateConfigurations(value);
-  //   } else if (isString(value) && regex.test(value)) {
-  //     return eval('`' + value + '`');
-  //   }
-  //
-  //   return value;
-  // });
-}
+};

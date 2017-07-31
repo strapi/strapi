@@ -8,7 +8,7 @@
         "port": 27017,
         "database": "development",
         "username": "",
-        "passsword": ""
+        "password": ""
       },
       "options": {}
     }

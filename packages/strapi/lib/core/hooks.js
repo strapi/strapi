@@ -83,4 +83,4 @@ const mountHooks = function (files, cwd) {
       }),
       resolve
     );
-}
+};

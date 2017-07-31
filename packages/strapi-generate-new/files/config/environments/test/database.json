@@ -8,7 +8,7 @@
         "port": 27017,
         "database": "strapi-${strapi.config.name}",
         "username": "",
-        "passsword": ""
+        "password": ""
       },
       "options": {}
     }
