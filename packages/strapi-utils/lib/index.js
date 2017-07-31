@@ -5,6 +5,7 @@
  */
 
 module.exports = {
+  cli: require('./cli'),
   commander: require('./commander'),
   finder: require('./finder'),
   joijson: require('./joi-json'),

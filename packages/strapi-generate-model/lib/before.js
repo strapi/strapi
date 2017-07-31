@@ -48,7 +48,7 @@ module.exports = (scope, cb) => {
   } else if (scope.args.plugin) {
     filePath = `./plugins/${scope.args.plugin}/models`;
   } else {
-    filePath = `./api/${scope.id}/models`;
+    filePath = `./api/${scope.id}`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
@@ -109,7 +109,7 @@ module.exports = (scope, cb) => {
 
   // Get default connection
   try {
-    scope.connection = JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'databases.json'))).defaultConnection || '';
+    scope.connection = JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json'))).defaultConnection || '';
   } catch (err) {
     return cb.invalid(err);
   }
