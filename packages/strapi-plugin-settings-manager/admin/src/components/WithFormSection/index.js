@@ -18,6 +18,7 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
+    checkForNestedForm: React.PropTypes.bool,
     handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.object,
     values: React.PropTypes.object,
@@ -46,22 +47,24 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
   componentDidMount() {
     // check if there is inside a section an input that requires nested input to display it on the entire line
-    forEach(this.props.section.items, (items) => {
-      forEach(items, (item) => {
-        forEach(item, (input) => {
+    if (this.props.checkForNestedForm) {
+      forEach(this.props.section.items, (items) => {
+        forEach(items, (item) => {
+          forEach(item, (input) => {
 
-          if (has(input, 'items')) {
-            // store the name of the input that has a nested form
-            this.setState({ hasNestedInput: true, inputWithNestedForm: input.name });
+            if (has(input, 'items')) {
+              // store the name of the input that has a nested form
+              this.setState({ hasNestedInput: true, inputWithNestedForm: input.name });
 
-            // showNestedForm if the selected input has a nested form
-            if (items.value === input.value) {
-              this.setState({ showNestedForm: true });
+              // showNestedForm if the selected input has a nested form
+              if (items.value === input.value) {
+                this.setState({ showNestedForm: true });
+              }
             }
-          }
+          });
         });
       });
-    });
+    }
   }
 
   renderInput = (props, key) => {
@@ -86,7 +89,6 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     // custom handle change props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
-
     return (
       <Input
         customBootstrapClass={customBootstrapClass}

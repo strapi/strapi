@@ -4,13 +4,13 @@
   background: #fff !important;
 }
 .baseline {
-  // display: none;
+  display: none;
   z-index: 100001;
   opacity: .2;
   position: absolute;
   top:0; left:0;
   width: 100%;
-  
+
   min-height: calc(100vh - 6rem); // TODO should be variable
   background: url('../../assets/images/baseline-18.png');
   pointer-events: none;
