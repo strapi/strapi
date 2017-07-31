@@ -19,17 +19,8 @@
 
 module.exports = function reload() {
   try {
-    // Require server configurations
-    const server = require(path.resolve(
-      process.cwd(),
-      'config',
-      'environments',
-      'development',
-      'server.json'
-    ));
-
     const reload = function() {
-      if (cluster.isWorker && process.env.NODE_ENV === 'development' && server.reload === true) process.send('message');
+      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.environments[this.config.environment].server.reload === true) process.send('message');
     };
 
     reload.isReloading = false;
