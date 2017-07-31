@@ -2,6 +2,15 @@
  * Container Generator
  */
 
+const path = require('path');
+
+// Plugin identifier based on the package.json `name` value
+const pluginPkg = require(path.resolve(process.cwd(), 'package.json'));
+const pluginId = pluginPkg.name.replace(
+  /^strapi-plugin-/i,
+  ''
+);
+
 const componentExists = require('../utils/componentExists');
 
 module.exports = {
@@ -45,6 +54,9 @@ module.exports = {
     message: 'Do you want i18n messages (i.e. will this component use text)?',
   }],
   actions: (data) => {
+    // Expose `pluginId` value
+    data.pluginId = pluginId;
+
     // Generate index.js and index.test.js
     const actions = [{
       type: 'add',
