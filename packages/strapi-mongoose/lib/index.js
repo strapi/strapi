@@ -46,13 +46,17 @@ module.exports = function (strapi) {
       }
 
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
-        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.hooks.mongoose.defaults);
+        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
-          mongoose.connect(`mongodb://${host}:${port}/${database}`);
+          mongoose.connect(`mongodb://${host}:${port}/${database}`, {
+            useMongoClient: true
+          });
         } else {
-          mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`);
+          mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
+            useMongoClient: true
+          });
         }
 
         const db = mongoose.connection;
@@ -64,9 +68,6 @@ module.exports = function (strapi) {
 
         // Handle success
         db.on('open', () => {
-          // Initialize collections
-          _.set(strapi, 'mongoose.collections', {});
-
           // Select models concerned by this connection
           const models = _.pickBy(strapi.models, {connection: connectionName});
 
@@ -78,7 +79,7 @@ module.exports = function (strapi) {
           const loadedAttributes = _.after(_.size(models), () => {
             _.forEach(models, (definition, model) => {
               try {
-                let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
+                let collection = strapi.config.hook.settings.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
 
                 // Set the default values to model settings.
                 _.defaults(definition, {
@@ -183,7 +184,7 @@ module.exports = function (strapi) {
 
             if (_.isEmpty(definition.attributes)) {
               // Generate empty schema
-              _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema({}));
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema({}));
 
               return loadedAttributes();
             }
@@ -192,7 +193,7 @@ module.exports = function (strapi) {
             // all attributes for relationships-- see below.
             const done = _.after(_.size(definition.attributes), () => {
               // Generate schema without virtual populate
-              _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
                 return model.type === 'virtual';
               })));
 
