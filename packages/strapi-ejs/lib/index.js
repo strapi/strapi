@@ -38,7 +38,7 @@ module.exports = function (strapi) {
     initialize: cb => {
       // Force cache mode in production
       if (strapi.config.environment === 'production') {
-        strapi.config.hook.ejs.cache = true;
+        strapi.config.hook.settings.ejs.cache = true;
       }
 
       render(strapi.app, strapi.config.hook.settings.ejs);

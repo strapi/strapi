@@ -51,7 +51,7 @@ module.exports = function(strapi) {
       // For each connection in the config register a new Knex connection.
       _.forEach(connections, (connection, name) => {
         // Apply defaults
-        _.defaults(connection.settings, strapi.hook.redis.defaults);
+        _.defaults(connection.settings, strapi.config.hook.settings.redis);
 
         try {
           const redis = new Redis(_.defaultsDeep({
