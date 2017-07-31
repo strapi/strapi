@@ -60,7 +60,7 @@ module.exports = async function(ctx, next) {
   ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
 
   // Call custom responses.
-  if (_.isFunction(_.get(strapi.config, `responses.${ctx.status}`))) {
-    await strapi.config.responses[ctx.status].call(this, ctx);
+  if (_.isFunction(_.get(strapi.config, `functions.responses.${ctx.status}`))) {
+    await strapi.config.functions.responses[ctx.status].call(this, ctx);
   }
 };
