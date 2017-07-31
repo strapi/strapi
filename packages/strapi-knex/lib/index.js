@@ -34,7 +34,7 @@ module.exports = strapi => {
 
     defaults: {
       connection: {
-        host: 'locahost',
+        host: 'localhost',
         charset: 'utf8'
       }
     },
@@ -96,13 +96,15 @@ module.exports = strapi => {
             schema: _.get(connection.settings, 'schema'),
             port: _.get(connection.settings, 'port'),
           },
-          debug: _.get(connection, 'debug') || false
-        }, strapi.config.hooks.knex);
+          debug: _.get(connection.options, 'debug') || false,
+          acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),
+          migrations: _.get(connection.options, 'migrations')
+        }, strapi.config.hook.settings.knex);
 
-        if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
+        if (options.client === 'pg' || options.client === 'mysql' && _.isString(_.get(options.connection, 'schema'))) {
           options.pool = {
-            min: 0,
-            max: 10,
+            min: _.get(connection.options, 'pool.min') || 0,
+            max: _.get(connection.options, 'pool.max') || 10,
             afterCreate: (conn, cb) => {
               conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
                 cb(err, conn);
@@ -117,7 +119,7 @@ module.exports = strapi => {
         // applications to have `knex` as a dependency.
         try {
           // Try to require from local dependency.
-          strapi.connections[name] = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options);
+          _.set(strapi, `connections.${name}`, require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options));
         } catch (err) {
           strapi.log.error('Impossible to use the `' + name + '` connection...');
           strapi.log.warn('Be sure that your client `' + name + '` are in the same node_modules directory');

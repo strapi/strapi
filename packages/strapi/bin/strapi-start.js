@@ -15,9 +15,6 @@ const _ = require('lodash');
 const forever = require('forever-monitor');
 const semver = require('semver')
 
-// Local Strapi dependencies.
-const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
-
 // Logger.
 const { logger, cli } = require('strapi-utils');
 
@@ -29,11 +26,6 @@ const { logger, cli } = require('strapi-utils');
  */
 
 module.exports = function() {
-  // Check that we're in a valid Strapi project.
-  if (!cli.isStrapiApp()) {
-    return logger.error('This command can only be used inside a Strapi project.');
-  }
-
   try {
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
@@ -49,7 +41,7 @@ module.exports = function() {
       'server.json'
     ));
 
-    if (process.env.NODE_ENV === 'development' && server.reload === true) {
+    if (process.env.NODE_ENV === 'development' && server.autoReload === true) {
       const options = _.assign(
         {},
         {
@@ -75,10 +67,10 @@ module.exports = function() {
       child.on('watch:restart', info => {
         logger.verbose(
           'Restarting due to ' +
-          info.file +
-          '... (' +
-          info.stat.replace(child.cwd, '.') +
-          ')'
+            info.file +
+            '... (' +
+            info.stat.replace(child.cwd, '.') +
+            ')'
         );
         console.log();
       });
@@ -93,33 +85,19 @@ module.exports = function() {
       return child.start();
     }
 
-    // Run app as a child_process when harmony flag is not detected.
-    if (!~process.execArgv.indexOf('--harmony')) {
-      const opts = Object.create(process.env);
-
-      // Apply harmony flag only when we are able to.
-      if (semver.lt(process.version, '8.0.0') && semver.gt(process.version, '7.0.0')) {
-        opts.execArgv = ['--harmony-async-await'];
-      }
-
-      return cp.fork(path.resolve(process.cwd(), 'server.js'), opts);
-    }
-
-    // Use the app's local `strapi` in `node_modules` if it's existant and valid.
-    const localStrapiPath = path.resolve(
-      process.cwd(),
-      'node_modules',
-      'strapi'
-    );
-
-    if (isLocalStrapiValid(localStrapiPath, process.cwd())) {
-      return require(localStrapiPath).start(afterwards);
-    }
-
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    return require('strapi').start(afterwards);
+    const strapi = function () {
+      try {
+        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
+      } catch (e) {
+        return require('strapi');
+      }
+    }();
+
+    strapi.start();
+
   } catch (e) {
     logger.error(e);
     process.exit(0);
