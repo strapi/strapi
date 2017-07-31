@@ -4,7 +4,7 @@
 *
 */
 
-import { forEach } from 'lodash';
+import { forEach, has } from 'lodash';
 import {
   CONFIG_FETCH,
   LANGUAGES_FETCH,
@@ -105,6 +105,12 @@ function getDataFromConfigs(configs) {
   forEach(configs.sections, (section) => {
     forEach(section.items, (item) => {
       data[item.target] = item.value;
+
+      if (has(item, 'items')) {
+        forEach(item.items, (itemValue) => {
+          data[itemValue.target] = itemValue.value;
+        })
+      }
     });
   });
 

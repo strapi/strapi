@@ -128,7 +128,7 @@ module.exports = {
     description: 'form.security.description',
     sections: [
       {
-        name: 'form.security.item.session',
+        name: 'form.security.item.csrf',
         items: [
           {
             name: 'form.security.item.session.enabled',
@@ -171,8 +171,8 @@ module.exports = {
             value: _.get(strapi.config, `environments.${env}.security.csrf.enabled`, null),
             items: [
               {
-                name: 'form.security.item.session.key',
-                target: 'security.session.key',
+                name: 'form.security.item.csrf.key',
+                target: 'security.csrf.key',
                 type: 'string',
                 value: _.get(strapi.config, `environments.${env}.security.csrf.key`, null),
                 validations: {}
