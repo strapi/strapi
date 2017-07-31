@@ -5,6 +5,7 @@
 import { map } from 'lodash';
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import routes from 'routes.json'; // eslint-disable-line
+import { camelCase } from 'lodash';
 
 // Try to require a node module without throwing an error
 const tryRequire = (path) => {
@@ -32,7 +33,7 @@ export default function createRoutes(store) {
       const component = tryRequire(`${route.container}/index`); // eslint-disable-line global-require
 
       process.nextTick(() => {
-        if (reducer) injectReducer(route.name, reducer.default);
+        if (reducer) injectReducer(camelCase(route.container), reducer.default);
         if (sagas) injectSagas(sagas.default);
         cb(null, component.default);
       });
