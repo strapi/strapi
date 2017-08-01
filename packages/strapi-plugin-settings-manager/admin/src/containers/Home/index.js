@@ -141,7 +141,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleDatabaseDelete = () => {
-    console.log('database will delete whend I am done coding');
+    // Database will delete whend I am done coding
   }
 
   addLanguage = () => {
