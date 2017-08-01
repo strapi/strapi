@@ -161,7 +161,7 @@ InputText.propTypes = {
   styles: React.PropTypes.object,
   target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string.isRequired,
+  value: React.PropTypes.string,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

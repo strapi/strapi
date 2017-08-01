@@ -128,7 +128,7 @@ module.exports = {
     description: 'form.security.description',
     sections: [
       {
-        name: 'form.security.item.csrf',
+        name: 'form.security.item.session',
         items: [
           {
             name: 'form.security.item.session.enabled',
@@ -235,13 +235,13 @@ module.exports = {
         items: [
           {
             name: 'form.security.item.hsts.enabled',
-            target: 'security.p3p.enabled',
+            target: 'security.hsts.enabled',
             type: 'boolean',
             value: _.get(strapi.config, `environments.${env}.security.hsts.enabled`, null),
             items: [
               {
-                name: 'form.security.item.p3p.maxAge',
-                target: 'security.p3p.maxAge',
+                name: 'form.security.item.hsts.maxAge',
+                target: 'security.hsts.maxAge',
                 type: 'number',
                 value: _.get(strapi.config, `environments.${env}.security.hsts.maxAge`, null),
                 validations: {
@@ -249,15 +249,15 @@ module.exports = {
                 }
               },
               {
-                name: 'form.security.item.p3p.includeSubDomains',
-                target: 'security.p3p.includeSubDomains',
+                name: 'form.security.item.hsts.includeSubDomains',
+                target: 'security.hsts.includeSubDomains',
                 type: 'boolean',
                 value: _.get(strapi.config, `environments.${env}.security.hsts.includeSubDomains`, null),
                 validations: {}
               },
               {
-                name: 'form.security.item.p3p.preload',
-                target: 'security.p3p.preload',
+                name: 'form.security.item.hsts.preload',
+                target: 'security.hsts.preload',
                 type: 'boolean',
                 value: _.get(strapi.config, `environments.${env}.security.hsts.preload`, null),
                 validations: {}

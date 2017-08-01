@@ -74,7 +74,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
 InputToggle.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   handleChange: React.PropTypes.func.isRequired,
-  isChecked: React.PropTypes.bool.isRequired,
+  isChecked: React.PropTypes.bool,
   name: React.PropTypes.string,
   target: React.PropTypes.string.isRequired,
 }

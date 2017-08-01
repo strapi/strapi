@@ -295,9 +295,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     // custom rendering for PopUpForm
     const renderPopUpForm = this.props.params.slug === 'languages' ? this.renderPopUpFormLanguage : false;
 
-    // TODO remove temporary condition to handle nestedForm rendering
-    const checkForNestedForm = this.props.params.slug !== 'languages'
-
     let renderRow = false;
 
     if (this.props.params.slug === 'languages') {
@@ -324,7 +321,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         handleListPopUpSubmit={this.addLanguage}
         selectOptions={selectOptions}
         renderPopUpForm={renderPopUpForm}
-        checkForNestedForm={checkForNestedForm}
       />
     );
   }

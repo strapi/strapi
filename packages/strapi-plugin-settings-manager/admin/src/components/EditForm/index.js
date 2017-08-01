@@ -23,7 +23,11 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             }
             return (
               <div key={key}>
-                <EditFormSection section={section} values={this.props.values} handleChange={this.props.handleChange} />
+                <EditFormSection
+                  section={section}
+                  values={this.props.values}
+                  handleChange={this.props.handleChange}
+                />
                 {line}
               </div>
             )
