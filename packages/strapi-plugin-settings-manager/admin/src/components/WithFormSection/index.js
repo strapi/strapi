@@ -33,6 +33,14 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       showNestedForm: false,
       inputWithNestedForm: '',
     };
+
+    this.inputs = {
+      string: InputText,
+      number: InputNumber,
+      boolean: InputToggle,
+      enum: InputEnum,
+      select: InputSelect,
+    };
   }
 
   componentDidMount() {
@@ -73,14 +81,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   }
 
   renderInput = (props, key) => {
-    const inputs = {
-      string: InputText,
-      number: InputNumber,
-      boolean: InputToggle,
-      enum: InputEnum,
-      select: InputSelect,
-    };
-    const Input = inputs[props.type];
+    const Input = this.inputs[props.type];
     const inputValue = this.props.values[props.target];
     // retrieve options for the select input
     const selectOptions = props.type === 'enum' || props.type === 'select' ? props.items : [];
