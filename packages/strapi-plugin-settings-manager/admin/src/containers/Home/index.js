@@ -99,12 +99,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleFetch(props) {
-    // if (props.params.slug !== 'languages') {
-    //   const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
-    //   this.props.configFetch(apiUrl);
-    // } else {
-    //   this.props.languagesFetch();
-    // }
     const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
 
     switch(props.params.slug) {

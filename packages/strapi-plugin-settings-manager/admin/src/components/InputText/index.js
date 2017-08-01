@@ -121,7 +121,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
-    const placeholder = this.props.placeholder || `Change ${this.props.name} field`;
+    const placeholder = this.props.placeholder || this.props.name;
 
     // retrieve styles from WhitInput HOC
     const styles = this.props.styles;
