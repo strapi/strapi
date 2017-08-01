@@ -88,11 +88,11 @@ export function* fetchLanguages() {
       method: 'GET',
     };
 
-    const requestUrlappLanguages = '/settings-manager/configurations/languages';
+    const requestUrlAppLanguages = '/settings-manager/configurations/languages';
     const requestUrlListLanguages = '/settings-manager/configurations/i18n';
 
     const [appLanguagesData, listLanguagesData] = yield [
-      call(request, requestUrlappLanguages, opts),
+      call(request, requestUrlAppLanguages, opts),
       call(request, requestUrlListLanguages, opts),
     ];
 

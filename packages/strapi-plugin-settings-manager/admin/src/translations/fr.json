@@ -68,7 +68,7 @@
   "request.error.config": "Le fichier de configuration n'éxiste pas.",
   "request.error.environment.required": "L'environnement est obligatoire.",
   "request.error.environment.unknow": "L'environnement est inconnu.",
-  "request.error.languages.exist": "Cette langue éxiste déjà.",
+  "request.error.languages.exist": "Cette langue existe déjà.",
   "request.error.languages.unknow": "Cette langue n'éxiste pas.",
   "request.error.languages.incorrect": "Cette langue est incorrecte.",
 
