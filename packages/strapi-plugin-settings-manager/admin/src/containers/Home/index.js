@@ -8,9 +8,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-// TODO uncomment for databases
 // modal
-// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import {
   find,
   findIndex,
@@ -29,6 +28,7 @@ import { router } from 'app';
 
 // design
 import ContentHeader from 'components/ContentHeader';
+import Debug from 'components/Debug';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
@@ -40,6 +40,7 @@ import {
   changeDefaultLanguage,
   changeInput,
   configFetch,
+  databasesFetch,
   editSettings,
   languageDelete,
   languagesFetch,
@@ -57,6 +58,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       editForm: EditForm,
       list: List,
       defaultComponent: HeaderNav,
+      debug: Debug,
     };
 
     // allowing state only for database modal purpose
@@ -97,11 +99,21 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleFetch(props) {
-    if (props.params.slug !== 'languages') {
-      const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
-      this.props.configFetch(apiUrl);
-    } else {
-      this.props.languagesFetch();
+    // if (props.params.slug !== 'languages') {
+    //   const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
+    //   this.props.configFetch(apiUrl);
+    // } else {
+    //   this.props.languagesFetch();
+    // }
+    const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
+
+    switch(props.params.slug) {
+      case 'languages':
+        return this.props.languagesFetch();
+      case 'databases':
+        return this.props.databasesFetch(props.params.env);
+      default:
+        return this.props.configFetch(apiUrl);
     }
   }
 
@@ -141,7 +153,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleDatabaseDelete = () => {
-    // Database will delete whend I am done coding
+    console.log('will detele');
   }
 
   addLanguage = () => {
@@ -241,42 +253,53 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     ))
   )
 
-  // renderRowDatabase = (props, key, listStyles) => {
-  //   return (
-  //     <li key={key}>
-  //       <div className={listStyles.flexLi}>
-  //         <div className={listStyles.flexed}>
-  //           <div className={`${listStyles.squared} ${listStyles.orange}`}>
-  //             {props.name}
-  //           </div>
-  //           <div className={listStyles.label}>{props.type}</div>
-  //         </div>
-  //         <div>{props.url}</div>
-  //         <div className={listStyles.centered}>{props.log}</div>
-  //         <div className={listStyles.flexed}>
-  //
-  //           <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
-  //           <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
-  //         </div>
-  //       </div>
-  //       <div>
-  //         <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
-  //           <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
-  //             Databases
-  //           </ModalHeader>
-  //           <div className={listStyles.bordered} />
-  //           <ModalBody className={listStyles.modalBody}>
-  //           </ModalBody>
-  //           <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
-  //             {/* TODO change tthis.toggle => this.props.addLanguage */}
-  //             <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
-  //             <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
-  //           </ModalFooter>
-  //         </Modal>
-  //       </div>
-  //     </li>
-  //   );
-  // }
+  renderRowDatabase = (props, key, listStyles) => {
+    let provider;
+
+    // TODO provider
+    switch(props.provider) {
+      case 'strapi-mongoose':
+        provider = 'M';
+        break;
+      default:
+        provider = 'N/A';
+    }
+    /* eslint-disable jsx-a11y/no-static-element-interactions */
+    return (
+      <li key={key}>
+        <div className={listStyles.flexLi}>
+          <div className={listStyles.flexed}>
+            <div className={`${listStyles.squared} ${listStyles.orange}`}>
+              {provider}
+            </div>
+            <div className={listStyles.label}>{props.name}</div>
+          </div>
+          <div>{props.database}</div>
+          <div className={listStyles.centered}>{props.host}</div>
+          <div className={listStyles.flexed}>
+
+            <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
+            <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
+          </div>
+        </div>
+        <div>
+          <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
+            <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
+              Databases
+            </ModalHeader>
+            <div className={listStyles.bordered} />
+            <ModalBody className={listStyles.modalBody}>
+            </ModalBody>
+            <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
+              {/* TODO change tthis.toggle => this.props.addLanguage */}
+              <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
+              <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
+            </ModalFooter>
+          </Modal>
+        </div>
+      </li>
+    );
+  }
 
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
@@ -284,10 +307,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
 
-    const listTitle = this.props.params.slug === 'languages' ? this.renderListTitle() : '';
+    const listTitle = this.props.params.slug === 'languages' || 'databases' ? this.renderListTitle() : '';
+    const listButtonLabel = this.props.params.slug === 'languages' || 'databases' ? this.renderListButtonLabel() : '';
+
     // sections is the props used by EditForm in case of list of table rendering we need to change its value
     const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages.sections : this.props.home.configsDisplay.sections;
-    const listButtonLabel = this.props.params.slug === 'languages' ? this.renderListButtonLabel() : '';
+
 
     // custom selectOptions for languages
     const selectOptions = this.props.params.slug === 'languages' ? this.props.home.listLanguages : [];
@@ -362,6 +387,7 @@ function mapDispatchToProps(dispatch) {
       changeDefaultLanguage,
       changeInput,
       configFetch,
+      databasesFetch,
       editSettings,
       languageDelete,
       languagesFetch,
@@ -376,6 +402,7 @@ Home.propTypes = {
   changeDefaultLanguage: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
+  databasesFetch: React.PropTypes.func,
   editSettings: React.PropTypes.func,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,

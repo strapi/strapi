@@ -18,3 +18,5 @@ export const NEW_LANGUAGE_POST = 'SettingsManager/Home/NEW_LANGUAGE_POST';
 export const NEW_LANGUAGE_POST_SUCCEEDED = 'SettingsManager/Home/NEW_LANGUAGE_POST_SUCCEEDED';
 export const LANGUAGE_DELETE = 'SettingsManager/Home/LANGUAGE_DELETE';
 export const LANGUAGE_ACTION_SUCCEEDED = 'SettingsManager/Home/LANGUAGE_ACTION_SUCCEEDED';
+export const DATABASES_FETCH = 'SettingsManager/Home/DATABASES_FETCH';
+export const DATABASES_FETCH_SUCCEEDED = 'SettingsManager/Home/DATABASES_FETCH_SUCCEEDED';

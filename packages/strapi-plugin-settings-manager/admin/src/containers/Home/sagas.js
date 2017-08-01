@@ -14,10 +14,12 @@ import {
   LANGUAGE_DELETE,
   LANGUAGES_FETCH,
   NEW_LANGUAGE_POST,
+  DATABASES_FETCH,
 } from './constants';
 
 import {
   configFetchSucceded,
+  databasesFetchSucceeded,
   languagesFetchSucceeded,
   languageActiontSucceded,
 } from './actions';
@@ -42,7 +44,6 @@ export function* deleteLanguage(action) {
     yield put(languageActiontSucceded());
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An Error occured');
   }
 }
@@ -59,11 +60,27 @@ export function* fetchConfig(action) {
     yield put(configFetchSucceded(data));
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An error occurred ');
   }
 }
 
+
+export function* fetchDatabases(action) {
+  try {
+    const opts = {
+      method: 'GET',
+    };
+
+    const requestUrl = `/settings-manager/configurations/databases/${action.environment}`;
+
+    const data = yield call(request, requestUrl, opts);
+
+    yield put(databasesFetchSucceeded(data));
+
+  } catch(error) {
+    window.Strapi.notification.error('An error occurred');
+  }
+}
 
 export function* fetchLanguages() {
   try {
@@ -111,7 +128,6 @@ export function* postLanguage() {
     yield put(languageActiontSucceded());
 
   } catch(error) {
-    console.log(error);
     // TODO handle error i18n
     window.Strapi.notification.error(error);
   }
@@ -150,6 +166,7 @@ export function* defaultSaga() {
   const editConfigWatcher = yield fork(takeLatest, EDIT_SETTINGS, settingsEdit);
   const postLanguageWatcher = yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
   const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
+  const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
@@ -157,6 +174,7 @@ export function* defaultSaga() {
   yield cancel(editConfigWatcher);
   yield cancel(postLanguageWatcher);
   yield cancel(deleteLanguageWatcher);
+  yield cancel(loadDatabasesWatcher);
 
 }
 

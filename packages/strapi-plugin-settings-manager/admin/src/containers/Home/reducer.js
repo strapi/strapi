@@ -13,6 +13,7 @@ import {
   LANGUAGES_FETCH_SUCCEEDED,
   EDIT_SETTINGS_SUCCEEDED,
   LANGUAGE_ACTION_SUCCEEDED,
+  DATABASES_FETCH_SUCCEEDED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -37,6 +38,12 @@ function homeReducer(state = initialState, action) {
       return state.updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state.set('modifiedData', state.get('initialData'));
+    case DATABASES_FETCH_SUCCEEDED:
+      return state
+        .set('configsDisplay', OrderedMap(action.configsDisplay))
+        .set('loading', false)
+        .set('initialData', Map())
+        .set('modifiedData', Map());
     case LANGUAGES_FETCH_SUCCEEDED:
       return state
         .set('loading', false)

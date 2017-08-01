@@ -9,6 +9,10 @@
   "menu.item.security": "Security",
   "menu.item.server": "Server",
 
+
+  "form.databases.name": "Databases",
+  "form.databases.description": "Configure your databases settings by environnement",
+
   "form.general.name": "General",
   "form.general.description": "Configure your general settings.",
 

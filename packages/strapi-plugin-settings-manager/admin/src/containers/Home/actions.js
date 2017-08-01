@@ -19,6 +19,8 @@ import {
   NEW_LANGUAGE_POST,
   LANGUAGE_ACTION_SUCCEEDED,
   LANGUAGE_DELETE,
+  DATABASES_FETCH,
+  DATABASES_FETCH_SUCCEEDED,
 } from './constants';
 
 export function defaultAction() {
@@ -142,5 +144,26 @@ export function languageDelete(languageToDelete) {
   return {
     type: LANGUAGE_DELETE,
     languageToDelete,
+  };
+}
+
+
+export function databasesFetch(environment) {
+  return {
+    type: DATABASES_FETCH,
+    environment,
+  };
+}
+
+export function databasesFetchSucceeded(data) {
+  const configsDisplay = {
+    name: 'form.databases.name',
+    description: 'form.databases.description',
+    sections: data.databases,
+  };
+
+  return {
+    type: DATABASES_FETCH_SUCCEEDED,
+    configsDisplay,
   };
 }

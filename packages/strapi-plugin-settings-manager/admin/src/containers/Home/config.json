@@ -1,6 +1,6 @@
 {
   "customComponents": {
     "editForm": ["general", "advanced"],
-    "list": ["languages"]
+    "list": ["languages", "databases"]
   }
 }
