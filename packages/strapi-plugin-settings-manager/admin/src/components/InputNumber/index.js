@@ -23,6 +23,8 @@
 * - handleFocus : function
 * - placeholder : string if set to "" nothing will display
 *
+*
+* - styles are retrieved from the HOC
 */
 
 import React from 'react';
@@ -107,10 +109,8 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
 
-    // retrieve styles from WithInput HOC
-    const styles = this.props.styles;
     return (
-      <div className={`${styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
+      <div className={`${this.props.styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
         <input
           type="number"
