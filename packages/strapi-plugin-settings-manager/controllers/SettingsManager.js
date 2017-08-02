@@ -68,7 +68,12 @@ module.exports = {
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
 
-    const model = _.has(Service, slug) ? Service[slug](env) : return ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);;
+    let model;
+    if (_.has(Service, slug)) {
+      model = Service[slug](env);
+    } else {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);
+    }
 
     const items = Service.getItems(model);
 

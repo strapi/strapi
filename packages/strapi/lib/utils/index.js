@@ -10,6 +10,8 @@ module.exports = {
     try {
       return require(path.resolve(this.config.appPath, url));
     } catch (e) {
+      this.log.error(e);
+
       return {};
     }
   },

@@ -35,12 +35,13 @@ module.exports = function() {
       'strapi'
     );
 
-    let strapi;
-    if (isLocalStrapiValid(localStrapiPath, process.cwd())) {
-      strapi = require(localStrapiPath);
-    } else {
-      strapi = require('strapi');
-    }
+    const strapi = function () {
+      try {
+        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
+      } catch (e) {
+        return require('strapi');
+      }
+    }();
 
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
