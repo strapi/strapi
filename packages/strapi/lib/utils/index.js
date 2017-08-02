@@ -49,7 +49,7 @@ module.exports = {
 
   optionalPath: path => {
     return path
-      .replace(/(.settings|.json|.js)/g, '')
+      .replace(/(\.settings|.json|.js)/g, '')
       .split('/')
       .slice(1, path.split('/').length - 1)
       .join('.')
@@ -58,7 +58,7 @@ module.exports = {
 
   aggregatePath: path => {
     return path
-      .replace(/(.settings|.json|.js)/g, '')
+      .replace(/(\.settings|.json|.js)/g, '')
       .split('/')
       .slice(1)
       .join('.')
