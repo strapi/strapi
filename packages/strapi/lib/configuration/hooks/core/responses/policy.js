@@ -52,7 +52,7 @@ module.exports = async function(ctx, next) {
 
   // Empty body is considered as `notFound` response.
   if (_.isUndefined(ctx.body) && _.isUndefined(ctx.status)) {
-    return ctx.notFound();
+    ctx.notFound();
   }
 
   if (_.isObject(ctx.body)) {
