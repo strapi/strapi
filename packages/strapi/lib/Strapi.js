@@ -171,7 +171,7 @@ class Strapi extends EventEmitter {
 
   reload() {
     const reload = function() {
-      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.environments[this.config.environment].server.reload === true) process.send('message');
+      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('message');
     };
 
     reload.isReloading = false;
