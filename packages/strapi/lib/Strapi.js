@@ -5,6 +5,7 @@ const Koa = require('koa');
 const utils = require('./utils');
 const http = require('http');
 const path = require('path');
+const cluster = require('cluster');
 const { includes } = require('lodash');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -23,6 +24,8 @@ class Strapi extends EventEmitter {
     super();
 
     this.setMaxListeners(15);
+
+    this.reload = this.reload();
 
     // Expose `koa`.
     this.app = new Koa();
@@ -72,8 +75,6 @@ class Strapi extends EventEmitter {
 
     // Bind context functions.
     this.loadFile = utils.loadFile.bind(this);
-
-    this.reload = this.reload();
   }
 
   async start(cb) {

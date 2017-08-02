@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const _ = require('lodash');
 
 module.exports = {
   menu: async ctx => {

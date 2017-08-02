@@ -2,1979 +2,1979 @@
 
 module.exports = [
   {
-    name: 'i18n.af',
+    name: 'language.af',
     value: 'af'
   },
   {
-    name: 'i18n.af_NA',
+    name: 'language.af_NA',
     value: 'af_NA'
   },
   {
-    name: 'i18n.af_ZA',
+    name: 'language.af_ZA',
     value: 'af_ZA'
   },
   {
-    name: 'i18n.agq',
+    name: 'language.agq',
     value: 'agq'
   },
   {
-    name: 'i18n.agq_CM',
+    name: 'language.agq_CM',
     value: 'agq_CM'
   },
   {
-    name: 'i18n.ak',
+    name: 'language.ak',
     value: 'ak'
   },
   {
-    name: 'i18n.ak_GH',
+    name: 'language.ak_GH',
     value: 'ak_GH'
   },
   {
-    name: 'i18n.am',
+    name: 'language.am',
     value: 'am'
   },
   {
-    name: 'i18n.am_ET',
+    name: 'language.am_ET',
     value: 'am_ET'
   },
   {
-    name: 'i18n.ar',
+    name: 'language.ar',
     value: 'ar'
   },
   {
-    name: 'i18n.ar_001',
+    name: 'language.ar_001',
     value: 'ar_001'
   },
   {
-    name: 'i18n.ar_AE',
+    name: 'language.ar_AE',
     value: 'ar_AE'
   },
   {
-    name: 'i18n.ar_BH',
+    name: 'language.ar_BH',
     value: 'ar_BH'
   },
   {
-    name: 'i18n.ar_DZ',
+    name: 'language.ar_DZ',
     value: 'ar_DZ'
   },
   {
-    name: 'i18n.ar_EG',
+    name: 'language.ar_EG',
     value: 'ar_EG'
   },
   {
-    name: 'i18n.ar_IQ',
+    name: 'language.ar_IQ',
     value: 'ar_IQ'
   },
   {
-    name: 'i18n.ar_JO',
+    name: 'language.ar_JO',
     value: 'ar_JO'
   },
   {
-    name: 'i18n.ar_KW',
+    name: 'language.ar_KW',
     value: 'ar_KW'
   },
   {
-    name: 'i18n.ar_LB',
+    name: 'language.ar_LB',
     value: 'ar_LB'
   },
   {
-    name: 'i18n.ar_LY',
+    name: 'language.ar_LY',
     value: 'ar_LY'
   },
   {
-    name: 'i18n.ar_MA',
+    name: 'language.ar_MA',
     value: 'ar_MA'
   },
   {
-    name: 'i18n.ar_OM',
+    name: 'language.ar_OM',
     value: 'ar_OM'
   },
   {
-    name: 'i18n.ar_QA',
+    name: 'language.ar_QA',
     value: 'ar_QA'
   },
   {
-    name: 'i18n.ar_SA',
+    name: 'language.ar_SA',
     value: 'ar_SA'
   },
   {
-    name: 'i18n.ar_SD',
+    name: 'language.ar_SD',
     value: 'ar_SD'
   },
   {
-    name: 'i18n.ar_SY',
+    name: 'language.ar_SY',
     value: 'ar_SY'
   },
   {
-    name: 'i18n.ar_TN',
+    name: 'language.ar_TN',
     value: 'ar_TN'
   },
   {
-    name: 'i18n.ar_YE',
+    name: 'language.ar_YE',
     value: 'ar_YE'
   },
   {
-    name: 'i18n.as',
+    name: 'language.as',
     value: 'as'
   },
   {
-    name: 'i18n.as_IN',
+    name: 'language.as_IN',
     value: 'as_IN'
   },
   {
-    name: 'i18n.asa',
+    name: 'language.asa',
     value: 'asa'
   },
   {
-    name: 'i18n.asa_TZ',
+    name: 'language.asa_TZ',
     value: 'asa_TZ'
   },
   {
-    name: 'i18n.az',
+    name: 'language.az',
     value: 'az'
   },
   {
-    name: 'i18n.az_Cyrl',
+    name: 'language.az_Cyrl',
     value: 'az_Cyrl'
   },
   {
-    name: 'i18n.az_Cyrl_AZ',
+    name: 'language.az_Cyrl_AZ',
     value: 'az_Cyrl_AZ'
   },
   {
-    name: 'i18n.az_Latn',
+    name: 'language.az_Latn',
     value: 'az_Latn'
   },
   {
-    name: 'i18n.az_Latn_AZ',
+    name: 'language.az_Latn_AZ',
     value: 'az_Latn_AZ'
   },
   {
-    name: 'i18n.bas',
+    name: 'language.bas',
     value: 'bas'
   },
   {
-    name: 'i18n.bas_CM',
+    name: 'language.bas_CM',
     value: 'bas_CM'
   },
   {
-    name: 'i18n.be',
+    name: 'language.be',
     value: 'be'
   },
   {
-    name: 'i18n.be_BY',
+    name: 'language.be_BY',
     value: 'be_BY'
   },
   {
-    name: 'i18n.bem',
+    name: 'language.bem',
     value: 'bem'
   },
   {
-    name: 'i18n.bem_ZM',
+    name: 'language.bem_ZM',
     value: 'bem_ZM'
   },
   {
-    name: 'i18n.bez',
+    name: 'language.bez',
     value: 'bez'
   },
   {
-    name: 'i18n.bez_TZ',
+    name: 'language.bez_TZ',
     value: 'bez_TZ'
   },
   {
-    name: 'i18n.bg',
+    name: 'language.bg',
     value: 'bg'
   },
   {
-    name: 'i18n.bg_BG',
+    name: 'language.bg_BG',
     value: 'bg_BG'
   },
   {
-    name: 'i18n.bm',
+    name: 'language.bm',
     value: 'bm'
   },
   {
-    name: 'i18n.bm_ML',
+    name: 'language.bm_ML',
     value: 'bm_ML'
   },
   {
-    name: 'i18n.bn',
+    name: 'language.bn',
     value: 'bn'
   },
   {
-    name: 'i18n.bn_BD',
+    name: 'language.bn_BD',
     value: 'bn_BD'
   },
   {
-    name: 'i18n.bn_IN',
+    name: 'language.bn_IN',
     value: 'bn_IN'
   },
   {
-    name: 'i18n.bo',
+    name: 'language.bo',
     value: 'bo'
   },
   {
-    name: 'i18n.bo_CN',
+    name: 'language.bo_CN',
     value: 'bo_CN'
   },
   {
-    name: 'i18n.bo_IN',
+    name: 'language.bo_IN',
     value: 'bo_IN'
   },
   {
-    name: 'i18n.br',
+    name: 'language.br',
     value: 'br'
   },
   {
-    name: 'i18n.br_FR',
+    name: 'language.br_FR',
     value: 'br_FR'
   },
   {
-    name: 'i18n.brx',
+    name: 'language.brx',
     value: 'brx'
   },
   {
-    name: 'i18n.brx_IN',
+    name: 'language.brx_IN',
     value: 'brx_IN'
   },
   {
-    name: 'i18n.bs',
+    name: 'language.bs',
     value: 'bs'
   },
   {
-    name: 'i18n.bs_BA',
+    name: 'language.bs_BA',
     value: 'bs_BA'
   },
   {
-    name: 'i18n.ca',
+    name: 'language.ca',
     value: 'ca'
   },
   {
-    name: 'i18n.ca_ES',
+    name: 'language.ca_ES',
     value: 'ca_ES'
   },
   {
-    name: 'i18n.cgg',
+    name: 'language.cgg',
     value: 'cgg'
   },
   {
-    name: 'i18n.cgg_UG',
+    name: 'language.cgg_UG',
     value: 'cgg_UG'
   },
   {
-    name: 'i18n.chr',
+    name: 'language.chr',
     value: 'chr'
   },
   {
-    name: 'i18n.chr_US',
+    name: 'language.chr_US',
     value: 'chr_US'
   },
   {
-    name: 'i18n.cs',
+    name: 'language.cs',
     value: 'cs'
   },
   {
-    name: 'i18n.cs_CZ',
+    name: 'language.cs_CZ',
     value: 'cs_CZ'
   },
   {
-    name: 'i18n.cy',
+    name: 'language.cy',
     value: 'cy'
   },
   {
-    name: 'i18n.cy_GB',
+    name: 'language.cy_GB',
     value: 'cy_GB'
   },
   {
-    name: 'i18n.da',
+    name: 'language.da',
     value: 'da'
   },
   {
-    name: 'i18n.da_DK',
+    name: 'language.da_DK',
     value: 'da_DK'
   },
   {
-    name: 'i18n.dav',
+    name: 'language.dav',
     value: 'dav'
   },
   {
-    name: 'i18n.dav_KE',
+    name: 'language.dav_KE',
     value: 'dav_KE'
   },
   {
-    name: 'i18n.de',
+    name: 'language.de',
     value: 'de'
   },
   {
-    name: 'i18n.de_AT',
+    name: 'language.de_AT',
     value: 'de_AT'
   },
   {
-    name: 'i18n.de_BE',
+    name: 'language.de_BE',
     value: 'de_BE'
   },
   {
-    name: 'i18n.de_CH',
+    name: 'language.de_CH',
     value: 'de_CH'
   },
   {
-    name: 'i18n.de_DE',
+    name: 'language.de_DE',
     value: 'de_DE'
   },
   {
-    name: 'i18n.de_LI',
+    name: 'language.de_LI',
     value: 'de_LI'
   },
   {
-    name: 'i18n.de_LU',
+    name: 'language.de_LU',
     value: 'de_LU'
   },
   {
-    name: 'i18n.dje',
+    name: 'language.dje',
     value: 'dje'
   },
   {
-    name: 'i18n.dje_NE',
+    name: 'language.dje_NE',
     value: 'dje_NE'
   },
   {
-    name: 'i18n.dua',
+    name: 'language.dua',
     value: 'dua'
   },
   {
-    name: 'i18n.dua_CM',
+    name: 'language.dua_CM',
     value: 'dua_CM'
   },
   {
-    name: 'i18n.dyo',
+    name: 'language.dyo',
     value: 'dyo'
   },
   {
-    name: 'i18n.dyo_SN',
+    name: 'language.dyo_SN',
     value: 'dyo_SN'
   },
   {
-    name: 'i18n.ebu',
+    name: 'language.ebu',
     value: 'ebu'
   },
   {
-    name: 'i18n.ebu_KE',
+    name: 'language.ebu_KE',
     value: 'ebu_KE'
   },
   {
-    name: 'i18n.ee',
+    name: 'language.ee',
     value: 'ee'
   },
   {
-    name: 'i18n.ee_GH',
+    name: 'language.ee_GH',
     value: 'ee_GH'
   },
   {
-    name: 'i18n.ee_TG',
+    name: 'language.ee_TG',
     value: 'ee_TG'
   },
   {
-    name: 'i18n.el',
+    name: 'language.el',
     value: 'el'
   },
   {
-    name: 'i18n.el_CY',
+    name: 'language.el_CY',
     value: 'el_CY'
   },
   {
-    name: 'i18n.el_GR',
+    name: 'language.el_GR',
     value: 'el_GR'
   },
   {
-    name: 'i18n.en',
+    name: 'language.en',
     value: 'en'
   },
   {
-    name: 'i18n.en_AS',
+    name: 'language.en_AS',
     value: 'en_AS'
   },
   {
-    name: 'i18n.en_AU',
+    name: 'language.en_AU',
     value: 'en_AU'
   },
   {
-    name: 'i18n.en_BB',
+    name: 'language.en_BB',
     value: 'en_BB'
   },
   {
-    name: 'i18n.en_BE',
+    name: 'language.en_BE',
     value: 'en_BE'
   },
   {
-    name: 'i18n.en_BM',
+    name: 'language.en_BM',
     value: 'en_BM'
   },
   {
-    name: 'i18n.en_BW',
+    name: 'language.en_BW',
     value: 'en_BW'
   },
   {
-    name: 'i18n.en_BZ',
+    name: 'language.en_BZ',
     value: 'en_BZ'
   },
   {
-    name: 'i18n.en_CA',
+    name: 'language.en_CA',
     value: 'en_CA'
   },
   {
-    name: 'i18n.en_GB',
+    name: 'language.en_GB',
     value: 'en_GB'
   },
   {
-    name: 'i18n.en_GU',
+    name: 'language.en_GU',
     value: 'en_GU'
   },
   {
-    name: 'i18n.en_GY',
+    name: 'language.en_GY',
     value: 'en_GY'
   },
   {
-    name: 'i18n.en_HK',
+    name: 'language.en_HK',
     value: 'en_HK'
   },
   {
-    name: 'i18n.en_IE',
+    name: 'language.en_IE',
     value: 'en_IE'
   },
   {
-    name: 'i18n.en_IN',
+    name: 'language.en_IN',
     value: 'en_IN'
   },
   {
-    name: 'i18n.en_JM',
+    name: 'language.en_JM',
     value: 'en_JM'
   },
   {
-    name: 'i18n.en_MH',
+    name: 'language.en_MH',
     value: 'en_MH'
   },
   {
-    name: 'i18n.en_MP',
+    name: 'language.en_MP',
     value: 'en_MP'
   },
   {
-    name: 'i18n.en_MT',
+    name: 'language.en_MT',
     value: 'en_MT'
   },
   {
-    name: 'i18n.en_MU',
+    name: 'language.en_MU',
     value: 'en_MU'
   },
   {
-    name: 'i18n.en_NA',
+    name: 'language.en_NA',
     value: 'en_NA'
   },
   {
-    name: 'i18n.en_NZ',
+    name: 'language.en_NZ',
     value: 'en_NZ'
   },
   {
-    name: 'i18n.en_PH',
+    name: 'language.en_PH',
     value: 'en_PH'
   },
   {
-    name: 'i18n.en_PK',
+    name: 'language.en_PK',
     value: 'en_PK'
   },
   {
-    name: 'i18n.en_SG',
+    name: 'language.en_SG',
     value: 'en_SG'
   },
   {
-    name: 'i18n.en_TT',
+    name: 'language.en_TT',
     value: 'en_TT'
   },
   {
-    name: 'i18n.en_UM',
+    name: 'language.en_UM',
     value: 'en_UM'
   },
   {
-    name: 'i18n.en_US',
+    name: 'language.en_US',
     value: 'en_US'
   },
   {
-    name: 'i18n.en_US_POSIX',
+    name: 'language.en_US_POSIX',
     value: 'en_US_POSIX'
   },
   {
-    name: 'i18n.en_VI',
+    name: 'language.en_VI',
     value: 'en_VI'
   },
   {
-    name: 'i18n.en_ZA',
+    name: 'language.en_ZA',
     value: 'en_ZA'
   },
   {
-    name: 'i18n.en_ZW',
+    name: 'language.en_ZW',
     value: 'en_ZW'
   },
   {
-    name: 'i18n.eo',
+    name: 'language.eo',
     value: 'eo'
   },
   {
-    name: 'i18n.es',
+    name: 'language.es',
     value: 'es'
   },
   {
-    name: 'i18n.es_419',
+    name: 'language.es_419',
     value: 'es_419'
   },
   {
-    name: 'i18n.es_AR',
+    name: 'language.es_AR',
     value: 'es_AR'
   },
   {
-    name: 'i18n.es_BO',
+    name: 'language.es_BO',
     value: 'es_BO'
   },
   {
-    name: 'i18n.es_CL',
+    name: 'language.es_CL',
     value: 'es_CL'
   },
   {
-    name: 'i18n.es_CO',
+    name: 'language.es_CO',
     value: 'es_CO'
   },
   {
-    name: 'i18n.es_CR',
+    name: 'language.es_CR',
     value: 'es_CR'
   },
   {
-    name: 'i18n.es_DO',
+    name: 'language.es_DO',
     value: 'es_DO'
   },
   {
-    name: 'i18n.es_EC',
+    name: 'language.es_EC',
     value: 'es_EC'
   },
   {
-    name: 'i18n.es_ES',
+    name: 'language.es_ES',
     value: 'es_ES'
   },
   {
-    name: 'i18n.es_GQ',
+    name: 'language.es_GQ',
     value: 'es_GQ'
   },
   {
-    name: 'i18n.es_GT',
+    name: 'language.es_GT',
     value: 'es_GT'
   },
   {
-    name: 'i18n.es_HN',
+    name: 'language.es_HN',
     value: 'es_HN'
   },
   {
-    name: 'i18n.es_MX',
+    name: 'language.es_MX',
     value: 'es_MX'
   },
   {
-    name: 'i18n.es_NI',
+    name: 'language.es_NI',
     value: 'es_NI'
   },
   {
-    name: 'i18n.es_PA',
+    name: 'language.es_PA',
     value: 'es_PA'
   },
   {
-    name: 'i18n.es_PE',
+    name: 'language.es_PE',
     value: 'es_PE'
   },
   {
-    name: 'i18n.es_PR',
+    name: 'language.es_PR',
     value: 'es_PR'
   },
   {
-    name: 'i18n.es_PY',
+    name: 'language.es_PY',
     value: 'es_PY'
   },
   {
-    name: 'i18n.es_SV',
+    name: 'language.es_SV',
     value: 'es_SV'
   },
   {
-    name: 'i18n.es_US',
+    name: 'language.es_US',
     value: 'es_US'
   },
   {
-    name: 'i18n.es_UY',
+    name: 'language.es_UY',
     value: 'es_UY'
   },
   {
-    name: 'i18n.es_VE',
+    name: 'language.es_VE',
     value: 'es_VE'
   },
   {
-    name: 'i18n.et',
+    name: 'language.et',
     value: 'et'
   },
   {
-    name: 'i18n.et_EE',
+    name: 'language.et_EE',
     value: 'et_EE'
   },
   {
-    name: 'i18n.eu',
+    name: 'language.eu',
     value: 'eu'
   },
   {
-    name: 'i18n.eu_ES',
+    name: 'language.eu_ES',
     value: 'eu_ES'
   },
   {
-    name: 'i18n.ewo',
+    name: 'language.ewo',
     value: 'ewo'
   },
   {
-    name: 'i18n.ewo_CM',
+    name: 'language.ewo_CM',
     value: 'ewo_CM'
   },
   {
-    name: 'i18n.fa',
+    name: 'language.fa',
     value: 'fa'
   },
   {
-    name: 'i18n.fa_AF',
+    name: 'language.fa_AF',
     value: 'fa_AF'
   },
   {
-    name: 'i18n.fa_IR',
+    name: 'language.fa_IR',
     value: 'fa_IR'
   },
   {
-    name: 'i18n.ff',
+    name: 'language.ff',
     value: 'ff'
   },
   {
-    name: 'i18n.ff_SN',
+    name: 'language.ff_SN',
     value: 'ff_SN'
   },
   {
-    name: 'i18n.fi',
+    name: 'language.fi',
     value: 'fi'
   },
   {
-    name: 'i18n.fi_FI',
+    name: 'language.fi_FI',
     value: 'fi_FI'
   },
   {
-    name: 'i18n.fil',
+    name: 'language.fil',
     value: 'fil'
   },
   {
-    name: 'i18n.fil_PH',
+    name: 'language.fil_PH',
     value: 'fil_PH'
   },
   {
-    name: 'i18n.fo',
+    name: 'language.fo',
     value: 'fo'
   },
   {
-    name: 'i18n.fo_FO',
+    name: 'language.fo_FO',
     value: 'fo_FO'
   },
   {
-    name: 'i18n.fr',
+    name: 'language.fr',
     value: 'fr'
   },
   {
-    name: 'i18n.fr_BE',
+    name: 'language.fr_BE',
     value: 'fr_BE'
   },
   {
-    name: 'i18n.fr_BF',
+    name: 'language.fr_BF',
     value: 'fr_BF'
   },
   {
-    name: 'i18n.fr_BI',
+    name: 'language.fr_BI',
     value: 'fr_BI'
   },
   {
-    name: 'i18n.fr_BJ',
+    name: 'language.fr_BJ',
     value: 'fr_BJ'
   },
   {
-    name: 'i18n.fr_BL',
+    name: 'language.fr_BL',
     value: 'fr_BL'
   },
   {
-    name: 'i18n.fr_CA',
+    name: 'language.fr_CA',
     value: 'fr_CA'
   },
   {
-    name: 'i18n.fr_CD',
+    name: 'language.fr_CD',
     value: 'fr_CD'
   },
   {
-    name: 'i18n.fr_CF',
+    name: 'language.fr_CF',
     value: 'fr_CF'
   },
   {
-    name: 'i18n.fr_CG',
+    name: 'language.fr_CG',
     value: 'fr_CG'
   },
   {
-    name: 'i18n.fr_CH',
+    name: 'language.fr_CH',
     value: 'fr_CH'
   },
   {
-    name: 'i18n.fr_CI',
+    name: 'language.fr_CI',
     value: 'fr_CI'
   },
   {
-    name: 'i18n.fr_CM',
+    name: 'language.fr_CM',
     value: 'fr_CM'
   },
   {
-    name: 'i18n.fr_DJ',
+    name: 'language.fr_DJ',
     value: 'fr_DJ'
   },
   {
-    name: 'i18n.fr_FR',
+    name: 'language.fr_FR',
     value: 'fr_FR'
   },
   {
-    name: 'i18n.fr_GA',
+    name: 'language.fr_GA',
     value: 'fr_GA'
   },
   {
-    name: 'i18n.fr_GF',
+    name: 'language.fr_GF',
     value: 'fr_GF'
   },
   {
-    name: 'i18n.fr_GN',
+    name: 'language.fr_GN',
     value: 'fr_GN'
   },
   {
-    name: 'i18n.fr_GP',
+    name: 'language.fr_GP',
     value: 'fr_GP'
   },
   {
-    name: 'i18n.fr_GQ',
+    name: 'language.fr_GQ',
     value: 'fr_GQ'
   },
   {
-    name: 'i18n.fr_KM',
+    name: 'language.fr_KM',
     value: 'fr_KM'
   },
   {
-    name: 'i18n.fr_LU',
+    name: 'language.fr_LU',
     value: 'fr_LU'
   },
   {
-    name: 'i18n.fr_MC',
+    name: 'language.fr_MC',
     value: 'fr_MC'
   },
   {
-    name: 'i18n.fr_MF',
+    name: 'language.fr_MF',
     value: 'fr_MF'
   },
   {
-    name: 'i18n.fr_MG',
+    name: 'language.fr_MG',
     value: 'fr_MG'
   },
   {
-    name: 'i18n.fr_ML',
+    name: 'language.fr_ML',
     value: 'fr_ML'
   },
   {
-    name: 'i18n.fr_MQ',
+    name: 'language.fr_MQ',
     value: 'fr_MQ'
   },
   {
-    name: 'i18n.fr_NE',
+    name: 'language.fr_NE',
     value: 'fr_NE'
   },
   {
-    name: 'i18n.fr_RE',
+    name: 'language.fr_RE',
     value: 'fr_RE'
   },
   {
-    name: 'i18n.fr_RW',
+    name: 'language.fr_RW',
     value: 'fr_RW'
   },
   {
-    name: 'i18n.fr_SN',
+    name: 'language.fr_SN',
     value: 'fr_SN'
   },
   {
-    name: 'i18n.fr_TD',
+    name: 'language.fr_TD',
     value: 'fr_TD'
   },
   {
-    name: 'i18n.fr_TG',
+    name: 'language.fr_TG',
     value: 'fr_TG'
   },
   {
-    name: 'i18n.fr_YT',
+    name: 'language.fr_YT',
     value: 'fr_YT'
   },
   {
-    name: 'i18n.ga',
+    name: 'language.ga',
     value: 'ga'
   },
   {
-    name: 'i18n.ga_IE',
+    name: 'language.ga_IE',
     value: 'ga_IE'
   },
   {
-    name: 'i18n.gl',
+    name: 'language.gl',
     value: 'gl'
   },
   {
-    name: 'i18n.gl_ES',
+    name: 'language.gl_ES',
     value: 'gl_ES'
   },
   {
-    name: 'i18n.gsw',
+    name: 'language.gsw',
     value: 'gsw'
   },
   {
-    name: 'i18n.gsw_CH',
+    name: 'language.gsw_CH',
     value: 'gsw_CH'
   },
   {
-    name: 'i18n.gu',
+    name: 'language.gu',
     value: 'gu'
   },
   {
-    name: 'i18n.gu_IN',
+    name: 'language.gu_IN',
     value: 'gu_IN'
   },
   {
-    name: 'i18n.guz',
+    name: 'language.guz',
     value: 'guz'
   },
   {
-    name: 'i18n.guz_KE',
+    name: 'language.guz_KE',
     value: 'guz_KE'
   },
   {
-    name: 'i18n.gv',
+    name: 'language.gv',
     value: 'gv'
   },
   {
-    name: 'i18n.gv_GB',
+    name: 'language.gv_GB',
     value: 'gv_GB'
   },
   {
-    name: 'i18n.ha',
+    name: 'language.ha',
     value: 'ha'
   },
   {
-    name: 'i18n.ha_Latn',
+    name: 'language.ha_Latn',
     value: 'ha_Latn'
   },
   {
-    name: 'i18n.ha_Latn_GH',
+    name: 'language.ha_Latn_GH',
     value: 'ha_Latn_GH'
   },
   {
-    name: 'i18n.ha_Latn_NE',
+    name: 'language.ha_Latn_NE',
     value: 'ha_Latn_NE'
   },
   {
-    name: 'i18n.ha_Latn_NG',
+    name: 'language.ha_Latn_NG',
     value: 'ha_Latn_NG'
   },
   {
-    name: 'i18n.haw',
+    name: 'language.haw',
     value: 'haw'
   },
   {
-    name: 'i18n.haw_US',
+    name: 'language.haw_US',
     value: 'haw_US'
   },
   {
-    name: 'i18n.he',
+    name: 'language.he',
     value: 'he'
   },
   {
-    name: 'i18n.he_IL',
+    name: 'language.he_IL',
     value: 'he_IL'
   },
   {
-    name: 'i18n.hi',
+    name: 'language.hi',
     value: 'hi'
   },
   {
-    name: 'i18n.hi_IN',
+    name: 'language.hi_IN',
     value: 'hi_IN'
   },
   {
-    name: 'i18n.hr',
+    name: 'language.hr',
     value: 'hr'
   },
   {
-    name: 'i18n.hr_HR',
+    name: 'language.hr_HR',
     value: 'hr_HR'
   },
   {
-    name: 'i18n.hu',
+    name: 'language.hu',
     value: 'hu'
   },
   {
-    name: 'i18n.hu_HU',
+    name: 'language.hu_HU',
     value: 'hu_HU'
   },
   {
-    name: 'i18n.hy',
+    name: 'language.hy',
     value: 'hy'
   },
   {
-    name: 'i18n.hy_AM',
+    name: 'language.hy_AM',
     value: 'hy_AM'
   },
   {
-    name: 'i18n.id',
+    name: 'language.id',
     value: 'id'
   },
   {
-    name: 'i18n.id_ID',
+    name: 'language.id_ID',
     value: 'id_ID'
   },
   {
-    name: 'i18n.ig',
+    name: 'language.ig',
     value: 'ig'
   },
   {
-    name: 'i18n.ig_NG',
+    name: 'language.ig_NG',
     value: 'ig_NG'
   },
   {
-    name: 'i18n.ii',
+    name: 'language.ii',
     value: 'ii'
   },
   {
-    name: 'i18n.ii_CN',
+    name: 'language.ii_CN',
     value: 'ii_CN'
   },
   {
-    name: 'i18n.is',
+    name: 'language.is',
     value: 'is'
   },
   {
-    name: 'i18n.is_IS',
+    name: 'language.is_IS',
     value: 'is_IS'
   },
   {
-    name: 'i18n.it',
+    name: 'language.it',
     value: 'it'
   },
   {
-    name: 'i18n.it_CH',
+    name: 'language.it_CH',
     value: 'it_CH'
   },
   {
-    name: 'i18n.it_IT',
+    name: 'language.it_IT',
     value: 'it_IT'
   },
   {
-    name: 'i18n.ja',
+    name: 'language.ja',
     value: 'ja'
   },
   {
-    name: 'i18n.ja_JP',
+    name: 'language.ja_JP',
     value: 'ja_JP'
   },
   {
-    name: 'i18n.jmc',
+    name: 'language.jmc',
     value: 'jmc'
   },
   {
-    name: 'i18n.jmc_TZ',
+    name: 'language.jmc_TZ',
     value: 'jmc_TZ'
   },
   {
-    name: 'i18n.ka',
+    name: 'language.ka',
     value: 'ka'
   },
   {
-    name: 'i18n.ka_GE',
+    name: 'language.ka_GE',
     value: 'ka_GE'
   },
   {
-    name: 'i18n.kab',
+    name: 'language.kab',
     value: 'kab'
   },
   {
-    name: 'i18n.kab_DZ',
+    name: 'language.kab_DZ',
     value: 'kab_DZ'
   },
   {
-    name: 'i18n.kam',
+    name: 'language.kam',
     value: 'kam'
   },
   {
-    name: 'i18n.kam_KE',
+    name: 'language.kam_KE',
     value: 'kam_KE'
   },
   {
-    name: 'i18n.kde',
+    name: 'language.kde',
     value: 'kde'
   },
   {
-    name: 'i18n.kde_TZ',
+    name: 'language.kde_TZ',
     value: 'kde_TZ'
   },
   {
-    name: 'i18n.kea',
+    name: 'language.kea',
     value: 'kea'
   },
   {
-    name: 'i18n.kea_CV',
+    name: 'language.kea_CV',
     value: 'kea_CV'
   },
   {
-    name: 'i18n.khq',
+    name: 'language.khq',
     value: 'khq'
   },
   {
-    name: 'i18n.khq_ML',
+    name: 'language.khq_ML',
     value: 'khq_ML'
   },
   {
-    name: 'i18n.ki',
+    name: 'language.ki',
     value: 'ki'
   },
   {
-    name: 'i18n.ki_KE',
+    name: 'language.ki_KE',
     value: 'ki_KE'
   },
   {
-    name: 'i18n.kk',
+    name: 'language.kk',
     value: 'kk'
   },
   {
-    name: 'i18n.kk_Cyrl',
+    name: 'language.kk_Cyrl',
     value: 'kk_Cyrl'
   },
   {
-    name: 'i18n.kk_Cyrl_KZ',
+    name: 'language.kk_Cyrl_KZ',
     value: 'kk_Cyrl_KZ'
   },
   {
-    name: 'i18n.kl',
+    name: 'language.kl',
     value: 'kl'
   },
   {
-    name: 'i18n.kl_GL',
+    name: 'language.kl_GL',
     value: 'kl_GL'
   },
   {
-    name: 'i18n.kln',
+    name: 'language.kln',
     value: 'kln'
   },
   {
-    name: 'i18n.kln_KE',
+    name: 'language.kln_KE',
     value: 'kln_KE'
   },
   {
-    name: 'i18n.km',
+    name: 'language.km',
     value: 'km'
   },
   {
-    name: 'i18n.km_KH',
+    name: 'language.km_KH',
     value: 'km_KH'
   },
   {
-    name: 'i18n.kn',
+    name: 'language.kn',
     value: 'kn'
   },
   {
-    name: 'i18n.kn_IN',
+    name: 'language.kn_IN',
     value: 'kn_IN'
   },
   {
-    name: 'i18n.ko',
+    name: 'language.ko',
     value: 'ko'
   },
   {
-    name: 'i18n.ko_KR',
+    name: 'language.ko_KR',
     value: 'ko_KR'
   },
   {
-    name: 'i18n.kok',
+    name: 'language.kok',
     value: 'kok'
   },
   {
-    name: 'i18n.kok_IN',
+    name: 'language.kok_IN',
     value: 'kok_IN'
   },
   {
-    name: 'i18n.ksb',
+    name: 'language.ksb',
     value: 'ksb'
   },
   {
-    name: 'i18n.ksb_TZ',
+    name: 'language.ksb_TZ',
     value: 'ksb_TZ'
   },
   {
-    name: 'i18n.ksf',
+    name: 'language.ksf',
     value: 'ksf'
   },
   {
-    name: 'i18n.ksf_CM',
+    name: 'language.ksf_CM',
     value: 'ksf_CM'
   },
   {
-    name: 'i18n.kw',
+    name: 'language.kw',
     value: 'kw'
   },
   {
-    name: 'i18n.kw_GB',
+    name: 'language.kw_GB',
     value: 'kw_GB'
   },
   {
-    name: 'i18n.lag',
+    name: 'language.lag',
     value: 'lag'
   },
   {
-    name: 'i18n.lag_TZ',
+    name: 'language.lag_TZ',
     value: 'lag_TZ'
   },
   {
-    name: 'i18n.lg',
+    name: 'language.lg',
     value: 'lg'
   },
   {
-    name: 'i18n.lg_UG',
+    name: 'language.lg_UG',
     value: 'lg_UG'
   },
   {
-    name: 'i18n.ln',
+    name: 'language.ln',
     value: 'ln'
   },
   {
-    name: 'i18n.ln_CD',
+    name: 'language.ln_CD',
     value: 'ln_CD'
   },
   {
-    name: 'i18n.ln_CG',
+    name: 'language.ln_CG',
     value: 'ln_CG'
   },
   {
-    name: 'i18n.lt',
+    name: 'language.lt',
     value: 'lt'
   },
   {
-    name: 'i18n.lt_LT',
+    name: 'language.lt_LT',
     value: 'lt_LT'
   },
   {
-    name: 'i18n.lu',
+    name: 'language.lu',
     value: 'lu'
   },
   {
-    name: 'i18n.lu_CD',
+    name: 'language.lu_CD',
     value: 'lu_CD'
   },
   {
-    name: 'i18n.luo',
+    name: 'language.luo',
     value: 'luo'
   },
   {
-    name: 'i18n.luo_KE',
+    name: 'language.luo_KE',
     value: 'luo_KE'
   },
   {
-    name: 'i18n.luy',
+    name: 'language.luy',
     value: 'luy'
   },
   {
-    name: 'i18n.luy_KE',
+    name: 'language.luy_KE',
     value: 'luy_KE'
   },
   {
-    name: 'i18n.lv',
+    name: 'language.lv',
     value: 'lv'
   },
   {
-    name: 'i18n.lv_LV',
+    name: 'language.lv_LV',
     value: 'lv_LV'
   },
   {
-    name: 'i18n.mas',
+    name: 'language.mas',
     value: 'mas'
   },
   {
-    name: 'i18n.mas_KE',
+    name: 'language.mas_KE',
     value: 'mas_KE'
   },
   {
-    name: 'i18n.mas_TZ',
+    name: 'language.mas_TZ',
     value: 'mas_TZ'
   },
   {
-    name: 'i18n.mer',
+    name: 'language.mer',
     value: 'mer'
   },
   {
-    name: 'i18n.mer_KE',
+    name: 'language.mer_KE',
     value: 'mer_KE'
   },
   {
-    name: 'i18n.mfe',
+    name: 'language.mfe',
     value: 'mfe'
   },
   {
-    name: 'i18n.mfe_MU',
+    name: 'language.mfe_MU',
     value: 'mfe_MU'
   },
   {
-    name: 'i18n.mg',
+    name: 'language.mg',
     value: 'mg'
   },
   {
-    name: 'i18n.mg_MG',
+    name: 'language.mg_MG',
     value: 'mg_MG'
   },
   {
-    name: 'i18n.mgh',
+    name: 'language.mgh',
     value: 'mgh'
   },
   {
-    name: 'i18n.mgh_MZ',
+    name: 'language.mgh_MZ',
     value: 'mgh_MZ'
   },
   {
-    name: 'i18n.mk',
+    name: 'language.mk',
     value: 'mk'
   },
   {
-    name: 'i18n.mk_MK',
+    name: 'language.mk_MK',
     value: 'mk_MK'
   },
   {
-    name: 'i18n.ml',
+    name: 'language.ml',
     value: 'ml'
   },
   {
-    name: 'i18n.ml_IN',
+    name: 'language.ml_IN',
     value: 'ml_IN'
   },
   {
-    name: 'i18n.mr',
+    name: 'language.mr',
     value: 'mr'
   },
   {
-    name: 'i18n.mr_IN',
+    name: 'language.mr_IN',
     value: 'mr_IN'
   },
   {
-    name: 'i18n.ms',
+    name: 'language.ms',
     value: 'ms'
   },
   {
-    name: 'i18n.ms_BN',
+    name: 'language.ms_BN',
     value: 'ms_BN'
   },
   {
-    name: 'i18n.ms_MY',
+    name: 'language.ms_MY',
     value: 'ms_MY'
   },
   {
-    name: 'i18n.mt',
+    name: 'language.mt',
     value: 'mt'
   },
   {
-    name: 'i18n.mt_MT',
+    name: 'language.mt_MT',
     value: 'mt_MT'
   },
   {
-    name: 'i18n.mua',
+    name: 'language.mua',
     value: 'mua'
   },
   {
-    name: 'i18n.mua_CM',
+    name: 'language.mua_CM',
     value: 'mua_CM'
   },
   {
-    name: 'i18n.my',
+    name: 'language.my',
     value: 'my'
   },
   {
-    name: 'i18n.my_MM',
+    name: 'language.my_MM',
     value: 'my_MM'
   },
   {
-    name: 'i18n.naq',
+    name: 'language.naq',
     value: 'naq'
   },
   {
-    name: 'i18n.naq_NA',
+    name: 'language.naq_NA',
     value: 'naq_NA'
   },
   {
-    name: 'i18n.nb',
+    name: 'language.nb',
     value: 'nb'
   },
   {
-    name: 'i18n.nb_NO',
+    name: 'language.nb_NO',
     value: 'nb_NO'
   },
   {
-    name: 'i18n.nd',
+    name: 'language.nd',
     value: 'nd'
   },
   {
-    name: 'i18n.nd_ZW',
+    name: 'language.nd_ZW',
     value: 'nd_ZW'
   },
   {
-    name: 'i18n.ne',
+    name: 'language.ne',
     value: 'ne'
   },
   {
-    name: 'i18n.ne_IN',
+    name: 'language.ne_IN',
     value: 'ne_IN'
   },
   {
-    name: 'i18n.ne_NP',
+    name: 'language.ne_NP',
     value: 'ne_NP'
   },
   {
-    name: 'i18n.nl',
+    name: 'language.nl',
     value: 'nl'
   },
   {
-    name: 'i18n.nl_AW',
+    name: 'language.nl_AW',
     value: 'nl_AW'
   },
   {
-    name: 'i18n.nl_BE',
+    name: 'language.nl_BE',
     value: 'nl_BE'
   },
   {
-    name: 'i18n.nl_CW',
+    name: 'language.nl_CW',
     value: 'nl_CW'
   },
   {
-    name: 'i18n.nl_NL',
+    name: 'language.nl_NL',
     value: 'nl_NL'
   },
   {
-    name: 'i18n.nl_SX',
+    name: 'language.nl_SX',
     value: 'nl_SX'
   },
   {
-    name: 'i18n.nmg',
+    name: 'language.nmg',
     value: 'nmg'
   },
   {
-    name: 'i18n.nmg_CM',
+    name: 'language.nmg_CM',
     value: 'nmg_CM'
   },
   {
-    name: 'i18n.nn',
+    name: 'language.nn',
     value: 'nn'
   },
   {
-    name: 'i18n.nn_NO',
+    name: 'language.nn_NO',
     value: 'nn_NO'
   },
   {
-    name: 'i18n.nus',
+    name: 'language.nus',
     value: 'nus'
   },
   {
-    name: 'i18n.nus_SD',
+    name: 'language.nus_SD',
     value: 'nus_SD'
   },
   {
-    name: 'i18n.nyn',
+    name: 'language.nyn',
     value: 'nyn'
   },
   {
-    name: 'i18n.nyn_UG',
+    name: 'language.nyn_UG',
     value: 'nyn_UG'
   },
   {
-    name: 'i18n.om',
+    name: 'language.om',
     value: 'om'
   },
   {
-    name: 'i18n.om_ET',
+    name: 'language.om_ET',
     value: 'om_ET'
   },
   {
-    name: 'i18n.om_KE',
+    name: 'language.om_KE',
     value: 'om_KE'
   },
   {
-    name: 'i18n.or',
+    name: 'language.or',
     value: 'or'
   },
   {
-    name: 'i18n.or_IN',
+    name: 'language.or_IN',
     value: 'or_IN'
   },
   {
-    name: 'i18n.pa',
+    name: 'language.pa',
     value: 'pa'
   },
   {
-    name: 'i18n.pa_Arab',
+    name: 'language.pa_Arab',
     value: 'pa_Arab'
   },
   {
-    name: 'i18n.pa_Arab_PK',
+    name: 'language.pa_Arab_PK',
     value: 'pa_Arab_PK'
   },
   {
-    name: 'i18n.pa_Guru',
+    name: 'language.pa_Guru',
     value: 'pa_Guru'
   },
   {
-    name: 'i18n.pa_Guru_IN',
+    name: 'language.pa_Guru_IN',
     value: 'pa_Guru_IN'
   },
   {
-    name: 'i18n.pl',
+    name: 'language.pl',
     value: 'pl'
   },
   {
-    name: 'i18n.pl_PL',
+    name: 'language.pl_PL',
     value: 'pl_PL'
   },
   {
-    name: 'i18n.ps',
+    name: 'language.ps',
     value: 'ps'
   },
   {
-    name: 'i18n.ps_AF',
+    name: 'language.ps_AF',
     value: 'ps_AF'
   },
   {
-    name: 'i18n.pt',
+    name: 'language.pt',
     value: 'pt'
   },
   {
-    name: 'i18n.pt_AO',
+    name: 'language.pt_AO',
     value: 'pt_AO'
   },
   {
-    name: 'i18n.pt_BR',
+    name: 'language.pt_BR',
     value: 'pt_BR'
   },
   {
-    name: 'i18n.pt_GW',
+    name: 'language.pt_GW',
     value: 'pt_GW'
   },
   {
-    name: 'i18n.pt_MZ',
+    name: 'language.pt_MZ',
     value: 'pt_MZ'
   },
   {
-    name: 'i18n.pt_PT',
+    name: 'language.pt_PT',
     value: 'pt_PT'
   },
   {
-    name: 'i18n.pt_ST',
+    name: 'language.pt_ST',
     value: 'pt_ST'
   },
   {
-    name: 'i18n.rm',
+    name: 'language.rm',
     value: 'rm'
   },
   {
-    name: 'i18n.rm_CH',
+    name: 'language.rm_CH',
     value: 'rm_CH'
   },
   {
-    name: 'i18n.rn',
+    name: 'language.rn',
     value: 'rn'
   },
   {
-    name: 'i18n.rn_BI',
+    name: 'language.rn_BI',
     value: 'rn_BI'
   },
   {
-    name: 'i18n.ro',
+    name: 'language.ro',
     value: 'ro'
   },
   {
-    name: 'i18n.ro_MD',
+    name: 'language.ro_MD',
     value: 'ro_MD'
   },
   {
-    name: 'i18n.ro_RO',
+    name: 'language.ro_RO',
     value: 'ro_RO'
   },
   {
-    name: 'i18n.rof',
+    name: 'language.rof',
     value: 'rof'
   },
   {
-    name: 'i18n.rof_TZ',
+    name: 'language.rof_TZ',
     value: 'rof_TZ'
   },
   {
-    name: 'i18n.ru',
+    name: 'language.ru',
     value: 'ru'
   },
   {
-    name: 'i18n.ru_MD',
+    name: 'language.ru_MD',
     value: 'ru_MD'
   },
   {
-    name: 'i18n.ru_RU',
+    name: 'language.ru_RU',
     value: 'ru_RU'
   },
   {
-    name: 'i18n.ru_UA',
+    name: 'language.ru_UA',
     value: 'ru_UA'
   },
   {
-    name: 'i18n.rw',
+    name: 'language.rw',
     value: 'rw'
   },
   {
-    name: 'i18n.rw_RW',
+    name: 'language.rw_RW',
     value: 'rw_RW'
   },
   {
-    name: 'i18n.rwk',
+    name: 'language.rwk',
     value: 'rwk'
   },
   {
-    name: 'i18n.rwk_TZ',
+    name: 'language.rwk_TZ',
     value: 'rwk_TZ'
   },
   {
-    name: 'i18n.saq',
+    name: 'language.saq',
     value: 'saq'
   },
   {
-    name: 'i18n.saq_KE',
+    name: 'language.saq_KE',
     value: 'saq_KE'
   },
   {
-    name: 'i18n.sbp',
+    name: 'language.sbp',
     value: 'sbp'
   },
   {
-    name: 'i18n.sbp_TZ',
+    name: 'language.sbp_TZ',
     value: 'sbp_TZ'
   },
   {
-    name: 'i18n.seh',
+    name: 'language.seh',
     value: 'seh'
   },
   {
-    name: 'i18n.seh_MZ',
+    name: 'language.seh_MZ',
     value: 'seh_MZ'
   },
   {
-    name: 'i18n.ses',
+    name: 'language.ses',
     value: 'ses'
   },
   {
-    name: 'i18n.ses_ML',
+    name: 'language.ses_ML',
     value: 'ses_ML'
   },
   {
-    name: 'i18n.sg',
+    name: 'language.sg',
     value: 'sg'
   },
   {
-    name: 'i18n.sg_CF',
+    name: 'language.sg_CF',
     value: 'sg_CF'
   },
   {
-    name: 'i18n.shi',
+    name: 'language.shi',
     value: 'shi'
   },
   {
-    name: 'i18n.shi_Latn',
+    name: 'language.shi_Latn',
     value: 'shi_Latn'
   },
   {
-    name: 'i18n.shi_Latn_MA',
+    name: 'language.shi_Latn_MA',
     value: 'shi_Latn_MA'
   },
   {
-    name: 'i18n.shi_Tfng',
+    name: 'language.shi_Tfng',
     value: 'shi_Tfng'
   },
   {
-    name: 'i18n.shi_Tfng_MA',
+    name: 'language.shi_Tfng_MA',
     value: 'shi_Tfng_MA'
   },
   {
-    name: 'i18n.si',
+    name: 'language.si',
     value: 'si'
   },
   {
-    name: 'i18n.si_LK',
+    name: 'language.si_LK',
     value: 'si_LK'
   },
   {
-    name: 'i18n.sk',
+    name: 'language.sk',
     value: 'sk'
   },
   {
-    name: 'i18n.sk_SK',
+    name: 'language.sk_SK',
     value: 'sk_SK'
   },
   {
-    name: 'i18n.sl',
+    name: 'language.sl',
     value: 'sl'
   },
   {
-    name: 'i18n.sl_SI',
+    name: 'language.sl_SI',
     value: 'sl_SI'
   },
   {
-    name: 'i18n.sn',
+    name: 'language.sn',
     value: 'sn'
   },
   {
-    name: 'i18n.sn_ZW',
+    name: 'language.sn_ZW',
     value: 'sn_ZW'
   },
   {
-    name: 'i18n.so',
+    name: 'language.so',
     value: 'so'
   },
   {
-    name: 'i18n.so_DJ',
+    name: 'language.so_DJ',
     value: 'so_DJ'
   },
   {
-    name: 'i18n.so_ET',
+    name: 'language.so_ET',
     value: 'so_ET'
   },
   {
-    name: 'i18n.so_KE',
+    name: 'language.so_KE',
     value: 'so_KE'
   },
   {
-    name: 'i18n.so_SO',
+    name: 'language.so_SO',
     value: 'so_SO'
   },
   {
-    name: 'i18n.sq',
+    name: 'language.sq',
     value: 'sq'
   },
   {
-    name: 'i18n.sq_AL',
+    name: 'language.sq_AL',
     value: 'sq_AL'
   },
   {
-    name: 'i18n.sr',
+    name: 'language.sr',
     value: 'sr'
   },
   {
-    name: 'i18n.sr_Cyrl',
+    name: 'language.sr_Cyrl',
     value: 'sr_Cyrl'
   },
   {
-    name: 'i18n.sr_Cyrl_BA',
+    name: 'language.sr_Cyrl_BA',
     value: 'sr_Cyrl_BA'
   },
   {
-    name: 'i18n.sr_Cyrl_ME',
+    name: 'language.sr_Cyrl_ME',
     value: 'sr_Cyrl_ME'
   },
   {
-    name: 'i18n.sr_Cyrl_RS',
+    name: 'language.sr_Cyrl_RS',
     value: 'sr_Cyrl_RS'
   },
   {
-    name: 'i18n.sr_Latn',
+    name: 'language.sr_Latn',
     value: 'sr_Latn'
   },
   {
-    name: 'i18n.sr_Latn_BA',
+    name: 'language.sr_Latn_BA',
     value: 'sr_Latn_BA'
   },
   {
-    name: 'i18n.sr_Latn_ME',
+    name: 'language.sr_Latn_ME',
     value: 'sr_Latn_ME'
   },
   {
-    name: 'i18n.sr_Latn_RS',
+    name: 'language.sr_Latn_RS',
     value: 'sr_Latn_RS'
   },
   {
-    name: 'i18n.sv',
+    name: 'language.sv',
     value: 'sv'
   },
   {
-    name: 'i18n.sv_FI',
+    name: 'language.sv_FI',
     value: 'sv_FI'
   },
   {
-    name: 'i18n.sv_SE',
+    name: 'language.sv_SE',
     value: 'sv_SE'
   },
   {
-    name: 'i18n.sw',
+    name: 'language.sw',
     value: 'sw'
   },
   {
-    name: 'i18n.sw_KE',
+    name: 'language.sw_KE',
     value: 'sw_KE'
   },
   {
-    name: 'i18n.sw_TZ',
+    name: 'language.sw_TZ',
     value: 'sw_TZ'
   },
   {
-    name: 'i18n.swc',
+    name: 'language.swc',
     value: 'swc'
   },
   {
-    name: 'i18n.swc_CD',
+    name: 'language.swc_CD',
     value: 'swc_CD'
   },
   {
-    name: 'i18n.ta',
+    name: 'language.ta',
     value: 'ta'
   },
   {
-    name: 'i18n.ta_IN',
+    name: 'language.ta_IN',
     value: 'ta_IN'
   },
   {
-    name: 'i18n.ta_LK',
+    name: 'language.ta_LK',
     value: 'ta_LK'
   },
   {
-    name: 'i18n.te',
+    name: 'language.te',
     value: 'te'
   },
   {
-    name: 'i18n.te_IN',
+    name: 'language.te_IN',
     value: 'te_IN'
   },
   {
-    name: 'i18n.teo',
+    name: 'language.teo',
     value: 'teo'
   },
   {
-    name: 'i18n.teo_KE',
+    name: 'language.teo_KE',
     value: 'teo_KE'
   },
   {
-    name: 'i18n.teo_UG',
+    name: 'language.teo_UG',
     value: 'teo_UG'
   },
   {
-    name: 'i18n.th',
+    name: 'language.th',
     value: 'th'
   },
   {
-    name: 'i18n.th_TH',
+    name: 'language.th_TH',
     value: 'th_TH'
   },
   {
-    name: 'i18n.ti',
+    name: 'language.ti',
     value: 'ti'
   },
   {
-    name: 'i18n.ti_ER',
+    name: 'language.ti_ER',
     value: 'ti_ER'
   },
   {
-    name: 'i18n.ti_ET',
+    name: 'language.ti_ET',
     value: 'ti_ET'
   },
   {
-    name: 'i18n.to',
+    name: 'language.to',
     value: 'to'
   },
   {
-    name: 'i18n.to_TO',
+    name: 'language.to_TO',
     value: 'to_TO'
   },
   {
-    name: 'i18n.tr',
+    name: 'language.tr',
     value: 'tr'
   },
   {
-    name: 'i18n.tr_TR',
+    name: 'language.tr_TR',
     value: 'tr_TR'
   },
   {
-    name: 'i18n.twq',
+    name: 'language.twq',
     value: 'twq'
   },
   {
-    name: 'i18n.twq_NE',
+    name: 'language.twq_NE',
     value: 'twq_NE'
   },
   {
-    name: 'i18n.tzm',
+    name: 'language.tzm',
     value: 'tzm'
   },
   {
-    name: 'i18n.tzm_Latn',
+    name: 'language.tzm_Latn',
     value: 'tzm_Latn'
   },
   {
-    name: 'i18n.tzm_Latn_MA',
+    name: 'language.tzm_Latn_MA',
     value: 'tzm_Latn_MA'
   },
   {
-    name: 'i18n.uk',
+    name: 'language.uk',
     value: 'uk'
   },
   {
-    name: 'i18n.uk_UA',
+    name: 'language.uk_UA',
     value: 'uk_UA'
   },
   {
-    name: 'i18n.ur',
+    name: 'language.ur',
     value: 'ur'
   },
   {
-    name: 'i18n.ur_IN',
+    name: 'language.ur_IN',
     value: 'ur_IN'
   },
   {
-    name: 'i18n.ur_PK',
+    name: 'language.ur_PK',
     value: 'ur_PK'
   },
   {
-    name: 'i18n.uz',
+    name: 'language.uz',
     value: 'uz'
   },
   {
-    name: 'i18n.uz_Arab',
+    name: 'language.uz_Arab',
     value: 'uz_Arab'
   },
   {
-    name: 'i18n.uz_Arab_AF',
+    name: 'language.uz_Arab_AF',
     value: 'uz_Arab_AF'
   },
   {
-    name: 'i18n.uz_Cyrl',
+    name: 'language.uz_Cyrl',
     value: 'uz_Cyrl'
   },
   {
-    name: 'i18n.uz_Cyrl_UZ',
+    name: 'language.uz_Cyrl_UZ',
     value: 'uz_Cyrl_UZ'
   },
   {
-    name: 'i18n.uz_Latn',
+    name: 'language.uz_Latn',
     value: 'uz_Latn'
   },
   {
-    name: 'i18n.uz_Latn_UZ',
+    name: 'language.uz_Latn_UZ',
     value: 'uz_Latn_UZ'
   },
   {
-    name: 'i18n.vai',
+    name: 'language.vai',
     value: 'vai'
   },
   {
-    name: 'i18n.vai_Latn',
+    name: 'language.vai_Latn',
     value: 'vai_Latn'
   },
   {
-    name: 'i18n.vai_Latn_LR',
+    name: 'language.vai_Latn_LR',
     value: 'vai_Latn_LR'
   },
   {
-    name: 'i18n.vai_Vaii',
+    name: 'language.vai_Vaii',
     value: 'vai_Vaii'
   },
   {
-    name: 'i18n.vai_Vaii_LR',
+    name: 'language.vai_Vaii_LR',
     value: 'vai_Vaii_LR'
   },
   {
-    name: 'i18n.vi',
+    name: 'language.vi',
     value: 'vi'
   },
   {
-    name: 'i18n.vi_VN',
+    name: 'language.vi_VN',
     value: 'vi_VN'
   },
   {
-    name: 'i18n.vun',
+    name: 'language.vun',
     value: 'vun'
   },
   {
-    name: 'i18n.vun_TZ',
+    name: 'language.vun_TZ',
     value: 'vun_TZ'
   },
   {
-    name: 'i18n.xog',
+    name: 'language.xog',
     value: 'xog'
   },
   {
-    name: 'i18n.xog_UG',
+    name: 'language.xog_UG',
     value: 'xog_UG'
   },
   {
-    name: 'i18n.yav',
+    name: 'language.yav',
     value: 'yav'
   },
   {
-    name: 'i18n.yav_CM',
+    name: 'language.yav_CM',
     value: 'yav_CM'
   },
   {
-    name: 'i18n.yo',
+    name: 'language.yo',
     value: 'yo'
   },
   {
-    name: 'i18n.yo_NG',
+    name: 'language.yo_NG',
     value: 'yo_NG'
   },
   {
-    name: 'i18n.zh',
+    name: 'language.zh',
     value: 'zh'
   },
   {
-    name: 'i18n.zh_Hans',
+    name: 'language.zh_Hans',
     value: 'zh_Hans'
   },
   {
-    name: 'i18n.zh_Hans_CN',
+    name: 'language.zh_Hans_CN',
     value: 'zh_Hans_CN'
   },
   {
-    name: 'i18n.zh_Hans_HK',
+    name: 'language.zh_Hans_HK',
     value: 'zh_Hans_HK'
   },
   {
-    name: 'i18n.zh_Hans_MO',
+    name: 'language.zh_Hans_MO',
     value: 'zh_Hans_MO'
   },
   {
-    name: 'i18n.zh_Hans_SG',
+    name: 'language.zh_Hans_SG',
     value: 'zh_Hans_SG'
   },
   {
-    name: 'i18n.zh_Hant',
+    name: 'language.zh_Hant',
     value: 'zh_Hant'
   },
   {
-    name: 'i18n.zh_Hant_HK',
+    name: 'language.zh_Hant_HK',
     value: 'zh_Hant_HK'
   },
   {
-    name: 'i18n.zh_Hant_MO',
+    name: 'language.zh_Hant_MO',
     value: 'zh_Hant_MO'
   },
   {
-    name: 'i18n.zh_Hant_TW',
+    name: 'language.zh_Hant_TW',
     value: 'zh_Hant_TW'
   },
   {
-    name: 'i18n.zu',
+    name: 'language.zu',
     value: 'zu'
   },
   {
-    name: 'i18n.zu_ZA',
+    name: 'language.zu_ZA',
     value: 'zu_ZA'
   }
 ];
