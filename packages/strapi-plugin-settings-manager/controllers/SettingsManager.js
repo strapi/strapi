@@ -65,7 +65,8 @@ module.exports = {
   update: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
-    let params = ctx.request.body;
+    let params = ctx.request.body.fields;
+
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
 

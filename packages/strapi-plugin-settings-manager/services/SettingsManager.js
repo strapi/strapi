@@ -598,7 +598,15 @@ module.exports = {
     return databases;
   },
 
-  getItems: model => _.flatten(_.map(model.sections, section => section.items)),
+  getItems: model => {
+    return _.flatten(_.map(model.sections, section => {
+      let items = section.items;
+
+      _.forEach(items, item => { if (item.type === 'boolean' && _.has(item, 'items')) items = _.concat(items, item.items) });
+
+      return items
+    }));
+  },
 
   cleanParams: (params, items) => {
     const cleanParams = {};
