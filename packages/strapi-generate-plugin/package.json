@@ -13,9 +13,9 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^4.0.0",
     "lodash": "^4.17.4",
-    "pluralize": "^3.1.0"
+    "pluralize": "^6.0.0"
   },
   "scripts": {
     "prepublish": "npm prune"

@@ -16,9 +16,6 @@ const _ = require('lodash');
 const fs = require('fs');
 const semver = require('semver')
 
-// Local Strapi dependencies.
-const isLocalStrapiValid = require('../lib/private/isLocalStrapiValid');
-
 // Logger.
 const { logger, cli } = require('strapi-utils');
 
@@ -30,11 +27,6 @@ const { logger, cli } = require('strapi-utils');
  */
 
 module.exports = function() {
-  // Check that we're in a valid Strapi project.
-  if (!cli.isStrapiApp()) {
-    return logger.error('This command can only be used inside a Strapi project.');
-  }
-
   try {
     // Use the app's local `strapi` in `node_modules` if it's existant and valid.
     const localStrapiPath = path.resolve(
@@ -64,7 +56,7 @@ module.exports = function() {
       'server.json'
     ));
 
-    if (process.env.NODE_ENV === 'development' && server.reload === true) {
+    if (process.env.NODE_ENV === 'development' && server.autoReload === true) {
       const restart = path => {
         if (strapi.reload.isWatching && cluster.isWorker && !strapi.reload.isReloading) {
           strapi.reload.isReloading = true;

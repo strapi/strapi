@@ -50,24 +50,26 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Create plugin helper to share utils between plugins (`strapi-helper-plugin`).~~
 - ~~Prototype the plugins queries process to be able to use different ORMs.~~
 - ~~Prototype the CLI to create, install and uninstall plugins.~~
+- ~~Ensure that we are compatible with Node 8.~~
 
 `strapi@alpha.5` *(expected release date: 10/08/2017)*:
-- [Plugin] Content Manager.
 - [Plugin] Settings Manager.
-- Update React-Boilerplate dependencies to the latest version.
+- Update `strapi-helper-plugin` and `strapi-admin` dependencies to the latest version.
 - Update layout design.
 - Create a draft of the guidelines to follow of how to create a plugin.
 - Finalize the plugins queries process to be able to use different ORMs.
 - Initialize the `strapi-docs` package.
 - Use [lerna](http://lernajs.io) to run tests.
+- Synchronize the ORM adapters to set the same properties in the AST.
+- Rewrite the Strapi core to improve performances and startup time.
 
 `strapi@alpha.6` *(expected release date: 21/09/2017)*:
+- [Plugin] Content Manager.
 - [Plugin] Content Type Builder.
-- [Plugin] Users & groups (with full authentication process).
-- Synchronize the ORM adapters to set the same properties in the AST.
 - Freeze (make immutable) the AST.
 - Remove global variable `strapi` and use the module pattern instead.
-- Give the ability to create a log file.
 - Write better tests.
-- Ensure that we are compatible with Node 8.
-- Rewrite the Strapi core to improve performances and startup time.
+
+`strapi@alpha.7` *(expected release date: 31/10/2017)*:
+- [Plugin] Users & groups (with full authentication process).
+- Give the ability to create a log file.

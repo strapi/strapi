@@ -14,7 +14,7 @@ const path = require('path');
 const beautify = require('js-beautify').js_beautify;
 
 // Local utilities.
-const dictionary = require('strapi-utils').dictionary;
+const dictionary = require('./utils/dictionary');
 
 /**
  * Runs after this generator has finished
