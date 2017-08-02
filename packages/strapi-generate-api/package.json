@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.4",
-    "pluralize": "^3.1.0"
+    "pluralize": "^6.0.0"
   },
   "scripts": {
     "prepublish": "npm prune"
