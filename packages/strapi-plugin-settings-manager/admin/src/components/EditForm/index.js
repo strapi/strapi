@@ -14,29 +14,31 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   render() {
     return (
       <div className={styles.editForm}>
-        <div className={styles.formContainer}>
-          {map(this.props.sections, (section, key) => {
-            let line;
-            // display hr only if next section
-            if (key + 1 < this.props.sections.length) {
-              line = <hr />;
-            }
-            return (
-              <div key={key}>
-                <EditFormSection
-                  section={section}
-                  values={this.props.values}
-                  handleChange={this.props.handleChange}
-                />
-                {line}
-              </div>
-            )
-          })}
-        </div>
-        <div className={styles.buttonContainer}>
-          <Button label={"cancel"} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
-          <Button type="submit" label={"save"} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
-        </div>
+        <form onSubmit={this.props.handleSubmit}>
+          <div className={styles.formContainer}>
+            {map(this.props.sections, (section, key) => {
+              let line;
+              // display hr only if next section
+              if (key + 1 < this.props.sections.length) {
+                line = <hr />;
+              }
+              return (
+                <div key={key}>
+                  <EditFormSection
+                    section={section}
+                    values={this.props.values}
+                    handleChange={this.props.handleChange}
+                  />
+                  {line}
+                </div>
+              )
+            })}
+          </div>
+          <div className={styles.buttonContainer}>
+            <Button type="button" label={"cancel"} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
+            <Button type="submit" label={"save"} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+          </div>
+        </form>
       </div>
     );
   }

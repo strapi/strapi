@@ -77,9 +77,9 @@
   "list.languages.title.plural": "languages are available",
   "list.languages.default.languages": "Default language",
   "list.languages.set.languages": "Set to default",
-  "list.database.button.label": "Add a new connection",
-  "list.database.title.singular": "connection in this environment",
-  "list.database.title.plural": "connections in this environment",
+  "list.databases.button.label": "Add a new connection",
+  "list.databases.title.singular": "connection in this environment",
+  "list.databases.title.plural": "connections in this environment",
 
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",

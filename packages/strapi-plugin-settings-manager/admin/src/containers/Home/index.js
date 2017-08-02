@@ -120,7 +120,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.cancelChanges();
   }
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
+    e.preventDefault();
     const prevSettings = this.props.home.initialData;
     const body = {};
     const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
