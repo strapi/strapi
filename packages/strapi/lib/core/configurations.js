@@ -76,6 +76,10 @@ module.exports.app = async function() {
     // Set current connections.
     this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
 
+    if (this.config.language.enabled) {
+      this.config.language.locales = Object.keys(strapi.config.locales);
+    }
+
     // Template literal string.
     this.config = templateConfigurations(this.config);
 

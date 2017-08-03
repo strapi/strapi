@@ -46,7 +46,7 @@ module.exports = {
 
   databaseModel: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
-    const { env } = ctx.params;
+    const env = strapi.config.environment;
 
     const model = Service.databases('${name}', env);
 
@@ -101,7 +101,7 @@ module.exports = {
     const languages = Service.getLanguages();
     const availableLanguages = strapi.plugins['settings-manager'].services.languages;
 
-    if (_.find(languages, { name })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
+    if (_.find(languages, { name: _.lowerCase(name).replace(' ', '_') })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.languages.exist' }] }]);
     if (!_.find(availableLanguages, { value: name })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.languages.incorrect' }] }]);
 
     const filePath = path.join(strapi.config.appPath, 'config', 'locales', `${name}.json`);

@@ -547,7 +547,7 @@ module.exports = {
           {
             name: 'form.database.item.password',
             target: `database.connections.${name}.settings.password`,
-            type: 'string',
+            type: 'password',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
             validations: {}
           },
@@ -702,7 +702,7 @@ module.exports = {
     };
 
     const checkType = (input, { type, target, items }) => {
-      if ((type === 'string' || type === 'text') && !_.isString(input)) return errors.push({
+      if ((type === 'string' || type === 'text' || type === 'password') && !_.isString(input)) return errors.push({
         target: target,
         message: 'request.error.type.string'
       });

@@ -20,8 +20,8 @@ module.exports = strapi => {
     defaults: {
       language: {
         enabled: false,
-        defaultLocale: 'en_US',
-        locales: ['en_US'],
+        defaultLocale: 'en_us',
+        locales: ['en_us'],
         modes: ['query', 'subdomain', 'cookie', 'header', 'url', 'tld'],
         cookieName: 'locale'
       }
@@ -42,7 +42,7 @@ module.exports = strapi => {
               strapi.config.paths.config,
               'locales'
             ),
-            locales: strapi.config.middleware.settings.language.locales,
+            locales: Object.keys(strapi.config.locales),
             defaultLocale: strapi.config.middleware.settings.language.defaultLocale,
             modes: strapi.config.middleware.settings.language.modes,
             cookieName: strapi.config.middleware.settings.language.cookieName,
