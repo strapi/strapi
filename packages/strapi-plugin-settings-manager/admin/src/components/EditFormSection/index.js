@@ -25,24 +25,22 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                 {sectionName}
               </span>
             </div>
-            <form>
-              {map(this.props.section.items, (item, key) => {
+            {map(this.props.section.items, (item, key) => {
 
-                if (this.props.showNestedForm) {
-                  return (
-                    <div key={key}>
-                      {this.props.renderInput(item, key)}
-                      <EditFormSectionNested
-                        section={item.items}
-                        values={this.props.values}
-                        handleChange={this.props.handleChange}
-                      />
-                    </div>
-                  )
-                }
-                return this.props.renderInput(item, key);
-              })}
-            </form>
+              if (this.props.showNestedForm) {
+                return (
+                  <div key={key} style={{width: '100%'}}>
+                    {this.props.renderInput(item, key)}
+                    <EditFormSectionNested
+                      section={item.items}
+                      values={this.props.values}
+                      handleChange={this.props.handleChange}
+                    />
+                  </div>
+                )
+              }
+              return this.props.renderInput(item, key);
+            })}
           </div>
         </div>
       </div>
