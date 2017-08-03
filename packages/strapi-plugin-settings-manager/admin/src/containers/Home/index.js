@@ -42,6 +42,7 @@ import {
   changeInput,
   configFetch,
   databasesFetch,
+  databaseDelete,
   editSettings,
   languageDelete,
   languagesFetch,
@@ -204,7 +205,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.languageDelete(target.id);
   }
 
-  handleDatabaseDelete = () => {
+  handleDatabaseDelete = ({ target }) => {
+    console.log(target);
+    this.props.databaseDelete(target.id, this.props.params.env);
     console.log('will detele');
   }
 
@@ -438,6 +441,7 @@ function mapDispatchToProps(dispatch) {
       changeDefaultLanguage,
       changeInput,
       configFetch,
+      databaseDelete,
       databasesFetch,
       editSettings,
       languageDelete,
@@ -454,6 +458,7 @@ Home.propTypes = {
   changeDefaultLanguage: React.PropTypes.func,
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
+  databaseDelete: React.PropTypes.func,
   databasesFetch: React.PropTypes.func,
   editSettings: React.PropTypes.func,
   environments: React.PropTypes.array,

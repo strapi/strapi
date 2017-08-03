@@ -16,6 +16,7 @@ import {
   NEW_LANGUAGE_POST,
   DATABASES_FETCH,
   NEW_DATABASE_POST,
+  DATABASE_DELETE,
 } from './constants';
 
 import {
@@ -25,6 +26,29 @@ import {
   languageActiontSucceded,
   databaseActionSucceeded,
 } from './actions';
+
+export function* deleteDatabase(action) {
+  try {
+    const opts = { method: 'DELETE' };
+
+    const requestUrl = `settings-manager/configurations/databases/${action.databaseToDelete}/${action.endPoint}`;
+
+    yield call(request, requestUrl, opts);
+
+    // TODO remove counter
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 4000);
+    });
+
+    yield put(databaseActionSucceeded());
+
+  } catch(error) {
+    console.log(error);
+    window.Strapi.notification.error('an error occured');
+  }
+}
 
 export function* deleteLanguage(action) {
   try {
@@ -202,6 +226,7 @@ export function* defaultSaga() {
   const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
   const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
   const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
+  const deleteDatabaseWatcher = yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
@@ -211,6 +236,7 @@ export function* defaultSaga() {
   yield cancel(deleteLanguageWatcher);
   yield cancel(loadDatabasesWatcher);
   yield cancel(postDatabaseWatcher);
+  yield cancel(deleteDatabaseWatcher);
 
 }
 

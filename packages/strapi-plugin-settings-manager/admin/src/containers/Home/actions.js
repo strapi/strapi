@@ -23,6 +23,7 @@ import {
   DATABASES_FETCH_SUCCEEDED,
   NEW_DATABASE_POST,
   DATABASE_ACTION_SUCCEEDED,
+  DATABASE_DELETE,
 } from './constants';
 
 export function defaultAction() {
@@ -190,5 +191,13 @@ export function newDatabasePost(endPoint, data) {
 export function databaseActionSucceeded() {
   return {
     type: DATABASE_ACTION_SUCCEEDED,
+  };
+}
+
+export function databaseDelete(databaseToDelete, endPoint) {
+  return {
+    type: DATABASE_DELETE,
+    databaseToDelete,
+    endPoint,
   };
 }

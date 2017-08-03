@@ -239,11 +239,11 @@ module.exports = {
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
     if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
 
-    const connections = _.clone(strapi.config.environments[env].databases.connections);
+    const connections = _.clone(strapi.config.environments[env].database.connections);
     connections[name] = undefined;
 
-    const params = { databases: { connections }};
-    const items = [{ target: 'databases.connections' }];
+    const params = { database: { connections }};
+    const items = [{ target: 'database.connections' }];
 
     strapi.reload.isWatching = false;
 
