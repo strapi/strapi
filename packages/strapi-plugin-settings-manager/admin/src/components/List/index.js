@@ -16,7 +16,7 @@
 */
 
 import React from 'react';
-import { map } from 'lodash';
+import { forEach, has, map} from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -29,16 +29,55 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     super(props);
     this.state = {
       modal: false,
+      isPopUpFormValid: true,
+      requiredInputs: [],
     };
+  }
+
+  componentDidMount() {
+    const requiredInputs = [];
+    forEach(this.props.sections, (section) => {
+      forEach(section.items, (item) => {
+        if (has(item.validations, 'required')) {
+          requiredInputs.push( item.target );
+        }
+      });
+    });
+
+    this.setState({ requiredInputs });
+
+    forEach(requiredInputs, (inputTarget) => {
+      if (!has(this.props.values, inputTarget)) {
+        this.setState({ isPopUpFormValid: false });
+      }
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.values !== this.props.values) {
+      forEach(this.state.requiredInputs, (inputTarget) => { // eslint-disable-line consistent-return
+        if (has(nextProps.values, inputTarget) && nextProps.values[inputTarget] !== "") {
+          this.setState({ isPopUpFormValid: true });
+        } else {
+          this.setState({ isPopUpFormValid: false });
+          return false;
+        }
+      });
+    }
   }
 
   toggle = () => {
     this.setState({ modal: !this.state.modal });
   }
 
-  handleSubmit = () => {
-    this.setState({ modal: !this.state.modal });
-    this.props.handleListPopUpSubmit();
+  handleSubmit = (e) => {
+    e.preventDefault();
+    // this.setState({ modal: !this.state.modal });
+
+    if (this.state.isPopUpFormValid) {
+      this.setState({ modal: !this.state.modal });
+      this.props.handleListPopUpSubmit(e);
+    }
   }
 
   render() {
@@ -87,14 +126,16 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               <FormattedMessage {...{id: this.props.listButtonLabel}} />
             </ModalHeader>
             <div className={styles.bordered} />
-            <ModalBody className={styles.modalBody}>
-              <PopUpForm {...this.props} />
-            </ModalBody>
-            <ModalFooter className={`${styles.noBorder} ${styles.flexStart} ${styles.modalFooter}`}>
-              {/* TODO change tthis.toggle => this.props.addLanguage */}
-              <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
-              <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
-            </ModalFooter>
+            <form onSubmit={this.handleSubmit}>
+
+              <ModalBody className={styles.modalBody}>
+                <PopUpForm {...this.props} />
+              </ModalBody>
+              <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
+                <Button type="submit" onClick={this.handleSubmit} className={styles.primary} disabled={!this.state.isPopUpFormValid}>Save</Button>{' '}
+                <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
+              </ModalFooter>
+            </form>
           </Modal>
         </div>
       </div>
@@ -116,6 +157,8 @@ List.propTypes = {
     React.PropTypes.bool,
     React.PropTypes.func,
   ]),
+  sections: React.PropTypes.array,
+  values: React.PropTypes.object,
 }
 
 export default List;

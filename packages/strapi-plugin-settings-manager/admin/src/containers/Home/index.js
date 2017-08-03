@@ -88,7 +88,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       }
     } else if (this.props.params.env !== nextProps.params.env && nextProps.params.env && this.props.params.env) {
       // get data if params env updated
-      this.props.configFetch(`${this.props.params.slug}/${nextProps.params.env}`);
+      this.handleFetch(nextProps);
     }
   }
 
@@ -96,6 +96,41 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (prevProps.home.didCreatedNewLanguage !== this.props.home.didCreatedNewLanguage) {
       this.handleFetch(this.props);
     }
+  }
+
+  /* eslint-disable react/sort-comp */
+  /* eslint-disable jsx-a11y/no-static-element-interactions */
+  addConnection = (e) => {
+    e.preventDefault();
+    // TODO add connection
+    console.log('added');
+  }
+
+  changeDefaultLanguage = ({ target }) => {
+    // create new object configsDisplay based on store property configsDisplay
+    const configsDisplay = {
+      name: this.props.home.configsDisplay.name,
+      description: this.props.home.configsDisplay.description,
+      sections: [],
+    };
+
+    // Find the index of the new setted language
+    const activeLanguageIndex = findIndex(this.props.home.configsDisplay.sections, ['name', target.id]);
+
+    forEach(this.props.home.configsDisplay.sections, (section, key) => {
+      // set all Language active state to false
+      if (key !== activeLanguageIndex) {
+        configsDisplay.sections.push({ name: section.name, active: false });
+      } else {
+        // set the new language active state to true
+        configsDisplay.sections.push({ name: section.name, active: true });
+      }
+    });
+
+    // reset all the configs to ensure component is updated
+    this.props.changeDefaultLanguage(configsDisplay, target.id);
+    // Edit the new config
+    this.props.editSettings({ 'i18n.i18n.defaultLocale': target.id }, 'i18n');
   }
 
   handleFetch(props) {
@@ -151,47 +186,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     console.log('will detele');
   }
 
-  addLanguage = () => {
-    this.props.newLanguagePost();
-  }
-
-  showDatabaseModal = () => {
-    // allow state here just for modal purpose
-    this.setState({ modal: !this.state.modal });
-  }
-
-  changeDefaultLanguage = ({ target }) => {
-    // create new object configsDisplay based on store property configsDisplay
-    const configsDisplay = {
-      name: this.props.home.configsDisplay.name,
-      description: this.props.home.configsDisplay.description,
-      sections: [],
-    };
-
-    // Find the index of the new setted language
-    const activeLanguageIndex = findIndex(this.props.home.configsDisplay.sections, ['name', target.id]);
-
-    forEach(this.props.home.configsDisplay.sections, (section, key) => {
-      // set all Language active state to false
-      if (key !== activeLanguageIndex) {
-        configsDisplay.sections.push({ name: section.name, active: false });
-      } else {
-        // set the new language active state to true
-        configsDisplay.sections.push({ name: section.name, active: true });
-      }
-    });
-
-    // reset all the configs to ensure component is updated
-    this.props.changeDefaultLanguage(configsDisplay, target.id);
-    // Edit the new config
-    this.props.editSettings({ 'i18n.i18n.defaultLocale': target.id }, 'i18n');
-  }
-
-  // Hide database modal
-  toggle = () => {
-    this.setState({ modal: !this.state.modal });
-  }
-
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => {
     // assign the target id the language name to prepare for delete
@@ -238,12 +232,38 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
+  renderPopUpFormDatabase = (section, props, popUpStyles) => (
+    map(section.items, (item, key) => {
+      const isActive = props.values[item.target] ?
+        <div className={popUpStyles.rounded}><i className="fa fa-check" /></div> : '';
+
+      if (item.name === 'form.database.item.default') {
+        return (
+          <div
+            key={key}
+            className={popUpStyles.defaultConnection}
+            id={item.target}
+            onClick={this.setDefaultConnectionDb}
+          >
+            {item.name}{isActive}
+          </div>
+        );
+      }
+      return (
+        props.renderInput(item, key)
+      );
+    })
+  )
+
+  setDefaultConnectionDb = (e) => {
+    const target = { name: e.target.id, value: !this.props.home.modifiedData[e.target.id] }
+    this.handleChange({target});
+  }
+
   renderPopUpFormLanguage = (section, props) => (
     map(section.items, (item, key) => (
       <div key={key}>
-        <form>
-          {props.renderInput(item, key)}
-        </form>
+        {props.renderInput(item, key)}
       </div>
     ))
   )
@@ -259,7 +279,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       default:
         provider = 'N/A';
     }
-    /* eslint-disable jsx-a11y/no-static-element-interactions */
+
     return (
       <li key={key}>
         <div className={listStyles.flexLi}>
@@ -283,13 +303,15 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
               Databases
             </ModalHeader>
             <div className={listStyles.bordered} />
-            <ModalBody className={listStyles.modalBody}>
-            </ModalBody>
-            <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
-              {/* TODO change tthis.toggle => this.props.addLanguage */}
-              <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
-              <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
-            </ModalFooter>
+            <form>
+
+              <ModalBody className={listStyles.modalBody}>
+              </ModalBody>
+              <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
+                <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
+                <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
+              </ModalFooter>
+            </form>
           </Modal>
         </div>
       </li>
@@ -305,23 +327,35 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const listTitle = this.props.params.slug === 'languages' || 'databases' ? this.renderListTitle() : '';
     const listButtonLabel = this.props.params.slug === 'languages' || 'databases' ? this.renderListButtonLabel() : '';
 
-    // sections is the props used by EditForm in case of list of table rendering we need to change its value
-    const sections = this.props.params.slug === 'languages' ? this.props.home.listLanguages.sections : this.props.home.configsDisplay.sections;
+    // check if HeaderNav component needs to render a form or a list
+    const renderListComponent = this.props.params.slug === 'databases';
 
+    let handleListPopUpSubmit;
+    // sections is the props used by EditForm in case of list of table rendering we need to change its value
+    let sections;
+    let renderPopUpForm = false;
+    let renderRow = false;
+
+    switch (this.props.params.slug) {
+      case 'languages':
+        sections = this.props.home.listLanguages.sections;
+        // custom rendering for PopUpForm
+        renderPopUpForm = this.renderPopUpFormLanguage;
+        renderRow = this.renderRowLanguage;
+        handleListPopUpSubmit = this.props.newLanguagePost;
+        break;
+      case 'databases':
+        sections = this.props.home.addDatabaseSection.sections;
+        renderPopUpForm = this.renderPopUpFormDatabase
+        handleListPopUpSubmit = this.addConnection;
+        renderRow = this.renderRowDatabase;
+        break;
+      default:
+        sections = this.props.home.configsDisplay.sections;
+    }
 
     // custom selectOptions for languages
     const selectOptions = this.props.params.slug === 'languages' ? this.props.home.listLanguages : [];
-
-    // custom rendering for PopUpForm
-    const renderPopUpForm = this.props.params.slug === 'languages' ? this.renderPopUpFormLanguage : false;
-
-    let renderRow = false;
-
-    if (this.props.params.slug === 'languages') {
-      renderRow = this.renderRowLanguage;
-    } else if (this.props.params.slug === 'databases') {
-      renderRow = this.renderRowDatabase;
-    }
 
     return (
       <Component
@@ -338,12 +372,26 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         listTitle={listTitle}
         listButtonLabel={listButtonLabel}
         handlei18n
-        handleListPopUpSubmit={this.addLanguage}
+        handleListPopUpSubmit={handleListPopUpSubmit}
         selectOptions={selectOptions}
         renderPopUpForm={renderPopUpForm}
+        renderListComponent={renderListComponent}
       />
     );
   }
+
+  showDatabaseModal = () => {
+    // allow state here just for modal purpose
+    this.setState({ modal: !this.state.modal });
+  }
+
+
+  // Hide database modal
+  toggle = () => {
+    this.setState({ modal: !this.state.modal });
+  }
+
+
 
   render() {
     if (this.props.home.loading) {

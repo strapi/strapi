@@ -155,15 +155,21 @@ export function databasesFetch(environment) {
   };
 }
 
-export function databasesFetchSucceeded(data) {
+export function databasesFetchSucceeded(listDatabases, appDatabases) {
   const configsDisplay = {
     name: 'form.databases.name',
     description: 'form.databases.description',
-    sections: data.databases,
+    sections: listDatabases.databases,
+  };
+
+  const modifiedData = {
+    'databases.defaultConnection': false,
   };
 
   return {
     type: DATABASES_FETCH_SUCCEEDED,
     configsDisplay,
+    appDatabases,
+    modifiedData,
   };
 }

@@ -83,12 +83,14 @@
 }
 
 .primary {
+  font-family: Lato;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   color: white;
   width: 15rem;
 }
 
 .secondary {
+  font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   margin-left: 1.9rem!important;
@@ -128,14 +130,17 @@
   margin-left: 25%;
   width: 50%!important;
   max-width: none;
+  position: relative;
 }
 
 .modalBody {
   padding: 0;
   padding-top: .5rem;
+
 }
 
 .modalFooter {
+
   margin-top: 4.5rem;
   margin-bottom: 3.5rem;
   padding-left: 3.1rem !important;

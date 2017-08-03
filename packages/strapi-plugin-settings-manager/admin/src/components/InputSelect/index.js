@@ -10,6 +10,14 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class InputSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    // init the select value
+    if (this.props.selectOptions[0].value !== '') {
+      const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
+      this.props.handleChange({ target });
+    }
+  }
+
   render() {
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
 
@@ -44,7 +52,10 @@ InputSelect.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   handleChange: React.PropTypes.func.isRequired,
   name: React.PropTypes.string.isRequired,
-  selectOptions: React.PropTypes.array,
+  selectOptions: React.PropTypes.oneOfType([
+    React.PropTypes.array,
+    React.PropTypes.object, // TODO remove
+  ]),
   target: React.PropTypes.string,
   value: React.PropTypes.string,
 };

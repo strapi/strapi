@@ -46,7 +46,7 @@ class App extends React.Component {
         <div className={`container-fluid ${styles.noPadding}`}>
           <div className={styles.baseline}></div>
           <div className="row">
-            <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} />
+            <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} envParams={this.props.params.env} />
             {React.Children.toArray(content)}
           </div>
         </div>
@@ -66,6 +66,7 @@ App.propTypes = {
   exposedComponents: React.PropTypes.object.isRequired,
   loading: React.PropTypes.bool,
   menuFetch: React.PropTypes.func,
+  params: React.PropTypes.object,
   sections: React.PropTypes.array.isRequired,
 };
 

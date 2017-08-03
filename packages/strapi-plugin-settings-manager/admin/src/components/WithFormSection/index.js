@@ -95,6 +95,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     // custom handleChange props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
+
     return (
       <Input
         customBootstrapClass={customBootstrapClass}
