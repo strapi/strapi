@@ -479,7 +479,7 @@ module.exports = {
         items: [
           {
             name: 'form.database.item.name',
-            target: `databases.connections.${name}.name`,
+            target: `database.connections.${name}.name`,
             type: 'string',
             value: name,
             validations: {
@@ -487,26 +487,39 @@ module.exports = {
             }
           },
           {
-            name: 'form.database.item.provider',
-            target: `databases.connections.${name}.connector`,
-            type: 'select',
+            name: 'form.database.item.connector',
+            target: `database.connections.${name}.connector`,
+            type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.connector`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.database.item.client',
+            target: `database.connections.${name}.settings.client`,
+            type: 'select',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.client`, null),
             items: [
               {
                 name: 'form.database.item.provider.mongo',
-                value: 'strapi-mongoose',
+                value: 'mongo',
               },
               {
                 name: 'form.database.item.provider.postgres',
-                value: 'strapi-bookshelf',
+                value: 'postgres',
               },
               {
                 name: 'form.database.item.provider.mysql',
-                value: 'strapi-bookshelf',
+                value: 'mysql',
               },
               {
                 name: 'form.database.item.provider.sqlite3',
-                value: 'strapi-bookshelf',
+                value: 'sqlite3',
+              },
+              {
+                name: 'form.database.item.provider.redis',
+                value: 'redis',
               }
             ],
             validations: {
@@ -515,7 +528,7 @@ module.exports = {
           },
           {
             name: 'form.database.item.host',
-            target: `databases.connections.${name}.settings.host`,
+            target: `database.connections.${name}.settings.host`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.host`, null),
             validations: {
@@ -524,7 +537,7 @@ module.exports = {
           },
           {
             name: 'form.database.item.username',
-            target: `databases.connections.${name}.settings.username`,
+            target: `database.connections.${name}.settings.username`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.username`, null),
             validations: {
@@ -533,14 +546,14 @@ module.exports = {
           },
           {
             name: 'form.database.item.password',
-            target: `databases.connections.${name}.settings.password`,
+            target: `database.connections.${name}.settings.password`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
             validations: {}
           },
           {
             name: 'form.database.item.database',
-            target: `databases.connections.${name}.settings.database`,
+            target: `database.connections.${name}.settings.database`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.database`, null),
             validations: {
@@ -554,7 +567,7 @@ module.exports = {
         items: [
           {
             name: 'form.database.item.default',
-            target: `databases.defaultConnection`,
+            target: `database.defaultConnection`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.defaultConnection`, null),
             validations: {
@@ -588,7 +601,9 @@ module.exports = {
     const databases = [];
 
     _.forEach(strapi.config.environments[env].database.connections, (connection, name) =>  databases.push({
-      provider: _.get(connection, 'connector'),
+      connector: _.get(connection, 'connector'),
+      letter: strapi.plugins['settings-manager'].services.settingsmanager.getClientLetter(_.get(connection, 'settings.client')),
+      color: strapi.plugins['settings-manager'].services.settingsmanager.getClientColor(_.get(connection, 'settings.client')),
       name,
       host: _.get(connection, 'settings.host'),
       database: _.get(connection, 'settings.database'),
@@ -596,6 +611,54 @@ module.exports = {
     }));
 
     return databases;
+  },
+
+  getClientConnector: client => {
+    const bookshelfClients = ['postgres', 'mysql', 'sqlite3'];
+    const mongooseClients = ['mongo'];
+    const redisClients = ['redis'];
+
+    let connector;
+    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-bookshelf';
+    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-mongoose';
+    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-redis';
+
+    return connector;
+  },
+
+  getClientColor: client => {
+    switch (client) {
+      case 'postgres':
+        return '#ffb500';
+        break;
+      case 'mysql':
+        return '#4479a1';
+        break;
+      case 'redis':
+        return '#ff5d00';
+        break;
+      case 'mongo':
+        return '#43b121';
+        break;
+      case 'sqlite3':
+        return '#006fff';
+        break;
+      default:
+        return '#000000';
+    }
+  },
+
+  getClientLetter: client => {
+    switch (client) {
+      case 'postgres':
+        return 'PG';
+        break;
+      case 'mysql':
+        return 'MY';
+        break;
+      default:
+        return _.upperCase(_.head(client));
+    }
   },
 
   getItems: model => {
@@ -774,9 +837,9 @@ module.exports = {
   },
 
   installDependency: (params, name) => {
-    const module = _.get(params, `databases.connections.${name}.connector`);
-    const installed = _.indexOf(_.keys(strapi.config.dependencies), module) !== -1;
+    const connector = _.get(params, `database.connections.${name}.connector`);
+    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
-    if (!installed) exec(`npm install ${module} --save`);
+    if (connector && !installed) exec(`npm install ${connector} --save`);
   }
 };

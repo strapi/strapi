@@ -65,8 +65,7 @@ module.exports = {
   update: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
-    let params = ctx.request.body.fields;
-
+    let params = ctx.request.body;
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
 
@@ -155,7 +154,7 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
-    const [name] = _.keys(params.databases.connections);
+    const [name] = _.keys(params.database.connections);
 
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
     if (!name || _.find(Service.getDatabases(env), { name })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.exist' }] }]);
@@ -167,6 +166,8 @@ module.exports = {
 
     let validationErrors;
     [params, validationErrors] = Service.paramsValidation(params, items);
+
+    params.database.connections[name].connector = Service.getClientConnector(params.database.connections[name].settings.client);
 
     if (!_.isEmpty(validationErrors)) return ctx.badRequest(null, Service.formatErrors(validationErrors));
 
@@ -201,13 +202,13 @@ module.exports = {
 
     if (!_.isEmpty(validationErrors)) return ctx.badRequest(null, Service.formatErrors(validationErrors));
 
-    const newName = _.get(params, `databases.connections.${name}.name`);
+    const newName = _.get(params, `database.connections.${name}.name`);
 
     if (newName && newName !== name) {
-      params = _.assign(_.clone(strapi.config.environments[env].databases.connections[name]), params.databases.connections[name]);
+      params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
       delete params.name;
 
-      const connections = _.clone(strapi.config.environments[env].databases.connections);
+      const connections = _.clone(strapi.config.environments[env].database.connections);
       connections[newName] = params;
       connections[name] = undefined;
 
@@ -216,9 +217,13 @@ module.exports = {
       items = [{ target: 'databases.connections' }];
     }
 
+    const newClient = _.get(params, `database.connections.${name}.settings.client`);
+
+    if (newClient) params.database.connections[name].connector = Service.getClientConnector(newClient);
+
     strapi.reload.isWatching = false;
 
-    Service.installDependency(params, newName);
+    Service.installDependency(params, name);
 
     const updateErrors = Service.updateSettings(params, items, env);
 
