@@ -14,7 +14,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
     return (
       <div className={`${styles.pluginLeftMenu} col-md-3`}>
         {map(this.props.sections, (section, index) => (
-          <PluginLeftMenuSection  key={index} section={section} environments={this.props.environments} />
+          <PluginLeftMenuSection  key={index} section={section} environments={this.props.environments} envParams={this.props.envParams} />
         ))}
       </div>
     );
@@ -23,6 +23,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
 
 PluginLeftMenu.propTypes = {
   environments: React.PropTypes.array,
+  envParams: React.PropTypes.string,
   sections: React.PropTypes.array.isRequired,
 };
 

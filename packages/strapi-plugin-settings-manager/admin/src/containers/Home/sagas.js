@@ -71,11 +71,15 @@ export function* fetchDatabases(action) {
       method: 'GET',
     };
 
-    const requestUrl = `/settings-manager/configurations/databases/${action.environment}`;
+    const requestUrlListDatabases = `/settings-manager/configurations/databases/${action.environment}`;
+    const requestUrlAppDatabases = '/settings-manager/configurations/database/model';
 
-    const data = yield call(request, requestUrl, opts);
+    const [listDatabasesData, appDatabaseData] = yield [
+      call(request, requestUrlListDatabases, opts),
+      call(request, requestUrlAppDatabases, opts),
+    ];
 
-    yield put(databasesFetchSucceeded(data));
+    yield put(databasesFetchSucceeded(listDatabasesData, appDatabaseData));
 
   } catch(error) {
     window.Strapi.notification.error('An error occurred');
@@ -128,6 +132,7 @@ export function* postLanguage() {
     yield put(languageActiontSucceded());
 
   } catch(error) {
+    console.log(error);
     // TODO handle error i18n
     window.Strapi.notification.error(error);
   }

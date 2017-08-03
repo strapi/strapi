@@ -23,6 +23,7 @@ const initialState = fromJS({
   initialData: Map(),
   modifiedData: Map(),
   listLanguages: Map(),
+  addDatabaseSection: Map(),
   didCreatedNewLanguage: false,
 });
 
@@ -41,9 +42,10 @@ function homeReducer(state = initialState, action) {
     case DATABASES_FETCH_SUCCEEDED:
       return state
         .set('configsDisplay', OrderedMap(action.configsDisplay))
+        .set('addDatabaseSection', OrderedMap(action.appDatabases))
         .set('loading', false)
         .set('initialData', Map())
-        .set('modifiedData', Map());
+        .set('modifiedData', Map(action.modifiedData));
     case LANGUAGES_FETCH_SUCCEEDED:
       return state
         .set('loading', false)
