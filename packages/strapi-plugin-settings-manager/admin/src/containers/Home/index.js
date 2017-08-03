@@ -20,6 +20,8 @@ import {
   includes,
   isObject,
   map,
+  omit,
+  replace,
   toNumber,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -103,7 +105,22 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   addConnection = (e) => {
     e.preventDefault();
     // TODO add connection
-    console.log('added');
+    const newData = {};
+    /* eslint-disable no-template-curly-in-string */
+    const dbName = get(this.props.home.modifiedData, 'database.connections.${name}.name');
+    map(this.props.home.modifiedData, (data, key) => {
+      const k = replace(key, '${name}', dbName);
+      if (key !== 'database.connections.${name}.name') {
+        newData[k] = data;
+      }
+    });
+
+    /* eslint-enable no-template-curly-in-string */
+    if (newData['database.defaultConnection']) {
+      newData['database.defaultConnection'] = dbName;
+    } else {
+      omit(newData, 'database.defaultConnection');
+    }
   }
 
   changeDefaultLanguage = ({ target }) => {
@@ -255,11 +272,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     })
   )
 
-  setDefaultConnectionDb = (e) => {
-    const target = { name: e.target.id, value: !this.props.home.modifiedData[e.target.id] }
-    this.handleChange({target});
-  }
-
   renderPopUpFormLanguage = (section, props) => (
     map(section.items, (item, key) => (
       <div key={key}>
@@ -268,55 +280,42 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     ))
   )
 
-  renderRowDatabase = (props, key, listStyles) => {
-    let provider;
-
-    // TODO provider
-    switch(props.provider) {
-      case 'strapi-mongoose':
-        provider = 'M';
-        break;
-      default:
-        provider = 'N/A';
-    }
-
-    return (
-      <li key={key}>
-        <div className={listStyles.flexLi}>
-          <div className={listStyles.flexed}>
-            <div className={`${listStyles.squared} ${listStyles.orange}`}>
-              {provider}
-            </div>
-            <div className={listStyles.label}>{props.name}</div>
+  renderRowDatabase = (props, key, listStyles) => (
+    <li key={key}>
+      <div className={listStyles.flexLi}>
+        <div className={listStyles.flexed}>
+          <div className={listStyles.squared} style={{ backgroundColor: props.color }}>
+            {props.letter}
           </div>
-          <div>{props.database}</div>
-          <div className={listStyles.centered}>{props.host}</div>
-          <div className={listStyles.flexed}>
-
-            <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
-            <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
-          </div>
+          <div className={listStyles.label}>{props.name}</div>
         </div>
-        <div>
-          <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
-            <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
-              Databases
-            </ModalHeader>
-            <div className={listStyles.bordered} />
-            <form>
+        <div>{props.database}</div>
+        <div className={listStyles.centered}>{props.host}</div>
+        <div className={listStyles.flexed}>
 
-              <ModalBody className={listStyles.modalBody}>
-              </ModalBody>
-              <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
-                <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
-                <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
-              </ModalFooter>
-            </form>
-          </Modal>
+          <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
+          <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
         </div>
-      </li>
-    );
-  }
+      </div>
+      <div>
+        <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
+          <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
+            Databases
+          </ModalHeader>
+          <div className={listStyles.bordered} />
+          <form>
+
+            <ModalBody className={listStyles.modalBody}>
+            </ModalBody>
+            <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
+              <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
+              <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
+            </ModalFooter>
+          </form>
+        </Modal>
+      </div>
+    </li>
+  )
 
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
@@ -385,6 +384,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.setState({ modal: !this.state.modal });
   }
 
+  setDefaultConnectionDb = (e) => {
+    const target = { name: e.target.id, value: !this.props.home.modifiedData[e.target.id] }
+    this.handleChange({target});
+  }
 
   // Hide database modal
   toggle = () => {

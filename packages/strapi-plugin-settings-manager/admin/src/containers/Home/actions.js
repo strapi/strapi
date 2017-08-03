@@ -4,7 +4,7 @@
 *
 */
 
-import { forEach, has } from 'lodash';
+import { forEach, has, remove } from 'lodash';
 import {
   CONFIG_FETCH,
   LANGUAGES_FETCH,
@@ -155,7 +155,10 @@ export function databasesFetch(environment) {
   };
 }
 
-export function databasesFetchSucceeded(listDatabases, appDatabases) {
+export function databasesFetchSucceeded(listDatabases, availableDatabases) {
+  // form.database.item.connector
+  const appDatabases = availableDatabases;
+  remove(appDatabases.sections[0].items, (item) => item.name === 'form.database.item.connector')
   const configsDisplay = {
     name: 'form.databases.name',
     description: 'form.databases.description',
@@ -163,7 +166,7 @@ export function databasesFetchSucceeded(listDatabases, appDatabases) {
   };
 
   const modifiedData = {
-    'databases.defaultConnection': false,
+    'database.defaultConnection': false,
   };
 
   return {
