@@ -46,7 +46,7 @@ module.exports = {
 
   databaseModel: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
-    const { env } = ctx.params;
+    const env = strapi.config.environment;
 
     const model = Service.databases('${name}', env);
 
