@@ -76,7 +76,7 @@ function homeReducer(state = initialState, action) {
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state
         .set('specificDatabase', OrderedMap(action.database))
-        .set('modifiedData', Map(action.data))
+        .set('initialData', Map(action.data))
         .set('modifiedData', Map(action.data));
     default:
       return state;

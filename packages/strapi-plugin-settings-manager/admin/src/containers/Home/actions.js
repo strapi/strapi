@@ -26,6 +26,7 @@ import {
   DATABASE_DELETE,
   SPECIFIC_DATABASE_FETCH,
   SPECIFIC_DATABASE_FETCH_SUCCEEDED,
+  DATABASE_EDIT,
 } from './constants';
 
 export function defaultAction() {
@@ -218,5 +219,15 @@ export function specificDatabaseFetchSucceeded(database) {
     type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
     database,
     data,
+  };
+}
+
+
+export function databaseEdit(data, apiUrl) {
+  console.log(apiUrl);
+  return {
+    type: DATABASE_EDIT,
+    data,
+    apiUrl,
   };
 }

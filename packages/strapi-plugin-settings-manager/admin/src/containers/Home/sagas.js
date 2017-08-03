@@ -18,6 +18,7 @@ import {
   NEW_DATABASE_POST,
   DATABASE_DELETE,
   SPECIFIC_DATABASE_FETCH,
+  DATABASE_EDIT,
 } from './constants';
 
 import {
@@ -28,6 +29,38 @@ import {
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
 } from './actions';
+
+export function* editDatabase(action) {
+  try {
+    const body = {};
+
+    forEach(action.data, (value, key) => {
+      set(body, key, value);
+    });
+
+    const opts = {
+      method: 'PUT',
+      body,
+    };
+
+    const requestUrl = `/settings-manager/configurations/databases/${action.apiUrl}`;
+
+    yield call(request, requestUrl, opts);
+
+    // TODO remove counter
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 4000);
+    });
+
+    yield put(databaseActionSucceeded());
+
+  } catch(error) {
+    console.log(error);
+    window.Strapi.notification.error('An error occured');
+  }
+}
 
 export function* deleteDatabase(action) {
   try {
@@ -228,7 +261,7 @@ export function* fetchSpecificDatabase(action) {
     const requestUrl = `/settings-manager/configurations/databases/${action.databaseName}/${action.endPoint}`;
 
     const data = yield call(request, requestUrl, opts);
-    
+
     yield put(specificDatabaseFetchSucceeded(data));
 
   } catch(error) {
@@ -248,6 +281,7 @@ export function* defaultSaga() {
   const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
   const deleteDatabaseWatcher = yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
   const fetchSpecificDatabaseWatcher = yield fork(takeLatest, SPECIFIC_DATABASE_FETCH, fetchSpecificDatabase);
+  const editDatabaseWatcher = yield fork(takeLatest, DATABASE_EDIT, editDatabase);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
@@ -259,7 +293,7 @@ export function* defaultSaga() {
   yield cancel(postDatabaseWatcher);
   yield cancel(deleteDatabaseWatcher);
   yield cancel(fetchSpecificDatabaseWatcher);
-
+  yield cancel(editDatabaseWatcher);
 }
 
 // All sagas to be loaded

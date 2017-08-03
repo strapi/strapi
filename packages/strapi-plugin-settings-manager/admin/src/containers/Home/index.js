@@ -41,10 +41,10 @@ import {
   changeDefaultLanguage,
   changeInput,
   configFetch,
+  databaseEdit,
   databasesFetch,
   databaseDelete,
   editSettings,
-  // editDatabase,
   languageDelete,
   languagesFetch,
   newLanguagePost,
@@ -182,22 +182,41 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const prevSettings = this.props.home.initialData;
-    const body = {};
     const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
 
     // send only updated settings
-    forEach(this.props.home.modifiedData, (value, key) => {
-      if (value !== prevSettings[key]) {
-        body[key] = value;
-      }
-    });
+    const body = this.sendUpdatedParams();
 
     if (!isEmpty(body)) {
       this.props.editSettings(body, apiUrl);
     } else {
       window.Strapi.notification.error('Settings are equals');
     }
+  }
+
+  handleSubmitEditDatabase = (databaseName) => {
+    const body = this.sendUpdatedParams();
+    const apiUrl = `${databaseName}/${this.props.params.env}`;
+    console.log(body)
+    if (!isEmpty(body)) {
+      this.props.databaseEdit(body, apiUrl);
+      console.log('not empty');
+    } else {
+      window.Strapi.notification.error('Settings are equals');
+    }
+  }
+
+  sendUpdatedParams = () => {
+    const prevSettings = this.props.home.initialData;
+    const body = {};
+
+    forEach(this.props.home.modifiedData, (value, key) => {
+      if (value !== prevSettings[key]) {
+        body[key] = value;
+      }
+    });
+
+    return body;
   }
 
   handleLanguageDelete = ({ target }) => {
@@ -211,28 +230,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.databaseDelete(target.id, this.props.params.env);
   }
 
-
-  handleSubmitEditDatabase = (databaseName) => {
-    const prevSettings = this.props.home.initialData;
-    const body = {};
-    console.log(databaseName);
-    // const apiUrl = `${databaseName}/${this.props.params.env}`;
-
-    // TODO refacto
-    // send only updated settings
-    forEach(this.props.home.modifiedData, (value, key) => {
-      if (value !== prevSettings[key]) {
-        body[key] = value;
-      }
-    });
-
-    if (!isEmpty(body)) {
-      // this.props.editDatabase(body, apiUrl);
-      console.log('not empty');
-    } else {
-      window.Strapi.notification.error('Settings are equals');
-    }
-  }
 
 
   // custom Row rendering for the component List with params slug === languages
@@ -446,8 +443,8 @@ function mapDispatchToProps(dispatch) {
       changeInput,
       configFetch,
       databaseDelete,
+      databaseEdit,
       databasesFetch,
-      // editDatabase,
       editSettings,
       languageDelete,
       languagesFetch,
@@ -465,6 +462,7 @@ Home.propTypes = {
   changeInput: React.PropTypes.func,
   configFetch: React.PropTypes.func.isRequired,
   databaseDelete: React.PropTypes.func,
+  databaseEdit: React.PropTypes.func,
   databasesFetch: React.PropTypes.func,
   editSettings: React.PropTypes.func,
   environments: React.PropTypes.array,
