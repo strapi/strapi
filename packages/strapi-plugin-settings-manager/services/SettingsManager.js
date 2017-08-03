@@ -838,8 +838,8 @@ module.exports = {
 
   installDependency: (params, name) => {
     const connector = _.get(params, `database.connections.${name}.connector`);
-    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), module) !== -1;
+    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
-    if (connector && !installed) exec(`npm install ${module} --save`);
+    if (connector && !installed) exec(`npm install ${connector} --save`);
   }
 };
