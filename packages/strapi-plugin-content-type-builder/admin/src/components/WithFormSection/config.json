@@ -1,0 +1,5 @@
+{
+  "application.description": "col-md-6 offset-md-6 pull-md-6",
+  "application.version": "col-md-6 offset-md-6 pull-md-6",
+  "databases.connections.${name}.settings.host": "col-md-12"
+}

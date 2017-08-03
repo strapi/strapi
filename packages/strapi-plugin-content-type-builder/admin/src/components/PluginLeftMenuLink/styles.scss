@@ -1,0 +1,34 @@
+
+.pluginLeftMenuLink { /* stylelint-disable */
+  color: #2D3138;
+}
+
+li:not(:first-child) {
+  margin-top: 0.2rem;
+}
+
+.link {
+  display: block;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  padding-top: 1rem;
+  padding-left: .6rem;
+  min-height: 3.4rem;
+  border-left: 0.4rem solid transparent;
+  color: #2C3138 !important;
+  text-decoration: none !important;
+  line-height: 1.6rem;
+
+  > i {
+    margin-right: 1rem;
+  }
+}
+
+.linkActive {
+  height: 3.4rem;
+  border-radius: 0.2rem;
+  background-color: #E9EAEB;;
+  font-weight: bold;
+  text-decoration: none;
+  color: #2D3138 !important;
+}
