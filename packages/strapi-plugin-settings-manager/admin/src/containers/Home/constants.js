@@ -23,3 +23,5 @@ export const DATABASES_FETCH_SUCCEEDED = 'SettingsManager/Home/DATABASES_FETCH_S
 export const NEW_DATABASE_POST = 'SettingsManager/Home/NEW_DATABASE_POST';
 export const DATABASE_ACTION_SUCCEEDED = 'SettingsManager/Home/DATABASE_ACTION_SUCCEEDED';
 export const DATABASE_DELETE = 'SettingsManager/Home/DATABASE_DELETE';
+export const SPECIFIC_DATABASE_FETCH = 'SettingsManager/Home/SPECIFIC_DATABASE_FETCH';
+export const SPECIFIC_DATABASE_FETCH_SUCCEEDED = 'SettingsManager/Home/SPECIFIC_DATABASE_FETCH_SUCCEEDED'; 

@@ -24,6 +24,8 @@ import {
   NEW_DATABASE_POST,
   DATABASE_ACTION_SUCCEEDED,
   DATABASE_DELETE,
+  SPECIFIC_DATABASE_FETCH,
+  SPECIFIC_DATABASE_FETCH_SUCCEEDED,
 } from './constants';
 
 export function defaultAction() {
@@ -199,5 +201,22 @@ export function databaseDelete(databaseToDelete, endPoint) {
     type: DATABASE_DELETE,
     databaseToDelete,
     endPoint,
+  };
+}
+
+export function specificDatabaseFetch(databaseName, endPoint) {
+  return {
+    type: SPECIFIC_DATABASE_FETCH,
+    databaseName,
+    endPoint,
+  };
+}
+
+export function specificDatabaseFetchSucceeded(database) {
+  const data = getDataFromConfigs(database);
+  return {
+    type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
+    database,
+    data,
   };
 }

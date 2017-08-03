@@ -17,6 +17,7 @@ import {
   DATABASES_FETCH,
   NEW_DATABASE_POST,
   DATABASE_DELETE,
+  SPECIFIC_DATABASE_FETCH,
 } from './constants';
 
 import {
@@ -25,6 +26,7 @@ import {
   languagesFetchSucceeded,
   languageActiontSucceded,
   databaseActionSucceeded,
+  specificDatabaseFetchSucceeded,
 } from './actions';
 
 export function* deleteDatabase(action) {
@@ -217,6 +219,24 @@ export function* settingsEdit(action) {
   }
 }
 
+export function* fetchSpecificDatabase(action) {
+  try {
+    const opts = {
+      method: 'GET',
+    };
+
+    const requestUrl = `/settings-manager/configurations/databases/${action.databaseName}/${action.endPoint}`;
+
+    const data = yield call(request, requestUrl, opts);
+    
+    yield put(specificDatabaseFetchSucceeded(data));
+
+  } catch(error) {
+    console.log(error);
+    window.Strapi.notification.error('An error occured');
+  }
+}
+
 // Individual exports for testing
 export function* defaultSaga() {
   const loadConfigWatcher = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
@@ -227,6 +247,7 @@ export function* defaultSaga() {
   const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
   const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
   const deleteDatabaseWatcher = yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
+  const fetchSpecificDatabaseWatcher = yield fork(takeLatest, SPECIFIC_DATABASE_FETCH, fetchSpecificDatabase);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
@@ -237,6 +258,7 @@ export function* defaultSaga() {
   yield cancel(loadDatabasesWatcher);
   yield cancel(postDatabaseWatcher);
   yield cancel(deleteDatabaseWatcher);
+  yield cancel(fetchSpecificDatabaseWatcher);
 
 }
 

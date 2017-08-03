@@ -8,8 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-// modal
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+
 import {
   find,
   findIndex,
@@ -33,6 +32,7 @@ import Debug from 'components/Debug';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
+import RowDatabase from 'components/RowDatabase';
 
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 import selectHome from './selectors';
@@ -44,10 +44,12 @@ import {
   databasesFetch,
   databaseDelete,
   editSettings,
+  // editDatabase,
   languageDelete,
   languagesFetch,
   newLanguagePost,
   newDatabasePost,
+  specificDatabaseFetch,
 } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
@@ -206,10 +208,32 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleDatabaseDelete = ({ target }) => {
-    console.log(target);
     this.props.databaseDelete(target.id, this.props.params.env);
-    console.log('will detele');
   }
+
+
+  handleSubmitEditDatabase = (databaseName) => {
+    const prevSettings = this.props.home.initialData;
+    const body = {};
+    console.log(databaseName);
+    // const apiUrl = `${databaseName}/${this.props.params.env}`;
+
+    // TODO refacto
+    // send only updated settings
+    forEach(this.props.home.modifiedData, (value, key) => {
+      if (value !== prevSettings[key]) {
+        body[key] = value;
+      }
+    });
+
+    if (!isEmpty(body)) {
+      // this.props.editDatabase(body, apiUrl);
+      console.log('not empty');
+    } else {
+      window.Strapi.notification.error('Settings are equals');
+    }
+  }
+
 
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => {
@@ -258,6 +282,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
   renderPopUpFormDatabase = (section, props, popUpStyles) => (
+    // TODO handle display edit
     map(section.items, (item, key) => {
       const isActive = props.values[item.target] ?
         <div className={popUpStyles.rounded}><i className="fa fa-check" /></div> : '';
@@ -288,41 +313,19 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     ))
   )
 
-  renderRowDatabase = (props, key, listStyles) => (
-    <li key={key}>
-      <div className={listStyles.flexLi}>
-        <div className={listStyles.flexed}>
-          <div className={listStyles.squared} style={{ backgroundColor: props.color }}>
-            {props.letter}
-          </div>
-          <div className={listStyles.label}>{props.name}</div>
-        </div>
-        <div>{props.database}</div>
-        <div className={listStyles.centered}>{props.host}</div>
-        <div className={listStyles.flexed}>
-
-          <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} id={props.name} /></div>
-          <div className={listStyles.leftSpaced}><i id={props.name} className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
-        </div>
-      </div>
-      <div>
-        <Modal isOpen={this.state.modal} toggle={this.toggle} className={listStyles.modalPosition}>
-          <ModalHeader toggle={this.toggle} className={`${listStyles.noBorder} ${listStyles.padded} ${listStyles.mHeader}`}>
-            Databases
-          </ModalHeader>
-          <div className={listStyles.bordered} />
-          <form>
-
-            <ModalBody className={listStyles.modalBody}>
-            </ModalBody>
-            <ModalFooter className={`${listStyles.noBorder} ${listStyles.flexStart} ${listStyles.modalFooter}`}>
-              <Button onClick={this.handleSubmit} className={listStyles.primary}>Save</Button>{' '}
-              <Button onClick={this.toggle} className={listStyles.secondary}>Cancel</Button>
-            </ModalFooter>
-          </form>
-        </Modal>
-      </div>
-    </li>
+  renderRowDatabase = (props, key) => (
+    // const isDefaultConnection = this.props.home.modifiedData['database.defaultConnection'] === props.host;
+    <RowDatabase
+      key={key}
+      data={props}
+      getDatabase={this.getDatabase}
+      handleDatabaseDelete={this.handleDatabaseDelete}
+      sections={this.props.home.specificDatabase.sections}
+      values={this.props.home.modifiedData}
+      handleChange={this.handleChange}
+      renderPopUpForm={this.renderPopUpFormDatabase}
+      handleSubmit={this.handleSubmitEditDatabase}
+    />
   )
 
   renderComponent = () => {
@@ -387,9 +390,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     );
   }
 
-  showDatabaseModal = () => {
+  getDatabase = (databaseName) => {
     // allow state here just for modal purpose
-    this.setState({ modal: !this.state.modal });
+    this.props.specificDatabaseFetch(databaseName, this.props.params.env);
+    // this.setState({ modal: !this.state.modal });
   }
 
   setDefaultConnectionDb = (e) => {
@@ -443,11 +447,13 @@ function mapDispatchToProps(dispatch) {
       configFetch,
       databaseDelete,
       databasesFetch,
+      // editDatabase,
       editSettings,
       languageDelete,
       languagesFetch,
       newDatabasePost,
       newLanguagePost,
+      specificDatabaseFetch,
     },
     dispatch
   )
@@ -470,6 +476,7 @@ Home.propTypes = {
   newDatabasePost: React.PropTypes.func,
   newLanguagePost: React.PropTypes.func,
   params: React.PropTypes.object.isRequired,
+  specificDatabaseFetch: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

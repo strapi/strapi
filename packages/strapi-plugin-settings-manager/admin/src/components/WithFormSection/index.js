@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { forEach, has, isObject } from 'lodash';
+import { forEach, has, isObject , join, pullAt, split} from 'lodash';
 
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
@@ -88,12 +88,15 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     // retrieve options for the select input
     const selectOptions = props.type === 'enum' || props.type === 'select' ? props.items : [];
 
+    // custom check for dynamic keys used for databases
+    const dynamicTarget = join(pullAt(split(props.target, '.'),['0', '1', '3', '4']), '.');
+
     // check if the input has a nested form so it is displayed on the entire line
     const customBootstrapClass = this.state.hasNestedInput ?
       // bootstrap class to make the input displayed on the entire line
       'col-md-6 offset-md-6 pull-md-6' :
       // if the input hasn't a nested form but the config requires him to be displayed differently
-      config[props.target] || '';
+      config[props.target] || config[dynamicTarget] || '';
 
     // custom handleChange props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;

@@ -15,6 +15,7 @@ import {
   LANGUAGE_ACTION_SUCCEEDED,
   DATABASES_FETCH_SUCCEEDED,
   DATABASE_ACTION_SUCCEEDED,
+  SPECIFIC_DATABASE_FETCH_SUCCEEDED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -27,6 +28,7 @@ const initialState = fromJS({
   addDatabaseSection: Map(),
   didCreatedNewLanguage: false,
   didCreatedNewDb: false,
+  specificDatabase: OrderedMap(),
 });
 
 function homeReducer(state = initialState, action) {
@@ -46,6 +48,7 @@ function homeReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.configsDisplay))
         .set('didCreatedNewDb', false)
         .set('addDatabaseSection', OrderedMap(action.appDatabases))
+        .set('specificDatabase', OrderedMap())
         .set('loading', false)
         .set('initialData', Map())
         .set('modifiedData', Map(action.modifiedData));
@@ -70,6 +73,11 @@ function homeReducer(state = initialState, action) {
       return state.set('didCreatedNewLanguage', true);
     case DATABASE_ACTION_SUCCEEDED:
       return state.set('didCreatedNewDb', true);
+    case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
+      return state
+        .set('specificDatabase', OrderedMap(action.database))
+        .set('modifiedData', Map(action.data))
+        .set('modifiedData', Map(action.data));
     default:
       return state;
   }
