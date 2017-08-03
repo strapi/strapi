@@ -479,7 +479,7 @@ module.exports = {
         items: [
           {
             name: 'form.database.item.name',
-            target: `databases.connections.${name}.name`,
+            target: `database.connections.${name}.name`,
             type: 'string',
             value: name,
             validations: {
@@ -488,7 +488,7 @@ module.exports = {
           },
           {
             name: 'form.database.item.connector',
-            target: `databases.connections.${name}.connector`,
+            target: `database.connections.${name}.connector`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.connector`, null),
             validations: {
@@ -837,9 +837,9 @@ module.exports = {
   },
 
   installDependency: (params, name) => {
-    const module = _.get(params, `database.connections.${name}.connector`);
-    const installed = _.indexOf(_.keys(strapi.config.dependencies), module) !== -1;
+    const connector = _.get(params, `database.connections.${name}.connector`);
+    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), module) !== -1;
 
-    if (!installed) exec(`npm install ${module} --save`);
+    if (connector && !installed) exec(`npm install ${module} --save`);
   }
 };

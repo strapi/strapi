@@ -154,8 +154,6 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
-    console.log(params);
-
     const [name] = _.keys(params.database.connections);
 
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
@@ -219,9 +217,13 @@ module.exports = {
       items = [{ target: 'databases.connections' }];
     }
 
+    const newClient = _.get(params, `database.connections.${name}.settings.client`);
+
+    if (newClient) params.database.connections[name].connector = Service.getClientConnector(newClient);
+
     strapi.reload.isWatching = false;
 
-    Service.installDependency(params, newName);
+    Service.installDependency(params, name);
 
     const updateErrors = Service.updateSettings(params, items, env);
 
