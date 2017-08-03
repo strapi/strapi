@@ -20,7 +20,6 @@ import {
   includes,
   isObject,
   map,
-  omit,
   replace,
   toNumber,
 } from 'lodash';
@@ -47,6 +46,7 @@ import {
   languageDelete,
   languagesFetch,
   newLanguagePost,
+  newDatabasePost,
 } from './actions'
 import styles from './styles.scss';
 import config from './config.json';
@@ -98,6 +98,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (prevProps.home.didCreatedNewLanguage !== this.props.home.didCreatedNewLanguage) {
       this.handleFetch(this.props);
     }
+
+    if (prevProps.home.didCreatedNewDb !== this.props.home.didCreatedNewDb) {
+      this.handleFetch(this.props);
+    }
   }
 
   /* eslint-disable react/sort-comp */
@@ -110,17 +114,18 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const dbName = get(this.props.home.modifiedData, 'database.connections.${name}.name');
     map(this.props.home.modifiedData, (data, key) => {
       const k = replace(key, '${name}', dbName);
-      if (key !== 'database.connections.${name}.name') {
+
+      if (key !== 'database.connections.${name}.name' && key !== 'database.defaultConnection') {
         newData[k] = data;
       }
     });
 
     /* eslint-enable no-template-curly-in-string */
-    if (newData['database.defaultConnection']) {
+    if (this.props.home.modifiedData['database.defaultConnection']) {
       newData['database.defaultConnection'] = dbName;
-    } else {
-      omit(newData, 'database.defaultConnection');
     }
+
+    this.props.newDatabasePost(this.props.params.env, newData);
   }
 
   changeDefaultLanguage = ({ target }) => {
@@ -293,8 +298,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         <div className={listStyles.centered}>{props.host}</div>
         <div className={listStyles.flexed}>
 
-          <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} /></div>
-          <div className={listStyles.leftSpaced}><i className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
+          <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} id={props.name} /></div>
+          <div className={listStyles.leftSpaced}><i id={props.name} className="fa fa-trash" onClick={this.handleDatabaseDelete} /></div>
         </div>
       </div>
       <div>
@@ -345,7 +350,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         break;
       case 'databases':
         sections = this.props.home.addDatabaseSection.sections;
-        renderPopUpForm = this.renderPopUpFormDatabase
+        renderPopUpForm = this.renderPopUpFormDatabase;
         handleListPopUpSubmit = this.addConnection;
         renderRow = this.renderRowDatabase;
         break;
@@ -437,6 +442,7 @@ function mapDispatchToProps(dispatch) {
       editSettings,
       languageDelete,
       languagesFetch,
+      newDatabasePost,
       newLanguagePost,
     },
     dispatch
@@ -456,6 +462,7 @@ Home.propTypes = {
   languagesFetch: React.PropTypes.func,
   location: React.PropTypes.object,
   menuSections: React.PropTypes.array,
+  newDatabasePost: React.PropTypes.func,
   newLanguagePost: React.PropTypes.func,
   params: React.PropTypes.object.isRequired,
 };

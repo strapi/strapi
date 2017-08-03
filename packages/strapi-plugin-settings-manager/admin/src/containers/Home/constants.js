@@ -20,3 +20,5 @@ export const LANGUAGE_DELETE = 'SettingsManager/Home/LANGUAGE_DELETE';
 export const LANGUAGE_ACTION_SUCCEEDED = 'SettingsManager/Home/LANGUAGE_ACTION_SUCCEEDED';
 export const DATABASES_FETCH = 'SettingsManager/Home/DATABASES_FETCH';
 export const DATABASES_FETCH_SUCCEEDED = 'SettingsManager/Home/DATABASES_FETCH_SUCCEEDED';
+export const NEW_DATABASE_POST = 'SettingsManager/Home/NEW_DATABASE_POST';
+export const DATABASE_ACTION_SUCCEEDED = 'SettingsManager/Home/DATABASE_ACTION_SUCCEEDED';

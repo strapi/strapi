@@ -36,6 +36,8 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     this.inputs = {
       string: InputText,
+      // TODO
+      password: InputText,
       number: InputNumber,
       boolean: InputToggle,
       enum: InputEnum,

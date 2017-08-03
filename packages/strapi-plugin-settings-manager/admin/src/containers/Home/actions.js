@@ -21,6 +21,8 @@ import {
   LANGUAGE_DELETE,
   DATABASES_FETCH,
   DATABASES_FETCH_SUCCEEDED,
+  NEW_DATABASE_POST,
+  DATABASE_ACTION_SUCCEEDED,
 } from './constants';
 
 export function defaultAction() {
@@ -174,5 +176,19 @@ export function databasesFetchSucceeded(listDatabases, availableDatabases) {
     configsDisplay,
     appDatabases,
     modifiedData,
+  };
+}
+
+export function newDatabasePost(endPoint, data) {
+  return {
+    type: NEW_DATABASE_POST,
+    endPoint,
+    data,
+  };
+}
+
+export function databaseActionSucceeded() {
+  return {
+    type: DATABASE_ACTION_SUCCEEDED,
   };
 }

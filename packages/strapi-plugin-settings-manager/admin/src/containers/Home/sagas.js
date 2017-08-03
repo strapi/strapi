@@ -1,8 +1,8 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
+import { forEach, set } from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
-
 import request from 'utils/request';
 
 // selectors
@@ -15,6 +15,7 @@ import {
   LANGUAGES_FETCH,
   NEW_LANGUAGE_POST,
   DATABASES_FETCH,
+  NEW_DATABASE_POST,
 } from './constants';
 
 import {
@@ -22,6 +23,7 @@ import {
   databasesFetchSucceeded,
   languagesFetchSucceeded,
   languageActiontSucceded,
+  databaseActionSucceeded,
 } from './actions';
 
 export function* deleteLanguage(action) {
@@ -38,7 +40,7 @@ export function* deleteLanguage(action) {
     yield new Promise(resolve => {
       setTimeout(() => {
         resolve();
-      }, 3000);
+      }, 4000);
     });
 
     yield put(languageActiontSucceded());
@@ -111,7 +113,7 @@ export function* postLanguage() {
   try {
     const newLanguage = yield select(makeSelectModifiedData());
     const body = {
-      name: newLanguage['i18n.i18n.defaultLocale'],
+      name: newLanguage['language.language.defaultLocale'],
     };
     const opts = {
       body,
@@ -126,7 +128,7 @@ export function* postLanguage() {
     yield new Promise(resolve => {
       setTimeout(() => {
         resolve();
-      }, 3000);
+      }, 4000);
     });
 
     yield put(languageActiontSucceded());
@@ -135,6 +137,39 @@ export function* postLanguage() {
     console.log(error);
     // TODO handle error i18n
     window.Strapi.notification.error(error);
+  }
+}
+
+export function* postDatabase(action) {
+  try {
+
+    const body = {};
+
+    forEach(action.data, (value, key) => {
+      set(body, key, value);
+    });
+
+    const opts = {
+      method: 'POST',
+      body,
+    };
+
+    const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
+
+    yield call(request, requestUrl, opts);
+
+    // TODO remove counter
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+
+    yield put(databaseActionSucceeded());
+
+  } catch(error) {
+    console.log(error);
+    window.Strapi.notification.error('An error occured');
   }
 }
 
@@ -149,15 +184,9 @@ export function* settingsEdit(action) {
 
     yield  call(request, requestUrl, opts);
 
-
-
     // TODO handle server reload to get response
     window.Strapi.notification.success('Your modifications have been updated');
 
-    // TODO uncomment following
-    // const data = yield call(request, requestUrl, { method: 'GET' });
-
-    // yield put(editSettingsSucceeded(data));
 
   } catch(error) {
     window.Strapi.notification.error('An error occured');
@@ -172,6 +201,7 @@ export function* defaultSaga() {
   const postLanguageWatcher = yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
   const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
   const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
+  const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
 
   yield take(LOCATION_CHANGE);
   yield cancel(loadConfigWatcher);
@@ -180,6 +210,7 @@ export function* defaultSaga() {
   yield cancel(postLanguageWatcher);
   yield cancel(deleteLanguageWatcher);
   yield cancel(loadDatabasesWatcher);
+  yield cancel(postDatabaseWatcher);
 
 }
 

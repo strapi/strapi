@@ -110,6 +110,8 @@ module.exports = {
       fs.writeFileSync(filePath, '{}');
 
       ctx.send({ ok: true });
+
+      strapi.reload();
     } catch (e) {
       ctx.badRequest(null, Service.formatErrors([{
         target: 'name',
@@ -119,7 +121,6 @@ module.exports = {
         }
       }]));
     }
-
   },
 
   deleteLanguage: async ctx => {
@@ -145,8 +146,6 @@ module.exports = {
         }
       }]));
     }
-
-    ctx.send({ ok: true });
   },
 
   createDatabase: async ctx => {
@@ -154,6 +153,7 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
+    console.log(params.database);
     const [name] = _.keys(params.database.connections);
 
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
