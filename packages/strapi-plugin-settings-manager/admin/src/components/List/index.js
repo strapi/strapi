@@ -132,8 +132,8 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
-                <Button type="submit" onClick={this.handleSubmit} className={styles.primary} disabled={!this.state.isPopUpFormValid}>Save</Button>{' '}
                 <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
+                <Button type="submit" onClick={this.handleSubmit} className={styles.primary} disabled={!this.state.isPopUpFormValid}>Save</Button>{' '}
               </ModalFooter>
             </form>
           </Modal>

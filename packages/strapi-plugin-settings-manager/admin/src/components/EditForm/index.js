@@ -28,6 +28,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
                     section={section}
                     values={this.props.values}
                     handleChange={this.props.handleChange}
+                    cancelAction={this.props.cancelAction}
                   />
                   {line}
                 </div>
@@ -45,6 +46,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 EditForm.propTypes = {
+  cancelAction: React.PropTypes.bool,
   handleCancel: React.PropTypes.func,
   handleChange: React.PropTypes.func.isRequired,
   handleSubmit: React.PropTypes.func,

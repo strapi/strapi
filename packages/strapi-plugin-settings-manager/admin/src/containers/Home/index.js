@@ -18,9 +18,13 @@ import {
   isEmpty,
   includes,
   isObject,
+  join,
   map,
   replace,
+  split,
   toNumber,
+  toLower,
+  upperCase,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
@@ -69,6 +73,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     // allowing state only for database modal purpose
     this.state = {
       modal: false,
+      toggleDefaultConnection: false,
     };
   }
 
@@ -111,22 +116,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   /* eslint-disable jsx-a11y/no-static-element-interactions */
   addConnection = (e) => {
     e.preventDefault();
-    // TODO add connection
     const newData = {};
     /* eslint-disable no-template-curly-in-string */
     const dbName = get(this.props.home.modifiedData, 'database.connections.${name}.name');
     map(this.props.home.modifiedData, (data, key) => {
       const k = replace(key, '${name}', dbName);
 
-      if (key !== 'database.connections.${name}.name' && key !== 'database.defaultConnection') {
+      if (key !== 'database.connections.${name}.name') {
         newData[k] = data;
       }
     });
-
-    /* eslint-enable no-template-curly-in-string */
-    if (this.props.home.modifiedData['database.defaultConnection']) {
-      newData['database.defaultConnection'] = dbName;
-    }
 
     this.props.newDatabasePost(this.props.params.env, newData);
   }
@@ -154,8 +153,26 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
     // reset all the configs to ensure component is updated
     this.props.changeDefaultLanguage(configsDisplay, target.id);
+
+    // format the default locale
+    const defaultLanguageArray = this.formatLanguageLocale(target.id);
+
     // Edit the new config
-    this.props.editSettings({ 'language.language.defaultLocale': target.id }, 'language');
+    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
+  }
+
+  formatLanguageLocale = (data) => {
+    const array = [];
+
+    forEach(split(data, '_'), (value, key) => {
+      if (key === 0){
+        array.push(toLower(value));
+      } else {
+        array.push(upperCase(value));
+      }
+    });
+
+    return array;
   }
 
   handleFetch(props) {
@@ -197,10 +214,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   handleSubmitEditDatabase = (databaseName) => {
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.params.env}`;
-    console.log(body)
+
     if (!isEmpty(body)) {
       this.props.databaseEdit(body, apiUrl);
-      console.log('not empty');
     } else {
       window.Strapi.notification.error('Settings are equals');
     }
@@ -220,8 +236,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleLanguageDelete = ({ target }) => {
-    // Display notification
-    window.Strapi.notification.success('Deleting language...');
     // retrieve the language to delete using the target id
     this.props.languageDelete(target.id);
   }
@@ -236,8 +250,12 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   renderRowLanguage = (props, key, liStyles) => {
     // assign the target id the language name to prepare for delete
     const deleteIcon = props.active ? '' : <i className="fa fa-trash"  onClick={this.handleLanguageDelete} id={props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
+
+    // format the locale to
+    const defaultLanguageArray = this.formatLanguageLocale(props.name);
+
     // retrieve language name from i18n translation
-    const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', props.name]);
+    const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', join(defaultLanguageArray, '_')]);
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
@@ -279,9 +297,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
 
   renderPopUpFormDatabase = (section, props, popUpStyles) => (
-    // TODO handle display edit
     map(section.items, (item, key) => {
-      const isActive = props.values[item.target] ?
+      const isActive = props.values[this.props.home.dbNameTarget] === this.props.home.modifiedData['database.defaultConnection'] ?
         <div className={popUpStyles.rounded}><i className="fa fa-check" /></div> : '';
 
       if (item.name === 'form.database.item.default') {
@@ -383,6 +400,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         selectOptions={selectOptions}
         renderPopUpForm={renderPopUpForm}
         renderListComponent={renderListComponent}
+        cancelAction={this.props.home.cancelAction}
       />
     );
   }
@@ -394,8 +412,13 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   setDefaultConnectionDb = (e) => {
-    const target = { name: e.target.id, value: !this.props.home.modifiedData[e.target.id] }
+    const value = this.state.toggleDefaultConnection ?
+      this.props.home.addDatabaseSection.sections[1].items[0].value
+        : this.props.home.modifiedData[this.props.home.dbNameTarget];
+    // const target = { name: e.target.id, value: this.props.home.modifiedData[this.props.home.dbNameTarget] }
+    const target = { name: e.target.id, value };
     this.handleChange({target});
+    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
   }
 
   // Hide database modal

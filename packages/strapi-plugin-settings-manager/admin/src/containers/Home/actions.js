@@ -27,6 +27,7 @@ import {
   SPECIFIC_DATABASE_FETCH,
   SPECIFIC_DATABASE_FETCH_SUCCEEDED,
   DATABASE_EDIT,
+  LANGUAGE_ACTION_ERROR,
 } from './constants';
 
 export function defaultAction() {
@@ -140,9 +141,15 @@ export function newLanguagePost() {
 }
 
 
-export function languageActiontSucceded() {
+export function languageActionSucceded() {
   return {
     type: LANGUAGE_ACTION_SUCCEEDED,
+  };
+}
+
+export function languageActionError() {
+  return {
+    type: LANGUAGE_ACTION_ERROR,
   };
 }
 
@@ -172,14 +179,16 @@ export function databasesFetchSucceeded(listDatabases, availableDatabases) {
   };
 
   const modifiedData = {
-    'database.defaultConnection': false,
+    'database.defaultConnection': availableDatabases.sections[1].items[0].value,
   };
 
+  const dbNameTarget = availableDatabases.sections[0].items[0].target;
   return {
     type: DATABASES_FETCH_SUCCEEDED,
     configsDisplay,
     appDatabases,
     modifiedData,
+    dbNameTarget,
   };
 }
 
@@ -215,16 +224,17 @@ export function specificDatabaseFetch(databaseName, endPoint) {
 
 export function specificDatabaseFetchSucceeded(database) {
   const data = getDataFromConfigs(database);
+  const dbNameTarget = database.sections[0].items[0].target;
   return {
     type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
     database,
     data,
+    dbNameTarget,
   };
 }
 
 
 export function databaseEdit(data, apiUrl) {
-  console.log(apiUrl);
   return {
     type: DATABASE_EDIT,
     data,

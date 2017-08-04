@@ -25,7 +25,8 @@ import {
   configFetchSucceded,
   databasesFetchSucceeded,
   languagesFetchSucceeded,
-  languageActiontSucceded,
+  languageActionSucceded,
+  languageActionError,
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
 } from './actions';
@@ -57,7 +58,6 @@ export function* editDatabase(action) {
     yield put(databaseActionSucceeded());
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An error occured');
   }
 }
@@ -80,7 +80,6 @@ export function* deleteDatabase(action) {
     yield put(databaseActionSucceeded());
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('an error occured');
   }
 }
@@ -95,16 +94,11 @@ export function* deleteLanguage(action) {
 
     yield call(request, requestUrl, opts);
 
-    // TODO remove counter
-    yield new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 4000);
-    });
-
-    yield put(languageActiontSucceded());
+    window.Strapi.notification.success('Deleting language...');
 
   } catch(error) {
+
+    yield put(languageActionError());
     window.Strapi.notification.error('An Error occured');
   }
 }
@@ -183,6 +177,7 @@ export function* postLanguage() {
 
     yield call(request, requestUrl, opts);
 
+    window.Strapi.notification.success('Adding a new language...');
     // TODO remove counter
     yield new Promise(resolve => {
       setTimeout(() => {
@@ -190,7 +185,7 @@ export function* postLanguage() {
       }, 4000);
     });
 
-    yield put(languageActiontSucceded());
+    yield put(languageActionSucceded());
 
   } catch(error) {
     console.log(error);
@@ -227,7 +222,6 @@ export function* postDatabase(action) {
     yield put(databaseActionSucceeded());
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An error occured');
   }
 }
@@ -265,7 +259,6 @@ export function* fetchSpecificDatabase(action) {
     yield put(specificDatabaseFetchSucceeded(data));
 
   } catch(error) {
-    console.log(error);
     window.Strapi.notification.error('An error occured');
   }
 }

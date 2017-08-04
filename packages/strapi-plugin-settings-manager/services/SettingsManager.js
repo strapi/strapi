@@ -461,7 +461,7 @@ module.exports = {
         items: [
           {
             name: 'form.language.choose',
-            target: 'language.language.defaultLocale',
+            target: 'language.defaultLocale',
             type: 'select',
             items: strapi.plugins['settings-manager'].services.languages
           }
@@ -800,8 +800,10 @@ module.exports = {
 
     _.forEach(items, ({ target }) => {
       if (_.has(params, target)) {
-        const input = _.get(params, target, null);
+        let input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
+
+        if (target === 'language.defaultLocale') input = _.lowerCase(input).replace(/ /g, '_');
 
         const filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 

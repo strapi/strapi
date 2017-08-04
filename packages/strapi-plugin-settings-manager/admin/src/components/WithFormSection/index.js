@@ -19,6 +19,7 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
+    cancelAction: React.PropTypes.bool,
     handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.oneOfType([
       React.PropTypes.object,
@@ -53,7 +54,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.section !== this.props.section) {
+    if (nextProps.section !== this.props.section || nextProps.cancelAction !== this.props.cancelAction) {
       this.setState({ showNestedForm: false, hasNestedInput: false, inputWithNestedForm: '' });
       if (isObject(nextProps.section)) {
         this.checkForNestedForm(nextProps);

@@ -32,7 +32,9 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.handleSubmit(this.state.databaseName);
+    this.setState({ modal: !this.state.modal });
   }
+
   render() {
     return (
       <li>
@@ -63,8 +65,8 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
-                <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
                 <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
+                <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
               </ModalFooter>
             </form>
           </Modal>
