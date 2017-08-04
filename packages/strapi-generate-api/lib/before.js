@@ -69,22 +69,26 @@ module.exports = (scope, cb) => {
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
-  // Map attributes and split them.
+  // Map attributes and split them for CLI.
   scope.attributes = scope.args.attributes.map((attribute) => {
-    const parts = attribute.split(':');
+    if (_.isString(attribute)) {
+      const parts = attribute.split(':');
 
-    parts[1] = parts[1] || 'string';
+      parts[1] = parts[1] || 'string';
 
-    // Handle invalid attributes.
-    if (!parts[1] || !parts[0]) {
-      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
-      return;
+      // Handle invalid attributes.
+      if (!parts[1] || !parts[0]) {
+        invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+        return;
+      }
+
+      return {
+        name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
+        type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
+      };
+    } else {
+      return attribute;
     }
-
-    return {
-      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
-      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
-    };
   });
 
   // Handle invalid action arguments.

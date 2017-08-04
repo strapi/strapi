@@ -7,6 +7,22 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/models/:model",
+      "handler": "ContentTypeBuilder.model",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/models",
+      "handler": "ContentTypeBuilder.create",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
