@@ -153,7 +153,6 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
-    console.log(params.database);
     const [name] = _.keys(params.database.connections);
 
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
@@ -212,9 +211,9 @@ module.exports = {
       connections[newName] = params;
       connections[name] = undefined;
 
-      params = { databases: { connections }};
+      params = { database: { connections }};
 
-      items = [{ target: 'databases.connections' }];
+      items = [{ target: 'database.connections' }];
     }
 
     const newClient = _.get(params, `database.connections.${name}.settings.client`);

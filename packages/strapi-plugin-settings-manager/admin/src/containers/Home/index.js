@@ -155,7 +155,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     // reset all the configs to ensure component is updated
     this.props.changeDefaultLanguage(configsDisplay, target.id);
     // Edit the new config
-    this.props.editSettings({ 'i18n.i18n.defaultLocale': target.id }, 'i18n');
+    this.props.editSettings({ 'language.language.defaultLocale': target.id }, 'language');
   }
 
   handleFetch(props) {

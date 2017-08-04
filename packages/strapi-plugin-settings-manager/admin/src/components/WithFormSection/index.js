@@ -10,6 +10,7 @@ import { forEach, has, isObject , join, pullAt, split} from 'lodash';
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
 import InputToggle from 'components/InputToggle';
+import InputPassword from 'components/InputPassword';
 import InputSelect from 'components/InputSelect';
 import InputEnum from 'components/InputEnum';
 import config from './config.json';
@@ -36,8 +37,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     this.inputs = {
       string: InputText,
-      // TODO
-      password: InputText,
+      password: InputPassword,
       number: InputNumber,
       boolean: InputToggle,
       enum: InputEnum,
