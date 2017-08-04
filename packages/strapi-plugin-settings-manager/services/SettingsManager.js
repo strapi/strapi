@@ -333,7 +333,7 @@ module.exports = {
             items: [
               {
                 name: 'form.security.item.xframe.value',
-                target: 'security.xframe',
+                target: 'security.xframe.value',
                 type: 'enum',
                 value: _.get(strapi.config, `environments.${env}.security.xframe.value`, null),
                 items: [
@@ -350,6 +350,7 @@ module.exports = {
                     value: 'ALLOW-FROM',
                     items: [{
                       name: '',
+                      target: 'security.xframe.value.nested',
                       type: 'string',
                       value: '',
                       validations: {

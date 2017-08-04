@@ -15,6 +15,7 @@ import {
   findKey,
   forEach,
   get,
+  has,
   isEmpty,
   includes,
   isObject,
@@ -189,8 +190,17 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    const value = target.type === 'number' ? toNumber(target.value) : target.value;
-    this.props.changeInput(target.name, value);
+    let value = target.type === 'number' ? toNumber(target.value) : target.value;
+    let name = target.name;
+
+    if (this.props.params.slug === 'security') {
+      // the only case where the input doesn't have a name
+      if (target.name === '') {
+        name = 'security.xframe.value.nested';
+        value = target.value;
+      }
+    }
+    this.props.changeInput(name, value);
   }
 
   handleCancel = () => {
@@ -227,11 +237,18 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const body = {};
 
     forEach(this.props.home.modifiedData, (value, key) => {
-      if (value !== prevSettings[key]) {
+      if (value !== prevSettings[key] && key !== 'security.xframe.value.nested') {
         body[key] = value;
       }
     });
 
+    if (has(this.props.home.modifiedData, 'security.xframe.value.nested')) {
+      const value = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
+      `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
+       : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
+
+      body['security.xframe.value'] = value;
+    }
     return body;
   }
 

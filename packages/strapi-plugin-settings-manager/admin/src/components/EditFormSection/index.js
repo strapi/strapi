@@ -35,6 +35,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                       section={item.items}
                       values={this.props.values}
                       handleChange={this.props.handleChange}
+                      sectionNested
                     />
                   </div>
                 )

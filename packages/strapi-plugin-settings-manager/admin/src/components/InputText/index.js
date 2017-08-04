@@ -116,7 +116,9 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   render() {
+    console.log(this.props)
     const inputValue = this.props.value || '';
+    console.log(inputValue)
     // override default onBlur
     const handleBlur = this.props.handleBlur || this.handleBlur;
     // override bootStrapClass
@@ -125,9 +127,10 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
 
+    const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
     return (
       <div className={`${this.props.styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
+        {name}
         <input
           name={this.props.target}
           id={this.props.name}
@@ -158,7 +161,7 @@ InputText.propTypes = {
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   styles: React.PropTypes.object,
-  target: React.PropTypes.string.isRequired,
+  target: React.PropTypes.string,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string,
 }
