@@ -204,7 +204,10 @@ module.exports = {
     const newName = _.get(params, `database.connections.${name}.name`);
 
     if (newName && newName !== name) {
+      const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
       params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
+      params.settings = settings;
+
       delete params.name;
 
       const connections = _.clone(strapi.config.environments[env].database.connections);

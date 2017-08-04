@@ -28,13 +28,6 @@ const { logger, cli } = require('strapi-utils');
 
 module.exports = function() {
   try {
-    // Use the app's local `strapi` in `node_modules` if it's existant and valid.
-    const localStrapiPath = path.resolve(
-      process.cwd(),
-      'node_modules',
-      'strapi'
-    );
-
     const strapi = function () {
       try {
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
