@@ -153,7 +153,6 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
-    console.log(params.database);
     const [name] = _.keys(params.database.connections);
 
     if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
@@ -205,16 +204,19 @@ module.exports = {
     const newName = _.get(params, `database.connections.${name}.name`);
 
     if (newName && newName !== name) {
+      const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
       params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
+      params.settings = settings;
+
       delete params.name;
 
       const connections = _.clone(strapi.config.environments[env].database.connections);
       connections[newName] = params;
       connections[name] = undefined;
 
-      params = { databases: { connections }};
+      params = { database: { connections }};
 
-      items = [{ target: 'databases.connections' }];
+      items = [{ target: 'database.connections' }];
     }
 
     const newClient = _.get(params, `database.connections.${name}.settings.client`);

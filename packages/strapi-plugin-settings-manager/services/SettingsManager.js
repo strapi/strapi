@@ -92,7 +92,7 @@ module.exports = {
             name: 'form.general.item.version',
             target: 'package.version',
             type: 'string',
-            value: _.get(strapi.config, 'version', null),
+            value: _.get(strapi.config, 'info.version', null),
             validations : {
               regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
               required: true
@@ -536,6 +536,15 @@ module.exports = {
             }
           },
           {
+            name: 'form.database.item.port',
+            target: `database.connections.${name}.settings.port`,
+            type: 'number',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.port`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.database.item.username',
             target: `database.connections.${name}.settings.username`,
             type: 'string',
@@ -840,6 +849,6 @@ module.exports = {
     const connector = _.get(params, `database.connections.${name}.connector`);
     const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
-    if (connector && !installed) exec(`npm install ${connector} --save`);
+    if (connector && !installed) exec(`npm install ${connector}@alpha`);
   }
 };
