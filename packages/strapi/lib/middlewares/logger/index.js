@@ -4,7 +4,7 @@
  * Logger hook
  */
 
-module.exports = strapi => {
+module.exports = function(strapi) {
   return {
     /**
      * Default options
@@ -21,12 +21,19 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      strapi.app.use(async function(ctx, next) {
-        const start = new Date();
-        await next();
-        const ms = new Date() - start;
-        strapi.log.debug(ctx.method + ' ' + ctx.url + ' (' + ms + 'ms)');
-      });
+      strapi.app.context.log = strapi.log;
+
+      if (strapi.config.middleware.settings.logger.requests) {
+        strapi.app.use(async (ctx, next) => {
+          const start = Date.now();
+
+          await next();
+
+          const delta = Math.ceil(Date.now() - start);
+
+          ctx.log.debug(`${ctx.method} ${ctx.url} (${delta} ms)`);
+        });
+      }
 
       cb();
     }

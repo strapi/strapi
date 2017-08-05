@@ -10,13 +10,14 @@
     }
   },
   "logger": {
-    "enabled": true
+    "enabled": false,
+    "requests": false
   },
   "parser": {
     "enabled": true,
     "multipart": true
   },
   "router": {
-    "enabled": true
+    "prefix": ""
   }
 }

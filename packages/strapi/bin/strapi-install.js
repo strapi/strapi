@@ -11,7 +11,8 @@ const { exec } = require('child_process');
 const fs = require('fs');
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli } = require('strapi-utils');
+const logger = require('strapi-utils').logger;
 
 /**
  * `$ strapi install`

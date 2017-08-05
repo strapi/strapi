@@ -39,14 +39,12 @@ module.exports = strapi => {
         : strapi.config.routes.find(route => route.path === '/');
 
       strapi.app.use(
-        strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.betterStatic(
-            path.resolve(strapi.config.appPath, strapi.config.middleware.settings.public.path || strapi.config.paths.static),
-            {
-              index: isIndexRoute ? false : 'index.html',
-              maxage: strapi.config.middleware.settings.public.maxAge
-            }
-          )
+        strapi.koaMiddlewares.static(
+          path.resolve(strapi.config.appPath, strapi.config.middleware.settings.public.path || strapi.config.paths.static),
+          {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          }
         )
       );
 
@@ -56,14 +54,12 @@ module.exports = strapi => {
         const app = new Koa();
 
         app.use(
-          strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.betterStatic(
-              path.resolve(
-                strapi.config.appPath,
-                'plugins',
-                plugin,
-                strapi.config.paths.static
-              )
+          strapi.koaMiddlewares.static(
+            path.resolve(
+              strapi.config.appPath,
+              'plugins',
+              plugin,
+              strapi.config.paths.static
             )
           )
         );

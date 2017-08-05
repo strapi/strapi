@@ -21,7 +21,15 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      strapi.app.use(strapi.koaMiddlewares.responseTime());
+      strapi.app.use(async (ctx, next) => {
+        const start = Date.now();
+
+        await next();
+
+        const delta = Math.ceil(Date.now() - start);
+
+        ctx.set('X-Response-Time', delta + 'ms');
+      });
 
       cb();
     }

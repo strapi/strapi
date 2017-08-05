@@ -102,6 +102,19 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
+    // These middlewares cannot be disabled.
+    merge(flattenMiddlewaresConfig, {
+      responses: {
+        enabled: true
+      },
+      router: {
+        enabled: true
+      },
+      boom: {
+        enabled: true
+      }
+    });
+
     // Exclude database and custom.
     middlewareCategories.push('database');
 
