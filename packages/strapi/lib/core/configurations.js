@@ -257,13 +257,8 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
-    // Set URL.
-    const ssl = get(this.config, 'ssl') || {};
-
-    this.config.url = isString(this.config.proxy)
-      ? this.config.proxy
-      : `${isEmpty(ssl) || ssl.disabled === true ? 'http' : 'https'}://${this
-          .config.host}:${this.config.port}`;
+    this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
+    this.config.url = `http://${this.config.host}:${this.config.port}`;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig) {
