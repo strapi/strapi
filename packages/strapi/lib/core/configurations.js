@@ -79,6 +79,9 @@ module.exports.app = async function() {
     // Template literal string.
     this.config = templateConfigurations(this.config);
 
+    // Initialize main router to use it in middlewares.
+    this.router = strapi.koaMiddlewares.joiRouter();
+
     // Define required middlewares categories.
     const middlewareCategories = ['request', 'response', 'security', 'server'];
 

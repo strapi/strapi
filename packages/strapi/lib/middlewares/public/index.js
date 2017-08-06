@@ -34,39 +34,42 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      const isIndexRoute = _.isEmpty(strapi.config.routes)
-        ? false
-        : strapi.config.routes.find(route => route.path === '/');
+      // Match every route with an extension.
+      // The file without extension will not be served.
+      // Note: This route could be override by the user.
+      strapi.router.route({
+        method: 'GET',
+        path: '/*.*',
+        handler: [
+          async (ctx, next) => {
+            ctx.url = path.basename(ctx.url);
 
-      strapi.app.use(
-        strapi.koaMiddlewares.static(
-          path.resolve(strapi.config.appPath, strapi.config.middleware.settings.public.path || strapi.config.paths.static),
-          {
+            await next();
+          },
+          strapi.koaMiddlewares.static(strapi.config.middleware.settings.public.path || strapi.config.paths.static, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
-          }
-        )
-      );
+          })
+        ]
+      });
 
-      // Mount static to a specific path (pattern: `/plugins/aBc`)
+      // Plugins.
       _.forEach(strapi.plugins, (value, plugin) => {
-        // Create koa sub-app
-        const app = new Koa();
+        strapi.router.route({
+          method: 'GET',
+          path: `/plugins/${plugin}/*.*`,
+          handler: [
+            async (ctx, next) => {
+              ctx.url = path.basename(ctx.url);
 
-        app.use(
-          strapi.koaMiddlewares.static(
-            path.resolve(
-              strapi.config.appPath,
-              'plugins',
-              plugin,
-              strapi.config.paths.static
-            )
-          )
-        );
-
-        strapi.app.use(
-          strapi.koaMiddlewares.mount(path.join('/plugins', plugin), app)
-        );
+              await next();
+            },
+            strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true
+            })
+          ]
+        });
       });
 
       cb();

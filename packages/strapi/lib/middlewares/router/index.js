@@ -41,7 +41,6 @@ module.exports = strapi => {
 
       // Initialize the router.
       if (!strapi.router) {
-        strapi.router = strapi.koaMiddlewares.joiRouter();
         strapi.router.prefix(strapi.config.middleware.settings.router.prefix || '');
       }
 
