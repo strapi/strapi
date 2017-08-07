@@ -13,12 +13,14 @@ module.exports = {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { model } = ctx.params;
 
+    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+
     ctx.send({ model: Service.getModel(model) });
   },
 
   create: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
-    const { name, attributes = [] } = ctx.request.body;
+    const { name, attributes = [] } = JSON.parse(ctx.request.body);
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
@@ -42,7 +44,7 @@ module.exports = {
       modelJSON.attributes = {};
 
       _.forEach(attributes, attribute => {
-        modelJSON.attributes[attribute.name] = _.get(attribute, 'validations', {});
+        modelJSON.attributes[attribute.name] = _.get(attribute, 'params', {});
       });
     }
 

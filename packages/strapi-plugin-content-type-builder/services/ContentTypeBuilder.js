@@ -24,10 +24,28 @@ module.exports = {
   getModel: slug => {
     const model = _.get(strapi.models, slug);
 
+    const attributes = [];
+    _.forEach(model.attributes, (params, name) => {
+      const relation = _.find(model.associations, { alias: name });
+
+      if (relation) {
+        params = {
+          target: relation.model || relation.collection,
+          key: relation.via,
+          nature: relation.nature
+        }
+      }
+
+      attributes.push({
+        name,
+        params
+      });
+    });
+
     return {
       name: slug,
       description: _.get(model, 'description', 'model.description.missing'),
-      attributes: model.attributes
+      attributes: attributes
     };
   },
 

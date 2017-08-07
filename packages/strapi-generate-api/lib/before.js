@@ -84,7 +84,7 @@ module.exports = (scope, cb) => {
 
       return {
         name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
-        validations: {
+        params: {
           type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
         }
       };
@@ -110,7 +110,7 @@ module.exports = (scope, cb) => {
     const compiled = _.template(attributeTemplate);
     return _.trimEnd(_.unescape(compiled({
       name: attribute.name,
-      validations: attribute.validations
+      params: attribute.params
     })));
   }).join(',\n');
 

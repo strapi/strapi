@@ -1,1 +1,1 @@
-"<%= name %>": <%= JSON.stringify(validations, null, 2) %>
+"<%= name %>": <%= JSON.stringify(params, null, 2) %>
