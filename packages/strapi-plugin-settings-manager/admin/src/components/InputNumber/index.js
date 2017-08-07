@@ -109,7 +109,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           onFocus={this.props.handleFocus}
           onChange={this.props.handleChange}
           value={inputValue}
-          type="text"
+          type="number"
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
         />

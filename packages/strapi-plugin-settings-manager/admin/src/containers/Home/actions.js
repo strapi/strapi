@@ -254,9 +254,13 @@ export function specificDatabaseFetch(databaseName, endPoint) {
   };
 }
 
-export function specificDatabaseFetchSucceeded(database) {
+export function specificDatabaseFetchSucceeded(db) {
+  const database = db;
   const data = getDataFromConfigs(database);
+  const name = database.sections[0].items[0].value;
+  remove(database.sections[0].items, (item) => item.target === `database.connections.${name}.connector`);
   const dbNameTarget = database.sections[0].items[0].target;
+
   return {
     type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
     database,
