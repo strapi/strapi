@@ -23,6 +23,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "PUT",
+      "path": "/models/:model",
+      "handler": "ContentTypeBuilder.updateModel",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

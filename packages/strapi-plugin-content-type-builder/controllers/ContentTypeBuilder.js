@@ -26,5 +26,28 @@ module.exports = {
     Service.generateAPI(name, attributes);
 
     ctx.send({ ok: true });
+  },
+
+  updateModel: async ctx => {
+    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+    const { model } = ctx.params;
+    const { name, attributes = [] } = JSON.parse(ctx.request.body);
+
+    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+
+    const modelFilePath = Service.getModelPath(model);
+    const modelJSON = Service.readModel(modelFilePath);
+
+    if (!_.isEmpty(attributes)) {
+      modelJSON.attributes = {};
+
+      _.forEach(attributes, attribute => {
+        modelJSON.attributes[attribute.name] = _.get(attribute, 'validations', {});
+      });
+    }
+
+    Service.rewriteModel(modelFilePath, modelJSON);
+
+    ctx.send({ ok: true });
   }
 };

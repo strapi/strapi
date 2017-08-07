@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path')
+const fs = require('fs')
 const _ = require('lodash');
 const generator = require('strapi-generate');
 
@@ -41,5 +43,30 @@ module.exports = {
     }
 
     generator(scope);
+  },
+
+  getModelPath: model => {
+    let searchFilePath;
+    const searchFileName = `${strapi.models[model].globalId}.settings.json`;
+    const apiPath = path.join(strapi.config.appPath, 'api');
+    const apis = fs.readdirSync(apiPath);
+
+    _.forEach(apis, api => {
+      const modelsPath = path.join(apiPath, api, 'models');
+      const models = fs.readdirSync(modelsPath);
+
+      if (_.indexOf(models, searchFileName) !== -1) searchFilePath = `${modelsPath}/${searchFileName}`;
+    });
+
+    return searchFilePath;
+  },
+
+  readModel: path => {
+    return JSON.parse(fs.readFileSync(path), 'utf8');
+  },
+
+  rewriteModel: (filePath, data) => {
+    fs.unlinkSync(filePath);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
   }
 };
