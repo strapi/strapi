@@ -1,0 +1,74 @@
+.popUpWarning { /* stylelint-disable */
+  width: 37.5rem!important;
+}
+
+.header {
+  border: none!important;
+  > h4 {
+    width: 100%;
+    text-align: center;
+    font-family: Lato;
+    font-weight: bold!important;
+    font-size: 1.8rem!important;
+
+  }
+}
+
+.centered {
+  justify-content: center;
+}
+
+.bordered {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  border: 1px solid #F6F6F6;
+}
+
+.noBorder {
+  border: none!important;
+}
+
+.modalFooter {
+
+  margin-top: 4.5rem;
+  margin-bottom: 3.5rem;
+  padding-left: 3.1rem !important;
+  > input {
+    margin-top: 1.3rem!important;
+  }
+}
+
+.primary {
+  font-family: Lato;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  color: white;
+  width: 15rem;
+
+}
+
+.secondary {
+  font-family: Lato;
+  width: 15rem;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+}
+
+.buttonContainer {
+  width: 100%;
+  padding: 0 .5rem;
+  display: flex;
+  margin-top: 3.5rem;
+  justify-content: space-between;
+
+}
+
+.modalBody {
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+
+.modalPosition {
+  top: 18.7rem;
+  width: 37.5rem;
+}

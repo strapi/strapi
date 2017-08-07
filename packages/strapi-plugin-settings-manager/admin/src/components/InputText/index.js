@@ -128,7 +128,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
     return (
       <div className={`${this.props.styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        {name}
+        {label}
         <input
           name={this.props.target}
           id={this.props.name}

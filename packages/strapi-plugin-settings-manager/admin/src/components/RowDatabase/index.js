@@ -8,6 +8,7 @@ import React from 'react';
 // modal
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import PopUpForm from 'components/PopUpForm';
+import PopUpWarning from 'components/PopUpWarning';
 import styles from 'components/List/styles.scss';
 
 class RowDatabase extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -17,6 +18,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     this.state = {
       modal: false,
       databaseName: '',
+      warning: false,
     };
   }
 
@@ -29,10 +31,17 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     this.setState({ modal: !this.state.modal });
   }
 
+  toggleWarning = () => this.setState({ warning: !this.state.warning })
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.handleSubmit(this.state.databaseName);
     this.setState({ modal: !this.state.modal });
+  }
+
+  deleteDatabase = () => {
+    this.setState({ warning: !this.state.warning });
+    this.props.handleDatabaseDelete(this.props.data.name);
   }
 
   render() {
@@ -50,7 +59,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           <div className={styles.flexed}>
 
             <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
-            <div className={styles.leftSpaced}><i id={this.props.data.name} className="fa fa-trash" onClick={this.props.handleDatabaseDelete} /></div>
+            <div className={styles.leftSpaced}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
         <div>
@@ -70,6 +79,14 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
               </ModalFooter>
             </form>
           </Modal>
+        </div>
+        <div>
+          <PopUpWarning
+            isOpen={this.state.warning}
+            toggleModal={this.toggleWarning}
+            handleConfirm={this.deleteDatabase}
+            warningMessage={'popUpWarning.databases.delete.message'}
+          />
         </div>
       </li>
     );

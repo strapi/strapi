@@ -257,8 +257,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.languageDelete(target.id);
   }
 
-  handleDatabaseDelete = ({ target }) => {
-    this.props.databaseDelete(target.id, this.props.params.env);
+  handleDatabaseDelete = (dbName) => {
+    window.Strapi.notification.info('Deleting database');
+    this.props.databaseDelete(dbName, this.props.params.env);
   }
 
 

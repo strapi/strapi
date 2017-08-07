@@ -28,6 +28,7 @@ import {
   SPECIFIC_DATABASE_FETCH_SUCCEEDED,
   DATABASE_EDIT,
   LANGUAGE_ACTION_ERROR,
+  DATABASE_ACTION_ERROR,
 } from './constants';
 
 export function defaultAction() {
@@ -211,6 +212,12 @@ export function newDatabasePost(endPoint, data) {
 export function databaseActionSucceeded() {
   return {
     type: DATABASE_ACTION_SUCCEEDED,
+  };
+}
+
+export function databaseActionError() {
+  return {
+    type: DATABASE_ACTION_ERROR,
   };
 }
 

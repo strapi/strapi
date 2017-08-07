@@ -29,6 +29,7 @@ import {
   languageActionError,
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
+  databaseActionError,
 } from './actions';
 
 export function* editDatabase(action) {
@@ -77,9 +78,9 @@ export function* deleteDatabase(action) {
       }, 4000);
     });
 
-    yield put(databaseActionSucceeded());
 
   } catch(error) {
+    yield put(databaseActionError());
     window.Strapi.notification.error('an error occured');
   }
 }

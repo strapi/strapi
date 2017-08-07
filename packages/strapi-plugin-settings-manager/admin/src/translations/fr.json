@@ -81,6 +81,9 @@
   "list.databases.title.singular": "connexion dans cet environnement",
   "list.databases.title.plural": "connexions dans cet environnement",
 
+  "popUpWarning.title": "Merci de confirmer",
+  "popUpWarning.databases.delete.message": "Etes-vous sûre de vouloir supprimer cette connexion ?",
+
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",
   "language.af_ZA": "Afrikaans (Suid-Afrika)",

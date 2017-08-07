@@ -19,6 +19,8 @@ import {
   LANGUAGE_DELETE,
   SPECIFIC_DATABASE_FETCH_SUCCEEDED,
   LANGUAGE_ACTION_ERROR,
+  DATABASE_DELETE,
+  DATABASE_ACTION_ERROR,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -63,6 +65,9 @@ function homeReducer(state = initialState, action) {
     case LANGUAGE_DELETE:
       return state
         .updateIn(['configsDisplay', 'sections'], list => remove(list, (language) => language.name !== action.languageToDelete));
+    case DATABASE_DELETE:
+      return state
+        .updateIn(['configsDisplay', 'sections'], list => remove(list, (database) => database.name !== action.databaseToDelete));
     case LANGUAGES_FETCH_SUCCEEDED:
       return state
         .set('loading', false)
@@ -84,6 +89,7 @@ function homeReducer(state = initialState, action) {
     case LANGUAGE_ACTION_ERROR:
       return state.set('didCreatedNewLanguage', true);
     case DATABASE_ACTION_SUCCEEDED:
+    case DATABASE_ACTION_ERROR:
       return state.set('didCreatedNewDb', true);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state

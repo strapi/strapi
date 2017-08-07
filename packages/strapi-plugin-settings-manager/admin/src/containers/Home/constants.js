@@ -27,3 +27,4 @@ export const DATABASE_DELETE = 'SettingsManager/Home/DATABASE_DELETE';
 export const SPECIFIC_DATABASE_FETCH = 'SettingsManager/Home/SPECIFIC_DATABASE_FETCH';
 export const SPECIFIC_DATABASE_FETCH_SUCCEEDED = 'SettingsManager/Home/SPECIFIC_DATABASE_FETCH_SUCCEEDED';
 export const DATABASE_EDIT = 'SettingsManager/Home/DATABASE_EDIT';
+export const DATABASE_ACTION_ERROR = 'SettingsManager/Home/DATABASE_ACTION_ERROR';
