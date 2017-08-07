@@ -21,6 +21,7 @@ module.exports = {
     const { name, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
+    if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
 
     Service.generateAPI(name, attributes);
 

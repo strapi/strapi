@@ -2,6 +2,6 @@
   "connection": "<%= connection %>",
   "collectionName": "<%= idPluralized %>",
   "attributes": {
-<%= attributes %>
+    <%= attributes %>
   }
 }
