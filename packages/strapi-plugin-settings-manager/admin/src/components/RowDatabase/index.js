@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 // modal
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import PopUpForm from 'components/PopUpForm';
@@ -74,8 +75,16 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
-                <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
-                <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
+                <FormattedMessage {...{id: 'form.button.cancel'}}>
+                  {(message) => (
+                    <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
+                  )}
+                </FormattedMessage>
+                <FormattedMessage {...{id: 'form.button.save'}}>
+                  {(message) => (
+                    <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
+                  )}
+                </FormattedMessage>
               </ModalFooter>
             </form>
           </Modal>

@@ -6,11 +6,32 @@
 
   "menu.section.environments": "Environnements",
   "menu.item.database": "Base de donnée",
+  "menu.item.request": "Requête",
+  "menu.item.response": "Réponse",
   "menu.item.security": "Sécurité",
   "menu.item.server": "Serveur",
 
-  "form.database.name": "Bases de données",
-  "form.database.description": "Modification des configurations de bases de données par environnement",
+  "form.button.cancel": "Annuler",
+  "form.button.save": "Sauvegarder",
+  "form.button.confirm": "Confimer",
+
+  "form.databases.name": "Bases de données",
+  "form.databases.description": "Modification des configurations de bases de données par environnement",
+
+  "form.database.item.name": "Nome de la Connexion",
+  "form.database.item.client": "Client",
+  "form.database.item.host": "Hôte",
+  "form.database.item.port": "Port",
+  "form.database.item.connector": "Connecteur",
+  "form.database.item.username": "Surnom",
+  "form.database.item.password": "Mot de Passe",
+  "form.database.item.database": "Base de données",
+  "form.database.item.default": "Définir comme connexion par défaut",
+  "form.database.item.provider.mongo": "Mongo",
+  "form.database.item.provider.postgres": "PostgresSQL",
+  "form.database.item.provider.mysql": "MySQL",
+  "form.database.item.provider.sqlite3": "SQlite3",
+  "form.database.item.provider.redis": "Redis",
 
 
   "form.general.name": "Général",
@@ -20,27 +41,53 @@
   "form.general.item.description": "Description",
   "form.general.item.version": "Version",
 
-  "form.advanced.name": "Anvancé",
+  "form.advanced.name": "Avancé",
   "form.advanced.description": "Modification des configurations avancé.",
 
   "form.advanced.item.admin": "Url du panel d'administration",
   "form.advanced.item.prefix": "Prefix de l'API",
 
+  "form.request.item.logger.enabled": "Logger",
+  "form.request.item.parser.enabled": "Parser",
+  "form.request.item.parser.multipart": "Parser Multipart",
+  "form.request.item.prefix.enabled": "Préfix",
+  "form.request.item.prefix": "Préfix",
+
+  "form.response.name": "Réponse",
+  "form.response.description": "Modification des réponses",
+  "form.response.item.gzip.enabled": "Gzip",
+  "form.response.item.responseTime.enabled": "Temps de réponse",
+
   "form.security.name": "Sécurité",
   "form.security.description": "Modification des configurations de sécurité.",
+
+  "form.security.item.csrf": "CSRF",
+  "form.security.item.p3p": "P3P",
+  "form.security.item.hsts": "HOSTS",
+  "form.security.item.csrf.enabled": "Activer CSRF",
+  "form.security.item.p3p.enabled": "Activer P3P",
+  "form.security.item.hsts.enabled": "Activer HOSTS",
+  "form.security.item.hsts.maxAge": "Max Age",
+  "form.security.item.hsts.includeSubDomains": "Inclure les sous-domaines",
+  "form.security.item.hsts.preload": "Preload",
 
   "form.security.item.session": "Session",
   "form.security.item.session.key": "Clé secrète",
   "form.security.item.session.maxAge": "Durée de vie ",
 
   "form.security.item.xframe": "Xframe",
+  "form.security.item.xframe.enabled": "Activer Xframe",
+  "form.security.item.xframe.value": "Options Xframe",
   "form.security.item.xframe.deny": "DENY",
   "form.security.item.xframe.sameorigin": "SAMEORIGIN",
   "form.security.item.xframe.allow-from": "ALLOW-FROM",
 
   "form.security.item.xssProtection": "Protection xss",
+  "form.security.item.xssProtection.enabled": "Activer Protection xss",
+  "form.security.item.xssProtection.mode": "Mode",
 
   "form.security.item.cors": "Cors",
+  "form.security.item.cors.enabled": "Cors Enabled",
   "form.security.item.cors.origin": "Origin",
 
   "form.server.name": "Serveur",
@@ -48,6 +95,7 @@
 
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
+  "form.server.item.cron": "Cron",
 
   "form.language.name": "Langages",
   "form.language.description": "Modification des langues.",

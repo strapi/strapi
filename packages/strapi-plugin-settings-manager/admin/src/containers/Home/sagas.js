@@ -116,6 +116,7 @@ export function* fetchConfig(action) {
     yield put(configFetchSucceded(data));
 
   } catch(error) {
+    console.log(error)
     window.Strapi.notification.error('An error occurred ');
   }
 }

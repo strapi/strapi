@@ -115,6 +115,24 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     }
   }
 
+  renderFormattedInput = (handleBlur, inputValue, placeholder) => (
+    <FormattedMessage {...{id: placeholder}}>
+      {(message) => (
+        <input
+          name={this.props.target}
+          id={this.props.name}
+          onBlur={handleBlur}
+          onFocus={this.props.handleFocus}
+          onChange={this.props.handleChange}
+          value={inputValue}
+          type="text"
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          placeholder={message}
+        />
+      )}
+    </FormattedMessage>
+  )
+
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
@@ -126,20 +144,24 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const placeholder = this.props.placeholder || this.props.name;
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
+
+    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+      : <input
+        name={this.props.target}
+        id={this.props.name}
+        onBlur={handleBlur}
+        onFocus={this.props.handleFocus}
+        onChange={this.props.handleChange}
+        value={inputValue}
+        type="text"
+        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+        placeholder={placeholder}
+      />;
+
     return (
       <div className={`${this.props.styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
         {label}
-        <input
-          name={this.props.target}
-          id={this.props.name}
-          onBlur={handleBlur}
-          onFocus={this.props.handleFocus}
-          onChange={this.props.handleChange}
-          value={inputValue}
-          type="text"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-          placeholder={placeholder}
-        />
+        {input}
         <small>{this.props.inputDescription}</small>
         {this.renderErrors()}
       </div>

@@ -6,12 +6,34 @@
 
   "menu.section.environments": "Environments",
   "menu.item.database": "Databases",
+  "menu.item.request": "Request",
+  "menu.item.response": "Response",
   "menu.item.security": "Security",
   "menu.item.server": "Server",
 
+  "form.button.cancel": "Cancel",
+  "form.button.save": "Save",
+  "form.button.confirm": "Confim",
 
-  "form.database.name": "Databases",
-  "form.database.description": "Configure your databases settings by environnement",
+  "form.databases.name": "Databases",
+  "form.databases.description": "Configure your databases settings by environnement",
+
+  "form.database.item.name": "Connection Name",
+  "form.database.item.client": "Client",
+  "form.database.item.connector": "Connector",
+  "form.database.item.host": "Host",
+  "form.database.item.port": "Port",
+  "form.database.item.username": "Username",
+  "form.database.item.password": "Password",
+  "form.database.item.database": "Databases",
+  "form.database.item.default": "Set as default connection",
+  "form.database.item.provider.mongo": "Mongo",
+  "form.database.item.provider.postgres": "PostgresSQL",
+  "form.database.item.provider.mysql": "MySQL",
+  "form.database.item.provider.sqlite3": "SQlite3",
+  "form.database.item.provider.redis": "Redis",
+
+
 
   "form.general.name": "General",
   "form.general.description": "Configure your general settings.",
@@ -26,21 +48,47 @@
   "form.advanced.item.admin": "Admin dashboard url",
   "form.advanced.item.prefix": "Prefix API",
 
+  "form.request.item.logger.enabled": "Logger",
+  "form.request.item.parser.enabled": "Parser",
+  "form.request.item.parser.multipart": "Parser Multipart",
+  "form.request.item.prefix": "Prefix",
+  "form.request.item.prefix.enabled": "Prefix",
+
+  "form.response.name": "Response",
+  "form.response.description": "Configure your response settings",
+  "form.response.item.gzip.enabled": "Gzip",
+  "form.response.item.responseTime.enabled": "Response Time",
+
   "form.security.name": "Security",
   "form.security.description": "Configure your security settings.",
+
+  "form.security.item.csrf": "CSRF",
+  "form.security.item.p3p": "P3P",
+  "form.security.item.hsts": "HOSTS",
+  "form.security.item.csrf.enabled": "CSRF Enabled",
+  "form.security.item.p3p.enabled": "P3P Enabled",
+  "form.security.item.hsts.enabled": "HOSTS Enabled",
+  "form.security.item.hsts.maxAge": "Max Age",
+  "form.security.item.hsts.includeSubDomains": "Include Sub Domain",
+  "form.security.item.hsts.preload": "Preload",
 
   "form.security.item.session": "Session",
   "form.security.item.session.key": "Secret key",
   "form.security.item.session.maxAge": "Maximum age",
 
   "form.security.item.xframe": "Xframe",
+  "form.security.item.xframe.enabled": "Xframe Enabled",
+  "form.security.item.xframe.value": "Xframe Options",
   "form.security.item.xframe.deny": "DENY",
   "form.security.item.xframe.sameorigin": "SAMEORIGIN",
   "form.security.item.xframe.allow-from": "ALLOW-FROM",
 
   "form.security.item.xssProtection": "xss Protection",
+  "form.security.item.xssProtection.enabled": "Protection xss Enabled",
+  "form.security.item.xssProtection.mode": "Mode",
 
   "form.security.item.cors": "Cors",
+  "form.security.item.cors.enabled": "Cors Enabled",
   "form.security.item.cors.origin": "Origin",
 
   "form.server.name": "Server",
@@ -48,6 +96,7 @@
 
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
+  "form.server.item.cron": "Cron",
 
   "form.language.name": "Languages",
   "form.language.description": "Configure your languages.",

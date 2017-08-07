@@ -217,7 +217,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     if (!isEmpty(body)) {
       this.props.editSettings(body, apiUrl);
     } else {
-      window.Strapi.notification.error('Settings are equals');
+      window.Strapi.notification.info('Settings are equals');
     }
   }
 
@@ -340,7 +340,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             id={item.target}
             onClick={this.setDefaultConnectionDb}
           >
-            {item.name}{isActive}
+            <FormattedMessage {...{id: item.name}} />{isActive}
           </div>
         );
       }

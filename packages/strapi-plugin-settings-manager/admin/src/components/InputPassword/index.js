@@ -115,17 +115,21 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
       <div className={`${bootStrapClass}`}>
         <div className={`${this.props.styles.inputText} ${bootStrapClassDanger}`}>
           <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
-          <input
-            name={this.props.target}
-            id={this.props.name}
-            onBlur={handleBlur}
-            onFocus={this.props.handleFocus}
-            onChange={this.props.handleChange}
-            value={inputValue}
-            type={type}
-            className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-            placeholder={placeholder}
-          />
+          <FormattedMessage {...{id: placeholder}}>
+            {(message) => (
+              <input
+                name={this.props.target}
+                id={this.props.name}
+                onBlur={handleBlur}
+                onFocus={this.props.handleFocus}
+                onChange={this.props.handleChange}
+                value={inputValue}
+                type={type}
+                className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+                placeholder={message}
+              />
+            )}
+          </FormattedMessage>
           <small>{this.props.inputDescription}</small>
           {this.renderErrors()}
         </div>

@@ -99,6 +99,24 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  renderFormattedInput = (handleBlur, inputValue, placeholder) => (
+    <FormattedMessage {...{id: placeholder}}>
+      {(message) => (
+        <input
+          name={this.props.target}
+          id={this.props.name}
+          onBlur={handleBlur}
+          onFocus={this.props.handleFocus}
+          onChange={this.props.handleChange}
+          value={inputValue}
+          type="text"
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          placeholder={message}
+        />
+      )}
+    </FormattedMessage>
+  )
+
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
@@ -109,20 +127,23 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
 
+    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+      : <input
+        type="number"
+        name={this.props.target}
+        id={this.props.name}
+        value={inputValue}
+        onBlur={handleBlur}
+        onChange={this.props.handleChange}
+        onFocus={this.props.handleFocus}
+        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+        placeholder={placeholder}
+      />;
+
     return (
       <div className={`${this.props.styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
-        <input
-          type="number"
-          name={this.props.target}
-          id={this.props.name}
-          value={inputValue}
-          onBlur={handleBlur}
-          onChange={this.props.handleChange}
-          onFocus={this.props.handleFocus}
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-          placeholder={placeholder}
-        />
+        {input}
         <small>{this.props.inputDescription}</small>
         {this.renderErrors()}
       </div>
