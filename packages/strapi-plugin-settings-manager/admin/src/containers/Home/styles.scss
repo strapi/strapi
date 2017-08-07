@@ -20,3 +20,13 @@
 .left {
   opacity: 0.3;
 }
+
+
+
+.flagContainer {
+  margin-left: 1rem;
+  background-position: 0;
+  > span {
+    margin-left: 3rem;
+  }
+}

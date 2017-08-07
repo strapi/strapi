@@ -20,7 +20,7 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
-
+    
     return (
       <div className={`${styles.inputSelect} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>

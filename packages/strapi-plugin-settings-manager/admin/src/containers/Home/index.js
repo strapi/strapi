@@ -29,6 +29,7 @@ import {
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
+import Select from 'react-select';
 import { router } from 'app';
 
 // design
@@ -38,8 +39,9 @@ import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import RowDatabase from 'components/RowDatabase';
-
+import SelectOptionLanguage from 'components/SelectOptionLanguage';
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
+import getFlag from '../../utils/getFlag';
 import selectHome from './selectors';
 import {
   cancelChanges,
@@ -263,7 +265,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
 
-
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => {
     // assign the target id the language name to prepare for delete
@@ -291,17 +292,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         </FormattedMessage>;
 
     const flagName = this.formatLanguageLocale(props.name);
-    let flag;
-    switch (flagName.length) {
-      case 2:
-        flag = toLower(flagName[1]);
-        break;
-      case 3:
-        flag = toLower(flagName[2]);
-        break;
-      default:
-        flag = toLower(flagName[0]);
-    }
+    const flag = getFlag(flagName);
 
     return (
       <li key={key}>
@@ -350,14 +341,42 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     })
   )
 
-  renderPopUpFormLanguage = (section, props) => (
-    map(section.items, (item, key) => (
-      <div key={key}>
-        {props.renderInput(item, key, this.renderCustomLanguagesSelectOption)}
-      </div>
-    ))
-  )
+  valueComponent = (props) => {
+    const flagName = this.formatLanguageLocale(props.value.value);
+    const flag = getFlag(flagName);
 
+    return (
+      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
+        <FormattedMessage {...{id: props.value.label}} className={styles.marginLeft} />
+      </span>
+    );
+  }
+
+  optionComponent = (props) => <SelectOptionLanguage {...props} />;
+
+  handleChangeLanguage = (value) => this.props.changeInput('language.defaultLocale', value.value);
+
+  renderPopUpFormLanguage = (section) => (
+    map(section.items, (item) => {
+      const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
+
+      return (
+        <div className={`col-md-6`}>
+          <FormattedMessage {...{id: item.name}} />
+          <Select
+            name={item.target}
+            value={value}
+            options={this.props.home.selectOptions.options}
+            onChange={this.handleChangeLanguage}
+            valueComponent={this.valueComponent}
+            optionComponent={this.optionComponent}
+            clearable={false}
+            searchable={false}
+          />
+        </div>
+      )
+    })
+  )
 
   renderRowDatabase = (props, key) => (
     // const isDefaultConnection = this.props.home.modifiedData['database.defaultConnection'] === props.host;
@@ -395,6 +414,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     switch (this.props.params.slug) {
       case 'languages':
         sections = this.props.home.listLanguages.sections;
+
         // custom rendering for PopUpForm
         renderPopUpForm = this.renderPopUpFormLanguage;
         renderRow = this.renderRowLanguage;

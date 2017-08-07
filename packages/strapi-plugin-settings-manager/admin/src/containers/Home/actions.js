@@ -82,10 +82,27 @@ export function languagesFetchSucceeded(appLanguages, listLanguages) {
     sections: appLanguages.languages,
   };
 
+  const selectOptionsObject = listLanguages.sections[0].items[0];
+
+  const selectOptions = {
+    name: selectOptionsObject.name,
+    target: selectOptionsObject.target,
+    type: selectOptionsObject.type,
+    options: [],
+  };
+
+  forEach(selectOptionsObject.items, (item) => {
+    selectOptions.options.push({
+      value: item.value,
+      label: item.name,
+    });
+  });
+
   return {
     type: LANGUAGES_FETCH_SUCCEEDED,
     configs,
     listLanguages,
+    selectOptions,
   };
 }
 

@@ -36,6 +36,7 @@ const initialState = fromJS({
   didCreatedNewDb: false,
   specificDatabase: OrderedMap(),
   dbNameTarget: '',
+  selectOptions: Map(),
 });
 
 function homeReducer(state = initialState, action) {
@@ -75,6 +76,7 @@ function homeReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.configs))
         .set('initialData', Map())
         .set('modifiedData', Map())
+        .set('selectOptions', Map(action.selectOptions))
         .set('listLanguages', Map(action.listLanguages));
     case EDIT_SETTINGS_SUCCEEDED:
       return state

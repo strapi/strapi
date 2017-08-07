@@ -11,6 +11,7 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
 import { map } from 'lodash';
 import 'flag-icon-css/css/flag-icon.css';
+import 'react-select/dist/react-select.css';
 import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import { define } from 'i18n';
