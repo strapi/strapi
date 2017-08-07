@@ -242,7 +242,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       }
     });
 
-    if (has(this.props.home.modifiedData, 'security.xframe.value.nested')) {
+    if (has(this.props.home.modifiedData, 'security.xframe.value.nested') && this.props.home.modifiedData['security.xframe.value'] === 'ALLOW-FROM') {
       const value = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
       `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
        : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
@@ -289,11 +289,24 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           )}
         </FormattedMessage>;
 
+    const flagName = this.formatLanguageLocale(props.name);
+    let flag;
+    switch (flagName.length) {
+      case 2:
+        flag = toLower(flagName[1]);
+        break;
+      case 3:
+        flag = toLower(flagName[2]);
+        break;
+      default:
+        flag = toLower(flagName[0]);
+    }
+
     return (
       <li key={key}>
         <div className={liStyles.flexLi}>
           <div className={liStyles.flexed}>
-            <div>{key}</div>
+            <div><span className={`flag-icon flag-icon-${flag}`} /></div>
             <div className={`${liStyles.label} ${liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
           <div>{props.name}</div>
@@ -339,10 +352,11 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   renderPopUpFormLanguage = (section, props) => (
     map(section.items, (item, key) => (
       <div key={key}>
-        {props.renderInput(item, key)}
+        {props.renderInput(item, key, this.renderCustomLanguagesSelectOption)}
       </div>
     ))
   )
+
 
   renderRowDatabase = (props, key) => (
     // const isDefaultConnection = this.props.home.modifiedData['database.defaultConnection'] === props.host;
@@ -462,6 +476,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
           name={this.props.home.configsDisplay.name}
           description={this.props.home.configsDisplay.description}
         />
+
         {this.renderComponent()}
       </div>
     );

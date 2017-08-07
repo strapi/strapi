@@ -11,7 +11,7 @@ import WithFormSection from 'components/WithFormSection';
 class EditFormSectionSubNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={this.props.styles.padded}>
+      <div className={`${this.props.styles.padded} ${this.props.styles.subNestedFormContainer}`}>
         <div className="row">
           {map(this.props.section, (item, key) => (
             this.props.renderInput(item, key)

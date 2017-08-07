@@ -4,7 +4,7 @@
 *
 */
 
-import { forEach, has, remove } from 'lodash';
+import { includes, forEach, has, remove, get, split } from 'lodash';
 import {
   CONFIG_FETCH,
   LANGUAGES_FETCH,
@@ -123,8 +123,16 @@ function getDataFromConfigs(configs) {
     });
   });
 
+  if (configs.name === 'form.security.name' && includes(split(get(data, 'security.xframe.value'), ' '), 'ALLOW-FROM')) {
+    const allowFromValue = split(get(data, 'security.xframe.value'), ' ')[0];
+    const allowFromValueNested = split(get(data, 'security.xframe.value'), ' ')[1];
+    data['security.xframe.value'] = allowFromValue;
+    data['security.xframe.value.nested'] = allowFromValueNested;
+
+  }
   return data;
 }
+
 
 export function changeDefaultLanguage(configsDisplay, newLanguage) {
   return {

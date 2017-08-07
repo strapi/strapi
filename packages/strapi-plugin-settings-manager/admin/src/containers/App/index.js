@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
 import { map } from 'lodash';
+import 'flag-icon-css/css/flag-icon.css';
 import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import { define } from 'i18n';
@@ -23,6 +24,7 @@ define(map(messages, (message, id) => ({
   defaultMessage: message,
 }
 )));
+
 
 class App extends React.Component {
   componentDidMount() {

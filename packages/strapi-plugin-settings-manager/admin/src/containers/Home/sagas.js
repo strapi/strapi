@@ -1,6 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
-import { forEach, set } from 'lodash';
+import { forEach, set, join, split, toLower, upperCase } from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
@@ -165,8 +165,18 @@ export function* fetchLanguages() {
 export function* postLanguage() {
   try {
     const newLanguage = yield select(makeSelectModifiedData());
+    const languageArray = [];
+
+    forEach(split(newLanguage['language.defaultLocale'], '_'), (value, key) => {
+      if (key === 0){
+        languageArray.push(toLower(value));
+      } else {
+        languageArray.push(upperCase(value));
+      }
+    });
+
     const body = {
-      name: newLanguage['language.language.defaultLocale'],
+      name: join(languageArray, '_'),
     };
     const opts = {
       body,

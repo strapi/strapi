@@ -116,9 +116,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   render() {
-    console.log(this.props)
     const inputValue = this.props.value || '';
-    console.log(inputValue)
     // override default onBlur
     const handleBlur = this.props.handleBlur || this.handleBlur;
     // override bootStrapClass
