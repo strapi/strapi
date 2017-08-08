@@ -14,16 +14,23 @@
   }
 
 .padded {
-  padding: 4px 15px 0 15px;
+  padding:  0 15px 0 15px;
 }
 
 
 .subNestedFormContainer {
-  margin: 1rem 15px;
+  margin: 1rem 15px .2rem 15px;
   padding: 0 2rem;
   background: #FAFAFB;
 }
 
 .spacer {
-  height: 1.4rem;
+  height: 1.5rem;
+}
+
+
+.nesTedFormContainer {
+  margin-top: 1rem;
+  padding-top: .2rem;
+  margin-bottom: .5rem;
 }

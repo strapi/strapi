@@ -56,7 +56,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
     // console.log(this.state);
 
     return (
-      <div className={this.props.styles.padded}>
+      <div className={`${this.props.styles.padded} ${this.props.styles.nesTedFormContainer}`}>
         <div className="row">
           {map(this.props.section, (item, key) => {
             if (this.state.showNestedForm) {
