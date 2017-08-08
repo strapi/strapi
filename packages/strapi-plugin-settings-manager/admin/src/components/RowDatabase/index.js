@@ -18,14 +18,13 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     super(props);
     this.state = {
       modal: false,
-      databaseName: '',
       warning: false,
     };
   }
 
-  showDatabaseModal = ({ target }) => {
-    this.setState({ modal: !this.state.modal, databaseName: target.id });
-    this.props.getDatabase(target.id);
+  showDatabaseModal = () => {
+    this.setState({ modal: !this.state.modal });
+    this.props.getDatabase(this.props.data.name);
   }
 
   toggle = () => {
@@ -36,7 +35,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.handleSubmit(this.state.databaseName);
+    this.props.handleSubmit(this.props.data.name);
     this.setState({ modal: !this.state.modal });
   }
 
@@ -49,17 +48,17 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     return (
       <li>
         <div className={styles.flexLi}>
-          <div className={styles.flexed}>
+          <div className={styles.flexed} onClick={this.showDatabaseModal} style={{ cursor: 'pointer' }}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
               {this.props.data.letter}
             </div>
             <div className={styles.label}>{this.props.data.name}</div>
           </div>
-          <div>{this.props.data.database}</div>
-          <div className={styles.centered}>{this.props.data.host}</div>
-          <div className={styles.flexed}>
+          <div onClick={this.showDatabaseModal} style={{ cursor: 'pointer' }}>{this.props.data.database}</div>
+          <div className={styles.centered} style={{ width: '15rem', cursor: 'pointer'}} onClick={this.showDatabaseModal}>{this.props.data.host}</div>
+          <div className={styles.flexed} style={{ width: '4rem', justifyContent: 'space-between'}}>
 
-            <div><i className="fa fa-pencil" onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
+            <div><i className="fa fa-pencil" style={{ cursor: 'pointer' }} onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
             <div className={styles.leftSpaced}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
@@ -97,6 +96,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             warningMessage={'popUpWarning.databases.delete.message'}
           />
         </div>
+        <div className={styles.spacer} />
       </li>
     );
   }

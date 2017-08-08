@@ -60,7 +60,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
           </div>
           <div>{this.props.name}</div>
           <div className={this.props.liStyles.centered}>{languageLabel}</div>
-          <div>{deleteIcon}</div>
+          <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
         </div>
         <div>
           <PopUpWarning
@@ -70,6 +70,8 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
             warningMessage={'popUpWarning.languages.delete.message'}
           />
         </div>
+        <div className={this.props.liStyles.spacer} />
+
       </li>
     );
   }

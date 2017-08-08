@@ -97,7 +97,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
             <div className={styles.titleContainer}>
               {this.props.listTitle}
             </div>
-            <div>
+            <div className={styles.buttonContainer}>
               {button}
             </div>
           </div>

@@ -1,10 +1,10 @@
 .listContainer { /* stylelint-disable */
-  margin-right: 15px;
+  // margin-right: 15px;
 }
 
 .listSubContainer {
   margin: 0 3.3rem;
-  padding: 1rem 3rem 5.8rem 3rem;
+  padding: 1rem 2.8rem 5.8rem 2.8rem;
   border-radius: 0.2rem;
   background-color: #FFFFFF;
   // background-color: red;
@@ -31,9 +31,11 @@
   padding-top: .5rem;
   > ul {
     list-style: none;
-    padding: 0 2.7rem 0 1rem;
+    padding: 0 1.7rem 0 1rem;
     > li {
-      margin-bottom: 3.3rem;
+
+      padding-top: .3rem;
+      line-height: 1.6rem;
     }
   }
 }
@@ -58,9 +60,10 @@
 
 .label {
   width: 20rem;
-  margin-left: 5.2rem;
+  margin-left: 5rem;
   color: #333740;
   font-weight: 600;
+
 }
 
 .capitalized {
@@ -68,16 +71,18 @@
 }
 
 .centered {
-  width: 25rem;
+  width: 20rem;
   text-align: right;
 }
 
 .italicText {
+  font-family: Lato;
   color: #49515A;
   font-style: italic;
 }
 
 .normal {
+  font-family: Lato;
   color: #1C5DE7;
   padding-top: 0rem;
 }
@@ -183,4 +188,20 @@
 
 .leftSpaced {
   margin-left: 1rem;
+}
+
+.buttonContainer {
+  > button {
+    margin-right: 0;
+  }
+}
+
+.trashContainer {
+  margin-left: 4rem;
+}
+
+.spacer {
+  height: 1.6rem;
+  margin-bottom: 1.6rem;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
 }

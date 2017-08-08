@@ -299,7 +299,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             valueComponent={this.valueComponent}
             optionComponent={this.optionComponent}
             clearable={false}
-            searchable={false}
+            
           />
         </div>
       )
