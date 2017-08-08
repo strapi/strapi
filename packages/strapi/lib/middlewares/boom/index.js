@@ -66,6 +66,20 @@ module.exports = strapi => {
 
         this.delegator.method(key);
       });
+
+      strapi.app.response.send = function(data) {
+        this.status = 200;
+        this.body = data;
+      };
+
+      strapi.app.response.created = function(data) {
+        this.status = 201;
+        this.body = data;
+      };
+
+      this.delegator
+        .method('send')
+        .method('created');
     }
   };
 };

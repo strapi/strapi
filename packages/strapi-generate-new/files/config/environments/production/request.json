@@ -10,8 +10,11 @@
     }
   },
   "logger": {
-    "enabled": false,
-    "requests": false
+    "logger": {
+      "level": "info",
+      "exposeInContext": true,
+      "requests": false
+    }
   },
   "parser": {
     "enabled": true,

@@ -16,8 +16,7 @@ const forever = require('forever-monitor');
 const semver = require('semver')
 
 // Logger.
-const { cli } = require('strapi-utils');
-const logger = require('strapi-utils').logger;
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi start`

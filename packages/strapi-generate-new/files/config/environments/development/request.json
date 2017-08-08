@@ -10,8 +10,9 @@
     }
   },
   "logger": {
-    "enabled": false,
-    "requests": true
+    "level": "debug",
+    "exposeInContext": true,
+    "requests": false
   },
   "parser": {
     "enabled": true,

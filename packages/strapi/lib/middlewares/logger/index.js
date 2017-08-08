@@ -4,7 +4,7 @@
  * Logger hook
  */
 
-module.exports = function(strapi) {
+module.exports = strapi => {
   return {
     /**
      * Default options
@@ -21,9 +21,15 @@ module.exports = function(strapi) {
      */
 
     initialize: function(cb) {
-      strapi.app.context.log = strapi.log;
+      if (strapi.config.middleware.settings.logger.level) {
+        strapi.log.level = strapi.config.middleware.settings.logger.level;
+      }
 
-      if (strapi.config.middleware.settings.logger.requests) {
+      if (strapi.config.middleware.settings.logger.exposeInContext) {
+        strapi.app.context.log = strapi.log;
+      }
+
+      if (strapi.config.middleware.settings.logger.requests && strapi.log.levelVal <= 20) {
         strapi.app.use(async (ctx, next) => {
           const start = Date.now();
 
@@ -31,7 +37,7 @@ module.exports = function(strapi) {
 
           const delta = Math.ceil(Date.now() - start);
 
-          ctx.log.debug(`${ctx.method} ${ctx.url} (${delta} ms)`);
+          strapi.log.debug(`${ctx.method} ${ctx.url} (${delta} ms)`);
         });
       }
 

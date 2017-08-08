@@ -113,6 +113,9 @@ module.exports.app = async function() {
       router: {
         enabled: true
       },
+      logger: {
+        enabled: true
+      },
       boom: {
         enabled: true
       }
