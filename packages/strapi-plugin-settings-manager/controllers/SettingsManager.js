@@ -217,6 +217,13 @@ module.exports = {
       params = { database: { connections }};
 
       items = [{ target: 'database.connections' }];
+
+      if (strapi.config.environments[env].database.defaultConnection === name) {
+        params.database.defaultConnection = newName;
+        items.push({
+          target: 'database.defaultConnection'
+        });
+      }
     }
 
     const newClient = _.get(params, `database.connections.${name}.settings.client`);
