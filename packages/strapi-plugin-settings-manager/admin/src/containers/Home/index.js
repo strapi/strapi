@@ -10,14 +10,12 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-  find,
   findIndex,
   findKey,
   forEach,
   get,
   isEmpty,
   includes,
-  isObject,
   join,
   map,
   replace,
@@ -36,6 +34,7 @@ import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import RowDatabase from 'components/RowDatabase';
 import SelectOptionLanguage from 'components/SelectOptionLanguage';
+import RowLanguage from 'components/RowLanguage';
 
 // App selectors
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
@@ -231,7 +230,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   // retrieve the language to delete using the target id
-  handleLanguageDelete = ({ target }) => this.props.languageDelete(target.id);
+  handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = (dbName) => {
     window.Strapi.notification.success('Deleting database');
@@ -242,45 +241,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   optionComponent = (props) => <SelectOptionLanguage {...props} />;
 
   // custom Row rendering for the component List with params slug === languages
-  renderRowLanguage = (props, key, liStyles) => {
-    // assign the target id the language name to prepare for delete
-    const deleteIcon = props.active ? '' : <i className="fa fa-trash"  onClick={this.handleLanguageDelete} id={props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
-
-    // format the locale to
-    const defaultLanguageArray = formatLanguageLocale(props.name);
-    const flag = getFlag(defaultLanguageArray);
-    // retrieve language name from i18n translation
-    const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', join(defaultLanguageArray, '_')]);
-    // apply i18n
-    const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
-
-    const languageLabel = props.active ?
-      <span className={liStyles.italicText}>
-        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
-      </span> :
-      // set the span's id with the language name to retrieve it
-        <FormattedMessage {...{id: 'list.languages.set.languages'}}>
-          {(message) => (
-            <button className={liStyles.normal} onClick={this.changeDefaultLanguage} id={props.name}>
-              {message}
-            </button>
-          )}
-        </FormattedMessage>;
-
-    return (
-      <li key={key}>
-        <div className={liStyles.flexLi}>
-          <div className={liStyles.flexed}>
-            <div><span className={`flag-icon flag-icon-${flag}`} /></div>
-            <div className={`${liStyles.label} ${liStyles.capitalized}`}>{languageDisplay}</div>
-          </div>
-          <div>{props.name}</div>
-          <div className={liStyles.centered}>{languageLabel}</div>
-          <div>{deleteIcon}</div>
-        </div>
-      </li>
-    )
-  }
+  renderRowLanguage = (props, key, liStyles) => (
+    <RowLanguage
+      key={key}
+      {...props}
+      liStyles={liStyles}
+      handleLanguageDelete={this.handleLanguageDelete}
+      listLanguages={this.props.home.listLanguages}
+      changeDefaultLanguage={this.changeDefaultLanguage}
+    />
+  )
 
   renderListTitle = () => {
     const availableContentNumber = this.props.home.configsDisplay.sections.length;

@@ -131,6 +131,7 @@
 
   "popUpWarning.title": "Merci de confirmer",
   "popUpWarning.databases.delete.message": "Etes-vous sûre de vouloir supprimer cette connexion ?",
+  "popUpWarning.languages.delete.message": "Etes-vous sûre de vouloir supprimer ce language ?",
 
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",
