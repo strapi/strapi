@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = {
@@ -25,9 +26,23 @@ module.exports = {
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
 
-    Service.generateAPI(name, attributes);
+    strapi.reload.isWatching = false;
+
+    await Service.generateAPI(name, attributes);
+
+    const modelFilePath = Service.getModelPath(name);
+    const modelJSON = JSON.parse(fs.readFileSync(modelFilePath), 'utf8');
+
+    modelJSON.attributes = Service.formatAttributes(attributes);
+
+    Service.clearRelations(name);
+    Service.createRelations(name, attributes);
+
+    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
 
     ctx.send({ ok: true });
+
+    strapi.reload();
   },
 
   updateModel: async ctx => {
@@ -38,18 +53,19 @@ module.exports = {
     if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
     const modelFilePath = Service.getModelPath(model);
-    const modelJSON = Service.readModel(modelFilePath);
+    const modelJSON = JSON.parse(fs.readFileSync(modelFilePath), 'utf8');
 
-    if (!_.isEmpty(attributes)) {
-      modelJSON.attributes = {};
+    modelJSON.attributes = Service.formatAttributes(attributes);
 
-      _.forEach(attributes, attribute => {
-        modelJSON.attributes[attribute.name] = _.get(attribute, 'params', {});
-      });
-    }
+    Service.clearRelations(model);
+    Service.createRelations(model, attributes);
 
-    Service.rewriteModel(modelFilePath, modelJSON);
+    strapi.reload.isWatching = false;
+
+    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
 
     ctx.send({ ok: true });
+
+    strapi.reload();
   }
 };

@@ -89,9 +89,10 @@ module.exports = (scope, cb) => {
         }
       };
     } else {
-      return attribute;
+      return _.has(attribute, 'params.type') ? attribute : undefined;
     }
   });
+  scope.attributes = _.compact(scope.attributes);
 
   // Handle invalid action arguments.
   // Send back invalidActions.
