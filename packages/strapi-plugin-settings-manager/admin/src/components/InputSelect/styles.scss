@@ -1,10 +1,16 @@
 .inputSelect { /* stylelint-disable */
-  margin-top: 1.8rem;
+  font-size: 1.3rem;
+  font-family: Lato;
+
   > label {
     text-transform: capitalize;
-    margin-bottom: .7rem;
+    margin-bottom: .8rem;
   }
   > select {
+    font-size: 1.3rem;
+    font-family: Lato;
     color: #333740;
+    height: 3.5rem!important;
+    border-radius: 0rem!important;
   }
 }

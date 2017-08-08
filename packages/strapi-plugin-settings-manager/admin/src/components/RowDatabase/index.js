@@ -68,9 +68,11 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
               Databases
             </ModalHeader>
             <div className={styles.bordered} />
+
             <form>
 
               <ModalBody className={styles.modalBody}>
+                <div className={styles.spacerSmall} />
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>

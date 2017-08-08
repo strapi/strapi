@@ -129,6 +129,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
             <form onSubmit={this.handleSubmit}>
 
               <ModalBody className={styles.modalBody}>
+                <div className={styles.spacerSmall} />
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>

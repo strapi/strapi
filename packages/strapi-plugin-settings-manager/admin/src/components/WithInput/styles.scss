@@ -13,6 +13,7 @@
   > input {
     margin-top: 4px;
     margin-bottom: 1.1rem;
+    border-radius: 0.25rem;
     height: 3.4rem;
     line-height: 1.6rem;
     font-family: Lato!important;
@@ -35,6 +36,7 @@
     margin-top: 4px;
     margin-bottom: 1.1rem;
     height: 3.4rem;
+    border-radius: 0.25rem;
     line-height: 1.6rem;
     font-family: Lato!important;
   }
@@ -42,7 +44,7 @@
 
 .insideInput {
   position: absolute;
-  top: 4.7rem;
+  top: 3.5rem;
   right: 2.7rem;
   color: #9EA7B8;
 }

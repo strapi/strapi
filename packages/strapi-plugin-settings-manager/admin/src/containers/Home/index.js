@@ -290,7 +290,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
 
       return (
         <div className={`col-md-6`}>
-          <FormattedMessage {...{id: item.name}} />
+          <div className={styles.modalLanguageLabel}>
+            <FormattedMessage {...{id: item.name}} />
+          </div>
           <Select
             name={item.target}
             value={value}
@@ -299,7 +301,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             valueComponent={this.valueComponent}
             optionComponent={this.optionComponent}
             clearable={false}
-            
+
           />
         </div>
       )

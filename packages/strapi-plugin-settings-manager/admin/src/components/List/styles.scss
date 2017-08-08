@@ -131,7 +131,7 @@
 
 
 .modalPosition {
-  margin-top: 48rem ;
+  margin-top: 22rem ;
   margin-left: 25%;
   width: 50%!important;
   max-width: none;
@@ -140,13 +140,13 @@
 
 .modalBody {
   padding: 0;
-  padding-top: .5rem;
+  padding-top: 2rem;
 
 }
 
 .modalFooter {
 
-  margin-top: 4.5rem;
+  margin-top: 1.1rem;
   margin-bottom: 3.5rem;
   padding-left: 3.1rem !important;
   > input {
@@ -160,6 +160,8 @@
 }
 
 .mHeader {
+  padding-top: 1.6rem;
+  padding-bottom: 1rem;
   > h4 {
     font-family: Lato;
     font-weight: bold!important;
@@ -204,4 +206,8 @@
   height: 1.6rem;
   margin-bottom: 1.6rem;
   border-bottom: 1px solid rgba(14,22,34,0.04);
+}
+
+.spacerSmall {
+  margin-bottom: 0rem;
 }
