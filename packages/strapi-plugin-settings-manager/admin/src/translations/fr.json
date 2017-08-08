@@ -33,7 +33,6 @@
   "form.database.item.provider.sqlite3": "SQlite3",
   "form.database.item.provider.redis": "Redis",
 
-
   "form.general.name": "Général",
   "form.general.description": "Modification des configurations général.",
 
@@ -48,10 +47,12 @@
   "form.advanced.item.prefix": "Prefix de l'API",
 
   "form.request.item.logger.enabled": "Logger",
-  "form.request.item.parser.enabled": "Parser",
+  "form.request.item.parser": "Parser",
+  "form.request.item.parser.enabled": "Activation du parser",
   "form.request.item.parser.multipart": "Parser Multipart",
-  "form.request.item.prefix.enabled": "Préfix",
   "form.request.item.prefix": "Préfix",
+  "form.request.item.prefix.enabled": "Activation du préfix",
+  "form.request.item.prefix.prefix": "Préfix",
 
   "form.response.name": "Réponse",
   "form.response.description": "Modification des réponses",

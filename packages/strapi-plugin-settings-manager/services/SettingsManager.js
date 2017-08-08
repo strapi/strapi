@@ -140,7 +140,12 @@ module.exports = {
             validations: {
               required: true
             }
-          },
+          }
+        ]
+      },
+      {
+        name: 'form.request.item.parser',
+        items: [
           {
             name: 'form.request.item.parser.enabled',
             target: 'request.parser.enabled',
@@ -157,7 +162,12 @@ module.exports = {
                 }
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        name: 'form.request.item.prefix',
+        items: [
           {
             name: 'form.request.item.prefix.enabled',
             target: 'request.router.enabled',
@@ -165,7 +175,7 @@ module.exports = {
             value: _.get(strapi.config, `environments.${env}.request.router.enabled`, null),
             items: [
               {
-                name: 'form.request.item.prefix',
+                name: 'form.request.item.prefix.prefix',
                 target: 'request.router.prefix',
                 type: 'string',
                 value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
