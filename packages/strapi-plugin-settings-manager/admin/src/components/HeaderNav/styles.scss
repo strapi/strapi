@@ -5,14 +5,14 @@
 .headerContainer {
   display: flex;
   flex-direction: row;
-  margin: 0 3.3rem;
+  margin: 0 1.8rem;
 }
 
 .headerLink {
   position: relative;
   display: flex;
   flex: 1 100%;
-  height: 4rem;
+  height: 3.6rem;
   border-radius: 1px 0 0 0;
   background-color: rgba(14,22,34,0.05);
   text-decoration: none !important;
@@ -50,9 +50,4 @@
   margin: auto 0.7rem;
   border-radius: 0.5rem;
   background-color: #27B70F;
-}
-
-.noPaddingLeft {
-  padding-left: 0;
-  // padding-top: 1.1rem; TODO check if property works with database view
 }

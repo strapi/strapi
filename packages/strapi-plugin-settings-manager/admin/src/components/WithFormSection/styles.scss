@@ -1,6 +1,6 @@
 .editFormSection { /* stylelint-disable */
   background: #FFFFFF;
-  padding-top: 0rem;
+  padding-top: 0.1rem;
 }
 
 .sectionHeader {
@@ -14,7 +14,7 @@
   }
 
 .padded {
-  padding: 0 15px 0 15px;
+  padding: 4px 15px 0 15px;
 }
 
 
@@ -22,4 +22,8 @@
   margin: 1rem 15px;
   padding: 0 2rem;
   background: #FAFAFB;
+}
+
+.spacer {
+  height: 1.4rem;
 }

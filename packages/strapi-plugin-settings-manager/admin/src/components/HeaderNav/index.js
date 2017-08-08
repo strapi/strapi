@@ -17,7 +17,7 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
     const component = this.props.renderListComponent ? <List {...this.props} /> : <EditForm {...this.props} />;
     return (
       <div className={styles.headerNav}>
-        <div className={`${styles.noPaddingLeft} container-fluid `}>
+        <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
               <div className={styles.headerContainer}>

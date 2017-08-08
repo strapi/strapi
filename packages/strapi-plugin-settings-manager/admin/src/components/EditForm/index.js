@@ -24,7 +24,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
                 line = <hr />;
               }
               return (
-                <div key={key}>
+                <div key={key} className={styles.sectionContainer}>
                   <EditFormSection
                     section={section}
                     values={this.props.values}

@@ -1,20 +1,28 @@
 .editForm { /* stylelint-disable */
-  margin-right: 15px; // Same as bootstrap row
 
 }
 
 .formContainer {
   margin: 0 3.3rem;
-  padding: 0.5rem 2.8rem 5.8rem 2.8rem;
+  padding: 2rem 1.2rem 5.8rem 1.2rem;
   border-radius: 0.2rem;
   background-color: #FFFFFF;
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
 
+  > div > hr {
+    // margin-top: 2.3rem;
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+  }
 }
 
 .buttonContainer {
   position: absolute;
-  top: 2.7rem;
-  right: 3.3rem;
-  padding-right: 2.8rem;
+  top: 3.3rem;
+  right: 0rem;
+  padding-right: 1.6rem;
+}
+
+.sectionContainer {
+  margin-bottom: 1.5rem;
 }

@@ -1,5 +1,6 @@
 .inputNumber { /* stylelint-disable */
-  margin-top: 1.5rem;
+  // margin-bottom: .3rem;
+  font-size: 1.3rem;
   font-family: Lato;
   > label {
     text-transform: capitalize;
@@ -10,15 +11,18 @@
     color: #ABAFBB;
   }
   > input {
-    margin-top: 2px;
-    margin-bottom: 1.4rem;
+    margin-top: 3px;
+    margin-bottom: 1.1rem;
+    height: 3.4rem;
+    line-height: 1.6rem;
     font-family: Lato!important;
   }
 }
 
 .inputText { /* stylelint-disable */
+  
   font-family: Lato!important;
-  margin-top: 1.5rem;
+  font-size: 1.3rem;
   > label {
     text-transform: capitalize;
   }
@@ -28,8 +32,10 @@
     color: #ABAFBB;
   }
   > input {
-    margin-top: 2px;
-    margin-bottom: 1.4rem;
+    margin-top: 3px;
+    margin-bottom: 1.1rem;
+    height: 3.4rem;
+    line-height: 1.6rem;
     font-family: Lato!important;
   }
 }
