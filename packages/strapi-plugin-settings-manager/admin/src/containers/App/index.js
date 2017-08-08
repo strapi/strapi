@@ -46,7 +46,7 @@ class App extends React.Component {
 
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        <div className={`container-fluid ${styles.noPadding}`}>
+        <div className="container-fluid">
           <div className={styles.baseline}></div>
           <div className="row">
             <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} envParams={this.props.params.env} />
