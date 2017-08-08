@@ -25,7 +25,6 @@ import {
   configFetchSucceded,
   databasesFetchSucceeded,
   languagesFetchSucceeded,
-  languageActionSucceded,
   languageActionError,
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
@@ -189,17 +188,9 @@ export function* postLanguage() {
     yield call(request, requestUrl, opts);
 
     window.Strapi.notification.success('Adding a new language...');
-    // TODO remove counter
-    yield new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 4000);
-    });
-
-    yield put(languageActionSucceded());
 
   } catch(error) {
-    // TODO handle error i18n
+    yield put(languageActionError());
     window.Strapi.notification.error(error);
   }
 }

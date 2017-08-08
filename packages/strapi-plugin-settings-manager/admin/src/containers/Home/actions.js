@@ -98,11 +98,15 @@ export function languagesFetchSucceeded(appLanguages, listLanguages) {
     });
   });
 
+  // Init the react-select
+  const selectedLanguage = { 'language.defaultLocale': selectOptionsObject.items[0].value };
+
   return {
     type: LANGUAGES_FETCH_SUCCEEDED,
     configs,
     listLanguages,
     selectOptions,
+    selectedLanguage,
   };
 }
 

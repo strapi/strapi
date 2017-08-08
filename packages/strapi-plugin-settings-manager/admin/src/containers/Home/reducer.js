@@ -5,7 +5,7 @@
  */
 
 import { fromJS, Map, OrderedMap } from 'immutable';
-import { remove } from 'lodash';
+import { remove, sortBy } from 'lodash';
 import {
   CONFIG_FETCH_SUCCEEDED,
   CHANGE_DEFAULT_LANGUAGE,
@@ -21,6 +21,7 @@ import {
   LANGUAGE_ACTION_ERROR,
   DATABASE_DELETE,
   DATABASE_ACTION_ERROR,
+  NEW_LANGUAGE_POST,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -75,7 +76,7 @@ function homeReducer(state = initialState, action) {
         .set('didCreatedNewLanguage', false)
         .set('configsDisplay', OrderedMap(action.configs))
         .set('initialData', Map())
-        .set('modifiedData', Map())
+        .set('modifiedData', Map(action.selectedLanguage))
         .set('selectOptions', Map(action.selectOptions))
         .set('listLanguages', Map(action.listLanguages));
     case EDIT_SETTINGS_SUCCEEDED:
@@ -99,6 +100,11 @@ function homeReducer(state = initialState, action) {
         .set('dbNameTarget', action.dbNameTarget)
         .set('initialData', Map(action.data))
         .set('modifiedData', Map(action.data));
+    case NEW_LANGUAGE_POST: // eslint-disable-line no-case-declarations
+      const sections = state.getIn(['configsDisplay', 'sections']);
+      sections.push({ active: false, name: state.getIn(['modifiedData', 'language.defaultLocale']) });
+      const newSections = sortBy(sections, (o) => o.name);
+      return state.setIn(['configsDisplay', 'sections'], newSections);
     default:
       return state;
   }
