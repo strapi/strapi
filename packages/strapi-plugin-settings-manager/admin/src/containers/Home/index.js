@@ -15,17 +15,13 @@ import {
   findKey,
   forEach,
   get,
-  has,
   isEmpty,
   includes,
   isObject,
   join,
   map,
   replace,
-  split,
   toNumber,
-  toLower,
-  upperCase,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
@@ -40,8 +36,14 @@ import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import RowDatabase from 'components/RowDatabase';
 import SelectOptionLanguage from 'components/SelectOptionLanguage';
+
+// App selectors
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
-import getFlag from '../../utils/getFlag';
+
+// utils
+import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
+import sendUpdatedParams from '../../utils/sendUpdatedParams';
+
 import selectHome from './selectors';
 import {
   cancelChanges,
@@ -58,6 +60,7 @@ import {
   newDatabasePost,
   specificDatabaseFetch,
 } from './actions'
+
 import styles from './styles.scss';
 import config from './config.json';
 
@@ -78,6 +81,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       modal: false,
       toggleDefaultConnection: false,
     };
+
+    this.sendUpdatedParams = sendUpdatedParams.bind(this);
   }
 
   componentDidMount() {
@@ -87,7 +92,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
       router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
     }
   }
-
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
@@ -158,24 +162,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.changeDefaultLanguage(configsDisplay, target.id);
 
     // format the default locale
-    const defaultLanguageArray = this.formatLanguageLocale(target.id);
+    const defaultLanguageArray = formatLanguageLocale(target.id);
 
     // Edit the new config
     this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
   }
 
-  formatLanguageLocale = (data) => {
-    const array = [];
-
-    forEach(split(data, '_'), (value, key) => {
-      if (key === 0){
-        array.push(toLower(value));
-      } else {
-        array.push(upperCase(value));
-      }
-    });
-
-    return array;
+  getDatabase = (databaseName) => {
+    // allow state here just for modal purpose
+    this.props.specificDatabaseFetch(databaseName, this.props.params.env);
+    // this.setState({ modal: !this.state.modal });
   }
 
   handleFetch(props) {
@@ -205,9 +201,9 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     this.props.changeInput(name, value);
   }
 
-  handleCancel = () => {
-    this.props.cancelChanges();
-  }
+  handleChangeLanguage = (value) => this.props.changeInput('language.defaultLocale', value.value);
+
+  handleCancel = () => this.props.cancelChanges();
 
   handleSubmit = (e) => {
     e.preventDefault();
@@ -234,36 +230,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  sendUpdatedParams = () => {
-    const prevSettings = this.props.home.initialData;
-    const body = {};
-
-    forEach(this.props.home.modifiedData, (value, key) => {
-      if (value !== prevSettings[key] && key !== 'security.xframe.value.nested') {
-        body[key] = value;
-      }
-    });
-
-    if (has(this.props.home.modifiedData, 'security.xframe.value.nested') && this.props.home.modifiedData['security.xframe.value'] === 'ALLOW-FROM') {
-      const value = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
-      `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
-       : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
-
-      body['security.xframe.value'] = value;
-    }
-    return body;
-  }
-
-  handleLanguageDelete = ({ target }) => {
-    // retrieve the language to delete using the target id
-    this.props.languageDelete(target.id);
-  }
+  // retrieve the language to delete using the target id
+  handleLanguageDelete = ({ target }) => this.props.languageDelete(target.id);
 
   handleDatabaseDelete = (dbName) => {
-    window.Strapi.notification.info('Deleting database');
+    window.Strapi.notification.success('Deleting database');
     this.props.databaseDelete(dbName, this.props.params.env);
   }
 
+  // function used for react-select option
+  optionComponent = (props) => <SelectOptionLanguage {...props} />;
 
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => {
@@ -271,8 +247,8 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const deleteIcon = props.active ? '' : <i className="fa fa-trash"  onClick={this.handleLanguageDelete} id={props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
 
     // format the locale to
-    const defaultLanguageArray = this.formatLanguageLocale(props.name);
-
+    const defaultLanguageArray = formatLanguageLocale(props.name);
+    const flag = getFlag(defaultLanguageArray);
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.home.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', join(defaultLanguageArray, '_')]);
     // apply i18n
@@ -290,9 +266,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             </button>
           )}
         </FormattedMessage>;
-
-    const flagName = this.formatLanguageLocale(props.name);
-    const flag = getFlag(flagName);
 
     return (
       <li key={key}>
@@ -341,21 +314,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     })
   )
 
-  valueComponent = (props) => {
-    const flagName = this.formatLanguageLocale(props.value.value);
-    const flag = getFlag(flagName);
-
-    return (
-      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
-        <FormattedMessage {...{id: props.value.label}} className={styles.marginLeft} />
-      </span>
-    );
-  }
-
-  optionComponent = (props) => <SelectOptionLanguage {...props} />;
-
-  handleChangeLanguage = (value) => this.props.changeInput('language.defaultLocale', value.value);
-
   renderPopUpFormLanguage = (section) => (
     map(section.items, (item) => {
       const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
@@ -379,7 +337,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   )
 
   renderRowDatabase = (props, key) => (
-    // const isDefaultConnection = this.props.home.modifiedData['database.defaultConnection'] === props.host;
     <RowDatabase
       key={key}
       data={props}
@@ -457,12 +414,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     );
   }
 
-  getDatabase = (databaseName) => {
-    // allow state here just for modal purpose
-    this.props.specificDatabaseFetch(databaseName, this.props.params.env);
-    // this.setState({ modal: !this.state.modal });
-  }
-
   setDefaultConnectionDb = (e) => {
     const value = this.state.toggleDefaultConnection ?
       this.props.home.addDatabaseSection.sections[1].items[0].value
@@ -474,11 +425,19 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
   }
 
   // Hide database modal
-  toggle = () => {
-    this.setState({ modal: !this.state.modal });
+  toggle = () => this.setState({ modal: !this.state.modal });
+
+  // function used for react-select
+  valueComponent = (props) => {
+    const flagName = formatLanguageLocale(props.value.value);
+    const flag = getFlag(flagName);
+
+    return (
+      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
+        <FormattedMessage {...{id: props.value.label}} className={styles.marginLeft} />
+      </span>
+    );
   }
-
-
 
   render() {
     if (this.props.home.loading) {
@@ -503,7 +462,6 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     );
   }
 }
-
 
 const mapStateToProps = createStructuredSelector({
   environments: makeSelectEnvironments(),

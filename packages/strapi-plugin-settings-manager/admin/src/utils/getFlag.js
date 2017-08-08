@@ -1,16 +1,19 @@
-import { toLower } from 'lodash';
+import { toLower, size, forEach, upperCase, split } from 'lodash';
 
 export default function getFlag(languageArray) {
-  let flag;
-  switch (languageArray.length) {
-    case 2:
-      flag = toLower(languageArray[1]);
-      break;
-    case 3:
-      flag = toLower(languageArray[2]);
-      break;
-    default:
-      flag = toLower(languageArray[0]);
-  }
-  return flag;
+  return toLower(languageArray[size(languageArray) -1]);
+}
+
+export function formatLanguageLocale(data) {
+  const array = [];
+
+  forEach(split(data, '_'), (value, key) => {
+    if (key === 0){
+      array.push(toLower(value));
+    } else {
+      array.push(upperCase(value));
+    }
+  });
+
+  return array;
 }

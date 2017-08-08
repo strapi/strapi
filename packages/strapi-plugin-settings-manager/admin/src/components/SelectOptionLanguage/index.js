@@ -5,9 +5,8 @@
 */
 
 import React from 'react';
-import { toLower, split, upperCase , forEach} from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import getFlag from '../../utils/getFlag';
+import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import styles from './styles.scss';
 
 class SelectOptionLanguage extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -27,22 +26,8 @@ class SelectOptionLanguage extends React.Component { // eslint-disable-line reac
     this.props.onFocus(this.props.option, event);
   }
 
-  formatLanguageLocale = () => {
-    const array = [];
-
-    forEach(split(this.props.option.value, '_'), (value, key) => {
-      if (key === 0){
-        array.push(toLower(value));
-      } else {
-        array.push(upperCase(value));
-      }
-    });
-
-    return array;
-  }
-
   render() {
-    const flagName = this.formatLanguageLocale();
+    const flagName = formatLanguageLocale(this.props.option.value);
     const flag = getFlag(flagName);
 
     return (
