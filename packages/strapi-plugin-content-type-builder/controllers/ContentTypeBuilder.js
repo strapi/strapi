@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const _ = require('lodash');
 
 module.exports = {
@@ -57,12 +58,29 @@ module.exports = {
 
     modelJSON.attributes = Service.formatAttributes(attributes);
 
+    strapi.reload.isWatching = false;
+
     Service.clearRelations(model);
     Service.createRelations(model, attributes);
 
+    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+
+    ctx.send({ ok: true });
+
+    strapi.reload();
+  },
+
+  deleteModel: async ctx => {
+    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+    const { model } = ctx.params;
+
+    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+
     strapi.reload.isWatching = false;
 
-    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+    Service.clearRelations(model);
+
+    Service.removeModel(model);
 
     ctx.send({ ok: true });
 

@@ -71,7 +71,7 @@ module.exports = {
 
   getModelPath: model => {
     let searchFilePath;
-    const searchFileName = `${_.get(strapi.models, `${model}.globalId`) || _.capitalize(model)}.settings.json`;
+    const searchFileName = `${_.get(strapi.models, `${model}.globalId`) || _.upperFirst(_.camelCase(model))}.settings.json`;
     const apiPath = path.join(strapi.config.appPath, 'api');
     const apis = fs.readdirSync(apiPath);
 
@@ -190,5 +190,51 @@ module.exports = {
         }
       });
     });
+  },
+
+  removeModel: model => {
+    const apiPath = path.join(strapi.config.appPath, 'api');
+
+    const deleteModelFile = (parentPath, fileName) => {
+      const filePath = path.join(parentPath, fileName);
+
+      if (_.startsWith(_.toLower(fileName), model)) {
+        fs.unlinkSync(filePath);
+      }
+
+      if (fileName === 'routes.json') {
+        const routesJSON = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+        _.remove(routesJSON.routes, function(route) {
+          return _.startsWith(_.toLower(route.handler), model);
+        });
+
+        if (_.isEmpty(routesJSON.routes)) {
+          fs.unlinkSync(filePath);
+        } else {
+          fs.writeFileSync(filePath, JSON.stringify(routesJSON, null, 2), 'utf8');
+        }
+      }
+    }
+
+    const recurciveDeleteFiles = folderPath => {
+      const items = fs.readdirSync(folderPath);
+
+      _.forEach(items, item => {
+        const itemPath = path.join(folderPath, item);
+
+        if (fs.lstatSync(itemPath).isDirectory()) {
+          recurciveDeleteFiles(itemPath);
+        } else {
+          deleteModelFile(folderPath, item);
+        }
+      });
+
+      if (_.isEmpty(fs.readdirSync(folderPath))) {
+        fs.rmdirSync(folderPath);
+      }
+    }
+
+    recurciveDeleteFiles(apiPath);
   }
 };
