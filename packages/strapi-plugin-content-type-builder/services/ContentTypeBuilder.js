@@ -64,6 +64,9 @@ module.exports = {
       generator(scope, {
         success: () => {
           resolve();
+        },
+        error: () => {
+          reject();
         }
       });
     });
@@ -173,11 +176,11 @@ module.exports = {
               switch (params.nature) {
                 case 'oneToOne':
                 case 'oneToMany':
-                  attr.model = model;
+                  attr.model = _.toLower(_.camelCase(model));
                   break;
                 case 'manyToOne':
                 case 'manyToMany':
-                  attr.collection = model;
+                  attr.collection = _.toLower(_.camelCase(model));
                   break;
                 default:
               }
