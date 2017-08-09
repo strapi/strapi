@@ -116,6 +116,7 @@ module.exports = {
             type: 'string',
             value: _.get(strapi.config, 'admin.path', null),
             validations : {
+              regex: '^(\\/([\\w#!:.?+=&%@!\\-\\/])+)$',
               maxLength: 255,
               required: true
             }
