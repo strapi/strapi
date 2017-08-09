@@ -1,6 +1,6 @@
 {
   "(/:slug(/:env))": {
-    "name": "home",
-    "container": "Home"
+    "name": "homePage",
+    "container": "HomePage"
   }
 }
