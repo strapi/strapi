@@ -158,8 +158,11 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
         placeholder={placeholder}
       />;
 
+
+    const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
+
     return (
-      <div className={`${this.props.styles.inputText} ${bootStrapClass} ${bootStrapClassDanger}`}>
+      <div className={`${this.props.styles.inputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
         {label}
         {input}
         <small>{this.props.inputDescription}</small>
@@ -170,6 +173,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputText.propTypes = {
+  addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
   errors: React.PropTypes.array,

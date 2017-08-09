@@ -19,6 +19,7 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
+    addRequiredInputDesign: React.PropTypes.bool,
     cancelAction: React.PropTypes.bool,
     handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.oneOfType([
@@ -113,6 +114,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
         selectOptions={selectOptions}
         validations={props.validations}
         value={inputValue}
+        addRequiredInputDesign={this.props.addRequiredInputDesign}
       />
     );
   }

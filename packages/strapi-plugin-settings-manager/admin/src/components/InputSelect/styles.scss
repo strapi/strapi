@@ -14,3 +14,13 @@
     border-radius: 0rem!important;
   }
 }
+
+.requiredClass {
+  > label:after {
+    color: red;
+    font-family: Lato;
+    font-weight: bold;
+    margin-left: 5px;
+    content: "*";
+  }
+}

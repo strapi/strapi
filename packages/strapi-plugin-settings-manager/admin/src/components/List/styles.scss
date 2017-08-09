@@ -93,12 +93,20 @@
   color: white;
   width: 15rem;
   margin-left: 1.9rem!important;
+  &:hover {
+    color: white;
+  }
 }
 
 .secondary {
   font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
+  &:hover {
+    color: #F64D0A;
+    background-color: white;
+    border: 0.1rem solid #F64D0A;
+  }
 }
 
 .bordered {
@@ -151,6 +159,11 @@
   padding-left: 3.1rem !important;
   > input {
     margin-top: 1.3rem!important;
+  }
+  > button {
+    &:focus {
+      outline: 0;
+    }
   }
 }
 

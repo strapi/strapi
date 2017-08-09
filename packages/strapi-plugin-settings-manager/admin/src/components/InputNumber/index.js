@@ -140,8 +140,10 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
         placeholder={placeholder}
       />;
 
+    const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
+
     return (
-      <div className={`${this.props.styles.inputNumber} ${bootStrapClass} ${bootStrapClassDanger}`}>
+      <div className={`${this.props.styles.inputNumber} ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
         {input}
         <small>{this.props.inputDescription}</small>
@@ -152,6 +154,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
+  addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
   errors: React.PropTypes.oneOfType([

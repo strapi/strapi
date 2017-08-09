@@ -304,6 +304,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
             clearable={false}
 
           />
+          <div className={styles.popUpSpacer} />
         </div>
       )
     })
@@ -332,7 +333,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
-
+    const addRequiredInputDesign = this.props.params.slug === 'databases';
     const listTitle = this.props.params.slug === 'languages' || 'databases' ? this.renderListTitle() : '';
     const listButtonLabel = this.props.params.slug === 'languages' || 'databases' ? this.renderListButtonLabel() : '';
 
@@ -390,6 +391,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         renderListComponent={renderListComponent}
         cancelAction={this.props.home.cancelAction}
         actionBeforeOpenPopUp={actionBeforeOpenPopUp}
+        addRequiredInputDesign={addRequiredInputDesign}
       />
     );
   }
