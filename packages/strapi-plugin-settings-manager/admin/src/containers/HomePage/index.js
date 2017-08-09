@@ -346,6 +346,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     let renderPopUpForm = false;
     let renderRow = false;
     let actionBeforeOpenPopUp;
+    let addListTitleMarginTop;
 
     switch (this.props.params.slug) {
       case 'languages':
@@ -362,6 +363,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         handleListPopUpSubmit = this.addConnection;
         renderRow = this.renderRowDatabase;
         actionBeforeOpenPopUp = this.emptyDbModifiedData;
+        addListTitleMarginTop = true;
         break;
       default:
         sections = this.props.home.configsDisplay.sections;
@@ -392,6 +394,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         cancelAction={this.props.home.cancelAction}
         actionBeforeOpenPopUp={actionBeforeOpenPopUp}
         addRequiredInputDesign={addRequiredInputDesign}
+        addListTitleMarginTop={addListTitleMarginTop}
       />
     );
   }

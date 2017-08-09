@@ -90,10 +90,12 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         onClick={this.toggle}
       />;
 
+    const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
+
     return (
       <div className={styles.listContainer}>
         <div className={styles.listSubContainer}>
-          <div className={styles.flex}>
+          <div className={`${addListTitleMarginTop} ${styles.flex}`}>
             <div className={styles.titleContainer}>
               {this.props.listTitle}
             </div>
@@ -154,6 +156,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
 List.propTypes = {
   actionBeforeOpenPopUp: React.PropTypes.func,
+  addListTitleMarginTop: React.PropTypes.bool,
   handlei18n: React.PropTypes.bool,
   handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,

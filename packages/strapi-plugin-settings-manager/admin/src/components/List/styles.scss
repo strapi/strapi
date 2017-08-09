@@ -11,6 +11,10 @@
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
 }
 
+.paddedTopList {
+  margin-top: 2.7rem!important;
+}
+
 .flex {
   display: flex;
   justify-content: space-between;
@@ -112,7 +116,7 @@
 .bordered {
   margin-left: 3rem;
   margin-right: 3rem;
-  border: 1px solid #F6F6F6;
+  border-bottom: 1px solid #F6F6F6;
 }
 
 .noBorder {
@@ -181,6 +185,11 @@
     font-size: 1.8rem!important;
 
   }
+  > button {
+    > span {
+      color: #0E1622!important;
+    }
+  }
 }
 
 
@@ -223,4 +232,16 @@
 
 .spacerSmall {
   margin-bottom: 0rem;
+}
+
+
+.ico {
+  color: #0E1622;
+  > i {
+    font-size: 1.1rem;
+  }
+}
+
+.databaseFont {
+  font-size: 1.3rem;
 }

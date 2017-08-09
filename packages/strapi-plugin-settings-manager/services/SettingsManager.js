@@ -556,6 +556,15 @@ module.exports = {
             }
           },
           {
+            name: 'form.database.item.database',
+            target: `database.connections.${name}.settings.database`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.database`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
             name: 'form.database.item.username',
             target: `database.connections.${name}.settings.username`,
             type: 'string',
@@ -570,15 +579,6 @@ module.exports = {
             type: 'password',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
             validations: {}
-          },
-          {
-            name: 'form.database.item.database',
-            target: `database.connections.${name}.settings.database`,
-            type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.database`, null),
-            validations: {
-              required: true
-            }
           }
         ]
       },

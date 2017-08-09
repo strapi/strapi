@@ -144,6 +144,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const placeholder = this.props.placeholder || this.props.name;
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
+    const spacer = !this.props.name ? {marginTop: '2.8rem'} : {marginTop: ''};
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
@@ -162,7 +163,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
 
     return (
-      <div className={`${this.props.styles.inputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
+      <div className={`${this.props.styles.inputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`} style={spacer}>
         {label}
         {input}
         <small>{this.props.inputDescription}</small>

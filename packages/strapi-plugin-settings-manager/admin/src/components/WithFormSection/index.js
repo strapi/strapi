@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { forEach, has, isObject , join, pullAt, split} from 'lodash';
+import { forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
@@ -102,6 +102,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     // custom handleChange props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
+    const hiddenLabel = includes(props.name, 'enabled');
 
     return (
       <Input
@@ -115,6 +116,8 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
         validations={props.validations}
         value={inputValue}
         addRequiredInputDesign={this.props.addRequiredInputDesign}
+        hiddenLabel={hiddenLabel}
+        inputDescription={props.description}
       />
     );
   }

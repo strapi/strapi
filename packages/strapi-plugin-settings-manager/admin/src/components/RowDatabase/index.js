@@ -46,20 +46,20 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     return (
-      <li>
+      <li className={styles.databaseFont}>
         <div className={styles.flexLi}>
           <div className={styles.flexed} onClick={this.showDatabaseModal} style={{ cursor: 'pointer' }}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
               {this.props.data.letter}
             </div>
-            <div className={styles.label}>{this.props.data.name}</div>
+            <div className={styles.label} style={{ fontWeight: '500'}}>{this.props.data.name}</div>
           </div>
-          <div onClick={this.showDatabaseModal} style={{ cursor: 'pointer' }}>{this.props.data.database}</div>
-          <div className={styles.centered} style={{ width: '15rem', cursor: 'pointer'}} onClick={this.showDatabaseModal}>{this.props.data.host}</div>
+          <div onClick={this.showDatabaseModal} style={{ cursor: 'pointer' }}>{this.props.data.host}</div>
+          <div className={styles.centered} style={{ width: '15rem', cursor: 'pointer'}} onClick={this.showDatabaseModal}>{this.props.data.database}</div>
           <div className={styles.flexed} style={{ width: '4rem', justifyContent: 'space-between'}}>
 
-            <div><i className="fa fa-pencil" style={{ cursor: 'pointer' }} onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
-            <div className={styles.leftSpaced}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
+            <div className={styles.ico}><i className="fa fa-pencil" style={{ cursor: 'pointer' }} onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
+            <div className={`${styles.leftSpaced} ${styles.ico}`}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
         <div>

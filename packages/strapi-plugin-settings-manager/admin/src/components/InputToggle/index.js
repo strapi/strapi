@@ -56,12 +56,12 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     const btnClassOff = this.state.isChecked ? 'btn ' : `btn ${styles.gradientOff}`;
     const btnClassOn = this.state.isChecked ? `btn ${styles.gradientOn}` : 'btn';
     const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
-
+    const label = this.props.hiddenLabel ? ''
+      : <div className={styles.toggleLabel}><FormattedMessage {...{id: this.props.name}} /></div>;
+    const resized = this.props.hiddenLabel ? { marginTop: '-1rem'} : { marginTop: ''};
     return (
-      <div className={`${customBootstrapClass} ${styles.container}`}>
-        <div className={styles.toggleLabel}>
-          <FormattedMessage {...{id: this.props.name}} />
-        </div>
+      <div className={`${customBootstrapClass} ${styles.container}`} style={resized}>
+        {label}
         <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">
           <button className={btnClassOff} id="off" onClick={this.toggle}>OFF</button>
           <button className={btnClassOn} id="on" onClick={this.toggle}>ON</button>
@@ -74,6 +74,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
 InputToggle.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   handleChange: React.PropTypes.func.isRequired,
+  hiddenLabel: React.PropTypes.bool,
   isChecked: React.PropTypes.bool,
   name: React.PropTypes.string,
   target: React.PropTypes.string.isRequired,

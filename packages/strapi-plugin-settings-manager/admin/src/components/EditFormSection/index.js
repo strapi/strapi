@@ -16,6 +16,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
   render() {
     const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage {...{id: this.props.section.name}} />;
     const spacer = !isEmpty(sectionName) ? <div className={this.props.styles.spacer} /> : '';
+    const sectionNameSpacer = !sectionName ? <div style={{height: '.2rem'}} /> : '';
     return (
       <div className={this.props.styles.editFormSection}>
         <div className="container-fluid">
@@ -25,6 +26,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                 {sectionName}
               </span>
               {spacer}
+              {sectionNameSpacer}
             </div>
             {map(this.props.section.items, (item, key) => {
 
