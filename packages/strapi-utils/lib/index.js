@@ -11,7 +11,7 @@ module.exports = {
   joijson: require('./joi-json'),
   json: require('./json'),
   knex: require('./knex'),
-  logger: require('./winston'),
+  logger: require('./logger'),
   models: require('./models'),
   regex: require('./regex')
 };

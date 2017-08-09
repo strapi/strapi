@@ -9,19 +9,19 @@
     "enabled": false
   },
   "hsts": {
-    "enabled": true,
+    "enabled": false,
     "maxAge": 31536000,
     "includeSubDomains": true
   },
   "xframe": {
-    "enabled": true,
+    "enabled": false,
     "value": "SAMEORIGIN"
   },
   "xss": {
     "enabled": false
   },
   "cors": {
-    "enabled": true,
+    "enabled": false,
     "origin": "http://localhost",
     "expose": [
       "WWW-Authenticate",
@@ -44,11 +44,8 @@
       "X-Frame-Options"
     ]
   },
-  "ssl": {
-    "enabled": false
-  },
   "ip": {
-    "enabled": true,
+    "enabled": false,
     "whiteList": [],
     "blackList": []
   }

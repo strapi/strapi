@@ -16,7 +16,7 @@ const forever = require('forever-monitor');
 const semver = require('semver')
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi start`
@@ -65,7 +65,7 @@ module.exports = function() {
 
       // Run listeners
       child.on('watch:restart', info => {
-        logger.verbose(
+        logger.info(
           'Restarting due to ' +
             info.file +
             '... (' +

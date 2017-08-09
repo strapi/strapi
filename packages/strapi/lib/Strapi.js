@@ -6,10 +6,10 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const { includes } = require('lodash');
+const { logger } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
-const { logger } = require('strapi-utils');
 const { EventEmitter } = require('events');
 
 /**
@@ -30,6 +30,9 @@ class Strapi extends EventEmitter {
     // Mount the HTTP server.
     this.server = http.createServer(this.app.callback());
 
+    // Logger.
+    this.log = logger;
+
     // Exclude EventEmitter, Koa and HTTP server to be freezed.
     this.propertiesToNotFreeze = Object.keys(this);
 
@@ -38,9 +41,6 @@ class Strapi extends EventEmitter {
 
     // Expose `plugin`.
     this.plugins = {};
-
-    // Winston logger.
-    this.log = logger;
 
     // Default configurations.
     this.config = {
@@ -76,13 +76,6 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      // Disable log when running tests.
-      if (this.config.environment === 'test') {
-        this.log.configure({
-          level: 'silent'
-        });
-      }
-
       // Enhance app.
       await this.enhancer();
       // Load the app.
@@ -153,8 +146,6 @@ class Strapi extends EventEmitter {
       middlewares.call(this),
       hooks.call(this)
     ]);
-
-
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
