@@ -67,12 +67,12 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
   }
 
   toggle = () => {
+    if (this.props.actionBeforeOpenPopUp && !this.state.modal) this.props.actionBeforeOpenPopUp();
     this.setState({ modal: !this.state.modal });
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    // this.setState({ modal: !this.state.modal });
 
     if (this.state.isPopUpFormValid) {
       this.setState({ modal: !this.state.modal });
@@ -153,6 +153,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
+  actionBeforeOpenPopUp: React.PropTypes.func,
   handlei18n: React.PropTypes.bool,
   handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,

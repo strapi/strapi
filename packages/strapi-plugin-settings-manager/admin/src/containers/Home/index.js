@@ -53,6 +53,7 @@ import {
   databasesFetch,
   databaseDelete,
   editSettings,
+  emptyDbModifiedData,
   languageDelete,
   languagesFetch,
   newLanguagePost,
@@ -322,6 +323,10 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     />
   )
 
+  emptyDbModifiedData = () => {
+    this.setState({ toggleDefaultConnection: false });
+    this.props.emptyDbModifiedData();
+  }
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
@@ -339,6 +344,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
     let sections;
     let renderPopUpForm = false;
     let renderRow = false;
+    let actionBeforeOpenPopUp;
 
     switch (this.props.params.slug) {
       case 'languages':
@@ -354,6 +360,7 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         renderPopUpForm = this.renderPopUpFormDatabase;
         handleListPopUpSubmit = this.addConnection;
         renderRow = this.renderRowDatabase;
+        actionBeforeOpenPopUp = this.emptyDbModifiedData;
         break;
       default:
         sections = this.props.home.configsDisplay.sections;
@@ -382,16 +389,16 @@ export class Home extends React.Component { // eslint-disable-line react/prefer-
         renderPopUpForm={renderPopUpForm}
         renderListComponent={renderListComponent}
         cancelAction={this.props.home.cancelAction}
+        actionBeforeOpenPopUp={actionBeforeOpenPopUp}
       />
     );
   }
 
-  setDefaultConnectionDb = (e) => {
+  setDefaultConnectionDb = () => {
     const value = this.state.toggleDefaultConnection ?
       this.props.home.addDatabaseSection.sections[1].items[0].value
         : this.props.home.modifiedData[this.props.home.dbNameTarget];
-    // const target = { name: e.target.id, value: this.props.home.modifiedData[this.props.home.dbNameTarget] }
-    const target = { name: e.target.id, value };
+    const target = { name: 'database.defaultConnection', value };
     this.handleChange({target});
     this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
   }
@@ -452,6 +459,7 @@ function mapDispatchToProps(dispatch) {
       databaseEdit,
       databasesFetch,
       editSettings,
+      emptyDbModifiedData,
       languageDelete,
       languagesFetch,
       newDatabasePost,
@@ -471,6 +479,7 @@ Home.propTypes = {
   databaseEdit: React.PropTypes.func,
   databasesFetch: React.PropTypes.func,
   editSettings: React.PropTypes.func,
+  emptyDbModifiedData: React.PropTypes.func,
   environments: React.PropTypes.array,
   home: React.PropTypes.object,
   languageDelete: React.PropTypes.func,

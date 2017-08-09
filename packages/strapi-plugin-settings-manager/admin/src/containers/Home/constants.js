@@ -28,3 +28,4 @@ export const SPECIFIC_DATABASE_FETCH = 'SettingsManager/Home/SPECIFIC_DATABASE_F
 export const SPECIFIC_DATABASE_FETCH_SUCCEEDED = 'SettingsManager/Home/SPECIFIC_DATABASE_FETCH_SUCCEEDED';
 export const DATABASE_EDIT = 'SettingsManager/Home/DATABASE_EDIT';
 export const DATABASE_ACTION_ERROR = 'SettingsManager/Home/DATABASE_ACTION_ERROR';
+export const EMPTY_DB_MODIFIED_DATA = 'SettingsManager/Home/EMPTY_DB_MODIFIED_DATA';

@@ -29,6 +29,7 @@ import {
   DATABASE_EDIT,
   LANGUAGE_ACTION_ERROR,
   DATABASE_ACTION_ERROR,
+  EMPTY_DB_MODIFIED_DATA,
 } from './constants';
 
 export function defaultAction() {
@@ -279,5 +280,11 @@ export function databaseEdit(data, apiUrl) {
     type: DATABASE_EDIT,
     data,
     apiUrl,
+  };
+}
+
+export function emptyDbModifiedData() {
+  return {
+    type: EMPTY_DB_MODIFIED_DATA,
   };
 }

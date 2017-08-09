@@ -221,6 +221,7 @@ export function* postDatabase(action) {
     });
 
     yield put(databaseActionSucceeded());
+    window.Strapi.notification.success('New Database added');
 
   } catch(error) {
     window.Strapi.notification.error('An error occured');

@@ -22,6 +22,7 @@ import {
   DATABASE_DELETE,
   DATABASE_ACTION_ERROR,
   NEW_LANGUAGE_POST,
+  EMPTY_DB_MODIFIED_DATA,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -39,6 +40,7 @@ const initialState = fromJS({
   dbNameTarget: '',
   selectOptions: Map(),
 });
+/* eslint-disable no-case-declarations */
 
 function homeReducer(state = initialState, action) {
   switch (action.type) {
@@ -92,6 +94,11 @@ function homeReducer(state = initialState, action) {
     case LANGUAGE_ACTION_ERROR:
       return state.set('didCreatedNewLanguage', true);
     case DATABASE_ACTION_SUCCEEDED:
+      const newDefaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
+      return state
+        .set('modifiedData', Map())
+        .setIn(['modifiedData', 'database.defaultConnection'], newDefaultDbConnection)
+        .set('didCreatedNewDb', true);
     case DATABASE_ACTION_ERROR:
       return state.set('didCreatedNewDb', true);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
@@ -100,7 +107,13 @@ function homeReducer(state = initialState, action) {
         .set('dbNameTarget', action.dbNameTarget)
         .set('initialData', Map(action.data))
         .set('modifiedData', Map(action.data));
-    case NEW_LANGUAGE_POST: // eslint-disable-line no-case-declarations
+    case EMPTY_DB_MODIFIED_DATA:
+      const defaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
+      return state
+      .set('modifiedData', Map())
+      .set('dbNameTarget', 'database.connections.${name}.name') // eslint-disable-line no-template-curly-in-string
+      .setIn(['modifiedData', 'database.defaultConnection'], defaultDbConnection);
+    case NEW_LANGUAGE_POST:
       const sections = state.getIn(['configsDisplay', 'sections']);
       sections.push({ active: false, name: state.getIn(['modifiedData', 'language.defaultLocale']) });
       const newSections = sortBy(sections, (o) => o.name);
