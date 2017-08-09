@@ -1,5 +1,8 @@
 const shell = require('shelljs');
 
+// Store installation start date.
+const installationStartDate = new Date();
+
 // Remove existing binary.
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
@@ -44,3 +47,9 @@ shell.cd('../strapi-plugin-settings-manager');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+
+// Log installation duration.
+const installationEndDate = new Date();
+const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
+shell.echo('Strapi has been succesfully installed.');
+shell.echo(`Installation took ${Math.floor(duration / 60) > 0 ? `${Math.floor(duration / 60)} minutes and ` : ''}${duration % 60} seconds.`);
