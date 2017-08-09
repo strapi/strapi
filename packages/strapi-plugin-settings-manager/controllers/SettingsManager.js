@@ -203,20 +203,17 @@ module.exports = {
 
     const newName = _.get(params, `database.connections.${name}.name`);
 
+    const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
+    params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
+    params.settings = settings;
+
+    delete params.name;
+
+    const connections = _.clone(strapi.config.environments[env].database.connections);
+
     if (newName && newName !== name) {
-      const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
-      params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
-      params.settings = settings;
-
-      delete params.name;
-
-      const connections = _.clone(strapi.config.environments[env].database.connections);
       connections[newName] = params;
       connections[name] = undefined;
-
-      params = { database: { connections }};
-
-      items = [{ target: 'database.connections' }];
 
       if (strapi.config.environments[env].database.defaultConnection === name) {
         params.database.defaultConnection = newName;
@@ -224,13 +221,25 @@ module.exports = {
           target: 'database.defaultConnection'
         });
       }
+    } else {
+      connections[name] = params;
     }
+
+    params = { database: { connections }};
+
+    items = [{ target: 'database.connections' }];
 
     const newClient = _.get(params, `database.connections.${name}.settings.client`);
 
     if (newClient) params.database.connections[name].connector = Service.getClientConnector(newClient);
 
     strapi.reload.isWatching = false;
+
+    const cleanErrors = Service.cleanDependency(env, params);
+
+    if (!_.isEmpty(cleanErrors)) {
+      return ctx.badRequest(null, Service.formatErrors(cleanErrors));
+    }
 
     Service.installDependency(params, name);
 

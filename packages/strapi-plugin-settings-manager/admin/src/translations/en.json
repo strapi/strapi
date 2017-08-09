@@ -1,6 +1,6 @@
 {
   "menu.section.global-settings": "Global settings",
-  "menu.item.general": "General",
+  "menu.item.application": "Application",
   "menu.item.languages": "Languages",
   "menu.item.advanced": "Advanced",
 
@@ -33,12 +33,12 @@
   "form.database.item.provider.sqlite3": "SQlite3",
   "form.database.item.provider.redis": "Redis",
 
-  "form.general.name": "General",
-  "form.general.description": "Configure your general settings.",
+  "form.application.name": "Application",
+  "form.application.description": "Configure your application settings.",
 
-  "form.general.item.name": "Name",
-  "form.general.item.description": "Description",
-  "form.general.item.version": "Version",
+  "form.application.item.name": "Name",
+  "form.application.item.description": "Description",
+  "form.application.item.version": "Version",
 
   "form.advanced.name": "Advanced",
   "form.advanced.description": "Configure your advanced settings.",

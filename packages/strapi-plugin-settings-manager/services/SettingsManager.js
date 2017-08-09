@@ -12,8 +12,8 @@ module.exports = {
         name: 'menu.section.global-settings',
         items: [
             {
-            slug: 'general',
-            name: 'menu.item.general',
+            slug: 'application',
+            name: 'menu.item.application',
             icon: 'globe'
           },
           {
@@ -61,15 +61,15 @@ module.exports = {
     ]
   },
 
-  general: () => ({
-    name: 'form.general.name',
-    description: 'form.general.description',
+  application: () => ({
+    name: 'form.application.name',
+    description: 'form.application.description',
     sections: [
       {
         name: '',
         items: [
           {
-            name: 'form.general.item.name',
+            name: 'form.application.item.name',
             target: 'application.name',
             type: 'string',
             value: _.get(strapi.config, 'name', null),
@@ -79,7 +79,7 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.item.description',
+            name: 'form.application.item.description',
             target: 'application.description',
             type: 'string',
             value: _.get(strapi.config, 'description', null),
@@ -89,7 +89,7 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.item.version',
+            name: 'form.application.item.version',
             target: 'package.version',
             type: 'string',
             value: _.get(strapi.config, 'info.version', null),
@@ -560,9 +560,7 @@ module.exports = {
             target: `database.connections.${name}.settings.username`,
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.username`, null),
-            validations: {
-              required: true
-            }
+            validations: {}
           },
           {
             name: 'form.database.item.password',
@@ -863,5 +861,62 @@ module.exports = {
     const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
     if (connector && !installed) exec(`npm install ${connector}@alpha`);
+  },
+
+  cleanDependency: (env, config) => {
+    const availableConnectors = ['strapi-mongoose', 'strapi-bookshelf', 'strapi-redis'];
+    let usedConnectors = [];
+    const errors = [];
+
+    _.forEach(_.keys(strapi.config.environments), environment => {
+      let connections = strapi.config.environments[environment].database.connections;
+
+      if (environment === env) {
+        connections = config.database.connections;
+      }
+
+      _.forEach(connections, connection => {
+        usedConnectors.push(connection.connector);
+      });
+    });
+
+    usedConnectors = _.uniq(usedConnectors);
+
+    _.forEach(availableConnectors, connector => {
+      const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+      const used = _.indexOf(usedConnectors, connector) !== -1;
+
+      if (installed && !used) {
+        const filePath = path.join(strapi.config.appPath, 'package.json');
+
+        try {
+          const fileContent = require(filePath);
+
+          _.set(fileContent, `dependencies.${connector}`, undefined);
+
+          try {
+            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              target,
+              message: 'request.error.config',
+              params: {
+                filePath: filePath
+              }
+            });
+          }
+        } catch (e) {
+          errors.push({
+            target,
+            message: 'request.error.config',
+            params: {
+              filePath: filePath
+            }
+          });
+        }
+      }
+    });
+
+    return errors;
   }
 };
