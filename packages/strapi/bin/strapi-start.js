@@ -17,7 +17,7 @@ const fs = require('fs');
 const semver = require('semver')
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi start`

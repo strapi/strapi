@@ -17,6 +17,9 @@ const reportback = require('reportback')();
 const pathRegexp = require('./util').pathRegexp;
 const generateTarget = require('./target');
 
+// Logger.
+const { logger } = require('strapi-utils');
+
 /**
  * Run a generator given an existing scope
  *
@@ -48,7 +51,7 @@ function generate(generator, scope, cb) {
     success: () => {
 
       // Emit output.
-      sb.log.verbose('Generating ' + util.inspect(generator) + ' at `' + scope.rootPath + '`...');
+      logger.info('Generating ' + util.inspect(generator) + ' at `' + scope.rootPath + '`...');
 
       // Process all of the generator's targets concurrently.
       async.each(Object.keys(generator.targets), (keyPath, asyncEachCb) => {

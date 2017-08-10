@@ -10,13 +10,17 @@
     }
   },
   "logger": {
-    "enabled": true
+    "logger": {
+      "level": "silent",
+      "exposeInContext": true,
+      "requests": false
+    }
   },
   "parser": {
     "enabled": true,
     "multipart": true
   },
   "router": {
-    "enabled": true
+    "prefix": ""
   }
 }
