@@ -20,11 +20,6 @@ module.exports = {
             slug: 'languages',
             name: 'menu.item.languages',
             icon: 'language'
-          },
-          {
-            slug: 'advanced',
-            name: 'menu.item.advanced',
-            icon: 'cogs'
           }
         ]
       },
@@ -103,29 +98,6 @@ module.exports = {
     ]
   }),
 
-  advanced: () => ({
-    name: 'form.advanced.name',
-    description: 'form.advanced.description',
-    sections: [
-      {
-        name: '',
-        items: [
-          {
-            name: 'form.advanced.item.admin',
-            target: 'application.admin.path',
-            type: 'string',
-            value: _.get(strapi.config, 'admin.path', null),
-            validations : {
-              regex: '^(\\/([\\w#!:.?+=&%@!\\-\\/])+)$',
-              maxLength: 255,
-              required: true
-            }
-          }
-        ]
-      }
-    ]
-  }),
-
   request: env => ({
     name: 'form.request.name',
     description: 'form.request.description',
@@ -134,10 +106,28 @@ module.exports = {
         name: '',
         items: [
           {
-            name: 'form.request.item.logger.enabled',
-            target: 'request.logger.enabled',
+            name: 'form.request.item.logger.level',
+            target: 'request.logger.level',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.request.logger.level`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.request.item.logger.exposeInContext',
+            target: 'request.logger.exposeInContext',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.logger.enabled`, null),
+            value: _.get(strapi.config, `environments.${env}.request.logger.exposeInContext`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.request.item.logger.requests',
+            target: 'request.logger.requests',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.request.logger.requests`, null),
             validations: {
               required: true
             }
@@ -167,24 +157,16 @@ module.exports = {
         ]
       },
       {
-        name: 'form.request.item.prefix',
+        name: 'form.request.item.router',
         items: [
           {
-            name: 'form.request.item.prefix.enabled',
-            target: 'request.router.enabled',
+            name: 'form.request.item.router.prefix',
+            target: 'request.router.prefix',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.router.enabled`, null),
-            items: [
-              {
-                name: 'form.request.item.prefix.prefix',
-                target: 'request.router.prefix',
-                type: 'string',
-                value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
-                validations : {
-                  maxLength: 255
-                }
-              }
-            ]
+            value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
+            validations : {
+              required: true
+            }
           }
         ]
       }
