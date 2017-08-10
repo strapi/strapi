@@ -92,25 +92,39 @@
 }
 
 .primary {
-  font-family: Lato;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
-  color: white;
-  width: 15rem;
+  height: 3rem;
+  font-family: Lato!important;
   margin-left: 1.9rem!important;
-  &:hover {
-    color: white;
+  cursor: pointer;
+  font-family: Lato;
+  &:focus {
+    outline: 0;
   }
+  border: none!important;
+  width: 15rem;
+  line-height: 1.6rem;
+  font-weight: 600;
+  border-radius: 3px;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white!important;
 }
 
 .secondary {
   font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
+  cursor: pointer;
   &:hover {
     color: #F64D0A;
     background-color: white;
     border: 0.1rem solid #F64D0A;
   }
+  height: 3rem;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
 }
 
 .bordered {

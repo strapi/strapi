@@ -1,4 +1,4 @@
-import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty } from 'lodash';
+import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty, size } from 'lodash';
 
 export function checkFormValidity(formData, formValidations) {
   const errors = [];
@@ -8,6 +8,7 @@ export function checkFormValidity(formData, formValidations) {
 
     if (!valueValidations) {
       forEach(formValidations, (data) => {
+
         if (data.nestedValidations) {
           forEach(data.nestedValidations, (nestedData) => {
             if (nestedData.target === key) valueValidations = nestedData;
@@ -98,7 +99,7 @@ export function getInputsValidationsFromConfigs(configs) {
           validations: item.validations,
         };
 
-        if (has(item, 'items')) {
+        if (has(item, 'items') && item.type !== 'select') {
           validations.nestedValidations = [];
 
           forEach(item.items, (subItem, key) => {
@@ -124,4 +125,20 @@ export function getInputsValidationsFromConfigs(configs) {
   });
 
   return formValidations;
+}
+
+/* eslint-disable no-template-curly-in-string */
+
+export function getRequiredInputsDb(data) {
+  const formErrors = [
+    { target: 'database.connections.${name}.name', errors: [{ id: 'request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.host', errors: [{ id: 'request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.port', errors: [{ id: 'request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.database', errors: [{ id: 'request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.username', errors: [{ id: 'request.error.validation.required' }] },
+  ];
+
+  // If size data === 2 user hasn't filled any input,
+  if (size(data) === 2) return formErrors;
+  return formErrors;
 }

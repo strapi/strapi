@@ -40,7 +40,7 @@ import RowLanguage from 'components/RowLanguage';
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 
 // utils
-import { checkFormValidity } from '../../utils/inputValidations';
+import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
 
@@ -72,9 +72,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     super(props);
     this.customComponents = config.customComponents;
     this.components = {
-      editForm: EditForm,
+      // editForm: EditForm,
+      defaultComponent: EditForm,
       list: List,
-      defaultComponent: HeaderNav,
+      defaultComponentWithEnvironments: HeaderNav,
       debug: Debug,
     };
 
@@ -136,7 +137,19 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       }
     });
 
-    this.props.newDatabasePost(this.props.params.env, newData);
+    // If size of modifiedData === 2 the user hasn't filled any inputs
+    // TODO change
+    const formErrors = getRequiredInputsDb(this.props.home.modifiedData);
+    // const formErrors = size(this.props.home.modifiedData)  === 2 ?
+    //   getRequiredInputsDb() :
+    //   checkFormValidity(this.props.home.modifiedData, this.props.home.formValidations);
+
+    if (isEmpty(formErrors)) {
+      // this.props.setErrors([]);
+      this.props.newDatabasePost(this.props.params.env, newData);
+    } else {
+      this.props.setErrors(formErrors);
+    }
   }
 
   changeDefaultLanguage = ({ target }) => {
@@ -224,14 +237,16 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
-  handleSubmitEditDatabase = (databaseName) => {
+  handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.params.env}`;
+    const formErrors = checkFormValidity(body, this.props.home.formValidations);
+    if (isEmpty(body)) return window.Strapi.notification.info('Settings are equals');
 
-    if (!isEmpty(body)) {
+    if (isEmpty(formErrors)) {
       this.props.databaseEdit(body, apiUrl);
     } else {
-      window.Strapi.notification.error('Settings are equals');
+      this.props.setErrors(formErrors);
     }
   }
 
@@ -326,6 +341,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       handleChange={this.handleChange}
       renderPopUpForm={this.renderPopUpFormDatabase}
       handleSubmit={this.handleSubmitEditDatabase}
+      formErrors={this.props.home.formErrors}
+      error={this.props.home.error}
     />
   )
 
@@ -335,7 +352,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
-    const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
+    let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug));
+
+    if (!specificComponent) {
+      // Check if params env : render HeaderNav component
+      specificComponent = !this.props.params.env ? 'defaultComponent' : 'defaultComponentWithEnvironments';
+    }
+    // const specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug)) || 'defaultComponent';
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
     const addRequiredInputDesign = this.props.params.slug === 'databases';
@@ -401,6 +424,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         addRequiredInputDesign={addRequiredInputDesign}
         addListTitleMarginTop={addListTitleMarginTop}
         formErrors={this.props.home.formErrors}
+        error={this.props.home.error}
       />
     );
   }

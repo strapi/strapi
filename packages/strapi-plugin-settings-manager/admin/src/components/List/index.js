@@ -16,7 +16,7 @@
 */
 
 import React from 'react';
-import { forEach, has, map} from 'lodash';
+import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -29,40 +29,14 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     super(props);
     this.state = {
       modal: false,
-      isPopUpFormValid: true,
+      // isPopUpFormValid: true,
       requiredInputs: [],
     };
   }
 
-  componentDidMount() {
-    const requiredInputs = [];
-    forEach(this.props.sections, (section) => {
-      forEach(section.items, (item) => {
-        if (has(item.validations, 'required')) {
-          requiredInputs.push( item.target );
-        }
-      });
-    });
-
-    this.setState({ requiredInputs });
-
-    forEach(requiredInputs, (inputTarget) => {
-      if (!has(this.props.values, inputTarget)) {
-        this.setState({ isPopUpFormValid: false });
-      }
-    });
-  }
-
   componentWillReceiveProps(nextProps) {
-    if (nextProps.values !== this.props.values) {
-      forEach(this.state.requiredInputs, (inputTarget) => { // eslint-disable-line consistent-return
-        if (has(nextProps.values, inputTarget) && nextProps.values[inputTarget] !== "") {
-          this.setState({ isPopUpFormValid: true });
-        } else {
-          this.setState({ isPopUpFormValid: false });
-          return false;
-        }
-      });
+    if (nextProps.error !== this.props.error) {
+      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false });
     }
   }
 
@@ -73,11 +47,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   handleSubmit = (e) => {
     e.preventDefault();
-
-    if (this.state.isPopUpFormValid) {
-      this.setState({ modal: !this.state.modal });
-      this.props.handleListPopUpSubmit(e);
-    }
+    this.props.handleListPopUpSubmit(e);
   }
 
   render() {
@@ -142,7 +112,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                 </FormattedMessage>
                 <FormattedMessage {...{id: 'form.button.save'}}>
                   {(message) => (
-                    <Button type="submit" onClick={this.handleSubmit} className={styles.primary} disabled={!this.state.isPopUpFormValid}>{message}</Button>
+                    <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
                   )}
                 </FormattedMessage>
               </ModalFooter>
@@ -157,6 +127,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 List.propTypes = {
   actionBeforeOpenPopUp: React.PropTypes.func,
   addListTitleMarginTop: React.PropTypes.bool,
+  error: React.PropTypes.bool,
   handlei18n: React.PropTypes.bool,
   handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,
@@ -170,8 +141,6 @@ List.propTypes = {
     React.PropTypes.bool,
     React.PropTypes.func,
   ]),
-  sections: React.PropTypes.array,
-  values: React.PropTypes.object,
 }
 
 export default List;

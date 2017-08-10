@@ -35,7 +35,7 @@ import {
 export function* editDatabase(action) {
   try {
     const body = {};
-
+    
     forEach(action.data, (value, key) => {
       set(body, key, value);
     });
@@ -53,9 +53,10 @@ export function* editDatabase(action) {
     yield new Promise(resolve => {
       setTimeout(() => {
         resolve();
-      }, 4000);
+      }, 5000);
     });
 
+    window.Strapi.notification.success('Edit db succeeded');
     yield put(databaseActionSucceeded());
 
   } catch(error) {

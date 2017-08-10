@@ -16,20 +16,20 @@
     margin-bottom: 2.8rem;
 
     // color
-    color: #333740;
+    color: #CED3DB;
     background-color: white;
     // text
     font-weight: 600;
     font-size: 1.2rem;
-    letter-spacing: 0.07rem;
+    letter-spacing: 0.1rem;
     font-family: Lato;
     &:first-of-type {
       border-right: none;
-      box-shadow: inset 4px 0 0px -2px rgba(0,0,0,0.05), inset 0px -4px 0px -2px rgba(0,0,0,0.05), 0px -4px 0px -2px rgba(0,0,0,0.05);
+      // box-shadow: inset -1px 1 3px 0 rgba(0,0,0,0.1);
     }
     &:nth-of-type(2) {
       border-left: none;
-      box-shadow: inset -4px 0 0px -2px rgba(0,0,0,0.05), inset 0px -4px 0px -2px rgba(0,0,0,0.05), 0px -4px 0px -2px rgba(0,0,0,0.05);
+      // box-shadow: inset -4px 0 0px -2px rgba(0,0,0,0.05), inset 0px -4px 0px -2px rgba(0,0,0,0.05), 0px -4px 0px -2px rgba(0,0,0,0.05);
     }
     &:hover {
       z-index: 0 !important;
@@ -40,13 +40,13 @@
 .gradientOff {
   background-image: linear-gradient( to bottom right, #F65A1D, #F68E0E );
   color: white !important;
-  box-shadow: none!important;
+  box-shadow: inset -1px 1px 3px rgba(0,0,0,0.1);
 }
 
 .gradientOn {
   background-image: linear-gradient( to bottom right, #005EEA, #0097F6);
   color: white !important;
-  box-shadow: none!important;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
 }
 
 .toggleLabel {

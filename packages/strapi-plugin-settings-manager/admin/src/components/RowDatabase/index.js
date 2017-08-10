@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { isEmpty } from 'lodash';
 // modal
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import PopUpForm from 'components/PopUpForm';
@@ -22,6 +23,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.error !== this.props.error) {
+      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false });
+    }
+  }
+
   showDatabaseModal = () => {
     this.setState({ modal: !this.state.modal });
     this.props.getDatabase(this.props.data.name);
@@ -36,7 +43,6 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.handleSubmit(this.props.data.name);
-    this.setState({ modal: !this.state.modal });
   }
 
   deleteDatabase = () => {
@@ -106,6 +112,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
 RowDatabase.propTypes = {
   data: React.PropTypes.object.isRequired,
+  error: React.PropTypes.bool,
   getDatabase: React.PropTypes.func,
   handleDatabaseDelete: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,

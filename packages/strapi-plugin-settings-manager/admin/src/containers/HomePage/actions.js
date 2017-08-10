@@ -267,8 +267,7 @@ export function specificDatabaseFetchSucceeded(db) {
   const name = database.sections[0].items[0].value;
   remove(database.sections[0].items, (item) => item.target === `database.connections.${name}.connector`);
   const dbNameTarget = database.sections[0].items[0].target;
-
-  const formValidations = getInputsValidationsFromConfigs(db);
+  const formValidations = getInputsValidationsFromConfigs(database);
   return {
     type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
     database,

@@ -42,6 +42,7 @@ const initialState = fromJS({
   selectOptions: Map(),
   formValidations: [],
   formErrors: [],
+  error: false,
 });
 /* eslint-disable no-case-declarations */
 
@@ -56,7 +57,6 @@ function homePageReducer(state = initialState, action) {
         .set('formErrors', [])
         .set('formValidations', action.formValidations);
     case CHANGE_INPUT:
-    // TODO remove error
       return state.updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state
@@ -93,6 +93,7 @@ function homePageReducer(state = initialState, action) {
         .set('listLanguages', Map(action.listLanguages));
     case EDIT_SETTINGS_SUCCEEDED:
       return state
+        .set('error', !state.get('error'))
         .set('formErrors', []);
     case CHANGE_DEFAULT_LANGUAGE:
       return state
@@ -106,6 +107,8 @@ function homePageReducer(state = initialState, action) {
       return state
         .set('modifiedData', Map())
         .setIn(['modifiedData', 'database.defaultConnection'], newDefaultDbConnection)
+        .set('formErrors', [])
+        .set('error', !state.get('error'))
         .set('didCreatedNewDb', true);
     case DATABASE_ACTION_ERROR:
       return state.set('didCreatedNewDb', true);
@@ -114,7 +117,7 @@ function homePageReducer(state = initialState, action) {
         .set('specificDatabase', OrderedMap(action.database))
         .set('dbNameTarget', action.dbNameTarget)
         .set('initialData', Map(action.data))
-        .set('formErrors', [])
+        .set('formValidations', action.formValidations)
         .set('modifiedData', Map(action.data));
     case EMPTY_DB_MODIFIED_DATA:
       const defaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
@@ -129,7 +132,8 @@ function homePageReducer(state = initialState, action) {
       const newSections = sortBy(sections, (o) => o.name);
       return state.setIn(['configsDisplay', 'sections'], newSections);
     case SET_ERRORS:
-      return state.set('formErrors', action.errors);
+      return state
+        .set('formErrors', action.errors)
     default:
       return state;
   }

@@ -22,13 +22,19 @@
 }
 
 .primary {
+  font-weight: 500;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
   color: white;
 }
 
 .secondary {
+  // height: 32px !important;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .secondaryAddType {

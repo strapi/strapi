@@ -144,7 +144,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const placeholder = this.props.placeholder || this.props.name;
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
-    const spacer = !this.props.name ? {marginTop: '2.8rem'} : {marginTop: ''};
+    const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
