@@ -4,14 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-module.exports = {
-  models: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+const Service = require('../services/ContentTypeBuilder');
 
+module.exports = {
+  getModels: async ctx => {
     ctx.send({ models: Service.getModels() });
   },
 
-  model: async ctx => {
+  getModel: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { model } = ctx.params;
 
@@ -20,8 +20,7 @@ module.exports = {
     ctx.send({ model: Service.getModel(model) });
   },
 
-  create: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+  createModel: async ctx => {
     const { name, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
@@ -52,7 +51,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
     }
 
-    const createRelations = Service.createRelations(name, attributes);
+    const createRelationsErrors = Service.createRelations(name, attributes);
 
     if (createRelationsErrors) {
       return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -70,7 +69,6 @@ module.exports = {
   },
 
   updateModel: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { model } = ctx.params;
     const { name, attributes = [] } = ctx.request.body;
 
@@ -99,7 +97,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
     }
 
-    const createRelations = Service.createRelations(model, attributes);
+    const createRelationsErrors = Service.createRelations(model, attributes);
 
     if (createRelationsErrors) {
       return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -117,7 +115,6 @@ module.exports = {
   },
 
   deleteModel: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { model } = ctx.params;
 
     if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);

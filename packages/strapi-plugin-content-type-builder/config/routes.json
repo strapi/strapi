@@ -3,7 +3,7 @@
     {
       "method": "GET",
       "path": "/models",
-      "handler": "ContentTypeBuilder.models",
+      "handler": "ContentTypeBuilder.getModels",
       "config": {
         "policies": []
       }
@@ -11,7 +11,7 @@
     {
       "method": "GET",
       "path": "/models/:model",
-      "handler": "ContentTypeBuilder.model",
+      "handler": "ContentTypeBuilder.getModel",
       "config": {
         "policies": []
       }
@@ -19,7 +19,7 @@
     {
       "method": "POST",
       "path": "/models",
-      "handler": "ContentTypeBuilder.create",
+      "handler": "ContentTypeBuilder.createModel",
       "config": {
         "policies": []
       }
