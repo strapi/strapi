@@ -50,7 +50,7 @@ module.exports = {
   },
 
   generateAPI: (name, attributes) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
         id: name,
@@ -74,18 +74,41 @@ module.exports = {
 
   getModelPath: model => {
     let searchFilePath;
+    const errors = [];
     const searchFileName = `${_.get(strapi.models, `${model}.globalId`) || _.upperFirst(_.camelCase(model))}.settings.json`;
     const apiPath = path.join(strapi.config.appPath, 'api');
-    const apis = fs.readdirSync(apiPath);
+
+    let apis;
+    try {
+      apis = fs.readdirSync(apiPath);
+    } catch (e) {
+      errors.push({
+        id: 'request.error.folder.read',
+        params: {
+          folderPath: apiPath
+        }
+      });
+    }
 
     _.forEach(apis, api => {
       const modelsPath = path.join(apiPath, api, 'models');
-      const models = fs.readdirSync(modelsPath);
+
+      let models;
+      try {
+        models = fs.readdirSync(modelsPath);
+      } catch (e) {
+        errors.push({
+          id: 'request.error.folder.read',
+          params: {
+            folderPath: modelsPath
+          }
+        });
+      }
 
       if (_.indexOf(models, searchFileName) !== -1) searchFilePath = `${modelsPath}/${searchFileName}`;
     });
 
-    return searchFilePath;
+    return [searchFilePath, errors];
   },
 
   formatAttributes: attributes => {
@@ -120,12 +143,35 @@ module.exports = {
   },
 
   clearRelations: model => {
+    const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
-    const apis = fs.readdirSync(apiPath);
+
+    let apis;
+    try {
+      apis = fs.readdirSync(apiPath);
+    } catch (e) {
+      errors.push({
+        id: 'request.error.folder.read',
+        params: {
+          folderPath: apiPath
+        }
+      });
+    }
 
     _.forEach(apis, api => {
       const modelsPath = path.join(apiPath, api, 'models');
-      const models = fs.readdirSync(modelsPath);
+
+      let models;
+      try {
+        models = fs.readdirSync(modelsPath);
+      } catch (e) {
+        errors.push({
+          id: 'request.error.folder.read',
+          params: {
+            folderPath: modelsPath
+          }
+        });
+      }
 
       _.forEach(models, modelPath => {
         if (_.endsWith(modelPath, '.settings.json')) {
@@ -136,25 +182,70 @@ module.exports = {
           });
 
           const modelFilePath = path.join(modelsPath, modelPath);
-          const modelJSON = JSON.parse(fs.readFileSync(modelFilePath, 'utf8'));
+
+          let modelJSON;
+          try {
+            modelJSON = JSON.parse(require(modelFilePath));
+          } catch (e) {
+            errors.push({
+              id: 'request.error.model.read',
+              params: {
+                filePath: modelFilePath
+              }
+            });
+          }
 
           _.forEach(relationsToDelete, relation => {
             modelJSON.attributes[relation.alias] = undefined;
           });
 
-          fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+          try {
+            fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              id: 'request.error.model.write',
+              params: {
+                filePath: modelFilePath
+              }
+            });
+          }
         }
       });
     });
+
+    return errors;
   },
 
   createRelations: (model, attributes) => {
+    const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
-    const apis = fs.readdirSync(apiPath);
+
+    let apis;
+    try {
+      apis = fs.readdirSync(apiPath);
+    } catch (e) {
+      errors.push({
+        id: 'request.error.folder.read',
+        params: {
+          folderPath: apiPath
+        }
+      });
+    }
 
     _.forEach(apis, api => {
       const modelsPath = path.join(apiPath, api, 'models');
-      const models = fs.readdirSync(modelsPath);
+
+      let models;
+      try {
+        models = fs.readdirSync(modelsPath);
+      } catch (e) {
+        errors.push({
+          id: 'request.error.folder.read',
+          params: {
+            folderPath: modelsPath
+          }
+        });
+      }
 
       _.forEach(models, modelPath => {
         if (_.endsWith(modelPath, '.settings.json')) {
@@ -166,7 +257,19 @@ module.exports = {
 
           if (!_.isEmpty(relationsToCreate)) {
             const modelFilePath = path.join(modelsPath, modelPath);
-            const modelJSON = JSON.parse(fs.readFileSync(modelFilePath, 'utf8'));
+
+
+            let modelJSON;
+            try {
+              modelJSON = JSON.parse(require(modelFilePath));
+            } catch (e) {
+              errors.push({
+                id: 'request.error.model.read',
+                params: {
+                  filePath: modelFilePath
+                }
+              });
+            }
 
             _.forEach(relationsToCreate, ({ name, params }) => {
               const attr = {
@@ -187,22 +290,43 @@ module.exports = {
 
               modelJSON.attributes[params.key] = attr;
 
-              fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+              try {
+                fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+              } catch (e) {
+                errors.push({
+                  id: 'request.error.model.write',
+                  params: {
+                    filePath: modelFilePath
+                  }
+                });
+              }
             });
           }
         }
       });
     });
+
+    return errors;
   },
 
   removeModel: model => {
+    const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
 
     const deleteModelFile = (parentPath, fileName) => {
       const filePath = path.join(parentPath, fileName);
 
       if (_.startsWith(_.toLower(fileName), model)) {
-        fs.unlinkSync(filePath);
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          errors.push({
+            id: 'request.error.file.unlink',
+            params: {
+              filePath
+            }
+          });
+        }
       }
 
       if (fileName === 'routes.json') {
@@ -213,15 +337,43 @@ module.exports = {
         });
 
         if (_.isEmpty(routesJSON.routes)) {
-          fs.unlinkSync(filePath);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (e) {
+            errors.push({
+              id: 'request.error.route.unlink',
+              params: {
+                filePath
+              }
+            });
+          }
         } else {
-          fs.writeFileSync(filePath, JSON.stringify(routesJSON, null, 2), 'utf8');
+          try {
+            fs.writeFileSync(filePath, JSON.stringify(routesJSON, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              id: 'request.error.route.write',
+              params: {
+                filePath
+              }
+            });
+          }
         }
       }
     }
 
     const recurciveDeleteFiles = folderPath => {
-      const items = fs.readdirSync(folderPath);
+      let items;
+      try {
+        items = fs.readdirSync(folderPath);
+      } catch (e) {
+        errors.push({
+          id: 'request.error.folder.read',
+          params: {
+            folderPath
+          }
+        });
+      }
 
       _.forEach(items, item => {
         const itemPath = path.join(folderPath, item);
@@ -234,10 +386,21 @@ module.exports = {
       });
 
       if (_.isEmpty(fs.readdirSync(folderPath))) {
-        fs.rmdirSync(folderPath);
+        try {
+          fs.rmdirSync(folderPath);
+        } catch (e) {
+          errors.push({
+            id: 'request.error.folder.unlink',
+            params: {
+              folderPath
+            }
+          });
+        }
       }
     }
 
     recurciveDeleteFiles(apiPath);
+
+    return errors;
   }
 };

@@ -22,7 +22,7 @@ module.exports = {
 
   create: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
-    const { name, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
@@ -31,15 +31,38 @@ module.exports = {
 
     await Service.generateAPI(name, attributes);
 
-    const modelFilePath = Service.getModelPath(name);
-    const modelJSON = JSON.parse(fs.readFileSync(modelFilePath), 'utf8');
+    const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
+
+    if (modelFilePathErrors) {
+      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
+    }
+
+    let modelJSON;
+    try {
+      modelJSON = JSON.parse(require(modelFilePath));
+    } catch (e) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
+    }
 
     modelJSON.attributes = Service.formatAttributes(attributes);
 
-    Service.clearRelations(name);
-    Service.createRelations(name, attributes);
+    const clearRelationsErrors = Service.clearRelations(name);
 
-    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+    if (clearRelationsErrors) {
+      return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
+    }
+
+    const createRelations = Service.createRelations(name, attributes);
+
+    if (createRelationsErrors) {
+      return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
+    }
+
+    try {
+      fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+    } catch (e) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
+    }
 
     ctx.send({ ok: true });
 
@@ -49,21 +72,44 @@ module.exports = {
   updateModel: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { model } = ctx.params;
-    const { name, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, attributes = [] } = ctx.request.body;
 
     if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
-    const modelFilePath = Service.getModelPath(model);
-    const modelJSON = JSON.parse(fs.readFileSync(modelFilePath), 'utf8');
+    const [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
+
+    if (modelFilePathErrors) {
+      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
+    }
+
+    let modelJSON;
+    try {
+      modelJSON = JSON.parse(require(modelFilePath));
+    } catch (e) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
+    }
 
     modelJSON.attributes = Service.formatAttributes(attributes);
 
     strapi.reload.isWatching = false;
 
-    Service.clearRelations(model);
-    Service.createRelations(model, attributes);
+    const clearRelationsErrors = Service.clearRelations(model);
 
-    fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+    if (clearRelationsErrors) {
+      return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
+    }
+
+    const createRelations = Service.createRelations(model, attributes);
+
+    if (createRelationsErrors) {
+      return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
+    }
+
+    try {
+      fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+    } catch (e) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
+    }
 
     ctx.send({ ok: true });
 
@@ -78,9 +124,17 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    Service.clearRelations(model);
+    const clearRelationsErrors = Service.clearRelations(model);
 
-    Service.removeModel(model);
+    if (clearRelationsErrors) {
+      return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
+    }
+
+    const removeModelErrors = Service.removeModel(model);
+
+    if (removeModelErrors) {
+      return ctx.badRequest(null, [{ messages: removeModelErrors }]);
+    }
 
     ctx.send({ ok: true });
 
