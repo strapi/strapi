@@ -74,7 +74,7 @@ module.exports = function() {
 
       if (cluster.isMaster) {
         cluster.on('message', () => {
-          strapi.log.info('The server will restart\n');
+          strapi.log.info('The server is restarting\n');
 
           _.forEach(cluster.workers, worker => worker.kill());
 
