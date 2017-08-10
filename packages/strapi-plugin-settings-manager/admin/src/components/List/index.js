@@ -73,25 +73,28 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               {button}
             </div>
           </div>
-          <div className={styles.ulContainer}>
-            <ul>
-              {map(this.props.listItems, (listItem, key) => {
-                if (this.props.renderRow) {
-                  return this.props.renderRow(listItem, key, styles);
-                }
-                return (
-                  <li key={key}>
-                    <div className={styles.flexLi}>
-                      {map(listItem, (item, index) => (
-                        <div key={index}>{item}</div>
-                      ))}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
         </div>
+        
+        <div className={styles.ulContainer}>
+          <ul>
+            {map(this.props.listItems, (listItem, key) => {
+              if (this.props.renderRow) {
+                return this.props.renderRow(listItem, key, styles);
+              }
+              return (
+                <li key={key}>
+                  <div className={styles.flexLi}>
+                    {map(listItem, (item, index) => (
+                      <div key={index}>{item}</div>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/*  </div> */}
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={styles.modalPosition}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder} ${styles.padded} ${styles.mHeader}`}>

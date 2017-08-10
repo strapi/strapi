@@ -54,7 +54,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     return (
       <li>
         <div className={this.props.liStyles.flexLi}>
-          <div className={this.props.liStyles.flexed}>
+          <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>
             <div><span className={`flag-icon flag-icon-${flag}`} /></div>
             <div className={`${this.props.liStyles.label} ${this.props.liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
@@ -70,8 +70,6 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
             warningMessage={'popUpWarning.languages.delete.message'}
           />
         </div>
-        <div className={this.props.liStyles.spacer} />
-
       </li>
     );
   }

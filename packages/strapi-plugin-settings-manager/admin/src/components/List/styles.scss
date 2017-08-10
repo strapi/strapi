@@ -4,7 +4,7 @@
 
 .listSubContainer {
   margin: 0 3.3rem;
-  padding: 1rem 2.8rem 5.8rem 2.8rem;
+  padding: 1rem 2.8rem 0rem 2.8rem;
   border-radius: 0.2rem;
   background-color: #FFFFFF;
   // background-color: red;
@@ -19,7 +19,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 0.8rem;
-  margin-bottom: 2.5rem;
+  // margin-bottom: 2.5rem;
 }
 
 .titleContainer {
@@ -32,14 +32,27 @@
 }
 
 .ulContainer {
-  padding-top: .5rem;
+  padding-top: 1.5rem;
+  margin: 0 3.3rem;
+  background-color: #FFFFFF;
+  // background-color: red;
+  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
   > ul {
     list-style: none;
-    padding: 0 1.7rem 0 1rem;
+    padding: 0;
     > li {
-
-      padding-top: .3rem;
-      line-height: 1.6rem;
+      line-height: 5rem;
+      height: 5rem;
+      border-bottom: 1px solid rgba(14,22,34,0.04);
+      &:last-of-type {
+        border: none;
+      }
+      &:hover {
+        background-color: rgba(14,22,34,0.03);
+      }
+    }
+    >li:not(:first-child) {
+      margin-top: .4rem;
     }
   }
 }
@@ -47,6 +60,9 @@
 .flexLi {
   display: flex;
   justify-content: space-between;
+  margin: 0 4.1rem 0 2.8rem;
+
+  align-items: center;
 }
 
 .flexLeft {
@@ -77,6 +93,10 @@
 .centered {
   width: 20rem;
   text-align: right;
+  > button {
+    // padding: 0;
+    margin-top: .1rem;
+  }
 }
 
 .italicText {
@@ -208,6 +228,7 @@
 
 
 .squared {
+  margin-top: 1.5rem;
   height: 2rem;
   width: 3.5rem;
   padding-top: .2rem;
@@ -258,4 +279,8 @@
 
 .databaseFont {
   font-size: 1.3rem;
+}
+
+.flagContainer {
+  margin-left: 1rem;
 }
