@@ -5,6 +5,7 @@
 */
 
 import { includes, forEach, has, remove, get, split } from 'lodash';
+import { getInputsValidationsFromConfigs } from '../../utils/inputValidations';
 import {
   CONFIG_FETCH,
   LANGUAGES_FETCH,
@@ -30,6 +31,7 @@ import {
   LANGUAGE_ACTION_ERROR,
   DATABASE_ACTION_ERROR,
   EMPTY_DB_MODIFIED_DATA,
+  SET_ERRORS,
 } from './constants';
 
 export function defaultAction() {
@@ -47,11 +49,12 @@ export function configFetch(endPoint) {
 
 export function configFetchSucceded(configs) {
   const data = getDataFromConfigs(configs);
-
+  const formValidations = getInputsValidationsFromConfigs(configs);
   return {
     type: CONFIG_FETCH_SUCCEEDED,
     configs,
     data,
+    formValidations,
   };
 }
 
@@ -120,13 +123,9 @@ export function editSettings(newSettings, endPoint) {
   };
 }
 
-export function editSettingsSucceeded(optimisticResponse) {
-  const data = getDataFromConfigs(optimisticResponse);
-
+export function editSettingsSucceeded() {
   return {
     type: EDIT_SETTINGS_SUCCEEDED,
-    optimisticResponse,
-    data,
   };
 }
 
@@ -214,12 +213,15 @@ export function databasesFetchSucceeded(listDatabases, availableDatabases) {
   };
 
   const dbNameTarget = availableDatabases.sections[0].items[0].target;
+  const formValidations = getInputsValidationsFromConfigs(availableDatabases);
+
   return {
     type: DATABASES_FETCH_SUCCEEDED,
     configsDisplay,
     appDatabases,
     modifiedData,
     dbNameTarget,
+    formValidations,
   };
 }
 
@@ -266,11 +268,13 @@ export function specificDatabaseFetchSucceeded(db) {
   remove(database.sections[0].items, (item) => item.target === `database.connections.${name}.connector`);
   const dbNameTarget = database.sections[0].items[0].target;
 
+  const formValidations = getInputsValidationsFromConfigs(db);
   return {
     type: SPECIFIC_DATABASE_FETCH_SUCCEEDED,
     database,
     data,
     dbNameTarget,
+    formValidations,
   };
 }
 
@@ -286,5 +290,12 @@ export function databaseEdit(data, apiUrl) {
 export function emptyDbModifiedData() {
   return {
     type: EMPTY_DB_MODIFIED_DATA,
+  };
+}
+
+export function setErrors(errors) {
+  return {
+    type: SET_ERRORS,
+    errors,
   };
 }

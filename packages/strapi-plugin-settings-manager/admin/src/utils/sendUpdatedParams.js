@@ -1,4 +1,4 @@
-import { forEach, has, includes } from 'lodash';
+import { forEach, includes } from 'lodash';
 
 export default function sendUpdatedParams() {
   const prevSettings = this.props.home.initialData;
@@ -8,14 +8,14 @@ export default function sendUpdatedParams() {
     if (value !== prevSettings[key] && key !== 'security.xframe.value.nested') {
       body[key] = value;
     }
+    else if (key === 'security.xframe.value.nested' && prevSettings['security.xframe.value.nested'] !== this.props.home.modifiedData['security.xframe.value.nested'] && this.props.home.modifiedData['security.xframe.value'] === 'ALLOW-FROM') {
+      const xFrameValue = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
+      `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
+       : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
+
+      body['security.xframe.value'] = xFrameValue;
+    }
   });
 
-  if (has(this.props.home.modifiedData, 'security.xframe.value.nested') && this.props.home.modifiedData['security.xframe.value'] === 'ALLOW-FROM') {
-    const value = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
-    `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
-     : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
-
-    body['security.xframe.value'] = value;
-  }
   return body;
 }

@@ -24,6 +24,7 @@ import {
 import {
   configFetchSucceded,
   databasesFetchSucceeded,
+  editSettingsSucceeded,
   languagesFetchSucceeded,
   languageActionError,
   databaseActionSucceeded,
@@ -241,7 +242,7 @@ export function* settingsEdit(action) {
 
     // TODO handle server reload to get response
     window.Strapi.notification.success('Your modifications have been updated');
-
+    yield put(editSettingsSucceeded());
 
   } catch(error) {
     window.Strapi.notification.error('An error occured');

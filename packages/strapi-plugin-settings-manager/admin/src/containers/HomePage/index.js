@@ -40,6 +40,7 @@ import RowLanguage from 'components/RowLanguage';
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 
 // utils
+import { checkFormValidity } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
 
@@ -58,6 +59,7 @@ import {
   languagesFetch,
   newLanguagePost,
   newDatabasePost,
+  setErrors,
   specificDatabaseFetch,
 } from './actions'
 
@@ -188,7 +190,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   handleChange = ({ target }) => {
-    let value = target.type === 'number' ? toNumber(target.value) : target.value;
+    let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
     let name = target.name;
 
     if (this.props.params.slug === 'security') {
@@ -205,17 +207,20 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleCancel = () => this.props.cancelChanges();
 
-  handleSubmit = (e) => {
+  handleSubmit = (e) => { // eslint-disable-line consistent-return
     e.preventDefault();
     const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
 
     // send only updated settings
     const body = this.sendUpdatedParams();
+    const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
-    if (!isEmpty(body)) {
+    if (isEmpty(body)) return window.Strapi.notification.info('Settings are equals');
+    if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl);
     } else {
-      window.Strapi.notification.info('Settings are equals');
+      this.props.setErrors(formErrors);
+      // window.Strapi.notification.info('Settings are equals');
     }
   }
 
@@ -395,6 +400,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         actionBeforeOpenPopUp={actionBeforeOpenPopUp}
         addRequiredInputDesign={addRequiredInputDesign}
         addListTitleMarginTop={addListTitleMarginTop}
+        formErrors={this.props.home.formErrors}
       />
     );
   }
@@ -469,6 +475,7 @@ function mapDispatchToProps(dispatch) {
       languagesFetch,
       newDatabasePost,
       newLanguagePost,
+      setErrors,
       specificDatabaseFetch,
     },
     dispatch
@@ -494,6 +501,7 @@ HomePage.propTypes = {
   newDatabasePost: React.PropTypes.func,
   newLanguagePost: React.PropTypes.func,
   params: React.PropTypes.object.isRequired,
+  setErrors: React.PropTypes.func,
   specificDatabaseFetch: React.PropTypes.func,
 };
 

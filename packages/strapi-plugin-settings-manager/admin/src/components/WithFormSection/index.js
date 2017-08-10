@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
+import { findIndex, forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
@@ -21,6 +21,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
     addRequiredInputDesign: React.PropTypes.bool,
     cancelAction: React.PropTypes.bool,
+    formErrors: React.PropTypes.array,
     handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.oneOfType([
       React.PropTypes.object,
@@ -104,6 +105,9 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
     const hiddenLabel = includes(props.name, 'enabled');
 
+    const errorIndex = findIndex(this.props.formErrors, ['target', props.target]);
+    const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
+
     return (
       <Input
         customBootstrapClass={customBootstrapClass}
@@ -118,6 +122,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
         addRequiredInputDesign={this.props.addRequiredInputDesign}
         hiddenLabel={hiddenLabel}
         inputDescription={props.description}
+        errors={errors}
       />
     );
   }

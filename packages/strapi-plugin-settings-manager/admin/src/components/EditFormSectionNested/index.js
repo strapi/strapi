@@ -53,8 +53,6 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
   }
 
   render() {
-    // console.log(this.state);
-
     return (
       <div className={`${this.props.styles.padded} ${this.props.styles.nesTedFormContainer}`}>
         <div className="row">
@@ -68,7 +66,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
                     section={this.state.section}
                     values={this.props.values}
                     handleChange={this.props.handleChange}
-
+                    formErrors={this.props.formErrors}
                   />
                 </div>
               )
@@ -83,6 +81,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 }
 
 EditFormSectionNested.propTypes = {
+  formErrors: React.PropTypes.array,
   handleChange: React.PropTypes.func,
   renderInput: React.PropTypes.func,
   section: React.PropTypes.oneOfType([

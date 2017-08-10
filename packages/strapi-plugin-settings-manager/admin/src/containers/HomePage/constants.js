@@ -29,3 +29,4 @@ export const SPECIFIC_DATABASE_FETCH_SUCCEEDED = 'SettingsManager/HomePage/SPECI
 export const DATABASE_EDIT = 'SettingsManager/HomePage/DATABASE_EDIT';
 export const DATABASE_ACTION_ERROR = 'SettingsManager/HomePage/DATABASE_ACTION_ERROR';
 export const EMPTY_DB_MODIFIED_DATA = 'SettingsManager/HomePage/EMPTY_DB_MODIFIED_DATA';
+export const SET_ERRORS = 'SettingsManager/HomePage/SET_ERRORS';

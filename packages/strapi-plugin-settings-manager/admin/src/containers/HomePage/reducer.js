@@ -23,6 +23,7 @@ import {
   DATABASE_ACTION_ERROR,
   NEW_LANGUAGE_POST,
   EMPTY_DB_MODIFIED_DATA,
+  SET_ERRORS,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -39,6 +40,8 @@ const initialState = fromJS({
   specificDatabase: OrderedMap(),
   dbNameTarget: '',
   selectOptions: Map(),
+  formValidations: [],
+  formErrors: [],
 });
 /* eslint-disable no-case-declarations */
 
@@ -49,12 +52,16 @@ function homePageReducer(state = initialState, action) {
         .set('loading', false)
         .set('configsDisplay', OrderedMap(action.configs))
         .set('initialData', Map(action.data))
-        .set('modifiedData', Map(action.data));
+        .set('modifiedData', Map(action.data))
+        .set('formErrors', [])
+        .set('formValidations', action.formValidations);
     case CHANGE_INPUT:
+    // TODO remove error
       return state.updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state
       .set('modifiedData', state.get('initialData'))
+      .set('formErrors', [])
       .set('cancelAction', !state.get('cancelAction'));
     case DATABASES_FETCH_SUCCEEDED:
       return state
@@ -65,6 +72,8 @@ function homePageReducer(state = initialState, action) {
         .set('loading', false)
         .set('initialData', Map())
         .set('dbNameTarget', action.dbNameTarget)
+        .set('formValidations', action.formValidations)
+        .set('formErrors', [])
         .set('modifiedData', Map(action.modifiedData));
     case LANGUAGE_DELETE:
       return state
@@ -80,12 +89,11 @@ function homePageReducer(state = initialState, action) {
         .set('initialData', Map())
         .set('modifiedData', Map(action.selectedLanguage))
         .set('selectOptions', Map(action.selectOptions))
+        .set('formErrors', [])
         .set('listLanguages', Map(action.listLanguages));
     case EDIT_SETTINGS_SUCCEEDED:
       return state
-        .set('configsDisplay', OrderedMap(action.optimisticResponse))
-        .set('initialData', Map(action.data))
-        .set('modifiedData', Map(action.data));
+        .set('formErrors', []);
     case CHANGE_DEFAULT_LANGUAGE:
       return state
         .set('configsDisplay', OrderedMap(action.configsDisplay))
@@ -106,18 +114,22 @@ function homePageReducer(state = initialState, action) {
         .set('specificDatabase', OrderedMap(action.database))
         .set('dbNameTarget', action.dbNameTarget)
         .set('initialData', Map(action.data))
+        .set('formErrors', [])
         .set('modifiedData', Map(action.data));
     case EMPTY_DB_MODIFIED_DATA:
       const defaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
       return state
       .set('modifiedData', Map())
       .set('dbNameTarget', 'database.connections.${name}.name') // eslint-disable-line no-template-curly-in-string
+      .set('formErrors', [])
       .setIn(['modifiedData', 'database.defaultConnection'], defaultDbConnection);
     case NEW_LANGUAGE_POST:
       const sections = state.getIn(['configsDisplay', 'sections']);
       sections.push({ active: false, name: state.getIn(['modifiedData', 'language.defaultLocale']) });
       const newSections = sortBy(sections, (o) => o.name);
       return state.setIn(['configsDisplay', 'sections'], newSections);
+    case SET_ERRORS:
+      return state.set('formErrors', action.errors);
     default:
       return state;
   }

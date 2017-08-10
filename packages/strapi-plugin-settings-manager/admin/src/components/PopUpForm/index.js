@@ -23,7 +23,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
                   {map(this.props.sections, (section) => {
                     // custom rendering
                     if (this.props.renderPopUpForm) {
-                      console.log('ook')
                       // Need to pass props to use this.props.renderInput from WithFormSection HOC
                       return this.props.renderPopUpForm(section, this.props, styles);
                     }
