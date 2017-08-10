@@ -39,7 +39,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
     const languageLabel = this.props.active ?
-      <span className={this.props.liStyles.italicText}>
+      <span className={this.props.liStyles.italicText} style={{ paddingRight: '.1rem'}}>
         <FormattedMessage {...{id: 'list.languages.default.languages'}} />
       </span> :
       // set the span's id with the language name to retrieve it
@@ -58,7 +58,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
             <div><span className={`flag-icon flag-icon-${flag}`} /></div>
             <div className={`${this.props.liStyles.label} ${this.props.liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
-          <div>{this.props.name}</div>
+          <div className="text-center" style={{ width: '4rem'}}>{this.props.name}</div>
           <div className={this.props.liStyles.centered}>{languageLabel}</div>
           <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
         </div>

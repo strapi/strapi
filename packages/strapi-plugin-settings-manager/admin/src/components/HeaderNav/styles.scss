@@ -1,3 +1,5 @@
+$linkcolour: #F5F5F5;
+
 .headerNav { /* stylelint-disable */
 
 }
@@ -9,6 +11,7 @@
   border-radius: 2px;
   > a {
     box-shadow: 1px 0 0px -2px rgba(0,0,0,0.05), inset 0px -1px 0px -2px rgba(0,0,0,0.05);
+    background-color: $linkcolour;
     &:first-child {
       border-radius: 2px 0 0 0;
     }
@@ -24,7 +27,7 @@
   flex: 1 100%;
   height: 3.6rem;
   border-radius: 2px 0 0 0;
-  background-color: rgba(14,22,34,0.05);
+  background-color: darken($linkcolour, 50%);
   text-decoration: none !important;
   font-family: Lato;
   font-size: 1.3rem;
@@ -33,7 +36,7 @@
 }
 
 .linkActive {
-  background-color: #FFFFFF;
+  background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
   box-shadow: 1px 0 0 -2px rgba(0,0,0,0.05)!important;
