@@ -19,6 +19,7 @@
 }
 
 .bordered {
+  margin-top: -.4rem;
   margin-left: 3rem;
   margin-right: 3rem;
   border: 1px solid #F6F6F6;
@@ -40,9 +41,16 @@
 
 .primary {
   font-family: Lato;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   color: white;
   width: 15rem;
+  border: none;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  &:active {
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    background-color: none!important;
+    color: white!important;
+
+  }
 
 }
 
@@ -59,7 +67,6 @@
   display: flex;
   margin-top: 3.5rem;
   justify-content: space-between;
-
 }
 
 .modalBody {
@@ -71,4 +78,43 @@
 .modalPosition {
   top: 18.7rem;
   width: 37.5rem;
+}
+
+.modalDangerBodyContainer {
+  padding-top: .1rem;
+  > img {
+    width: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  > p {
+    line-height: 1.8rem;
+  }
+
+  color: #F64D0A;
+  text-align: center;
+  font-family: Lato;
+  font-size: 1.3rem;
+}
+
+.buttonDangerContainer {
+  width: 100%;
+  padding: 0 .5rem;
+  display: flex;
+  margin-top: 3.1rem;
+  justify-content: space-around;
+  > button {
+    width: 31.5rem;
+    height: 3rem;
+    font-size: 1.3rem;
+      -webkit-font-smoothing: antialiased;
+    &:hover {
+      color: white;
+    }
+
+  }
+}
+
+.modalPosition {
+  top: 20.3rem;
+  width: 37.5rm;
 }

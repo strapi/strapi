@@ -132,6 +132,8 @@
 
   "popUpWarning.title": "Merci de confirmer",
   "popUpWarning.databases.delete.message": "Etes-vous sûre de vouloir supprimer cette connexion ?",
+  "popUpWarning.danger.message": "Des models sont toujours reliés à cette connexion.....",
+  "popUpWarning.databases.danger.ok.message": "J'ai compris",
   "popUpWarning.languages.delete.message": "Etes-vous sûre de vouloir supprimer ce language ?",
 
   "language.af": "Afrikaans",

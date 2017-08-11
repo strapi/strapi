@@ -12,7 +12,7 @@
 }
 
 .paddedTopList {
-  margin-top: 2.7rem!important;
+  margin-top: 2.8rem!important;
 }
 
 .flex {
@@ -32,7 +32,7 @@
 }
 
 .ulContainer {
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   margin: 0 3.3rem;
   background-color: #FFFFFF;
   // background-color: red;
@@ -40,10 +40,15 @@
   > ul {
     list-style: none;
     padding: 0;
+    // .borderBottom {
+    //   &:last-child{
+    //     border-bottom: none;
+    //   }
     > li {
-      line-height: 5rem;
-      height: 5rem;
-      border-bottom: 1px solid rgba(14,22,34,0.04);
+      line-height: 5.2rem;
+      height: 5.2rem;
+
+      border-bottom: 1px solid transparent;
       &:last-of-type {
         border: none;
       }
@@ -51,17 +56,32 @@
         background-color: rgba(14,22,34,0.03);
       }
     }
-    >li:not(:first-child) {
-      margin-top: .4rem;
+    >li:first-child {
+      padding-top: .3rem;
+      padding-bottom: 5.1rem;
+      height: 5.2rem;
+      line-height: 5.2rem;
+    }
+
+    > li:last-child .borderBottom {
+      border-top: none;
     }
   }
+}
+
+.liSpacer {
+  height: .2rem!important;
+}
+
+.borderBottom {
+  border-top: 1px solid rgba(14,22,34,0.04);
 }
 
 .flexLi {
   display: flex;
   justify-content: space-between;
   margin: 0 4.1rem 0 2.8rem;
-
+  position: relative;
   align-items: center;
 }
 
@@ -95,7 +115,14 @@
   text-align: right;
   > button {
     padding-right: 0;
-    margin-top: .1rem;
+    padding-top: .2rem;
+    // margin-top: .1rem;
+    &:first-child {
+      // margin-top: .1rem;
+    }
+    > div {
+      padding-top: .2rem;
+    }
   }
 }
 
@@ -103,12 +130,15 @@
   font-family: Lato;
   color: #49515A;
   font-style: italic;
+  height: 100%;
+  height: 5.2rem;
+  line-height: 5.2rem;
 }
 
 .normal {
   font-family: Lato;
   color: #1C5DE7;
-  padding-top: 0rem;
+  // padding-top: 0rem;
 }
 
 .primary {
@@ -283,4 +313,9 @@
 
 .flagContainer {
   margin-left: 1rem;
+}
+
+.bottomSpacer {
+  height: 1.2rem;
+  background-color: #FFFFFF;
 }

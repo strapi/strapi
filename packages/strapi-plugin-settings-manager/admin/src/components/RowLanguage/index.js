@@ -39,9 +39,14 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
     const languageLabel = this.props.active ?
-      <span className={this.props.liStyles.italicText} style={{ paddingRight: '.1rem'}}>
-        <FormattedMessage {...{id: 'list.languages.default.languages'}} />
-      </span> :
+      <FormattedMessage {...{id: 'list.languages.default.languages'}}>
+        {(message) => (
+
+          <div className={this.props.liStyles.italicText} >
+            {message}
+          </div>
+        )}
+      </FormattedMessage> :
       // set the span's id with the language name to retrieve it
         <FormattedMessage {...{id: 'list.languages.set.languages'}}>
           {(message) => (
@@ -50,9 +55,11 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
             </button>
           )}
         </FormattedMessage>;
-
+    const spacer = this.props.active ? <div className={this.props.liStyles.liSpacer} /> : '';
+    const borderPosition = this.props.active ? '-.3rem' : '-.6rem';
     return (
       <li>
+        {spacer}
         <div className={this.props.liStyles.flexLi}>
           <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>
             <div><span className={`flag-icon flag-icon-${flag}`} /></div>
@@ -61,7 +68,10 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
           <div className="text-center" style={{ width: '4rem'}}>{this.props.name}</div>
           <div className={this.props.liStyles.centered}>{languageLabel}</div>
           <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
+          <div className={this.props.liStyles.borderBottom} />
         </div>
+        <div className={this.props.liStyles.borderBottom} style={{ margin: `${borderPosition} 4.8rem 0 2.8rem`}} />
+
         <div>
           <PopUpWarning
             isOpen={this.state.showWarning}

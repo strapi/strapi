@@ -74,7 +74,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
             </div>
           </div>
         </div>
-        
+
         <div className={styles.ulContainer}>
           <ul>
             {map(this.props.listItems, (listItem, key) => {
@@ -92,6 +92,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               );
             })}
           </ul>
+          <div className={styles.bottomSpacer} />
         </div>
 
         {/*  </div> */}

@@ -53,7 +53,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   render() {
     return (
       <li className={styles.databaseFont} style={{ cursor: 'pointer'}} >
-        <div style={{ position: 'absolute', width: '73rem', height: '5rem'}} onClick={this.showDatabaseModal}></div>
+        <div style={{ position: 'absolute', width: '73rem', height: '5.2rem'}} onClick={this.showDatabaseModal}></div>
         <div className={styles.flexLi}>
           <div className={styles.flexed}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
@@ -69,6 +69,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             <div className={`${styles.leftSpaced} ${styles.ico}`}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
+        <div className={styles.borderBottom} style={{ margin: `-.4rem 4.8rem 0 2.8rem`}} />
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={styles.modalPosition}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder} ${styles.padded} ${styles.mHeader}`}>
@@ -102,7 +103,10 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             isOpen={this.state.warning}
             toggleModal={this.toggleWarning}
             handleConfirm={this.deleteDatabase}
+            handleConfirmDanger={this.toggleWarning}
             warningMessage={'popUpWarning.databases.delete.message'}
+            dangerMessage={'popUpWarning.databases.danger.message'}
+            showDanger={this.props.data.isUsed}
           />
         </div>
       </li>
