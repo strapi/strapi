@@ -20,52 +20,56 @@ module.exports = {
     ctx.send({ model: Service.getModel(model) });
   },
 
+  getConnections: async ctx => {
+    ctx.send({ connections: Service.getConnections() });
+  },
+
   createModel: async ctx => {
-    const { name, attributes = [] } = ctx.request.body;
+    const { name, connection, attributes = [] } = JSON.parse(ctx.request.body);
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
 
     strapi.reload.isWatching = false;
 
-    await Service.generateAPI(name, attributes);
+    await Service.generateAPI(name, connection, attributes);
 
     const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
 
-    if (modelFilePathErrors) {
+    if (!_.isEmpty(modelFilePathErrors)) {
       return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
     }
 
-    let modelJSON;
     try {
-      modelJSON = JSON.parse(require(modelFilePath));
+      console.log(modelFilePath);
+      const modelJSON = require(modelFilePath);
+
+      modelJSON.attributes = Service.formatAttributes(attributes);
+
+      const clearRelationsErrors = Service.clearRelations(name);
+
+      if (!_.isEmpty(clearRelationsErrors)) {
+        return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
+      }
+
+      const createRelationsErrors = Service.createRelations(name, attributes);
+
+      if (!_.isEmpty(createRelationsErrors)) {
+        return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
+      }
+
+      try {
+        fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+
+        ctx.send({ ok: true });
+
+        strapi.reload();
+      } catch (e) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
+      }
     } catch (e) {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
-
-    modelJSON.attributes = Service.formatAttributes(attributes);
-
-    const clearRelationsErrors = Service.clearRelations(name);
-
-    if (clearRelationsErrors) {
-      return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
-    }
-
-    const createRelationsErrors = Service.createRelations(name, attributes);
-
-    if (createRelationsErrors) {
-      return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
-    }
-
-    try {
-      fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
-    } catch (e) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
-    }
-
-    ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   updateModel: async ctx => {
@@ -76,42 +80,41 @@ module.exports = {
 
     const [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
 
-    if (modelFilePathErrors) {
+    if (!_.isEmpty(modelFilePathErrors)) {
       return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
     }
 
-    let modelJSON;
     try {
-      modelJSON = JSON.parse(require(modelFilePath));
+      const modelJSON = JSON.parse(require(modelFilePath));
+
+      modelJSON.attributes = Service.formatAttributes(attributes);
+
+      strapi.reload.isWatching = false;
+
+      const clearRelationsErrors = Service.clearRelations(model);
+
+      if (!_.isEmpty(clearRelationsErrors)) {
+        return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
+      }
+
+      const createRelationsErrors = Service.createRelations(model, attributes);
+
+      if (!_.isEmpty(createRelationsErrors)) {
+        return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
+      }
+
+      try {
+        fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+
+        ctx.send({ ok: true });
+
+        strapi.reload();
+      } catch (e) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
+      }
     } catch (e) {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
-
-    modelJSON.attributes = Service.formatAttributes(attributes);
-
-    strapi.reload.isWatching = false;
-
-    const clearRelationsErrors = Service.clearRelations(model);
-
-    if (clearRelationsErrors) {
-      return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
-    }
-
-    const createRelationsErrors = Service.createRelations(model, attributes);
-
-    if (createRelationsErrors) {
-      return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
-    }
-
-    try {
-      fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
-    } catch (e) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
-    }
-
-    ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   deleteModel: async ctx => {
@@ -123,13 +126,13 @@ module.exports = {
 
     const clearRelationsErrors = Service.clearRelations(model);
 
-    if (clearRelationsErrors) {
+    if (!_.isEmpty(clearRelationsErrors)) {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
     }
 
     const removeModelErrors = Service.removeModel(model);
 
-    if (removeModelErrors) {
+    if (!_.isEmpty(removeModelErrors)) {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
 
