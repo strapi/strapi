@@ -127,6 +127,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
                 type={type}
                 className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
                 placeholder={message}
+                autoComplete="off"
               />
             )}
           </FormattedMessage>

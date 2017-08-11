@@ -1,4 +1,13 @@
-import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty, size } from 'lodash';
+import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty, size, remove } from 'lodash';
+
+/*
+* @method : check invalid inputs
+*
+* @params {object, object} formData, formValidations
+*
+* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'errorId'}]}]
+*
+*/
 
 export function checkFormValidity(formData, formValidations) {
   const errors = [];
@@ -129,6 +138,19 @@ export function getInputsValidationsFromConfigs(configs) {
 
 /* eslint-disable no-template-curly-in-string */
 
+/*
+*
+* Specific to databasePost
+*
+* @method : check if all required inputs are filled for creating a new database
+*
+* @params {object} formData
+*
+* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'errorId'}]}]
+*
+*/
+
+
 export function getRequiredInputsDb(data) {
   const formErrors = [
     { target: 'database.connections.${name}.name', errors: [{ id: 'request.error.validation.required' }] },
@@ -139,5 +161,10 @@ export function getRequiredInputsDb(data) {
 
   // If size data === 2 user hasn't filled any input,
   if (size(data) === 2) return formErrors;
+
+  forEach(data, (value, target) => {
+    remove(formErrors, (object) => object.target === target);
+  });
+
   return formErrors;
 }

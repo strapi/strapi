@@ -15,7 +15,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   render() {
     return (
       <div className={styles.editForm}>
-        <form onSubmit={this.props.handleSubmit}>
+        <form onSubmit={this.props.handleSubmit} autoComplete="nope">
           <div className={styles.formContainer}>
             {map(this.props.sections, (section, key) => {
               let line;

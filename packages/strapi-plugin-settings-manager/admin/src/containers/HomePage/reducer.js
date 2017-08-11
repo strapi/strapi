@@ -93,6 +93,7 @@ function homePageReducer(state = initialState, action) {
         .set('listLanguages', Map(action.listLanguages));
     case EDIT_SETTINGS_SUCCEEDED:
       return state
+        .set('initialData', state.get('modifiedData'))
         .set('error', !state.get('error'))
         .set('formErrors', []);
     case CHANGE_DEFAULT_LANGUAGE:

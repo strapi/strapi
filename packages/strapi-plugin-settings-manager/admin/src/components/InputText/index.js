@@ -128,6 +128,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           type="text"
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
+          autoComplete="off"
         />
       )}
     </FormattedMessage>

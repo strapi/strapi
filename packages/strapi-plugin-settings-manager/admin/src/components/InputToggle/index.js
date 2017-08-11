@@ -63,8 +63,8 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
       <div className={`${customBootstrapClass} ${styles.container}`} style={resized}>
         {label}
         <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">
-          <button className={btnClassOff} id="off" onClick={this.toggle}>OFF</button>
-          <button className={btnClassOn} id="on" onClick={this.toggle}>ON</button>
+          <button type="button" className={btnClassOff} id="off" onClick={this.toggle}>OFF</button>
+          <button type="button" className={btnClassOn} id="on" onClick={this.toggle}>ON</button>
         </div>
       </div>
     );

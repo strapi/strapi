@@ -358,7 +358,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       // Check if params env : render HeaderNav component
       specificComponent = !this.props.params.env ? 'defaultComponent' : 'defaultComponentWithEnvironments';
     }
-    
+
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
     const addRequiredInputDesign = this.props.params.slug === 'databases';
