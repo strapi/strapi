@@ -162,7 +162,7 @@ module.exports = {
           {
             name: 'form.request.item.router.prefix',
             target: 'request.router.prefix',
-            type: 'boolean',
+            type: 'string',
             value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
             validations : {
               required: true
