@@ -135,7 +135,6 @@ export function getRequiredInputsDb(data) {
     { target: 'database.connections.${name}.settings.host', errors: [{ id: 'request.error.validation.required' }] },
     { target: 'database.connections.${name}.settings.port', errors: [{ id: 'request.error.validation.required' }] },
     { target: 'database.connections.${name}.settings.database', errors: [{ id: 'request.error.validation.required' }] },
-    { target: 'database.connections.${name}.settings.username', errors: [{ id: 'request.error.validation.required' }] },
   ];
 
   // If size data === 2 user hasn't filled any input,
