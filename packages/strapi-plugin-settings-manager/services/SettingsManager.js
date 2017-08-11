@@ -601,6 +601,12 @@ module.exports = {
   getDatabases: env => {
     const databases = [];
 
+
+    const databasesUsed = [];
+    _.forEach(strapi.models, model => {
+      databasesUsed.push(model.connection);
+    });
+
     _.forEach(strapi.config.environments[env].database.connections, (connection, name) =>  databases.push({
       connector: _.get(connection, 'connector'),
       letter: strapi.plugins['settings-manager'].services.settingsmanager.getClientLetter(_.get(connection, 'settings.client')),
@@ -608,7 +614,8 @@ module.exports = {
       name,
       host: _.get(connection, 'settings.host'),
       database: _.get(connection, 'settings.database'),
-      active: (_.get(strapi.config, `environments.${env}.database.defaultConnection`) === name)
+      active: (_.get(strapi.config, `environments.${env}.database.defaultConnection`) === name),
+      isUsed: _.includes(databasesUsed, name)
     }));
 
     return databases;
