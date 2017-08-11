@@ -170,6 +170,13 @@ module.exports = {
 
     if (!_.isEmpty(validationErrors)) return ctx.badRequest(null, Service.formatErrors(validationErrors));
 
+    if (_.isEmpty(_.keys(strapi.config.environments[env].database.connections)) || _.isEmpty(strapi.config.environments[env].database.defaultConnection)) {
+      params.database.defaultConnection = name;
+      items.push({
+        target: 'database.defaultConnection'
+      });
+    }
+
     Service.installDependency(params, name);
 
     strapi.reload.isWatching = false;
@@ -215,12 +222,38 @@ module.exports = {
       connections[newName] = params;
       connections[name] = undefined;
 
-      if (strapi.config.environments[env].database.defaultConnection === name) {
-        params.database.defaultConnection = newName;
-        items.push({
-          target: 'database.defaultConnection'
-        });
-      }
+      _.forEach(strapi.models, (model, modelName) => {
+        if (name === model.connection) {
+          const [searchFilePath, getModelPathErrors] = Service.getModelPath(modelName);
+
+          if (!_.isEmpty(getModelPathErrors)) {
+            return ctx.badRequest(null, Service.formatErrors(getModelPathErrors));
+          }
+
+          try {
+            const modelJSON = require(searchFilePath);
+            modelJSON.connection = newName;
+
+            try {
+              fs.writeFileSync(searchFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+            } catch (e) {
+              return ctx.badRequest(null, Service.formatErrors([{
+                id: 'request.error.mode.write',
+                params: {
+                  filePath: searchFilePath
+                }
+              }]));
+            }
+          } catch (e) {
+            return ctx.badRequest(null, Service.formatErrors([{
+              id: 'request.error.mode.read',
+              params: {
+                filePath: searchFilePath
+              }
+            }]));
+          }
+        }
+      });
     } else {
       connections[name] = params;
     }
@@ -228,6 +261,13 @@ module.exports = {
     params = { database: { connections }};
 
     items = [{ target: 'database.connections' }];
+
+    if (newName && newName !== name && strapi.config.environments[env].database.defaultConnection === name) {
+      params.database.defaultConnection = newName;
+      items.push({
+        target: 'database.defaultConnection'
+      });
+    }
 
     const newClient = _.get(params, `database.connections.${name}.settings.client`);
 
@@ -262,6 +302,13 @@ module.exports = {
 
     const params = { database: { connections }};
     const items = [{ target: 'database.connections' }];
+
+    if (strapi.config.environments[env].database.defaultConnection === name) {
+      params.database.defaultConnection = '';
+      items.push({
+        target: 'database.defaultConnection'
+      });
+    }
 
     strapi.reload.isWatching = false;
 
