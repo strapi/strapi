@@ -13,7 +13,7 @@ const path = require('path');
 const rimraf = require('rimraf');
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi uninstall`

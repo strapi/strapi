@@ -9,11 +9,12 @@ node node_modules/mocha/bin/_mocha `scripts/_get-test-directories.sh` --opts tes
 
 # Test `strapi-admin`
 cd packages/strapi-admin
-npm install
 npm run test
-cd ../..
+
+# Test `strapi-plugin-content-manager`
+cd ../strapi-plugin-content-manager
+npm run test
 
 # Test `strapi-plugin-settings-manager`
-cd packages/strapi-plugin-settings-manager
-npm install
+cd ../strapi-plugin-settings-manager
 npm run test

@@ -20,7 +20,7 @@
     "mongoose-double": "0.0.1",
     "mongoose-float": "^1.0.2",
     "pluralize": "^6.0.0",
-    "strapi-utils": "^3.0.0-alpha.4.8"
+    "strapi-utils": "file:../strapi-utils"
   },
   "strapi": {
     "isHook": true
