@@ -115,6 +115,9 @@ module.exports = (scope, cb) => {
     })));
   }).join(',\n');
 
+  // Set collectionName
+  scope.collectionName = _.get(scope.args, 'collectionName', undefined);
+
   // Get default connection
   try {
     scope.connection = _.get(scope.args, 'connection') || JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json'))).defaultConnection || '';

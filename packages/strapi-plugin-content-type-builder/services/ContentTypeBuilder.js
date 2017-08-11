@@ -59,7 +59,7 @@ module.exports = {
     return _.compact(connections);
   },
 
-  generateAPI: (name, connection, attributes) => {
+  generateAPI: (name, connection, collectionName, attributes) => {
     return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
@@ -68,9 +68,10 @@ module.exports = {
         args: {
           api: name,
           attributes,
-          connection
+          connection,
+          collectionName: !_.isEmpty(collectionName) ? collectionName : undefined
         }
-      }
+      };
 
       generator(scope, {
         success: () => {

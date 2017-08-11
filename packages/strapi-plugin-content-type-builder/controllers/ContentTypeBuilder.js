@@ -25,14 +25,14 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, connection, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, connection, collectionName, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
 
     strapi.reload.isWatching = false;
 
-    await Service.generateAPI(name, connection, attributes);
+    await Service.generateAPI(name, connection, collectionName, attributes);
 
     const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
 
@@ -41,7 +41,6 @@ module.exports = {
     }
 
     try {
-      console.log(modelFilePath);
       const modelJSON = require(modelFilePath);
 
       modelJSON.attributes = Service.formatAttributes(attributes);

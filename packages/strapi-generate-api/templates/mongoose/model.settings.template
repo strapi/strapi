@@ -1,6 +1,6 @@
 {
   "connection": "<%= connection %>",
-  "collectionName": "<%= idPluralized %>",
+  "collectionName": "<%= collectionName || idPluralized %>",
   "attributes": {
     <%= attributes %>
   }
