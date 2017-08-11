@@ -601,7 +601,6 @@ module.exports = {
   getDatabases: env => {
     const databases = [];
 
-
     const databasesUsed = [];
     _.forEach(strapi.models, model => {
       databasesUsed.push(model.connection);
@@ -866,7 +865,9 @@ module.exports = {
       }
 
       _.forEach(connections, connection => {
-        usedConnectors.push(connection.connector);
+        if (_.get(connection, 'connector')) {
+          usedConnectors.push(connection.connector);
+        }
       });
     });
 
@@ -908,5 +909,46 @@ module.exports = {
     });
 
     return errors;
+  },
+
+  getModelPath: model => {
+    let searchFilePath;
+    const errors = [];
+    const searchFileName = `${model}.settings.json`;
+    const apiPath = path.join(strapi.config.appPath, 'api');
+
+    let apis;
+    try {
+      apis = fs.readdirSync(apiPath);
+
+      _.forEach(apis, api => {
+        const modelsPath = path.join(apiPath, api, 'models');
+
+        let models;
+        try {
+          models = fs.readdirSync(modelsPath);
+
+          const modelIndex = _.indexOf(_.map(models, model => _.toLower(model)), searchFileName);
+
+          if (modelIndex !== -1) searchFilePath = `${modelsPath}/${models[modelIndex]}`;
+        } catch (e) {
+          errors.push({
+            id: 'request.error.folder.read',
+            params: {
+              folderPath: modelsPath
+            }
+          });
+        }
+      });
+    } catch (e) {
+      errors.push({
+        id: 'request.error.folder.read',
+        params: {
+          folderPath: apiPath
+        }
+      });
+    }
+
+    return [searchFilePath, errors];
   }
 };
