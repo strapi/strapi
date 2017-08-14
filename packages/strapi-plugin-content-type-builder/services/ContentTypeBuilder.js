@@ -50,16 +50,10 @@ module.exports = {
   },
 
   getConnections: () => {
-    let connections = [];
-
-    _.forEach(_.keys(strapi.config.environments), env => {
-      connections = _.assign(connections, _.keys(strapi.config.environments[env].database.connections));
-    });
-
-    return _.compact(connections);
+    return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
-  generateAPI: (name, connection, collectionName, attributes) => {
+  generateAPI: (name, description, connection, collectionName, attributes) => {
     return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
@@ -67,6 +61,7 @@ module.exports = {
         rootPath: strapi.config.appPath,
         args: {
           api: name,
+          description,
           attributes,
           connection,
           collectionName: !_.isEmpty(collectionName) ? collectionName : undefined
@@ -124,13 +119,14 @@ module.exports = {
   },
 
   formatAttributes: attributes => {
+    const errors = [];
     const attrs = {};
 
     _.forEach(attributes, attribute => {
       if (_.has(attribute, 'params.type')) {
-        attrs[attribute.name] = _.get(attribute, 'params');
+        attrs[attribute.name] = attribute.params;
       } else if (_.has(attribute, 'params.target')) {
-        const relation = _.get(attribute, 'params');
+        const relation = attribute.params;
         const attr = {
           required: relation.required,
           columnName: relation.columnName,
@@ -143,8 +139,8 @@ module.exports = {
           case 'manyToOne':
             attr.model = relation.target;
             break;
-          case 'oneToMany':
           case 'manyToMany':
+          case 'oneToMany':
             attr.collection = relation.target;
             break;
           default:
@@ -152,9 +148,18 @@ module.exports = {
 
         attrs[attribute.name] = attr;
       }
+
+      if (!_.isNaN(parseFloat(attribute.name[0])) || !_.isNaN(parseFloat(_.get(attribute, 'params.key'), NaN))) {
+        errors.push({
+          id: 'request.error.attribute.values',
+          params: {
+            attribute
+          }
+        });
+      }
     });
 
-    return attrs;
+    return [attrs, errors];
   },
 
   clearRelations: model => {

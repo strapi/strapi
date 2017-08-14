@@ -205,6 +205,8 @@ module.exports = function (strapi) {
             _.forEach(definition.attributes, (details, name) => {
               const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
 
+              console.log("coucou", details, name);
+
               // Build associations key
               if (!_.isEmpty(verbose)) {
                 utilsModels.defineAssociations(globalName, definition, details, name);

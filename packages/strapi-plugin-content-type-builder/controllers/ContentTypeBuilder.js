@@ -25,14 +25,22 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, description, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
+    if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
+    if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
+
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+
+    if (!_.isEmpty(attributesErrors)) {
+      return ctx.badRequest(null, [{ messages: attributesErrors }]);
+    }
 
     strapi.reload.isWatching = false;
 
-    await Service.generateAPI(name, connection, collectionName, attributes);
+    await Service.generateAPI(name, description, connection, collectionName, []);
 
     const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
 
@@ -43,7 +51,7 @@ module.exports = {
     try {
       const modelJSON = require(modelFilePath);
 
-      modelJSON.attributes = Service.formatAttributes(attributes);
+      modelJSON.attributes = formatedAttributes;
 
       const clearRelationsErrors = Service.clearRelations(name);
 
@@ -73,9 +81,18 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, description, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
 
-    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
+    if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
+    if (!strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
+
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+
+    if (!_.isEmpty(attributesErrors)) {
+      return ctx.badRequest(null, [{ messages: attributesErrors }]);
+    }
 
     const [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
 
@@ -86,7 +103,10 @@ module.exports = {
     try {
       const modelJSON = require(modelFilePath);
 
-      modelJSON.attributes = Service.formatAttributes(attributes);
+      modelJSON.attributes = formatedAttributes;
+      modelJSON.description = description;
+      modelJSON.description = connection;
+      modelJSON.collectionName = collectionName;
 
       strapi.reload.isWatching = false;
 
@@ -112,7 +132,6 @@ module.exports = {
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }
     } catch (e) {
-      console.log(e);
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
   },
