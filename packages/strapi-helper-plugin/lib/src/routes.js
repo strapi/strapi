@@ -2,10 +2,9 @@
 // They are all wrapped in the App component, which should contain the navbar etc
 // See http://blog.mxstbr.com/2016/01/react-apps-with-pages for more information
 // about the code splitting business
-import { map } from 'lodash';
+import { camelCase, map } from 'lodash';
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import routes from 'routes.json'; // eslint-disable-line
-import { camelCase } from 'lodash';
 
 // Try to require a node module without throwing an error
 const tryRequire = (path) => {
