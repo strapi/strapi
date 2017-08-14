@@ -45,7 +45,7 @@ module.exports = (scope, cb) => {
     // ...
   }
 
-  logger.verbose('Copying the dashboard...');
+  logger.info('Copying the dashboard...');
 
   // Trigger callback with no error to proceed.
   return cb.success();

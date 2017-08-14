@@ -13,10 +13,6 @@ describe('logger', () => {
     assert(typeof strapi.log === 'object');
   });
 
-  it('`strapi.log.verbose` should be a function', () => {
-    assert(typeof strapi.log.verbose === 'function');
-  });
-
   it('`strapi.log.info` should be a function', () => {
     assert(typeof strapi.log.info === 'function');
   });

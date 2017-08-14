@@ -9,6 +9,5 @@
     "url",
     "tld"
   ],
-  "locales": ["en_US", "fr_FR"],
   "cookieName": "locale"
 }

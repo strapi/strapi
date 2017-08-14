@@ -69,16 +69,12 @@ const strapi = require('../lib/');
       assert(typeof strapi.middleware.parser.load.initialize === 'function');
     });
 
-    it('`strapi.middleware.proxy` should be a function', () => {
-      assert(typeof strapi.middleware.proxy.load.initialize === 'function');
-    });
-
     it('`strapi.middleware.public` should be a function', () => {
       assert(typeof strapi.middleware.public.load.initialize === 'function');
     });
 
     it('`strapi.middleware.responses` should not be a function', () => {
-      assert(typeof strapi.middleware.responses === "undefined");
+      assert(typeof strapi.middleware.responses.load.initialize === "function");
     });
 
     it('`strapi.middleware.responseTime` should be a function', () => {
@@ -91,10 +87,6 @@ const strapi = require('../lib/');
 
     it('`strapi.middleware.session` should be a function', () => {
       assert(typeof strapi.middleware.session.load.initialize === 'function');
-    });
-
-    it('`strapi.middleware.ssl` should be a function', () => {
-      assert(typeof strapi.middleware.ssl.load.initialize === 'function');
     });
 
     it('`strapi.middleware.xframe` should be a function', () => {
