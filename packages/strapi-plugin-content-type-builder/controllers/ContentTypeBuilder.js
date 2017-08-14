@@ -25,7 +25,7 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, connection, collectionName, attributes = [] } = ctx.request.body;
+    const { name, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
@@ -73,7 +73,7 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, attributes = [] } = ctx.request.body;
+    const { name, attributes = [] } = JSON.parse(ctx.request.body);
 
     if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
@@ -84,7 +84,7 @@ module.exports = {
     }
 
     try {
-      const modelJSON = JSON.parse(require(modelFilePath));
+      const modelJSON = require(modelFilePath);
 
       modelJSON.attributes = Service.formatAttributes(attributes);
 
@@ -112,6 +112,7 @@ module.exports = {
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }
     } catch (e) {
+      console.log(e);
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
   },

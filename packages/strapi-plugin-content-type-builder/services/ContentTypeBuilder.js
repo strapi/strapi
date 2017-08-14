@@ -33,7 +33,7 @@ module.exports = {
           target: relation.model || relation.collection,
           key: relation.via,
           nature: relation.nature
-        }
+        };
       }
 
       attributes.push({
@@ -120,7 +120,6 @@ module.exports = {
       });
     }
 
-
     return [searchFilePath, errors];
   },
 
@@ -133,6 +132,9 @@ module.exports = {
       } else if (_.has(attribute, 'params.target')) {
         const relation = _.get(attribute, 'params');
         const attr = {
+          required: relation.required,
+          columnName: relation.columnName,
+          unique: relation.unique,
           via: relation.key
         };
 
@@ -255,6 +257,7 @@ module.exports = {
 
                   _.forEach(relationsToCreate, ({ name, params }) => {
                     const attr = {
+                      columnName: params.targetColumnName,
                       via: name
                     };
 
