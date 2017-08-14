@@ -19,7 +19,7 @@ import NotificationProvider from 'containers/NotificationProvider';
 import configureStore from './store';
 
 // Import i18n messages
-import { translationMessages } from './i18n';
+import { translationMessages, languages } from './i18n';
 
 // Import the CSS reset, which HtmlWebpackPlugin transfers to the build folder
 import 'sanitize.css/sanitize.css';
@@ -175,6 +175,7 @@ window.Strapi = {
     },
   }),
   router: browserHistory,
+  languages,
 };
 
 const dispatch = store.dispatch;

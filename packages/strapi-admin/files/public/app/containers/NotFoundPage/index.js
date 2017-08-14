@@ -10,15 +10,13 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { defineMessages, FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 import { Link } from 'react-router';
 import messages from './messages.json';
-import { define } from '../../i18n';
-define(messages);
+defineMessages(messages);
 
 export default class NotFound extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
   render() {
     return (
       <div className={styles.notFound}>
