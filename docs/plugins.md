@@ -43,12 +43,12 @@ A plugin can have an API, which can be used exactly the same way that an API gen
 The API logic of a plugin is located in `./plugins/content-manager`.
 
 The folders and files structure is the following:
+ - `admin`: contains the files related to the display in the admin panel
  - `config`: contains the config of the plugin
   - `routes.json`: contains the list of routes of the plugin API
  - `controllers`: contains the controllers of the plugin API
  - `models`: contains the models of the plugin API
  - `services`: contains the services of the plugin API
- - `admin`: contains the files related to the display in the admin panel
 
 #### Routes
 
