@@ -55,24 +55,20 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
             </button>
           )}
         </FormattedMessage>;
-    const spacer = this.props.active ? <div className={this.props.liStyles.liSpacer} /> : '';
-    const borderPosition = this.props.active ? '-.3rem' : '-.6rem';
 
     return (
       <li>
-        <div className={this.props.liStyles.hovered} />
-        {spacer}
-        <div className={this.props.liStyles.flexLi}>
+        <div className={this.props.liStyles.hoveredLanguage} />
+        <div style={{ marginTop: '.2rem'}} />
+        <div className={`${this.props.liStyles.borderBottom} ${this.props.liStyles.flexLi}`}>
           <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>
             <div><span className={`flag-icon flag-icon-${flag}`} /></div>
             <div className={`${this.props.liStyles.label} ${this.props.liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
-          <div className="text-center" style={{ width: '4rem'}}>{this.props.name}</div>
+          <div className="text-center" style={{ width: '8rem'}}>{this.props.name}</div>
           <div className={this.props.liStyles.centered}>{languageLabel}</div>
           <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
-          <div className={this.props.liStyles.borderBottom} />
         </div>
-        <div className={this.props.liStyles.borderBottom} style={{ margin: `${borderPosition} 4.8rem 0 2.8rem`}} />
 
         <div>
           <PopUpWarning

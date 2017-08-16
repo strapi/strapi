@@ -31,49 +31,39 @@
 }
 
 .ulContainer {
-  padding-top: 1rem;
+  padding-top: 1.3rem;
   margin: 0 3.3rem;
   background-color: #FFFFFF;
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
   > ul {
     list-style: none;
     padding: 0;
-
     > li {
-      line-height: 5.2rem;
       height: 5.2rem;
+      line-height: 5.2rem;
+      font-size: 1.3rem;
       position: relative;
-      border-bottom: 1px solid transparent;
-      &:after {
-        padding-top: 0;
+      // margin-top: 0!important;
+      // &:hover {
+      //   background-color: rgba(14,22,34,0.03);
+      // }
+      &:last-child .borderBottom {
+        border-bottom: none;
       }
-      &:last-of-type {
-        border: none;
-      }
-      &:hover {
-        .hovered {
-          position: absolute;
-          top: -.2rem;
-          height: 5.3rem;
-          margin-right: 13rem!important;
-          width: 100%;
+      .hoveredLanguage {
+        position: absolute;
+        top: -.2rem;
+        height: 5.4rem;
+
+        width: 100%;
+        &:hover {
           background-color: rgba(14,22,34,0.03);
         }
       }
     }
-    >li:first-child {
-      padding-top: .3rem;
-      padding-bottom: 5.1rem;
-      height: 5.2rem;
-      line-height: 5.2rem;
-      .hovered {
-        top: .1rem!important;
-      }
-    }
-
-    > li:last-child .borderBottom {
-      border-top: none;
-    }
+    // > li:not(:first-child) {
+    //   padding-top: .2rem;
+    // }
   }
 }
 
@@ -83,7 +73,8 @@
 }
 
 .borderBottom {
-  border-top: 1px solid rgba(14,22,34,0.04);
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+
 }
 
 .flexLi {
@@ -108,7 +99,9 @@
 }
 
 .label {
-  width: 20rem;
+  width: 15rem;
+  height: 5.2rem;
+  line-height: 5.2rem;
   margin-left: 5rem;
   color: #333740;
   font-weight: 600;
@@ -120,16 +113,10 @@
 }
 
 .centered {
-  width: 20rem;
+  width: 25rem;
   text-align: right;
   > button {
-    padding-right: 0;
-    padding-top: .2rem;
-    &:first-child {
-    }
-    > div {
-      padding-top: .2rem;
-    }
+    padding: 0;
   }
 }
 
@@ -146,6 +133,7 @@
 .normal {
   font-family: Lato;
   color: #1C5DE7;
+  cursor: pointer;
 }
 
 .primary {
@@ -274,7 +262,7 @@
 
 
 .squared {
-  margin-top: 1.5rem;
+  margin-top: 1.6rem;
   height: 2rem;
   width: 3.5rem;
   padding-top: .2rem;
@@ -303,6 +291,7 @@
 
 .trashContainer {
   margin-left: 4rem;
+  cursor: pointer;
 }
 
 .spacer {
@@ -323,12 +312,14 @@
   }
 }
 
+
+
 .databaseFont {
   font-size: 1.3rem;
   &:hover {
     .hovered {
       position: absolute;
-      top: -.5rem!important;
+      top: 0rem!important;
       height: 5.2rem;
       margin-right: 13rem!important;
       width: 100%;
@@ -339,6 +330,9 @@
 
 .flagContainer {
   margin-left: 1rem;
+  margin-right: 10rem;
+  height: 5.2rem;
+  line-height: 5.2rem;
 }
 
 .bottomSpacer {

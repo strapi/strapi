@@ -68,13 +68,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             {this.props.data.host}
           </div>
           <div className={styles.centered} style={{ width: '8rem'}}>{this.props.data.database}</div>
-          <div className={styles.flexed} style={{ minWidth: '4rem', justifyContent: 'space-between'}}>
+          <div className={styles.flexed} style={{ minWidth: '3rem', justifyContent: 'space-between'}}>
 
             <div className={styles.ico}><i className="fa fa-pencil" id={this.props.data.name} /></div>
             <div className={`${styles.leftSpaced} ${styles.ico}`}><i id="trash" className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
-        <div className={styles.borderBottom} style={{ margin: `-.4rem 4.8rem 0 2.8rem`}} />
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={styles.modalPosition}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder} ${styles.padded} ${styles.mHeader}`}>

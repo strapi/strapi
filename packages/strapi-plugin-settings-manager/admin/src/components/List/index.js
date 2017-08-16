@@ -92,7 +92,6 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               );
             })}
           </ul>
-          <div className={styles.bottomSpacer} />
         </div>
 
         {/*  </div> */}
