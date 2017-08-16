@@ -1,0 +1,58 @@
+/**
+ *
+ * This component is the skeleton around the actual pages, and should only
+ * contain code that should be seen on all pages. (e.g. navigation bar)
+ *
+ */
+
+import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { pluginId } from 'app';
+import { modelsFetch } from './actions';
+
+class App extends React.Component {
+  componentDidMount() {
+    this.props.modelsFetch();
+  }
+
+  render() {
+    // Assign plugin component to children
+    const content = React.Children.map(this.props.children, child =>
+      React.cloneElement(child, {
+        exposedComponents: this.props.exposedComponents,
+      })
+    );
+
+    return (
+      <div className={pluginId}>
+        {React.Children.toArray(content)}
+      </div>
+    );
+  }
+}
+
+App.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
+App.propTypes = {
+  children: React.PropTypes.node,
+  exposedComponents: React.PropTypes.object.isRequired,
+  modelsFetch: React.PropTypes.func,
+};
+
+export function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      modelsFetch,
+    },
+    dispatch
+  )
+}
+
+const mapStateToProps = createStructuredSelector({});
+
+// Wrap the component to inject dispatch and state into it
+export default connect(mapStateToProps, mapDispatchToProps)(App);
