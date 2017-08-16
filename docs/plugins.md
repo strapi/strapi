@@ -192,7 +192,7 @@ The admin panel is a [React](https://facebook.github.io/react/) application whic
 To start the project in development mode:
  - Open a new tab in you terminal
  - Move to the `./plugins/my-plugin` folder
- - For the moment `npm link strapi-helper-plugin`
+ - For now `npm link strapi-helper-plugin`
  - Install the dependencies: `npm install`
  - Start the project: `npm start`
  - Open the admin panel in your web browser: [http://localhost:1337](http://localhost:1337)
