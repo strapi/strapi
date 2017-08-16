@@ -43,27 +43,19 @@
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
-      // margin-top: 0!important;
-      // &:hover {
-      //   background-color: rgba(14,22,34,0.03);
-      // }
       &:last-child .borderBottom {
         border-bottom: none;
       }
-      .hoveredLanguage {
-        position: absolute;
-        top: -.2rem;
-        height: 5.4rem;
-
-        width: 100%;
-        &:hover {
+      &:hover {
+        .hoveredLanguage {
+          position: absolute;
+          top: -.2rem;
+          height: 5.4rem;
+          width: 100%;
           background-color: rgba(14,22,34,0.03);
         }
       }
     }
-    // > li:not(:first-child) {
-    //   padding-top: .2rem;
-    // }
   }
 }
 
