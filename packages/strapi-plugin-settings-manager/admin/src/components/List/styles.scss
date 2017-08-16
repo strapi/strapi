@@ -7,7 +7,7 @@
   padding: 1rem 2.8rem 0rem 2.8rem;
   border-radius: 0.2rem;
   background-color: #FFFFFF;
-  // background-color: red;
+
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
 }
 
@@ -19,7 +19,6 @@
   display: flex;
   justify-content: space-between;
   margin-top: 0.8rem;
-  // margin-bottom: 2.5rem;
 }
 
 .titleContainer {
@@ -35,25 +34,31 @@
   padding-top: 1rem;
   margin: 0 3.3rem;
   background-color: #FFFFFF;
-  // background-color: red;
   box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
   > ul {
     list-style: none;
     padding: 0;
-    // .borderBottom {
-    //   &:last-child{
-    //     border-bottom: none;
-    //   }
+
     > li {
       line-height: 5.2rem;
       height: 5.2rem;
-
+      position: relative;
       border-bottom: 1px solid transparent;
+      &:after {
+        padding-top: 0;
+      }
       &:last-of-type {
         border: none;
       }
       &:hover {
-        background-color: rgba(14,22,34,0.03);
+        .hovered {
+          position: absolute;
+          top: -.2rem;
+          height: 5.3rem;
+          margin-right: 13rem!important;
+          width: 100%;
+          background-color: rgba(14,22,34,0.03);
+        }
       }
     }
     >li:first-child {
@@ -61,6 +66,9 @@
       padding-bottom: 5.1rem;
       height: 5.2rem;
       line-height: 5.2rem;
+      .hovered {
+        top: .1rem!important;
+      }
     }
 
     > li:last-child .borderBottom {
@@ -68,6 +76,7 @@
     }
   }
 }
+
 
 .liSpacer {
   height: .2rem!important;
@@ -116,9 +125,7 @@
   > button {
     padding-right: 0;
     padding-top: .2rem;
-    // margin-top: .1rem;
     &:first-child {
-      // margin-top: .1rem;
     }
     > div {
       padding-top: .2rem;
@@ -133,12 +140,12 @@
   height: 100%;
   height: 5.2rem;
   line-height: 5.2rem;
+  padding-right: .3rem;
 }
 
 .normal {
   font-family: Lato;
   color: #1C5DE7;
-  // padding-top: 0rem;
 }
 
 .primary {
@@ -181,6 +188,15 @@
   margin-left: 3rem;
   margin-right: 3rem;
   border-bottom: 1px solid #F6F6F6;
+}
+
+.dbHost {
+  width: 22rem;
+  text-align: center;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .noBorder {
@@ -309,6 +325,16 @@
 
 .databaseFont {
   font-size: 1.3rem;
+  &:hover {
+    .hovered {
+      position: absolute;
+      top: -.5rem!important;
+      height: 5.2rem;
+      margin-right: 13rem!important;
+      width: 100%;
+      background-color: rgba(14,22,34,0.03);
+    }
+  }
 }
 
 .flagContainer {

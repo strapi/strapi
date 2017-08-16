@@ -57,8 +57,10 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
         </FormattedMessage>;
     const spacer = this.props.active ? <div className={this.props.liStyles.liSpacer} /> : '';
     const borderPosition = this.props.active ? '-.3rem' : '-.6rem';
+
     return (
       <li>
+        <div className={this.props.liStyles.hovered} />
         {spacer}
         <div className={this.props.liStyles.flexLi}>
           <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>

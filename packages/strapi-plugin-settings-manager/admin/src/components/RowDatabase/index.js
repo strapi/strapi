@@ -29,9 +29,11 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  showDatabaseModal = () => {
-    this.setState({ modal: !this.state.modal });
-    this.props.getDatabase(this.props.data.name);
+  showDatabaseModal = (e) => {
+    if (e.target.id !== 'trash') {
+      this.setState({ modal: !this.state.modal });
+      this.props.getDatabase(this.props.data.name);
+    }
   }
 
   toggle = () => {
@@ -52,8 +54,9 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     return (
-      <li className={styles.databaseFont} style={{ cursor: 'pointer'}} >
-        <div style={{ position: 'absolute', width: '73rem', height: '5.2rem'}} onClick={this.showDatabaseModal}></div>
+      <li className={styles.databaseFont} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
+        <div className={styles.hovered} />
+
         <div className={styles.flexLi}>
           <div className={styles.flexed}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
@@ -61,12 +64,14 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             </div>
             <div className={styles.label} style={{ fontWeight: '500'}}>{this.props.data.name}</div>
           </div>
-          <div onClick={this.showDatabaseModal}>{this.props.data.host}</div>
-          <div className={styles.centered} style={{ width: '15rem'}} onClick={this.showDatabaseModal}>{this.props.data.database}</div>
-          <div className={styles.flexed} style={{ width: '4rem', justifyContent: 'space-between'}}>
+          <div className={styles.dbHost}>
+            {this.props.data.host}
+          </div>
+          <div className={styles.centered} style={{ width: '8rem'}}>{this.props.data.database}</div>
+          <div className={styles.flexed} style={{ minWidth: '4rem', justifyContent: 'space-between'}}>
 
-            <div className={styles.ico}><i className="fa fa-pencil" onClick={this.showDatabaseModal} id={this.props.data.name} /></div>
-            <div className={`${styles.leftSpaced} ${styles.ico}`}><i id={this.props.data.name} className="fa fa-trash" onClick={this.toggleWarning} /></div>
+            <div className={styles.ico}><i className="fa fa-pencil" id={this.props.data.name} /></div>
+            <div className={`${styles.leftSpaced} ${styles.ico}`}><i id="trash" className="fa fa-trash" onClick={this.toggleWarning} /></div>
           </div>
         </div>
         <div className={styles.borderBottom} style={{ margin: `-.4rem 4.8rem 0 2.8rem`}} />
