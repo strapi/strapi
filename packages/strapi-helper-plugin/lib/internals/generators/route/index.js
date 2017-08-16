@@ -9,12 +9,8 @@ const routesFilePath = path.resolve(process.cwd(), 'admin', 'src', 'routes.json'
 const componentExists = require('../utils/componentExists');
 
 // Generate the update file content
-const generateUpdatedFileContent = (data) => {
-  // Check if the file is existing or not
-  const routesFilesExists = fs.existsSync(routesFilePath);
-
-  // Read file
-  const fileContent = routesFilesExists ? JSON.parse(fs.readFileSync(routesFilePath, 'utf8')) : {};
+const generateUpdatedFileContent = (data, existingContent) => {
+  const fileContent = existingContent || {};
 
   // Add new route
   const updatedFileContent = fileContent;
@@ -55,18 +51,53 @@ module.exports = {
   actions: (data) => {
     const replaceFile = () => {
       // Check if the file is existing or not
-      const routesFilesExists = fs.existsSync(routesFilePath);
+      let routesFilesStats;
+      try {
+        routesFilesStats = fs.statSync(routesFilePath);
+      } catch (error) {
+        routesFilesStats = false;
+      }
+      const routesFilesExists = routesFilesStats && routesFilesStats.isFile();
+
+      // Read the file content
+      let existingContent = {};
+      if (routesFilesExists) {
+        try {
+          existingContent = fs.readFileSync(routesFilePath, 'utf8');
+        } catch (error) {
+          existingContent = false;
+          console.log('Unable to read existing `admin/src/routes.json` file content.');
+        }
+
+        try {
+          existingContent = JSON.parse(existingContent);
+        } catch (error) {
+          existingContent = false;
+          console.log('Unable to parse existing `admin/src/routes.json` file content.');
+        }
+      }
 
       // Generate updated content
-      const updatedContent = generateUpdatedFileContent(data);
+      const updatedContent = generateUpdatedFileContent(data, existingContent || {});
 
       // Delete the file if existing
       if (routesFilesExists) {
-        fs.unlinkSync(routesFilePath);
+        try {
+          fs.unlinkSync(routesFilePath);
+        } catch (error) {
+          console.log('Unable to remove `admin/src/routes.json` file.');
+          throw error;
+        }
       }
 
       // Write the new file
-      fs.writeFileSync(routesFilePath, JSON.stringify(updatedContent, null, 2), 'utf8');
+      try {
+        fs.writeFileSync(routesFilePath, JSON.stringify(updatedContent, null, 2), 'utf8');
+        console.log('File `admin/src/routes.json` successfully written.');
+      } catch (error) {
+        console.log('Unable to write `admin/src/routes.json` file.');
+        throw error;
+      }
     };
 
     return [replaceFile];
