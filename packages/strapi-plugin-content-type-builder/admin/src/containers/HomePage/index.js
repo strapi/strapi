@@ -22,7 +22,7 @@ import styles from './styles.scss';
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
 
   handleClick = () => {
-    console.log(this.props.homePage);
+    console.log('ici', this.props.homePage);
   }
 
   render() {
