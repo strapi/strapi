@@ -9,8 +9,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { map } from 'lodash';
 import { pluginId } from 'app';
+import { define } from 'i18n';
+import messages from '../../translations/en.json';
+import styles from './styles.scss';
 import { modelsFetch } from './actions';
+
+define(map(messages, (message, id) => ({
+  id,
+  defaultMessage: message,
+}
+)));
 
 class App extends React.Component {
   componentDidMount() {
@@ -26,7 +36,7 @@ class App extends React.Component {
     );
 
     return (
-      <div className={pluginId}>
+      <div className={`${pluginId} ${styles.app}`}>
         {React.Children.toArray(content)}
       </div>
     );

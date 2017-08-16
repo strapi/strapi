@@ -8,96 +8,67 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { injectIntl } from 'react-intl';
-import { pluginId, pluginName, pluginDescription } from 'app';
-import Button from 'components/Button';
+import { size } from 'lodash';
+import Helmet from 'react-helmet';
+import { makeSelectLoading, makeSelectModels } from 'containers/App/selectors';
 
-import { loadData } from './actions';
-// import { makeSelectModels } from 'containers/App/selectors';
-import { makeSelectLoading, makeSelectData } from './selectors';
+// Design
+import ContentHeader from 'components/ContentHeader';
+import EmptyContentTypeView from 'components/EmptyContentTypeView';
+
+import selectHomePage from './selectors';
 import styles from './styles.scss';
 
-export class HomePage extends React.Component {
-  generateDataBlock() {
-    let dataBlock;
-    if (this.props.data) {
-      const items = this.props.data.map((item, i) => <li key={i}>{item}</li>);
-      dataBlock = (
-        <div>
-          <p>Data:</p>
-          <ul>{items}</ul>
-        </div>
-      );
-    }
-    return dataBlock;
+export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
+  handleClick = () => {
+    console.log(this.props.homePage);
   }
 
   render() {
-    // Generate the data block
-    const dataBlock = this.generateDataBlock();
+    if (this.props.modelsLoading) return <div />;
 
-    // Plugin header config
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
-    const pluginHeaderTitle = pluginName;
-    const pluginHeaderDescription = pluginDescription;
+    const component = size(this.props.models) === 0 ? <EmptyContentTypeView handleClick={this.handleClick} /> : <div />;
 
     return (
       <div className={styles.homePage}>
-        <PluginHeader
-          title={{
-            id: `${pluginId}-title`,
-            defaultMessage: pluginHeaderTitle,
-          }}
-          description={{
-            id: `${pluginId}-description`,
-            defaultMessage: pluginHeaderDescription,
-          }}
+        <Helmet
+          title="HomePage"
+          meta={[
+            { name: 'description', content: 'Description of HomePage' },
+          ]}
         />
-        <div className="row">
-          <div className="col-md-12">
-            <p>This is an example of a fake API call.</p>
-            <p>Loading: {this.props.loading ? 'yes' : 'no'}.</p>
-            {dataBlock}
-            <Button
-              label={this.props.loading ? 'Loading...' : 'Submit'}
-              disabled={this.props.loading}
-              onClick={this.props.loadData}
-            />
-          </div>
-        </div>
+        <ContentHeader
+          name={'home.contentTypeBuilder.name'}
+          description={'home.contentTypeBuilder.description'}
+          noMargin
+        />
+        {component}
       </div>
     );
   }
 }
 
-HomePage.contextTypes = {
-  router: React.PropTypes.object.isRequired,
-};
-
-HomePage.propTypes = {
-  data: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.object,
-  ]),
-  exposedComponents: React.PropTypes.object.isRequired,
-  loadData: React.PropTypes.func.isRequired,
-  loading: React.PropTypes.bool.isRequired,
-};
+const mapStateToProps = createStructuredSelector({
+  homePage: selectHomePage(),
+  modelsLoading: makeSelectLoading(),
+  models: makeSelectModels(),
+});
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    {
-      loadData,
-    },
+    {},
     dispatch,
   );
-}
+};
 
-const mapStateToProps = createStructuredSelector({
-  loading: makeSelectLoading(),
-  data: makeSelectData(),
-});
+HomePage.propTypes =  {
+  homePage: React.PropTypes.object.isRequired,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.array,
+  ]),
+  modelsLoading: React.PropTypes.bool,
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  injectIntl(HomePage)
-);
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

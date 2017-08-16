@@ -13,7 +13,7 @@ const makeSelectLoading = () => createSelector(
 
 const makeSelectModels = () => createSelector(
  selectGlobalDomain(),
- (globalSate) => globalSate.get('models'),
+ (globalSate) => globalSate.get('models').toJS(),
 );
 
 const selectLocationState = () => {

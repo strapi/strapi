@@ -14,7 +14,7 @@ export function* fetchModels() {
     yield put(modelsFetchSucceeded(data));
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error('notification.error.message')
   }
 }
 

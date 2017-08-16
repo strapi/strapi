@@ -1,1 +1,10 @@
-{}
+{
+  "home.contentTypeBuilder.name": "Content Types",
+  "home.contentTypeBuilder.description": "Créez, éditer vos models.",
+  "home.emptyContentType.title": "Il n'y a pas de model disponible",
+  "home.emptyContentType.description": "Créez votre premier model....",
+
+  "button.contentType.create": "Créer un modèle",
+
+  "notification.error.message": "Une erreur est survenue"
+}

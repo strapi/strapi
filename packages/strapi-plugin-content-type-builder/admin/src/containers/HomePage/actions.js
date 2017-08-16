@@ -4,17 +4,12 @@
  *
  */
 
-import { LOAD_DATA, LOADED_DATA } from './constants';
+import {
+  DEFAULT_ACTION,
+} from './constants';
 
-export function loadData() {
+export function defaultAction() {
   return {
-    type: LOAD_DATA,
-  };
-}
-
-export function loadedData(data) {
-  return {
-    type: LOADED_DATA,
-    data,
+    type: DEFAULT_ACTION,
   };
 }

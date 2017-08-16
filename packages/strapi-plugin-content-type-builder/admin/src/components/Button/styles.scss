@@ -1,3 +1,49 @@
 .button {
+  height: 3rem;
+  border-radius: 0.3rem;
+  text-transform: capitalize;
+  margin-right: 1.8rem;
+  cursor: pointer;
+  font-family: Lato;
+  &:focus {
+    outline: 0;
+  }
+  > i {
+    margin-right: 1.3rem;
+  }
+}
 
+.buttonLg {
+  width: 15rem;
+}
+
+.buttonMd {
+  width: 10rem;
+}
+
+.primary {
+  font-weight: 500;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+}
+
+.secondary {
+  // height: 32px !important;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.secondaryAddType {
+  height: 2.6rem;
+  color: #1C5DE7;
+  line-height: 1.6rem;
+  border: 0.1rem solid #1C5DE7;
+  font-weight: 500;
+  font-size: 1.3rem;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
 }

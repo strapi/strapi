@@ -1,1 +1,10 @@
-{}
+{
+  "home.contentTypeBuilder.name": "Content Types",
+  "home.contentTypeBuilder.description": "Create, update you own content types.",
+  "home.emptyContentType.title": "There is no Content Type Available",
+  "home.emptyContentType.description": "Create your first Content Type to be able to retrieve data from your API.",
+
+  "button.contentType.create": "Create Content Type",
+
+  "notification.error.message": "An error occured"
+}
