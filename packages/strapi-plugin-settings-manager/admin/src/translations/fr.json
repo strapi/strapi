@@ -73,7 +73,7 @@
   "form.security.item.csrf.enabled": "Activer CSRF",
   "form.security.item.csrf.key": "form.security.item.csrf.key",
   "form.security.item.csrf.secret": "form.security.item.csrf.secret",
-  "form.security.item.csrf.cookie": "form.security.item.csrf.cookieeee",
+  "form.security.item.csrf.cookie": "form.security.item.csrf.cookie",
   "form.security.item.csrf.angular": "form.security.item.csrf.angular",
   "form.security.item.p3p.enabled": "Activer P3P",
   "form.security.item.hsts.enabled": "Activer HOSTS",
