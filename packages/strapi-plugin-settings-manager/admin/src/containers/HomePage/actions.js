@@ -6,6 +6,7 @@
 
 import { includes, forEach, has, remove, get, split } from 'lodash';
 import { getInputsValidationsFromConfigs } from '../../utils/inputValidations';
+import translations from '../../translations/en.json';
 import {
   CONFIG_FETCH,
   LANGUAGES_FETCH,
@@ -98,7 +99,7 @@ export function languagesFetchSucceeded(appLanguages, listLanguages) {
   forEach(selectOptionsObject.items, (item) => {
     selectOptions.options.push({
       value: item.value,
-      label: item.name,
+      label: translations[item.name],
     });
   });
 

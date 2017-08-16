@@ -103,7 +103,9 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     // custom handleChange props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
-    const hiddenLabel = includes(props.name, 'enabled');
+    let hiddenLabel = includes(props.name, 'enabled');
+
+    if (includes(config.showInputLabel, props.name)) hiddenLabel = false;
 
     const errorIndex = findIndex(this.props.formErrors, ['target', props.target]);
     const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];

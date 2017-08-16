@@ -228,7 +228,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const body = this.sendUpdatedParams();
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
-    if (isEmpty(body)) return window.Strapi.notification.info('Settings are equals');
+    if (isEmpty(body)) return window.Strapi.notification.info('{ id: strapi.notification.info.settingsEqual }');
     if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl);
     } else {
@@ -241,7 +241,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
-    if (isEmpty(body)) return window.Strapi.notification.info('Settings are equals');
+    if (isEmpty(body)) return window.Strapi.notification.info('{ id: strapi.notification.info.settingsEqual }');
 
     if (isEmpty(formErrors)) {
       this.props.databaseEdit(body, apiUrl);
@@ -254,7 +254,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = (dbName) => {
-    window.Strapi.notification.success('Deleting database');
+    window.Strapi.notification.success('{ id: strapi.notification.success.databaseDelete}');
     this.props.databaseDelete(dbName, this.props.params.env);
   }
 
