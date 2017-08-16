@@ -2,10 +2,10 @@
 @import "../../styles/variables/variables";
 
 .link {
-  padding-top: 1rem;
-  padding-bottom: 0.2rem;
+  padding-top: .8rem;
+  padding-bottom: 0.4rem;
   padding-left: 1.6rem;
-  min-height: 4rem;
+  min-height: 3.6rem;
   border-left: 0.3rem solid transparent;
   cursor: pointer;
   color: $left-menu-link-color;
@@ -13,17 +13,15 @@
   display: block;
 
   &:hover {
+    color: $white;
     background: $left-menu-link-hover;
     border-left: 0.3rem solid $strapi-blue;
-  }
-
-  &:hover {
-    color: $left-menu-link-color;
     text-decoration: none;
   }
 }
 
 .linkActive {
+  color: $white;
   border-left: 0.3rem solid $strapi-blue;
 }
 
@@ -32,8 +30,9 @@
   margin-right: 1.2rem;
   vertical-align: middle;
   font-size: 1.2rem;
-  width: 1.2rem;
-  padding-bottom: 0.4rem;
+  width: 1.4rem;
+  height: 1.2rem;
+  padding-bottom: 0.2rem;
   text-align: center;
 }
 
