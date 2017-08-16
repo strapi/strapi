@@ -3,7 +3,7 @@
   "version": "3.0.0-alpha.4.8",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
-    "name": "settings-manager",
+    "name": "Settings Manager",
     "icon": "ion-document-text",
     "description": "Description of settings-manager plugin."
   },
