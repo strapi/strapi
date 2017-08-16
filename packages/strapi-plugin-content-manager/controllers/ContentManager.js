@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 /**
  * A set of functions called "actions" for `ContentManager`
  */

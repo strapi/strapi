@@ -7,7 +7,12 @@
 
 import { reduce } from 'lodash';
 
-import { pluginId } from 'app';
+// Plugin identifier based on the package.json `name` value
+const pluginPkg = require('../../../../package.json');
+const pluginId = pluginPkg.name.replace(
+  /^strapi-plugin-/i,
+  ''
+);
 
 /**
  * Add plugin identifier as translation message prefix,
@@ -27,7 +32,7 @@ const formatMessages = messages => reduce(messages, (result, value, key) => {
  *
  * @param language {String}
  */
-const requireTranslations = async language => {
+const requireTranslations = language => {
   try {
     return require(`translations/${language}.json`);
   } catch (error) {
@@ -45,6 +50,5 @@ const translationMessages = reduce(window.Strapi.languages, (result, language) =
   obj[language] = formatMessages(messages);
   return obj;
 }, {});
-console.log(translationMessages);
 
 export { translationMessages };

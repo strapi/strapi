@@ -18,7 +18,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
             key={k}
             icon={sectionLink.get('icon') || 'link'}
             label={sectionLink.get('label')}
-            destination={`/plugins/${plugin.get('id')}${sectionLink.get('destination')}`}
+            destination={`/plugins/${plugin.get('id')}/${sectionLink.get('destination')}`}
           />
         ));
 
