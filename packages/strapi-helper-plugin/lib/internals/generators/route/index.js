@@ -2,38 +2,35 @@
  * Route Generator
  */
 const fs = require('fs');
+const path = require('path');
+
+const routesFilePath = path.resolve(process.cwd(), 'admin', 'src', 'routes.json');
 
 const componentExists = require('../utils/componentExists');
 
-function reducerExists(comp) {
-  try {
-    fs.accessSync(`src/containers/${comp}/reducer.js`, fs.F_OK);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
+// Generate the update file content
+const generateUpdatedFileContent = (data) => {
+  // Check if the file is existing or not
+  const routesFilesExists = fs.existsSync(routesFilePath);
 
-function sagasExists(comp) {
-  try {
-    fs.accessSync(`src/containers/${comp}/sagas.js`, fs.F_OK);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
+  // Read file
+  const fileContent = routesFilesExists ? JSON.parse(fs.readFileSync(routesFilePath, 'utf8')) : {};
 
-function trimTemplateFile(template) {
-  // Loads the template file and trims the whitespace and then returns the content as a string.
-  return fs.readFileSync(`internals/generators/route/${template}`, 'utf8').replace(/\s*$/, '');
-}
+  // Add new route
+  const updatedFileContent = fileContent;
+  updatedFileContent[data.path] = {
+    container: data.container,
+  };
+
+  return updatedFileContent;
+};
 
 module.exports = {
   description: 'Add a route',
   prompts: [{
     type: 'input',
-    name: 'component',
-    message: 'Which component should the route show?',
+    name: 'container',
+    message: 'Which container should the route show?',
     validate: (value) => {
       if ((/.+/).test(value)) {
         return componentExists(value) ? true : `"${value}" doesn't exist.`;
@@ -55,27 +52,23 @@ module.exports = {
     },
   }],
 
-  // Add the route to the routes.js file above the error route
-  // TODO smarter route adding
   actions: (data) => {
-    const actions = [];
-    if (reducerExists(data.component)) {
-      data.useSagas = sagasExists(data.component); // eslint-disable-line no-param-reassign
-      actions.push({
-        type: 'modify',
-        path: '../../../../../admin/src/routes.js',
-        pattern: /(\s{\n\s{0,}path: '\*',)/g,
-        template: trimTemplateFile('routeWithReducer.hbs'),
-      });
-    } else {
-      actions.push({
-        type: 'modify',
-        path: '../../../../../admin/src/routes.js',
-        pattern: /(\s{\n\s{0,}path: '\*',)/g,
-        template: trimTemplateFile('route.hbs'),
-      });
-    }
+    const replaceFile = () => {
+      // Check if the file is existing or not
+      const routesFilesExists = fs.existsSync(routesFilePath);
 
-    return actions;
+      // Generate updated content
+      const updatedContent = generateUpdatedFileContent(data);
+
+      // Delete the file if existing
+      if (routesFilesExists) {
+        fs.unlinkSync(routesFilePath);
+      }
+
+      // Write the new file
+      fs.writeFileSync(routesFilePath, JSON.stringify(updatedContent, null, 2), 'utf8');
+    };
+
+    return [replaceFile];
   },
 };

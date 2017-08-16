@@ -6,12 +6,6 @@
  */
 import 'babel-polyfill';
 
-/* eslint-disable import/no-unresolved */
-// Load the manifest.json file and the .htaccess file
-import '!file?name=[name].[ext]!./manifest.json';
-import 'file?name=[name].[ext]!./.htaccess';
-/* eslint-enable import/no-unresolved */
-
 // Import all the third party stuff
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -25,7 +19,7 @@ import NotificationProvider from 'containers/NotificationProvider';
 import configureStore from './store';
 
 // Import i18n messages
-import { translationMessages } from './i18n';
+import { translationMessages, languages } from './i18n';
 
 // Import the CSS reset, which HtmlWebpackPlugin transfers to the build folder
 import 'sanitize.css/sanitize.css';
@@ -115,34 +109,30 @@ import { pluginLoaded, updatePlugin } from './containers/App/actions';
  * @param params
  */
 const registerPlugin = (plugin) => {
+  const formattedPlugin = plugin;
+
   // Add routes
   // Initial list of routes
   const homeRoute = rootRoute.childRoutes[0];
   const pluginsRoute = _.find(homeRoute.childRoutes, { name: 'plugins' });
 
   // Create a new prefixed route for each plugin routes
-  if (plugin && plugin.routes) {
-    plugin.routes.forEach(route => {
+  if (formattedPlugin && formattedPlugin.routes) {
+    formattedPlugin.routes.forEach(route => {
       pluginsRoute.childRoutes.push({
-        path: `/plugins/${plugin.id}${route.path}`,
-        name: `plugins_${plugin.id}_${route.name}`,
+        path: `/plugins/${formattedPlugin.id}${route.path}`,
+        name: `plugins_${formattedPlugin.id}_${route.name}`,
         getComponent: route.getComponent,
       });
     });
   }
 
-  // TMP
-  // setTimeout(() => {
-  //   store.dispatch(showNotification('Plugin loaded!', 'success'));
-  //   store.dispatch(showNotification('Oooooops!', 'warning'));
-  //   store.dispatch(showNotification('An error occurred!', 'error'));
-  //   store.dispatch(showNotification('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis earum fugiat inventore iste. Accusantium cumque dolor ducimus esse ex fugiat natus nulla qui ratione ullam vero, voluptas voluptate? Officia, tempora!', 'info'));
-  // }, 500);
-
   // Merge admin translation messages
-  _.merge(translationMessages, plugin.translationMessages);
+  _.merge(translationMessages, formattedPlugin.translationMessages);
 
-  store.dispatch(pluginLoaded(plugin));
+  formattedPlugin.leftMenuSections = formattedPlugin.leftMenuSections || [];
+
+  store.dispatch(pluginLoaded(formattedPlugin));
 };
 
 import { showNotification } from './containers/NotificationProvider/actions';
@@ -176,11 +166,12 @@ window.Strapi = {
     translationMessages: (translationMessagesUpdated) => {
       render(_.merge({}, translationMessages, translationMessagesUpdated));
     },
-    leftMenuLinks: (leftMenuLinksUpdated) => {
-      store.dispatch(updatePlugin(pluginId, 'leftMenuLinks', leftMenuLinksUpdated));
+    leftMenuSections: (leftMenuSectionsUpdated) => {
+      store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
   router: browserHistory,
+  languages,
 };
 
 const dispatch = store.dispatch;

@@ -5,34 +5,54 @@
  *
  */
 
-import { addLocaleData, defineMessages } from 'react-intl';
+import { addLocaleData } from 'react-intl';
+import { reduce } from 'lodash';
 
-import enTranslationMessages from './translations/en.json';
-import frTranslationMessages from './translations/fr.json';
+// Import config
+import { languages } from '../../config/admin.json';
 
-import enLocaleData from 'react-intl/locale-data/en';
-import frLocaleData from 'react-intl/locale-data/fr';
-
-
-addLocaleData(enLocaleData);
-addLocaleData(frLocaleData);
-
-const appLocales = [
-  'en',
-  'fr',
-];
-
-const translationMessages = {
-  en: enTranslationMessages,
-  fr: frTranslationMessages,
+/**
+ * Try to require translation file.
+ *
+ * @param language {String}
+ */
+const requireTranslations = async language => {
+  try {
+    return await System.import(`./translations/${language}.json`);
+  } catch (error) {
+    console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`);
+    return false;
+  }
 };
 
-const define = messages => {
-  defineMessages(messages);
+/**
+ * Try to require the language in `react-intl` locale data
+ * and add locale data if it has been found.
+ *
+ * @param language {String}
+ */
+const addLanguageLocaleData = async language => {
+  try {
+    const localeData = await System.import(`react-intl/locale-data/${language}`);
+    addLocaleData(localeData);
+    return true;
+  } catch (error) {
+    console.error(`It looks like the language "${language}" is not supported by "react-intl" module.`);
+    return false;
+  }
 };
+
+/**
+ * Dynamically generate `translationsMessages object`.
+ */
+const translationMessages = reduce(languages, (result, language) => {
+  const obj = result;
+  obj[language] = requireTranslations(language);
+  addLanguageLocaleData(language);
+  return obj;
+}, {});
 
 export {
-  appLocales,
-  define,
+  languages,
   translationMessages,
 };
