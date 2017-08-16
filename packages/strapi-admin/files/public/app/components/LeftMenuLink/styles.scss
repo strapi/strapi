@@ -6,7 +6,7 @@
   padding-bottom: 0.2rem;
   padding-left: 1.6rem;
   min-height: 4rem;
-  border-left: 0.4rem solid transparent;
+  border-left: 0.3rem solid transparent;
   cursor: pointer;
   color: $left-menu-link-color;
   text-decoration: none;
@@ -14,7 +14,7 @@
 
   &:hover {
     background: $left-menu-link-hover;
-    border-left: 0.4rem solid $strapi-blue;
+    border-left: 0.3rem solid $strapi-blue;
   }
 
   &:hover {
@@ -24,7 +24,7 @@
 }
 
 .linkActive {
-  border-left: 0.4rem solid $strapi-blue;
+  border-left: 0.3rem solid $strapi-blue;
 }
 
 .linkIcon {
