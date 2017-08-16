@@ -16,9 +16,9 @@ import { languages } from '../../config/admin.json';
  *
  * @param language {String}
  */
-const requireTranslations = async language => {
+const requireTranslations = language => {
   try {
-    return await System.import(`./translations/${language}.json`);
+    return require(`./translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
     console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`);
     return false;
@@ -31,9 +31,9 @@ const requireTranslations = async language => {
  *
  * @param language {String}
  */
-const addLanguageLocaleData = async language => {
+const addLanguageLocaleData = language => {
   try {
-    const localeData = await System.import(`react-intl/locale-data/${language}`);
+    const localeData = require(`react-intl/locale-data/${language}`); // eslint-disable-line global-require
     addLocaleData(localeData);
     return true;
   } catch (error) {

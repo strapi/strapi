@@ -34,7 +34,7 @@ const formatMessages = messages => reduce(messages, (result, value, key) => {
  */
 const requireTranslations = language => {
   try {
-    return require(`translations/${language}.json`);
+    return require(`translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
     console.error(`Unable to load "${language}" translation for the plugin ${pluginId}. Please make sure "${language}.json" file exists in "pluginPath/admin/src/translations" folder.`);
     return false;
