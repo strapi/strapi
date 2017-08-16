@@ -49,8 +49,10 @@ module.exports = {
     message: 'Do you want sagas for asynchronous flows? (e.g. fetching data)',
   }],
   actions: (data) => {
+    const dataFormatted = data;
+
     // Expose `pluginId` value
-    data.pluginId = pluginId;
+    dataFormatted.pluginId = pluginId;
 
     // Generate index.js and index.test.js
     const actions = [{
@@ -66,7 +68,7 @@ module.exports = {
     }];
 
     // If they want a SCSS file, add styles.scss
-    if (data.wantCSS) {
+    if (dataFormatted.wantCSS) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/styles.scss',
@@ -76,7 +78,7 @@ module.exports = {
     }
 
     // If component wants messages
-    if (data.wantMessages) {
+    if (dataFormatted.wantMessages) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/messages.js',
@@ -87,7 +89,7 @@ module.exports = {
 
     // If they want actions and a reducer, generate actions.js, constants.js,
     // reducer.js and the corresponding tests for actions and the reducer
-    if (data.wantActionsAndReducer) {
+    if (dataFormatted.wantActionsAndReducer) {
       // Actions
       actions.push({
         type: 'add',
@@ -140,7 +142,7 @@ module.exports = {
     }
 
     // Sagas
-    if (data.wantSagas) {
+    if (dataFormatted.wantSagas) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/sagas.js',
