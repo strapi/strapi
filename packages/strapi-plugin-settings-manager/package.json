@@ -4,7 +4,7 @@
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
-    "icon": "ion-document-text",
+    "icon": "wrench",
     "description": "Description of settings-manager plugin."
   },
   "scripts": {
