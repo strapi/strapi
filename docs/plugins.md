@@ -218,7 +218,7 @@ The admin panel related part of each plugin is contained in `./plugins/my-plugin
       - `sagas.js`: list of [redux-sagas functions](https://github.com/redux-saga/redux-saga) used by the current container (optional)
       - `selectors.js`: list of [selectors](https://github.com/reactjs/reselect) used by the current container
       - `styles.scss`: style of the current container (optional)
-    - `AboutPage`: secondary page
+    - `TeamPage`: secondary page
    - `translations`: contains the translations to make the plugin internationalized
     - `de.json`
     - `en.json`
