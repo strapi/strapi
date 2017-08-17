@@ -31,17 +31,26 @@ module.exports = (scope, cb) => {
   // Copy the default files.
   fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(scope.rootPath));
 
+  const availableDependencies = [];
   const missingDependencies = [];
 
   // Verify if the dependencies are available into the global
   _.forEach(_.merge(_.get(packageJSON, 'dependencies'), _.get(packageJSON, 'devDependencies')), (value, key) => {
     try {
       fs.accessSync(path.resolve(strapiRootPath, key), fs.constants.R_OK | fs.constants.W_OK);
-      fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
+      availableDependencies.push({
+        key,
+        global: true
+      });
+      // fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
     } catch (e1) {
       try {
         fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', key), fs.constants.R_OK | fs.constants.W_OK);
-        fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
+        availableDependencies.push({
+          key,
+          global: false
+        });
+        // fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
       } catch (e2) {
         missingDependencies.push(key);
       }
@@ -66,6 +75,14 @@ module.exports = (scope, cb) => {
 
         return cb();
       }
+
+      availableDependencies.forEach(dependency => {
+        if (dependency.global) {
+          fs.symlinkSync(path.resolve(strapiRootPath, dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        } else {
+          fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        }
+      })
 
       logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
 
