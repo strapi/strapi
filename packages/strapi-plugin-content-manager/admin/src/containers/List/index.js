@@ -8,7 +8,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
-import { define } from 'i18n';
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
@@ -35,9 +34,6 @@ import {
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
-import messages from './messages.json';
-
-define(messages);
 
 export class List extends React.Component {
   componentWillMount() {
@@ -117,7 +113,7 @@ export class List extends React.Component {
     // Define plugin header actions
     const pluginHeaderActions = [
       {
-        label: messages.addAnEntry,
+        label: 'content-manager.containers.List.addAnEntry',
         class: 'btn-primary',
         onClick: () => this.context.router.push(this.addRoute),
       },
@@ -125,19 +121,18 @@ export class List extends React.Component {
 
     // Plugin header config
     const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
-    messages.pluginHeaderDescription.values = {
-      label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase(),
-    };
 
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title={{
-              id: 'plugin-content-manager-title',
-              defaultMessage: `${pluginHeaderTitle}`,
+            title={pluginHeaderTitle}
+            description={{
+              id: 'content-manager.containers.List.pluginHeaderDescription',
+              values: {
+                label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase(),
+              },
             }}
-            description={messages.pluginHeaderDescription}
             actions={pluginHeaderActions}
           />
           <Container>

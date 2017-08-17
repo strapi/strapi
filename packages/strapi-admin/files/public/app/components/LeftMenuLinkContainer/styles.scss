@@ -2,24 +2,25 @@
 @import "../../styles/variables/variables";
 
 .leftMenuLinkContainer { /* stylelint-ignore */
-  padding-top: 1.4rem;
+  padding-top: .6rem;
 }
 
 .title {
   padding-left: 2rem;
   padding-right: 1.6rem;
   padding-top: 1.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: .6rem;
   color: $left-menu-title-color;
   text-transform: uppercase;
   font-size: 1.1rem;
-  letter-spacing: .1rem;
+  letter-spacing: .2rem;
+  font-weight: 600;
 }
 
 .list {
   list-style: none;
   padding: 0;
-  margin-bottom: 2.2rem;
+  margin-bottom: 2rem;
 }
 
 .noPluginsInstalled {

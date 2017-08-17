@@ -1,10 +1,11 @@
 /**
-*
-* Notification
-*
-*/
+ *
+ * Notification
+ *
+ */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
@@ -44,7 +45,7 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
         <icon className={`ion ${options.icon} ${styles.notificationIcon}`}></icon>
         <p className={styles.notificationContent}>
           <span className={styles.notificationTitle}>{options.title}: </span>
-          <span>{this.props.notification.message}</span>
+          <span><FormattedMessage id={this.props.notification.message} /></span>
         </p>
         <icon className={`ion ion-ios-close-empty pull-right ${styles.notificationClose}`} onClick={this.onCloseClicked}></icon>
       </li>
