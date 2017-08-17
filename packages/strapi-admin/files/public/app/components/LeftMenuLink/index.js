@@ -16,7 +16,7 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
     const isLinkActive = _.startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
 
     return (
-      <li>
+      <li className={styles.item}>
         <Link className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`} to={this.props.destination}>
           <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
           <span className={styles.linkLabel}>{this.props.label}</span>

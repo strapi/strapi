@@ -1,9 +1,15 @@
 // Import
 @import "../../styles/variables/variables";
 
+.item {
+  &:not(:first-child) {
+    margin-top: 0;
+  }
+}
+
 .link {
-  padding-top: .8rem;
-  padding-bottom: 0.4rem;
+  padding-top: 0.8rem;
+  padding-bottom: 0.2rem;
   padding-left: 1.6rem;
   min-height: 3.6rem;
   border-left: 0.3rem solid transparent;
