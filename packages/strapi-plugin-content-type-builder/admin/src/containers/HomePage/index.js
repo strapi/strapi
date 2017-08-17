@@ -15,6 +15,7 @@ import { makeSelectLoading, makeSelectModels } from 'containers/App/selectors';
 // Design
 import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
+import Table from 'components/Table';
 
 import selectHomePage from './selectors';
 import styles from './styles.scss';
@@ -25,10 +26,27 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     console.log('ici', this.props.homePage);
   }
 
+  renderTableComponent = () => {
+    const availableNumber = size(this.props.models);
+    const title = availableNumber > 1 ? 'table.contentType.title.plural'
+      : 'table.contentType.title.singular';
+    return (
+      <Table
+        availableNumber={availableNumber}
+        title={title}
+        buttonLabel={'button.contentType.add'}
+        handleButtonClick={this.handleClick}
+      />
+    );
+  }
+
+
   render() {
     if (this.props.modelsLoading) return <div />;
 
-    const component = size(this.props.models) === 0 ? <EmptyContentTypeView handleClick={this.handleClick} /> : <div />;
+    const component = size(this.props.models) === 0 ?
+      <EmptyContentTypeView handleClick={this.handleClick} />
+        : this.renderTableComponent();
 
     return (
       <div className={styles.homePage}>

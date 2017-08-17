@@ -1,5 +1,4 @@
 import { takeLatest } from 'redux-saga';
-import { LOCATION_CHANGE } from 'react-router-redux';
 import { call, take, put, fork, cancel } from 'redux-saga/effects';
 import request from 'utils/request';
 import { MODELS_FETCH, MODELS_FETCH_SUCCEEDED } from './constants';

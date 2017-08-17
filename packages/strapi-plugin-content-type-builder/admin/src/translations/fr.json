@@ -1,10 +1,15 @@
 {
   "home.contentTypeBuilder.name": "Content Types",
-  "home.contentTypeBuilder.description": "Créez, éditer vos models.",
+  "home.contentTypeBuilder.description": "Créez, éditer vos modèles.",
   "home.emptyContentType.title": "Il n'y a pas de model disponible",
-  "home.emptyContentType.description": "Créez votre premier model....",
+  "home.emptyContentType.description": "Créez votre premier modèle...",
 
   "button.contentType.create": "Créer un modèle",
+  "button.contentType.add": "Ajouter un modèle",
 
-  "notification.error.message": "Une erreur est survenue"
+  "notification.error.message": "Une erreur est survenue",
+
+  "table.contentType.title.plural": "Modèles sont disponibles",
+  "table.contentType.title.singular": "Modèle est disponible"
+
 }
