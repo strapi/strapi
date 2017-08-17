@@ -4,10 +4,12 @@
  *
  */
 
-import React from 'react';
-import styles from './styles.scss';
-import { Link } from 'react-router';
 import _ from 'lodash';
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import { Link } from 'react-router';
+
+import styles from './styles.scss';
 
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -15,11 +17,15 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
     // because of the two levels router.
     const isLinkActive = _.startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
 
+    // const label = this.props.label.id
+    //   ? <FormattedMessage id={this.props.label.id} className={styles.linkLabel} />
+    //   : <span className={styles.linkLabel}>{this.props.label}</span>;
+
     return (
       <li className={styles.item}>
         <Link className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`} to={this.props.destination}>
           <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
-          <span className={styles.linkLabel}>{this.props.label}</span>
+          <FormattedMessage id={this.props.label} className={styles.linkLabel} />
         </Link>
       </li>
     );
