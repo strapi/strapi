@@ -36,7 +36,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     // retrieve language name from i18n translation
     const languageObject = find(get(this.props.listLanguages, ['sections', '0', 'items', '0', 'items']), ['value', join(defaultLanguageArray, '_')]);
     // apply i18n
-    const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
+    const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: `settings-manager.${languageObject.name}` }} /> : '';
 
     const languageLabel = this.props.active ?
       <FormattedMessage id="settings-manager.list.languages.default.languages">

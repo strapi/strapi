@@ -448,7 +448,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     return (
       <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
-        <FormattedMessage id={`settings-manager.${props.value.label}`} className={styles.marginLeft} />
+        <FormattedMessage id={props.value.label} className={styles.marginLeft} />
       </span>
     );
   }
