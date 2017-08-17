@@ -24,6 +24,7 @@ define(map(messages, (message, id) => ({
 
 class App extends React.Component {
   componentDidMount() {
+    console.log('did mount');
     this.props.modelsFetch();
   }
 
