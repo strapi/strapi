@@ -25,7 +25,7 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -81,7 +81,7 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, connection, collectionName, attributes = [] } = JSON.parse(ctx.request.body);
+    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
