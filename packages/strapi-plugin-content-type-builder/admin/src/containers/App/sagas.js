@@ -9,10 +9,10 @@ export function* fetchModels() {
 
     const requestUrl = '/content-type-builder/models';
     const data = yield call(request, requestUrl, { method: 'GET' });
-    console.log('data', data);
     yield put(modelsFetchSucceeded(data));
 
   } catch(error) {
+    // TODO handle i18n
     window.Strapi.notification.error('notification.error.message')
   }
 }

@@ -1,0 +1,122 @@
+.tableListContainer { /* stylelint-disable */
+  padding: 2rem 0 0rem 0;
+  background: #FFFFFF;
+  font-family: Lato;
+}
+
+.headerContainer {
+  width: 100%;
+  padding: 0 1.8rem 0 1.8rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+
+.titleContainer {
+  color: #333740;
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 2.2rem;
+}
+
+.ulContainer {
+  margin-top: 1.6rem;
+  width: 100%;
+  > ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    > li:first-child {
+      margin-bottom: .5rem;
+      border-radius: 2px 2px 0 0;
+      background-color: #F3F3F4;
+      // background-color: rgba(16,22,34,0.04);
+    }
+    > li:not(:first-child) {
+      position: relative;
+      margin-bottom: .2rem;
+      cursor: pointer;
+      &:hover {
+        .hovered {
+          position: absolute;
+          width: 100%;
+          height: 5.4rem;
+          top: -.2rem;
+
+          background-color: #F7F8F8;
+        }
+      }
+    }
+    > li:nth-child(2) {
+      &:hover {
+        .hovered {
+          position: absolute;
+          width: 100%;
+          height: 5.6rem;
+          top: -.5rem;
+          background-color: #F7F8F8;
+        }
+      }
+    }
+    > li:last-child {
+      margin-bottom: 0;
+      .liInnerContainer {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.liHeaderContainer {
+  height: 3rem;
+  margin: 0;
+  padding: 0 4.6rem 0 1.9rem;
+  font-size: 1.3rem;
+  line-height: 1.6rem;
+  font-weight: 600;
+  > div {
+    padding: 0;
+    align-self: center;
+  }
+  > div:last-child {
+    text-align: right;
+  }
+}
+
+.liInnerContainer {
+  height: 5.2rem;
+  margin: 0 3.2rem 0 1.9rem ;
+  padding: 0 1.4rem 0 0rem;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+  color: #333740;
+  font-size: 1.3rem;
+  > div {
+    padding: 0;
+    align-self: center;
+  }
+  > div:first-child{
+    padding-left: 1.4rem;
+  }
+  > div:last-child {
+    text-align: right;
+  }
+  > div:nth-child(2) {
+    font-weight: 600;
+  }
+}
+
+
+.icoContainer {
+  display: flex;
+  justify-content: flex-end;
+  > div {
+    color: #0E1622;
+  >  i {
+      font-size: 1.1rem;
+    }
+  }
+  > div:last-child {
+    margin-left: 1.3rem;
+  }
+}

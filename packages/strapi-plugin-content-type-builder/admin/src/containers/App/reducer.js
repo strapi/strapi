@@ -18,7 +18,6 @@ function appReducer(state = initialState, action) {
     case MODELS_FETCH:
       return state.set('loading', true);
     case MODELS_FETCH_SUCCEEDED:
-      console.log('ok');
       return state
         .set('loading', false)
         .set('models', List(action.models.models));

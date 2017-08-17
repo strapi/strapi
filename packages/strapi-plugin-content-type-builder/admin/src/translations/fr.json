@@ -10,6 +10,9 @@
   "notification.error.message": "Une erreur est survenue",
 
   "table.contentType.title.plural": "Modèles sont disponibles",
-  "table.contentType.title.singular": "Modèle est disponible"
+  "table.contentType.title.singular": "Modèle est disponible",
+  "table.contentType.head.name": "Nom",
+  "table.contentType.head.description": "Description",
+  "table.contentType.head.fields": "Champs"
 
 }
