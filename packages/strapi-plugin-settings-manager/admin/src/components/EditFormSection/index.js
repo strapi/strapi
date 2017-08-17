@@ -14,7 +14,7 @@ import EditFormSectionNested from 'components/EditFormSectionNested';
 
 class EditFormSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage {...{id: this.props.section.name}} />;
+    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage id={`settings-manager.${this.props.section.name}`} />;
     const spacer = !isEmpty(sectionName) ? <div className={this.props.styles.spacer} /> : '';
     const sectionNameSpacer = !sectionName ? <div style={{height: '.2rem'}} /> : '';
     const sectionDescription = this.props.section.description ? <div className={this.props.styles.sectionDescription}>{this.props.section.description}</div> : '';

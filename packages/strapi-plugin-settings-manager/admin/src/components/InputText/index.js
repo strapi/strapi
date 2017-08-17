@@ -116,7 +116,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
-    <FormattedMessage {...{id: placeholder}}>
+    <FormattedMessage id={`settings-manager.${placeholder}`}>
       {(message) => (
         <input
           name={this.props.target}
@@ -144,7 +144,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
 
-    const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label> : '';
+    const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)

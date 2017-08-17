@@ -228,7 +228,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const body = this.sendUpdatedParams();
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
-    if (isEmpty(body)) return window.Strapi.notification.info('{ id: strapi.notification.info.settingsEqual }');
+    if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
     if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl);
     } else {
@@ -241,7 +241,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
-    if (isEmpty(body)) return window.Strapi.notification.info('{ id: strapi.notification.info.settingsEqual }');
+    if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
     if (isEmpty(formErrors)) {
       this.props.databaseEdit(body, apiUrl);
@@ -254,7 +254,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = (dbName) => {
-    window.Strapi.notification.success('{ id: strapi.notification.success.databaseDelete}');
+    window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
     this.props.databaseDelete(dbName, this.props.params.env);
   }
 
@@ -276,7 +276,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   renderListTitle = () => {
     const availableContentNumber = this.props.home.configsDisplay.sections.length;
     const title = availableContentNumber > 1 ? `list.${this.props.params.slug}.title.plural` : `list.${this.props.params.slug}.title.singular`;
-    const titleDisplay = title ? <FormattedMessage {...{id: title}} /> : '';
+    const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
     return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
   }
 
@@ -295,7 +295,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
             id={item.target}
             onClick={this.setDefaultConnectionDb}
           >
-            <FormattedMessage {...{id: item.name}} />{isActive}
+            <FormattedMessage id={`settings-manager.${item.name}`} />{isActive}
           </div>
         );
       }
@@ -312,7 +312,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       return (
         <div className={`col-md-6`}>
           <div className={styles.modalLanguageLabel}>
-            <FormattedMessage {...{id: item.name}} />
+            <FormattedMessage id={`settings-manager.${item.name}`} />
           </div>
           <Select
             name={item.target}
@@ -448,7 +448,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     return (
       <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
-        <FormattedMessage {...{id: props.value.label}} className={styles.marginLeft} />
+        <FormattedMessage id={`settings-manager.${props.value.label}`} className={styles.marginLeft} />
       </span>
     );
   }

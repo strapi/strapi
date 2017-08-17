@@ -114,8 +114,8 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
     return (
       <div className={`${bootStrapClass}`}>
         <div className={`${this.props.styles.inputText} ${bootStrapClassDanger}`}>
-          <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
-          <FormattedMessage {...{id: placeholder}}>
+          <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label>
+          <FormattedMessage id={`settings-manager.${placeholder}`}>
             {(message) => (
               <input
                 name={this.props.target}

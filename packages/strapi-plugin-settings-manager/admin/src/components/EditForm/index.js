@@ -38,12 +38,12 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             })}
           </div>
           <div className={styles.buttonContainer}>
-            <FormattedMessage {...{id: 'form.button.cancel'}}>
+            <FormattedMessage id="settings-manager.form.button.cancel">
               {(message) => (
                 <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
               )}
             </FormattedMessage>
-            <FormattedMessage {...{id: 'form.button.save'}}>
+            <FormattedMessage id="settings-manager.form.button.save">
               {(message) => (
                 <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
               )}

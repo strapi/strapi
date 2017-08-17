@@ -39,7 +39,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: languageObject.name }} /> : '';
 
     const languageLabel = this.props.active ?
-      <FormattedMessage {...{id: 'list.languages.default.languages'}}>
+      <FormattedMessage id="settings-manager.list.languages.default.languages">
         {(message) => (
 
           <div className={this.props.liStyles.italicText} >
@@ -48,7 +48,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
         )}
       </FormattedMessage> :
       // set the span's id with the language name to retrieve it
-        <FormattedMessage {...{id: 'list.languages.set.languages'}}>
+        <FormattedMessage id="settings-manager.list.languages.set.languages">
           {(message) => (
             <button className={this.props.liStyles.normal} onClick={this.props.changeDefaultLanguage} id={this.props.name}>
               {message}

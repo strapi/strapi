@@ -21,11 +21,11 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
   render() {
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? styles.requiredClass : '';
-    
+
     return (
       <div className={`${styles.inputSelect} ${requiredClass} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>
-          <FormattedMessage {...{id: this.props.name}} />
+          <FormattedMessage id={`settings-manager.${this.props.name}`} />
         </label>
         <select
           className="form-control"
@@ -35,7 +35,7 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
           value={this.props.value}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage {...{id: option.name}} key={key}>
+            <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
               {(message) => (
                 <option value={option.value}>
                   {message}

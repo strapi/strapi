@@ -98,7 +98,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={styles.modalPosition}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder} ${styles.padded} ${styles.mHeader}`}>
-              <FormattedMessage {...{id: this.props.listButtonLabel}} />
+              <FormattedMessage id={`settings-manager.${this.props.listButtonLabel}`} />
             </ModalHeader>
             <div className={styles.bordered} />
             <form onSubmit={this.handleSubmit}>
@@ -108,12 +108,12 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
-                <FormattedMessage {...{id: 'form.button.cancel'}}>
+                <FormattedMessage id="settings-manager.form.button.cancel">
                   {(message) => (
                     <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
-                <FormattedMessage {...{id: 'form.button.save'}}>
+                <FormattedMessage id="settings-manager.form.button.save">
                   {(message) => (
                     <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
                   )}

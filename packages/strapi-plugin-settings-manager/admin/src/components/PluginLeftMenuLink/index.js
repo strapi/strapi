@@ -38,7 +38,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
           <div>
             <i className={`fa fa-${this.props.link.icon}`} />
           </div>
-          <span><FormattedMessage {...{id: this.props.link.name}} /></span>
+          <span><FormattedMessage id={`settings-manager.${this.props.link.name}`} /></span>
         </Link>
       </li>
     );

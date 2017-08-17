@@ -16,7 +16,7 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
     <ModalBody>
       <div className={styles.modalDangerBodyContainer}>
         <img src={Danger} alt="icon" />
-        <FormattedMessage {...{id: this.props.dangerMessage}}>
+        <FormattedMessage id={`settings-manager.${this.props.dangerMessage}`}>
           {(message) => (
             <p>{message}</p>
           )}
@@ -24,7 +24,7 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
       </div>
       <div className={styles.buttonDangerContainer}>
         <Button onClick={this.props.handleConfirmDanger} className={styles.primary}>
-          <FormattedMessage {...{id: 'popUpWarning.danger.ok.message'}} />
+          <FormattedMessage id="settings-manager.popUpWarning.danger.ok.message" />
         </Button>
       </div>
     </ModalBody>
@@ -32,14 +32,14 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 
   renderModalBody = () => (
     <ModalBody className={styles.modalBody}>
-      <FormattedMessage {...{id: this.props.warningMessage}} />
+      <FormattedMessage id={`settings-manager.${this.props.warningMessage}`} />
       <div className={styles.buttonContainer}>
-        <FormattedMessage {...{id: 'form.button.cancel'}}>
+        <FormattedMessage id="settings-manager.form.button.cancel">
           {(message) => (
             <Button onClick={this.props.toggleModal} className={styles.secondary}>{message}</Button>
           )}
         </FormattedMessage>
-        <FormattedMessage {...{id: 'form.button.confirm'}}>
+        <FormattedMessage id="settings-manager.form.button.confirm">
           {(message) => (
             <Button onClick={this.props.handleConfirm} className={styles.primary}>{message}</Button>
           )}
@@ -54,7 +54,7 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
       <div className={styles.popUpWarning}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggleModal} className={styles.modalPosition}>
           <ModalHeader toggle={this.props.toggleModal} className={styles.header}>
-            <FormattedMessage {...{id: 'popUpWarning.title'}} />
+            <FormattedMessage id="settings-manager.popUpWarning.title" />
           </ModalHeader>
           <div className={styles.bordered} />
 

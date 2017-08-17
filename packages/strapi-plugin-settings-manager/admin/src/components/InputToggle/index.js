@@ -57,7 +57,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     const btnClassOn = this.state.isChecked ? `btn ${styles.gradientOn}` : 'btn';
     const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
     const label = this.props.hiddenLabel ? ''
-      : <div className={styles.toggleLabel}><FormattedMessage {...{id: this.props.name}} /></div>;
+      : <div className={styles.toggleLabel}><FormattedMessage id={`settings-manager.${this.props.name}`} /></div>;
     const resized = this.props.hiddenLabel ? { marginTop: '-1rem'} : { marginTop: ''};
     return (
       <div className={`${customBootstrapClass} ${styles.container}`} style={resized}>

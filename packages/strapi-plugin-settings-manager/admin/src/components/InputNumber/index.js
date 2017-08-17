@@ -100,7 +100,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
-    <FormattedMessage {...{id: placeholder}}>
+    <FormattedMessage id={`settings-manager.${placeholder}`}>
       {(message) => (
         <input
           name={this.props.target}
@@ -144,7 +144,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 
     return (
       <div className={`${this.props.styles.inputNumber} ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}><FormattedMessage {...{id: this.props.name}} /></label>
+        <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label>
         {input}
         <small>{this.props.inputDescription}</small>
         {this.renderErrors()}

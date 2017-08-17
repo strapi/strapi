@@ -88,12 +88,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
-                <FormattedMessage {...{id: 'form.button.cancel'}}>
+                <FormattedMessage id="settings-manager.form.button.cancel">
                   {(message) => (
                     <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
-                <FormattedMessage {...{id: 'form.button.save'}}>
+                <FormattedMessage id="settings-manager.form.button.save">
                   {(message) => (
                     <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
                   )}
