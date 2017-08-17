@@ -5,7 +5,7 @@ import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpt
 *
 * @params {object, object} formData, formValidations
 *
-* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'errorId'}]}]
+* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'settings-manager.errorId'}]}]
 *
 */
 
@@ -31,7 +31,7 @@ export function checkFormValidity(formData, formValidations) {
 
     forEach(valueValidations.nestedValidations, (nestedValidations) => {
       if (nestedValidations.validations.required && !has(formData, nestedValidations.target)) {
-        errors.push({ target: nestedValidations.target, errors: [{ id: 'request.error.validation.required' }] });
+        errors.push({ target: nestedValidations.target, errors: [{ id: 'settings-manager.request.error.validation.required' }] });
       }
     });
 
@@ -42,7 +42,7 @@ export function checkFormValidity(formData, formValidations) {
     if (!isEmpty(inputErrors)) errors.push({ target: key, errors: inputErrors });
 
     if (formData['security.xframe.value'] && formData['security.xframe.value'] === 'ALLOW-FROM.ALLOW-FROM ') {
-      errors.push({ target: 'security.xframe.value.nested', errors: [{ id: 'request.error.validation.required' }] });
+      errors.push({ target: 'security.xframe.value.nested', errors: [{ id: 'settings-manager.request.error.validation.required' }] });
     }
   });
 
@@ -53,27 +53,27 @@ export function checkFormValidity(formData, formValidations) {
 function validate(value, validations) {
   let errors = [];
   // Handle i18n
-  const requiredError = { id: 'request.error.validation.required' };
+  const requiredError = { id: 'settings-manager.request.error.validation.required' };
   mapKeys(validations, (validationValue, validationKey) => {
     switch (validationKey) {
       case 'maxLength':
         if (value.length > validationValue) {
-          errors.push({ id: 'request.error.validation.maxLength' });
+          errors.push({ id: 'settings-manager.request.error.validation.maxLength' });
         }
         break;
       case 'minLength':
         if (value.length < validationValue) {
-          errors.push({ id: 'request.error.validation.minLength' });
+          errors.push({ id: 'settings-manager.request.error.validation.minLength' });
         }
         break;
       case 'required':
         if (value.length === 0) {
-          errors.push({ id: 'request.error.validation.required' });
+          errors.push({ id: 'settings-manager.request.error.validation.required' });
         }
         break;
       case 'regex':
         if (!new RegExp(validationValue).test(value)) {
-          errors.push({ id: 'request.error.validation.regex' });
+          errors.push({ id: 'settings-manager.request.error.validation.regex' });
         }
         break;
       default:
@@ -146,17 +146,17 @@ export function getInputsValidationsFromConfigs(configs) {
 *
 * @params {object} formData
 *
-* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'errorId'}]}]
+* @return {array} returns errors[{ target: inputTarget, errors: [{id: 'settings-manager.errorId'}]}]
 *
 */
 
 
 export function getRequiredInputsDb(data) {
   const formErrors = [
-    { target: 'database.connections.${name}.name', errors: [{ id: 'request.error.validation.required' }] },
-    { target: 'database.connections.${name}.settings.host', errors: [{ id: 'request.error.validation.required' }] },
-    { target: 'database.connections.${name}.settings.port', errors: [{ id: 'request.error.validation.required' }] },
-    { target: 'database.connections.${name}.settings.database', errors: [{ id: 'request.error.validation.required' }] },
+    { target: 'database.connections.${name}.name', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.host', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.port', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
+    { target: 'database.connections.${name}.settings.database', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
   ];
 
   // If size data === 2 user hasn't filled any input,

@@ -66,12 +66,12 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
   validate = (value) => {
     let errors = [];
 
-    const requiredError = { id: 'request.error.validation.required' };
+    const requiredError = { id: 'settings-manager.request.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'required':
           if (value.length === 0) {
-            errors.push({ id: 'request.error.validation.required' });
+            errors.push({ id: 'settings-manager.request.error.validation.required' });
           }
           break;
         default:

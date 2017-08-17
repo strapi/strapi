@@ -46,27 +46,27 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
   validate = (value) => {
     let errors = [];
     // handle i18n
-    const requiredError = { id: 'request.error.validation.required' };
+    const requiredError = { id: 'settings-manager.request.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push({ id: 'request.error.validation.maxLength' });
+            errors.push({ id: 'settings-manager.request.error.validation.maxLength' });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push({ id: 'request.error.validation.minLength' });
+            errors.push({ id: 'settings-manager.request.error.validation.minLength' });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push({ id: 'request.error.validation.required' });
+            errors.push({ id: 'settings-manager.request.error.validation.required' });
           }
           break;
         case 'regex':
           if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: 'request.error.validation.regex' });
+            errors.push({ id: 'settings-manager.request.error.validation.regex' });
           }
           break;
         default:
@@ -86,8 +86,9 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
     if (!this.props.noErrorsDescription) {
       return (
         map(this.state.errors, (error, key) => {
-          const displayError = isObject(error) && error.id ?
-            <FormattedMessage {...error} /> : error;
+          const displayError = isObject(error) && error.id
+            ? <FormattedMessage id={error} />
+            : error;
           return (
             <div key={key} className="form-control-feedback">{displayError}</div>
           );
