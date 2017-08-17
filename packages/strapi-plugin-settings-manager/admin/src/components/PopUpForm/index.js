@@ -13,26 +13,24 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   render() {
     return (
       <div className={styles.popUpForm}>
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-sm-12">
-              <div className={styles.padded}>
+        <div className="row">
+          <div className="col-sm-12">
+            <div className={styles.padded}>
 
-                <div className="row">
+              <div className="row">
 
-                  {map(this.props.sections, (section) => {
-                    // custom rendering
-                    if (this.props.renderPopUpForm) {
-                      // Need to pass props to use this.props.renderInput from WithFormSection HOC
-                      return this.props.renderPopUpForm(section, this.props, styles);
-                    }
-                    return (
-                      map(section.items, (item, key) => (
-                        this.props.renderInput(item, key)
-                      ))
-                    );
-                  })}
-                </div>
+                {map(this.props.sections, (section) => {
+                  // custom rendering
+                  if (this.props.renderPopUpForm) {
+                    // Need to pass props to use this.props.renderInput from WithFormSection HOC
+                    return this.props.renderPopUpForm(section, this.props, styles);
+                  }
+                  return (
+                    map(section.items, (item, key) => (
+                      this.props.renderInput(item, key)
+                    ))
+                  );
+                })}
               </div>
             </div>
           </div>
