@@ -64,7 +64,6 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
                   <li key={key} onClick={this.goTo}>
-                    <div className={styles.hovered}  />
                     <div className={`${styles.liInnerContainer} row`}>
                       <div className="col-md-1"><i className={`fa ${rowItem.icon}`} /></div>
                       <div className="col-md-2">{startCase(rowItem.name)}</div>

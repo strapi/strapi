@@ -28,36 +28,22 @@
     padding: 0;
     list-style: none;
     > li:first-child {
-      margin-bottom: .5rem;
+      margin-top: 0rem;
       border-radius: 2px 2px 0 0;
       background-color: #F3F3F4;
-      // background-color: rgba(16,22,34,0.04);
     }
     > li:not(:first-child) {
       position: relative;
-      margin-bottom: .2rem;
+      height: 5.4rem;
+      line-height: 5.4rem;
       cursor: pointer;
       &:hover {
-        .hovered {
-          position: absolute;
-          width: 100%;
-          height: 5.4rem;
-          top: -.2rem;
-
-          background-color: #F7F8F8;
-        }
+        background-color: #F7F8F8;
       }
     }
     > li:nth-child(2) {
-      &:hover {
-        .hovered {
-          position: absolute;
-          width: 100%;
-          height: 5.6rem;
-          top: -.5rem;
-          background-color: #F7F8F8;
-        }
-      }
+      height: 5.7rem;
+      padding-top: .3rem;
     }
     > li:last-child {
       margin-bottom: 0;
@@ -71,7 +57,7 @@
 .liHeaderContainer {
   height: 3rem;
   margin: 0;
-  padding: 0 4.6rem 0 1.9rem;
+  padding: 0 4.6rem .3rem 1.9rem;
   font-size: 1.3rem;
   line-height: 1.6rem;
   font-weight: 600;
@@ -85,7 +71,6 @@
 }
 
 .liInnerContainer {
-  height: 5.2rem;
   margin: 0 3.2rem 0 1.9rem ;
   padding: 0 1.4rem 0 0rem;
   border-bottom: 1px solid rgba(14,22,34,0.04);
