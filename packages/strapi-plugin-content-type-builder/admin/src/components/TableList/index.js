@@ -5,29 +5,13 @@
 */
 
 import React from 'react';
-import { map, startCase } from 'lodash';
+import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import ButtonPrimaryHotline from 'components/Button';
+import LiTableList from 'components/LiTableList';
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  delete = () => {
-    console.log('will delete');
-  }
-
-  edit = () => {
-    console.log('edit');
-  }
-
-  goTo = (e) => {
-    if (e.target.id !== 'edit' && e.target.id !== 'delete') {
-      console.log('will go to');
-    }
-  }
-
-
-
   render() {
     return (
       <div className={styles.tableListContainer}>
@@ -63,24 +47,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                   </div>
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
-                  <li key={key} onClick={this.goTo}>
-                    <div className={`${styles.liInnerContainer} row`}>
-                      <div className="col-md-1"><i className={`fa ${rowItem.icon}`} /></div>
-                      <div className="col-md-2">{startCase(rowItem.name)}</div>
-                      <div className="col-md-5 text-center">{rowItem.description}</div>
-                      <div className="col-md-3 text-center">{rowItem.fields}</div>
-                      <div className="col-md-1">
-                        <div className={styles.icoContainer}>
-                          <div>
-                            <i className="fa fa-pencil" id="edit" onClick={this.edit} />
-                          </div>
-                          <div>
-                            <i className="fa fa-trash" id="delete" onClick={this.delete} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
+                  <LiTableList key={key} rowItem={rowItem} />
                 ))}
               </ul>
             </div>

@@ -7,6 +7,14 @@
   "button.contentType.create": "Créer un modèle",
   "button.contentType.add": "Ajouter un modèle",
 
+  "menu.section.contentTypeBuilder.name.plural": "Modèles",
+  "menu.section.contentTypeBuilder.name.singular": "Modèle",
+  "menu.section.documentation.name": "Documentation",
+  "menu.section.documentation.guide": "Découvrez plus à propose des modèles dans notre",
+  "menu.section.documentation.guideLink": "guide.",
+  "menu.section.documentation.tutorial": "Découvrez notre",
+  "menu.section.documentation.tutorialLink": "tuto vidéo.",
+
   "notification.error.message": "Une erreur est survenue",
 
   "table.contentType.title.plural": "Modèles sont disponibles",

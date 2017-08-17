@@ -10,6 +10,7 @@ import { MODELS_FETCH, MODELS_FETCH_SUCCEEDED } from './constants';
 /* eslint-disable new-cap */
 const initialState = fromJS({
   loading: true,
+  menu: List(),
   models: Map(),
 });
 
@@ -20,7 +21,8 @@ function appReducer(state = initialState, action) {
     case MODELS_FETCH_SUCCEEDED:
       return state
         .set('loading', false)
-        .set('models', List(action.models.models));
+        .set('menu', List(action.menu.sections))
+        .set('models', List(action.data.models));
     default:
       return state;
   }

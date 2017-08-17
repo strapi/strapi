@@ -6,6 +6,13 @@
 
   "button.contentType.create": "Create Content Type",
   "button.contentType.add": "Add Content Type",
+  "menu.section.contentTypeBuilder.name.plural": "Content Types",
+  "menu.section.contentTypeBuilder.name.singular": "Content Type",
+  "menu.section.documentation.name": "Documentation",
+  "menu.section.documentation.guide": "Read more about content types in our",
+  "menu.section.documentation.guideLink": "guide.",
+  "menu.section.documentation.tutorial": "Check out our",
+  "menu.section.documentation.tutorialLink": "tutorial video.",
 
   "notification.error.message": "An error occured",
 

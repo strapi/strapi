@@ -16,6 +16,11 @@ const makeSelectModels = () => createSelector(
  (globalSate) => globalSate.get('models').toJS(),
 );
 
+const makeSelectMenu = () => createSelector(
+  selectGlobalDomain(),
+  (globalSate) => globalSate.get('menu').toJS(),
+);
+
 const selectLocationState = () => {
   let prevRoutingState;
   let prevRoutingStateJS;
@@ -33,4 +38,9 @@ const selectLocationState = () => {
 };
 
 
-export { selectLocationState, makeSelectLoading, makeSelectModels };
+export {
+  selectLocationState,
+  makeSelectLoading,
+  makeSelectModels,
+  makeSelectMenu,
+};

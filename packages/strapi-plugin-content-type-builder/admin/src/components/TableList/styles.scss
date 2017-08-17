@@ -92,12 +92,14 @@
 }
 
 
-.icoContainer {
+.icContainer {
   display: flex;
   justify-content: flex-end;
   > div {
+    height: 100%;
     color: #0E1622;
   >  i {
+      z-index: 0;
       font-size: 1.1rem;
     }
   }
