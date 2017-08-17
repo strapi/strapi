@@ -647,5 +647,7 @@
   "language.zh_Hant_MO": "中文（繁體中文，中華人民共和國澳門特別行政區）",
   "language.zh_Hant_TW": "中文（繁體中文，台灣）",
   "language.zu": "isiZulu",
-  "language.zu_ZA": "isiZulu (iNingizimu Afrika)"
+  "language.zu_ZA": "isiZulu (iNingizimu Afrika)",
+
+  "pageNotFound": "Page introuvable"
 }
