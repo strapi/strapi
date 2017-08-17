@@ -30,15 +30,15 @@ export function* getRecords() {
   };
 
   try {
-    const requestUrl = `/content-manager/explorer/${currentModel}`;
+    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}`;
 
     // Call our request helper (see 'utils/request')
-    const data = yield call(request, requestUrl, {
+    const response = yield call(request, requestUrl, {
       method: 'GET',
       params,
     });
 
-    yield put(loadedRecord(data));
+    yield put(loadedRecord(response));
   } catch (err) {
     window.Strapi.notification.error('An error occurred during records fetch.');
   }
@@ -48,19 +48,12 @@ export function* getCount() {
   const currentModel = yield select(makeSelectCurrentModelName());
 
   try {
-    const opts = {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'default',
-    };
-    const response = yield fetch(
-      `/content-manager/explorer/${currentModel}/count`,
-      opts
+    const response = yield call(
+      request,
+      `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}/count`,
     );
 
-    const data = yield response.json();
-
-    yield put(loadedCount(data.count));
+    yield put(loadedCount(response.count));
   } catch (err) {
     window.Strapi.notification.error(
       'An error occurred during count records fetch.'

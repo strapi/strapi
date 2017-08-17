@@ -1,14 +1,11 @@
 {
   "/": {
-    "name": "home",
     "container": "Home"
   },
   "/:slug": {
-    "name": "list",
     "container": "List"
   },
   "/:slug/:id": {
-    "name": "edit",
     "container": "Edit"
   }
 }

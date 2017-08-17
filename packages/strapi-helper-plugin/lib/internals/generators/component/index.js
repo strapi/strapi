@@ -29,11 +29,6 @@ module.exports = {
     name: 'wantCSS',
     default: true,
     message: 'Does it have styling?',
-  }, {
-    type: 'confirm',
-    name: 'wantMessages',
-    default: true,
-    message: 'Do you want i18n messages (i.e. will this component use text)?',
   }],
   actions: (data) => {
     // Generate index.js and index.test.js

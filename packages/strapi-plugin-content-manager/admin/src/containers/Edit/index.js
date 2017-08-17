@@ -10,7 +10,6 @@ import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 
 import { router } from 'app';
-import { define } from 'i18n';
 
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
@@ -34,10 +33,6 @@ import {
   makeSelectDeleting,
   makeSelectIsCreating,
 } from './selectors';
-import messages from './messages.json';
-
-define(messages);
-
 
 export class Edit extends React.Component {
   componentWillMount() {
@@ -81,14 +76,14 @@ export class Edit extends React.Component {
     // Define plugin header actions
     const pluginHeaderActions = [
       {
-        label: messages.cancel,
+        label: 'content-manager.containers.Edit.cancel',
         class: 'btn-default',
         onClick: () => {
           router.push(`/plugins/content-manager/${this.props.currentModelName}`);
         },
       },
       {
-        label: this.props.editing ? messages.editing : messages.submit,
+        label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
         class: 'btn-primary',
         onClick: this.props.editRecord,
         disabled: this.props.editing,
@@ -98,7 +93,7 @@ export class Edit extends React.Component {
     // Add the `Delete` button only in edit mode
     if (!this.props.isCreating) {
       pluginHeaderActions.push({
-        label: messages.delete,
+        label: 'content-manager.containers.Edit.delete',
         class: 'btn-danger',
         onClick: this.props.deleteRecord,
         disabled: this.props.deleting,
@@ -115,10 +110,7 @@ export class Edit extends React.Component {
       <div className="col-md-12">
         <div className="container-fluid">
           <PluginHeader
-            title={{
-              id: 'plugin-content-manager-title',
-              defaultMessage: `${pluginHeaderTitle}`,
-            }}
+            title={pluginHeaderTitle}
             description={{
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`,
