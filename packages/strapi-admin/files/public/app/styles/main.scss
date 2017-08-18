@@ -8,7 +8,8 @@
   @import "libs/fontawesome/fontawesome";
 
   // Expose base styles
-  @import "base/helpers";
+  @import "base/bootstrap-override";
+  @import "base/animations";
   @import "base/animations";
 
   // Set the global font-size in order
