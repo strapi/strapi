@@ -6,23 +6,61 @@
     "type": "git",
     "url": "git://github.com/strapi/strapi-admin.git"
   },
-  "engines": {
-    "npm": ">=3"
-  },
-  "author": "Strapi",
-  "license": "MIT",
   "scripts": {
-    "setup": "npm install && cd public && npm install && npm run build",
-    "test": "cd public && npm run test"
+    "analyze:clean": "rimraf stats.json",
+    "preanalyze": "npm run analyze:clean",
+    "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "build": "cross-env NODE_ENV=production IS_ADMIN=true webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "rimraf admin/build",
+    "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node node_modules/strapi-helper-plugin/lib/server",
+    "generate": "node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "pretest": "npm run lint",
+    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
+    "test": "echo Tests are not implemented.",
+    "prepublish": "npm run build",
+    "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
   },
-  "pre-commit": [
-    "test"
-  ],
   "dependencies": {
-    "cheerio": "0.22.0",
-    "lodash": "^4.17.2"
+    "cheerio": "^1.0.0-rc.2",
+    "sanitize.css": "^4.1.0"
   },
   "devDependencies": {
-    "pre-commit": "1.1.3"
-  }
+    "cross-env": "^3.1.3",
+    "eslint": "^3.9.0",
+    "eslint-config-airbnb": "^12.0.0",
+    "eslint-config-airbnb-base": "^9.0.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-import-resolver-webpack": "^0.6.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-import": "^2.0.1",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-react": "^6.4.1",
+    "eslint-plugin-redux-saga": "^0.1.5",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "html-loader": "^0.4.3",
+    "html-webpack-plugin": "^2.22.0",
+    "plop": "^1.5.0",
+    "prettier": "^1.5.3",
+    "rimraf": "^2.5.4",
+    "strapi-helper-plugin": "3.0.0-alpha.4.8",
+    "webpack": "^2.1.0-beta.25"
+  },
+  "author": {
+    "name": "Strapi",
+    "email": "",
+    "url": ""
+  },
+  "maintainers": [
+    {
+      "name": "Strapi",
+      "email": "",
+      "url": ""
+    }
+  ],
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
 }

@@ -119,5 +119,10 @@
     "webpack-dev-middleware": "1.8.4",
     "webpack-hot-middleware": "2.13.1",
     "whatwg-fetch": "1.0.0"
+  },
+  "devDependencies": {
+    "extract-text-webpack-plugin": "^2.1.2",
+    "html-loader": "^0.4.3",
+    "html-webpack-plugin": "^2.22.0"
   }
 }

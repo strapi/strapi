@@ -18,7 +18,7 @@ module.exports = {
 
   generateAdminIndexFile: () => {
     // Read the default `index.html` file from the admin panel build
-    const html = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', 'index.html'));
+    const html = fs.readFileSync(path.resolve(__dirname, '..', 'admin', 'build', 'index.html'));
 
     // Convert the stream to a string
     const htmlString = html.toString();

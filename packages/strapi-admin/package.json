@@ -17,7 +17,7 @@
     "strapi-utils": "^3.0.0-alpha.4.8"
   },
   "scripts": {
-    "test": "cd files/public && npm run test",
+    "test": "cd files/admin && npm run test",
     "prepublish": "cd files && npm run setup"
   },
   "author": {

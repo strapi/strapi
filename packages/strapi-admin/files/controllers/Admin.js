@@ -29,7 +29,7 @@ module.exports = {
 
   file: async ctx => {
     try {
-      const file = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'build', ctx.params.file));
+      const file = fs.readFileSync(path.resolve(__dirname, '..', 'admin', 'build', ctx.params.file));
       ctx.body = file;
     } catch (err) {
       ctx.body = ctx.notFound();
