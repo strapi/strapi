@@ -23,9 +23,9 @@ export class LanguageProvider extends React.Component { // eslint-disable-line r
 }
 
 LanguageProvider.propTypes = {
-  children: React.PropTypes.element.isRequired.isRequired.isRequired,
-  locale: React.PropTypes.string.isRequired.isRequired,
-  messages: React.PropTypes.object.isRequired.isRequired,
+  children: React.PropTypes.element.isRequired,
+  locale: React.PropTypes.string.isRequired,
+  messages: React.PropTypes.object.isRequired,
 };
 
 

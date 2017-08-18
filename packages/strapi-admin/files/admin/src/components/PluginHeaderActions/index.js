@@ -33,7 +33,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
 }
 
 PluginHeaderActions.propTypes = {
-  actions: React.PropTypes.array.isRequired.isRequired,
+  actions: React.PropTypes.array.isRequired,
 };
 
 export default PluginHeaderActions;

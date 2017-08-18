@@ -19,7 +19,7 @@ ToggleOption.propTypes = {
     React.PropTypes.object.isRequired,
     React.PropTypes.string.isRequired,
   ]).isRequired,
-  value: React.PropTypes.string.isRequired.isRequired,
+  value: React.PropTypes.string.isRequired,
 };
 
 export default injectIntl(ToggleOption);

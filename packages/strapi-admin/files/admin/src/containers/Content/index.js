@@ -23,7 +23,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 }
 
 Content.propTypes = {
-  children: React.PropTypes.node.isRequired.isRequired,
+  children: React.PropTypes.node.isRequired,
 };
 
 const mapStateToProps = createSelector(

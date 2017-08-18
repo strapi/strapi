@@ -37,13 +37,13 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired.isRequired.isRequired,
+  router: React.PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  children: React.PropTypes.node.isRequired.isRequired,
-  notifications: React.PropTypes.object.isRequired.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired.isRequired,
+  children: React.PropTypes.node.isRequired,
+  notifications: React.PropTypes.object.isRequired,
+  onHideNotification: React.PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

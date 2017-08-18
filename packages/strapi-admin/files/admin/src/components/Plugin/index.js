@@ -23,8 +23,8 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 }
 
 Plugin.propTypes = {
-  description: React.PropTypes.object.isRequired.isRequired,
-  title: React.PropTypes.object.isRequired.isRequired,
+  description: React.PropTypes.object.isRequired,
+  title: React.PropTypes.object.isRequired,
 };
 
 export default Plugin;

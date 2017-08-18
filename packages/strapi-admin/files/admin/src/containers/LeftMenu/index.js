@@ -26,7 +26,7 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
 }
 
 LeftMenu.propTypes = {
-  plugins: React.PropTypes.object.isRequired.isRequired,
+  plugins: React.PropTypes.object.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

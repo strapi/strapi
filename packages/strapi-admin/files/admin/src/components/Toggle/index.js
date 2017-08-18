@@ -28,9 +28,9 @@ function Toggle(props) { // eslint-disable-line react/prefer-stateless-function
 }
 
 Toggle.propTypes = {
-  messages: React.PropTypes.object.isRequired.isRequired,
-  onToggle: React.PropTypes.func.isRequired.isRequired,
-  values: React.PropTypes.array.isRequired.isRequired,
+  messages: React.PropTypes.object.isRequired,
+  onToggle: React.PropTypes.func.isRequired,
+  values: React.PropTypes.array.isRequired,
 };
 
 export default Toggle;

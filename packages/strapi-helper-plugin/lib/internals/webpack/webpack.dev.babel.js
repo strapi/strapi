@@ -13,7 +13,6 @@ const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 const plugins = [
   new webpack.HotModuleReplacementPlugin(), // Tell webpack we want hot reloading
-  new webpack.NoErrorsPlugin(),
 ];
 
 const isAdmin = process.env.IS_ADMIN === 'true';
@@ -70,7 +69,9 @@ module.exports = require('./webpack.base.babel')({
   }, {
     loader: 'postcss-loader',
     options: {
-      config: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+      config: {
+        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js')
+      },
     },
   }, {
     loader: 'sass-loader',
@@ -117,7 +118,9 @@ module.exports = require('./webpack.base.babel')({
  */
 function dependencyHandlers() {
   // Don't do anything during the DLL Build step
-  if (process.env.BUILDING_DLL) { return []; }
+  if (process.env.BUILDING_DLL) {
+    return [];
+  }
 
   // If the package.json does not have a dllPlugin property, use the CommonsChunkPlugin
   if (!dllPlugin) {

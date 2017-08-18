@@ -37,11 +37,11 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
 }
 
 PluginPage.contextTypes = {
-  router: React.PropTypes.object.isRequired.isRequired.isRequired,
+  router: React.PropTypes.object.isRequired,
 };
 
 PluginPage.propTypes = {
-  plugins: React.PropTypes.object.isRequired.isRequired,
+  plugins: React.PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createSelector(

@@ -88,7 +88,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
 }
 
 LeftMenuLinkContainer.propTypes = {
-  plugins: React.PropTypes.object.isRequired.isRequired,
+  plugins: React.PropTypes.object.isRequired,
 };
 
 export default LeftMenuLinkContainer;

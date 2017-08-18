@@ -48,7 +48,7 @@
     "prettier": "^1.5.3",
     "rimraf": "^2.5.4",
     "strapi-helper-plugin": "file:../strapi-helper-plugin",
-    "webpack": "^2.1.0-beta.25"
+    "webpack": "^3.5.5"
   },
   "author": {
     "name": "Strapi team",

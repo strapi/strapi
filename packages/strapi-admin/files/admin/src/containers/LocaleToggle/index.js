@@ -29,7 +29,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 }
 
 LocaleToggle.propTypes = {
-  onLocaleToggle: React.PropTypes.func.isRequired.isRequired,
+  onLocaleToggle: React.PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createSelector(
