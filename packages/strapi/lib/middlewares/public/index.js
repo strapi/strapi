@@ -42,9 +42,9 @@ module.exports = strapi => {
         path: '/*(.*)?',
         handler: [
           async (ctx, next) => {
-            const basename = path.basename(ctx.url);
+            const parse = path.parse(ctx.url);
 
-            ctx.url = basename === '' ? '/' : basename;
+            ctx.url = path.join(parse.dir, parse.base);
 
             await next();
           },
