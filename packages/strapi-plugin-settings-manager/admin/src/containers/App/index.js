@@ -50,18 +50,18 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: React.PropTypes.object.isRequired.isRequired,
 };
 
 App.propTypes = {
-  children: React.PropTypes.node.isRequired,
-  environments: React.PropTypes.array,
-  environmentsFetch: React.PropTypes.func,
-  exposedComponents: React.PropTypes.object.isRequired,
-  loading: React.PropTypes.bool,
-  menuFetch: React.PropTypes.func,
-  params: React.PropTypes.object,
-  sections: React.PropTypes.array.isRequired,
+  children: React.PropTypes.node.isRequired.isRequired,
+  environments: React.PropTypes.array.isRequired,
+  environmentsFetch: React.PropTypes.func.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired.isRequired,
+  loading: React.PropTypes.bool.isRequired,
+  menuFetch: React.PropTypes.func.isRequired,
+  params: React.PropTypes.object.isRequired,
+  sections: React.PropTypes.array.isRequired.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -72,7 +72,7 @@ export function mapDispatchToProps(dispatch) {
     },
     dispatch
   );
-};
+}
 
 const mapStateToProps = createStructuredSelector({
   sections: makeSelectSections(),

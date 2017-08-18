@@ -50,17 +50,17 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputSelect.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  handleChange: React.PropTypes.func.isRequired,
-  name: React.PropTypes.string.isRequired,
+  addRequiredInputDesign: React.PropTypes.bool.isRequired,
+  customBootstrapClass: React.PropTypes.string.isRequired,
+  handleChange: React.PropTypes.func.isRequired.isRequired,
+  name: React.PropTypes.string.isRequired.isRequired,
   selectOptions: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object, // TODO remove
-  ]),
-  target: React.PropTypes.string,
-  validations: React.PropTypes.object,
-  value: React.PropTypes.string,
+    React.PropTypes.array.isRequired,
+    React.PropTypes.object.isRequired, // TODO remove
+  ]).isRequired,
+  target: React.PropTypes.string.isRequired,
+  validations: React.PropTypes.object.isRequired,
+  value: React.PropTypes.string.isRequired,
 };
 
 export default InputSelect;

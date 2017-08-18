@@ -25,8 +25,8 @@ class PluginHeaderTitle extends React.Component { // eslint-disable-line react/p
 }
 
 PluginHeaderTitle.propTypes = {
-  description: React.PropTypes.object,
-  title: React.PropTypes.object,
+  description: React.PropTypes.object.isRequired.isRequired,
+  title: React.PropTypes.object.isRequired.isRequired,
 };
 
 export default PluginHeaderTitle;

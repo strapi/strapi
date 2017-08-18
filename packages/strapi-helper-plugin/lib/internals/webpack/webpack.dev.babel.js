@@ -92,8 +92,8 @@ module.exports = require('./webpack.base.babel')({
     [
       require.resolve('babel-preset-latest'),
       {
-        "es2015": {
-          "modules": false,
+        es2015: {
+          modules: false,
         },
       },
     ],

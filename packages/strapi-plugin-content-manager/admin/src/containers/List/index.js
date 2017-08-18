@@ -162,11 +162,11 @@ List.propTypes = {
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   currentModelName: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   currentPage: React.PropTypes.number.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
   history: React.PropTypes.object.isRequired,
@@ -178,18 +178,19 @@ List.propTypes = {
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   onLimitChange: React.PropTypes.func.isRequired,
+  params: React.PropTypes.object.isRequired,
   records: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   route: React.PropTypes.object.isRequired,
   routeParams: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   setCurrentModelName: React.PropTypes.func.isRequired,
   sort: React.PropTypes.string.isRequired,
 };

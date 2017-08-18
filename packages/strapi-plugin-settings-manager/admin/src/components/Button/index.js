@@ -22,11 +22,11 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  addShape: React.PropTypes.bool,
-  buttonBackground: React.PropTypes.string,
-  buttonSize: React.PropTypes.string,
-  handlei18n: React.PropTypes.bool,
-  label: React.PropTypes.string.isRequired,
+  addShape: React.PropTypes.bool.isRequired,
+  buttonBackground: React.PropTypes.string.isRequired,
+  buttonSize: React.PropTypes.string.isRequired,
+  handlei18n: React.PropTypes.bool.isRequired,
+  label: React.PropTypes.string.isRequired.isRequired,
 };
 
 export default Button;

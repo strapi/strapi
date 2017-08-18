@@ -54,8 +54,8 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
 }
 
 Notification.propTypes = {
-  notification: React.PropTypes.object,
-  onHideNotification: React.PropTypes.func,
+  notification: React.PropTypes.object.isRequired.isRequired,
+  onHideNotification: React.PropTypes.func.isRequired.isRequired,
 };
 
 export default Notification;

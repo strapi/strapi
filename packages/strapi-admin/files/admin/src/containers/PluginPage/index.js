@@ -17,9 +17,9 @@ const exposedComponents = {
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const containers = this.props.plugins.valueSeq().map((plugin, i) => {
+    const containers = this.props.plugins.valueSeq().map((plugin) => {
       const Elem = plugin.get('mainComponent');
-      return <Elem key={i} {...this.props} exposedComponents={exposedComponents}></Elem>;
+      return <Elem key={plugin.id} {...this.props} exposedComponents={exposedComponents}></Elem>;
     });
 
     return (
@@ -37,11 +37,11 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
 }
 
 PluginPage.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: React.PropTypes.object.isRequired.isRequired.isRequired,
 };
 
 PluginPage.propTypes = {
-  plugins: React.PropTypes.object,
+  plugins: React.PropTypes.object.isRequired.isRequired,
 };
 
 const mapStateToProps = createSelector(

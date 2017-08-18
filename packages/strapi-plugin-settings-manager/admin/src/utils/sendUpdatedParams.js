@@ -9,9 +9,9 @@ export default function sendUpdatedParams() {
       body[key] = value;
     }
     else if (key === 'security.xframe.value.nested' && prevSettings['security.xframe.value.nested'] !== this.props.home.modifiedData['security.xframe.value.nested'] && this.props.home.modifiedData['security.xframe.value'] === 'ALLOW-FROM') {
-      const xFrameValue = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM') ?
-      `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
-       : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
+      const xFrameValue = includes(this.props.home.modifiedData['security.xframe.value.nested'], 'ALLOW-FROM')
+        ? `ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`
+        : `ALLOW-FROM.ALLOW-FROM ${this.props.home.modifiedData['security.xframe.value.nested']}`;
 
       body['security.xframe.value'] = xFrameValue;
     }

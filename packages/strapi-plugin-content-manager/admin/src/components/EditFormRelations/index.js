@@ -35,15 +35,15 @@ EditFormRelations.propTypes = {
   currentModelName: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.string,
-  ]),
+  ]).isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };
 

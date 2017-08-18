@@ -430,9 +430,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   setDefaultConnectionDb = () => {
-    const value = this.state.toggleDefaultConnection ?
-      this.props.home.addDatabaseSection.sections[1].items[0].value
-        : this.props.home.modifiedData[this.props.home.dbNameTarget];
+    const value = this.state.toggleDefaultConnection
+      ? this.props.home.addDatabaseSection.sections[1].items[0].value
+      : this.props.home.modifiedData[this.props.home.dbNameTarget];
     const target = { name: 'database.defaultConnection', value };
     this.handleChange({target});
     this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
@@ -507,26 +507,26 @@ function mapDispatchToProps(dispatch) {
 }
 
 HomePage.propTypes = {
-  cancelChanges: React.PropTypes.func,
-  changeDefaultLanguage: React.PropTypes.func,
-  changeInput: React.PropTypes.func,
-  configFetch: React.PropTypes.func.isRequired,
-  databaseDelete: React.PropTypes.func,
-  databaseEdit: React.PropTypes.func,
-  databasesFetch: React.PropTypes.func,
-  editSettings: React.PropTypes.func,
-  emptyDbModifiedData: React.PropTypes.func,
-  environments: React.PropTypes.array,
-  home: React.PropTypes.object,
-  languageDelete: React.PropTypes.func,
-  languagesFetch: React.PropTypes.func,
-  location: React.PropTypes.object,
-  menuSections: React.PropTypes.array,
-  newDatabasePost: React.PropTypes.func,
-  newLanguagePost: React.PropTypes.func,
-  params: React.PropTypes.object.isRequired,
-  setErrors: React.PropTypes.func,
-  specificDatabaseFetch: React.PropTypes.func,
+  cancelChanges: React.PropTypes.func.isRequired,
+  changeDefaultLanguage: React.PropTypes.func.isRequired,
+  changeInput: React.PropTypes.func.isRequired,
+  configFetch: React.PropTypes.func.isRequired.isRequired,
+  databaseDelete: React.PropTypes.func.isRequired,
+  databaseEdit: React.PropTypes.func.isRequired,
+  databasesFetch: React.PropTypes.func.isRequired,
+  editSettings: React.PropTypes.func.isRequired,
+  emptyDbModifiedData: React.PropTypes.func.isRequired,
+  environments: React.PropTypes.array.isRequired,
+  home: React.PropTypes.object.isRequired,
+  languageDelete: React.PropTypes.func.isRequired,
+  languagesFetch: React.PropTypes.func.isRequired,
+  location: React.PropTypes.object.isRequired,
+  menuSections: React.PropTypes.array.isRequired,
+  newDatabasePost: React.PropTypes.func.isRequired,
+  newLanguagePost: React.PropTypes.func.isRequired,
+  params: React.PropTypes.object.isRequired.isRequired,
+  setErrors: React.PropTypes.func.isRequired,
+  specificDatabaseFetch: React.PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

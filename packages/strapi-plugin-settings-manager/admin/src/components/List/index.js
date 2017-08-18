@@ -51,14 +51,17 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
   }
 
   render() {
-    const button = this.props.noListButtonPopUp ? '' :
-      <ButtonPrimaryHotline
-        buttonBackground={'secondaryAddType'}
-        label={this.props.listButtonLabel}
-        handlei18n={this.props.handlei18n}
-        addShape
-        onClick={this.toggle}
-      />;
+    const button = this.props.noListButtonPopUp
+      ? ''
+      : (
+        <ButtonPrimaryHotline
+          buttonBackground={'secondaryAddType'}
+          label={this.props.listButtonLabel}
+          handlei18n={this.props.handlei18n}
+          addShape
+          onClick={this.toggle}
+        />
+      );
 
     const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
 
@@ -128,22 +131,23 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  actionBeforeOpenPopUp: React.PropTypes.func,
-  addListTitleMarginTop: React.PropTypes.bool,
-  error: React.PropTypes.bool,
-  handlei18n: React.PropTypes.bool,
-  handleListPopUpSubmit: React.PropTypes.func,
-  listButtonLabel: React.PropTypes.string,
-  listItems: React.PropTypes.array,
+  actionBeforeOpenPopUp: React.PropTypes.func.isRequired,
+  addListTitleMarginTop: React.PropTypes.bool.isRequired,
+  error: React.PropTypes.bool.isRequired,
+  formErrors: React.PropTypes.array.isRequired,
+  handlei18n: React.PropTypes.bool.isRequired,
+  handleListPopUpSubmit: React.PropTypes.func.isRequired,
+  listButtonLabel: React.PropTypes.string.isRequired,
+  listItems: React.PropTypes.array.isRequired,
   listTitle: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.object,
-  ]),
-  noListButtonPopUp: React.PropTypes.bool,
+    React.PropTypes.string.isRequired,
+    React.PropTypes.object.isRequired,
+  ]).isRequired,
+  noListButtonPopUp: React.PropTypes.bool.isRequired,
   renderRow: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.func,
-  ]),
+    React.PropTypes.bool.isRequired,
+    React.PropTypes.func.isRequired,
+  ]).isRequired,
 }
 
 export default List;

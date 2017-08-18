@@ -49,7 +49,7 @@ function Comp(props) {
 
 // Add contextTypes to get access to the admin router
 Comp.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: React.PropTypes.object.isRequired.isRequired,
 };
 
 // Hot reloadable translation json files

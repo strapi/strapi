@@ -10,7 +10,7 @@ import ToggleOption from 'components/ToggleOption';
 
 import styles from './styles.scss';
 
-function Toggle(props) {  // eslint-disable-line react/prefer-stateless-function
+function Toggle(props) { // eslint-disable-line react/prefer-stateless-function
   let content = (<option>--</option>);
 
   // If we have items, render them
@@ -28,9 +28,9 @@ function Toggle(props) {  // eslint-disable-line react/prefer-stateless-function
 }
 
 Toggle.propTypes = {
-  messages: React.PropTypes.object,
-  onToggle: React.PropTypes.func,
-  values: React.PropTypes.array,
+  messages: React.PropTypes.object.isRequired.isRequired,
+  onToggle: React.PropTypes.func.isRequired.isRequired,
+  values: React.PropTypes.array.isRequired.isRequired,
 };
 
 export default Toggle;

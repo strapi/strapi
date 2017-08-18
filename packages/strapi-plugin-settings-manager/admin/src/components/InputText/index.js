@@ -148,18 +148,21 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
 
-    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
-      : <input
-        name={this.props.target}
-        id={this.props.name}
-        onBlur={handleBlur}
-        onFocus={this.props.handleFocus}
-        onChange={this.props.handleChange}
-        value={inputValue}
-        type="text"
-        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-        placeholder={placeholder}
-      />;
+    const input = placeholder
+      ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+      : (
+        <input
+          name={this.props.target}
+          id={this.props.name}
+          onBlur={handleBlur}
+          onFocus={this.props.handleFocus}
+          onChange={this.props.handleChange}
+          value={inputValue}
+          type="text"
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          placeholder={placeholder}
+        />
+      );
 
 
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
@@ -176,21 +179,21 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputText.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.func,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func,
-  inputDescription: React.PropTypes.string,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  styles: React.PropTypes.object,
-  target: React.PropTypes.string,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
+  addRequiredInputDesign: React.PropTypes.bool.isRequired,
+  customBootstrapClass: React.PropTypes.string.isRequired,
+  deactivateErrorHighlight: React.PropTypes.bool.isRequired,
+  errors: React.PropTypes.array.isRequired,
+  handleBlur: React.PropTypes.func.isRequired,
+  handleChange: React.PropTypes.func.isRequired.isRequired,
+  handleFocus: React.PropTypes.func.isRequired,
+  inputDescription: React.PropTypes.string.isRequired,
+  name: React.PropTypes.string.isRequired.isRequired,
+  noErrorsDescription: React.PropTypes.bool.isRequired,
+  placeholder: React.PropTypes.string.isRequired,
+  styles: React.PropTypes.object.isRequired,
+  target: React.PropTypes.string.isRequired,
+  validations: React.PropTypes.object.isRequired.isRequired,
+  value: React.PropTypes.string.isRequired,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

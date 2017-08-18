@@ -29,9 +29,9 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
 }
 
 LeftMenuLink.propTypes = {
-  destination: React.PropTypes.string,
-  icon: React.PropTypes.string,
-  label: React.PropTypes.string,
+  destination: React.PropTypes.string.isRequired.isRequired,
+  icon: React.PropTypes.string.isRequired.isRequired,
+  label: React.PropTypes.string.isRequired.isRequired,
 };
 
 export default LeftMenuLink;

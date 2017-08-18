@@ -38,23 +38,27 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: `settings-manager.${languageObject.name}` }} /> : '';
 
-    const languageLabel = this.props.active ?
-      <FormattedMessage id="settings-manager.list.languages.default.languages">
-        {(message) => (
+    const languageLabel = this.props.active
+      ? (
+        <FormattedMessage id="settings-manager.list.languages.default.languages">
+          {(message) => (
 
-          <div className={this.props.liStyles.italicText} >
-            {message}
-          </div>
-        )}
-      </FormattedMessage> :
-      // set the span's id with the language name to retrieve it
+            <div className={this.props.liStyles.italicText} >
+              {message}
+            </div>
+          )}
+        </FormattedMessage>
+      )
+      : (
+        // set the span's id with the language name to retrieve it
         <FormattedMessage id="settings-manager.list.languages.set.languages">
           {(message) => (
             <button className={this.props.liStyles.normal} onClick={this.props.changeDefaultLanguage} id={this.props.name}>
               {message}
             </button>
           )}
-        </FormattedMessage>;
+        </FormattedMessage>
+      );
 
     return (
       <li>
@@ -84,12 +88,12 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowLanguage.propTypes = {
-  active: React.PropTypes.bool,
-  changeDefaultLanguage: React.PropTypes.func.isRequired,
-  handleLanguageDelete: React.PropTypes.func.isRequired,
-  listLanguages: React.PropTypes.object.isRequired,
-  liStyles: React.PropTypes.object,
-  name: React.PropTypes.string.isRequired,
+  active: React.PropTypes.bool.isRequired,
+  changeDefaultLanguage: React.PropTypes.func.isRequired.isRequired,
+  handleLanguageDelete: React.PropTypes.func.isRequired.isRequired,
+  listLanguages: React.PropTypes.object.isRequired.isRequired,
+  liStyles: React.PropTypes.object.isRequired,
+  name: React.PropTypes.string.isRequired.isRequired,
 };
 
 export default RowLanguage;

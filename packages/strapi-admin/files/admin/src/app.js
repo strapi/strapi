@@ -110,7 +110,7 @@ const registerPlugin = (plugin) => {
 
   // Create a new prefixed route for each plugin routes
   if (formattedPlugin && formattedPlugin.routes) {
-    formattedPlugin.routes.forEach(route => {
+    formattedPlugin.routes.forEach((route) => {
       pluginsRoute.childRoutes.push({
         path: `/plugins/${formattedPlugin.id}${route.path}`,
         name: `plugins_${formattedPlugin.id}_${route.name}`,

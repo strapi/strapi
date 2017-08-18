@@ -38,9 +38,9 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
-  environments: React.PropTypes.array,
-  envParams: React.PropTypes.string,
-  section: React.PropTypes.object.isRequired,
+  environments: React.PropTypes.array.isRequired,
+  envParams: React.PropTypes.string.isRequired,
+  section: React.PropTypes.object.isRequired.isRequired,
 };
 
 export default PluginLeftMenuSection;

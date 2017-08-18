@@ -13,10 +13,6 @@ import { selectPlugins } from 'containers/App/selectors';
 import styles from './styles.scss';
 
 export class Content extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  static propTypes = {
-    children: React.PropTypes.node,
-  };
-
   render() {
     return (
       <div className={styles.content}>
@@ -27,6 +23,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 }
 
 Content.propTypes = {
+  children: React.PropTypes.node.isRequired.isRequired,
 };
 
 const mapStateToProps = createSelector(

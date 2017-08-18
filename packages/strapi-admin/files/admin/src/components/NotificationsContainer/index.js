@@ -38,8 +38,8 @@ class NotificationsContainer extends React.Component { // eslint-disable-line re
 }
 
 NotificationsContainer.propTypes = {
-  notifications: React.PropTypes.object,
-  onHideNotification: React.PropTypes.func,
+  notifications: React.PropTypes.object.isRequired.isRequired,
+  onHideNotification: React.PropTypes.func.isRequired.isRequired,
 };
 
 export default NotificationsContainer;

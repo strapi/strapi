@@ -11,9 +11,9 @@ import styles from './styles.scss';
 
 class PluginHeaderActions extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const actions = this.props.actions && this.props.actions.map((action, i) => (
+    const actions = this.props.actions && this.props.actions.map((action) => (
       <button
-        key={i}
+        key={action.label}
         className={`btn ${action.class} ${styles.btn}`}
         onClick={action.onClick}
         disabled={action.disabled}
@@ -33,7 +33,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
 }
 
 PluginHeaderActions.propTypes = {
-  actions: React.PropTypes.array,
+  actions: React.PropTypes.array.isRequired.isRequired,
 };
 
 export default PluginHeaderActions;

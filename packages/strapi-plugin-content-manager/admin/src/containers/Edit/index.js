@@ -135,7 +135,7 @@ Edit.propTypes = {
   currentModelName: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.string,
-  ]),
+  ]).isRequired,
   deleteRecord: React.PropTypes.func.isRequired,
   deleting: React.PropTypes.bool.isRequired,
   editing: React.PropTypes.bool.isRequired,
@@ -147,12 +147,12 @@ Edit.propTypes = {
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   routeParams: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   setCurrentModelName: React.PropTypes.func.isRequired,
   setInitialState: React.PropTypes.func.isRequired,
   setIsCreating: React.PropTypes.func.isRequired,

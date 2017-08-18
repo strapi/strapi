@@ -56,13 +56,13 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 EditForm.propTypes = {
-  cancelAction: React.PropTypes.bool,
-  formErrors: React.PropTypes.array,
-  handleCancel: React.PropTypes.func,
-  handleChange: React.PropTypes.func.isRequired,
-  handleSubmit: React.PropTypes.func,
-  sections: React.PropTypes.array,
-  values: React.PropTypes.object,
+  cancelAction: React.PropTypes.bool.isRequired,
+  formErrors: React.PropTypes.array.isRequired,
+  handleCancel: React.PropTypes.func.isRequired,
+  handleChange: React.PropTypes.func.isRequired.isRequired,
+  handleSubmit: React.PropTypes.func.isRequired,
+  sections: React.PropTypes.array.isRequired,
+  values: React.PropTypes.object.isRequired,
 };
 
 export default EditForm;

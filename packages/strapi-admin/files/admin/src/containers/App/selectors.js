@@ -20,7 +20,7 @@ const selectLocationState = () => {
 /**
  * Direct selector to the languageToggle state domain
  */
-const selectApp = () => state => state.get('app');
+const selectApp = () => (state) => state.get('app');
 
 /**
  * Select the language locale

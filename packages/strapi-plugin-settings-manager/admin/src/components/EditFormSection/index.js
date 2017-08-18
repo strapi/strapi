@@ -56,13 +56,13 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 }
 
 EditFormSection.propTypes = {
-  formErrors: React.PropTypes.array,
-  handleChange: React.PropTypes.func,
-  renderInput: React.PropTypes.func,
-  section: React.PropTypes.object,
-  showNestedForm: React.PropTypes.bool,
-  styles: React.PropTypes.object,
-  values: React.PropTypes.object,
+  formErrors: React.PropTypes.array.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
+  renderInput: React.PropTypes.func.isRequired,
+  section: React.PropTypes.object.isRequired,
+  showNestedForm: React.PropTypes.bool.isRequired,
+  styles: React.PropTypes.object.isRequired,
+  values: React.PropTypes.object.isRequired,
 };
 
 export default WithFormSection(EditFormSection); // eslint-disable-line new-cap

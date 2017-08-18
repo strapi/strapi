@@ -58,7 +58,7 @@ App.contextTypes = {
 App.propTypes = {
   children: React.PropTypes.node.isRequired,
   exposedComponents: React.PropTypes.object.isRequired,
-  loading: React.PropTypes.bool,
+  loading: React.PropTypes.bool.isRequired,
   loadModels: React.PropTypes.func.isRequired,
   updateSchema: React.PropTypes.func.isRequired,
 };

@@ -31,9 +31,9 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
 }
 
 PluginHeader.propTypes = {
-  actions: React.PropTypes.array,
-  description: React.PropTypes.object,
-  title: React.PropTypes.object,
+  actions: React.PropTypes.array.isRequired.isRequired,
+  description: React.PropTypes.object.isRequired.isRequired,
+  title: React.PropTypes.object.isRequired.isRequired,
 };
 
 export default PluginHeader;
