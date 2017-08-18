@@ -40,7 +40,6 @@ const port = argv.port || process.env.PORT || 3000;
 module.exports = require('./webpack.base.babel')({
   // Add hot reloading in development
   entry: [
-    'eventsource-polyfill', // Necessary for hot reloading with IE
     `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
     appPath,
   ],
