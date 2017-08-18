@@ -72,9 +72,12 @@
     "expect-jsx": "2.6.0",
     "exports-loader": "0.6.3",
     "express": "4.14.0",
+    "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "0.9.0",
     "fontfaceobserver": "2.0.1",
     "history": "3.0.0",
+    "html-loader": "^0.4.3",
+    "html-webpack-plugin": "^2.22.0",
     "image-webpack-loader": "2.0.0",
     "immutable": "3.8.1",
     "imports-loader": "0.6.5",
@@ -119,10 +122,5 @@
     "webpack-dev-middleware": "1.8.4",
     "webpack-hot-middleware": "2.13.1",
     "whatwg-fetch": "1.0.0"
-  },
-  "devDependencies": {
-    "extract-text-webpack-plugin": "^2.1.2",
-    "html-loader": "^0.4.3",
-    "html-webpack-plugin": "^2.22.0"
   }
 }
