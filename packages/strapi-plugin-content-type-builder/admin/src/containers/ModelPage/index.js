@@ -8,12 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
+import { size } from 'lodash';
 
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
 
 import ContentHeader from 'components/ContentHeader';
 import EmptyAttributesView from 'components/EmptyAttributesView';
+import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
 import { modelFetch } from './actions';
@@ -37,6 +39,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    console.log(this.props.modelPage);
+    const content = size(this.props.modelPage.model.attributes) === 0 ?
+      <EmptyAttributesView handleClick={this.handleClick} /> :
+        <List />;
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">
@@ -52,9 +58,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   noI18n
                   editIcon
                 />
-                <EmptyAttributesView
-                  handleClick={this.handleClick}
-                />
+                {content}
               </div>
             </div>
           </div>

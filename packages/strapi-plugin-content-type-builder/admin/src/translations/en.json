@@ -19,6 +19,8 @@
   "menu.section.documentation.tutorial": "Check out our",
   "menu.section.documentation.tutorialLink": "tutorial video.",
 
+  "modelPage.contentHeader.emptyDescription.description": "There is no description for this Content Type",
+
   "notification.error.message": "An error occured",
 
   "table.contentType.title.plural": "Content Types are available",

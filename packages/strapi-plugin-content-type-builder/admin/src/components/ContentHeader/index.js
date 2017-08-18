@@ -14,13 +14,15 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     const editIcon = this.props.editIcon ?
       <i className="fa fa-pencil" onClick={this.edit} role="button" />
        : '';
+
+    const description = this.props.description || <FormattedMessage id={'modelPage.contentHeader.emptyDescription.description'} />
     return (
       <div className={containerClass}>
         <div className={`${styles.title} ${styles.flex}`}>
           <span>{startCase(this.props.name)}</span>
           {editIcon}
         </div>
-        <div className={styles.subTitle}>{this.props.description}</div>
+        <div className={styles.subTitle}>{description}</div>
       </div>
     );
   }
