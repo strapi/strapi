@@ -12,6 +12,8 @@ import { bindActionCreators } from 'redux';
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
 
+import ContentHeader from 'components/ContentHeader';
+import EmptyAttributesView from 'components/EmptyAttributesView';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
 import { modelFetch } from './actions';
@@ -24,6 +26,16 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     this.props.modelFetch(this.props.params.modelName);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.params.modelName !== this.props.params.modelName) {
+      this.props.modelFetch(this.props.params.modelName);
+    }
+  }
+
+  handleClick = () => {
+    console.log('click');
+  }
+
   render() {
     return (
       <div className={styles.modelPage}>
@@ -32,6 +44,19 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
             <PluginLeftMenu
               sections={this.props.menu}
             />
+            <div className="col-md-9">
+              <div className={styles.componentsContainer}>
+                <ContentHeader
+                  name={this.props.modelPage.model.name}
+                  description={this.props.modelPage.model.description}
+                  noI18n
+                  editIcon
+                />
+                <EmptyAttributesView
+                  handleClick={this.handleClick}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -56,6 +81,7 @@ function mapDispatchToProps(dispatch) {
 ModelPage.propTypes = {
   menu: React.PropTypes.array,
   modelFetch: React.PropTypes.func,
+  modelPage: React.PropTypes.object,
   params: React.PropTypes.object,
 };
 

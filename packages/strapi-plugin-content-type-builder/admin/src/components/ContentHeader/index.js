@@ -1,16 +1,41 @@
 import React from 'react';
+import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 class ContentHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  edit = () => {
+    console.log('edit');
+  }
+
+  renderContentHeader = () => {
+    const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
+    const editIcon = this.props.editIcon ?
+      <i className="fa fa-pencil" onClick={this.edit} role="button" />
+       : '';
+    return (
+      <div className={containerClass}>
+        <div className={`${styles.title} ${styles.flex}`}>
+          <span>{startCase(this.props.name)}</span>
+          {editIcon}
+        </div>
+        <div className={styles.subTitle}>{this.props.description}</div>
+      </div>
+    );
+  }
+
   render() {
     const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
+    const description = isEmpty(this.props.description) ? '' : <FormattedMessage {...{id: this.props.description}} />;
+
+    if (this.props.noI18n) return this.renderContentHeader();
     return (
       <div className={containerClass}>
         <div className={styles.title}>
           <FormattedMessage {...{id: this.props.name }} />
         </div>
-        <div className={styles.subTitle}><FormattedMessage {...{id: this.props.description}} /></div>
+        <div className={styles.subTitle}>{description}</div>
       </div>
     );
   }
@@ -18,7 +43,9 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 
 ContentHeader.propTypes = {
   description: React.PropTypes.string,
+  editIcon: React.PropTypes.bool,
   name: React.PropTypes.string,
+  noI18n: React.PropTypes.bool,
   noMargin: React.PropTypes.bool,
 };
 

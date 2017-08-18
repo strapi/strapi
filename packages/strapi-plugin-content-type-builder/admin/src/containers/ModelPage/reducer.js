@@ -18,7 +18,7 @@ function modelPageReducer(state = initialState, action) {
   switch (action.type) {
     case MODEL_FETCH_SUCCEEDED:
       return state
-        .set('model', Map(action.model));
+        .set('model', Map(action.model.model));
     default:
       return state;
   }

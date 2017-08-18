@@ -17,7 +17,9 @@ export function modelsFetchSucceeded(data) {
   const sections = [];
 
   forEach(data.models, (model) => {
-    sections.push({icon: model.icon, name: model.name});
+    // TODO uncomment if we use icon from the API
+    // sections.push({icon: model.icon, name: model.name});
+    sections.push({icon: 'fa-caret-square-o-right', name: model.name});
   });
 
   sections.push({ icon: 'fa-plus', name: 'button.contentType.add' })

@@ -1,6 +1,6 @@
 .contentHeader { /* stylelint-disable */
   position: relative;
-  margin: 2.4rem 4rem 3.3rem 4rem;
+  margin: 2.4rem 0rem 3.3rem 0rem;
   font-family: Lato;
 }
 
@@ -16,6 +16,13 @@
   font-size: 2.4rem;
   line-height: 2.9rem;
   font-weight: 600;
+  > i {
+    margin-top: 1.2rem;
+    margin-left: 1rem;
+    font-size: 1.2rem;
+    color: rgba(16,22,34,0.35);
+    cursor: pointer;
+  }
 }
 
 .subTitle {
@@ -23,4 +30,19 @@
   color: #787E8F;
   font-size: 1.3rem;
   line-height: 1.5rem;
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.icoContainer {
+  // padding-top: .3rem;
+  font-size: 1.2rem;
+  color: rgba(16,22,34,0.35);;
+  > i {
+    margin-left: 1rem;
+  }
+  // color: #101622;
 }

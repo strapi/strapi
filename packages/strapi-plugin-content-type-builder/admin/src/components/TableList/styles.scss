@@ -33,6 +33,7 @@
       background-color: #F3F3F4;
     }
     > li:not(:first-child) {
+      margin-top: 0!important;
       position: relative;
       height: 5.4rem;
       line-height: 5.4rem;

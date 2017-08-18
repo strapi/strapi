@@ -4,8 +4,13 @@
   "home.emptyContentType.title": "There is no Content Type Available",
   "home.emptyContentType.description": "Create your first Content Type to be able to retrieve data from your API.",
 
+  "home.emptyAttributes.title": "There is no fields yet",
+  "home.emptyAttributes.description": "Add your first field to your new Content Type",
+
   "button.contentType.create": "Create Content Type",
   "button.contentType.add": "Add Content Type",
+  "button.attributes.add": "Add New Field",
+
   "menu.section.contentTypeBuilder.name.plural": "Content Types",
   "menu.section.contentTypeBuilder.name.singular": "Content Type",
   "menu.section.documentation.name": "Documentation",

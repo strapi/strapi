@@ -1,3 +1,8 @@
 .modelPage { /* stylelint-disable */
+  min-height: calc(100vh - 6rem);
+  background: rgba(14,22,34,0.02);
+}
 
+.componentsContainer {
+  padding: 0 1.5rem 0 1.5rem;
 }
