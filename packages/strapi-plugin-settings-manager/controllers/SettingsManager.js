@@ -153,9 +153,10 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+
     const [name] = _.keys(params.database.connections);
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
     if (!name || _.find(Service.getDatabases(env), { name })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.exist' }] }]);
 
     const model = Service.databases(name, env);
