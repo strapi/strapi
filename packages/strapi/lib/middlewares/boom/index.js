@@ -49,6 +49,10 @@ module.exports = strapi => {
           ctx.notFound();
         }
 
+        if (ctx.body.isBoom && ctx.body.data) {
+          ctx.body.output.payload.message = ctx.body.data;
+        }
+
         // Format `ctx.body` and `ctx.status`.
         ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
         ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
