@@ -210,10 +210,13 @@ module.exports = {
     if (!_.isEmpty(validationErrors)) return ctx.badRequest(null, Service.formatErrors(validationErrors));
 
     const newName = _.get(params, `database.connections.${name}.name`);
+    const defaultConnection = params.database.defaultConnection;
 
-    const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
-    params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
-    params.settings = settings;
+    if (params.database.connections) {
+      const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
+      params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
+      params.settings = settings;
+    }
 
     delete params.name;
 
@@ -255,7 +258,7 @@ module.exports = {
           }
         }
       });
-    } else {
+    } else if (params.database.connections) {
       connections[name] = params;
     }
 
@@ -265,6 +268,11 @@ module.exports = {
 
     if (newName && newName !== name && strapi.config.environments[env].database.defaultConnection === name) {
       params.database.defaultConnection = newName;
+      items.push({
+        target: 'database.defaultConnection'
+      });
+    } else if (defaultConnection) {
+      params.database.defaultConnection = defaultConnection;
       items.push({
         target: 'database.defaultConnection'
       });
