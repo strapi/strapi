@@ -20,6 +20,13 @@
   "menu.section.documentation.tutorialLink": "tutorial video.",
 
   "modelPage.contentHeader.emptyDescription.description": "There is no description for this Content Type",
+  "modelPage.contentType.list.title.plural": "fields",
+  "modelPage.contentType.list.title.singular": "field",
+  "modelPage.contentType.list.title.including": "including",
+  "modelPage.contentType.list.relationShipTitle.plural": "relationships",
+  "modelPage.contentType.list.relationShipTitle.singular": "relationship",
+  "modelPage.attribute.relationWith": "Relation with",
+
 
   "notification.error.message": "An error occured",
 

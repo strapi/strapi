@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import { startCase } from 'lodash';
 import { Link } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
@@ -28,14 +29,14 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 
   render() {
     if (this.props.link.name === 'button.contentType.add') return this.renderAddLink();
-
+    
     return (
       <li className={styles.pluginLeftMenuLink}>
         <Link className={styles.link} to={`/plugins/content-type-builder/${this.props.link.name}`} activeClassName={styles.linkActive}>
           <div>
             <i className={`fa ${this.props.link.icon}`} />
           </div>
-          <span><FormattedMessage id={this.props.link.name} /></span>
+          <span>{startCase(this.props.link.name)}</span>
         </Link>
       </li>
     );
