@@ -39,7 +39,7 @@
     list-style: none;
     padding: 0;
     > li {
-      height: 5.2rem;
+      min-height: 5.2rem;
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
@@ -50,7 +50,7 @@
         .hoveredLanguage {
           position: absolute;
           top: -.2rem;
-          height: 5.4rem;
+          min-height: 5.4rem;
           width: 100%;
           background-color: rgba(14,22,34,0.03);
         }
@@ -107,6 +107,10 @@
 .centered {
   width: 25rem;
   text-align: right;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   > button {
     padding: 0;
   }
@@ -303,14 +307,14 @@
 .databaseFont {
   font-size: 1.3rem;
   &:hover {
-    .hovered {
-      position: absolute;
-      top: 0rem!important;
+    //.hovered {
+    //  position: absolute;
+      //top: 0rem!important;
       height: 5.2rem;
-      margin-right: 13rem!important;
-      width: 100%;
+      //margin-right: 13rem!important;
+      //width: 100%;
       background-color: rgba(14,22,34,0.03);
-    }
+    //}
   }
 }
 

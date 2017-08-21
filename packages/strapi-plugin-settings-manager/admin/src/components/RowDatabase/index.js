@@ -54,9 +54,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     return (
-      <li className={styles.databaseFont} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
-        <div className={styles.hovered} />
-
+      <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
         <div className={styles.flexLi}>
           <div className={styles.flexed}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
@@ -67,7 +65,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           <div className={styles.dbHost}>
             {this.props.data.host}
           </div>
-          <div className={styles.centered} style={{ width: '8rem'}}>{this.props.data.database}</div>
+          <div className={styles.centered} style={{ width: '15rem'}}>{this.props.data.database}</div>
           <div className={styles.flexed} style={{ minWidth: '3rem', justifyContent: 'space-between'}}>
 
             <div className={styles.ico}><i className="fa fa-pencil" id={this.props.data.name} /></div>
@@ -81,7 +79,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
             </ModalHeader>
             <div className={styles.bordered} />
 
-            <form>
+            <form autoComplete="off">
 
               <ModalBody className={styles.modalBody}>
                 <div className={styles.spacerSmall} />
