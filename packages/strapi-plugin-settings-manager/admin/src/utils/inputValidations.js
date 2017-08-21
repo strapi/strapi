@@ -41,7 +41,7 @@ export function checkFormValidity(formData, formValidations, formErrors) {
 
     if (!isEmpty(inputErrors)) errors.push({ target: key, errors: inputErrors });
 
-    if (formData['security.xframe.value'] && formData['security.xframe.value'] === 'ALLOW-FROM.ALLOW-FROM ') {
+    if (formData['security.xframe.value'] && formData['security.xframe.value'] === 'ALLOW-FROM' || formData['security.xframe.value'] === 'ALLOW-FROM.ALLOW-FROM ') {
       errors.push({ target: 'security.xframe.value.nested', errors: [{ id: 'settings-manager.request.error.validation.required' }] });
     }
   });

@@ -137,15 +137,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       }
     });
 
-    // If size of modifiedData === 2 the user hasn't filled any inputs
-    // TODO change
     const formErrors = getRequiredInputsDb(this.props.home.modifiedData, this.props.home.formErrors);
-    // const formErrors = size(this.props.home.modifiedData)  === 2 ?
-    //   getRequiredInputsDb() :
-    //   checkFormValidity(this.props.home.modifiedData, this.props.home.formValidations);
 
     if (isEmpty(formErrors)) {
-      // this.props.setErrors([]);
       this.props.newDatabasePost(this.props.params.env, newData);
     } else {
       this.props.setErrors(formErrors);
@@ -233,8 +227,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     e.preventDefault();
     const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
 
+    const isCreatingNewFields = this.props.params.slug === 'security';
     // send only updated settings
-    const body = this.sendUpdatedParams();
+    const body = this.sendUpdatedParams(isCreatingNewFields);
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
@@ -331,7 +326,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
             valueComponent={this.valueComponent}
             optionComponent={this.optionComponent}
             clearable={false}
-
           />
           <div className={styles.popUpSpacer} />
         </div>

@@ -172,7 +172,7 @@ export function newLanguagePost() {
 }
 
 
-export function languageActionSucceded() {
+export function languageActionSucceeded() {
   return {
     type: LANGUAGE_ACTION_SUCCEEDED,
   };

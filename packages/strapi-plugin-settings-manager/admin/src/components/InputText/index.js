@@ -28,7 +28,7 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, mapKeys, reject, map, isObject, union } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -49,7 +49,8 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      this.setState({ errors: nextProps.errors });
+      const errors = uniqBy(union(this.state.errors, nextProps.errors), 'id');
+      this.setState({ errors });
     }
   }
 
@@ -58,7 +59,11 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     if (!isEmpty(target.value) || this.state.hasInitialValue) {
       // validates basic string validations
       // add custom logic here such as alerts...
-      const errors = union(this.props.errors, this.validate(target.value));
+      // specific check for db
+      const indexErrorDbExist = findIndex(this.props.errors, ['id', 'settings-manager.request.error.database.exist']);
+      const errors = indexErrorDbExist !== -1 ?
+        uniqBy(union(this.props.errors, this.validate(target.value)), 'id') : this.validate(target.value);
+
       this.setState({ errors, hasInitialValue: true });
     }
   }
@@ -147,7 +152,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
-
+    
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
         name={this.props.target}

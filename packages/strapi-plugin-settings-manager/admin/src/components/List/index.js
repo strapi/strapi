@@ -61,6 +61,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
       />;
 
     const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
+    const titleSpacer = this.props.addListTitleMarginTop ? <div style={{ height: '.1rem'}} /> : '';
 
     return (
       <div className={styles.listContainer}>
@@ -73,6 +74,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               {button}
             </div>
           </div>
+          {titleSpacer}
         </div>
 
         <div className={styles.ulContainer}>

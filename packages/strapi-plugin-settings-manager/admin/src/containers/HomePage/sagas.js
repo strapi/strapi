@@ -27,6 +27,7 @@ import {
   editSettingsSucceeded,
   languagesFetchSucceeded,
   languageActionError,
+  languageActionSucceeded,
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
   databaseActionError,
@@ -190,6 +191,8 @@ export function* postLanguage() {
     yield call(request, requestUrl, opts);
 
     window.Strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
+
+    yield put(languageActionSucceeded());
 
   } catch(error) {
     yield put(languageActionError());

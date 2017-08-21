@@ -28,7 +28,7 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, map, mapKeys, isObject, reject } from 'lodash';
+import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -49,7 +49,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      this.setState({ errors: nextProps.errors });
+      this.setState({ errors: uniqBy(union(this.state.errors, nextProps.errors), 'id') });
     }
   }
 
