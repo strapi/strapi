@@ -139,7 +139,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     // If size of modifiedData === 2 the user hasn't filled any inputs
     // TODO change
-    const formErrors = getRequiredInputsDb(this.props.home.modifiedData);
+    const formErrors = getRequiredInputsDb(this.props.home.modifiedData, this.props.home.formErrors);
     // const formErrors = size(this.props.home.modifiedData)  === 2 ?
     //   getRequiredInputsDb() :
     //   checkFormValidity(this.props.home.modifiedData, this.props.home.formValidations);
@@ -213,6 +213,15 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         value = target.value;
       }
     }
+
+    if (this.props.params.slug === 'databases') {
+      if (name === this.props.home.dbNameTarget) {
+
+        const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
+          [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
+        this.props.setErrors(formErrors);
+      }
+    }
     this.props.changeInput(name, value);
   }
 
@@ -240,7 +249,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.params.env}`;
-    const formErrors = checkFormValidity(body, this.props.home.formValidations);
+    const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
     if (isEmpty(formErrors)) {

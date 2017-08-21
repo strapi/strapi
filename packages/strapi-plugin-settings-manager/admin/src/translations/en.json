@@ -111,6 +111,7 @@
   "form.language.description": "Configure your languages.",
   "form.language.choose": "Choose your language",
 
+  "request.error.database.exist": "This connection already exists",
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",
   "request.error.type.boolean": "A boolean is required.",

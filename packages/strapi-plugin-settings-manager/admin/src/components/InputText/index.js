@@ -28,7 +28,7 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject, union } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -58,7 +58,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     if (!isEmpty(target.value) || this.state.hasInitialValue) {
       // validates basic string validations
       // add custom logic here such as alerts...
-      const errors = this.validate(target.value);
+      const errors = union(this.props.errors, this.validate(target.value));
       this.setState({ errors, hasInitialValue: true });
     }
   }

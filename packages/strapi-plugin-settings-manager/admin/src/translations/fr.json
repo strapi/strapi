@@ -111,6 +111,7 @@
   "form.language.description": "Modification des langues.",
   "form.language.choose": "Choisissez votre langue",
 
+  "request.error.database.exist": "Cette connexion est déjà utilisée",
   "request.error.type.string": "Un texte est demandé.",
   "request.error.type.number": "Un nombre est demandé.",
   "request.error.type.boolean": "Un boolean est demandé.",
