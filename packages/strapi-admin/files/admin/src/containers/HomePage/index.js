@@ -1,46 +1,29 @@
 /*
+ *
  * HomePage
  *
- * This is the first thing users see of our App, at the '/' route
- *
- * NOTE: while this component should technically be a stateless functional
- * component (SFC), hot reloading does not currently support SFCs. If hot
- * reloading is not a neccessity for you then you can refactor it and remove
- * the linting exception.
  */
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { selectPlugins } from 'containers/App/selectors';
-import LeftMenu from 'containers/LeftMenu';
-import Header from 'components/Header/index';
-import Content from 'containers/Content';
-import styles from './syles.scss';
+import Helmet from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
+import messages from './messages.json';
+import styles from './styles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={styles.homePage}>
-        <LeftMenu plugins={this.props.plugins}></LeftMenu>
-        <div className={styles.homePageRightWrapper}>
-          <Header></Header>
-          <Content {...this.props}>
-
-          </Content>
-        </div>
+      <div className={styles.wrapper}>
+        <Helmet
+          title="Home Page"
+        />
+        <p><FormattedMessage {...messages.welcome} />.</p>
       </div>
     );
   }
 }
 
-HomePage.propTypes = {
-  plugins: React.PropTypes.object.isRequired,
-};
-
-const mapStateToProps = createStructuredSelector({
-  plugins: selectPlugins(),
-});
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -48,4 +31,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+export default connect(mapDispatchToProps)(HomePage);

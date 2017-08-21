@@ -1,6 +1,6 @@
 /**
  *
- * App.react.js
+ * App.js
  *
  * This component is the skeleton around the actual pages, and should only
  * contain code that should be seen on all pages. (e.g. navigation bar)
@@ -12,14 +12,13 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+import { Switch, Route } from 'react-router-dom';
 
-import { hideNotification } from 'containers/NotificationProvider/actions';
-import { selectNotifications } from 'containers/NotificationProvider/selectors';
-import NotificationsContainer from 'components/NotificationsContainer';
+import AdminPage from 'containers/AdminPage';
+import NotFoundPage from 'containers/NotFoundPage';
 
-import { selectPlugins } from './selectors';
+import NotificationProvider from 'containers/NotificationProvider';
+
 import '../../styles/main.scss';
 import styles from './styles.scss';
 
@@ -27,9 +26,12 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   render() {
     return (
       <div>
-        <NotificationsContainer onHideNotification={this.props.onHideNotification} notifications={this.props.notifications}></NotificationsContainer>
+        <NotificationProvider />
         <div className={styles.container}>
-          {React.Children.toArray(this.props.children)}
+          <Switch>
+            <Route path="/admin" component={AdminPage} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
         </div>
       </div>
     );
@@ -40,22 +42,6 @@ App.contextTypes = {
   router: React.PropTypes.object.isRequired,
 };
 
-App.propTypes = {
-  children: React.PropTypes.node.isRequired,
-  notifications: React.PropTypes.object.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired,
-};
+App.propTypes = {};
 
-const mapStateToProps = createStructuredSelector({
-  plugins: selectPlugins(),
-  notifications: selectNotifications(),
-});
-
-function mapDispatchToProps(dispatch) {
-  return {
-    onHideNotification: (id) => { dispatch(hideNotification(id)); },
-    dispatch,
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default App;

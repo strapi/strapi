@@ -10,58 +10,32 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { applyRouterMiddleware, Router, browserHistory } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux';
-import useScroll from 'react-router-scroll';
+import { ConnectedRouter } from 'react-router-redux';
+import createHistory from 'history/createBrowserHistory';
 import _ from 'lodash';
 import 'sanitize.css/sanitize.css';
 
 import LanguageProvider from 'containers/LanguageProvider';
-import NotificationProvider from 'containers/NotificationProvider';
-import { selectLocationState } from 'containers/App/selectors';
+
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 
-import createRoutes from './routes';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
 
 // Create redux store with history
-// this uses the singleton browserHistory provided by react-router
-// Optionally, this could be changed to leverage a created history
-// e.g. `const browserHistory = useRouterHistory(createBrowserHistory)();`
 const initialState = {};
-const store = configureStore(initialState, browserHistory);
-
-// Sync history and store, as the react-router-redux reducer
-// is under the non-default key ("routing"), selectLocationState
-// must be provided for resolving how to retrieve the "route" in the state
-const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState: selectLocationState(),
-});
-
-// Set up the router, wrapping all Routes in the App component
-const rootRoute = {
-  component: App,
-  childRoutes: createRoutes(store),
-};
+const history = createHistory();
+const store = configureStore(initialState, history);
 
 const render = (translatedMessages) => {
   ReactDOM.render(
     <Provider store={store}>
       <LanguageProvider messages={translatedMessages}>
-        <NotificationProvider>
-          <Router
-            history={history}
-            routes={rootRoute}
-            render={
-              // Scroll to top when going to a new page, imitating default browser
-              // behaviour
-              applyRouterMiddleware(useScroll())
-            }
-          />
-        </NotificationProvider>
+        <ConnectedRouter history={history}>
+          <App />
+        </ConnectedRouter>
       </LanguageProvider>
     </Provider>,
     document.getElementById('app')
@@ -160,7 +134,7 @@ window.Strapi = {
       store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
-  router: browserHistory,
+  // router: browserHistory,
   languages,
 };
 

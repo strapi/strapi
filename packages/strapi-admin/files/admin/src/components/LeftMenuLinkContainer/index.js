@@ -68,17 +68,17 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
             <LeftMenuLink
               icon="cubes"
               label={messages.listPlugins.id}
-              destination="/list-plugins"
+              destination="/admin/list-plugins"
             />
             <LeftMenuLink
               icon="download"
               label={messages.installNewPlugin.id}
-              destination="/install-plugin"
+              destination="/admin/install-plugin"
             />
             <LeftMenuLink
               icon="gear"
               label={messages.configuration.id}
-              destination="/configuration"
+              destination="/admin/configuration"
             />
           </ul>
         </div>

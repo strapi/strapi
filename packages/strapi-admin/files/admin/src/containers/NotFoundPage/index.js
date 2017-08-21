@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import styles from './styles.scss';
 import messages from './messages.json';
@@ -28,7 +28,7 @@ export default class NotFound extends React.Component { // eslint-disable-line r
         <h2 className={styles.notFoundDescription}>
           <FormattedMessage {...messages.description} />
         </h2>
-        <Link to={'/'}>Back to home page.</Link>
+        <Link to="/admin">Back to home page.</Link>
       </div>
     );
   }

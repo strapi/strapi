@@ -6,27 +6,38 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 
-import selectNotificationProvider from './selectors';
+import NotificationsContainer from 'components/NotificationsContainer';
+import { selectNotifications } from './selectors';
+import { hideNotification } from './actions';
+
 
 export class NotificationProvider extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div>
-        {React.Children.only(this.props.children)}
-      </div>
+      <NotificationsContainer
+        onHideNotification={this.props.onHideNotification}
+        notifications={this.props.notifications}
+      />
     );
   }
 }
 
 NotificationProvider.propTypes = {
-  children: React.PropTypes.object.isRequired,
+  notifications: React.PropTypes.object.isRequired,
+  onHideNotification: React.PropTypes.func.isRequired,
 };
 
-const mapStateToProps = selectNotificationProvider();
+const mapStateToProps = createStructuredSelector({
+  notifications: selectNotifications(),
+});
 
 function mapDispatchToProps(dispatch) {
   return {
+    onHideNotification: (id) => {
+      dispatch(hideNotification(id));
+    },
     dispatch,
   };
 }
