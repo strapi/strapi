@@ -22,7 +22,7 @@ const fs = require('fs-extra');
 module.exports = function (scope, cb) {
 
   // Copy the admin files.
-  fs.copySync(path.resolve(__dirname, '..', 'node_modules', 'strapi-admin', 'files'), path.resolve(scope.rootPath, 'admin'));
+  fs.copySync(path.resolve(__dirname, '..', 'node_modules', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'));
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {

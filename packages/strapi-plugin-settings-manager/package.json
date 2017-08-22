@@ -42,7 +42,7 @@
     "eslint-plugin-babel": "^4.1.2",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.2.1",
+    "eslint-plugin-react": "^7.3.0",
     "eslint-plugin-redux-saga": "^0.4.0",
     "plop": "^1.8.0",
     "prettier": "^1.5.3",
