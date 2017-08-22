@@ -8,12 +8,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
-import { pluginId, pluginName, pluginDescription } from 'app';
+import { compose } from 'redux';
+
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
+
 import Button from 'components/Button';
 
 import styles from './styles.scss';
 import { loadData } from './actions';
 import { makeSelectLoading, makeSelectData } from './selectors';
+import reducer from './reducer';
+import saga from './saga';
 
 export class HomePage extends React.Component {
   generateDataBlock() {
@@ -34,25 +40,10 @@ export class HomePage extends React.Component {
     // Generate the data block
     const dataBlock = this.generateDataBlock();
 
-    // Plugin header config
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
-    const pluginHeaderTitle = pluginName;
-    const pluginHeaderDescription = pluginDescription;
-
     return (
       <div className={styles.homePage}>
-        <PluginHeader
-          title={{
-            id: `${pluginId}-title`,
-            defaultMessage: pluginHeaderTitle,
-          }}
-          description={{
-            id: `${pluginId}-description`,
-            defaultMessage: pluginHeaderDescription,
-          }}
-        />
         <div className="row">
-          <div className="col-md-12">
+          <div className="col-md-12">eiuaei
             <p>This is an example of a fake API call.</p>
             <p>Loading: {this.props.loading ? 'yes' : 'no'}.</p>
             {dataBlock}
@@ -69,7 +60,7 @@ export class HomePage extends React.Component {
 }
 
 HomePage.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: React.PropTypes.object,
 };
 
 HomePage.propTypes = {
@@ -77,9 +68,9 @@ HomePage.propTypes = {
     React.PropTypes.bool,
     React.PropTypes.object,
   ]),
-  exposedComponents: React.PropTypes.object.isRequired,
-  loadData: React.PropTypes.func.isRequired,
-  loading: React.PropTypes.bool.isRequired,
+  exposedComponents: React.PropTypes.object,
+  loadData: React.PropTypes.func,
+  loading: React.PropTypes.bool,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -94,6 +85,13 @@ const mapStateToProps = createStructuredSelector({
   data: makeSelectData(),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  injectIntl(HomePage)
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: 'homePage', reducer });
+const withSaga = injectSaga({ key: 'homePage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(injectIntl(HomePage));

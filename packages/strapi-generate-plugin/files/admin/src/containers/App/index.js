@@ -8,32 +8,29 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import { Switch, Route } from 'react-router-dom';
+import { compose } from 'redux';
+
+import HomePage from 'containers/HomePage';
+
 import { pluginId } from 'app';
 
 class App extends React.Component {
   render() {
-    // Assign plugin component to children
-    const content = React.Children.map(this.props.children, child =>
-      React.cloneElement(child, {
-        exposedComponents: this.props.exposedComponents,
-      })
-    );
-
+    console.log(this.props.match);
+    
     return (
       <div className={pluginId}>
-        {React.Children.toArray(content)}
+        <Switch>
+          <Route path="" component={HomePage} exact />
+        </Switch>
       </div>
     );
   }
 }
 
-App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
-};
-
 App.propTypes = {
-  children: React.PropTypes.node.isRequired,
-  exposedComponents: React.PropTypes.object.isRequired,
+  match: React.PropTypes.object,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -45,4 +42,8 @@ export function mapDispatchToProps(dispatch) {
 const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+export default compose(
+  withConnect,
+)(App);

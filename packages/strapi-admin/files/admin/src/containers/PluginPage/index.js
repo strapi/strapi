@@ -12,9 +12,14 @@ import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    // Detect plugin id from url params
+    const pluginId = this.props.match.params.pluginId;
+
     const containers = this.props.plugins.valueSeq().map((plugin) => {
-      const Elem = plugin.get('mainComponent');
-      return <Elem key={plugin.get('id')} {...this.props} />;
+      if (plugin.get('id') === pluginId) {
+        const Elem = plugin.get('mainComponent');
+        return <Elem key={plugin.get('id')} {...this.props} />;
+      }
     });
 
     return (
@@ -36,6 +41,7 @@ PluginPage.contextTypes = {
 };
 
 PluginPage.propTypes = {
+  match: React.PropTypes.object.isRequired,
   plugins: React.PropTypes.object.isRequired,
 };
 
