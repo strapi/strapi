@@ -30,6 +30,10 @@
 
   "notification.error.message": "An error occured",
 
+  "popUpForm.contentType.header.title": "Add New Content Type",
+  "popUpForm.navContainer.base": "Base settings",
+  "popUpForm.navContainer.advanced": "Advanced settings",
+
   "table.contentType.title.plural": "Content Types are available",
   "table.contentType.title.singular": "Content Type is available",
   "table.contentType.head.name": "Name",

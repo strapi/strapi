@@ -1,3 +1,70 @@
 .popUpForm { /* stylelint-disable */
+  font-family: Lato;
+}
 
+.modalPosition {
+  top: 16.8rem;
+  > div {
+    border:none;
+  }
+}
+
+.popUpFormHeader {
+  margin: 0 2.9rem;
+  padding: 1.3rem 0 2.2rem 0;
+  // border-bottom: 1px solid blue;
+  border-bottom: 1px solid #F6F6F6;
+  position: relative;
+  // >h4 {
+  //   font-weight: bold!important;
+  //   font-size: 1.8rem!important;
+  // }
+  > button {
+    margin-right: -1.5rem;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0;
+    }
+  }
+}
+
+.contentType {
+  > div {
+    width: 74.5rem;
+  }
+}
+
+.modalFooter {
+  border: none;
+}
+
+.headerContainer {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: flex;
+  padding: 1.6rem 2.9rem 0 2.9rem;
+}
+
+.titleContainer {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.navContainer {
+  display: flex;
+  height: 3.8rem;
+  margin-left: 5rem;
+  padding-top: .6rem;
+  color: #9EA7B8;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  >div:last-child {
+    margin-left: 3rem;
+    border-bottom: 1px solid black;
+  }
 }

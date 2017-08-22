@@ -30,6 +30,10 @@
 
   "notification.error.message": "Une erreur est survenue",
 
+  "popUpForm.contentType.header.title": "Ajouter un Nouveau Modèle",
+  "popUpForm.navContainer.base": "Réglages de base",
+  "popUpForm.navContainer.advanced": "Réglages avancés",
+
   "table.contentType.title.plural": "Modèles sont disponibles",
   "table.contentType.title.singular": "Modèle est disponible",
   "table.contentType.head.name": "Nom",

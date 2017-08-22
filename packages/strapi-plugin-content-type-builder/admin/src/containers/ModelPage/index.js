@@ -42,7 +42,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClick} /> :
         <List model={this.props.modelPage.model} />;
-      console.log(this.props.modelPage)
+        
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">

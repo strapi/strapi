@@ -22,7 +22,7 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
           </FormattedMessage>
           <div className={styles.buttonContainer}>
             <Button
-              onClick={this.props.handleClick}
+              onClick={this.props.handleButtonClick}
               buttonBackground={'primary'}
               label={'button.contentType.create'}
               addShape
@@ -30,13 +30,14 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
             />
           </div>
         </div>
+
       </div>
     );
   }
 }
 
 EmptyContentTypeView.propTypes = {
-  handleClick: React.PropTypes.func,
+  handleButtonClick: React.PropTypes.func,
 };
 
 export default EmptyContentTypeView;

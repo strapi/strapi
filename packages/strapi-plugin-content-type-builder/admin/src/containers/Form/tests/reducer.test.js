@@ -1,6 +1,6 @@
 import expect from 'expect';
-import formReducer from '../reducer';
 import { fromJS } from 'immutable';
+import formReducer from '../reducer';
 
 describe('formReducer', () => {
   it('returns the initial state', () => {

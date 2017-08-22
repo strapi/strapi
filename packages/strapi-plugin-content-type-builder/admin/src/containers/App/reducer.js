@@ -4,14 +4,14 @@
  *
  */
 
-import { fromJS, Map, List } from 'immutable';
+import { fromJS, List } from 'immutable';
 import { MODELS_FETCH, MODELS_FETCH_SUCCEEDED } from './constants';
 
 /* eslint-disable new-cap */
 const initialState = fromJS({
   loading: true,
   menu: List(),
-  models: Map(),
+  models: List(),
 });
 
 function appReducer(state = initialState, action) {

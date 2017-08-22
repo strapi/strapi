@@ -12,6 +12,8 @@ import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import { makeSelectLoading, makeSelectModels } from 'containers/App/selectors';
 
+import Form from 'containers/Form';
+
 // Design
 import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
@@ -21,10 +23,15 @@ import selectHomePage from './selectors';
 import styles from './styles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  constructor(props) {
+    super(props);
 
-  handleClick = () => {
-    console.log('ici', this.props.homePage);
+    this.state = {
+      showModal: false,
+    };
   }
+
+  toggleModal = () => this.setState({ showModal: !this.state.showModal });
 
   renderTableListComponent = () => {
     const availableNumber = size(this.props.models);
@@ -35,7 +42,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         availableNumber={availableNumber}
         title={title}
         buttonLabel={'button.contentType.add'}
-        handleButtonClick={this.handleClick}
+        handleButtonClick={this.toggleModal}
         rowItems={this.props.models}
       />
     );
@@ -46,7 +53,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.modelsLoading) return <div />;
 
     const component = size(this.props.models) === 0 ?
-      <EmptyContentTypeView handleClick={this.handleClick} />
+      <EmptyContentTypeView handleButtonClick={this.toggleModal} />
         : this.renderTableListComponent();
 
     return (
@@ -63,6 +70,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           noMargin
         />
         {component}
+        <Form
+          isOpen={this.state.showModal}
+          toggle={this.toggleModal}
+          popUpFormType={'contentType'}
+        />
       </div>
     );
   }
@@ -82,7 +94,7 @@ function mapDispatchToProps(dispatch) {
 };
 
 HomePage.propTypes =  {
-  homePage: React.PropTypes.object.isRequired,
+  // homePage: React.PropTypes.object.isRequired,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,
