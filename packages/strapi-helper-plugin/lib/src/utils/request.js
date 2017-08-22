@@ -1,5 +1,4 @@
 import 'whatwg-fetch';
-import _ from 'lodash';
 
 /**
  * Parses the JSON returned by a network request
@@ -20,7 +19,6 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response) {
-
   if (response.status >= 200 && response.status < 300) {
     return response;
   }

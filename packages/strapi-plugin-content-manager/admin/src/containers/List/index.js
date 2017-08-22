@@ -7,12 +7,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import { compose } from 'redux';
 import _ from 'lodash';
+import { router } from 'app';
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
+import PluginHeader from 'components/PluginHeader';
+
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
 
 import styles from './styles.scss';
 import {
@@ -34,11 +40,13 @@ import {
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
+import reducer from './reducer';
+import saga from './sagas';
 
 export class List extends React.Component {
   componentWillMount() {
     // Init the view
-    this.init(this.props.routeParams.slug);
+    this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -66,15 +74,13 @@ export class List extends React.Component {
     this.props.loadCount();
 
     // Define the `create` route url
-    this.addRoute = `${this.props.route.path.replace(':slug', slug)}/create`;
+    this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
   }
 
   render() {
     if (!this.props.currentModelName || !this.props.schema) {
       return <div />;
     }
-
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
 
     let content;
     if (this.props.loadingRecords) {
@@ -100,12 +106,12 @@ export class List extends React.Component {
         <Table
           records={this.props.records}
           route={this.props.route}
-          routeParams={this.props.routeParams}
           headers={tableHeaders}
           changeSort={this.props.changeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
+          match={this.props.match}
         />
       );
     }
@@ -115,7 +121,7 @@ export class List extends React.Component {
       {
         label: 'content-manager.containers.List.addAnEntry',
         class: 'btn-primary',
-        onClick: () => this.context.router.push(this.addRoute),
+        onClick: () => router.push(this.addRoute),
       },
     ];
 
@@ -168,13 +174,13 @@ List.propTypes = {
     React.PropTypes.bool,
   ]).isRequired,
   currentPage: React.PropTypes.number.isRequired,
-  exposedComponents: React.PropTypes.object.isRequired,
   history: React.PropTypes.object.isRequired,
   limit: React.PropTypes.number.isRequired,
   loadCount: React.PropTypes.func.isRequired,
   loadingRecords: React.PropTypes.bool.isRequired,
   loadRecords: React.PropTypes.func.isRequired,
   location: React.PropTypes.object.isRequired,
+  match: React.PropTypes.object.isRequired,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -186,7 +192,6 @@ List.propTypes = {
     React.PropTypes.bool,
   ]).isRequired,
   route: React.PropTypes.object.isRequired,
-  routeParams: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -234,4 +239,13 @@ const mapStateToProps = createStructuredSelector({
   schema: makeSelectSchema(),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(List);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: 'list', reducer });
+const withSaga = injectSaga({ key: 'list', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(List);

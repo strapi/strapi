@@ -67,28 +67,6 @@ module.exports = require('./webpack.base.babel')({
     publicPath: `${isAdmin ? 'http://localhost:1337/admin/' : `/${pluginId}/`}`,
   },
 
-  // Transform our own .scss files
-  cssLoaders: [{
-    loader: 'style-loader',
-  }, {
-    loader: 'css-loader',
-    options: {
-      localIdentName: `${isAdmin ? 'admin' : pluginId}[local]__[path][name]__[hash:base64:5]`,
-      modules: true,
-      importLoaders: 1,
-      sourceMap: true,
-    },
-  }, {
-    loader: 'postcss-loader',
-    options: {
-      config: {
-        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
-      },
-    },
-  }, {
-    loader: 'sass-loader',
-  }],
-
   // In production, we minify our CSS with cssnano
   postcssPlugins: [
     postcssFocus(),

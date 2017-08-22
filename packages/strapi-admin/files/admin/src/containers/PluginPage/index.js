@@ -9,17 +9,12 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createSelector } from 'reselect';
 import { selectPlugins } from 'containers/App/selectors';
-import PluginHeader from 'components/PluginHeader';
-
-const exposedComponents = {
-  PluginHeader,
-};
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const containers = this.props.plugins.valueSeq().map((plugin) => {
       const Elem = plugin.get('mainComponent');
-      return <Elem key={plugin.get('id')} {...this.props} exposedComponents={exposedComponents}></Elem>;
+      return <Elem key={plugin.get('id')} {...this.props} />;
     });
 
     return (

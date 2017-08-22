@@ -34,7 +34,6 @@ const logger = require('../../server/logger');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const dllPlugin = pkg.dllPlugin;
-const pluginId = pkg.name.replace(/^strapi-/i, '');
 const port = argv.port || process.env.PORT || 3000;
 
 module.exports = require('./webpack.base.babel')({
@@ -52,29 +51,7 @@ module.exports = require('./webpack.base.babel')({
   },
 
   // Add development plugins
-  plugins: dependencyHandlers().concat(plugins), // eslint-disable-line no-use-before-define
-
-  // Transform our own .scss files
-  cssLoaders: [{
-    loader: 'style-loader',
-  }, {
-    loader: 'css-loader',
-    options: {
-      localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
-      modules: true,
-      importLoaders: 1,
-      sourceMap: true,
-    },
-  }, {
-    loader: 'postcss-loader',
-    options: {
-      config: {
-        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
-      },
-    },
-  }, {
-    loader: 'sass-loader',
-  }],
+  plugins: dependencyHandlers().concat(plugins), // eslint-disable-line no-use-before-define,
 
   // Process the CSS with PostCSS
   postcssPlugins: [

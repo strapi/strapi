@@ -9,6 +9,9 @@ import PluginHeaderTitle from 'components/PluginHeaderTitle';
 import PluginHeaderActions from 'components/PluginHeaderActions';
 
 import styles from './styles.scss';
+// const styles = {};
+console.log('styles', styles);
+
 
 class PluginHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
