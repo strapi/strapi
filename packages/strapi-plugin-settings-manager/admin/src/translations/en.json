@@ -16,7 +16,7 @@
   "form.button.confirm": "Confim",
 
   "form.databases.name": "Databases",
-  "form.databases.description": "Configure your databases settings by environnement",
+  "form.databases.description": "Configure your databases settings by environnement.",
 
   "form.database.item.name": "Connection Name",
   "form.database.item.client": "Client",
@@ -46,6 +46,8 @@
   "form.advanced.item.admin": "Admin dashboard url",
   "form.advanced.item.prefix": "Prefix API",
 
+  "form.request.name": "Request",
+  "form.request.description": "Configure your request settings.",
   "form.request.item.logger.enabled": "Logger",
   "form.request.item.parser": "Parser",
   "form.request.item.parser.enabled": "Parser activation",
@@ -53,14 +55,15 @@
   "form.request.item.prefix": "Prefix",
   "form.request.item.prefix.enabled": "Prefix activation",
   "form.request.item.prefix.prefix": "Prefix",
-  "form.request.item.logger.level": "Form.Request.Item.Logger.Level",
-  "form.request.item.logger.exposeInContext": "form.request.item.logger.exposeInContext",
-  "form.request.item.logger.requests": "form.request.item.logger.requests",
-  "form.request.item.router": "form.request.item.router",
-  "form.request.item.router.prefix": "form.request.item.router.prefix",
+  "form.request.item.logger": "Logger",
+  "form.request.item.logger.level": "Level",
+  "form.request.item.logger.exposeInContext": "Expose in context",
+  "form.request.item.logger.requests": "Requests",
+  "form.request.item.router": "Router",
+  "form.request.item.router.prefix": "Prefix",
 
   "form.response.name": "Response",
-  "form.response.description": "Configure your response settings",
+  "form.response.description": "Configure your response settings.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Response Time",
 
@@ -109,7 +112,7 @@
 
   "form.language.name": "Languages",
   "form.language.description": "Configure your languages.",
-  "form.language.choose": "Choose your language",
+  "form.language.choose": "Choose a language",
 
   "request.error.database.exist": "This connection already exists",
   "request.error.type.string": "A text is required.",
