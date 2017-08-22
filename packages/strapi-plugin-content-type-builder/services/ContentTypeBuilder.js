@@ -29,11 +29,11 @@ module.exports = {
       const relation = _.find(model.associations, { alias: name });
 
       if (relation) {
-        params = {
-          target: relation.model || relation.collection,
-          key: relation.via,
-          nature: relation.nature
-        };
+        params = _.omit(params, ['collection', 'model', 'via']);
+        params.target = relation.model || relation.collection;
+        params.key = relation.via;
+        params.nature = relation.nature;
+        params.targetColumnName = _.get(strapi.models[params.target].attributes[params.key], 'columnName', '');
       }
 
       attributes.push({
