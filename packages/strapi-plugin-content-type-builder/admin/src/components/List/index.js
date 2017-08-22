@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { forEach, has, map, size } from 'lodash';
+import { get, forEach, filter, has, map, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import ButtonPrimaryHotline from 'components/Button';
 import AttributeRow from 'components/AttributeRow';
@@ -18,16 +18,13 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     const title = availableNumber > 1 ? 'modelPage.contentType.list.title.plural'
       : 'modelPage.contentType.list.title.singular';
 
-    let relationShipNumber = 0;
-
-    forEach(this.props.model.attributes, (attribute) => {
-      if (has(attribute.params, 'model')) relationShipNumber += 1;
-    });
+    const relationShipNumber = this.props.model.attributes.filter(attr => has(attr.params, 'model')).length;
 
     const relationShipTitle = relationShipNumber > 1 ? 'modelPage.contentType.list.relationShipTitle.plural'
       : 'modelPage.contentType.list.relationShipTitle.singular';
 
     let fullTitle;
+
     if (relationShipNumber > 0) {
       fullTitle = (
         <div className={styles.titleContainer}>

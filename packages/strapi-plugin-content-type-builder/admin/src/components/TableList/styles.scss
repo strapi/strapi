@@ -96,6 +96,7 @@
 .icContainer {
   display: flex;
   justify-content: flex-end;
+  z-index: 9999;
   > div {
     height: 100%;
     color: #0E1622;

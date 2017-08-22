@@ -11,19 +11,22 @@ import { router } from 'app';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 class LiTableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  edit = () => {
+  edit = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('edit', this.props.rowItem.name);
   }
 
-  delete = () => {
+  delete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('delete', this.props.rowItem.name);
   }
 
   goTo = (e) => {
-    if (!includes(e.target.className, 'ico')) {
-      router.push(`/plugins/content-type-builder/${this.props.rowItem.name}`);
-    }
+    router.push(`/plugins/content-type-builder/${this.props.rowItem.name}`);
   }
+
   render() {
     return (
       <li>
@@ -34,11 +37,11 @@ class LiTableList extends React.Component { // eslint-disable-line react/prefer-
           <div className="col-md-3 text-center">{this.props.rowItem.fields}</div>
           <div className="col-md-1">
             <div className={styles.icContainer}>
-              <div className="ico">
-                <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
+              <div>
+                <i className="fa fa-pencil" onClick={this.edit} role="button" />
               </div>
-              <div className="ico">
-                <i className="fa fa-trash ico" onClick={this.delete} role="button" />
+              <div>
+                <i className="fa fa-trash" onClick={this.delete} role="button" />
               </div>
             </div>
           </div>
