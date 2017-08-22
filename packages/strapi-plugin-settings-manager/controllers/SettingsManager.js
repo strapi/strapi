@@ -222,6 +222,7 @@ module.exports = {
 
     const connections = _.clone(strapi.config.environments[env].database.connections);
 
+
     if (newName && newName !== name) {
       connections[newName] = params;
       connections[name] = undefined;
@@ -258,7 +259,7 @@ module.exports = {
           }
         }
       });
-    } else if (params.database.connections) {
+    } else if (params.settings) {
       connections[name] = params;
     }
 
