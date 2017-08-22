@@ -37,11 +37,11 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
           <Header />
           <Content {...this.props}>
             <Switch>
-              <Route path="/admin" component={HomePage} exact />
-              <Route path="/admin/plugins" component={PluginPage} />
-              <Route path="/admin/list-plugins" component={ComingSoonPage} exact />
-              <Route path="/admin/install-plugin" component={ComingSoonPage} exact />
-              <Route path="/admin/configuration" component={ComingSoonPage} exact />
+              <Route path="/" component={HomePage} exact />
+              <Route path="/plugins" component={PluginPage} />
+              <Route path="/list-plugins" component={ComingSoonPage} exact />
+              <Route path="/install-plugin" component={ComingSoonPage} exact />
+              <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
             </Switch>
           </Content>

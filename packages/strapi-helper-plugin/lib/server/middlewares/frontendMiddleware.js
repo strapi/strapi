@@ -14,8 +14,8 @@ const addDevMiddlewares = (app, webpackConfig) => {
     silent: true,
     stats: 'errors-only',
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      'Access-Control-Allow-Origin': '*',
+    },
   });
 
   app.use(middleware);

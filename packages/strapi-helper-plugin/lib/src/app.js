@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { syncHistoryWithStore } from 'react-router-redux';
+
 import App from 'containers/App'; // eslint-disable-line
-import { selectLocationState } from 'containers/App/selectors'; // eslint-disable-line
-import configureStore from 'store';
-import createRoutes from 'routes';
+
+import configureStore from './store';
 import { translationMessages } from './i18n';
 
 // Plugin identifier based on the package.json `name` value
@@ -25,18 +24,9 @@ const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 const router = window.Strapi.router;
 
-// Create redux store with history
-// this uses the singleton browserHistory provided by react-router
-// Optionally, this could be changed to leverage a created history
-// e.g. `const browserHistory = useRouterHistory(createBrowserHistory)();`
+// Create redux store with Strapi admin history
 const store = configureStore({}, window.Strapi.router);
 
-// Sync history and store, as the react-router-redux reducer
-// is under the non-default key ("routing"), selectLocationState
-// must be provided for resolving how to retrieve the "route" in the state
-syncHistoryWithStore(window.Strapi.router, store, {
-  selectLocationState: selectLocationState(),
-});
 
 // Define the plugin root component
 function Comp(props) {
@@ -75,7 +65,6 @@ window.Strapi.registerPlugin({
   id: pluginId,
   leftMenuLinks: [],
   mainComponent: Comp,
-  routes: createRoutes(store),
   translationMessages,
 });
 

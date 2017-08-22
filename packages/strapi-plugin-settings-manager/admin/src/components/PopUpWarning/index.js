@@ -71,9 +71,9 @@ PopUpWarning.propTypes = {
   dangerMessage: React.PropTypes.string.isRequired,
   handleConfirm: React.PropTypes.func.isRequired,
   handleConfirmDanger: React.PropTypes.func.isRequired,
-  isOpen: React.PropTypes.bool.isRequired.isRequired,
+  isOpen: React.PropTypes.bool.isRequired,
   showDanger: React.PropTypes.bool.isRequired,
-  toggleModal: React.PropTypes.func.isRequired.isRequired,
+  toggleModal: React.PropTypes.func.isRequired,
   warningMessage: React.PropTypes.string.isRequired,
 }
 

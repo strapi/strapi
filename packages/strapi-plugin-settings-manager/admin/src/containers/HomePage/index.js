@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
@@ -35,11 +35,14 @@ import List from 'components/List';
 import RowDatabase from 'components/RowDatabase';
 import SelectOptionLanguage from 'components/SelectOptionLanguage';
 import RowLanguage from 'components/RowLanguage';
+import PluginLeftMenu from 'components/PluginLeftMenu';
 
 // App selectors
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 
 // utils
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
 import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
@@ -61,7 +64,9 @@ import {
   newDatabasePost,
   setErrors,
   specificDatabaseFetch,
-} from './actions'
+} from './actions';
+import reducer from './reducer';
+import saga from './sagas';
 
 import styles from './styles.scss';
 import config from './config.json';
@@ -89,7 +94,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   componentDidMount() {
-    if (this.props.params.slug) {
+    if (this.props.match.params.slug) {
       this.handleFetch(this.props);
     } else {
       router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
@@ -98,15 +103,15 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
-    if (this.props.params.slug !== nextProps.params.slug && nextProps.params.slug) {
-      if (nextProps.params.slug) {
+    if (this.props.match.params.slug !== nextProps.match.params.slug && nextProps.match.params.slug) {
+      if (nextProps.match.params.slug) {
         // get data from api if params slug updated
         this.handleFetch(nextProps);
       } else {
         // redirect user if no params slug provided
         router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
       }
-    } else if (this.props.params.env !== nextProps.params.env && nextProps.params.env && this.props.params.env) {
+    } else if (this.props.match.params.env !== nextProps.match.params.env && nextProps.match.params.env && this.props.match.params.env) {
       // get data if params env updated
       this.handleFetch(nextProps);
     }
@@ -146,7 +151,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
-      this.props.newDatabasePost(this.props.params.env, newData);
+      this.props.newDatabasePost(this.props.match.params.env, newData);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -185,18 +190,18 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   getDatabase = (databaseName) => {
     // allow state here just for modal purpose
-    this.props.specificDatabaseFetch(databaseName, this.props.params.env);
+    this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
     // this.setState({ modal: !this.state.modal });
   }
 
   handleFetch(props) {
-    const apiUrl = props.params.env ? `${props.params.slug}/${props.params.env}` : props.params.slug;
+    const apiUrl = props.match.params.env ? `${props.match.params.slug}/${props.match.params.env}` : props.match.params.slug;
 
-    switch(props.params.slug) {
+    switch(props.match.params.slug) {
       case 'languages':
         return this.props.languagesFetch();
       case 'databases':
-        return this.props.databasesFetch(props.params.env);
+        return this.props.databasesFetch(props.match.params.env);
       default:
         return this.props.configFetch(apiUrl);
     }
@@ -206,7 +211,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
     let name = target.name;
 
-    if (this.props.params.slug === 'security') {
+    if (this.props.match.params.slug === 'security') {
       // the only case where the input doesn't have a name
       if (target.name === '') {
         name = 'security.xframe.value.nested';
@@ -222,7 +227,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleSubmit = (e) => { // eslint-disable-line consistent-return
     e.preventDefault();
-    const apiUrl = this.props.params.env ? `${this.props.params.slug}/${this.props.params.env}` : this.props.params.slug;
+    const apiUrl = this.props.match.params.env ? `${this.props.match.params.slug}/${this.props.match.params.env}` : this.props.match.params.slug;
 
     // send only updated settings
     const body = this.sendUpdatedParams();
@@ -239,7 +244,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
-    const apiUrl = `${databaseName}/${this.props.params.env}`;
+    const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
@@ -255,7 +260,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleDatabaseDelete = (dbName) => {
     window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
-    this.props.databaseDelete(dbName, this.props.params.env);
+    this.props.databaseDelete(dbName, this.props.match.params.env);
   }
 
   // function used for react-select option
@@ -275,12 +280,12 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   renderListTitle = () => {
     const availableContentNumber = this.props.home.configsDisplay.sections.length;
-    const title = availableContentNumber > 1 ? `list.${this.props.params.slug}.title.plural` : `list.${this.props.params.slug}.title.singular`;
+    const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
     return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
   }
 
-  renderListButtonLabel = () => `list.${this.props.params.slug}.button.label`;
+  renderListButtonLabel = () => `list.${this.props.match.params.slug}.button.label`;
 
   renderPopUpFormDatabase = (section, props, popUpStyles) => (
     map(section.items, (item, key) => {
@@ -352,21 +357,21 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
-    let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.params.slug));
+    let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.match.params.slug));
 
     if (!specificComponent) {
       // Check if params env : render HeaderNav component
-      specificComponent = !this.props.params.env ? 'defaultComponent' : 'defaultComponentWithEnvironments';
+      specificComponent = !this.props.match.params.env ? 'defaultComponent' : 'defaultComponentWithEnvironments';
     }
 
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
-    const addRequiredInputDesign = this.props.params.slug === 'databases';
-    const listTitle = this.props.params.slug === 'languages' || 'databases' ? this.renderListTitle() : '';
-    const listButtonLabel = this.props.params.slug === 'languages' || 'databases' ? this.renderListButtonLabel() : '';
+    const addRequiredInputDesign = this.props.match.params.slug === 'databases';
+    const listTitle = this.props.match.params.slug === 'languages' || 'databases' ? this.renderListTitle() : '';
+    const listButtonLabel = this.props.match.params.slug === 'languages' || 'databases' ? this.renderListButtonLabel() : '';
 
     // check if HeaderNav component needs to render a form or a list
-    const renderListComponent = this.props.params.slug === 'databases';
+    const renderListComponent = this.props.match.params.slug === 'databases';
 
     let handleListPopUpSubmit;
     // sections is the props used by EditForm in case of list of table rendering we need to change its value
@@ -376,7 +381,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     let actionBeforeOpenPopUp;
     let addListTitleMarginTop;
 
-    switch (this.props.params.slug) {
+    switch (this.props.match.params.slug) {
       case 'languages':
         sections = this.props.home.listLanguages.sections;
 
@@ -398,7 +403,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
 
     // custom selectOptions for languages
-    const selectOptions = this.props.params.slug === 'languages' ? this.props.home.listLanguages : [];
+    const selectOptions = this.props.match.params.slug === 'languages' ? this.props.home.listLanguages : [];
 
     return (
       <Component
@@ -410,7 +415,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         handleSubmit={this.handleSubmit}
         links={this.props.environments}
         path={this.props.location.pathname}
-        slug={this.props.params.slug}
+        slug={this.props.match.params.slug}
         renderRow={renderRow}
         listTitle={listTitle}
         listButtonLabel={listButtonLabel}
@@ -459,19 +464,24 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
 
     return (
-      <div className={`${styles.home} col-md-9`}>
-        <Helmet
-          title="Settings Manager"
-          meta={[
-            { name: 'Settings Manager Plugin', content: 'Modify your app settings' },
-          ]}
-        />
-        <ContentHeader
-          name={this.props.home.configsDisplay.name}
-          description={this.props.home.configsDisplay.description}
-        />
+      <div className="container-fluid">
+        <div className="row">
+          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.environment} />
+          <div className={`${styles.home} col-md-9`}>
+            <Helmet
+              title="Settings Manager"
+              meta={[
+                { name: 'Settings Manager Plugin', content: 'Modify your app settings' },
+              ]}
+            />
+            <ContentHeader
+              name={this.props.home.configsDisplay.name}
+              description={this.props.home.configsDisplay.description}
+            />
 
-        {this.renderComponent()}
+            {this.renderComponent()}
+          </div>
+        </div>
       </div>
     );
   }
@@ -481,7 +491,7 @@ const mapStateToProps = createStructuredSelector({
   environments: makeSelectEnvironments(),
   home: selectHomePage(),
   menuSections: makeSelectSections(),
-})
+});
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
@@ -503,14 +513,14 @@ function mapDispatchToProps(dispatch) {
       specificDatabaseFetch,
     },
     dispatch
-  )
+  );
 }
 
 HomePage.propTypes = {
   cancelChanges: React.PropTypes.func.isRequired,
   changeDefaultLanguage: React.PropTypes.func.isRequired,
   changeInput: React.PropTypes.func.isRequired,
-  configFetch: React.PropTypes.func.isRequired.isRequired,
+  configFetch: React.PropTypes.func.isRequired,
   databaseDelete: React.PropTypes.func.isRequired,
   databaseEdit: React.PropTypes.func.isRequired,
   databasesFetch: React.PropTypes.func.isRequired,
@@ -521,12 +531,21 @@ HomePage.propTypes = {
   languageDelete: React.PropTypes.func.isRequired,
   languagesFetch: React.PropTypes.func.isRequired,
   location: React.PropTypes.object.isRequired,
+  match: React.PropTypes.object.isRequired,
   menuSections: React.PropTypes.array.isRequired,
   newDatabasePost: React.PropTypes.func.isRequired,
   newLanguagePost: React.PropTypes.func.isRequired,
-  params: React.PropTypes.object.isRequired.isRequired,
   setErrors: React.PropTypes.func.isRequired,
   specificDatabaseFetch: React.PropTypes.func.isRequired,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: 'homePage', reducer });
+const withSaga = injectSaga({ key: 'homePage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(HomePage);

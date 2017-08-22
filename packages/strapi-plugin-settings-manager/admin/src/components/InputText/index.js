@@ -184,15 +184,15 @@ InputText.propTypes = {
   deactivateErrorHighlight: React.PropTypes.bool.isRequired,
   errors: React.PropTypes.array.isRequired,
   handleBlur: React.PropTypes.func.isRequired,
-  handleChange: React.PropTypes.func.isRequired.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func.isRequired,
   inputDescription: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired.isRequired,
+  name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool.isRequired,
   placeholder: React.PropTypes.string.isRequired,
   styles: React.PropTypes.object.isRequired,
   target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired.isRequired,
+  validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string.isRequired,
 }
 

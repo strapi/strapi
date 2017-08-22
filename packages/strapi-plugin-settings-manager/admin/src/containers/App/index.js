@@ -8,16 +8,22 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import 'flag-icon-css/css/flag-icon.css';
 import 'react-select/dist/react-select.css';
+import { Switch, Route } from 'react-router-dom';
+
 import { pluginId } from 'app';
-import PluginLeftMenu from 'components/PluginLeftMenu';
+
+import injectSaga from 'utils/injectSaga';
+
+import HomePage from 'containers/HomePage';
 
 import { menuFetch, environmentsFetch } from './actions';
-import { makeSelectSections, makeSelectEnvironments, makeSelectLoading } from './selectors';
+import { makeSelectLoading } from './selectors';
 import styles from './styles.scss';
 
+import saga from './sagas';
 
 class App extends React.Component {
   componentDidMount() {
@@ -29,39 +35,27 @@ class App extends React.Component {
     if (this.props.loading) {
       return <div />;
     }
-    // Assign plugin component to children
-    const content = React.Children.map(this.props.children, child =>
-      React.cloneElement(child, {
-        exposedComponents: this.props.exposedComponents,
-      })
-    );
 
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        <div className="container-fluid">
-          <div className="row">
-            <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} envParams={this.props.params.env} />
-            {React.Children.toArray(content)}
-          </div>
-        </div>
+        <Switch>
+          <Route path="/plugins/settings-manager/:slug/:env" component={HomePage} />
+          <Route path="/plugins/settings-manager/:slug" component={HomePage} />
+          <Route path="/plugins/settings-manager" component={HomePage} />
+        </Switch>
       </div>
     );
   }
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired.isRequired,
+  router: React.PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  children: React.PropTypes.node.isRequired.isRequired,
-  environments: React.PropTypes.array.isRequired,
   environmentsFetch: React.PropTypes.func.isRequired,
-  exposedComponents: React.PropTypes.object.isRequired.isRequired,
   loading: React.PropTypes.bool.isRequired,
   menuFetch: React.PropTypes.func.isRequired,
-  params: React.PropTypes.object.isRequired,
-  sections: React.PropTypes.array.isRequired.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -75,10 +69,15 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  sections: makeSelectSections(),
-  environments: makeSelectEnvironments(),
   loading: makeSelectLoading(),
 });
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withSaga = injectSaga({ key: 'global', saga });
+
+export default compose(
+  withSaga,
+  withConnect,
+)(App);

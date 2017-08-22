@@ -119,7 +119,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowDatabase.propTypes = {
-  data: React.PropTypes.object.isRequired.isRequired,
+  data: React.PropTypes.object.isRequired,
   error: React.PropTypes.bool.isRequired,
   formErrors: React.PropTypes.array.isRequired,
   getDatabase: React.PropTypes.func.isRequired,

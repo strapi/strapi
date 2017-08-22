@@ -26,7 +26,9 @@ import { translationMessages, languages } from './i18n';
 
 // Create redux store with history
 const initialState = {};
-const history = createHistory();
+const history = createHistory({
+  basename: '/admin',
+});
 const store = configureStore(initialState, history);
 
 const render = (translatedMessages) => {
@@ -77,22 +79,6 @@ window.onload = function onLoad() {
 const registerPlugin = (plugin) => {
   const formattedPlugin = plugin;
 
-  // Add routes
-  // Initial list of routes
-  const homeRoute = rootRoute.childRoutes[0];
-  const pluginsRoute = _.find(homeRoute.childRoutes, { name: 'plugins' });
-
-  // Create a new prefixed route for each plugin routes
-  if (formattedPlugin && formattedPlugin.routes) {
-    formattedPlugin.routes.forEach((route) => {
-      pluginsRoute.childRoutes.push({
-        path: `/plugins/${formattedPlugin.id}${route.path}`,
-        name: `plugins_${formattedPlugin.id}_${route.name}`,
-        getComponent: route.getComponent,
-      });
-    });
-  }
-
   // Merge admin translation messages
   _.merge(translationMessages, formattedPlugin.translationMessages);
 
@@ -134,7 +120,7 @@ window.Strapi = {
       store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
-  // router: browserHistory,
+  router: history,
   languages,
 };
 

@@ -45,7 +45,7 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
 
 InputEnum.propTypes = {
   customBootstrapClass: React.PropTypes.string.isRequired,
-  handleChange: React.PropTypes.func.isRequired.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
   name: React.PropTypes.string.isRequired,
   selectOptions: React.PropTypes.array.isRequired,
   target: React.PropTypes.string.isRequired,

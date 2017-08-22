@@ -26,7 +26,7 @@ Button.propTypes = {
   buttonBackground: React.PropTypes.string.isRequired,
   buttonSize: React.PropTypes.string.isRequired,
   handlei18n: React.PropTypes.bool.isRequired,
-  label: React.PropTypes.string.isRequired.isRequired,
+  label: React.PropTypes.string.isRequired,
 };
 
 export default Button;

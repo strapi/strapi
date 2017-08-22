@@ -58,7 +58,7 @@ export default function request(url, options) {
 
   // Set headers
   optionsObj.headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'text/plain',
   };
 
   // Add parameters to url

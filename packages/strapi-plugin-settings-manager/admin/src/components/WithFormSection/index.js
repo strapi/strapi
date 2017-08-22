@@ -22,7 +22,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     addRequiredInputDesign: React.PropTypes.bool.isRequired,
     cancelAction: React.PropTypes.bool.isRequired,
     formErrors: React.PropTypes.array.isRequired,
-    handleChange: React.PropTypes.func.isRequired.isRequired,
+    handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.oneOfType([
       React.PropTypes.object.isRequired,
       React.PropTypes.array.isRequired,

@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, findIndex } from 'lodash';
 import styles from './styles.scss';
@@ -49,7 +49,7 @@ PluginLeftMenuLink.propTypes = {
   environments: React.PropTypes.array.isRequired,
   environmentsRequired: React.PropTypes.bool.isRequired,
   envParams: React.PropTypes.string.isRequired,
-  link: React.PropTypes.object.isRequired.isRequired,
+  link: React.PropTypes.object.isRequired,
 };
 
 export default PluginLeftMenuLink;

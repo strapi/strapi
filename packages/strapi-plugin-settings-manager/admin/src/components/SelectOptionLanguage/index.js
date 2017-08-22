@@ -42,7 +42,7 @@ SelectOptionLanguage.propTypes = {
   isFocused: React.PropTypes.bool.isRequired,
   onFocus: React.PropTypes.func.isRequired,
   onSelect: React.PropTypes.func.isRequired,
-  option: React.PropTypes.object.isRequired.isRequired,
+  option: React.PropTypes.object.isRequired,
 };
 
 export default SelectOptionLanguage;

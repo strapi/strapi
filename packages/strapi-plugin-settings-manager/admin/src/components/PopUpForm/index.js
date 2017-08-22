@@ -41,7 +41,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 PopUpForm.propTypes = {
-  renderInput: React.PropTypes.func.isRequired.isRequired,
+  renderInput: React.PropTypes.func.isRequired,
   renderPopUpForm: React.PropTypes.oneOfType([
     React.PropTypes.func.isRequired,
     React.PropTypes.bool.isRequired,

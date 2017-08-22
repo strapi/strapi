@@ -13,7 +13,7 @@ class LeftMenuHeader extends React.Component { // eslint-disable-line react/pref
   render() {
     return (
       <div className={styles.leftMenuHeader}>
-        <Link to="/admin" className={styles.leftMenuHeaderLink}>
+        <Link to="/" className={styles.leftMenuHeaderLink}>
           <span className={styles.projectName}></span>
         </Link>
       </div>

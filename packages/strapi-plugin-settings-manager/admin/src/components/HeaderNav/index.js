@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { join, map, take } from 'lodash';
 import EditForm from 'components/EditForm';
 import List from 'components/List';

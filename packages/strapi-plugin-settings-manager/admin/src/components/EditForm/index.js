@@ -59,7 +59,7 @@ EditForm.propTypes = {
   cancelAction: React.PropTypes.bool.isRequired,
   formErrors: React.PropTypes.array.isRequired,
   handleCancel: React.PropTypes.func.isRequired,
-  handleChange: React.PropTypes.func.isRequired.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
   handleSubmit: React.PropTypes.func.isRequired,
   sections: React.PropTypes.array.isRequired,
   values: React.PropTypes.object.isRequired,

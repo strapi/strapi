@@ -29,7 +29,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
         <NotificationProvider />
         <div className={styles.container}>
           <Switch>
-            <Route path="/admin" component={AdminPage} />
+            <Route path="/" component={AdminPage} />
             <Route path="" component={NotFoundPage} />
           </Switch>
         </div>

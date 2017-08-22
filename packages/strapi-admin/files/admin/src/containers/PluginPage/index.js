@@ -19,7 +19,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
   render() {
     const containers = this.props.plugins.valueSeq().map((plugin) => {
       const Elem = plugin.get('mainComponent');
-      return <Elem key={plugin.id} {...this.props} exposedComponents={exposedComponents}></Elem>;
+      return <Elem key={plugin.get('id')} {...this.props} exposedComponents={exposedComponents}></Elem>;
     });
 
     return (

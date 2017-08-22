@@ -82,7 +82,7 @@ module.exports = require('./webpack.base.babel')({
     loader: 'postcss-loader',
     options: {
       config: {
-        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js')
+        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
       },
     },
   }, {
