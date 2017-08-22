@@ -26,8 +26,15 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.error !== this.props.error) {
-      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false });
+      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false, loader: false });
     }
+
+    // if (nextProps.formErrors !== this.props.formErrors && nextProps.formErrors) this.setState({ loader: false });
+    if (!isEmpty(nextProps.formErrors)) this.setState({ loader: false });
+  }
+
+  componentWillUnmount() {
+    // this.setState({})
   }
 
   showDatabaseModal = (e) => {
@@ -45,7 +52,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.setState({ loader: !this.state.loader });
+    this.setState({ loader: true });
     this.props.handleSubmit(this.props.data.name);
   }
 
@@ -56,7 +63,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     const loader = this.state.loader ?
-      <Button onClick={this.handleSubmit} className={styles.primary}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
         : <FormattedMessage id="settings-manager.form.button.save">
           {(message) => (
             <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
