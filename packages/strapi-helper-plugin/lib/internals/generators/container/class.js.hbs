@@ -1,4 +1,4 @@
-/*
+/**
  *
  * {{properCase name }}
  *
@@ -15,13 +15,25 @@ import { FormattedMessage } from 'react-intl';
 {{/if}}
 {{#if wantActionsAndReducer}}
 import { createStructuredSelector } from 'reselect';
+{{/if}}
+import { compose } from 'redux';
+
+{{#if wantSaga}}
+import injectSaga from 'utils/injectSaga';
+{{/if}}
+{{#if wantActionsAndReducer}}
+import injectReducer from 'utils/injectReducer';
 import makeSelect{{properCase name}} from './selectors';
+import reducer from './reducer';
+{{/if}}
+{{#if wantSaga}}
+import saga from './saga';
 {{/if}}
 {{#if wantMessages}}
 import messages from './messages';
 {{/if}}
 
-export class {{ properCase name }} extends React.{{{ component }}} { // eslint-disable-line react/prefer-stateless-function
+export class {{ properCase name }} extends {{{ type }}} { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
       <div>
@@ -45,7 +57,7 @@ export class {{ properCase name }} extends React.{{{ component }}} { // eslint-d
 
 {{#if wantActionsAndReducer}}
 const mapStateToProps = createStructuredSelector({
-  {{name}}: makeSelect{{properCase name}}(),
+  {{ lowerCase name }}: makeSelect{{properCase name}}(),
 });
 {{/if}}
 
@@ -56,7 +68,22 @@ function mapDispatchToProps(dispatch) {
 }
 
 {{#if wantActionsAndReducer}}
-export default connect(mapStateToProps, mapDispatchToProps)({{ properCase name }});
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: '{{ camelCase name }}', reducer });
 {{else}}
-export default connect(null, mapDispatchToProps)({{ properCase name }});
+const withConnect = connect(null, mapDispatchToProps);
 {{/if}}
+{{#if wantSaga}}
+const withSaga = injectSaga({ key: '{{ camelCase name }}', saga });
+{{/if}}
+
+export default compose(
+{{#if wantActionsAndReducer}}
+  withReducer,
+{{/if}}
+{{#if wantSaga}}
+  withSaga,
+{{/if}}
+  withConnect,
+)({{ properCase name }});

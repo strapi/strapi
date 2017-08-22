@@ -35,7 +35,7 @@
     "build": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",
     "start": "cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "pretest": "npm run lint",
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
