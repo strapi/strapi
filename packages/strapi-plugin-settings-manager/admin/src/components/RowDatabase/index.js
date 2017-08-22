@@ -20,6 +20,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
     this.state = {
       modal: false,
       warning: false,
+      loader: false,
     };
   }
 
@@ -44,6 +45,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
   handleSubmit = (e) => {
     e.preventDefault();
+    this.setState({ loader: !this.state.loader });
     this.props.handleSubmit(this.props.data.name);
   }
 
@@ -53,6 +55,13 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
+    const loader = this.state.loader ?
+      <Button onClick={this.handleSubmit} className={styles.primary}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+        : <FormattedMessage id="settings-manager.form.button.save">
+          {(message) => (
+            <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
+          )}
+        </FormattedMessage>;
     return (
       <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
         <div className={styles.flexLi}>
@@ -91,11 +100,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
                     <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
-                <FormattedMessage id="settings-manager.form.button.save">
-                  {(message) => (
-                    <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
-                  )}
-                </FormattedMessage>
+                {loader}
               </ModalFooter>
             </form>
           </Modal>

@@ -346,6 +346,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       handleSubmit={this.handleSubmitEditDatabase}
       formErrors={this.props.home.formErrors}
       error={this.props.home.error}
+      resetToggleDefaultConnection={this.resetToggleDefaultConnection}
     />
   )
 
@@ -440,6 +441,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     this.handleChange({target});
     this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
   }
+
+  // Set the toggleDefaultConnection to false
+  resetToggleDefaultConnection = () => this.setState({ toggleDefaultConnection: false });
 
   // Hide database modal
   toggle = () => this.setState({ modal: !this.state.modal });

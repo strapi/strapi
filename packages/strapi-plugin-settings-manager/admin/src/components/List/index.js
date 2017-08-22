@@ -31,12 +31,13 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
       modal: false,
       // isPopUpFormValid: true,
       requiredInputs: [],
+      loader: false,
     };
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.error !== this.props.error) {
-      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false });
+      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false, loader: false });
     }
   }
 
@@ -47,6 +48,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   handleSubmit = (e) => {
     e.preventDefault();
+    this.setState({ loader: !this.state.loader });
     this.props.handleListPopUpSubmit(e);
   }
 
@@ -63,6 +65,13 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
     const titleSpacer = this.props.addListTitleMarginTop ? <div style={{ height: '.1rem'}} /> : '';
 
+    const loader = this.state.loader ?
+      <Button onClick={this.handleSubmit} className={styles.primary}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+        : <FormattedMessage id="settings-manager.form.button.save">
+          {(message) => (
+            <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
+          )}
+        </FormattedMessage>;
     return (
       <div className={styles.listContainer}>
         <div className={styles.listSubContainer}>
@@ -115,11 +124,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
                     <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
-                <FormattedMessage id="settings-manager.form.button.save">
-                  {(message) => (
-                    <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
-                  )}
-                </FormattedMessage>
+                {loader}
               </ModalFooter>
             </form>
           </Modal>

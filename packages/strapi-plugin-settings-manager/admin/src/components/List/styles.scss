@@ -50,6 +50,12 @@ button {
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
+      &:first-child .language {
+        margin-top: .3rem;
+      }
+      .language {
+        margin-top: .1rem;
+      }
       &:last-child .borderBottom {
         border-bottom: none;
       }
@@ -63,10 +69,13 @@ button {
         }
       }
     }
+
   }
 }
 
-
+.li:first-child .language {
+  margin-top: 11rem;
+}
 .liSpacer {
   height: .2rem!important;
 }
@@ -82,6 +91,17 @@ button {
   margin: 0 4.1rem 0 2.8rem;
   position: relative;
   align-items: center;
+}
+
+.flexLiLanguage {
+  display: flex;
+  // justify-content: space-between;
+  margin: 0 4.1rem 0 2.8rem;
+  position: relative;
+  align-items: center;
+  > div:last-child {
+    justify-content: flex-end;
+  }
 }
 
 .flexLeft {
@@ -130,7 +150,7 @@ button {
   height: 100%;
   height: 5.2rem;
   line-height: 5.2rem;
-  padding-right: .3rem;
+  padding-right: 1rem;
 }
 
 .normal {
@@ -156,22 +176,6 @@ button {
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white!important;
-  // &:hover {
-  //   &::after {
-  //     position: absolute;
-  //     width: 100%;
-  //     height: 100%;
-  //     top: 0;
-  //     left: 0;
-  //     border-radius: 0.3rem;
-  //     content: '';
-  //     opacity: 0.1;
-  //     background: #FFFFFF;
-  //   }
-  // }
-  // &:active {
-  //   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
-  // }
 }
 
 .secondary {
@@ -189,25 +193,6 @@ button {
   border: 0.1rem solid #F64D0A;
   position: relative;
   border-radius: 3px;
-  // &:hover {
-  //   color: #F64D0A;
-  //   background-color: white;
-  //   border: 0.1rem solid #F64D0A;
-  //   &::after {
-  //     position: absolute;
-  //     width: 100%;
-  //     height: 100%;
-  //     top: 0;
-  //     left: 0;
-  //     border-radius: 0.3rem;
-  //     content: '';
-  //     opacity: 0.1;
-  //     background: #FFFFFF;
-  //   }
-  // }
-  // &:active {
-  //   border: 0.15rem solid #F64D0A;
-  // }
 }
 
 .bordered {
@@ -263,7 +248,6 @@ button {
 }
 
 .modalFooter {
-
   margin-top: 1.1rem;
   margin-bottom: 1.1rem;
   > input {
@@ -322,7 +306,8 @@ button {
 }
 
 .trashContainer {
-  margin-left: 4rem;
+  // width: 5rem;
+  margin-left: 6rem;
   cursor: pointer;
 }
 
@@ -349,20 +334,15 @@ button {
 .databaseFont {
   font-size: 1.3rem;
   &:hover {
-    //.hovered {
-    //  position: absolute;
-      //top: 0rem!important;
-      height: 5.2rem;
-      //margin-right: 13rem!important;
-      //width: 100%;
-      background-color: rgba(14,22,34,0.03);
-    //}
+    height: 5.2rem;
+    background-color: rgba(14,22,34,0.03);
   }
 }
 
 .flagContainer {
+  width: 33%;
   margin-left: 1rem;
-  margin-right: 10rem;
+  // margin-right: 10rem;
   height: 5.2rem;
   line-height: 5.2rem;
 }
@@ -370,4 +350,37 @@ button {
 .bottomSpacer {
   height: 1.2rem;
   background-color: #FFFFFF;
+}
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-top: -1.2rem;
+}
+
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  font-size: 5rem;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: .4s;
 }

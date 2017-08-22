@@ -10,6 +10,10 @@ import WithFormSection from 'components/WithFormSection';
 import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentWillUnmount() {
+    if (this.props.resetToggleDefaultConnection) this.props.resetToggleDefaultConnection();
+  }
+
   render() {
     return (
       <div className={styles.popUpForm}>
@@ -46,6 +50,7 @@ PopUpForm.propTypes = {
     React.PropTypes.func,
     React.PropTypes.bool,
   ]),
+  resetToggleDefaultConnection: React.PropTypes.func,
   sections: React.PropTypes.array,
 };
 

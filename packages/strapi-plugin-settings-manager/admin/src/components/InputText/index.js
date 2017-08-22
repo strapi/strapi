@@ -116,14 +116,14 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
             ? <FormattedMessage {...error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback">{displayError}</div>
+            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
           );
         })
       );
     }
   }
 
-  renderFormattedInput = (handleBlur, inputValue, placeholder) => (
+  renderFormattedInput = (handleBlur, inputValue, placeholder, marginBottom) => (
     <FormattedMessage id={`settings-manager.${placeholder}`}>
       {(message) => (
         <input
@@ -137,6 +137,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
           autoComplete="off"
+          style={{marginBottom}}
         />
       )}
     </FormattedMessage>
@@ -154,8 +155,8 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
-
-    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+    const marginBottomInput = isEmpty(this.state.errors) ? '4.3rem' : '2.4rem';
+    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
       : <input
         name={this.props.target}
         id={this.props.name}
@@ -166,16 +167,18 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
         type="text"
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
         placeholder={placeholder}
+        style={{marginBottom: marginBottomInput }}
       />;
 
 
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
-
+    let marginTopSmall = this.props.inputDescription ? '-3rem' : '-1.5rem';
+    if (!isEmpty(this.state.errors) && this.props.inputDescription) marginTopSmall = '-1.2rem';
     return (
       <div className={`${this.props.styles.inputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`} style={spacer}>
         {label}
         {input}
-        <small>{this.props.inputDescription}</small>
+        <small style={{ marginTop: marginTopSmall }}>{this.props.inputDescription}</small>
         {this.renderErrors()}
       </div>
     );
