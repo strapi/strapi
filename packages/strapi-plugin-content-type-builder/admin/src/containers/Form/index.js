@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { isEmpty, split } from 'lodash';
 import { store } from 'app';
@@ -15,6 +16,7 @@ import { getAsyncInjectors } from 'utils/asyncInjectors';
 import reducer from './reducer';
 import sagas from './sagas';
 import selectForm from './selectors';
+import { setForm } from './actions';
 
 import styles from './styles.scss';
 
@@ -32,17 +34,22 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   componentDidMount() {
     if (this.props.hash) {
+
+      // Get the formType within the hash
+      this.props.setForm(this.props.hash);
       this.setState({ showModal: true });
     }
   }
 
-  componentWillReceiveProps(nextProps) { // eslint-disable-line consistent-return
+  componentWillReceiveProps(nextProps) {
     if (nextProps.hash !== this.props.hash) {
       if (!isEmpty(nextProps.hash)) {
-        return this.setState({ showModal: true });
+        this.props.setForm(nextProps.hash);
+        this.setState({ showModal: true });
+      } else {
+        this.setState({ showModal: false });
       }
 
-      this.setState({ showModal: false });
     }
   }
 
@@ -67,15 +74,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 const mapStateToProps = selectForm();
 
 function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
+  return bindActionCreators(
+    {
+      setForm,
+    },
+    dispatch
+  );
 }
 
 Form.propTypes = {
   hash: React.PropTypes.string.isRequired,
   popUpHeaderNavLinks: React.PropTypes.array,
   routePath: React.PropTypes.string,
+  setForm: React.PropTypes.func.isRequired,
   toggle: React.PropTypes.func.isRequired,
 };
 

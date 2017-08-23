@@ -58,7 +58,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const component = size(this.props.models) === 0 ?
       <EmptyContentTypeView handleButtonClick={this.toggleModal} />
         : this.renderTableListComponent();
-
+      
     return (
       <div className={styles.homePage}>
         <Helmet

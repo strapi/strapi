@@ -1,0 +1,43 @@
+{
+  "contentType": {
+    "baseSettings": {
+      "items": [
+        {
+          "name": "form.contentType.item.connections",
+          "target": "contentType.connection",
+          "type": "select",
+          "value": "",
+          "items": []
+        },
+        {
+          "name": "form.contentType.item.name",
+          "target": "contentType.name",
+          "value": "",
+          "type": "string",
+          "validations": {
+            "required": true
+          }
+        },
+        {
+          "name": "form.contentType.item.description",
+          "target": "contentType.description",
+          "value": "",
+          "type": "textarea",
+          "validations": {}
+        }
+      ]
+    },
+    "advancedSettings": {
+      "items": [
+        {
+          "name": "form.contentType.item.collectionName",
+          "target": "contentType.collectionName",
+          "type": "string",
+          "value": "",
+          "validations": {},
+          "inputDescription": "form.contentType.item.collectionName.inputDescription"
+        }
+      ]
+    }
+  }
+}
