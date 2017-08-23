@@ -11,16 +11,12 @@ try {
     packageJSON.version = pkgJSON.version;
 
     Object.keys(packageJSON.dependencies).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
-      if (packageJSON.dependencies[dependency].indexOf('file:') !== -1) {
-        packageJSON.dependencies[dependency] = '^' + pkgJSON.version;
-      }
+      packageJSON.dependencies[dependency] = '^' + pkgJSON.version;
     });
 
     if (packageJSON.devDependencies) {
       Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
-        if (packageJSON.devDependencies[devDependency].indexOf('file:') !== -1) {
-          packageJSON.devDependencies[devDependency] = '^' + pkgJSON.version;
-        }
+        packageJSON.devDependencies[devDependency] = '^' + pkgJSON.version;
       });
     }
 
