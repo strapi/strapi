@@ -49,7 +49,7 @@ module.exports = (scope, cb) => {
   });
 
   if (!_.isEmpty(missingDependencies)) {
-    logger.verbose('Installing dependencies...');
+    logger.info('Installing dependencies...');
 
     npm.install({
       dependencies: missingDependencies,

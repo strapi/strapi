@@ -18,7 +18,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
         onClick={action.onClick}
         disabled={action.disabled}
       >
-        <FormattedMessage {...action.label} />
+        <FormattedMessage id={action.label} />
       </button>
     ));
 

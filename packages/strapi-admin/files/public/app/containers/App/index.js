@@ -27,7 +27,6 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
       <div>
         <NotificationsContainer onHideNotification={this.props.onHideNotification} notifications={this.props.notifications}></NotificationsContainer>
         <div className={styles.container}>
-          <div className={styles.baseline}></div>
           {React.Children.toArray(this.props.children)}
         </div>
       </div>

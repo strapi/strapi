@@ -1,20 +1,37 @@
+$linkcolour: #F5F5F5;
+
 .headerNav { /* stylelint-disable */
-  // margin-right: 15px;
+
 }
 
 .headerContainer {
   display: flex;
   flex-direction: row;
-  margin: 0 3.3rem;
+  margin: 0 1.8rem;
+  border-radius: 2px;
+  > a {
+    // z-index: 100;
+    // box-shadow: 1px 0 0px rgba(0,0,0,0.05);
+    box-shadow: 1px 0 0px rgba(0,0,0,0.05), inset 0px -1px 0px -2px rgba(0,0,0,0.05);
+    background-color: $linkcolour;
+    &:first-child {
+      border-radius: 2px 0 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 2px 0 0;
+    }
+
+  }
 }
 
 .headerLink {
   position: relative;
   display: flex;
   flex: 1 100%;
-  height: 4rem;
-  border-radius: 1px 0 0 0;
-  background-color: rgba(14,22,34,0.05);
+  height: 3.6rem;
+  border-radius: 2px 0 0 0;
+  background-color: darken($linkcolour, 50%);
   text-decoration: none !important;
   font-family: Lato;
   font-size: 1.3rem;
@@ -22,14 +39,51 @@
   line-height: 1.6rem;
 }
 
-.linkActive {
-  background-color: #FFFFFF;
+
+.linkActive:first-child {
+  background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
+  z-index: 100;
+  box-shadow: 1px 0 0 rgba(0,0,0,0.05);
   > div {
     &:first-child {
       position: absolute;
-      height: 0.3rem;
+      height: 0.2rem;
+      top: 0rem;
+      width: 100%;
+      background-color: #1C5DE7;
+    }
+  }
+}
+
+.linkActive:last-child {
+  background-color: #FFFFFF!important;
+  font-weight: bold;
+  text-decoration: none !important;
+  z-index: 100;
+  box-shadow: -1px 0 0 rgba(0,0,0,0.05);
+  > div {
+    &:first-child {
+      position: absolute;
+      height: 0.2rem;
+      top: 0rem;
+      width: 100%;
+      background-color: #1C5DE7;
+    }
+  }
+}
+
+.linkActive:not(:first-child, :last-child) {
+  background-color: #FFFFFF!important;
+  font-weight: bold;
+  text-decoration: none !important;
+  z-index: 100;
+  box-shadow: 1px 0 0 rgba(0,0,0,0.05), -1px 0 0 rgba(0,0,0,0.05)!important ;
+  > div {
+    &:first-child {
+      position: absolute;
+      height: 0.2rem;
       top: 0rem;
       width: 100%;
       background-color: #1C5DE7;
@@ -47,12 +101,8 @@
 .notifPoint {
 	height: 0.4rem;
   width: 0.4rem;
-  margin: auto 0.7rem;
+  margin: 1px 0 0 0.7rem;
+  align-self: center;
   border-radius: 0.5rem;
   background-color: #27B70F;
-}
-
-.noPaddingLeft {
-  padding-left: 0;
-  // padding-top: 1.1rem; TODO check if property works with database view
 }

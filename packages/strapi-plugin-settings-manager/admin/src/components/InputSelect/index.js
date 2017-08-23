@@ -10,13 +10,22 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class InputSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    // init the select value
+    if (this.props.selectOptions[0].value !== '') {
+      const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
+      this.props.handleChange({ target });
+    }
+  }
+
   render() {
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
+    const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? styles.requiredClass : '';
 
     return (
-      <div className={`${styles.inputSelect} ${bootStrapClass}`}>
+      <div className={`${styles.inputSelect} ${requiredClass} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>
-          <FormattedMessage {...{id: this.props.name}} />
+          <FormattedMessage id={`settings-manager.${this.props.name}`} />
         </label>
         <select
           className="form-control"
@@ -26,7 +35,7 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
           value={this.props.value}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage {...{id: option.name}} key={key}>
+            <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
               {(message) => (
                 <option value={option.value}>
                   {message}
@@ -41,11 +50,16 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputSelect.propTypes = {
+  addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   handleChange: React.PropTypes.func.isRequired,
   name: React.PropTypes.string.isRequired,
-  selectOptions: React.PropTypes.array,
+  selectOptions: React.PropTypes.oneOfType([
+    React.PropTypes.array,
+    React.PropTypes.object, // TODO remove
+  ]),
   target: React.PropTypes.string,
+  validations: React.PropTypes.object,
   value: React.PropTypes.string,
 };
 

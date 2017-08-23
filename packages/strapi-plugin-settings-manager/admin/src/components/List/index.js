@@ -16,7 +16,7 @@
 */
 
 import React from 'react';
-import { map } from 'lodash';
+import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -29,16 +29,28 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     super(props);
     this.state = {
       modal: false,
+      // isPopUpFormValid: true,
+      requiredInputs: [],
+      loader: false,
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.error !== this.props.error && isEmpty(nextProps.formErrors)) {
+      this.setState({ modal: false, loader: false });
+    }
+    if (!isEmpty(nextProps.formErrors)) this.setState({ loader: false });
+  }
+
   toggle = () => {
+    if (this.props.actionBeforeOpenPopUp && !this.state.modal) this.props.actionBeforeOpenPopUp();
     this.setState({ modal: !this.state.modal });
   }
 
-  handleSubmit = () => {
-    this.setState({ modal: !this.state.modal });
-    this.props.handleListPopUpSubmit();
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.setState({ loader: true});
+    this.props.handleListPopUpSubmit(e);
   }
 
   render() {
@@ -51,50 +63,71 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         onClick={this.toggle}
       />;
 
+    const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
+    const titleSpacer = this.props.addListTitleMarginTop ? <div style={{ height: '.1rem'}} /> : '';
+
+    const loader = this.state.loader ?
+      <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+        : <FormattedMessage id="settings-manager.form.button.save">
+          {(message) => (
+            <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
+          )}
+        </FormattedMessage>;
     return (
       <div className={styles.listContainer}>
         <div className={styles.listSubContainer}>
-          <div className={styles.flex}>
+          <div className={`${addListTitleMarginTop} ${styles.flex}`}>
             <div className={styles.titleContainer}>
               {this.props.listTitle}
             </div>
-            <div>
+            <div className={styles.buttonContainer}>
               {button}
             </div>
           </div>
-          <div className={styles.ulContainer}>
-            <ul>
-              {map(this.props.listItems, (listItem, key) => {
-                if (this.props.renderRow) {
-                  return this.props.renderRow(listItem, key, styles);
-                }
-                return (
-                  <li key={key}>
-                    <div className={styles.flexLi}>
-                      {map(listItem, (item, index) => (
-                        <div key={index}>{item}</div>
-                      ))}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+          {titleSpacer}
         </div>
+
+        <div className={styles.ulContainer}>
+          <ul>
+            {map(this.props.listItems, (listItem, key) => {
+              if (this.props.renderRow) {
+                return this.props.renderRow(listItem, key, styles);
+              }
+              return (
+                <li key={key}>
+                  <div className={styles.flexLi}>
+                    {map(listItem, (item, index) => (
+                      <div key={index}>{item}</div>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/*  </div> */}
         <div>
           <Modal isOpen={this.state.modal} toggle={this.toggle} className={styles.modalPosition}>
             <ModalHeader toggle={this.toggle} className={`${styles.noBorder} ${styles.padded} ${styles.mHeader}`}>
-              <FormattedMessage {...{id: this.props.listButtonLabel}} />
+              <FormattedMessage id={`settings-manager.${this.props.listButtonLabel}`} />
             </ModalHeader>
             <div className={styles.bordered} />
-            <ModalBody className={styles.modalBody}>
-              <PopUpForm {...this.props} />
-            </ModalBody>
-            <ModalFooter className={`${styles.noBorder} ${styles.flexStart} ${styles.modalFooter}`}>
-              {/* TODO change tthis.toggle => this.props.addLanguage */}
-              <Button onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
-              <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
-            </ModalFooter>
+            <form onSubmit={this.handleSubmit}>
+
+              <ModalBody className={styles.modalBody}>
+                <div className={styles.spacerSmall} />
+                <PopUpForm {...this.props} />
+              </ModalBody>
+              <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
+                <FormattedMessage id="settings-manager.form.button.cancel">
+                  {(message) => (
+                    <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
+                  )}
+                </FormattedMessage>
+                {loader}
+              </ModalFooter>
+            </form>
           </Modal>
         </div>
       </div>
@@ -103,6 +136,9 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
+  actionBeforeOpenPopUp: React.PropTypes.func,
+  addListTitleMarginTop: React.PropTypes.bool,
+  error: React.PropTypes.bool,
   handlei18n: React.PropTypes.bool,
   handleListPopUpSubmit: React.PropTypes.func,
   listButtonLabel: React.PropTypes.string,

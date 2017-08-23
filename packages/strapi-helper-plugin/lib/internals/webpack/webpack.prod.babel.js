@@ -7,7 +7,7 @@ const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
-const pluginId = pkg.name.replace(/^strapi-/i, '');
+const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
@@ -19,7 +19,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: `/${pluginId}/`,
+    publicPath: `/${pluginId}/assets/`,
   },
 
   // Transform our own .scss files

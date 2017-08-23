@@ -7,14 +7,9 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 
-import { define } from 'i18n';
-
 import Container from 'components/Container';
 
-import messages from './messages.json';
 import styles from './styles.scss';
-
-define(messages);
 
 export class Home extends React.Component {
   render() {
@@ -24,15 +19,14 @@ export class Home extends React.Component {
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title={{
-              id: 'plugin-content-manager-title',
-              defaultMessage: 'Content Manager',
+            title="Content Manager"
+            description={{
+              id: 'content-manager.containers.Home.pluginHeaderDescription',
             }}
-            description={messages.pluginHeaderDescription}
           />
           <Container>
             <p>
-              <FormattedMessage {...messages.introduction} />
+              <FormattedMessage id="content-manager.containers.Home.introduction" />
             </p>
           </Container>
         </div>

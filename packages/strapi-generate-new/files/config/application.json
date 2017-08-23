@@ -1,10 +1,6 @@
 {
   "name": "Default Application",
   "description": "This API is going to be awesome!",
-  "admin": {
-    "path": "/admin",
-    "name": "Default Application - Admin Panel"
-  },
   "favicon": {
     "path": "favicon.ico",
     "maxAge": 86400000

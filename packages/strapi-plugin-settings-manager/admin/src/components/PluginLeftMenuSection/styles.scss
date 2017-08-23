@@ -2,8 +2,9 @@
   margin-top: 3.3rem;
 
   > p {
+    -webkit-font-smoothing: antialiased;
     margin: 0;
-    padding-left: 3rem;
+    padding-left: 1.5rem;
     line-height: 1.3rem;
     color: #919BAE;
     letter-spacing: 0.1rem;
@@ -13,7 +14,7 @@
     text-transform: uppercase;
   }
   > ul {
-    margin: 1rem 0 0 0;
+    margin: 1rem 0 0 -1.5rem;
     padding: 0;
     list-style: none;
     font-size: 1.3rem;

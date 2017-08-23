@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "defaultLocale": "en_US",
+  "defaultLocale": "en_us",
   "modes": [
     "query",
     "subdomain",
@@ -9,6 +9,5 @@
     "url",
     "tld"
   ],
-  "locales": ["en_US", "fr_FR"],
   "cookieName": "locale"
 }
