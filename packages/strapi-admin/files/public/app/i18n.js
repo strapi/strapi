@@ -20,7 +20,7 @@ const requireTranslations = language => {
   try {
     return require(`./translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
-    console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`);
+    console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`); // eslint-disable-line no-console
     return false;
   }
 };
@@ -37,7 +37,7 @@ const addLanguageLocaleData = language => {
     addLocaleData(localeData);
     return true;
   } catch (error) {
-    console.error(`It looks like the language "${language}" is not supported by "react-intl" module.`);
+    console.error(`It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
     return false;
   }
 };
