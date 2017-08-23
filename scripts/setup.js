@@ -36,7 +36,7 @@ shell.exec('npm install ../strapi-generate ../strapi-generate-admin ../strapi-ge
 shell.exec('npm link');
 
 shell.cd('../strapi-helper-plugin');
-shell.exec('npm install');
+shell.exec('npm link');
 
 shell.cd('../strapi-plugin-content-manager');
 shell.exec('npm install ../strapi-helper-plugin');
