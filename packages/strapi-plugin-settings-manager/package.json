@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.5",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -48,7 +48,7 @@
     "plop": "^1.5.0",
     "prettier": "^1.5.3",
     "rimraf": "^2.5.4",
-    "strapi-helper-plugin": "^3.0.0-alpha.4.8",
+    "strapi-helper-plugin": "^3.0.0-alpha.5",
     "webpack": "^2.1.0-beta.25"
   },
   "author": {
