@@ -24,7 +24,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   }
 
   goTo = () => {
-    router.push(`/plugins/content-type-builder/${this.props.rowItem.name}`);
+    router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}`);
   }
 
   render() {

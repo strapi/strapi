@@ -92,7 +92,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
-        <Link className={linkStyles.link} to={`/plugins/content-type-builder/${props.link.name}`} activeClassName={linkStyles.linkActive}>
+        <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
           <div>
             <i className={`fa ${props.link.icon}`} />
           </div>

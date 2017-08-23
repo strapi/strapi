@@ -28,6 +28,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
             key={index}
             section={section}
             renderCustomLink={this.props.renderCustomLink}
+            basePath={this.props.basePath}
           />
         ))}
         {customSection}
@@ -38,6 +39,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
 
 PluginLeftMenu.propTypes = {
   addCustomSection: React.PropTypes.func,
+  basePath: React.PropTypes.string,
   renderCustomLink: React.PropTypes.func,
   sections: React.PropTypes.array.isRequired,
 };

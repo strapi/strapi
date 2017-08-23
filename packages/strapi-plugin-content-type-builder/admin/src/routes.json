@@ -3,7 +3,7 @@
     "name": "homePage",
     "container": "HomePage"
   },
-  "/:modelName": {
+  "/models/:modelName": {
     "name": "modelPage",
     "container": "ModelPage"
   }

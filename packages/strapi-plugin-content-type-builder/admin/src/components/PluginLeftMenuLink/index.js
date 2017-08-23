@@ -19,7 +19,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 
     return (
       <li className={styles.pluginLeftMenuLink}>
-        <Link className={styles.link} to={`/plugins/content-type-builder/${this.props.link.name}`} activeClassName={styles.linkActive}>
+        <Link className={styles.link} to={`/plugins/${this.props.basePath}/${this.props.link.name}`} activeClassName={styles.linkActive}>
           <div>
             <i className={`fa ${this.props.link.icon}`} />
           </div>
@@ -31,6 +31,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 }
 
 PluginLeftMenuLink.propTypes = {
+  basePath: React.PropTypes.string,
   link: React.PropTypes.object.isRequired,
   renderCustomLink: React.PropTypes.func,
 };

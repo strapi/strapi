@@ -22,6 +22,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
         key={index}
         link={item}
         renderCustomLink={this.props.renderCustomLink}
+        basePath={this.props.basePath}
       />
     ));
     return (
@@ -38,6 +39,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
+  basePath: React.PropTypes.string,
   renderCustomLink: React.PropTypes.func,
   section: React.PropTypes.object.isRequired,
 };

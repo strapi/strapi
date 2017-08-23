@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { map } from 'lodash';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
 import styles from './styles.scss';
@@ -14,40 +15,26 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   constructor(props) {
     super(props);
     this.state = {
-      isFirstNavLinkActive: true,
-      linkActive: 'base',
       value: 'a',
     };
-  }
-
-  changeForm = (linkActive) => {
-    if (linkActive !== this.state.linkActive) {
-      this.setState({ linkActive, isFirstNavLinkActive: !this.state.isFirstNavLinkActive });
-    }
   }
 
   // TODO remove temp
   handleChange = ({ target }) => this.setState({ value: target.value });
 
-  renderNavContainer = () => {
-    console.log('oeeek');
-    return (
-      <div className={styles.navContainer}>
+  renderNavContainer = () => (
+    <div className={styles.navContainer}>
+      {map(this.props.popUpHeaderNavLinks, (link, key) => (
         <PopUpHeaderNavLink
-          message={'popUpForm.navContainer.base'}
-          showActiveClass={this.state.isFirstNavLinkActive}
+          key={key}
+          message={link.message}
           handleClick={this.changeForm}
-          name={'base'}
+          name={link.name}
+          routePath={this.props.routePath}
         />
-        <PopUpHeaderNavLink
-          message={'popUpForm.navContainer.advanced'}
-          showActiveClass={!this.state.isFirstNavLinkActive}
-          handleClick={this.changeForm}
-          name={'advanced'}
-        />
-      </div>
-    );
-  }
+      ))}
+    </div>
+  )
 
   renderPopUpHeader = () => {
     const popUpTitle = `popUpForm.${this.props.popUpFormType}.header.title`;
@@ -84,6 +71,8 @@ PopUpForm.propTypes = {
   isOpen: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
   popUpFormType: React.PropTypes.string.isRequired,
+  popUpHeaderNavLinks: React.PropTypes.array,
+  routePath: React.PropTypes.string,
   toggle: React.PropTypes.func,
 };
 

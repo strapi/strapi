@@ -10,6 +10,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { size } from 'lodash';
 import Helmet from 'react-helmet';
+import { router } from 'app';
 import { makeSelectLoading, makeSelectModels } from 'containers/App/selectors';
 
 import Form from 'containers/Form';
@@ -26,12 +27,16 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   constructor(props) {
     super(props);
 
-    this.state = {
-      showModal: false,
-    };
+    this.popUpHeaderNavLinks = [
+      { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
+      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
+    ];
   }
 
-  toggleModal = () => this.setState({ showModal: !this.state.showModal });
+  toggleModal = () => {
+    const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings'
+    router.push(`plugins/content-type-builder/${locationHash}`);
+  }
 
   renderTableListComponent = () => {
     const availableNumber = size(this.props.models);
@@ -50,8 +55,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
 
   render() {
-    if (this.props.modelsLoading) return <div />;
-
     const component = size(this.props.models) === 0 ?
       <EmptyContentTypeView handleButtonClick={this.toggleModal} />
         : this.renderTableListComponent();
@@ -71,9 +74,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         />
         {component}
         <Form
-          isOpen={this.state.showModal}
+          hash={this.props.location.hash}
           toggle={this.toggleModal}
-          popUpFormType={'contentType'}
+          routePath={this.props.route.path}
+          popUpHeaderNavLinks={this.popUpHeaderNavLinks}
         />
       </div>
     );
@@ -95,11 +99,13 @@ function mapDispatchToProps(dispatch) {
 
 HomePage.propTypes =  {
   // homePage: React.PropTypes.object.isRequired,
+  location: React.PropTypes.object,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,
   ]),
-  modelsLoading: React.PropTypes.bool,
+  // modelsLoading: React.PropTypes.bool,
+  route: React.PropTypes.object,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
