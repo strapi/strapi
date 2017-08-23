@@ -5,48 +5,20 @@
 */
 
 import React from 'react';
-import { has, map, size } from 'lodash';
-import { FormattedMessage } from 'react-intl';
+import { map } from 'lodash';
 import ButtonPrimaryHotline from 'components/Button';
-import AttributeRow from 'components/AttributeRow';
 import styles from './styles.scss';
 
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
-  renderListTitle = () => {
-    const availableNumber = size(this.props.model.attributes);
-    const title = availableNumber > 1 ? 'modelPage.contentType.list.title.plural'
-      : 'modelPage.contentType.list.title.singular';
-
-    const relationShipNumber = this.props.model.attributes.filter(attr => has(attr.params, 'model')).length;
-
-    const relationShipTitle = relationShipNumber > 1 ? 'modelPage.contentType.list.relationShipTitle.plural'
-      : 'modelPage.contentType.list.relationShipTitle.singular';
-
-    let fullTitle;
-
-    if (relationShipNumber > 0) {
-      fullTitle = (
-        <div className={styles.titleContainer}>
-          {availableNumber} <FormattedMessage id={title} /> <FormattedMessage id={'modelPage.contentType.list.title.including'} /> {relationShipNumber} <FormattedMessage id={relationShipTitle} />
-        </div>
-      );
-    } else {
-      fullTitle = (
-        <div className={styles.titleContainer}>
-          {availableNumber} <FormattedMessage id={title} />
-
-        </div>
-      );
-    }
-    return fullTitle;
-  }
-
   render() {
+    const title = this.props.renderCustomListTitle ?
+      this.props.renderCustomListTitle(this.props, styles)
+      : this.props.listContent.title;
+
     return (
       <div className={styles.list}>
         <div className={styles.flex}>
-          {this.renderListTitle()}
+          {title}
           <div className={styles.buttonContainer}>
             <ButtonPrimaryHotline
               buttonBackground={'secondaryAddType'}
@@ -59,9 +31,15 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         </div>
         <div className={styles.ulContainer}>
           <ul>
-            {map(this.props.model.attributes, (attribute, key) => (
-              <AttributeRow key={key} row={attribute} />
-            ))}
+            {map(this.props.listContent[this.props.listContentMappingKey], (row, key) => {
+              if (this.props.renderCustomLi) return this.props.renderCustomLi(row, key);
+
+              return (
+                <li key={key}>
+                  {row.name}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -71,7 +49,10 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
 List.propTypes = {
   handleButtonClick: React.PropTypes.func,
-  model: React.PropTypes.object,
+  listContent: React.PropTypes.object,
+  listContentMappingKey: React.PropTypes.string.isRequired,
+  renderCustomLi: React.PropTypes.func,
+  renderCustomListTitle: React.PropTypes.func,
 }
 
 export default List;

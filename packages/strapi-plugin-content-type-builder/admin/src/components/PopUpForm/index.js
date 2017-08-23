@@ -26,7 +26,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderNavContainer = () => {
-    console.log('ok');
+    console.log('oeeek');
     return (
       <div className={styles.navContainer}>
         <PopUpHeaderNavLink

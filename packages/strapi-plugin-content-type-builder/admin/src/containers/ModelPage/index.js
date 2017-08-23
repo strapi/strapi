@@ -8,13 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { size, startCase } from 'lodash';
+import { has, size, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
 
+import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 import List from 'components/List';
@@ -84,6 +85,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </li>
   )
 
+  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} />
+
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
 
@@ -99,10 +102,44 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     );
   }
 
+  renderListTitle = (props, listStyles) => {
+    const availableNumber = size(props.listContent.attributes);
+    const title = availableNumber > 1 ? 'modelPage.contentType.list.title.plural'
+      : 'modelPage.contentType.list.title.singular';
+
+    const relationShipNumber = props.listContent.attributes.filter(attr => has(attr.params, 'model')).length;
+
+    const relationShipTitle = relationShipNumber > 1 ? 'modelPage.contentType.list.relationShipTitle.plural'
+      : 'modelPage.contentType.list.relationShipTitle.singular';
+
+    let fullTitle;
+
+    if (relationShipNumber > 0) {
+      fullTitle = (
+        <div className={listStyles.titleContainer}>
+          {availableNumber} <FormattedMessage id={title} /> <FormattedMessage id={'modelPage.contentType.list.title.including'} /> {relationShipNumber} <FormattedMessage id={relationShipTitle} />
+        </div>
+      );
+    } else {
+      fullTitle = (
+        <div className={listStyles.titleContainer}>
+          {availableNumber} <FormattedMessage id={title} />
+
+        </div>
+      );
+    }
+    return fullTitle;
+  }
+
   render() {
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClick} /> :
-        <List model={this.props.modelPage.model} />;
+        <List
+          listContent={this.props.modelPage.model}
+          renderCustomListTitle={this.renderListTitle}
+          listContentMappingKey={'attributes'}
+          renderCustomLi={this.renderCustomLi}
+        />;
 
     return (
       <div className={styles.modelPage}>
