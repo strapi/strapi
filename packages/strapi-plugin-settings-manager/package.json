@@ -26,6 +26,7 @@
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
     "flag-icon-css": "^2.8.0",
+    "koa-send": "^4.1.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-select": "^1.0.0-rc.5",
