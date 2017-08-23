@@ -16,6 +16,14 @@ try {
       }
     });
 
+    if (packageJSON.devDependencies) {
+      Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+        if (packageJSON.devDependencies[devDependency].indexOf('file:') !== -1) {
+          packageJSON.devDependencies[devDependency] = '^' + pkgJSON.version;
+        }
+      });
+    }
+
     fs.writeFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf8');
   });
 } catch (error) {
