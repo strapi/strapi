@@ -18,7 +18,7 @@
   "form.databases.name": "Bases de données",
   "form.databases.description": "Modification des configurations de bases de données par environnement.",
 
-  "form.database.item.name": "Nome de la Connexion",
+  "form.database.item.name": "Nom de la Connexion",
   "form.database.item.client": "Client",
   "form.database.item.host": "Hôte",
   "form.database.item.port": "Port",

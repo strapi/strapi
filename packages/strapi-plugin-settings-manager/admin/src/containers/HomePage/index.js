@@ -210,11 +210,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (this.props.params.slug === 'databases') {
       if (name === this.props.home.dbNameTarget) {
-
         const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
           [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
         this.props.setErrors(formErrors);
+      } else {
+        this.props.setErrors([]);
       }
+
     }
     this.props.changeInput(name, value);
   }

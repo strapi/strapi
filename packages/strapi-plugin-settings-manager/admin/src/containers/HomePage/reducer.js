@@ -114,7 +114,10 @@ function homePageReducer(state = initialState, action) {
         .set('error', !state.get('error'))
         .set('didCreatedNewDb', true);
     case DATABASE_ACTION_ERROR:
-      return state.set('didCreatedNewDb', true);
+      return state
+        .set('error', !state.get('error'))
+        .set('formErrors', action.formErrors)
+        // .set('didCreatedNewDb', true);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state
         .set('specificDatabase', OrderedMap(action.database))
