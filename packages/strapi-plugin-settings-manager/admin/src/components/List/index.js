@@ -36,8 +36,8 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.error !== this.props.error) {
-      if (isEmpty(nextProps.formErrors)) this.setState({ modal: false, loader: false });
+    if (nextProps.error !== this.props.error && isEmpty(nextProps.formErrors)) {
+      this.setState({ modal: false, loader: false });
     }
     if (!isEmpty(nextProps.formErrors)) this.setState({ loader: false });
   }
