@@ -36,21 +36,17 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
       })
     ));
 
-
-    // List of links
-    let pluginsLinks = this.props.plugins.valueSeq().map((plugin) => (
-      <LeftMenuLink
-        key={plugin.get('id')}
-        icon={plugin.get('icon') || 'plug'}
-        label={plugin.get('name')}
-        destination={`/plugins/${plugin.get('id')}`}
-      />
-    ));
-
     // Check if the plugins list is empty or not
-    if (!pluginsLinks.size) {
-      pluginsLinks = <span className={styles.noPluginsInstalled}>No plugins installed yet.</span>;
-    }
+    const pluginsLinks = this.props.plugins.size
+      ? this.props.plugins.valueSeq().map((plugin) => (
+        <LeftMenuLink
+          key={plugin.get('id')}
+          icon={plugin.get('icon') || 'plug'}
+          label={plugin.get('name')}
+          destination={`/plugins/${plugin.get('id')}`}
+        />
+      ))
+      : <span className={styles.noPluginsInstalled}>No plugins installed yet.</span>;
 
     return (
       <div className={styles.leftMenuLinkContainer}>
