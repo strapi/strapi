@@ -163,7 +163,9 @@ export function getRequiredInputsDb(data, dbExistsErrors) {
   if (size(data) === 2) return formErrors;
 
   forEach(data, (value, target) => {
-    remove(formErrors, (object) => object.target === target);
+    if (value !== '') {
+      remove(formErrors, (object) => object.target === target);
+    }
   });
 
   return union(dbExistsErrors, formErrors);
