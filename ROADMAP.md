@@ -52,23 +52,22 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Prototype the CLI to create, install and uninstall plugins.~~
 - ~~Ensure that we are compatible with Node 8.~~
 
-`strapi@alpha.5` *(expected release date: 10/08/2017)*:
-- [Plugin] Settings Manager.
-- Update `strapi-helper-plugin` and `strapi-admin` dependencies to the latest version.
-- Update layout design.
-- Create a draft of the guidelines to follow of how to create a plugin.
-- Finalize the plugins queries process to be able to use different ORMs.
-- Initialize the `strapi-docs` package.
-- Use [lerna](http://lernajs.io) to run tests.
-- Synchronize the ORM adapters to set the same properties in the AST.
-- Rewrite the Strapi core to improve performances and startup time.
+`strapi@alpha.5` *(expected release date: 30/08/2017)*:
+- ~~[Plugin] Settings Manager~~.
+- ~~Update layout design~~.
+- ~~Create a draft of the guidelines to follow of how to create a plugin~~.
+- ~~Initialize the `strapi-docs` package~~.
+- ~~Synchronize the ORM adapters to set the same properties in the AST~~.
+- ~~Rewrite the Strapi core to improve performances and startup time~~.
+- ~~Freeze (make immutable) the AST~~.
+- ~~Remove global variable `strapi` and use the module pattern instead~~.
 
 `strapi@alpha.6` *(expected release date: 21/09/2017)*:
 - [Plugin] Content Manager.
 - [Plugin] Content Type Builder.
-- Freeze (make immutable) the AST.
-- Remove global variable `strapi` and use the module pattern instead.
-- Write better tests.
+- Finalize the plugins queries process to be able to use different ORMs.
+- Update `strapi-helper-plugin` and `strapi-admin` dependencies to the latest version.
+- Use [lerna](http://lernajs.io) to run tests.
 
 `strapi@alpha.7` *(expected release date: 31/10/2017)*:
 - [Plugin] Users & groups (with full authentication process).

@@ -56,10 +56,12 @@ module.exports = strapi => {
       // Note: This route could be override by the user.
       strapi.router.route({
         method: 'GET',
-        path: '/*.*',
+        path: '/*(.*)?',
         handler: [
           async (ctx, next) => {
-            ctx.url = path.basename(ctx.url);
+            const parse = path.parse(ctx.url);
+
+            ctx.url = path.join(parse.dir, parse.base);
 
             await next();
           },
