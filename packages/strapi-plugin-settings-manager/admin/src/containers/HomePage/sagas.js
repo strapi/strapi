@@ -236,9 +236,9 @@ export function* postDatabase(action) {
 
   } catch(error) {
     const formErrors = map(error.response.payload.message, (err) => {
-      const dbName = err.target.split('.')[2];
+      const target = err.target ? replace(err.target, err.target.split('.')[2], '${name}') : 'database.connections.${name}.name';
       return (
-        { target: replace(err.target, dbName, '${name}'), errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }
+        { target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }
       );
     });
 
