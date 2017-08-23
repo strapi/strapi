@@ -6,6 +6,7 @@
 
 // Node.js core.
 const path = require('path');
+const { exec } = require('child_process');
 
 // Public node modules.
 const _ = require('lodash');
@@ -82,11 +83,20 @@ module.exports = (scope, cb) => {
         } else {
           fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
         }
-      })
+      });
 
-      logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+      exec('strapi install settings-manager@alpha', (err, stdout) => {
+        logger.info('Installing Settings Manager plugin...');
 
-      cb();
+        if (err) {
+          logger.error('An error occured during Settings Manager plugin installation.');
+          logger.error(stdout);
+        }
+
+        logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+
+        cb();
+      });
     });
   }
 };
