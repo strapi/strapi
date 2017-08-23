@@ -240,9 +240,10 @@ export function databaseActionSucceeded() {
   };
 }
 
-export function databaseActionError() {
+export function databaseActionError(formErrors) {
   return {
     type: DATABASE_ACTION_ERROR,
+    formErrors,
   };
 }
 
