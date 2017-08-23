@@ -34,6 +34,23 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
+      // Default index pages.
+      strapi.router.route({
+        method: 'GET',
+        path: '/',
+        handler: [
+          async (ctx, next) => {
+            ctx.url = path.basename(`${ctx.url}/index.html`);
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(strapi.config.middleware.settings.public.path || strapi.config.paths.static, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
       // Match every route with an extension.
       // The file without extension will not be served.
       // Note: This route could be override by the user.

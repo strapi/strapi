@@ -33,7 +33,6 @@
     "async": "^2.1.2",
     "boom": "^5.2.0",
     "delegates": "^1.0.0",
-    "forever-monitor": "^1.7.1",
     "glob": "^7.1.2",
     "kcors": "^2.2.0",
     "koa": "^2.1.0",

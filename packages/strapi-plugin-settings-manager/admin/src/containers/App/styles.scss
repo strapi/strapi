@@ -1,0 +1,9 @@
+.app { /* stylelint-disable */
+  min-height: calc(100vh - 6rem); // TODO should be variable
+  // background: rgba(14,22,34,0.02);
+  background: #fff !important;
+}
+
+.noPadding {
+  padding: 0!important;
+}

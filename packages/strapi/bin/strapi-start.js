@@ -9,10 +9,11 @@
 // Node.js core.
 const cp = require('child_process');
 const path = require('path');
+const cluster = require('cluster');
 
 // Public dependencies
 const _ = require('lodash');
-const forever = require('forever-monitor');
+const fs = require('fs');
 const semver = require('semver')
 
 // Logger.
@@ -27,6 +28,14 @@ const { cli, logger } = require('strapi-utils');
 
 module.exports = function() {
   try {
+    const strapi = function () {
+      try {
+        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
+      } catch (e) {
+        return require('strapi');
+      }
+    }();
+
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
       process.env.NODE_ENV = 'development';
@@ -42,62 +51,47 @@ module.exports = function() {
     ));
 
     if (process.env.NODE_ENV === 'development' && server.autoReload === true) {
-      const options = _.assign(
-        {},
-        {
-          silent: false,
-          watch: true,
-          watchDirectory: process.cwd(),
-          watchIgnoreDotFiles: true, // Whether to ignore file starting with a '.'
-          watchIgnorePatterns: [
-            'node_modules/**/*',
-            'public/**/*',
-            '.git/**/*',
-            '.idea'
-          ], // Ignore patterns to use when watching files.
-          killTree: true, // Kills the entire child process tree on `exit`,
-          spinSleepTime: 0,
-          command: 'node'
+      const restart = path => {
+        if (strapi.reload.isWatching && cluster.isWorker && !strapi.reload.isReloading) {
+          strapi.reload.isReloading = true;
+          strapi.log.info(`File changed: ${path}`);
+          strapi.reload();
         }
-      );
+      };
 
-      const child = new forever.Monitor('server.js', options);
+      const setFilesToWatch = (src) => {
+        var files = fs.readdirSync(src);
+        _.forEach(files, file => {
+          if (_.startsWith(file, '.') || file === 'node_modules') return;
 
-      // Run listeners
-      child.on('watch:restart', info => {
-        logger.info(
-          'Restarting due to ' +
-            info.file +
-            '... (' +
-            info.stat.replace(child.cwd, '.') +
-            ')'
-        );
-        console.log();
-      });
+          const filePath = `${src}/${file}`;
+          if (fs.statSync(filePath).isDirectory()) setFilesToWatch(filePath);
+          else fs.watchFile(filePath, (evt, path) => restart(filePath));
+        });
+      };
 
-      child.on('exit:code', function(code) {
-        if (code) {
-          process.exit(code);
-        }
-      });
+      setFilesToWatch(process.cwd());
 
-      // Start child process
-      return child.start();
+      if (cluster.isMaster) {
+        cluster.on('message', () => {
+          strapi.log.info('The server is restarting\n');
+
+          _.forEach(cluster.workers, worker => worker.kill());
+
+          cluster.fork();
+        });
+
+        cluster.fork();
+      }
+
+      if (cluster.isWorker) return strapi.start(afterwards);
+      else return;
     }
 
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    const strapi = function () {
-      try {
-        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
-      } catch (e) {
-        return require('strapi');
-      }
-    }();
-
-    strapi.start();
-
+    strapi.start(afterwards);
   } catch (e) {
     logger.error(e);
     process.exit(0);

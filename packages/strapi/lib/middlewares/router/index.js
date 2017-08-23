@@ -57,7 +57,8 @@ module.exports = strapi => {
           composeEndpoint(value, null, router)(cb);
         });
 
-        router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
+        // router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
+        router.prefix('/admin');
 
         // TODO:
         // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
