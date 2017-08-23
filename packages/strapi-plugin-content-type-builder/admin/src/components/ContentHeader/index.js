@@ -1,3 +1,9 @@
+/**
+*
+* ContentHeader
+*
+*/
+
 import React from 'react';
 import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';

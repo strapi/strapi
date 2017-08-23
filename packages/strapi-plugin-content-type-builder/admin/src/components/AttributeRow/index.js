@@ -7,13 +7,13 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
-import Boolean from '../../assets/images/icon_boolean.svg';
-import Date from '../../assets/images/icon_date.svg';
-import Image from '../../assets/images/icon_image.svg';
-import Json from '../../assets/images/icon_json.svg';
-import Relation from '../../assets/images/icon_relation.svg';
-import String from '../../assets/images/icon_string.svg';
-import Text from '../../assets/images/icon_text.svg';
+import IcoBoolean from '../../assets/images/icon_boolean.svg';
+import IcoDate from '../../assets/images/icon_date.svg';
+import IcoImage from '../../assets/images/icon_image.svg';
+import IcoJson from '../../assets/images/icon_json.svg';
+import IcoRelation from '../../assets/images/icon_relation.svg';
+import IcoString from '../../assets/images/icon_string.svg';
+import IcoText from '../../assets/images/icon_text.svg';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -21,13 +21,13 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
   constructor(props) {
     super(props);
     this.asset = {
-      'boolean': Boolean,
-      'date': Date,
-      'image': Image,
-      'json': Json,
-      'relation': Relation,
-      'string': String,
-      'text': Text,
+      'boolean': IcoBoolean,
+      'date': IcoDate,
+      'image': IcoImage,
+      'json': IcoJson,
+      'relation': IcoRelation,
+      'string': IcoString,
+      'text': IcoText,
     };
   }
 

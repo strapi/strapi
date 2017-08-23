@@ -1,6 +1,6 @@
 /**
 *
-* LiTableList
+* TableListRow
 *
 */
 
@@ -10,7 +10,7 @@ import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
-class LiTableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class TableListRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
   edit = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -51,8 +51,8 @@ class LiTableList extends React.Component { // eslint-disable-line react/prefer-
   }
 }
 
-LiTableList.propTypes = {
+TableListRow.propTypes = {
   rowItem: React.PropTypes.object.isRequired,
 };
 
-export default LiTableList;
+export default TableListRow;

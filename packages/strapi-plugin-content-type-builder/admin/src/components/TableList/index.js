@@ -8,7 +8,7 @@ import React from 'react';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import ButtonPrimaryHotline from 'components/Button';
-import LiTableList from 'components/LiTableList';
+import TableListRow from 'components/TableListRow';
 import styles from './styles.scss';
 
 class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -47,7 +47,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                   </div>
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
-                  <LiTableList key={key} rowItem={rowItem} />
+                  <TableListRow key={key} rowItem={rowItem} />
                 ))}
               </ul>
             </div>
