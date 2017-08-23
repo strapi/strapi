@@ -16,6 +16,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     this.state = {
       isFirstNavLinkActive: true,
       linkActive: 'base',
+      value: 'a',
     };
   }
 
@@ -24,6 +25,9 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       this.setState({ linkActive, isFirstNavLinkActive: !this.state.isFirstNavLinkActive });
     }
   }
+
+  // TODO remove temp
+  handleChange = ({ target }) => this.setState({ value: target.value });
 
   renderNavContainer = () => {
     console.log('oeeek');
@@ -64,7 +68,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             {navContainer}
           </div>
           <ModalBody>
-            hello
+            Hello
           </ModalBody>
           <ModalFooter className={styles.modalFooter}>
             <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
@@ -81,6 +85,6 @@ PopUpForm.propTypes = {
   noNav: React.PropTypes.bool,
   popUpFormType: React.PropTypes.string.isRequired,
   toggle: React.PropTypes.func,
-}
+};
 
 export default PopUpForm;

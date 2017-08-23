@@ -1,0 +1,42 @@
+.input { /* stylelint-disable */
+  margin-bottom: 3.3rem;
+  font-size: 1.3rem;
+  font-family: Lato;
+  > label {
+    margin-bottom: 0;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  > input {
+    margin-top: .9rem;
+    padding-left: 1rem;
+    height: 3.4rem;
+    border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
+    line-height: 3.4rem;
+    font-size: 1.3rem;
+    font-family: Lato!important;
+    background-size: 0!important;
+  }
+}
+
+.inputDescriptionContainer {
+  margin-top: 1.3rem;
+  line-height: 1.2rem;
+  > small {
+    color: #9EA7B8;
+    font-family: Lato;
+    font-size: 1.2rem;
+  }
+}
+
+
+.errorContainer {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+  line-height: 1.3rem;
+}
+
+.spacer {
+  height: .5rem;
+}
