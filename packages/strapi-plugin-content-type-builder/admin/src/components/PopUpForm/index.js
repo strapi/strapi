@@ -26,6 +26,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderNavContainer = () => {
+    console.log('ok');
     return (
       <div className={styles.navContainer}>
         <PopUpHeaderNavLink
@@ -83,10 +84,3 @@ PopUpForm.propTypes = {
 }
 
 export default PopUpForm;
-
-// <div>
-//   <FormattedMessage id={'popUpForm.navContainer.base'} />
-// </div>
-// <div>
-//   <FormattedMessage id={'popUpForm.navContainer.advanced'} />
-// </div>

@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { includes, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -23,7 +23,7 @@ class LiTableList extends React.Component { // eslint-disable-line react/prefer-
     console.log('delete', this.props.rowItem.name);
   }
 
-  goTo = (e) => {
+  goTo = () => {
     router.push(`/plugins/content-type-builder/${this.props.rowItem.name}`);
   }
 

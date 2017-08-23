@@ -1,42 +1,29 @@
 /**
 *
 * PluginLeftMenuLink
+*   - Required props:
+*     - {object} Link
+*
+*   - Optionnal props:
+*     - {function} renderCustomLink : overrides the behavior of the link
 *
 */
 
 import React from 'react';
-import { startCase } from 'lodash';
 import { Link } from 'react-router';
-import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  /* eslint-disable jsx-a11y/no-static-element-interactions */
-  onClick =  () => {
-    console.log('click');
-  }
-
-  renderAddLink = () => (
-    <li className={styles.pluginLeftMenuLink}>
-      <div className={styles.liInnerContainer} onClick={this.onClick}>
-        <div>
-          <i className={`fa ${this.props.link.icon}`} />
-        </div>
-        <span><FormattedMessage id={this.props.link.name} /></span>
-      </div>
-    </li>
-  )
-
   render() {
-    if (this.props.link.name === 'button.contentType.add') return this.renderAddLink();
-    
+    if (this.props.renderCustomLink) return this.props.renderCustomLink(this.props, styles);
+
     return (
       <li className={styles.pluginLeftMenuLink}>
         <Link className={styles.link} to={`/plugins/content-type-builder/${this.props.link.name}`} activeClassName={styles.linkActive}>
           <div>
             <i className={`fa ${this.props.link.icon}`} />
           </div>
-          <span>{startCase(this.props.link.name)}</span>
+          <span>{this.props.link.name}</span>
         </Link>
       </li>
     );
@@ -45,6 +32,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 
 PluginLeftMenuLink.propTypes = {
   link: React.PropTypes.object.isRequired,
+  renderCustomLink: React.PropTypes.func,
 };
 
 export default PluginLeftMenuLink;

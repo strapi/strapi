@@ -3,7 +3,7 @@
  * App actions
  *
  */
-import { size, forEach } from 'lodash';
+import { size, map } from 'lodash';
 import { MODELS_FETCH, MODELS_FETCH_SUCCEEDED } from './constants';
 
 export function modelsFetch() {
@@ -14,15 +14,9 @@ export function modelsFetch() {
 
 export function modelsFetchSucceeded(data) {
   const modelNumber = size(data.models) > 1 ? 'plural' : 'singular';
-  const sections = [];
+  const sections = map(data.models, (model) => ({icon: 'fa-caret-square-o-right', name: model.name }));
+  sections.push({ icon: 'fa-plus', name: 'button.contentType.add' });
 
-  forEach(data.models, (model) => {
-    // TODO uncomment if we use icon from the API
-    // sections.push({icon: model.icon, name: model.name});
-    sections.push({icon: 'fa-caret-square-o-right', name: model.name});
-  });
-
-  sections.push({ icon: 'fa-plus', name: 'button.contentType.add' })
   const menu = {
     sections: [
       {

@@ -8,6 +8,8 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+
 class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   goTo = () => {
     this.props.handleClick(this.props.name);

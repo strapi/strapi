@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { get, forEach, filter, has, map, size } from 'lodash';
+import { has, map, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import ButtonPrimaryHotline from 'components/Button';
 import AttributeRow from 'components/AttributeRow';

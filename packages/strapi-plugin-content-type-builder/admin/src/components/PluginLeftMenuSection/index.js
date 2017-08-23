@@ -2,6 +2,10 @@
 *
 * PluginLeftMenuSection
 *
+*   - Required props:
+*     - {object} section
+*
+*
 */
 
 import React from 'react';
@@ -17,6 +21,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
       <PluginLeftMenuLink
         key={index}
         link={item}
+        renderCustomLink={this.props.renderCustomLink}
       />
     ));
     return (
@@ -33,6 +38,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
+  renderCustomLink: React.PropTypes.func,
   section: React.PropTypes.object.isRequired,
 };
 
