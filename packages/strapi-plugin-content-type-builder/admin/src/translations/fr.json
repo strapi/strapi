@@ -37,7 +37,8 @@
 
   "notification.error.message": "Une erreur est survenue",
 
-  "popUpForm.contentType.header.title": "Ajouter un Nouveau Modèle",
+  "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Modèle",
+  "popUpForm.edit.contentType.header.title": "Modifier un Modèle",
   "popUpForm.navContainer.base": "Réglages de base",
   "popUpForm.navContainer.advanced": "Réglages avancés",
 

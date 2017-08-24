@@ -7,7 +7,7 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { includes, isEmpty, split, toNumber, replace } from 'lodash';
+import { camelCase, includes, isEmpty, split, toNumber, replace } from 'lodash';
 import { store } from 'app';
 
 import PopUpForm from 'components/PopUpForm';
@@ -74,14 +74,20 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  handleBlur = ({ target }) => {
+    if (target.name === 'name') {
+      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
+    }
+  }
+
   handleChange = ({ target }) => {
     const value = target.type === 'number' ? toNumber(target.value) : target.value;
+
     this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
   }
 
   handleSubmit = () => {
     if (includes(this.props.hash, 'edit')) {
-      console.log('edit');
       this.props.contentTypeEdit();
     }
   }
@@ -99,6 +105,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   render() {
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
+    const popUpTitle = includes(this.props.hash, 'edit') ?
+      `popUpForm.edit.${popUpFormType}.header.title` : `popUpForm.create.${popUpFormType}.header.title`;
 
     // Two kinds of values are available modifiedData and modifiedDataEdit
     // Allows the user to start creating a contentType and modifying an existing one at the same time
@@ -111,6 +119,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           isOpen={this.state.showModal}
           toggle={this.toggle}
           popUpFormType={popUpFormType}
+          popUpTitle={popUpTitle}
           routePath={`${this.props.routePath}/${this.props.hash}`}
           popUpHeaderNavLinks={this.props.popUpHeaderNavLinks}
           form={this.props.form}
@@ -118,6 +127,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           selectOptions={this.props.selectOptions}
           selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
           handleChange={this.handleChange}
+          handleBlur={this.handleBlur}
           handleSubmit={this.handleSubmit}
         />
       </div>

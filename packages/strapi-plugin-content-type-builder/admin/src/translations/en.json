@@ -37,7 +37,8 @@
 
   "notification.error.message": "An error occured",
 
-  "popUpForm.contentType.header.title": "Add New Content Type",
+  "popUpForm.create.contentType.header.title": "Add New Content Type",
+  "popUpForm.edit.contentType.header.title": "Edit Content Type",
   "popUpForm.navContainer.base": "Base settings",
   "popUpForm.navContainer.advanced": "Advanced settings",
 

@@ -23,6 +23,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         key={key}
         type={item.type}
         handleChange={this.props.handleChange}
+        handleBlur={this.props.handleBlur}
         name={item.name}
         target={item.target}
         validations={item.validations}
@@ -51,8 +52,10 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   )
 
   renderPopUpHeader = () => {
-    const popUpTitle = `popUpForm.${this.props.popUpFormType}.header.title`;
-    return <FormattedMessage id={popUpTitle} />;
+    if (this.props.renderCustomPopUpHeader) {
+      return (this.props.renderCustomPopUpHeader);
+    }
+    return <FormattedMessage id={this.props.popUpTitle} />;
   }
 
   render() {
@@ -90,12 +93,15 @@ PopUpForm.propTypes = {
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,
   ]),
+  handleBlur: React.PropTypes.func,
   handleChange: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,
   isOpen: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
   popUpFormType: React.PropTypes.string.isRequired,
   popUpHeaderNavLinks: React.PropTypes.array,
+  popUpTitle: React.PropTypes.string,
+  renderCustomPopUpHeader: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
