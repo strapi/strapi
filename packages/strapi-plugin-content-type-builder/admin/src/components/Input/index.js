@@ -103,7 +103,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               value={this.props.value}
               name={this.props.target}
               id={this.props.name}
-              rows="3"
+
               placeholder={placeholder}
             />
           )}

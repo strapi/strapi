@@ -77,7 +77,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           </ModalBody>
           <ModalFooter className={styles.modalFooter}>
             <Button onClick={this.props.toggle} className={styles.secondary}>Cancel</Button>
-            <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
+            <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}>Save</Button>{' '}
           </ModalFooter>
         </Modal>
       </div>
@@ -91,6 +91,7 @@ PopUpForm.propTypes = {
     React.PropTypes.object.isRequired,
   ]),
   handleChange: React.PropTypes.func,
+  handleSubmit: React.PropTypes.func,
   isOpen: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
   popUpFormType: React.PropTypes.string.isRequired,

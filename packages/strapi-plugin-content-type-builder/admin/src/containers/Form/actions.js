@@ -13,6 +13,8 @@ import {
   CHANGE_INPUT,
   CONNECTIONS_FETCH,
   CONNECTIONS_FETCH_SUCCEEDED,
+  CONTENT_TYPE_ACTION_SUCCEEDED,
+  CONTENT_TYPE_EDIT,
   CONTENT_TYPE_FETCH,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
@@ -21,11 +23,13 @@ import {
 
 import forms from './forms.json';
 
-export function changeInput(key, value) {
+export function changeInput(key, value, isEditing) {
+  const objectToModify = isEditing ? 'modifiedDataEdit' : 'modifiedData';
   return {
     type: CHANGE_INPUT,
     key,
     value,
+    objectToModify,
   };
 }
 
@@ -43,6 +47,13 @@ export function connectionsFetchSucceeded(data) {
   };
 }
 
+export function contentTypeActionSucceeded() {
+  console.log('ok');
+  return {
+    type: CONTENT_TYPE_ACTION_SUCCEEDED,
+  };
+}
+
 export function contentTypeFetch(contentTypeName) {
   return {
     type: CONTENT_TYPE_FETCH,
@@ -51,7 +62,9 @@ export function contentTypeFetch(contentTypeName) {
 }
 
 export function contentTypeFetchSucceeded(contentType) {
-  const dataArray = [['attributes', List(contentType.model.attributes)]];
+  // TODO remove forced connection
+  const dataArray = [['attributes', List(contentType.model.attributes)], ['connection', 'default']];
+  // const dataArray = [['attributes', List(contentType.model.attributes)]];
   forEach(contentType.model, (value, key) => {
     if (key !== 'attributes') {
       dataArray.push([key, value]);
@@ -62,6 +75,12 @@ export function contentTypeFetchSucceeded(contentType) {
   return {
     type: CONTENT_TYPE_FETCH_SUCCEEDED,
     data,
+  };
+}
+
+export function contentTypeEdit() {
+  return {
+    type: CONTENT_TYPE_EDIT,
   };
 }
 

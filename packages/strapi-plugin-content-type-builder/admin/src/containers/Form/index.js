@@ -19,6 +19,7 @@ import selectForm from './selectors';
 import {
   changeInput,
   connectionsFetch,
+  contentTypeEdit,
   contentTypeFetch,
   resetDidFetchModelProp,
   setForm,
@@ -43,11 +44,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.connectionsFetch();
 
     if (this.props.hash) {
-      // if (includes(this.props.hash, 'create')) {
       // Get the formType within the hash
       this.props.setForm(this.props.hash);
       this.setState({ showModal: true });
-      // }
+
+      // Fetch Model is the user is editing contentType
+      if (includes(this.props.hash, 'edit')) {
+        const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '').toLowerCase();
+        this.props.contentTypeFetch(contentTypeName)
+      }
     }
   }
 
@@ -71,12 +76,21 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   handleChange = ({ target }) => {
     const value = target.type === 'number' ? toNumber(target.value) : target.value;
-    this.props.changeInput(target.name, value);
+    this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
+  }
+
+  handleSubmit = () => {
+    if (includes(this.props.hash, 'edit')) {
+      console.log('edit');
+      this.props.contentTypeEdit();
+    }
   }
 
   toggle = () => {
     this.props.toggle();
 
+    // Set the didFetchModel props to false when the modal is closing so the store is emptied
+    // Only for editing
     if (this.state.showModal && includes(this.props.hash, 'edit')) {
       this.props.resetDidFetchModelProp();
     }
@@ -85,6 +99,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   render() {
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
+
+    // Two kinds of values are available modifiedData and modifiedDataEdit
+    // Allows the user to start creating a contentType and modifying an existing one at the same time
+
+    const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
 
     return (
       <div className={styles.form}>
@@ -95,10 +114,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           routePath={`${this.props.routePath}/${this.props.hash}`}
           popUpHeaderNavLinks={this.props.popUpHeaderNavLinks}
           form={this.props.form}
-          values={this.props.modifiedData}
+          values={values}
           selectOptions={this.props.selectOptions}
           selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
           handleChange={this.handleChange}
+          handleSubmit={this.handleSubmit}
         />
       </div>
     );
@@ -112,6 +132,7 @@ function mapDispatchToProps(dispatch) {
     {
       changeInput,
       connectionsFetch,
+      contentTypeEdit,
       contentTypeFetch,
       resetDidFetchModelProp,
       setForm,
@@ -123,6 +144,7 @@ function mapDispatchToProps(dispatch) {
 Form.propTypes = {
   changeInput: React.PropTypes.func.isRequired,
   connectionsFetch: React.PropTypes.func.isRequired,
+  contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
@@ -130,6 +152,7 @@ Form.propTypes = {
   ]),
   hash: React.PropTypes.string.isRequired,
   modifiedData: React.PropTypes.object,
+  modifiedDataEdit: React.PropTypes.object,
   popUpHeaderNavLinks: React.PropTypes.array,
   resetDidFetchModelProp: React.PropTypes.func,
   routePath: React.PropTypes.string,

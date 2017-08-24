@@ -1,19 +1,45 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
 import { takeLatest } from 'redux-saga';
-import { call, take, put, fork, cancel } from 'redux-saga/effects';
+import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
 import {
   connectionsFetchSucceeded,
+  contentTypeActionSucceeded,
   contentTypeFetchSucceeded,
 } from './actions';
 
 import {
   CONNECTIONS_FETCH,
+  CONTENT_TYPE_EDIT,
   CONTENT_TYPE_FETCH,
 } from './constants';
+
+import {
+  makeSelectInitialDataEdit,
+  makeSelectModifiedDataEdit,
+} from './selectors';
+
+export function* editContentType() {
+  try {
+    const body = yield select(makeSelectModifiedDataEdit());
+    const opts = {
+      method: 'PUT',
+      body,
+    };
+
+    const initialContentType = yield select(makeSelectInitialDataEdit());
+    const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
+
+    yield call(request, requestUrl, opts);
+    yield put(contentTypeActionSucceeded());
+
+  } catch(error) {
+    console.log(error);
+  }
+}
 
 export function* fetchConnections() {
   try {
@@ -46,7 +72,10 @@ export function* fetchContentType(action) {
 // Individual exports for testing
 export function* defaultSaga() {
   const loadConnectionsWatcher = yield fork(takeLatest, CONNECTIONS_FETCH, fetchConnections);
+
+  yield fork(takeLatest, CONTENT_TYPE_EDIT, editContentType);
   yield fork(takeLatest, CONTENT_TYPE_FETCH, fetchContentType);
+
 
   yield take(LOCATION_CHANGE);
 

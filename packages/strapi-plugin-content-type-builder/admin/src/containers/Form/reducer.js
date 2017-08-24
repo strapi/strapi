@@ -20,7 +20,9 @@ const initialState = fromJS({
   selectOptions: List(),
   form: List(),
   initialData: Map(),
+  initialDataEdit: Map(),
   modifiedData: Map(),
+  modifiedDataEdit: Map(),
   isFormSet: false,
   didFetchModel: false,
 });
@@ -29,7 +31,7 @@ function formReducer(state = initialState, action) {
   switch (action.type) {
     case CHANGE_INPUT:
       return state
-        .updateIn(['modifiedData', action.key], () => action.value);
+        .updateIn([action.objectToModify, action.key], () => action.value);
     case CONNECTIONS_FETCH_SUCCEEDED:
       return state
         .set('selectOptions', List(action.connections))
@@ -37,12 +39,11 @@ function formReducer(state = initialState, action) {
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
         .set('didFetchModel', true)
-        .set('initialData', action.data)
-        .set('modifiedData', action.data);
+        .set('initialDataEdit', action.data)
+        .set('modifiedDataEdit', action.data);
     case RESET_DID_FETCH_MODEL_PROP:
       return state
-        .set('didFetchModel', false)
-        .set('isFormSet', false);
+        .set('didFetchModel', false);
     case SET_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));

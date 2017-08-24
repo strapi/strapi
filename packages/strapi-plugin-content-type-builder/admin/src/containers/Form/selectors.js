@@ -16,10 +16,28 @@ const selectFormDomain = () => state => state.get('form');
 
 const selectForm = () => createSelector(
   selectFormDomain(),
-  (substate) => substate.toJS()
+  (substate) => substate.toJS(),
+);
+
+const makeSelectModifiedData = () => createSelector(
+  selectFormDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
+);
+
+const makeSelectModifiedDataEdit = () => createSelector(
+  selectFormDomain(),
+  (substate) => substate.get('modifiedDataEdit').toJS(),
+);
+
+const makeSelectInitialDataEdit = () => createSelector(
+  selectFormDomain(),
+  (substate) => substate.get('initialDataEdit').toJS()
 );
 
 export default selectForm;
 export {
   selectFormDomain,
+  makeSelectInitialDataEdit,
+  makeSelectModifiedData,
+  makeSelectModifiedDataEdit,
 };
