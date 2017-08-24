@@ -7,13 +7,13 @@
 }
 
 .errorContainerTextArea {
-  margin-top: .4rem;
+  margin-top: .5rem;
   line-height: 1.3rem;
-  margin-bottom: .7rem;
+  margin-bottom: .5rem;
 }
 
 .input {
-  margin-bottom: 3.3rem;
+  margin-bottom: 1.5rem;
   font-size: 1.3rem;
   font-family: Lato;
   > label {
@@ -41,6 +41,7 @@
     line-height: 3.2rem;
     border: 1px solid #E3E9F3;
     border-radius: 0.25rem;
+    -moz-appearance: none;
     -webkit-appearance: none;
     font-size: 1.3rem;
     font-family: Lato!important;
@@ -75,7 +76,7 @@
 
 
 .inputTextArea {
-  margin-bottom: 3.2rem;
+  margin-bottom: 1.6rem;
   font-size: 1.3rem;
   font-family: Lato;
   > label {
@@ -84,12 +85,12 @@
     text-transform: capitalize;
   }
   > textarea {
-    margin-top: .8rem;
+    margin-top: .9rem;
     padding: 0 1rem .3rem 1rem;
     // height: 3.4rem;
     border: 1px solid #E3E9F3;
     border-radius: 0.25rem;
-    line-height: 3.6rem;
+    line-height: 3.5rem;
     font-size: 1.3rem;
     font-family: Lato!important;
     background-size: 0!important;

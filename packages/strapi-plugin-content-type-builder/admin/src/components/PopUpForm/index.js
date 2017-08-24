@@ -24,6 +24,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   handleChange = ({ target }) => this.setState({ value: target.value });
 
   renderInput = (item, key) => {
+    // const customBootstrapClass = 'col-md-6'
     const customBootstrapClass = item.type === 'textarea' ?
       'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6'
     return (
