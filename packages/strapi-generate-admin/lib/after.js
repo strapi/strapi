@@ -4,6 +4,9 @@
  * Module dependencies
  */
 
+const { exec } = require('child_process');
+const path = require('path');
+
 /**
  * Runs after this generator has finished
  *
@@ -11,7 +14,14 @@
  * @param {Function} cb
  */
 
-module.exports = function afterGenerate(scope, cb) {
+module.exports =  (scope, cb) => {
+  exec('npm install', {
+    cwd: path.resolve(scope.rootPath, 'admin')
+  }, (err, stdout) => {
+    if (err) {
+      return cb(err);
+    }
 
-  return cb();
+    cb();
+  });
 };
