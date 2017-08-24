@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { startCase } from 'lodash';
+import { startCase, capitalize } from 'lodash';
 import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -14,7 +14,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   edit = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('edit', this.props.rowItem.name);
+    router.push(`plugins/content-type-builder/#edit${capitalize(this.props.rowItem.name)}::contentType::baseSettings`);
   }
 
   delete = (e) => {

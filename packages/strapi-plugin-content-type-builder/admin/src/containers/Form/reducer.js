@@ -6,7 +6,10 @@
 
 import { fromJS, List, Map } from 'immutable';
 import {
+  CHANGE_INPUT,
   CONNECTIONS_FETCH_SUCCEEDED,
+  CONTENT_TYPE_FETCH_SUCCEEDED,
+  RESET_DID_FETCH_MODEL_PROP,
   SET_FORM,
 } from './constants';
 
@@ -18,19 +21,38 @@ const initialState = fromJS({
   form: List(),
   initialData: Map(),
   modifiedData: Map(),
+  isFormSet: false,
+  didFetchModel: false,
 });
 
 function formReducer(state = initialState, action) {
   switch (action.type) {
+    case CHANGE_INPUT:
+      return state
+        .updateIn(['modifiedData', action.key], () => action.value);
     case CONNECTIONS_FETCH_SUCCEEDED:
       return state
         .set('selectOptions', List(action.connections))
         .set('selectOptionsFetchSucceeded', !state.get('selectOptionsFetchSucceeded'));
-    case SET_FORM:
+    case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
+        .set('didFetchModel', true)
+        .set('initialData', action.data)
+        .set('modifiedData', action.data);
+    case RESET_DID_FETCH_MODEL_PROP:
+      return state
+        .set('didFetchModel', false)
+        .set('isFormSet', false);
+    case SET_FORM: {
+      if (state.get('isFormSet')) {
+        return state.set('form', Map(action.form));
+      }
+      return state
+        .set('isFormSet', true)
         .set('form', Map(action.form))
         .set('initialData', action.data)
         .set('modifiedData', action.data);
+    }
     default:
       return state;
   }

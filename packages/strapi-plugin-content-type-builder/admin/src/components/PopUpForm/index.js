@@ -13,25 +13,16 @@ import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
 import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: 'a',
-    };
-  }
-
-  // TODO remove temp
-  handleChange = ({ target }) => this.setState({ value: target.value });
-
   renderInput = (item, key) => {
     // const customBootstrapClass = 'col-md-6'
     const customBootstrapClass = item.type === 'textarea' ?
-      'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6'
+      'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6';
+
     return (
       <Input
         key={key}
         type={item.type}
-        handleChange={this.handleChange}
+        handleChange={this.props.handleChange}
         name={item.name}
         target={item.target}
         validations={item.validations}
@@ -85,8 +76,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             </div>
           </ModalBody>
           <ModalFooter className={styles.modalFooter}>
+            <Button onClick={this.props.toggle} className={styles.secondary}>Cancel</Button>
             <Button type="submit" onClick={this.handleSubmit} className={styles.primary}>Save</Button>{' '}
-            <Button onClick={this.toggle} className={styles.secondary}>Cancel</Button>
           </ModalFooter>
         </Modal>
       </div>
@@ -99,6 +90,7 @@ PopUpForm.propTypes = {
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,
   ]),
+  handleChange: React.PropTypes.func,
   isOpen: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
   popUpFormType: React.PropTypes.string.isRequired,

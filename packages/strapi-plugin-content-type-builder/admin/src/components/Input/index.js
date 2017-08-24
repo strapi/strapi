@@ -28,7 +28,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
+    if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
       const target = { name: nextProps.target, value: nextProps.selectOptions[0].value  };
       this.props.handleChange({ target });
     }

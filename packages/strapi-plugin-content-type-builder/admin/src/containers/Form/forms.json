@@ -4,7 +4,7 @@
       "items": [
         {
           "name": "form.contentType.item.connections",
-          "target": "contentType.connection",
+          "target": "connection",
           "type": "select",
           "value": "",
           "items": [{}],
@@ -12,7 +12,7 @@
         },
         {
           "name": "form.contentType.item.name",
-          "target": "contentType.name",
+          "target": "name",
           "value": "",
           "type": "string",
           "validations": {
@@ -21,7 +21,7 @@
         },
         {
           "name": "form.contentType.item.description",
-          "target": "contentType.description",
+          "target": "description",
           "value": "",
           "type": "textarea",
           "placeholder": "form.contentType.item.description.placeholder",
@@ -33,7 +33,7 @@
       "items": [
         {
           "name": "form.contentType.item.collectionName",
-          "target": "contentType.collectionName",
+          "target": "collectionName",
           "type": "string",
           "value": "",
           "validations": {},
