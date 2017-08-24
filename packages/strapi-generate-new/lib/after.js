@@ -12,6 +12,7 @@ const { exec } = require('child_process');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const npm = require('enpeem');
+const getInstalledPath = require('get-installed-path');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -33,37 +34,31 @@ module.exports = (scope, cb) => {
   fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(scope.rootPath));
 
   const availableDependencies = [];
-  const missingDependencies = [];
+  const dependencies = _.get(packageJSON, 'dependencies');
+  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
+  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
 
   // Verify if the dependencies are available into the global
-  _.forEach(_.merge(_.get(packageJSON, 'dependencies'), _.get(packageJSON, 'devDependencies')), (value, key) => {
+  _.forEach(strapiDependencies, (key) => {
     try {
-      fs.accessSync(path.resolve(strapiRootPath, key), fs.constants.R_OK | fs.constants.W_OK);
+      const isInstalled = getInstalledPath.sync(key);
+
       availableDependencies.push({
         key,
-        global: true
+        global: true,
+        path: isInstalled
       });
-      // fs.symlinkSync(path.resolve(strapiRootPath, key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
-    } catch (e1) {
-      try {
-        fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', key), fs.constants.R_OK | fs.constants.W_OK);
-        availableDependencies.push({
-          key,
-          global: false
-        });
-        // fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', key), path.resolve(scope.rootPath, 'node_modules', key), 'dir');
-      } catch (e2) {
-        missingDependencies.push(key);
-      }
+    } catch (e) {
+      othersDependencies.push(key);
     }
   });
 
-  if (!_.isEmpty(missingDependencies)) {
-    logger.info('Installing dependencies...');
-
+  logger.info('Installing dependencies...');
+  if (!_.isEmpty(othersDependencies)) {
     npm.install({
-      dependencies: missingDependencies,
+      dependencies: othersDependencies,
       loglevel: 'silent',
+      production: true,
       'cache-min': 999999999
     }, err => {
       if (err) {
@@ -71,32 +66,40 @@ module.exports = (scope, cb) => {
         logger.warn('You should run `npm install` into your application before starting it.');
         console.log();
         logger.warn('Some dependencies could not be installed:');
-        _.forEach(missingDependencies, value => logger.warn('• ' + value));
+        _.forEach(othersDependencies, value => logger.warn('• ' + value));
         console.log();
 
         return cb();
       }
 
+      pluginsInstallation();
+    });
+  } else {
+    pluginsInstallation();
+  }
+
+  function pluginsInstallation() {
+    exec('strapi install settings-manager@alpha', (err, stdout) => {
+      logger.info('Installing plugin `Settings Manager`...');
+
+      if (err) {
+        logger.error('An error occured during Settings Manager plugin installation.');
+        logger.error(stdout);
+      }
+
       availableDependencies.forEach(dependency => {
+        logger.info(`Linking \`${dependency.key}\` dependency to the project...`);
+
         if (dependency.global) {
-          fs.symlinkSync(path.resolve(strapiRootPath, dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+          fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
         } else {
           fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
         }
       });
 
-      exec('strapi install settings-manager@alpha', (err, stdout) => {
-        logger.info('Installing Settings Manager plugin...');
+      logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
 
-        if (err) {
-          logger.error('An error occured during Settings Manager plugin installation.');
-          logger.error(stdout);
-        }
-
-        logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
-
-        cb();
-      });
+      cb();
     });
   }
 };
