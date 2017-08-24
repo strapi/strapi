@@ -11,6 +11,13 @@
   "button.contentType.add": "Add Content Type",
   "button.attributes.add": "Add New Field",
 
+  "form.contentType.item.connections": "Connection",
+  "form.contentType.item.name": "Name",
+  "form.contentType.item.description": "Description",
+  "form.contentType.item.description.placeholder": "Write your little description here...",
+  "form.contentType.item.collectionName": "Collection Name",
+  "form.contentType.item.collectionName.inputDescription": "Useful when your Content Type Name and your table name is different",
+
   "menu.section.contentTypeBuilder.name.plural": "Content Types",
   "menu.section.contentTypeBuilder.name.singular": "Content Type",
   "menu.section.documentation.name": "Documentation",

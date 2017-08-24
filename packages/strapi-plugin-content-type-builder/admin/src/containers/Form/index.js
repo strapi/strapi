@@ -16,7 +16,10 @@ import { getAsyncInjectors } from 'utils/asyncInjectors';
 import reducer from './reducer';
 import sagas from './sagas';
 import selectForm from './selectors';
-import { setForm } from './actions';
+import {
+  connectionsFetch,
+  setForm,
+} from './actions';
 
 import styles from './styles.scss';
 
@@ -33,8 +36,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   componentDidMount() {
-    if (this.props.hash) {
+    // Get available db connections
+    this.props.connectionsFetch();
 
+    if (this.props.hash) {
       // Get the formType within the hash
       this.props.setForm(this.props.hash);
       this.setState({ showModal: true });
@@ -65,6 +70,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           popUpFormType={popUpFormType}
           routePath={`${this.props.routePath}/${this.props.hash}`}
           popUpHeaderNavLinks={this.props.popUpHeaderNavLinks}
+          form={this.props.form}
+          values={this.props.modifiedData}
+          selectOptions={this.props.selectOptions}
+          selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
         />
       </div>
     );
@@ -76,6 +85,7 @@ const mapStateToProps = selectForm();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      connectionsFetch,
       setForm,
     },
     dispatch
@@ -83,9 +93,17 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.propTypes = {
+  connectionsFetch: React.PropTypes.func.isRequired,
+  form: React.PropTypes.oneOfType([
+    React.PropTypes.array.isRequired,
+    React.PropTypes.object.isRequired,
+  ]),
   hash: React.PropTypes.string.isRequired,
+  modifiedData: React.PropTypes.object,
   popUpHeaderNavLinks: React.PropTypes.array,
   routePath: React.PropTypes.string,
+  selectOptions: React.PropTypes.array,
+  selectOptionsFetchSucceeded: React.PropTypes.bool,
   setForm: React.PropTypes.func.isRequired,
   toggle: React.PropTypes.func.isRequired,
 };

@@ -1,18 +1,18 @@
 import expect from 'expect';
 import {
-  defaultAction,
+  setForm,
 } from '../actions';
 import {
-  DEFAULT_ACTION,
+  SET_FORM,
 } from '../constants';
 
 describe('Form actions', () => {
-  describe('Default Action', () => {
-    it('has a type of DEFAULT_ACTION', () => {
+  describe('SetForm Action', () => {
+    it('has a type of SET_FORM', () => {
       const expected = {
-        type: DEFAULT_ACTION,
+        type: SET_FORM,
       };
-      expect(defaultAction()).toEqual(expected);
+      expect(setForm()).toEqual(expected);
     });
   });
 });

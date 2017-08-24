@@ -4,16 +4,30 @@
  *
  */
 
-import { map } from 'lodash';
+ /* eslint-disable new-cap */
+
+import { map , forEach} from 'lodash';
+import { Map, List } from 'immutable';
+
 import {
-  DEFAULT_ACTION,
   SET_FORM,
+  CONNECTIONS_FETCH,
+  CONNECTIONS_FETCH_SUCCEEDED,
 } from './constants';
+
 import forms from './forms.json';
 
-export function defaultAction() {
+export function connectionsFetch() {
   return {
-    type: DEFAULT_ACTION,
+    type: CONNECTIONS_FETCH,
+  };
+}
+
+export function connectionsFetchSucceeded(data) {
+  const connections = map(data.connections, (connection) => ({ name: connection, value: connection }))
+  return {
+    type: CONNECTIONS_FETCH_SUCCEEDED,
+    connections,
   };
 }
 
@@ -28,12 +42,20 @@ export function setForm(hash) {
 }
 
 
+/**
+*
+* @param  {object} form
+* @return {object} data : An object { target: value }
+*/
+
 function getDataFromForm(form) {
-  const data = {};
-  map(form, (formSection) => {
-    map(formSection.items, (item) => {
-      data[item.target] = item.value;
-    });
+  const dataArray = [['attributes', List()]];
+
+  forEach(form, (formSection) => {
+    map(formSection.items, (item) => dataArray.push([item.target, item.value]));
   });
+
+  const data = Map(dataArray);
+
   return data;
 }

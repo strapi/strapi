@@ -7,7 +7,8 @@
           "target": "contentType.connection",
           "type": "select",
           "value": "",
-          "items": []
+          "items": [{}],
+          "validations": {}
         },
         {
           "name": "form.contentType.item.name",
@@ -23,6 +24,7 @@
           "target": "contentType.description",
           "value": "",
           "type": "textarea",
+          "placeholder": "form.contentType.item.description.placeholder",
           "validations": {}
         }
       ]

@@ -11,6 +11,13 @@
   "button.contentType.add": "Ajouter un modèle",
   "button.attributes.add": "Ajouter un champs",
 
+  "form.contentType.item.connections": "Connexion",
+  "form.contentType.item.name": "Nom",
+  "form.contentType.item.description": "Description",
+  "form.contentType.item.description.placeholder": "Ecrivez votre petite description ici...",
+  "form.contentType.item.collectionName": "Nom de la Collection",
+  "form.contentType.item.collectionName.inputDescription": "Pratique quand le Nom de votre Modèle et de votre table sont différents",
+
   "menu.section.contentTypeBuilder.name.plural": "Modèles",
   "menu.section.contentTypeBuilder.name.singular": "Modèle",
   "menu.section.documentation.name": "Documentation",
