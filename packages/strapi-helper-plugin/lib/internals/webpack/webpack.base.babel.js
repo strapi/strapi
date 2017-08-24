@@ -36,7 +36,7 @@ module.exports = (options) => ({
               ],
             },
           },
-        }
+        },
       },
       include: [
         path.join(process.cwd(), 'admin', 'src'),
