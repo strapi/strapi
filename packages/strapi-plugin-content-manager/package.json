@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.5.4",
+  "version": "3.0.0-alpha.5.5",
   "description": "A powerful UI to easily manage your data.",
   "engines": {
     "node": ">= 8.0.0",
@@ -61,7 +61,7 @@
     "plop": "^1.5.0",
     "prettier": "^1.5.3",
     "rimraf": "^2.5.4",
-    "strapi-helper-plugin": "3.0.0-alpha.5.4",
+    "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^2.1.0-beta.25"
   }
 }
