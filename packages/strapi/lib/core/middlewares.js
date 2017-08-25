@@ -13,47 +13,36 @@ module.exports = function() {
 
   return Promise.all([
     new Promise((resolve, reject) => {
+      const cwd = path.resolve(__dirname, '..', '..');
+
       glob(
         './node_modules/*(koa-*|kcors)',
         {
-          cwd: path.resolve(__dirname, '..', '..')
+          cwd
         },
         (err, files) => {
           if (err) {
             return reject(err);
           }
 
-          parallel(
-            files.map(p => cb => {
-              const extractStr = p
-                .split('/')
-                .pop()
-                .replace(/^koa(-|\.)/, '')
-                .split('-');
+          requireMiddlewares.call(this, files, cwd)(resolve, reject);
+        }
+      );
+    }),
+    new Promise((resolve, reject) => {
+      const cwd = process.cwd();
 
-              const name = lowerFirst(
-                extractStr.length === 1
-                  ? extractStr[0]
-                  : extractStr.map(p => upperFirst(p)).join('')
-              );
+      glob(
+        './node_modules/*(koa-*|kcors)',
+        {
+          cwd
+        },
+        (err, files) => {
+          if (err) {
+            return reject(err);
+          }
 
-              // Lazy loading.
-              Object.defineProperty(this.koaMiddlewares, name, {
-                configurable: false,
-                enumerable: true,
-                get: () => require(path.resolve(__dirname, '..', '..', p))
-              });
-
-              cb();
-            }),
-            err => {
-              if (err) {
-                return reject(err);
-              }
-
-              resolve();
-            }
-          );
+          requireMiddlewares.call(this, files, cwd)(resolve, reject);
         }
       );
     }),
@@ -92,6 +81,41 @@ module.exports = function() {
       );
     })
   ]);
+};
+
+const requireMiddlewares = function (files, cwd) {
+  return (resolve, reject) =>
+    parallel(
+      files.map(p => cb => {
+        const extractStr = p
+          .split('/')
+          .pop()
+          .replace(/^koa(-|\.)/, '')
+          .split('-');
+
+        const name = lowerFirst(
+          extractStr.length === 1
+            ? extractStr[0]
+            : extractStr.map(p => upperFirst(p)).join('')
+        );
+
+        // Lazy loading.
+        Object.defineProperty(this.koaMiddlewares, name, {
+          configurable: false,
+          enumerable: true,
+          get: () => require(path.resolve(cwd, p))
+        });
+
+        cb();
+      }),
+      err => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      }
+    );
 };
 
 const mountMiddlewares = function (files, cwd) {
