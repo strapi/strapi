@@ -11,7 +11,7 @@ import { createStructuredSelector } from 'reselect';
 import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import { router } from 'app';
-import { makeSelectLoading, makeSelectModels } from 'containers/App/selectors';
+import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
 
 import Form from 'containers/Form';
 
@@ -78,6 +78,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           toggle={this.toggleModal}
           routePath={this.props.route.path}
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
+          menuData={this.props.menu}
         />
       </div>
     );
@@ -88,6 +89,7 @@ const mapStateToProps = createStructuredSelector({
   homePage: selectHomePage(),
   modelsLoading: makeSelectLoading(),
   models: makeSelectModels(),
+  menu: makeSelectMenu(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -100,6 +102,7 @@ function mapDispatchToProps(dispatch) {
 HomePage.propTypes =  {
   // homePage: React.PropTypes.object.isRequired,
   location: React.PropTypes.object,
+  menu: React.PropTypes.array,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,

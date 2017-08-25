@@ -1,4 +1,6 @@
 {
+
+  "contentType.temporaryDisplay": "(Not saved)",
   "home.contentTypeBuilder.name": "Content Types",
   "home.contentTypeBuilder.description": "Create, update your own content types.",
   "home.emptyContentType.title": "There is no Content Type Available",

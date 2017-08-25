@@ -90,13 +90,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
 
+    const temporary = props.link.isTemporary ? <FormattedMessage id={'contentType.temporaryDisplay'} /> : '';
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
         <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
           <div>
-            <i className={`fa ${props.link.icon}`} />
+            <i className={`fa fa-caret-square-o-right`} />
           </div>
           <span>{startCase(props.link.name)}</span>
+          <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>{temporary}</span>
         </Link>
       </li>
     );

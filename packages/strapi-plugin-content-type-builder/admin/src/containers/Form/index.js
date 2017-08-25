@@ -7,8 +7,19 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { camelCase, includes, isEmpty, split, toNumber, replace } from 'lodash';
-import { store } from 'app';
+import {
+  camelCase,
+  includes,
+  isEmpty,
+  size,
+  split,
+  toNumber,
+  replace,
+} from 'lodash';
+
+import { router, store } from 'app';
+
+import { storeTemporaryMenu } from 'containers/App/actions';
 
 import PopUpForm from 'components/PopUpForm';
 import { getAsyncInjectors } from 'utils/asyncInjectors';
@@ -19,6 +30,7 @@ import selectForm from './selectors';
 import {
   changeInput,
   connectionsFetch,
+  contentTypeCreate,
   contentTypeEdit,
   contentTypeFetch,
   resetDidFetchModelProp,
@@ -42,7 +54,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   componentDidMount() {
     // Get available db connections
     this.props.connectionsFetch();
-
+    console.log('mount')
     if (this.props.hash) {
       // Get the formType within the hash
       this.props.setForm(this.props.hash);
@@ -89,6 +101,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   handleSubmit = () => {
     if (includes(this.props.hash, 'edit')) {
       this.props.contentTypeEdit();
+    } else {
+      const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
+      // Insert before the add button the not saved contentType
+      oldMenu.splice(size(oldMenu) - 1, 0, { icon: 'fa-cube', fields: 0, description: this.props.modifiedData.description, name: this.props.modifiedData.name, isTemporary: true });
+      const newMenu = oldMenu;
+
+      // Store the temporary contentType in the localStorage
+      this.props.contentTypeCreate(this.props.modifiedData);
+
+      // Store new menu in localStorage and update App leftMenu
+      this.props.storeTemporaryMenu(newMenu);
+
+      router.push(this.props.routePath);
     }
   }
 
@@ -112,7 +137,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Allows the user to start creating a contentType and modifying an existing one at the same time
 
     const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
-
+    console.log(this.props)
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -142,10 +167,12 @@ function mapDispatchToProps(dispatch) {
     {
       changeInput,
       connectionsFetch,
+      contentTypeCreate,
       contentTypeEdit,
       contentTypeFetch,
       resetDidFetchModelProp,
       setForm,
+      storeTemporaryMenu,
     },
     dispatch
   );
@@ -154,6 +181,7 @@ function mapDispatchToProps(dispatch) {
 Form.propTypes = {
   changeInput: React.PropTypes.func.isRequired,
   connectionsFetch: React.PropTypes.func.isRequired,
+  contentTypeCreate: React.PropTypes.func,
   contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
@@ -161,6 +189,7 @@ Form.propTypes = {
     React.PropTypes.object.isRequired,
   ]),
   hash: React.PropTypes.string.isRequired,
+  menuData: React.PropTypes.array.isRequired,
   modifiedData: React.PropTypes.object,
   modifiedDataEdit: React.PropTypes.object,
   popUpHeaderNavLinks: React.PropTypes.array,
@@ -169,6 +198,7 @@ Form.propTypes = {
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
   setForm: React.PropTypes.func.isRequired,
+  storeTemporaryMenu: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
 };
 

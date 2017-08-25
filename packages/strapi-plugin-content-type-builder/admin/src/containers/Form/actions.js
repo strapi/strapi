@@ -8,12 +8,14 @@
 
 import { map , forEach} from 'lodash';
 import { Map, List } from 'immutable';
+import { storeData } from '../../utils/storeData';
 
 import {
   CHANGE_INPUT,
   CONNECTIONS_FETCH,
   CONNECTIONS_FETCH_SUCCEEDED,
   CONTENT_TYPE_ACTION_SUCCEEDED,
+  CONTENT_TYPE_CREATE,
   CONTENT_TYPE_EDIT,
   CONTENT_TYPE_FETCH,
   CONTENT_TYPE_FETCH_SUCCEEDED,
@@ -40,7 +42,7 @@ export function connectionsFetch() {
 }
 
 export function connectionsFetchSucceeded(data) {
-  const connections = map(data.connections, (connection) => ({ name: connection, value: connection }))
+  const connections = map(data.connections, (connection) => ({ name: connection, value: connection }));
   return {
     type: CONNECTIONS_FETCH_SUCCEEDED,
     connections,
@@ -48,9 +50,16 @@ export function connectionsFetchSucceeded(data) {
 }
 
 export function contentTypeActionSucceeded() {
-  console.log('ok');
   return {
     type: CONTENT_TYPE_ACTION_SUCCEEDED,
+  };
+}
+
+export function contentTypeCreate(newModel) {
+  storeData.setContentType(newModel);
+
+  return {
+    type: CONTENT_TYPE_CREATE,
   };
 }
 

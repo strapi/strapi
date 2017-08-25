@@ -1,7 +1,7 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 
 import { takeLatest } from 'redux-saga';
-import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
+import { call, put, fork, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
@@ -71,15 +71,15 @@ export function* fetchContentType(action) {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  const loadConnectionsWatcher = yield fork(takeLatest, CONNECTIONS_FETCH, fetchConnections);
+  yield fork(takeLatest, CONNECTIONS_FETCH, fetchConnections);
 
   yield fork(takeLatest, CONTENT_TYPE_EDIT, editContentType);
   yield fork(takeLatest, CONTENT_TYPE_FETCH, fetchContentType);
 
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadConnectionsWatcher);
+  // yield cancel(loadConnectionsWatcher);
 }
 
 // All sagas to be loaded

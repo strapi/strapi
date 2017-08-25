@@ -12,6 +12,7 @@ import { createStructuredSelector } from 'reselect';
 import { map } from 'lodash';
 import { pluginId } from 'app';
 import { define } from 'i18n';
+import { storeData } from '../../utils/storeData';
 import messages from '../../translations/en.json';
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
@@ -25,6 +26,12 @@ define(map(messages, (message, id) => ({
 class App extends React.Component {
   componentDidMount() {
     this.props.modelsFetch();
+  }
+
+
+  componentWillUnmount() {
+    // Empty the app localStorage
+    storeData.clearAppStorage();
   }
 
   render() {
