@@ -79,6 +79,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           routePath={this.props.route.path}
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
+          redirectRoute={`${this.props.route.path}/models`}
         />
       </div>
     );

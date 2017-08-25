@@ -7,12 +7,13 @@
 import React from 'react';
 import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { router } from 'app';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 class ContentHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
   edit = () => {
-    console.log('edit');
+    router.push(this.props.editPath);
   }
 
   renderContentHeader = () => {
@@ -52,6 +53,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 ContentHeader.propTypes = {
   description: React.PropTypes.string,
   editIcon: React.PropTypes.bool,
+  editPath: React.PropTypes.string,
   name: React.PropTypes.string,
   noI18n: React.PropTypes.bool,
   noMargin: React.PropTypes.bool,

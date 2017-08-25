@@ -54,7 +54,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   componentDidMount() {
     // Get available db connections
     this.props.connectionsFetch();
-    console.log('mount')
+
     if (this.props.hash) {
       // Get the formType within the hash
       this.props.setForm(this.props.hash);
@@ -113,7 +113,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       // Store new menu in localStorage and update App leftMenu
       this.props.storeTemporaryMenu(newMenu);
 
-      router.push(this.props.routePath);
+      router.push(`${this.props.redirectRoute}/${this.props.modifiedData.name}`);
     }
   }
 
@@ -137,7 +137,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Allows the user to start creating a contentType and modifying an existing one at the same time
 
     const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
-    console.log(this.props)
+
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -193,6 +193,7 @@ Form.propTypes = {
   modifiedData: React.PropTypes.object,
   modifiedDataEdit: React.PropTypes.object,
   popUpHeaderNavLinks: React.PropTypes.array,
+  redirectRoute: React.PropTypes.string.isRequired,
   resetDidFetchModelProp: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,

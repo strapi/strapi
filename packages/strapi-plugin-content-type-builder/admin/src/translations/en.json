@@ -38,6 +38,7 @@
 
 
   "notification.error.message": "An error occured",
+  "notification.info.contentType.creating.notSaved": "You are already creating a Content Type",
 
   "popUpForm.create.contentType.header.title": "Add New Content Type",
   "popUpForm.edit.contentType.header.title": "Edit Content Type",

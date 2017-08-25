@@ -37,6 +37,7 @@
   "modelPage.attribute.relationWith": "Relation avec",
 
   "notification.error.message": "Une erreur est survenue",
+  "notification.info.contentType.creating.notSaved": "Une creation de Modèle est déjà en cours",
 
   "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Modèle",
   "popUpForm.edit.contentType.header.title": "Modifier un Modèle",

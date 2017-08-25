@@ -8,9 +8,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { has, size, startCase } from 'lodash';
+import { has, size, replace, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
+import { router } from 'app';
 
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
@@ -18,10 +19,13 @@ import { makeSelectMenu } from 'containers/App/selectors';
 import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
 import EmptyAttributesView from 'components/EmptyAttributesView';
+import Form from 'containers/Form';
 import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
-import { modelFetch } from './actions';
+import { storeData } from '../../utils/storeData';
+
+import { modelFetch, modelFetchSucceeded } from './actions';
 
 import selectModelPage from './selectors';
 import styles from './styles.scss';
@@ -29,18 +33,23 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  constructor(props) {
+    super(props);
+
+    this.popUpHeaderNavLinks = [
+      { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
+      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
+    ];
+  }
+
   componentDidMount() {
-    this.props.modelFetch(this.props.params.modelName);
+    this.fetchModel();
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.params.modelName !== this.props.params.modelName) {
-      this.props.modelFetch(this.props.params.modelName);
+      this.fetchModel();
     }
-  }
-
-  handleClick = () => {
-    console.log('click');
   }
 
   addCustomSection = (sectionStyles) => (
@@ -69,9 +78,34 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </div>
   )
 
+  fetchModel = () => {
+    if (storeData.getIsModelTemporary && storeData.getContentType()) {
+      if (storeData.getContentType().name === this.props.params.modelName) {
+        this.props.modelFetchSucceeded({ model: storeData.getContentType() });
+      } else {
+        this.props.modelFetch(this.props.params.modelName);
+      }
+    } else {
+      this.props.modelFetch(this.props.params.modelName);
+    }
+  }
 
   handleAddLinkClick = () => {
-    console.log('click bla');
+    if (storeData.getIsModelTemporary()) {
+      window.Strapi.notification.info('notification.info.contentType.creating.notSaved');
+    } else {
+      this.toggleModal();
+    }
+  }
+
+  handleClick = () => {
+    console.log('click');
+
+  }
+
+  toggleModal = () => {
+    const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
+    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}${locationHash}`);
   }
 
   renderAddLink = (props, customLinkStyles) => (
@@ -134,6 +168,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    const redirectRoute = replace(this.props.route.path, '/:modelName', '');
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClick} /> :
         <List
@@ -159,12 +194,21 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   description={this.props.modelPage.model.description}
                   noI18n
                   editIcon
+                  editPath={`${redirectRoute}/${this.props.params.modelName}#edit${this.props.params.modelName}::contentType::baseSettings`}
                 />
                 {content}
               </div>
             </div>
           </div>
         </div>
+        <Form
+          hash={this.props.location.hash}
+          toggle={this.toggleModal}
+          routePath={this.props.route.path}
+          popUpHeaderNavLinks={this.popUpHeaderNavLinks}
+          menuData={this.props.menu}
+          redirectRoute={redirectRoute}
+        />
       </div>
     );
   }
@@ -179,16 +223,20 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       modelFetch,
+      modelFetchSucceeded,
     },
     dispatch,
   );
 }
 
 ModelPage.propTypes = {
+  location: React.PropTypes.object,
   menu: React.PropTypes.array,
   modelFetch: React.PropTypes.func,
+  modelFetchSucceeded: React.PropTypes.func,
   modelPage: React.PropTypes.object,
   params: React.PropTypes.object,
+  route: React.PropTypes.object,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModelPage);
