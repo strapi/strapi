@@ -100,11 +100,13 @@ const requireMiddlewares = function (files, cwd) {
         );
 
         // Lazy loading.
-        Object.defineProperty(this.koaMiddlewares, name, {
-          configurable: false,
-          enumerable: true,
-          get: () => require(path.resolve(cwd, p))
-        });
+        if (!this.koaMiddlewares.hasOwnProperty(name)) {
+          Object.defineProperty(this.koaMiddlewares, name, {
+            configurable: false,
+            enumerable: true,
+            get: () => require(path.resolve(cwd, p))
+          });
+        }
 
         cb();
       }),
