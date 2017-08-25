@@ -62,14 +62,18 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.connectionsFetch();
 
     if (this.props.hash) {
-      // Get the formType within the hash
-      this.props.setForm(this.props.hash);
       this.setState({ showModal: true });
 
-      // Fetch Model is the user is editing contentType
-      if (includes(this.props.hash, 'edit')) {
-        const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '');
-        this.fetchModel(contentTypeName);
+      // TODO refacto
+      if (includes(this.props.hash, 'contentType')) {
+        // Get the formType within the hash
+        this.props.setForm(this.props.hash);
+
+        // Fetch Model is the user is editing contentType
+        if (includes(this.props.hash, 'edit')) {
+          const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '');
+          this.fetchModel(contentTypeName);
+        }
       }
     }
   }
@@ -77,14 +81,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   componentWillReceiveProps(nextProps) {
     if (nextProps.hash !== this.props.hash) {
       if (!isEmpty(nextProps.hash)) {
-
-        this.props.setForm(nextProps.hash);
         this.setState({ showModal: true });
 
-        if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
-          const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
-          this.fetchModel(contentTypeName);
+        // TODO refacto
+        if (includes(nextProps.hash, 'contentType')) {
+
+          this.props.setForm(nextProps.hash);
+
+          if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
+            const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
+            this.fetchModel(contentTypeName);
+          }
         }
+
       } else {
         this.setState({ showModal: false });
       }
@@ -195,6 +204,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           handleChange={this.handleChange}
           handleBlur={this.handleBlur}
           handleSubmit={this.handleSubmit}
+          noNav={this.props.noNav}
         />
       </div>
     );
@@ -235,6 +245,7 @@ Form.propTypes = {
   menuData: React.PropTypes.array.isRequired,
   modifiedData: React.PropTypes.object,
   modifiedDataEdit: React.PropTypes.object,
+  noNav: React.PropTypes.bool,
   popUpHeaderNavLinks: React.PropTypes.array,
   redirectRoute: React.PropTypes.string.isRequired,
   resetDidFetchModelProp: React.PropTypes.func,

@@ -37,6 +37,15 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     );
   }
 
+  renderModalBody = () => {
+    switch (this.props.popUpFormType) {
+      case 'contentType':
+        return map(this.props.form.items, (item, key ) => this.renderInput(item, key));
+      default:
+        return <div>Hello</div>;
+    }
+  }
+
   renderNavContainer = () => (
     <div className={styles.navContainer}>
       {map(this.props.popUpHeaderNavLinks, (link, key) => (
@@ -74,7 +83,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <ModalBody className={styles.modalBody}>
             <div className="container-fluid">
               <div className="row">
-                {map(this.props.form.items, (item, key ) => this.renderInput(item, key))}
+                {this.renderModalBody()}
               </div>
             </div>
           </ModalBody>
