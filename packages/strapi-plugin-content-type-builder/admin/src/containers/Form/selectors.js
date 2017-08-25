@@ -34,9 +34,15 @@ const makeSelectInitialDataEdit = () => createSelector(
   (substate) => substate.get('initialDataEdit').toJS()
 );
 
+const makeSelectDidFetchModel = () => createSelector(
+  selectFormDomain(),
+  (substate) => substate.get('didFetchModel'),
+);
+
 export default selectForm;
 export {
   selectFormDomain,
+  makeSelectDidFetchModel,
   makeSelectInitialDataEdit,
   makeSelectModifiedData,
   makeSelectModifiedDataEdit,

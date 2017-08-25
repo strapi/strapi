@@ -40,9 +40,9 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                 <li>
                   <div className={`${styles.liHeaderContainer} row`}>
                     <div className="col-md-1"></div>
-                    <div className="col-md-2"><FormattedMessage {...{ id: 'table.contentType.head.name' }} /></div>
+                    <div className="col-md-3"><FormattedMessage {...{ id: 'table.contentType.head.name' }} /></div>
                     <div className="col-md-5 text-center"><FormattedMessage {...{ id: 'table.contentType.head.description' }} /></div>
-                    <div className="col-md-3 text-center"><FormattedMessage {...{ id: 'table.contentType.head.fields' }} /></div>
+                    <div className="col-md-2 text-center"><FormattedMessage {...{ id: 'table.contentType.head.fields' }} /></div>
                     <div className="col-md-1"></div>
                   </div>
                 </li>

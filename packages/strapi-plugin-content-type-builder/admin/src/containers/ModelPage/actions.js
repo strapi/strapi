@@ -24,7 +24,6 @@ export function modelFetch(modelName) {
 }
 
 export function modelFetchSucceeded(model) {
-  console.log('model', model);
   return {
     type: MODEL_FETCH_SUCCEEDED,
     model,

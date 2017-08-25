@@ -49,10 +49,10 @@ export function modelsFetchSucceeded(models) {
   };
 }
 
-export function storeTemporaryMenu(newMenu) {
+export function storeTemporaryMenu(newMenu, position, nbElementToRemove) {
 
   const newModel = newMenu[size(newMenu) - 2];
-  const newLink = { icon: 'fa-caret-square-o-right', name: newModel.name };
+  const newLink = { icon: 'fa-caret-square-o-right', name: newModel.name, isTemporary: true };
 
   storeData.setMenu(newMenu);
   storeData.setModel(newModel);
@@ -62,5 +62,7 @@ export function storeTemporaryMenu(newMenu) {
     type: STORE_TEMPORARY_MENU,
     newModel,
     newLink,
+    position,
+    nbElementToRemove,
   };
 }

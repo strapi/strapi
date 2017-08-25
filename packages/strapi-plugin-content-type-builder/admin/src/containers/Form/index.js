@@ -9,6 +9,8 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {
   camelCase,
+  findIndex,
+  get,
   includes,
   isEmpty,
   size,
@@ -22,7 +24,10 @@ import { router, store } from 'app';
 import { storeTemporaryMenu } from 'containers/App/actions';
 
 import PopUpForm from 'components/PopUpForm';
+
 import { getAsyncInjectors } from 'utils/asyncInjectors';
+
+import { storeData } from '../../utils/storeData';
 
 import reducer from './reducer';
 import sagas from './sagas';
@@ -33,6 +38,7 @@ import {
   contentTypeCreate,
   contentTypeEdit,
   contentTypeFetch,
+  contentTypeFetchSucceeded,
   resetDidFetchModelProp,
   setForm,
 } from './actions';
@@ -62,8 +68,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
       // Fetch Model is the user is editing contentType
       if (includes(this.props.hash, 'edit')) {
-        const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '').toLowerCase();
-        this.props.contentTypeFetch(contentTypeName)
+        const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '');
+        this.fetchModel(contentTypeName);
       }
     }
   }
@@ -76,14 +82,34 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         this.setState({ showModal: true });
 
         if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
-          const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '').toLowerCase();
-          this.props.contentTypeFetch(contentTypeName)
+          const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
+          this.fetchModel(contentTypeName);
         }
       } else {
         this.setState({ showModal: false });
       }
 
     }
+  }
+
+  testContentType = (contentTypeName, cbSuccess, successData, cbFail, failData) => {
+    // Check if the content type is in the localStorage (not saved)
+    // To prevent request error
+    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === contentTypeName) {
+      cbSuccess(successData);
+    } else {
+      cbFail(failData);
+    }
+  }
+
+  fetchModel = (contentTypeName) => {
+    this.testContentType(
+      contentTypeName,
+      this.props.contentTypeFetchSucceeded,
+      { model: storeData.getContentType() },
+      this.props.contentTypeFetch,
+      contentTypeName
+    );
   }
 
   handleBlur = ({ target }) => {
@@ -98,22 +124,38 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
   }
 
+  createContentType = (data) => {
+    const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
+
+    // Check if link already exist in the menu to remove it
+    const index = findIndex(oldMenu, [ 'name', replace(split(this.props.hash, '::')[0], '#edit', '')]);
+
+    // Insert at a specific position or before the add button the not saved contentType
+    const position = index !== -1 ? index  : size(oldMenu) - 1;
+
+    oldMenu.splice(position, index !== -1 ? 1 : 0, { icon: 'fa-cube', fields: 0, description: data.description, name: data.name, isTemporary: true });
+
+    const newMenu = oldMenu;
+
+    // Store the temporary contentType in the localStorage
+    this.props.contentTypeCreate(data);
+
+    // Store new menu in localStorage and update App leftMenu
+    this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
+
+    router.push(`${this.props.redirectRoute}/${data.name}`);
+  }
+
   handleSubmit = () => {
     if (includes(this.props.hash, 'edit')) {
-      this.props.contentTypeEdit();
+      this.testContentType(
+        replace(split(this.props.hash, '::')[0], '#edit', ''),
+        this.createContentType,
+        this.props.modifiedDataEdit,
+        this.props.contentTypeEdit,
+      );
     } else {
-      const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
-      // Insert before the add button the not saved contentType
-      oldMenu.splice(size(oldMenu) - 1, 0, { icon: 'fa-cube', fields: 0, description: this.props.modifiedData.description, name: this.props.modifiedData.name, isTemporary: true });
-      const newMenu = oldMenu;
-
-      // Store the temporary contentType in the localStorage
-      this.props.contentTypeCreate(this.props.modifiedData);
-
-      // Store new menu in localStorage and update App leftMenu
-      this.props.storeTemporaryMenu(newMenu);
-
-      router.push(`${this.props.redirectRoute}/${this.props.modifiedData.name}`);
+      this.createContentType(this.props.modifiedData);
     }
   }
 
@@ -135,7 +177,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     // Two kinds of values are available modifiedData and modifiedDataEdit
     // Allows the user to start creating a contentType and modifying an existing one at the same time
-
     const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
 
     return (
@@ -170,6 +211,7 @@ function mapDispatchToProps(dispatch) {
       contentTypeCreate,
       contentTypeEdit,
       contentTypeFetch,
+      contentTypeFetchSucceeded,
       resetDidFetchModelProp,
       setForm,
       storeTemporaryMenu,
@@ -184,6 +226,7 @@ Form.propTypes = {
   contentTypeCreate: React.PropTypes.func,
   contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
+  contentTypeFetchSucceeded: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,

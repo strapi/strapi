@@ -28,10 +28,12 @@ function appReducer(state = initialState, action) {
         .set('loading', false)
         .set('menu', List(action.menu.sections))
         .set('models', List(action.data.models));
-    case STORE_TEMPORARY_MENU:
+    case STORE_TEMPORARY_MENU: {
+      const modelsSize = size(state.get('models').toJS())
       return state
-        .updateIn(['menu', '0', 'items'], (list) => list.splice(size(state.getIn(['menu', 'items'])) - 1, 0, action.newLink))
-        .update('models', array => array.splice(size(state.get('models')) - 1, 0, action.newModel));
+      .updateIn(['menu', '0', 'items'], (list) => list.splice(action.position, action.nbElementToRemove, action.newLink))
+      .update('models', array => array.splice(action.nbElementToRemove === 0 ? modelsSize : modelsSize -1 , 1, action.newModel));
+    }
     default:
       return state;
   }

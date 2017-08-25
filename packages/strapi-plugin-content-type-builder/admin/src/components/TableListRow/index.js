@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { startCase, capitalize } from 'lodash';
+import { startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
@@ -15,7 +15,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   edit = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`plugins/content-type-builder/#edit${capitalize(this.props.rowItem.name)}::contentType::baseSettings`);
+    router.push(`plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
 
   delete = (e) => {
@@ -34,9 +34,9 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
       <li>
         <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
           <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
-          <div className={`col-md-2 ${styles.italic}`}>{startCase(this.props.rowItem.name)} {temporary}</div>
+          <div className={`col-md-3 ${styles.italic}`}>{startCase(this.props.rowItem.name)} {temporary}</div>
           <div className="col-md-5 text-center">{this.props.rowItem.description}</div>
-          <div className="col-md-3 text-center">{this.props.rowItem.fields}</div>
+          <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
           <div className="col-md-1">
             <div className={styles.icContainer}>
               <div>

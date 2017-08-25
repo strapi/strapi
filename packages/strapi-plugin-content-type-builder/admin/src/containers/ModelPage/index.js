@@ -8,13 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { has, size, replace, startCase } from 'lodash';
+import { get, has, size, replace, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { router } from 'app';
 
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
+import { makeSelectDidFetchModel } from 'containers/Form/selectors';
 
 import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
@@ -50,6 +51,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     if (prevProps.params.modelName !== this.props.params.modelName) {
       this.fetchModel();
     }
+
+    // Refecth content type after editing it
+    if (prevProps.location.hash !== this.props.location.hash && this.props.didFetchModel) {
+      this.fetchModel();
+    }
   }
 
   addCustomSection = (sectionStyles) => (
@@ -79,12 +85,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   )
 
   fetchModel = () => {
-    if (storeData.getIsModelTemporary && storeData.getContentType()) {
-      if (storeData.getContentType().name === this.props.params.modelName) {
-        this.props.modelFetchSucceeded({ model: storeData.getContentType() });
-      } else {
-        this.props.modelFetch(this.props.params.modelName);
-      }
+    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === this.props.params.modelName) {
+      this.props.modelFetchSucceeded({ model: storeData.getContentType() });
     } else {
       this.props.modelFetch(this.props.params.modelName);
     }
@@ -168,6 +170,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.route.path, '/:modelName', '');
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClick} /> :
@@ -204,7 +207,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         <Form
           hash={this.props.location.hash}
           toggle={this.toggleModal}
-          routePath={this.props.route.path}
+          routePath={`${redirectRoute}/${this.props.params.modelName}`}
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
           redirectRoute={redirectRoute}
@@ -217,6 +220,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 const mapStateToProps = createStructuredSelector({
   modelPage: selectModelPage(),
   menu: makeSelectMenu(),
+  didFetchModel: makeSelectDidFetchModel(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -230,6 +234,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 ModelPage.propTypes = {
+  didFetchModel: React.PropTypes.bool,
   location: React.PropTypes.object,
   menu: React.PropTypes.array,
   modelFetch: React.PropTypes.func,
