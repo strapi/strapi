@@ -20,6 +20,8 @@ import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
 import TableList from 'components/TableList';
 
+import { storeData } from '../../utils/storeData';
+
 import selectHomePage from './selectors';
 import styles from './styles.scss';
 
@@ -31,6 +33,14 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
       { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
     ];
+  }
+
+  handleButtonClick = () => {
+    if (storeData.getIsModelTemporary()) {
+      window.Strapi.notification.info('notification.info.contentType.creating.notSaved');
+    } else {
+      this.toggleModal();
+    }
   }
 
   toggleModal = () => {
@@ -47,7 +57,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         availableNumber={availableNumber}
         title={title}
         buttonLabel={'button.contentType.add'}
-        handleButtonClick={this.toggleModal}
+        handleButtonClick={this.handleButtonClick}
         rowItems={this.props.models}
       />
     );
