@@ -41,5 +41,37 @@
         }
       ]
     }
+  },
+  "attributesDisplay": {
+    "items": [
+      {
+        "type": "string",
+        "description": "popUpForm.attributes.string.description"
+      },
+      {
+        "type": "text",
+        "description": "popUpForm.attributes.text.description"
+      },
+      {
+        "type": "boolean",
+        "description": "popUpForm.attributes.boolean.description"
+      },
+      {
+        "type": "date",
+        "description": "popUpForm.attributes.date.description"
+      },
+      {
+        "type": "json",
+        "description": "popUpForm.attributes.json.description"
+      },
+      {
+        "type": "media",
+        "description": "popUpForm.attributes.media.description"
+      },
+      {
+        "type": "relation",
+        "description": "popUpForm.attributes.relation.description"
+      }
+    ]
   }
 }

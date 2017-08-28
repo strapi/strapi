@@ -37,15 +37,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     );
   }
 
-  renderModalBody = () => {
-    switch (this.props.popUpFormType) {
-      case 'contentType':
-        return map(this.props.form.items, (item, key ) => this.renderInput(item, key));
-      default:
-        return <div>Hello</div>;
-    }
-  }
-
   renderNavContainer = () => (
     <div className={styles.navContainer}>
       {map(this.props.popUpHeaderNavLinks, (link, key) => (
@@ -69,7 +60,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
   render() {
     const navContainer = this.props.noNav ? '' : this.renderNavContainer();
-
+    const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
+      : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
     return (
       <div className={styles.popUpForm}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition} ${styles[this.props.popUpFormType]}`}>
@@ -83,7 +75,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <ModalBody className={styles.modalBody}>
             <div className="container-fluid">
               <div className="row">
-                {this.renderModalBody()}
+                {modalBody}
               </div>
             </div>
           </ModalBody>
@@ -111,6 +103,10 @@ PopUpForm.propTypes = {
   popUpHeaderNavLinks: React.PropTypes.array,
   popUpTitle: React.PropTypes.string,
   renderCustomPopUpHeader: React.PropTypes.func,
+  renderModalBody: React.PropTypes.oneOfType([
+    React.PropTypes.bool,
+    React.PropTypes.func,
+  ]),
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,

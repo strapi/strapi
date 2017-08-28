@@ -40,7 +40,16 @@
   "notification.error.message": "An error occured",
   "notification.info.contentType.creating.notSaved": "You are already creating a Content Type",
 
+  "popUpForm.attributes.string.description": "Titles, names, paragraphs, list of names",
+  "popUpForm.attributes.text.description": "Descriptions, text paragraphs, articles ",
+  "popUpForm.attributes.boolean.description": "Yes or no, 1 or 0, true or false",
+  "popUpForm.attributes.date.description": "Event date, opening hours",
+  "popUpForm.attributes.json.description": "Data in JSON format",
+  "popUpForm.attributes.media.description": "Images, videos, PDFs and other files",
+  "popUpForm.attributes.relation.description": "Refers to a Content Type",
+
   "popUpForm.create.contentType.header.title": "Add New Content Type",
+  "popUpForm.choose.attributes.header.title": "Add New Field",
   "popUpForm.edit.contentType.header.title": "Edit Content Type",
   "popUpForm.navContainer.base": "Base settings",
   "popUpForm.navContainer.advanced": "Advanced settings",
