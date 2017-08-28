@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+
 import IcoBoolean from '../../assets/images/icon_boolean.svg';
 import IcoDate from '../../assets/images/icon_date.svg';
 import IcoImage from '../../assets/images/icon_image.svg';
@@ -15,6 +16,8 @@ import IcoString from '../../assets/images/icon_string.svg';
 import IcoText from '../../assets/images/icon_text.svg';
 
 import styles from './styles.scss';
+
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 
 class AttributeCard extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -30,11 +33,16 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
     };
   }
 
+  goTo = () => {
+    this.props.handleClick(this.props.attribute.type);
+  }
+
   render() {
     const bootstrapClass = this.props.attribute.type === 'relation' ? 'col-md-6 offset-md-3' : 'col-md-6';
+    console.log(this.props);
     return (
       <div className={bootstrapClass}>
-        <div className={styles.attributeCardContainer}>
+        <div className={styles.attributeCardContainer} onClick={this.goTo}>
           <div className={styles.attributeCard}>
             <img src={this.asset[this.props.attribute.type]} role="presentation" />
             <FormattedMessage id={`popUpForm.attributes.${this.props.attribute.type}.name`}>
@@ -53,6 +61,7 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
 
 AttributeCard.propTypes = {
   attribute: React.PropTypes.object.isRequired,
+  handleClick: React.PropTypes.func,
 }
 
 export default AttributeCard;

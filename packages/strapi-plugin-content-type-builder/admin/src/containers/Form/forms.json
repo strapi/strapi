@@ -73,5 +73,51 @@
         "description": "popUpForm.attributes.relation.description"
       }
     ]
+  },
+  "attribute": {
+    "text": {
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.string.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {}
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.settings.name",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {}
+          }
+        ]
+      }
+    },
+    "string": {
+      "baseSettings": {},
+      "advancedSettings": {}
+    },
+    "date": {
+      "baseSettings": {},
+      "advancedSettings": {}
+    },
+    "boolean": {
+      "baseSettings": {},
+      "advancedSettings": {}
+    },
+    "json": {
+      "baseSettings": {},
+      "advancedSettings": {}
+    },
+    "media": {
+      "baseSettings": {},
+      "advancedSettings": {}
+    }
   }
 }

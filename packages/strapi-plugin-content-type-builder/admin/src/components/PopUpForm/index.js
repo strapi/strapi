@@ -64,7 +64,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
     return (
       <div className={styles.popUpForm}>
-        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition} ${styles[this.props.popUpFormType]}`}>
+        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
           <ModalHeader toggle={this.props.toggle} className={styles.popUpFormHeader} />
           <div className={styles.headerContainer}>
             <div className={styles.titleContainer}>
@@ -99,7 +99,7 @@ PopUpForm.propTypes = {
   handleSubmit: React.PropTypes.func,
   isOpen: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
-  popUpFormType: React.PropTypes.string.isRequired,
+  // popUpFormType: React.PropTypes.string.isRequired,
   popUpHeaderNavLinks: React.PropTypes.array,
   popUpTitle: React.PropTypes.string,
   renderCustomPopUpHeader: React.PropTypes.func,

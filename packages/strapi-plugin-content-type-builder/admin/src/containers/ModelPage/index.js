@@ -37,10 +37,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   constructor(props) {
     super(props);
 
-    this.state = {
-      noNav: false,
-    }
-
     this.popUpHeaderNavLinks = [
       { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
       { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
@@ -105,16 +101,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleClickAddAttribute = () => {
-    this.setState({ noNav: true });
     router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#choose::attributes`);
   }
 
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
     router.push(`plugins/content-type-builder/models/${this.props.params.modelName}${locationHash}`);
-    if (this.props.location.hash) {
-      this.setState({ noNav: false });
-    }
   }
 
   renderAddLink = (props, customLinkStyles) => (
@@ -218,7 +210,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
           redirectRoute={redirectRoute}
-          noNav={this.state.noNav}
         />
       </div>
     );

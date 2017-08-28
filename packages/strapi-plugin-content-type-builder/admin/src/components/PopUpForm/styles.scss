@@ -1,5 +1,5 @@
 /* stylelint-disable */
-.contentType, .attributes {
+.contentType, .attribute, .attributes {
   > div {
     width: 74.5rem;
   }
@@ -54,6 +54,7 @@
   top: 16.8rem;
   > div {
     border:none;
+    width: 74.5rem;
   }
 }
 

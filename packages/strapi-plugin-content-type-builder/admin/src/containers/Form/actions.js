@@ -6,7 +6,7 @@
 
  /* eslint-disable new-cap */
 
-import { map , forEach} from 'lodash';
+import { map , forEach, replace } from 'lodash';
 import { Map, List } from 'immutable';
 import { storeData } from '../../utils/storeData';
 
@@ -20,6 +20,7 @@ import {
   CONTENT_TYPE_FETCH,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
+  SET_ATTRIBUTE_FORM,
   SET_FORM,
 } from './constants';
 
@@ -97,6 +98,15 @@ export function resetDidFetchModelProp() {
   return {
     type: RESET_DID_FETCH_MODEL_PROP,
   };
+}
+
+export function setAttributeForm(hash) {
+  const form = forms.attribute[replace(hash.split('::')[1], 'attribute', '')][hash.split('::')[2]];
+  
+  return {
+    type: SET_ATTRIBUTE_FORM,
+    form,
+  }
 }
 
 export function setForm(hash) {

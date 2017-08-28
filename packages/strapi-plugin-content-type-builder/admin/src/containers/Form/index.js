@@ -42,6 +42,7 @@ import {
   contentTypeFetch,
   contentTypeFetchSucceeded,
   resetDidFetchModelProp,
+  setAttributeForm,
   setForm,
 } from './actions';
 
@@ -95,6 +96,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
             const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
             this.fetchModel(contentTypeName);
           }
+        }
+
+        if (includes(nextProps.hash, 'create') && includes(nextProps.hash, 'attribute')) {
+          console.log('oeeeee');
+          this.props.setAttributeForm(nextProps.hash);
         }
 
       } else {
@@ -175,20 +181,25 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     let popUpTitle;
     const type = split(this.props.hash, '::')[0];
     switch (true) {
-      case includes(type, 'create'):
+      case includes(type, 'create') && popUpFormType === 'contentType':
         popUpTitle = `popUpForm.create.${popUpFormType}.header.title`;
         break;
       case includes(type, 'choose'):
         popUpTitle = `popUpForm.choose.${popUpFormType}.header.title`;
         break;
-      case includes(type, 'edit'):
+      case includes(type, 'edit') && popUpFormType === 'contentType':
         popUpTitle = `popUpForm.edit.${popUpFormType}.header.title`;
         break;
       default:
-        popUpTitle = '';
+        popUpTitle = 'popUpForm.doing';
     }
 
     return popUpTitle;
+  }
+
+  goToAttributeTypeView = (attributeType) => {
+    const attributesSize = size(this.props.modifiedDataEdit.attributes);
+    router.push(`${this.props.routePath}#create::attribute${attributeType}::baseSettings::${attributesSize}`);
   }
 
   toggle = () => {
@@ -206,6 +217,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       <AttributeCard
         key={key}
         attribute={attribute}
+        routePath={this.props.routePath}
+        handleClick={this.goToAttributeTypeView}
       />
     ))
   )
@@ -214,13 +227,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
-
+    console.log(this.props);
     // Two kinds of values are available modifiedData and modifiedDataEdit
     // Allows the user to start creating a contentType and modifying an existing one at the same time
     const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
-    const noNav = this.props.noNav || includes(popUpTitle, 'attributes');
+    const noNav = includes(this.props.hash, 'choose');
     // Override the default rendering
-    const renderModalBody = popUpFormType === 'attributes' ? this.renderModalBodyChooseAttributes : false;
+    const renderModalBody = includes(this.props.hash, '#choose') ? this.renderModalBodyChooseAttributes : false;
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -257,6 +270,7 @@ function mapDispatchToProps(dispatch) {
       contentTypeFetch,
       contentTypeFetchSucceeded,
       resetDidFetchModelProp,
+      setAttributeForm,
       setForm,
       storeTemporaryMenu,
     },
@@ -279,13 +293,14 @@ Form.propTypes = {
   menuData: React.PropTypes.array.isRequired,
   modifiedData: React.PropTypes.object,
   modifiedDataEdit: React.PropTypes.object,
-  noNav: React.PropTypes.bool,
+  // noNav: React.PropTypes.bool,
   popUpHeaderNavLinks: React.PropTypes.array,
   redirectRoute: React.PropTypes.string.isRequired,
   resetDidFetchModelProp: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
+  setAttributeForm: React.PropTypes.func,
   setForm: React.PropTypes.func.isRequired,
   storeTemporaryMenu: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
