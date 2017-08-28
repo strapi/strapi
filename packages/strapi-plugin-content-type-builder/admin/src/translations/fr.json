@@ -40,12 +40,20 @@
   "notification.info.contentType.creating.notSaved": "Une creation de Modèle est déjà en cours",
 
   "popUpForm.attributes.string.description": "Titres, noms, paragraphes, listes de noms",
-  "popUpForm.attributes.text.description": "Descriptions, paragraphes de texte, articles ",
+  "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
   "popUpForm.attributes.boolean.description": "Oui ou non, 1 ou 0, vrai ou faux",
-  "popUpForm.attributes.date.description": "Date événements, horaires d'ouverture",
+  "popUpForm.attributes.date.description": "Date événements, horaires",
   "popUpForm.attributes.json.description": "Données au format JSON",
   "popUpForm.attributes.media.description": "Images, vidéos, PDFs et autres fichiers",
   "popUpForm.attributes.relation.description": "Pointe vers un autre Modèle",
+
+  "popUpForm.attributes.string.name": "Chaîne de caractères",
+  "popUpForm.attributes.text.name": "Text",
+  "popUpForm.attributes.boolean.name": "Boolean",
+  "popUpForm.attributes.date.name": "Date",
+  "popUpForm.attributes.json.name": "JSON",
+  "popUpForm.attributes.media.name": "Media",
+  "popUpForm.attributes.relation.name": "Relation",
 
   "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Modèle",
   "popUpForm.choose.attributes.header.title": "Ajouter un Nouveau Champs",

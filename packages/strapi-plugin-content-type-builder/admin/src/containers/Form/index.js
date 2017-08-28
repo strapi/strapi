@@ -13,6 +13,7 @@ import {
   get,
   includes,
   isEmpty,
+  map,
   size,
   split,
   toNumber,
@@ -23,6 +24,7 @@ import { router, store } from 'app';
 
 import { storeTemporaryMenu } from 'containers/App/actions';
 
+import AttributeCard from 'components/AttributeCard';
 import PopUpForm from 'components/PopUpForm';
 
 import { getAsyncInjectors } from 'utils/asyncInjectors';
@@ -44,6 +46,7 @@ import {
 } from './actions';
 
 import styles from './styles.scss';
+import forms from './forms.json';
 
 const { injectReducer, injectSagas } = getAsyncInjectors(store);
 injectReducer('form', reducer);
@@ -198,10 +201,14 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  renderModalBodyChooseAttributes = () => {
-    console.log('ok');
-    return <div> yop</div>;
-  }
+  renderModalBodyChooseAttributes = () => (
+    map(forms.attributesDisplay.items, (attribute, key) => (
+      <AttributeCard
+        key={key}
+        attribute={attribute}
+      />
+    ))
+  )
 
   render() {
     // Ensure typeof(popUpFormType) is String
