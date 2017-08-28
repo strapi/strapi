@@ -61,6 +61,11 @@
   "popUpForm.navContainer.base": "Réglages de base",
   "popUpForm.navContainer.advanced": "Réglages avancés",
 
+  "popUpWarning.button.cancel": "Annuler",
+  "popUpWarning.button.confirm": "Confirmer",
+  "popUpWarning.title": "Merci de confirmer",
+  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûre de vouloir supprimer ce modèle?",
+
   "table.contentType.title.plural": "Modèles sont disponibles",
   "table.contentType.title.singular": "Modèle est disponible",
   "table.contentType.head.name": "Nom",

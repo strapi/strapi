@@ -12,6 +12,7 @@ import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import { router } from 'app';
 import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
+import { deleteContentType } from 'containers/App/actions';
 
 import Form from 'containers/Form';
 
@@ -43,6 +44,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
+  handleDelete = (contentTypeName) => {
+    console.log(contentTypeName);
+    this.props.deleteContentType(contentTypeName);
+  }
+
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
     router.push(`plugins/content-type-builder/${locationHash}`);
@@ -59,6 +65,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         buttonLabel={'button.contentType.add'}
         handleButtonClick={this.handleButtonClick}
         rowItems={this.props.models}
+        handleDelete={this.handleDelete}
       />
     );
   }
@@ -105,20 +112,21 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    {},
+    {
+      deleteContentType,
+    },
     dispatch,
   );
 };
 
 HomePage.propTypes =  {
-  // homePage: React.PropTypes.object.isRequired,
+  deleteContentType: React.PropTypes.func,
   location: React.PropTypes.object,
   menu: React.PropTypes.array,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,
   ]),
-  // modelsLoading: React.PropTypes.bool,
   route: React.PropTypes.object,
 };
 

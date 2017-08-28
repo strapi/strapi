@@ -39,7 +39,6 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
 
   render() {
     const bootstrapClass = this.props.attribute.type === 'relation' ? 'col-md-6 offset-md-3' : 'col-md-6';
-    console.log(this.props);
     return (
       <div className={bootstrapClass}>
         <div className={styles.attributeCardContainer} onClick={this.goTo}>

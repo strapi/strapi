@@ -7,15 +7,36 @@
 /* eslint-disable new-cap */
 
 import { List, Map } from 'immutable';
-import { concat, size, map } from 'lodash';
+import { concat, size, map, findIndex } from 'lodash';
 
 import { storeData } from '../../utils/storeData';
 
 import {
+  DELETE_CONTENT_TYPE,
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
 } from './constants';
+
+export function deleteContentType(itemToDelete) {
+  const oldMenu = storeData.getMenu();
+
+  if (oldMenu) {
+    const index = findIndex(oldMenu, ['name', itemToDelete]);
+    if (oldMenu[index].isTemporary) {
+      storeData.clearAppStorage();
+    }else {
+      oldMenu.splice(index, 1);
+      const newMenu = oldMenu
+      storeData.setMenu(newMenu);
+    }
+  }
+
+  return {
+    type: DELETE_CONTENT_TYPE,
+    itemToDelete,
+  }
+}
 
 export function modelsFetch() {
   return {
