@@ -45,7 +45,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   handleDelete = (contentTypeName) => {
-    console.log(contentTypeName);
     this.props.deleteContentType(contentTypeName);
   }
 

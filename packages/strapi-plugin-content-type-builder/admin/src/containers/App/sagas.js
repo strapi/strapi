@@ -1,8 +1,21 @@
 import { takeLatest } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects';
 import request from 'utils/request';
-import { MODELS_FETCH } from './constants';
+import { DELETE_CONTENT_TYPE, MODELS_FETCH } from './constants';
 import { modelsFetchSucceeded } from './actions';
+
+export function* deleteContentType(action) {
+  try {
+    if (action.sendRequest) {
+      const requestUrl = `content-type-builder/models/${action.itemToDelete}`;
+      
+      yield call(request, requestUrl, { method: 'DELETE' });
+    }
+
+  } catch(error) {
+    console.log(error);
+  }
+}
 
 export function* fetchModels() {
   try {
@@ -23,6 +36,7 @@ export function* fetchModels() {
 export function* defaultSaga() {
   // TODO check if problems
   yield fork(takeLatest, MODELS_FETCH, fetchModels);
+  yield fork(takeLatest, DELETE_CONTENT_TYPE, deleteContentType);
   // const loadModelsWatcher = yield fork(takeLatest, MODELS_FETCH, fetchModels);
 
   // Suspend execution until location changes

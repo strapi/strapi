@@ -20,10 +20,12 @@ import {
 
 export function deleteContentType(itemToDelete) {
   const oldMenu = storeData.getMenu();
+  let sendRequest = true;
 
   if (oldMenu) {
     const index = findIndex(oldMenu, ['name', itemToDelete]);
     if (oldMenu[index].isTemporary) {
+      sendRequest = false;
       storeData.clearAppStorage();
     }else {
       oldMenu.splice(index, 1);
@@ -35,6 +37,7 @@ export function deleteContentType(itemToDelete) {
   return {
     type: DELETE_CONTENT_TYPE,
     itemToDelete,
+    sendRequest,
   }
 }
 
