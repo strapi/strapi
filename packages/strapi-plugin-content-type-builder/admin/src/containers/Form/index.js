@@ -116,7 +116,29 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       } else {
         this.setState({ showModal: false });
       }
+    }
 
+    // Close modal when updating a content type && success updating
+    if (nextProps.shouldRefetchContentType !== this.props.shouldRefetchContentType) {
+      // Check if localStorage because the PluginLeftMenu is based on the localStorage
+      if (storeData.getMenu()) {
+        // Update localStorage
+        const oldMenu = storeData.getMenu();
+        const index = findIndex(oldMenu, ['name', replace(this.props.hash.split('::')[0], '#edit', '')]);
+        const modifiedContentType = {
+          name: this.props.modifiedDataEdit.name,
+          icon: 'fa-caret-square-o-right',
+        };
+
+        oldMenu.splice(index, 1, modifiedContentType);
+        const newMenu = oldMenu;
+        storeData.setMenu(newMenu);
+      }
+
+      // Close Modal
+      router.push(`${this.props.redirectRoute}/${this.props.modifiedDataEdit.name}`);
+      // Reset props
+      this.props.resetDidFetchModelProp();
     }
   }
 
@@ -145,6 +167,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
+
+    this.props.resetDidFetchModelProp();
 
     router.push(`${this.props.redirectRoute}/${data.name}`);
   }
@@ -258,7 +282,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   toggle = () => {
     this.props.toggle();
-
     // Set the didFetchModel props to false when the modal is closing so the store is emptied
     // Only for editing
     if (this.state.showModal && includes(this.props.hash, 'edit')) {
@@ -349,6 +372,7 @@ Form.propTypes = {
   selectOptionsFetchSucceeded: React.PropTypes.bool,
   setAttributeForm: React.PropTypes.func,
   setForm: React.PropTypes.func.isRequired,
+  shouldRefetchContentType: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
 };

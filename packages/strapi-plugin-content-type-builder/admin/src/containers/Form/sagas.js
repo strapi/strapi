@@ -34,6 +34,12 @@ export function* editContentType() {
     const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
 
     yield call(request, requestUrl, opts);
+
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
     yield put(contentTypeActionSucceeded());
 
   } catch(error) {

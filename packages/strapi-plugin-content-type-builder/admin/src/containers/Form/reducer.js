@@ -9,6 +9,7 @@ import {
   CHANGE_INPUT,
   CHANGE_INPUT_ATTRIBUTE,
   CONNECTIONS_FETCH_SUCCEEDED,
+  CONTENT_TYPE_ACTION_SUCCEEDED,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
   SET_ATTRIBUTE_FORM,
@@ -28,6 +29,7 @@ const initialState = fromJS({
   modifiedDataEdit: Map(),
   isFormSet: false,
   didFetchModel: false,
+  shouldRefetchContentType: false,
 });
 
 function formReducer(state = initialState, action) {
@@ -41,6 +43,10 @@ function formReducer(state = initialState, action) {
       return state
         .set('selectOptions', List(action.connections))
         .set('selectOptionsFetchSucceeded', !state.get('selectOptionsFetchSucceeded'));
+    case CONTENT_TYPE_ACTION_SUCCEEDED:
+      return state
+        .set('shouldRefetchContentType', !state.get('shouldRefetchContentType'))
+        .set('initialDataEdit', state.get('modifiedDataEdit'));
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
         .set('didFetchModel', true)
@@ -48,12 +54,13 @@ function formReducer(state = initialState, action) {
         .set('modifiedDataEdit', action.data);
     case RESET_DID_FETCH_MODEL_PROP:
       return state
-        .set('didFetchModel', false);
+        .set('didFetchModel', false)
+        .set('isFormSet', false);
     case SET_ATTRIBUTE_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));
       }
-      
+
       return state
         .set('isFormSet', true)
         .set('form', Map(action.form))

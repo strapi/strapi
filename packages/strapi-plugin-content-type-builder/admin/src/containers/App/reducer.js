@@ -37,7 +37,7 @@ function appReducer(state = initialState, action) {
       const modelsSize = size(state.get('models').toJS())
       return state
       .updateIn(['menu', '0', 'items'], (list) => list.splice(action.position, action.nbElementToRemove, action.newLink))
-      .update('models', array => array.splice(action.nbElementToRemove === 0 ? modelsSize : modelsSize -1 , 1, action.newModel));
+      .update('models', array => array.splice(action.nbElementToRemove === 0 ? modelsSize : modelsSize - 1 , 1, action.newModel));
     }
     default:
       return state;
