@@ -6,7 +6,7 @@
 
 .headerContainer {
   width: 100%;
-  padding: 0 1.8rem 0 1.8rem;
+  padding: 0 1rem 0 3rem;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -60,6 +60,7 @@
   margin: 0;
   padding: 0 4.6rem .3rem 1.9rem;
   font-size: 1.3rem;
+
   line-height: 1.6rem;
   font-weight: 600;
   > div {

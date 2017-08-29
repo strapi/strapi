@@ -63,6 +63,11 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
 
+    const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
+      : <ModalFooter className={styles.modalFooter}>
+        <Button onClick={this.props.toggle} className={styles.secondary}>Cancel</Button>
+        <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}>Save</Button>{' '}
+      </ModalFooter>;
     return (
       <div className={styles.popUpForm}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
@@ -80,10 +85,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               </div>
             </div>
           </ModalBody>
-          <ModalFooter className={styles.modalFooter}>
-            <Button onClick={this.props.toggle} className={styles.secondary}>Cancel</Button>
-            <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}>Save</Button>{' '}
-          </ModalFooter>
+          {modalFooter}
         </Modal>
       </div>
     );
@@ -99,6 +101,7 @@ PopUpForm.propTypes = {
   handleChange: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,
   isOpen: React.PropTypes.bool,
+  noButtons: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
   // popUpFormType: React.PropTypes.string.isRequired,
   popUpHeaderNavLinks: React.PropTypes.array,

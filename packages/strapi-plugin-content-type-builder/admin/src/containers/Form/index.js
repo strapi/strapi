@@ -277,6 +277,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const noNav = includes(this.props.hash, 'choose');
     // Override the default rendering
     const renderModalBody = includes(this.props.hash, '#choose') ? this.renderModalBodyChooseAttributes : false;
+
+    const noButtons = includes(this.props.hash, '#choose');
+
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -295,6 +298,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           handleSubmit={this.handleSubmit}
           noNav={noNav}
           renderModalBody={renderModalBody}
+          noButtons={noButtons}
         />
       </div>
     );
