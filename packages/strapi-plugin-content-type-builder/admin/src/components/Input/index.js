@@ -52,7 +52,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   renderInputCheckbox = (requiredClass,  inputDescription) => {
     const title = !isEmpty(this.props.title) ? <div className={styles.inputTitle}><FormattedMessage id={this.props.title} /></div> : '';
-    const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}} />
+    const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}}></div>;
+
     return (
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
@@ -60,7 +61,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.name}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
-                <input className="form-check-input" type="checkbox" value={this.props.value} onChange={this.props.handleChange} name={this.props.target} />
+                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.props.handleChange} name={this.props.target} />
                 {message}
               </label>
             )}
@@ -241,7 +242,10 @@ Input.propTypes = {
   title: React.PropTypes.string,
   type: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
+  value: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
 };
 
 export default Input;

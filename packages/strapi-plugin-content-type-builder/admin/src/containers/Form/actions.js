@@ -82,7 +82,7 @@ export function contentTypeFetch(contentTypeName) {
 
 export function contentTypeFetchSucceeded(contentType) {
   const dataArray = [['attributes', List(contentType.model.attributes)]];
-  
+
   forEach(contentType.model, (value, key) => {
     if (key !== 'attributes') {
       dataArray.push([key, value]);
@@ -119,6 +119,8 @@ export function setAttributeForm(hash) {
     params: Map({
       type: formType,
       required: false,
+      // TODO remove with correct value
+      minLength: true,
     }),
   });
 

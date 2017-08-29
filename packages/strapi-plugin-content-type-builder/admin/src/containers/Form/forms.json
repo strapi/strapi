@@ -100,7 +100,7 @@
           },
           {
             "name": "form.attribute.item.uniqueField",
-            "target": "required",
+            "target": "unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -108,14 +108,23 @@
           },
           {
             "name": "form.attribute.item.minimumLength",
-            "target": "required",
+            "target": "minLength",
             "type": "checkbox",
-            "value": false,
-            "validations": {}
+            "value": true,
+            "validations": {},
+            "items": [
+              {
+                "name": "",
+                "target": "minLength.value",
+                "value": "",
+                "type": "number",
+                "validations": {}
+              }
+            ]
           },
           {
             "name": "form.attribute.item.maximumLength",
-            "target": "required",
+            "target": "maxLength",
             "type": "checkbox",
             "value": false,
             "validations": {}
