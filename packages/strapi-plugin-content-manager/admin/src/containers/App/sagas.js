@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { takeLatest } from 'redux-saga';
-import { fork, put, select, call } from 'redux-saga/effects';
+import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
 import { generateSchema } from 'utils/schema';

@@ -13,10 +13,8 @@ import styles from './styles.scss';
 
 class Table extends React.Component {
   render() {
-    console.log(this.props.match.path);
-    
     const tableRows = this.props.records.map((record, key) => {
-      const destination = `${this.props.match.path.replace(':slug', this.props.match.params.slug)}/${record[this.props.primaryKey]}`;
+      const destination = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`;
 
       return (
         <TableRow
@@ -53,9 +51,10 @@ Table.propTypes = {
   changeSort: React.PropTypes.func.isRequired,
   headers: React.PropTypes.array.isRequired,
   history: React.PropTypes.object.isRequired,
-  match: React.PropTypes.object.isRequired,
   primaryKey: React.PropTypes.string.isRequired,
   records: React.PropTypes.array.isRequired,
+  route: React.PropTypes.object.isRequired,
+  routeParams: React.PropTypes.object.isRequired,
   sort: React.PropTypes.string.isRequired,
 };
 

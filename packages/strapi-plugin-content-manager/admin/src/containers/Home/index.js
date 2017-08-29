@@ -7,8 +7,8 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 
-import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
+import PluginHeader from 'components/PluginHeader';
 
 import styles from './styles.scss';
 
@@ -18,10 +18,13 @@ export class Home extends React.Component {
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title="Content Manager"
+            title={{
+              id: 'content-manager.containers.Home.pluginHeaderTitle',
+            }}
             description={{
               id: 'content-manager.containers.Home.pluginHeaderDescription',
             }}
+            actions={[]}
           />
           <Container>
             <p>
@@ -34,9 +37,7 @@ export class Home extends React.Component {
   }
 }
 
-Home.propTypes = {
-  // exposedComponents: React.PropTypes.object.isRequired,
-};
+Home.propTypes = {};
 
 export function mapDispatchToProps() {
   return {};

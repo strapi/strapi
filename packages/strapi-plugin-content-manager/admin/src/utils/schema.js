@@ -39,10 +39,9 @@ const generateSchema = (models) => {
       model: value.model,
       attribute,
       label: _.upperFirst(attribute),
-      descripion: '',
+      description: '',
       displayedAttribute: _.findKey(models[value.model].attributes, { type: 'string' }) || 'id',
-    })
-    );
+    }));
 
     // Set the formatted model to the schema
     schema[name] = schemaModel;

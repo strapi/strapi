@@ -68,13 +68,10 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
       ? <p>{this.props.relation.description}</p>
       : '';
 
+    /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className="form-group">
-        <label // eslint-disable-line jsx-a11y/label-has-for
-          htmlFor={this.props.relation.label}
-        >
-          {this.props.relation.label}
-        </label>
+        <label htmlFor={this.props.relation.label}>{this.props.relation.label}</label>
         {description}
         <Select.Async
           onChange={this.onChange}
@@ -84,6 +81,7 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
         />
       </div>
     );
+    /* eslint-disable jsx-a11y/label-has-for */
   }
 }
 

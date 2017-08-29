@@ -1,4 +1,6 @@
 {
+  "containers.Home.pluginHeaderTitle": "Content Types",
+  "containers.Home.pluginHeaderDescription": "Create and update your content types",
   "containers.Home.introduction": "A powerful UI to easily manage your data.",
   "containers.Home.pluginHeaderDescription": "To edit your content's entries go to the specific link in the left menu.",
   "containers.Edit.submit": "Submit",

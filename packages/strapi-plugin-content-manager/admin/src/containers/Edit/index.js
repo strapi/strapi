@@ -7,19 +7,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
-// import _ from 'lodash';
+import _ from 'lodash';
 
 import { router } from 'app';
 
-import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 import EditForm from 'components/EditForm';
 import { makeSelectSchema } from 'containers/App/selectors';
 import EditFormRelations from 'components/EditFormRelations';
-
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 
 import {
   setInitialState,
@@ -38,23 +33,23 @@ import {
   makeSelectDeleting,
   makeSelectIsCreating,
 } from './selectors';
-import reducer from './reducer';
-import saga from './sagas';
 
 export class Edit extends React.Component {
   componentWillMount() {
     this.props.setInitialState();
-    this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
+    this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
 
     // Detect that the current route is the `create` route or not
-    if (this.props.match.params.id === 'create') {
+    if (this.props.routeParams.id === 'create') {
       this.props.setIsCreating();
     } else {
-      this.props.loadRecord(this.props.match.params.id);
+      this.props.loadRecord(this.props.routeParams.id);
     }
   }
 
   render() {
+    const PluginHeader = this.props.exposedComponents.PluginHeader;
+
     let content = <p>Loading...</p>;
     let relations;
     if (!this.props.loading && this.props.schema && this.props.currentModelName) {
@@ -145,14 +140,15 @@ Edit.propTypes = {
   deleting: React.PropTypes.bool.isRequired,
   editing: React.PropTypes.bool.isRequired,
   editRecord: React.PropTypes.func.isRequired,
+  exposedComponents: React.PropTypes.object.isRequired,
   isCreating: React.PropTypes.bool.isRequired,
   loading: React.PropTypes.bool.isRequired,
   loadRecord: React.PropTypes.func.isRequired,
-  match: React.PropTypes.object.isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]).isRequired,
+  routeParams: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -194,13 +190,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-const withReducer = injectReducer({ key: 'edit', reducer });
-const withSaga = injectSaga({ key: 'edit', saga });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(Edit);
+export default connect(mapStateToProps, mapDispatchToProps)(Edit);

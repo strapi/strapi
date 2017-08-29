@@ -12,15 +12,16 @@ import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
+import injectSaga from 'utils/injectSaga';
+
+import Home from 'containers/Home';
 import Edit from 'containers/Edit';
 import List from 'containers/List';
-import Home from 'containers/Home';
-
-import injectSaga from 'utils/injectSaga';
-import saga from './sagas';
 
 import { loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
+
+import saga from './sagas';
 
 const tryRequire = (path) => {
   try {
@@ -33,6 +34,7 @@ const tryRequire = (path) => {
 class App extends React.Component {
   componentWillMount() {
     const config = tryRequire('../../../../config/admin.json');
+
     if (!_.isEmpty(_.get(config, 'admin.schema'))) {
       this.props.updateSchema(config.admin.schema);
     } else {
@@ -79,8 +81,6 @@ const mapStateToProps = createStructuredSelector({
   loading: makeSelectLoading(),
 });
 
-
-// Wrap the component to inject dispatch and state into it
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withSaga = injectSaga({ key: 'global', saga });

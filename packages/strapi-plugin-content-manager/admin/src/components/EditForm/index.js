@@ -102,17 +102,16 @@ class EditForm extends React.Component {
       ? <p>{attributeValue.description}</p>
       : '';
 
+    /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div key={attributeKey} className="form-group">
-        <label // eslint-disable-line jsx-a11y/label-has-for
-          htmlFor={attributeKey}
-        >
-          {attributeValue.label || attributeKey}
-        </label>
+        <label htmlFor={attributeKey}>{attributeValue.label || attributeKey}</label>
         {description}
         {input}
+
       </div>
     );
+    /* eslint-disable jsx-a11y/label-has-for */
   }
 
   render() {

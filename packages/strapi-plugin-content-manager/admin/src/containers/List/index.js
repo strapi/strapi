@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
+import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
-import { router } from 'app';
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Container from 'components/Container';
@@ -40,6 +39,7 @@ import {
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
+
 import reducer from './reducer';
 import saga from './sagas';
 
@@ -56,7 +56,7 @@ export class List extends React.Component {
 
     // If the location changed, init the view
     if (locationChanged) {
-      this.init(nextProps.params.slug);
+      this.init(nextProps.match.params.slug);
     }
   }
 
@@ -65,7 +65,7 @@ export class List extends React.Component {
     this.props.setCurrentModelName(slug.toLowerCase());
 
     // Set default sort value
-    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey);
+    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'desc');
 
     // Load records
     this.props.loadRecords();
@@ -105,13 +105,13 @@ export class List extends React.Component {
       content = (
         <Table
           records={this.props.records}
-          route={this.props.route}
+          route={this.props.match}
+          routeParams={this.props.match.params}
           headers={tableHeaders}
           changeSort={this.props.changeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
-          match={this.props.match}
         />
       );
     }
@@ -121,18 +121,20 @@ export class List extends React.Component {
       {
         label: 'content-manager.containers.List.addAnEntry',
         class: 'btn-primary',
-        onClick: () => router.push(this.addRoute),
+        onClick: () => this.context.router.push(this.addRoute),
       },
     ];
 
     // Plugin header config
-    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
+    // const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
 
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title={pluginHeaderTitle}
+            title={{
+              id: 'test',
+            }}
             description={{
               id: 'content-manager.containers.List.pluginHeaderDescription',
               values: {
@@ -186,15 +188,14 @@ List.propTypes = {
     React.PropTypes.bool,
   ]).isRequired,
   onLimitChange: React.PropTypes.func.isRequired,
-  params: React.PropTypes.object.isRequired,
   records: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.bool,
   ]).isRequired,
-  route: React.PropTypes.object.isRequired,
+  // route: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
-    React.PropTypes.object,
     React.PropTypes.bool,
+    React.PropTypes.object,
   ]).isRequired,
   setCurrentModelName: React.PropTypes.func.isRequired,
   sort: React.PropTypes.string.isRequired,

@@ -7,7 +7,6 @@
 import React from 'react';
 import { Link } from 'react-router';
 import _ from 'lodash';
-import { router } from 'app';
 
 import styles from './styles.scss';
 
@@ -42,7 +41,7 @@ class TableRow extends React.Component {
    * Redirect to the edit page
    */
   goEditPage() {
-    router.push(this.props.destination);
+    this.context.router.push(this.props.destination);
   }
 
   render() {
