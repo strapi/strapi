@@ -1,7 +1,8 @@
 module.exports = {
 
-  find: async (params) => {
-    const entries = await params.model
+  find: async function (params) {
+    console.log(params);
+    const entries = await this
       .forge()
       .query((qb) => {
         qb.limit(Number(params.limit));
@@ -19,8 +20,8 @@ module.exports = {
     return entries;
   },
 
-  count: async (params) => {
-    const count = await params.model
+  count: async function (params) {
+    const count = await this
       .forge()
       .count();
 

@@ -1,56 +1,40 @@
 module.exports = {
-
-  find: async (params) => {
-    const entries = params.model
+  find: async function (params) {
+    return this
       .find()
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip));
-
-    return entries;
   },
 
-  count: async (params) => {
-    const count = await params.model
-      .count();
-
-    return Number(count);
+  count: async function (params) {
+    return Number(await this
+      .count());
   },
 
-  findOne: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .findOne(where);
-
-    return entry;
+  findOne: async function (params) {
+    return await this
+      .findOne({
+        [this.primaryKey]: params.id
+      });
   },
 
-  create: async (params) => {
-    const entry = await params.model
+  create: async function (params) {
+    return await this
       .create(params.values);
-
-    return entry;
   },
 
-  update: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .update(where, params.values);
-
-    return entry;
+  update: async function (params) {
+    return await this
+      .update({
+        [this.primaryKey]: params.id
+      }, params.values);
   },
 
-  delete: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .destroy(where);
-
-    return entry;
+  delete: async function (params) {
+    return await this
+      .destroy({
+        [this.primaryKey]: params.id
+      });
   }
 };

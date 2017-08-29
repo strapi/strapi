@@ -50,6 +50,7 @@
     "koa-static": "^4.0.1",
     "lodash": "^4.16.5",
     "node-schedule": "^1.2.0",
+    "stack-trace": "0.0.10",
     "strapi-generate": "^3.0.0-alpha.4.8",
     "strapi-generate-admin": "^3.0.0-alpha.4.8",
     "strapi-generate-api": "^3.0.0-alpha.4.8",
