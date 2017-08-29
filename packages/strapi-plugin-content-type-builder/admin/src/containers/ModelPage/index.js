@@ -178,6 +178,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           renderCustomListTitle={this.renderListTitle}
           listContentMappingKey={'attributes'}
           renderCustomLi={this.renderCustomLi}
+          handleButtonClick={this.handleClickAddAttribute}
         />;
 
     return (
@@ -210,6 +211,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
           redirectRoute={redirectRoute}
+          modelName={this.props.params.modelName}
         />
       </div>
     );

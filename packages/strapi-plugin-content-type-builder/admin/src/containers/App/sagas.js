@@ -8,12 +8,12 @@ export function* deleteContentType(action) {
   try {
     if (action.sendRequest) {
       const requestUrl = `content-type-builder/models/${action.itemToDelete}`;
-      
+
       yield call(request, requestUrl, { method: 'DELETE' });
     }
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error('notification.error.message')
   }
 }
 

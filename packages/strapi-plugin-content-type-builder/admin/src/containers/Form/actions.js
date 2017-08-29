@@ -12,6 +12,7 @@ import { storeData } from '../../utils/storeData';
 
 import {
   CHANGE_INPUT,
+  CHANGE_INPUT_ATTRIBUTE,
   CONNECTIONS_FETCH,
   CONNECTIONS_FETCH_SUCCEEDED,
   CONTENT_TYPE_ACTION_SUCCEEDED,
@@ -33,6 +34,14 @@ export function changeInput(key, value, isEditing) {
     key,
     value,
     objectToModify,
+  };
+}
+
+export function changeInputAttribute(key, value) {
+  return {
+    type: CHANGE_INPUT_ATTRIBUTE,
+    key,
+    value,
   };
 }
 
@@ -101,11 +110,23 @@ export function resetDidFetchModelProp() {
 }
 
 export function setAttributeForm(hash) {
-  const form = forms.attribute[replace(hash.split('::')[1], 'attribute', '')][hash.split('::')[2]];
-  
+  const hashArray = hash.split('::');
+  const formType = replace(hashArray[1], 'attribute', '');
+  const settingsType = hashArray[2];
+  const form = forms.attribute[formType][settingsType];
+
+  const attribute = Map({
+    name: '',
+    params: Map({
+      type: formType,
+      required: false,
+    }),
+  });
+
   return {
     type: SET_ATTRIBUTE_FORM,
     form,
+    attribute,
   }
 }
 

@@ -13,6 +13,9 @@
   "button.contentType.add": "Add Content Type",
   "button.attributes.add": "Add New Field",
 
+  "form.attribute.item.textarea.name": "Name",
+  "form.attribute.item.string.name": "Name",
+
   "form.contentType.item.connections": "Connection",
   "form.contentType.item.name": "Name",
   "form.contentType.item.description": "Description",

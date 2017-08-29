@@ -79,6 +79,20 @@
       "baseSettings": {
         "items": [
           {
+            "name": "form.attribute.item.textarea.name",
+            "target": "name",
+            "type": "textarea",
+            "value": "",
+            "validations": {}
+          }
+        ]
+      },
+      "advancedSettings": {}
+    },
+    "string": {
+      "baseSettings": {
+        "items": [
+          {
             "name": "form.attribute.item.string.name",
             "target": "name",
             "type": "string",
@@ -87,20 +101,6 @@
           }
         ]
       },
-      "advancedSettings": {
-        "items": [
-          {
-            "name": "form.attribute.item.settings.name",
-            "target": "params.required",
-            "type": "checkbox",
-            "value": false,
-            "validations": {}
-          }
-        ]
-      }
-    },
-    "string": {
-      "baseSettings": {},
       "advancedSettings": {}
     },
     "date": {

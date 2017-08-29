@@ -5,6 +5,7 @@
  */
 
 export const CHANGE_INPUT = 'ContentTypeBuilder/Form/CHANGE_INPUT';
+export const CHANGE_INPUT_ATTRIBUTE = 'ContentTypeBuilder/Form/CHANGE_INPUT_ATTRIBUTE';
 export const CONNECTIONS_FETCH = 'ContentTypeBuilder/Form/CONNECTIONS_FETCH';
 export const CONNECTIONS_FETCH_SUCCEEDED = 'ContentTypeBuilder/Form/CONNECTIONS_FETCH_SUCCEEDED';
 export const CONTENT_TYPE_ACTION_SUCCEEDED = 'ContentTypeBuilder/Form/CONTENT_TYPE_ACTION_SUCCEEDED';

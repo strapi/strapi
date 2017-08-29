@@ -12,6 +12,9 @@
   "button.contentType.add": "Ajouter un modèle",
   "button.attributes.add": "Ajouter un champs",
 
+  "form.attribute.item.textarea.name": "Nom",
+  "form.attribute.item.string.name": "Nom",
+
   "form.contentType.item.connections": "Connexion",
   "form.contentType.item.name": "Nom",
   "form.contentType.item.description": "Description",

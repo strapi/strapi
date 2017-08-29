@@ -62,6 +62,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     const navContainer = this.props.noNav ? '' : this.renderNavContainer();
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
+
     return (
       <div className={styles.popUpForm}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>

@@ -7,6 +7,7 @@
 import { fromJS, List, Map } from 'immutable';
 import {
   CHANGE_INPUT,
+  CHANGE_INPUT_ATTRIBUTE,
   CONNECTIONS_FETCH_SUCCEEDED,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
@@ -22,6 +23,7 @@ const initialState = fromJS({
   form: List(),
   initialData: Map(),
   initialDataEdit: Map(),
+  modifiedDataAttribute: Map(),
   modifiedData: Map(),
   modifiedDataEdit: Map(),
   isFormSet: false,
@@ -33,6 +35,8 @@ function formReducer(state = initialState, action) {
     case CHANGE_INPUT:
       return state
         .updateIn([action.objectToModify, action.key], () => action.value);
+    case CHANGE_INPUT_ATTRIBUTE:
+      return state.updateIn(['modifiedDataAttribute', action.key], () => action.value);
     case CONNECTIONS_FETCH_SUCCEEDED:
       return state
         .set('selectOptions', List(action.connections))
@@ -45,10 +49,16 @@ function formReducer(state = initialState, action) {
     case RESET_DID_FETCH_MODEL_PROP:
       return state
         .set('didFetchModel', false);
-    case SET_ATTRIBUTE_FORM:
+    case SET_ATTRIBUTE_FORM: {
+      if (state.get('isFormSet')) {
+        return state.set('form', Map(action.form));
+      }
+      
       return state
         .set('isFormSet', true)
-        .set('form', Map(action.form));
+        .set('form', Map(action.form))
+        .set('modifiedDataAttribute', action.attribute);
+    }
     case SET_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));

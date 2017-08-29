@@ -36,6 +36,7 @@ import sagas from './sagas';
 import selectForm from './selectors';
 import {
   changeInput,
+  changeInputAttribute,
   connectionsFetch,
   contentTypeCreate,
   contentTypeEdit,
@@ -52,6 +53,8 @@ import forms from './forms.json';
 const { injectReducer, injectSagas } = getAsyncInjectors(store);
 injectReducer('form', reducer);
 injectSagas(sagas);
+
+/* eslint-disable react/sort-comp */
 
 export class Form extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -79,6 +82,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           this.fetchModel(contentTypeName);
         }
       }
+
+      if (includes(this.props.hash, 'create') && includes(this.props.hash, 'attribute')) {
+        const contentTypeName = replace(split(this.props.hash, '::')[0], '#create', '');
+        this.fetchModel(contentTypeName);
+        this.props.setAttributeForm(this.props.hash);
+      }
     }
   }
 
@@ -99,7 +108,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         }
 
         if (includes(nextProps.hash, 'create') && includes(nextProps.hash, 'attribute')) {
-          console.log('oeeeee');
+          const contentTypeName = replace(split(nextProps.hash, '::')[0], '#create', '');
+          this.fetchModel(contentTypeName);
           this.props.setAttributeForm(nextProps.hash);
         }
 
@@ -110,36 +120,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  testContentType = (contentTypeName, cbSuccess, successData, cbFail, failData) => {
-    // Check if the content type is in the localStorage (not saved)
-    // To prevent request error
-    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === contentTypeName) {
-      cbSuccess(successData);
-    } else {
-      cbFail(failData);
-    }
-  }
-
-  fetchModel = (contentTypeName) => {
-    this.testContentType(
-      contentTypeName,
-      this.props.contentTypeFetchSucceeded,
-      { model: storeData.getContentType() },
-      this.props.contentTypeFetch,
-      contentTypeName
-    );
-  }
-
-  handleBlur = ({ target }) => {
-    if (target.name === 'name') {
-      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
-    }
-  }
-
-  handleChange = ({ target }) => {
-    const value = target.type === 'number' ? toNumber(target.value) : target.value;
-
-    this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
+  addAttributeToTempContentType = () => {
+    const contentType = this.props.modifiedDataEdit;
+    contentType.attributes.push(this.props.modifiedDataAttribute);
+    this.props.contentTypeCreate(contentType);
+    router.push(`${this.props.redirectRoute}/${contentType.name}`);
   }
 
   createContentType = (data) => {
@@ -164,6 +149,32 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     router.push(`${this.props.redirectRoute}/${data.name}`);
   }
 
+  fetchModel = (contentTypeName) => {
+    this.testContentType(
+      contentTypeName,
+      this.props.contentTypeFetchSucceeded,
+      { model: storeData.getContentType() },
+      this.props.contentTypeFetch,
+      contentTypeName
+    );
+  }
+
+  handleBlur = ({ target }) => {
+    if (target.name === 'name') {
+      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
+    }
+  }
+
+  handleChange = ({ target }) => {
+    const value = target.type === 'number' ? toNumber(target.value) : target.value;
+
+    if (includes(this.props.hash.split('::')[1], 'attribute')) {
+      this.props.changeInputAttribute(target.name, value);
+    } else {
+      this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
+    }
+  }
+
   handleSubmit = () => {
     if (includes(this.props.hash, 'edit')) {
       this.testContentType(
@@ -171,6 +182,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         this.createContentType,
         this.props.modifiedDataEdit,
         this.props.contentTypeEdit,
+      );
+    } else if (includes(this.props.hash.split('::')[1], 'attribute')) {
+      this.testContentType(
+        replace(split(this.props.hash, '::')[0], '#create', ''),
+        this.addAttributeToTempContentType,
       );
     } else {
       this.createContentType(this.props.modifiedData);
@@ -197,19 +213,26 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     return popUpTitle;
   }
 
-  goToAttributeTypeView = (attributeType) => {
-    const attributesSize = size(this.props.modifiedDataEdit.attributes);
-    router.push(`${this.props.routePath}#create::attribute${attributeType}::baseSettings::${attributesSize}`);
+  getValues = () => {
+    let values;
+    // Three kinds of values are available modifiedData and modifiedDataEdit
+    // Allows the user to start creating a contentType and modifying an existing one at the same time
+    switch (true) {
+      case includes(this.props.hash, 'edit'):
+        values = this.props.modifiedDataEdit;
+        break;
+      case includes(this.props.hash.split('::')[1], 'attribute'):
+        values = this.props.modifiedDataAttribute;
+        break;
+      default:
+        values = this.props.modifiedData;
+    }
+
+    return values;
   }
 
-  toggle = () => {
-    this.props.toggle();
-
-    // Set the didFetchModel props to false when the modal is closing so the store is emptied
-    // Only for editing
-    if (this.state.showModal && includes(this.props.hash, 'edit')) {
-      this.props.resetDidFetchModelProp();
-    }
+  goToAttributeTypeView = (attributeType) => {
+    router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
   }
 
   renderModalBodyChooseAttributes = () => (
@@ -223,14 +246,34 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     ))
   )
 
+  testContentType = (contentTypeName, cbSuccess, successData, cbFail, failData) => {
+    // Check if the content type is in the localStorage (not saved)
+    // To prevent request error
+    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === contentTypeName) {
+      cbSuccess(successData);
+    } else {
+      cbFail(failData);
+    }
+  }
+
+  toggle = () => {
+    this.props.toggle();
+
+    // Set the didFetchModel props to false when the modal is closing so the store is emptied
+    // Only for editing
+    if (this.state.showModal && includes(this.props.hash, 'edit')) {
+      this.props.resetDidFetchModelProp();
+    }
+  }
+
   render() {
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
-    console.log(this.props);
-    // Two kinds of values are available modifiedData and modifiedDataEdit
-    // Allows the user to start creating a contentType and modifying an existing one at the same time
-    const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
+
+    // const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
+    const values = this.getValues();
+
     const noNav = includes(this.props.hash, 'choose');
     // Override the default rendering
     const renderModalBody = includes(this.props.hash, '#choose') ? this.renderModalBodyChooseAttributes : false;
@@ -264,6 +307,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       changeInput,
+      changeInputAttribute,
       connectionsFetch,
       contentTypeCreate,
       contentTypeEdit,
@@ -280,6 +324,7 @@ function mapDispatchToProps(dispatch) {
 
 Form.propTypes = {
   changeInput: React.PropTypes.func.isRequired,
+  changeInputAttribute: React.PropTypes.func,
   connectionsFetch: React.PropTypes.func.isRequired,
   contentTypeCreate: React.PropTypes.func,
   contentTypeEdit: React.PropTypes.func,
@@ -291,7 +336,9 @@ Form.propTypes = {
   ]),
   hash: React.PropTypes.string.isRequired,
   menuData: React.PropTypes.array.isRequired,
+  modelName: React.PropTypes.string,
   modifiedData: React.PropTypes.object,
+  modifiedDataAttribute: React.PropTypes.object,
   modifiedDataEdit: React.PropTypes.object,
   // noNav: React.PropTypes.bool,
   popUpHeaderNavLinks: React.PropTypes.array,
