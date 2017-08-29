@@ -10,6 +10,7 @@ import {
   CHANGE_INPUT_ATTRIBUTE,
   CONNECTIONS_FETCH_SUCCEEDED,
   CONTENT_TYPE_ACTION_SUCCEEDED,
+  CONTENT_TYPE_CREATE,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
   SET_ATTRIBUTE_FORM,
@@ -47,6 +48,8 @@ function formReducer(state = initialState, action) {
       return state
         .set('shouldRefetchContentType', !state.get('shouldRefetchContentType'))
         .set('initialDataEdit', state.get('modifiedDataEdit'));
+    case CONTENT_TYPE_CREATE:
+      return state.set('isFormSet', false);
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
         .set('didFetchModel', true)

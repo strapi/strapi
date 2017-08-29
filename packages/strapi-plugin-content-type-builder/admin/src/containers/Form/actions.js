@@ -81,9 +81,8 @@ export function contentTypeFetch(contentTypeName) {
 }
 
 export function contentTypeFetchSucceeded(contentType) {
-  // TODO remove forced connection
-  const dataArray = [['attributes', List(contentType.model.attributes)], ['connection', 'default']];
-  // const dataArray = [['attributes', List(contentType.model.attributes)]];
+  const dataArray = [['attributes', List(contentType.model.attributes)]];
+  
   forEach(contentType.model, (value, key) => {
     if (key !== 'attributes') {
       dataArray.push([key, value]);

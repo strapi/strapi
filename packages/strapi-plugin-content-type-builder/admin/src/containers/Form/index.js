@@ -67,55 +67,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   componentDidMount() {
     // Get available db connections
     this.props.connectionsFetch();
-
-    if (this.props.hash) {
-      this.setState({ showModal: true });
-
-      // TODO refacto
-      if (includes(this.props.hash, 'contentType')) {
-        // Get the formType within the hash
-        this.props.setForm(this.props.hash);
-
-        // Fetch Model is the user is editing contentType
-        if (includes(this.props.hash, 'edit')) {
-          const contentTypeName = replace(split(this.props.hash, '::')[0], '#edit', '');
-          this.fetchModel(contentTypeName);
-        }
-      }
-
-      if (includes(this.props.hash, 'create') && includes(this.props.hash, 'attribute')) {
-        const contentTypeName = replace(split(this.props.hash, '::')[0], '#create', '');
-        this.fetchModel(contentTypeName);
-        this.props.setAttributeForm(this.props.hash);
-      }
-    }
+    this.initComponent(this.props, true);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.hash !== this.props.hash) {
-      if (!isEmpty(nextProps.hash)) {
-        this.setState({ showModal: true });
-
-        // TODO refacto
-        if (includes(nextProps.hash, 'contentType')) {
-
-          this.props.setForm(nextProps.hash);
-
-          if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
-            const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
-            this.fetchModel(contentTypeName);
-          }
-        }
-
-        if (includes(nextProps.hash, 'create') && includes(nextProps.hash, 'attribute')) {
-          const contentTypeName = replace(split(nextProps.hash, '::')[0], '#create', '');
-          this.fetchModel(contentTypeName);
-          this.props.setAttributeForm(nextProps.hash);
-        }
-
-      } else {
-        this.setState({ showModal: false });
-      }
+      this.initComponent(nextProps, !nextProps.isFormSet);
     }
 
     // Close modal when updating a content type && success updating
@@ -151,15 +108,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   createContentType = (data) => {
     const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
-
     // Check if link already exist in the menu to remove it
     const index = findIndex(oldMenu, [ 'name', replace(split(this.props.hash, '::')[0], '#edit', '')]);
 
     // Insert at a specific position or before the add button the not saved contentType
     const position = index !== -1 ? index  : size(oldMenu) - 1;
-
     oldMenu.splice(position, index !== -1 ? 1 : 0, { icon: 'fa-cube', fields: 0, description: data.description, name: data.name, isTemporary: true });
-
     const newMenu = oldMenu;
 
     // Store the temporary contentType in the localStorage
@@ -168,8 +122,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
 
+    // Tell the parent containers to update
     this.props.resetDidFetchModelProp();
-
+    // Close modal
     router.push(`${this.props.redirectRoute}/${data.name}`);
   }
 
@@ -259,6 +214,29 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
   }
 
+  initComponent = (props, condition) => {
+    if (!isEmpty(props.hash)) {
+      this.setState({ showModal: true });
+
+      const valueToReplace = includes(props.hash, '#create') ? '#create' : '#edit';
+      const contentTypeName = replace(split(props.hash, '::')[0], valueToReplace, '');
+
+      if (condition && !isEmpty(contentTypeName) && contentTypeName !== '#choose') {
+        this.fetchModel(contentTypeName);
+      }
+
+      if (includes(props.hash, 'contentType')) {
+        this.props.setForm(props.hash);
+      }
+
+      if (includes(props.hash, '#create') && includes(props.hash, 'attribute')) {
+        this.props.setAttributeForm(props.hash);
+      }
+    } else {
+      this.setState({ showModal: false });
+    }
+  }
+
   renderModalBodyChooseAttributes = () => (
     map(forms.attributesDisplay.items, (attribute, key) => (
       <AttributeCard
@@ -283,8 +261,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   toggle = () => {
     this.props.toggle();
     // Set the didFetchModel props to false when the modal is closing so the store is emptied
-    // Only for editing
-    if (this.state.showModal && includes(this.props.hash, 'edit')) {
+    if (this.state.showModal) {
       this.props.resetDidFetchModelProp();
     }
   }
@@ -378,3 +355,29 @@ Form.propTypes = {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Form);
+
+
+
+// if (!isEmpty(nextProps.hash)) {
+//   this.setState({ showModal: true });
+//
+//   // TODO refacto
+//   if (includes(nextProps.hash, 'contentType')) {
+//
+//     this.props.setForm(nextProps.hash);
+//
+//     if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
+//       const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
+//       this.fetchModel(contentTypeName);
+//     }
+//   }
+//
+//   if (includes(nextProps.hash, 'create') && includes(nextProps.hash, 'attribute')) {
+//     const contentTypeName = replace(split(nextProps.hash, '::')[0], '#create', '');
+//     this.fetchModel(contentTypeName);
+//     this.props.setAttributeForm(nextProps.hash);
+//   }
+//
+// } else {
+//   this.setState({ showModal: false });
+// }

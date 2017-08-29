@@ -56,8 +56,7 @@ export function* fetchConnections() {
     yield put(connectionsFetchSucceeded(data));
 
   } catch(error) {
-    console.log(error);
-    // TODO notification
+    window.Strapi.notification.error('notification.error.message')
   }
 }
 
@@ -71,7 +70,7 @@ export function* fetchContentType(action) {
     yield put(contentTypeFetchSucceeded(data));
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error('notification.error.message')
   }
 }
 
