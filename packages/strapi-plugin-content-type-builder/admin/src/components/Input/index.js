@@ -50,6 +50,30 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     }
   }
 
+  renderInputCheckbox = (requiredClass,  inputDescription) => {
+    const title = !isEmpty(this.props.title) ? <div className={styles.inputTitle}><FormattedMessage id={this.props.title} /></div> : '';
+    const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}} />
+    return (
+      <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
+        <div className="form-check">
+          {title}
+          <FormattedMessage id={this.props.name}>
+            {(message) => (
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
+                <input className="form-check-input" type="checkbox" value={this.props.value} onChange={this.props.handleChange} name={this.props.target} />
+                {message}
+              </label>
+            )}
+          </FormattedMessage>
+          <div className={styles.inputCheckboxDescriptionContainer}>
+            <small>{inputDescription}</small>
+          </div>
+        </div>
+        {spacer}
+      </div>
+    )
+  }
+
   renderInputSelect = (bootStrapClass, requiredClass, inputDescription) => {
     const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
     return (
@@ -174,12 +198,14 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       spacer = <div />;
     }
 
-    if (this.props.type === 'select') {
-      return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
-    }
-
-    if (this.props.type === 'textarea') {
-      return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription);
+    switch (this.props.type) {
+      case 'select':
+        return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
+      case 'textarea':
+        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription);
+      case 'checkbox':
+        return this.renderInputCheckbox(requiredClass, inputDescription);
+      default:
     }
 
     return (
@@ -212,6 +238,7 @@ Input.propTypes = {
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
   target: React.PropTypes.string,
+  title: React.PropTypes.string,
   type: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
   value: React.PropTypes.string,

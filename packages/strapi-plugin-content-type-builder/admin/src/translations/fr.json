@@ -14,6 +14,13 @@
 
   "form.attribute.item.textarea.name": "Nom",
   "form.attribute.item.string.name": "Nom",
+  "form.attribute.item.settings.name": "Paramètres",
+  "form.attribute.item.requiredField": "Champ obligatoire",
+  "form.attribute.item.uniqueField": "Champ unique",
+  "form.attribute.item.minimumLength": "Taille minimun",
+  "form.attribute.item.maximumLength": "Taille maximum",
+  "form.attribute.item.requiredField.description": "Vous ne pourrez pas créer une entrée si ce champ est vide",
+  "form.attribute.item.uniqueField.description": "Vous ne pourrez pas créer une entrée s'il existe un champ similaire",
 
   "form.contentType.item.connections": "Connexion",
   "form.contentType.item.name": "Nom",

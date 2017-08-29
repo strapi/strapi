@@ -87,7 +87,41 @@
           }
         ]
       },
-      "advancedSettings": {}
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          },
+          {
+            "name": "form.attribute.item.minimumLength",
+            "target": "required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {}
+          },
+          {
+            "name": "form.attribute.item.maximumLength",
+            "target": "required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {}
+          }
+        ]
+      }
     },
     "string": {
       "baseSettings": {

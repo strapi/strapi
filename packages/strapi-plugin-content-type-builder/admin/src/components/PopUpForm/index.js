@@ -33,6 +33,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         selectOptions={this.props.selectOptions || []}
         selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
         placeholder={item.placeholder}
+        title={item.title}
       />
     );
   }
