@@ -45,6 +45,7 @@ module.exports = {
     return {
       name: slug,
       description: _.get(model, 'description', 'model.description.missing'),
+      connection: model.connection,
       attributes: attributes
     };
   },
@@ -330,7 +331,7 @@ module.exports = {
     const deleteModelFile = (parentPath, fileName) => {
       const filePath = path.join(parentPath, fileName);
 
-      if (_.startsWith(_.toLower(fileName), model)) {
+      if (_.startsWith(`${_.toLower(fileName)}.`, `${model}.`)) {
         try {
           fs.unlinkSync(filePath);
         } catch (e) {
