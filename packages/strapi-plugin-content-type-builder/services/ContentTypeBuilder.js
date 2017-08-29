@@ -330,7 +330,7 @@ module.exports = {
     const deleteModelFile = (parentPath, fileName) => {
       const filePath = path.join(parentPath, fileName);
 
-      if (_.startsWith(_.toLower(fileName), model)) {
+      if (_.startsWith(`${_.toLower(fileName)}.`, `${model}.`)) {
         try {
           fs.unlinkSync(filePath);
         } catch (e) {

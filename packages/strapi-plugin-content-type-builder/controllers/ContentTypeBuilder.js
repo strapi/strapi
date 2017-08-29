@@ -85,7 +85,8 @@ module.exports = {
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
-    if (!strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
+    if (!strapi.models[model]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
@@ -94,10 +95,16 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
-    const [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
+    let [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
 
     if (!_.isEmpty(modelFilePathErrors)) {
       return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
+    }
+
+    strapi.reload.isWatching = false;
+
+    if (name !== model) {
+      await Service.generateAPI(name, description, connection, collectionName, []);
     }
 
     try {
@@ -105,10 +112,8 @@ module.exports = {
 
       modelJSON.attributes = formatedAttributes;
       modelJSON.description = description;
-      modelJSON.description = connection;
+      modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
-
-      strapi.reload.isWatching = false;
 
       const clearRelationsErrors = Service.clearRelations(model);
 
@@ -116,10 +121,24 @@ module.exports = {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(model, attributes);
+      const createRelationsErrors = Service.createRelations(name, attributes);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
+      }
+
+      if (name !== model) {
+        const removeModelErrors = Service.removeModel(model);
+
+        if (!_.isEmpty(removeModelErrors)) {
+          return ctx.badRequest(null, [{ messages: removeModelErrors }]);
+        }
+
+        [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
+
+        if (!_.isEmpty(modelFilePathErrors)) {
+          return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
+        }
       }
 
       try {
