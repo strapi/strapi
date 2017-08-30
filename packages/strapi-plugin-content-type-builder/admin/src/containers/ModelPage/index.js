@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { get, has, size, replace, startCase } from 'lodash';
+import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { router } from 'app';
@@ -26,7 +26,11 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 
 import { storeData } from '../../utils/storeData';
 
-import { modelFetch, modelFetchSucceeded } from './actions';
+import {
+  deleteAttribute,
+  modelFetch,
+  modelFetchSucceeded,
+} from './actions';
 
 import selectModelPage from './selectors';
 import styles from './styles.scss';
@@ -84,6 +88,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </div>
   )
 
+  handleEditAttribute = (attributeName) => {
+    const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
+    console.log(index);
+  }
+
   fetchModel = () => {
     if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === this.props.params.modelName) {
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
@@ -104,6 +113,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#choose::attributes`);
   }
 
+  handleDelete = (attributeName) => {
+    const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
+    this.props.deleteAttribute(index, this.props.params.modelName);
+  }
+
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
     router.push(`plugins/content-type-builder/models/${this.props.params.modelName}${locationHash}`);
@@ -120,7 +134,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </li>
   )
 
-  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} />
+  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} handleEdit={this.handleEditAttribute} handleDelete={this.handleDelete} />
 
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
@@ -227,6 +241,7 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      deleteAttribute,
       modelFetch,
       modelFetchSucceeded,
     },
@@ -235,6 +250,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 ModelPage.propTypes = {
+  deleteAttribute: React.PropTypes.func,
   didFetchModel: React.PropTypes.bool,
   location: React.PropTypes.object,
   menu: React.PropTypes.array,

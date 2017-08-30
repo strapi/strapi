@@ -19,7 +19,13 @@ const selectModelPage = () => createSelector(
   (substate) => substate.toJS()
 );
 
+const makeSelectModel = () => createSelector(
+  selectModelPageDomain(),
+  (substate) => substate.get('model').toJS(),
+);
+
 export default selectModelPage;
 export {
   selectModelPageDomain,
+  makeSelectModel,
 };

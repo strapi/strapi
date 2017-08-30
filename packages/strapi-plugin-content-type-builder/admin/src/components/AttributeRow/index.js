@@ -7,6 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
+import PopUpWarning from 'components/PopUpWarning';
 import IcoBoolean from '../../assets/images/icon_boolean.svg';
 import IcoDate from '../../assets/images/icon_date.svg';
 import IcoImage from '../../assets/images/icon_image.svg';
@@ -29,14 +30,24 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'string': IcoString,
       'text': IcoText,
     };
+    this.state = {
+      showWarning: false,
+    };
   }
 
   edit = () => {
-    console.log('edit');
+    this.props.handleEdit(this.props.row.name);
   }
 
   delete = () => {
-    console.log('delete');
+    this.props.handleDelete(this.props.row.name);
+    this.setState({ showWarning: false });
+  }
+
+  toggleModalWarning = (e) => {
+    e.preventDefault();
+    e.stopPropagation()
+    this.setState({ showWarning: !this.state.showWarning });
   }
 
   renderAttributesBox = () => {
@@ -63,16 +74,25 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
               <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
             </div>
             <div className="ico">
-              <i className="fa fa-trash ico" onClick={this.delete} role="button" />
+              <i className="fa fa-trash ico" onClick={this.toggleModalWarning} role="button" />
             </div>
           </div>
         </div>
+        <PopUpWarning
+          isOpen={this.state.showWarning}
+          toggleModal={this.toggleModalWarning}
+          bodyMessage={'popUpWarning.bodyMessage.contentType.delete'}
+          popUpWarningType={'danger'}
+          handleConfirm={this.delete}
+        />
       </li>
     );
   }
 }
 
 AttributeRow.propTypes = {
+  handleDelete: React.PropTypes.func,
+  handleEdit: React.PropTypes.func,
   row: React.PropTypes.object,
 }
 
