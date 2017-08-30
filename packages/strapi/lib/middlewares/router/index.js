@@ -8,9 +8,6 @@
 const _ = require('lodash');
 const Boom = require('boom');
 
-// Strapi utilities.
-const joijson = require('strapi-utils').joijson;
-
 /**
  * Router hook
  */
@@ -36,14 +33,6 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      const Joi = strapi.koaMiddlewares.joiRouter.Joi;
-      const builder = joijson.builder(Joi);
-
-      // Initialize the router.
-      if (!strapi.router) {
-        strapi.router.prefix(strapi.config.middleware.settings.router.prefix || '');
-      }
-
       _.forEach(strapi.config.routes, value => {
         composeEndpoint(value, null, strapi.router)(cb);
       });
@@ -98,13 +87,6 @@ module.exports = strapi => {
 
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
-      strapi.app.use(
-        strapi.router.router.allowedMethods({
-          throw: false,
-          notImplemented: () => Boom.notImplemented(),
-          methodNotAllowed: () => Boom.methodNotAllowed()
-        })
-      );
 
       cb();
     }
