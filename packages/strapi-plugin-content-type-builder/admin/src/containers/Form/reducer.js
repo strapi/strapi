@@ -65,7 +65,8 @@ function formReducer(state = initialState, action) {
         .set('modifiedDataEdit', action.data);
     case RESET_DID_FETCH_MODEL_PROP:
       return state
-        .set('didFetchModel', true);
+        .set('didFetchModel', true)
+        .set('isFormSet', false);
     case SET_ATTRIBUTE_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));
