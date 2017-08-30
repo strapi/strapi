@@ -9,27 +9,27 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
-import { DELETE_ATTRIBUTE, MODEL_FETCH, SUBMIT } from './constants';
+import { MODEL_FETCH, SUBMIT } from './constants';
 import { modelFetchSucceeded, postContentTypeSucceeded } from './actions';
 import { makeSelectModel } from './selectors';
 
 // Individual exports for testing
-export function* attributeDelete(action) {
-  try {
-    if (action.sendRequest) {
-      const body = yield select(makeSelectModel());
-      const requestUrl = `/content-type-builder/models/${action.modelName}`;
-      const opts = {
-        method: 'PUT',
-        body,
-      };
-
-      yield call(request, requestUrl, opts);
-    }
-  } catch(error) {
-    window.Strapi.notification.error('An error occured');
-  }
-}
+// export function* attributeDelete(action) {
+//   try {
+//     if (action.sendRequest) {
+//       const body = yield select(makeSelectModel());
+//       const requestUrl = `/content-type-builder/models/${action.modelName}`;
+//       const opts = {
+//         method: 'PUT',
+//         body,
+//       };
+//
+//       yield call(request, requestUrl, opts);
+//     }
+//   } catch(error) {
+//     window.Strapi.notification.error('An error occured');
+//   }
+// }
 
 export function* fetchModel(action) {
   try {
@@ -70,13 +70,13 @@ export function* submitChanges() {
 
 export function* defaultSaga() {
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
+  // const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
   yield take(LOCATION_CHANGE);
 
   yield cancel(loadModelWatcher);
-  yield cancel(deleteAttributeWatcher);
+  // yield cancel(deleteAttributeWatcher);
   yield cancel(loadSubmitChanges);
 }
 

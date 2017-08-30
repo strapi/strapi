@@ -74,8 +74,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
       : <ModalFooter className={styles.modalFooter}>
-        <Button onClick={this.props.toggle} className={styles.secondary}>Cancel</Button>
-        <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}>Save</Button>{' '}
+        <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="form.button.cancel" /></Button>
+        <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={this.props.buttonSubmitMessage} /></Button>{' '}
       </ModalFooter>;
     return (
       <div className={styles.popUpForm}>
@@ -102,6 +102,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 PopUpForm.propTypes = {
+  buttonSubmitMessage: React.PropTypes.string.isRequired,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,

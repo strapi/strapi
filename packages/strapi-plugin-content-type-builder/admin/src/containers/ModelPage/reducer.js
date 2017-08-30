@@ -5,6 +5,7 @@
  */
 
 import { fromJS, Map, List } from 'immutable';
+// import { findIndex, differenceWith, isEqual, filter } from 'lodash';
 /* eslint-disable new-cap */
 import {
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
@@ -22,17 +23,24 @@ const initialState = fromJS({
     attributes: List(),
   }),
   postContentTypeSuccess: false,
+  showButtons: false,
 });
 
 function modelPageReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_ATTRIBUTE_TO_CONTENT_TYPE:
-      return state.updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute));
-    case CANCEL_CHANGES:
-      return state.set('model', state.get('initialModel'));
-    case DELETE_ATTRIBUTE:
       return state
+        .updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute))
+        .set('showButtons', true);
+    case CANCEL_CHANGES:
+      return state
+        .set('showButtons', false)
+        .set('model', state.get('initialModel'));
+    case DELETE_ATTRIBUTE: {
+      return state
+        .set('showButtons', true)
         .updateIn(['model', 'attributes'], (list) => list.splice(action.position, 1));
+    }
     case MODEL_FETCH_SUCCEEDED:
       return state
         .set('model', Map(action.model.model))

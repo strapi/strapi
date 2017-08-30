@@ -59,6 +59,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     // Refecth content type after editing it
     if (prevProps.location.hash !== this.props.location.hash && this.props.didFetchModel) {
+      console.log('ok')
       this.fetchModel();
     }
   }
@@ -187,7 +188,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.route.path, '/:modelName', '');
-    const addButtons = size(get(this.props.modelPage.model, 'attributes')) > 0;
+    const addButtons = this.props.modelPage.showButtons;
 
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :

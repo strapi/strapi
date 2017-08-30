@@ -22,6 +22,10 @@
   "form.attribute.item.requiredField.description": "Vous ne pourrez pas créer une entrée si ce champ est vide",
   "form.attribute.item.uniqueField.description": "Vous ne pourrez pas créer une entrée s'il existe un champ similaire",
 
+  "form.button.cancel": "Annuler",
+  "form.button.continue": "Continue",
+  "form.button.save": "Sauvegarder",
+
   "form.contentType.item.connections": "Connexion",
   "form.contentType.item.name": "Nom",
   "form.contentType.item.description": "Description",

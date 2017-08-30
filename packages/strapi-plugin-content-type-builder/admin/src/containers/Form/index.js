@@ -304,7 +304,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const renderModalBody = includes(this.props.hash, '#choose') ? this.renderModalBodyChooseAttributes : false;
 
     const noButtons = includes(this.props.hash, '#choose');
-
+    const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -326,6 +326,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           noButtons={noButtons}
           overrideRenderInputCondition={this.checkForNestedInput}
           overrideRenderInput={this.renderInput}
+          buttonSubmitMessage={buttonSubmitMessage}
         />
       </div>
     );
