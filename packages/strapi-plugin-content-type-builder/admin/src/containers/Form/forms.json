@@ -92,7 +92,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "name": "form.attribute.item.requiredField",
-            "target": "required",
+            "target": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -100,7 +100,7 @@
           },
           {
             "name": "form.attribute.item.uniqueField",
-            "target": "unique",
+            "target": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -108,14 +108,14 @@
           },
           {
             "name": "form.attribute.item.minimumLength",
-            "target": "minLength",
+            "target": "params.minLength",
             "type": "checkbox",
             "value": true,
             "validations": {},
             "items": [
               {
                 "name": "",
-                "target": "minLength.value",
+                "target": "params.minLengthValue",
                 "value": "",
                 "type": "number",
                 "validations": {}
@@ -124,7 +124,7 @@
           },
           {
             "name": "form.attribute.item.maximumLength",
-            "target": "maxLength",
+            "target": "params.maxLength",
             "type": "checkbox",
             "value": false,
             "validations": {}

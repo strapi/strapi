@@ -14,10 +14,10 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
     return (
       <div className={styles.emptyContentTypeView}>
         <div>
-          <FormattedMessage {...{id: 'home.emptyContentType.title'}}>
+          <FormattedMessage id="home.emptyContentType.title">
             {(title) => <div className={styles.title}>{title}</div>}
           </FormattedMessage>
-          <FormattedMessage {...{id: 'home.emptyContentType.description'}}>
+          <FormattedMessage id="home.emptyContentType.description">
             {(description) => <div className={styles.description}>{description}</div>}
           </FormattedMessage>
           <div className={styles.buttonContainer}>

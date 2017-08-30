@@ -47,7 +47,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 
   render() {
     const relationType = capitalize(this.props.row.params.type)
-    || <div><FormattedMessage id={'modelPage.attribute.relationWith'} /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.model)}</span></div>;
+    || <div><FormattedMessage id="modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.model)}</span></div>;
 
     return (
       <li className={styles.attributeRow}>

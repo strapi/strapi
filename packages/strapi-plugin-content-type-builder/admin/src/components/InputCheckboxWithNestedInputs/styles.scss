@@ -1,0 +1,39 @@
+.inputCheckboxWithNestedInputs { /* stylelint-disable */
+  font-size: 1.3rem;
+  font-family: Lato;
+  margin-bottom: 1.5rem;
+  > div {
+    margin-bottom: 0;
+  }
+}
+
+.inputTitle {
+  margin-bottom: 1.7rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.checkboxLabel {
+  // padding-top: .1rem;
+  font-weight: 500;
+  > input {
+    margin-right: 1.2rem;
+  }
+}
+
+.descriptionContainer {
+  width: 150%;
+  padding-top: .2rem;
+  padding-left: 2.5rem;
+  line-height: 1.2rem;
+  > small {
+    color: #9EA7B8;
+    font-family: Lato;
+    font-size: 1.2rem;
+  }
+}
+
+.nestedInputContainer {
+  margin-top: -2.2rem;
+  margin-bottom: -19px;
+}

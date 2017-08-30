@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { isEmpty, map, isObject } from 'lodash';
+import { get, isEmpty, map, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -32,6 +32,16 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       const target = { name: nextProps.target, value: nextProps.selectOptions[0].value  };
       this.props.handleChange({ target });
     }
+  }
+
+  handleChangeCheckbox = (e) => {
+    const target = {
+      type: e.target.type,
+      value: !this.props.value,
+      name: e.target.name,
+    };
+
+    this.props.handleChange({ target });
   }
 
   renderErrors = (errorStyles) => { // eslint-disable-line consistent-return
@@ -61,7 +71,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.name}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.props.handleChange} name={this.props.target} />
+                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.target} />
                 {message}
               </label>
             )}
@@ -175,8 +185,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       <label htmlFor={this.props.name}><FormattedMessage id={`${this.props.name}`} /></label>
         : <label htmlFor={this.props.name} />;
 
-    const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ?
+    const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
       styles.requiredClass : '';
+
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
@@ -245,6 +256,7 @@ Input.propTypes = {
   value: React.PropTypes.oneOfType([
     React.PropTypes.string,
     React.PropTypes.bool,
+    React.PropTypes.number,
   ]),
 };
 

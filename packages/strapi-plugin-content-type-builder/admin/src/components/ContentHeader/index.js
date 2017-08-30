@@ -22,7 +22,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
       <i className="fa fa-pencil" onClick={this.edit} role="button" />
        : '';
 
-    const description = this.props.description || <FormattedMessage id={'modelPage.contentHeader.emptyDescription.description'} />
+    const description = this.props.description || <FormattedMessage id="modelPage.contentHeader.emptyDescription.description" />
     return (
       <div className={containerClass}>
         <div className={`${styles.title} ${styles.flex}`}>
@@ -36,13 +36,13 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 
   render() {
     const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
-    const description = isEmpty(this.props.description) ? '' : <FormattedMessage {...{id: this.props.description}} />;
+    const description = isEmpty(this.props.description) ? '' : <FormattedMessage id={this.props.description} />;
 
     if (this.props.noI18n) return this.renderContentHeader();
     return (
       <div className={containerClass}>
         <div className={styles.title}>
-          <FormattedMessage {...{id: this.props.name }} />
+          <FormattedMessage id={this.props.name} />
         </div>
         <div className={styles.subTitle}>{description}</div>
       </div>

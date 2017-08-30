@@ -25,6 +25,7 @@ import { router, store } from 'app';
 import { storeTemporaryMenu } from 'containers/App/actions';
 
 import AttributeCard from 'components/AttributeCard';
+import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
 
 import { getAsyncInjectors } from 'utils/asyncInjectors';
@@ -138,40 +139,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     );
   }
 
-  handleBlur = ({ target }) => {
-    if (target.name === 'name') {
-      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
-    }
-  }
-
-  handleChange = ({ target }) => {
-    const value = target.type === 'number' ? toNumber(target.value) : target.value;
-
-    if (includes(this.props.hash.split('::')[1], 'attribute')) {
-      this.props.changeInputAttribute(target.name, value);
-    } else {
-      this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
-    }
-  }
-
-  handleSubmit = () => {
-    if (includes(this.props.hash, 'edit')) {
-      this.testContentType(
-        replace(split(this.props.hash, '::')[0], '#edit', ''),
-        this.createContentType,
-        this.props.modifiedDataEdit,
-        this.props.contentTypeEdit,
-      );
-    } else if (includes(this.props.hash.split('::')[1], 'attribute')) {
-      this.testContentType(
-        replace(split(this.props.hash, '::')[0], '#create', ''),
-        this.addAttributeToTempContentType,
-      );
-    } else {
-      this.createContentType(this.props.modifiedData);
-    }
-  }
-
   generatePopUpTitle = (popUpFormType) => {
     let popUpTitle;
     const type = split(this.props.hash, '::')[0];
@@ -212,6 +179,40 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   goToAttributeTypeView = (attributeType) => {
     router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
+  }
+
+  handleBlur = ({ target }) => {
+    if (target.name === 'name') {
+      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
+    }
+  }
+
+  handleChange = ({ target }) => {
+    const value = target.type === 'number' ? toNumber(target.value) : target.value;
+
+    if (includes(this.props.hash.split('::')[1], 'attribute')) {
+      this.props.changeInputAttribute(target.name, value);
+    } else {
+      this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
+    }
+  }
+
+  handleSubmit = () => {
+    if (includes(this.props.hash, 'edit')) {
+      this.testContentType(
+        replace(split(this.props.hash, '::')[0], '#edit', ''),
+        this.createContentType,
+        this.props.modifiedDataEdit,
+        this.props.contentTypeEdit,
+      );
+    } else if (includes(this.props.hash.split('::')[1], 'attribute')) {
+      this.testContentType(
+        replace(split(this.props.hash, '::')[0], '#create', ''),
+        this.addAttributeToTempContentType,
+      );
+    } else {
+      this.createContentType(this.props.modifiedData);
+    }
   }
 
   initComponent = (props, condition) => {
@@ -266,6 +267,20 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  checkForNestedInput = (item) => {
+    const hasNestedInput = item.items && item.type !== 'select';
+    return hasNestedInput;
+  }
+
+  renderInput = (item, key) => (
+    <InputCheckboxWithNestedInputs
+      key={key}
+      data={item}
+      value={this.props.modifiedDataAttribute.params}
+      handleChange={this.handleChange}
+    />
+  )
+
   render() {
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
@@ -299,6 +314,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           noNav={noNav}
           renderModalBody={renderModalBody}
           noButtons={noButtons}
+          overrideRenderInputCondition={this.checkForNestedInput}
+          overrideRenderInput={this.renderInput}
         />
       </div>
     );

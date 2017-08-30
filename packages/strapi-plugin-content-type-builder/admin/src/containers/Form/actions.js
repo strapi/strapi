@@ -38,9 +38,13 @@ export function changeInput(key, value, isEditing) {
 }
 
 export function changeInputAttribute(key, value) {
+  const keys = key.split('.');
+  const firstKey = keys[0];
+  const secondKey = keys[1];
   return {
     type: CHANGE_INPUT_ATTRIBUTE,
-    key,
+    firstKey,
+    secondKey,
     value,
   };
 }
@@ -121,6 +125,7 @@ export function setAttributeForm(hash) {
       required: false,
       // TODO remove with correct value
       minLength: true,
+      minLengthValue: 0,
     }),
   });
 
