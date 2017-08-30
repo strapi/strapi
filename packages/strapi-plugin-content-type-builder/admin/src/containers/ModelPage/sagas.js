@@ -39,11 +39,12 @@ export function* fetchModel(action) {
 
 export function* defaultSaga() {
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
+  const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
 
   yield take(LOCATION_CHANGE);
 
   yield cancel(loadModelWatcher);
+  yield cancel(deleteAttributeWatcher);
 }
 
 // All sagas to be loaded
