@@ -190,7 +190,7 @@ class Pagination extends React.Component {
     // Generate links
     const links = linksOptions.map((linksOption, i) => (
       <li
-        className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`}
+        className={`${linksOption.isActive && styles.navLiActive}`}
         key={i}
       >
         <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
@@ -201,36 +201,35 @@ class Pagination extends React.Component {
 
     return (
       <div className={styles.pagination}>
-        <a
-          href
-          className={`
-             ${styles.paginationNavigator}
-             ${styles.paginationNavigatorPrevious}
-             ${this.isFirstPage() && styles.paginationNavigatorDisabled}
-           `}
-          onClick={this.onGoPreviousPageClicked}
-          disabled={this.isFirstPage()}
-        >
-          <i className="ion ion-chevron-left" />
-        </a>
-        <div className={styles.separator} />
-        <nav className={styles.nav}>
-          <ul className={styles.navUl}>
-            {links}
-          </ul>
-        </nav>
-        <a
-          href
-          className={`
-             ${styles.paginationNavigator}
-             ${styles.paginationNavigatorNext}
-             ${this.isLastPage() && styles.paginationNavigatorDisabled}
-           `}
-          onClick={this.onGoNextPageClicked}
-          disabled={this.isLastPage()}
-        >
-          <i className="ion ion-chevron-right" />
-        </a>
+        <div>
+          <a
+            href
+            className={`
+               ${styles.paginationNavigator}
+               ${this.isFirstPage() && styles.paginationNavigatorDisabled}
+             `}
+            onClick={this.onGoPreviousPageClicked}
+            disabled={this.isFirstPage()}
+          >
+            <i className="fa fa-angle-left" aria-hidden="true"></i>
+          </a>
+          <nav className={styles.nav}>
+            <ul className={styles.navUl}>
+              {links}
+            </ul>
+          </nav>
+          <a
+            href
+            className={`
+               ${styles.paginationNavigator}
+               ${this.isLastPage() && styles.paginationNavigatorDisabled}
+             `}
+            onClick={this.onGoNextPageClicked}
+            disabled={this.isLastPage()}
+          >
+            <i className="fa fa-angle-right" aria-hidden="true"></i>
+          </a>
+        </div>
       </div>
     );
   }

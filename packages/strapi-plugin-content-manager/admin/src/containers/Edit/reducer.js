@@ -22,7 +22,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  currentModelName: null,
+  currentModelName: '',
   loading: false,
   record: false,
   editing: false,

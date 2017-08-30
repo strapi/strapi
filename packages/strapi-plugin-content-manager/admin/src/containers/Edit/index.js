@@ -6,15 +6,24 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 
 import { router } from 'app';
 
-import Container from 'components/Container';
 import EditForm from 'components/EditForm';
 import { makeSelectSchema } from 'containers/App/selectors';
 import EditFormRelations from 'components/EditFormRelations';
+import PluginHeader from 'components/PluginHeader';
+
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
+
+import reducer from './reducer';
+import saga from './sagas';
+
+import styles from './styles.scss';
 
 import {
   setInitialState,
@@ -25,6 +34,7 @@ import {
   editRecord,
   deleteRecord,
 } from './actions';
+
 import {
   makeSelectRecord,
   makeSelectLoading,
@@ -37,21 +47,20 @@ import {
 export class Edit extends React.Component {
   componentWillMount() {
     this.props.setInitialState();
-    this.props.setCurrentModelName(this.props.routeParams.slug.toLowerCase());
+    this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
 
     // Detect that the current route is the `create` route or not
-    if (this.props.routeParams.id === 'create') {
+    if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
     } else {
-      this.props.loadRecord(this.props.routeParams.id);
+      this.props.loadRecord(this.props.match.params.id);
     }
   }
 
   render() {
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
-
     let content = <p>Loading...</p>;
     let relations;
+
     if (!this.props.loading && this.props.schema && this.props.currentModelName) {
       content = (
         <EditForm
@@ -77,28 +86,32 @@ export class Edit extends React.Component {
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.Edit.cancel',
-        class: 'btn-default',
+        handlei18n: true,
+        buttonBackground: 'secondary',
+        buttonSize: 'buttonLg',
         onClick: () => {
           router.push(`/plugins/content-manager/${this.props.currentModelName}`);
         },
       },
       {
+        handlei18n: true,
+        buttonBackground: 'primary',
+        buttonSize: 'buttonLg',
         label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
-        class: 'btn-primary',
         onClick: this.props.editRecord,
         disabled: this.props.editing,
       },
     ];
 
     // Add the `Delete` button only in edit mode
-    if (!this.props.isCreating) {
-      pluginHeaderActions.push({
-        label: 'content-manager.containers.Edit.delete',
-        class: 'btn-danger',
-        onClick: this.props.deleteRecord,
-        disabled: this.props.deleting,
-      });
-    }
+    // if (!this.props.isCreating) {
+    //   pluginHeaderActions.push({
+    //     label: 'content-manager.containers.Edit.delete',
+    //     class: 'btn-danger',
+    //     onClick: this.props.deleteRecord,
+    //     disabled: this.props.deleting,
+    //   });
+    // }
 
     // Plugin header config
     const pluginHeaderTitle = _.get(this.props.schema, [this.props.currentModelName, 'label']) || 'Content Manager';
@@ -107,24 +120,26 @@ export class Edit extends React.Component {
       : `#${this.props.record && this.props.record.get('id')}`;
 
     return (
-      <div className="col-md-12">
-        <div className="container-fluid">
+      <div>
+        <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title={pluginHeaderTitle}
+            title={{
+              id: pluginHeaderTitle,
+            }}
             description={{
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={pluginHeaderActions}
           />
-          <Container>
-            <div className="row">
-              <div className="col-md-8">
-                {content}
-                {relations}
-              </div>
+          <div className='row'>
+            <div className='col-lg-8'>
+              {content}
             </div>
-          </Container>
+            <div className="col-lg-4">
+              {relations}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -136,19 +151,23 @@ Edit.propTypes = {
     React.PropTypes.bool,
     React.PropTypes.string,
   ]).isRequired,
-  deleteRecord: React.PropTypes.func.isRequired,
-  deleting: React.PropTypes.bool.isRequired,
+  // deleteRecord: React.PropTypes.func.isRequired,
+  // deleting: React.PropTypes.bool.isRequired,
   editing: React.PropTypes.bool.isRequired,
   editRecord: React.PropTypes.func.isRequired,
-  exposedComponents: React.PropTypes.object.isRequired,
   isCreating: React.PropTypes.bool.isRequired,
   loading: React.PropTypes.bool.isRequired,
   loadRecord: React.PropTypes.func.isRequired,
+  match: React.PropTypes.shape({
+    params: React.PropTypes.shape({
+      id: React.PropTypes.string,
+      slug: React.PropTypes.string,
+    }),
+  }).isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
   ]).isRequired,
-  routeParams: React.PropTypes.object.isRequired,
   schema: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -190,4 +209,13 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Edit);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: 'edit', reducer });
+const withSaga = injectSaga({ key: 'edit', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(Edit);

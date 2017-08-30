@@ -1,6 +1,5 @@
-import { takeLatest } from 'redux-saga';
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { call, cancel, fork, put, take, select } from 'redux-saga/effects';
+import { call, cancel, fork, put, take, select, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
 import { router } from 'app';
@@ -110,4 +109,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [defaultSaga];
+export default defaultSaga;

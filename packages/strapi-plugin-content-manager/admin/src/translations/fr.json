@@ -7,7 +7,7 @@
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.delete": "Supprimer",
   "containers.Edit.cancel": "Annuler",
-  "containers.List.addAnEntry": "Ajouter une entrée",
+  "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.pluginHeaderDescription": "Gérér vos {label}",
   "components.LimitSelect.itemsPerPage": "Nombre d'éléments par page",
   "containers.List.errorFetchRecords": "Erreur"

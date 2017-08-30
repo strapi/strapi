@@ -9,21 +9,18 @@ import PluginHeaderTitle from 'components/PluginHeaderTitle';
 import PluginHeaderActions from 'components/PluginHeaderActions';
 
 import styles from './styles.scss';
-// const styles = {};
-console.log('styles', styles);
-
 
 class PluginHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
       <div className={`${styles.pluginHeader} row`}>
-        <div className="col-lg-6">
+        <div className="col-lg-8">
           <PluginHeaderTitle
             title={this.props.title}
             description={this.props.description}
           />
         </div>
-        <div className="col-lg-6">
+        <div className="col-lg-4 justify-content-end">
           <PluginHeaderActions
             actions={this.props.actions}
           />

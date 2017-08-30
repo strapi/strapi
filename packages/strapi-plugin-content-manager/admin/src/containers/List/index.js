@@ -11,7 +11,6 @@ import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
-import Container from 'components/Container';
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
 import PluginHeader from 'components/PluginHeader';
@@ -116,24 +115,30 @@ export class List extends React.Component {
       );
     }
 
+    // Plugin header config
+    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
+
     // Define plugin header actions
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
-        class: 'btn-primary',
-        onClick: () => this.context.router.push(this.addRoute),
+        labelValues: {
+          entity: pluginHeaderTitle,
+        },
+        handlei18n: true,
+        addShape: true,
+        buttonBackground: 'primary',
+        buttonSize: 'buttonLg',
+        // onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];
-
-    // Plugin header config
-    // const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
 
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
-              id: 'test',
+              id: pluginHeaderTitle,
             }}
             description={{
               id: 'content-manager.containers.List.pluginHeaderDescription',
@@ -143,17 +148,19 @@ export class List extends React.Component {
             }}
             actions={pluginHeaderActions}
           />
-          <Container>
-            {content}
-            <TableFooter
-              limit={this.props.limit}
-              currentPage={this.props.currentPage}
-              changePage={this.props.changePage}
-              count={this.props.count}
-              className="push-lg-right"
-              onLimitChange={this.props.onLimitChange}
-            />
-          </Container>
+          <div className='row'>
+            <div className='col-lg-12'>
+              {content}
+              <TableFooter
+                limit={this.props.limit}
+                currentPage={this.props.currentPage}
+                changePage={this.props.changePage}
+                count={this.props.count}
+                className="push-lg-right"
+                onLimitChange={this.props.onLimitChange}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );

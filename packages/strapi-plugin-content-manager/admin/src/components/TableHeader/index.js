@@ -40,9 +40,12 @@ class TableHeader extends React.Component {
       );
     });
 
+    // Add empty th for actions column.
+    headers.push(<th></th>);
+
     return (
       <thead className={styles.tableHeader}>
-        <tr className={styles.tableHeader}>
+        <tr>
           {headers}
         </tr>
       </thead>

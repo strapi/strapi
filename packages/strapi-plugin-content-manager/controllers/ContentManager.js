@@ -73,7 +73,7 @@ module.exports = {
   update: async ctx => {
     // Update an entry using `queries` system
     const entryUpdated = await queries.update({
-      id: ctx.params.id
+      id: ctx.params.id,
       values: ctx.request.body
     });
 
