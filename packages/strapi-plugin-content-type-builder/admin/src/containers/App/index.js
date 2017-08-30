@@ -21,6 +21,7 @@ import messages from '../../translations/en.json';
 
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
+import { makeSelectMenu } from './selectors';
 
 define(map(messages, (message, id) => ({
   id,
@@ -50,12 +51,13 @@ class App extends React.Component {
     const content = React.Children.map(this.props.children, child =>
       React.cloneElement(child, {
         exposedComponents: this.props.exposedComponents,
+        menu: this.props.menu,
       })
     );
 
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        {React.Children.toArray(content)}
+        {React.Children.toArray(content, 'fuck')}
       </div>
     );
   }
@@ -68,6 +70,7 @@ App.contextTypes = {
 App.propTypes = {
   children: React.PropTypes.node,
   exposedComponents: React.PropTypes.object.isRequired,
+  menu: React.PropTypes.array,
   modelsFetch: React.PropTypes.func,
   shouldRefetchContentType: React.PropTypes.bool,
 };
@@ -82,6 +85,7 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
+  menu: makeSelectMenu(),
   shouldRefetchContentType: makeSelectShouldRefetchContentType(),
 });
 

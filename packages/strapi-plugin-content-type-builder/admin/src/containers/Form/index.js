@@ -23,7 +23,7 @@ import {
 import { router, store } from 'app';
 
 import { storeTemporaryMenu } from 'containers/App/actions';
-
+import { addAttributeToContentType } from 'containers/ModelPage/actions';
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
@@ -44,6 +44,7 @@ import {
   contentTypeFetch,
   contentTypeFetchSucceeded,
   resetDidFetchModelProp,
+  resetIsFormSet,
   setAttributeForm,
   setForm,
 } from './actions';
@@ -98,6 +99,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       // Reset props
       this.props.resetDidFetchModelProp();
     }
+  }
+
+  addAttributeToContentType = () => {
+    this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
+    // this.props.resetDidFetchModelProp();
+    this.props.resetIsFormSet();
+    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
   }
 
   addAttributeToTempContentType = () => {
@@ -209,6 +217,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       this.testContentType(
         replace(split(this.props.hash, '::')[0], '#create', ''),
         this.addAttributeToTempContentType,
+        null,
+        this.addAttributeToContentType,
       );
     } else {
       this.createContentType(this.props.modifiedData);
@@ -263,7 +273,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.toggle();
     // Set the didFetchModel props to false when the modal is closing so the store is emptied
     if (this.state.showModal) {
-      this.props.resetDidFetchModelProp();
+      this.props.resetIsFormSet();
     }
   }
 
@@ -327,6 +337,7 @@ const mapStateToProps = selectForm();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeToContentType,
       changeInput,
       changeInputAttribute,
       connectionsFetch,
@@ -335,6 +346,7 @@ function mapDispatchToProps(dispatch) {
       contentTypeFetch,
       contentTypeFetchSucceeded,
       resetDidFetchModelProp,
+      resetIsFormSet,
       setAttributeForm,
       setForm,
       storeTemporaryMenu,
@@ -344,6 +356,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.propTypes = {
+  addAttributeToContentType: React.PropTypes.func,
   changeInput: React.PropTypes.func.isRequired,
   changeInputAttribute: React.PropTypes.func,
   connectionsFetch: React.PropTypes.func.isRequired,
@@ -365,6 +378,7 @@ Form.propTypes = {
   popUpHeaderNavLinks: React.PropTypes.array,
   redirectRoute: React.PropTypes.string.isRequired,
   resetDidFetchModelProp: React.PropTypes.func,
+  resetIsFormSet: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,

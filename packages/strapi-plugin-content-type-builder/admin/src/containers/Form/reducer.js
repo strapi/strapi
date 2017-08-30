@@ -13,6 +13,7 @@ import {
   CONTENT_TYPE_CREATE,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
+  RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_FORM,
 } from './constants';
@@ -67,6 +68,8 @@ function formReducer(state = initialState, action) {
       return state
         .set('didFetchModel', true)
         .set('isFormSet', false);
+    case RESET_IS_FORM_SET:
+      return state.set('isFormSet', false);
     case SET_ATTRIBUTE_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));

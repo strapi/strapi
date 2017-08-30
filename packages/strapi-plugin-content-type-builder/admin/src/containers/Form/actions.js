@@ -21,6 +21,7 @@ import {
   CONTENT_TYPE_FETCH,
   CONTENT_TYPE_FETCH_SUCCEEDED,
   RESET_DID_FETCH_MODEL_PROP,
+  RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_FORM,
 } from './constants';
@@ -112,6 +113,12 @@ export function resetDidFetchModelProp() {
   };
 }
 
+export function resetIsFormSet() {
+  return {
+    type: RESET_IS_FORM_SET,
+  };
+}
+
 export function setAttributeForm(hash) {
   const hashArray = hash.split('::');
   const formType = replace(hashArray[1], 'attribute', '');
@@ -122,10 +129,10 @@ export function setAttributeForm(hash) {
     name: '',
     params: Map({
       type: formType,
-      required: false,
+      required: true,
       // TODO remove with correct value
-      minLength: true,
-      minLengthValue: 0,
+      // minLength: true,
+      // minLengthValue: 0,
     }),
   });
 

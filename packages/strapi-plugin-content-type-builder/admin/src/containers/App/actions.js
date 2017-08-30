@@ -16,6 +16,7 @@ import {
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
+  TEMPORARY_CONTENT_TYPE_POSTED,
 } from './constants';
 
 export function deleteContentType(itemToDelete) {
@@ -88,5 +89,11 @@ export function storeTemporaryMenu(newMenu, position, nbElementToRemove) {
     newLink,
     position,
     nbElementToRemove,
+  };
+}
+
+export function temporaryContentTypePosted() {
+  return {
+    type: TEMPORARY_CONTENT_TYPE_POSTED,
   };
 }

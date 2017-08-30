@@ -23,6 +23,9 @@
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
 
+  "form.button.cancel": "Cancel",
+  "form.button.save": "Save",
+  
   "form.contentType.item.connections": "Connection",
   "form.contentType.item.name": "Name",
   "form.contentType.item.description": "Description",

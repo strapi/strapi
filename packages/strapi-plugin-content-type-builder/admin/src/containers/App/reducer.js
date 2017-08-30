@@ -11,6 +11,7 @@ import {
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
+  TEMPORARY_CONTENT_TYPE_POSTED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -38,6 +39,13 @@ function appReducer(state = initialState, action) {
       return state
       .updateIn(['menu', '0', 'items'], (list) => list.splice(action.position, action.nbElementToRemove, action.newLink))
       .update('models', array => array.splice(action.nbElementToRemove === 0 ? modelsSize : modelsSize - 1 , 1, action.newModel));
+    }
+    case TEMPORARY_CONTENT_TYPE_POSTED: {
+      const oldMenuItem = state.getIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2]);
+      oldMenuItem.isTemporary = false;
+      const newData = oldMenuItem;
+      return state
+        .updateIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2], () => newData);
     }
     default:
       return state;

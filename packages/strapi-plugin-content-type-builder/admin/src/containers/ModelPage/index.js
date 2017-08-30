@@ -14,7 +14,6 @@ import { Link } from 'react-router';
 import { router } from 'app';
 
 // Global selectors
-import { makeSelectMenu } from 'containers/App/selectors';
 import { makeSelectDidFetchModel } from 'containers/Form/selectors';
 
 import AttributeRow from 'components/AttributeRow';
@@ -27,9 +26,11 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 import { storeData } from '../../utils/storeData';
 
 import {
+  cancelChanges,
   deleteAttribute,
   modelFetch,
   modelFetchSucceeded,
+  submit,
 } from './actions';
 
 import selectModelPage from './selectors';
@@ -88,11 +89,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </div>
   )
 
-  handleEditAttribute = (attributeName) => {
-    const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
-    console.log(index);
-  }
-
   fetchModel = () => {
     if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === this.props.params.modelName) {
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
@@ -117,6 +113,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     this.props.deleteAttribute(index, this.props.params.modelName);
   }
+
+  handleEditAttribute = (attributeName) => {
+    const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
+    console.log(index);
+  }
+
 
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
@@ -185,6 +187,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.route.path, '/:modelName', '');
+    const addButtons = size(get(this.props.modelPage.model, 'attributes')) > 0;
+
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
         <List
@@ -194,7 +198,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           renderCustomLi={this.renderCustomLi}
           handleButtonClick={this.handleClickAddAttribute}
         />;
-
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">
@@ -209,9 +212,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <ContentHeader
                   name={this.props.modelPage.model.name}
                   description={this.props.modelPage.model.description}
-                  noI18n
+                  icoType="pencil"
                   editIcon
                   editPath={`${redirectRoute}/${this.props.params.modelName}#edit${this.props.params.modelName}::contentType::baseSettings`}
+                  addButtons={addButtons}
+                  handleSubmit={this.props.submit}
+                  handleCancel={this.props.cancelChanges}
                 />
                 {content}
               </div>
@@ -234,22 +240,24 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
 const mapStateToProps = createStructuredSelector({
   modelPage: selectModelPage(),
-  menu: makeSelectMenu(),
   didFetchModel: makeSelectDidFetchModel(),
 });
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelChanges,
       deleteAttribute,
       modelFetch,
       modelFetchSucceeded,
+      submit,
     },
     dispatch,
   );
 }
 
 ModelPage.propTypes = {
+  cancelChanges: React.PropTypes.func,
   deleteAttribute: React.PropTypes.func,
   didFetchModel: React.PropTypes.bool,
   location: React.PropTypes.object,
@@ -259,6 +267,7 @@ ModelPage.propTypes = {
   modelPage: React.PropTypes.object,
   params: React.PropTypes.object,
   route: React.PropTypes.object,
+  submit: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModelPage);

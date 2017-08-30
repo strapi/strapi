@@ -34,14 +34,9 @@ export function* fetchModels() {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  // TODO check if problems
-  yield fork(takeLatest, MODELS_FETCH, fetchModels);
   yield fork(takeLatest, DELETE_CONTENT_TYPE, deleteContentType);
-  // const loadModelsWatcher = yield fork(takeLatest, MODELS_FETCH, fetchModels);
+  yield fork(takeLatest, MODELS_FETCH, fetchModels);
 
-  // Suspend execution until location changes
-  // yield take(MODELS_FETCH_SUCCEEDED);
-  // yield cancel(loadModelsWatcher);
 }
 
 // All sagas to be loaded
