@@ -30,6 +30,7 @@ import {
   deleteAttribute,
   modelFetch,
   modelFetchSucceeded,
+  resetShowButtonsProps,
   submit,
 } from './actions';
 
@@ -60,6 +61,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidUpdate(prevProps) {
     if (prevProps.params.modelName !== this.props.params.modelName) {
+      this.props.resetShowButtonsProps();
       this.fetchModel();
     }
   }
@@ -188,8 +190,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.route.path, '/:modelName', '');
-    const addButtons = this.props.modelPage.showButtons;
-
+    // const addButtons = this.props.modelPage.showButtons;
+    const addButtons  = get(storeData.getContentType(), 'name') === this.props.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
         <List
@@ -252,6 +254,7 @@ function mapDispatchToProps(dispatch) {
       deleteAttribute,
       modelFetch,
       modelFetchSucceeded,
+      resetShowButtonsProps,
       submit,
     },
     dispatch,
@@ -267,6 +270,7 @@ ModelPage.propTypes = {
   modelFetchSucceeded: React.PropTypes.func,
   modelPage: React.PropTypes.object,
   params: React.PropTypes.object,
+  resetShowButtonsProps: React.PropTypes.func,
   route: React.PropTypes.object,
   submit: React.PropTypes.func,
   updatedContentType: React.PropTypes.bool,

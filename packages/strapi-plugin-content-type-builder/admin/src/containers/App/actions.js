@@ -16,6 +16,7 @@ import {
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
+  TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
   TEMPORARY_CONTENT_TYPE_POSTED,
 } from './constants';
 
@@ -92,8 +93,16 @@ export function storeTemporaryMenu(newMenu, position, nbElementToRemove) {
   };
 }
 
-export function temporaryContentTypePosted() {
+export function temporaryContentTypeFieldsUpdated(fieldNumber) {
+  return {
+    type: TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
+    fieldNumber,
+  };
+}
+
+export function temporaryContentTypePosted(fieldNumber) {
   return {
     type: TEMPORARY_CONTENT_TYPE_POSTED,
+    fieldNumber,
   };
 }

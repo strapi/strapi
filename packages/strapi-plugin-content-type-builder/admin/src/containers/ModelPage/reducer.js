@@ -5,7 +5,8 @@
  */
 
 import { fromJS, Map, List } from 'immutable';
-import { size, differenceBy } from 'lodash';
+import { get, size, differenceBy } from 'lodash';
+import { storeData } from '../../utils/storeData';
 /* eslint-disable new-cap */
 import {
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
@@ -13,6 +14,7 @@ import {
   DELETE_ATTRIBUTE,
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
+  RESET_SHOW_BUTTONS_PROPS,
   UPDATE_CONTENT_TYPE,
 } from './constants';
 
@@ -41,9 +43,14 @@ function modelPageReducer(state = initialState, action) {
       const contentTypeAttributes = state.getIn(['model', 'attributes']).toJS();
       contentTypeAttributes.splice(action.position, 1);
       const updatedContentTypeAttributes = contentTypeAttributes;
-      const showButtons = size(updatedContentTypeAttributes) !== size(state.getIn(['initialModel', 'attributes']).toJS())
+
+      let showButtons = size(updatedContentTypeAttributes) !== size(state.getIn(['initialModel', 'attributes']).toJS())
         || size(differenceBy(state.getIn(['initialModel', 'attributes']).toJS(), updatedContentTypeAttributes, 'name')) > 0;
 
+      if (get(storeData.getContentType(), 'name') === state.getIn(['initialModel', 'name'])) {
+        showButtons = size(get(storeData.getContentType(), 'attributes')) > 0;
+      }
+      
       return state
         .set('showButtons', showButtons)
         .updateIn(['model', 'attributes'], (list) => list.splice(action.position, 1));
@@ -56,6 +63,8 @@ function modelPageReducer(state = initialState, action) {
         .setIn(['initialModel', 'attributes'], List(action.model.model.attributes));
     case POST_CONTENT_TYPE_SUCCEEDED:
       return state.set('postContentTypeSuccess', !state.get('postContentTypeSuccess'));
+    case RESET_SHOW_BUTTONS_PROPS:
+      return state.set('showButtons', false);
     case UPDATE_CONTENT_TYPE:
       return state
         .set('model', Map(action.data))

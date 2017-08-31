@@ -22,7 +22,7 @@ import {
 
 import { router, store } from 'app';
 
-import { storeTemporaryMenu } from 'containers/App/actions';
+import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
 import { addAttributeToContentType, updateContentType } from 'containers/ModelPage/actions';
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
@@ -107,15 +107,30 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   addAttributeToContentType = () => {
+    // Update the parent container (ModelPage)
     this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
+    // Empty the store
     this.props.resetIsFormSet();
+    // Close modal
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
   }
 
   addAttributeToTempContentType = () => {
+    // Get the entire content type from the reducer
     const contentType = this.props.modifiedDataEdit;
+    // Add the new attribute to the content type attribute list
     contentType.attributes.push(this.props.modifiedDataAttribute);
+    // Reset the store and update the parent container
     this.props.contentTypeCreate(contentType);
+    // Get the displayed model from the localStorage
+    const model = storeData.getModel();
+    // Set the new field number in the localStorage
+    model.fields = size(contentType.attributes);
+    // Update the global store (app container) to add the new value to the model without refetching
+    this.props.temporaryContentTypeFieldsUpdated(model.fields);
+    // Store the updated model in the localStorage
+    storeData.setModel(model);
+    // Close modal
     router.push(`${this.props.redirectRoute}/${contentType.name}`);
   }
 
@@ -355,6 +370,7 @@ function mapDispatchToProps(dispatch) {
       setAttributeForm,
       setForm,
       storeTemporaryMenu,
+      temporaryContentTypeFieldsUpdated,
       updateContentType,
     },
     dispatch
@@ -392,6 +408,7 @@ Form.propTypes = {
   setForm: React.PropTypes.func.isRequired,
   shouldRefetchContentType: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,
+  temporaryContentTypeFieldsUpdated: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
   updateContentType: React.PropTypes.func,
 };

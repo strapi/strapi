@@ -29,7 +29,7 @@ const initialState = fromJS({
   modifiedData: Map(),
   modifiedDataEdit: Map(),
   isFormSet: false,
-  didFetchModel: true,
+  // didFetchModel: true,
   shouldRefetchContentType: false,
   updatedContentType: false,
 });
@@ -59,11 +59,11 @@ function formReducer(state = initialState, action) {
     case CONTENT_TYPE_CREATE:
       return state
         .set('isFormSet', false)
-        .set('didFetchModel', true)
+        // .set('didFetchModel', true)
         .set('updatedContentType', !state.get('updatedContentType'));
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
-        .set('didFetchModel', false)
+        // .set('didFetchModel', false)
         .set('initialDataEdit', action.data)
         .set('modifiedDataEdit', action.data);
     case RESET_IS_FORM_SET:

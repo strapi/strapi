@@ -15,6 +15,7 @@ import {
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
   SUBMIT,
+  RESET_SHOW_BUTTONS_PROPS,
   UPDATE_CONTENT_TYPE,
 } from './constants';
 
@@ -84,6 +85,12 @@ export function modelFetchSucceeded(data) {
 export function postContentTypeSucceeded() {
   return {
     type: POST_CONTENT_TYPE_SUCCEEDED,
+  };
+}
+
+export function resetShowButtonsProps() {
+  return {
+    type: RESET_SHOW_BUTTONS_PROPS,
   };
 }
 

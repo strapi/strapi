@@ -13,3 +13,4 @@ export const MODEL_FETCH_SUCCEEDED = 'ContentTypeBuilder/ModelPage/MODEL_FETCH_S
 export const POST_CONTENT_TYPE_SUCCEEDED = 'ContentTypeBuilder/ModelPage/POST_CONTENT_TYPE_SUCCEEDED';
 export const SUBMIT = 'ContentTypeBuilder/ModelPage/SUBMIT';
 export const UPDATE_CONTENT_TYPE = 'ContentTypeBuilder/ModelPage/UPDATE_CONTENT_TYPE';
+export const RESET_SHOW_BUTTONS_PROPS = 'ContentTypeBuilder/ModelPage/RESET_SHOW_BUTTONS_PROPS';

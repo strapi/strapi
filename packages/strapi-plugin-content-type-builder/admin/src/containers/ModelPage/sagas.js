@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { forEach, get, includes, map, replace, set, unset } from 'lodash';
+import { forEach, get, includes, map, replace, set, size, unset } from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
@@ -53,7 +53,7 @@ export function* submitChanges() {
 
     if (method === 'POST') {
       storeData.clearAppStorage();
-      yield put(temporaryContentTypePosted());
+      yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
       yield put(postContentTypeSucceeded());
     }
 

@@ -129,10 +129,9 @@ export function setAttributeForm(hash) {
     name: '',
     params: Map({
       type: formType,
-      required: true,
-      // TODO remove with correct value
-      minLength: true,
-      // minLengthValue: 0,
+      required: false,
+      maxLength: false,
+      minLength: false,
     }),
   });
 

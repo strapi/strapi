@@ -24,8 +24,14 @@ const makeSelectModel = () => createSelector(
   (substate) => substate.get('model').toJS(),
 );
 
+const makeSelectPostContentTypeSuccess = () => createSelector(
+  selectModelPageDomain(),
+  (substate) => substate.get('postContentTypeSuccess'),
+)
+
 export default selectModelPage;
 export {
   selectModelPageDomain,
   makeSelectModel,
+  makeSelectPostContentTypeSuccess,
 };

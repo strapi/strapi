@@ -12,6 +12,7 @@ import {
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
   TEMPORARY_CONTENT_TYPE_POSTED,
+  TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -40,12 +41,22 @@ function appReducer(state = initialState, action) {
       .updateIn(['menu', '0', 'items'], (list) => list.splice(action.position, action.nbElementToRemove, action.newLink))
       .update('models', array => array.splice(action.nbElementToRemove === 0 ? modelsSize : modelsSize - 1 , 1, action.newModel));
     }
+    case TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED: {
+      const newModel = state.getIn(['models', size(state.get('models').toJS()) - 1]);
+      newModel.fields = action.fieldNumber;
+      return state
+        .updateIn(['models', size(state.get('models').toJS()) - 1], () => newModel);
+    }
     case TEMPORARY_CONTENT_TYPE_POSTED: {
+      const newModel = state.getIn(['models', size(state.get('models').toJS()) - 1]);
+      newModel.isTemporary = false;
+      newModel.fields = action.fieldNumber;
       const oldMenuItem = state.getIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2]);
       oldMenuItem.isTemporary = false;
       const newData = oldMenuItem;
       return state
-        .updateIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2], () => newData);
+        .updateIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2], () => newData)
+        .updateIn(['models', size(state.get('models').toJS()) - 1], () => newModel);
     }
     default:
       return state;
