@@ -33,7 +33,7 @@ module.exports = {
 
   delete: async function (params) {
     return await this
-      .destroy({
+      .remove({
         [this.primaryKey]: params.id
       });
   }

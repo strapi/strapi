@@ -46,8 +46,8 @@ class EditForm extends React.Component {
           type={this.getInputType(details.type)}
           name={details.label}
           target={attr}
-          value={this.props.record && this.props.record.get(attr)}
-          placeholder={details.placeholder || details.label || attr}
+          value={this.props.record.get(attr) || ''}
+          placeholder={details.placeholder || details.label || attr || ''}
           handleChange={this.props.handleChange}
           validations={{}}
         />
@@ -66,7 +66,7 @@ class EditForm extends React.Component {
 
 EditForm.propTypes = {
   currentModelName: React.PropTypes.string.isRequired,
-  handleChange: React.propTypes.func.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,

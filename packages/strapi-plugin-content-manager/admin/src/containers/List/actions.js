@@ -7,6 +7,10 @@
 import pluralize from 'pluralize';
 
 import {
+  DELETE_RECORD_SUCCESS,
+} from '../Edit/constants';
+
+import {
   SET_CURRENT_MODEL_NAME,
   LOAD_RECORDS,
   LOADED_RECORDS,
@@ -16,6 +20,8 @@ import {
   CHANGE_SORT,
   CHANGE_LIMIT,
 } from './constants';
+
+
 
 export function setCurrentModelName(modelName) {
   return {
@@ -69,5 +75,11 @@ export function changeLimit(limit) {
   return {
     type: CHANGE_LIMIT,
     limit,
+  };
+}
+
+export function recordDeleted() {
+  return {
+    type: DELETE_RECORD_SUCCESS,
   };
 }

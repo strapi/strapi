@@ -22,12 +22,12 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
         </div>
         <div className="col-lg-2 justify-content-end">
           <PluginHeaderActions
-            actions={this.props.subActions}
+            actions={this.props.subActions || []}
           />
         </div>
         <div className="col-lg-3 justify-content-end">
           <PluginHeaderActions
-            actions={this.props.actions}
+            actions={this.props.actions || []}
           />
         </div>
       </div>
@@ -37,6 +37,7 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
 
 PluginHeader.propTypes = {
   actions: React.PropTypes.array.isRequired,
+  subActions: React.PropTypes.array,
   description: React.PropTypes.object.isRequired,
   title: React.PropTypes.object.isRequired,
 };

@@ -10,7 +10,10 @@ import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 
+// Selectors.
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+
+// Components.
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
 import PluginHeader from 'components/PluginHeader';
@@ -18,7 +21,15 @@ import PluginHeader from 'components/PluginHeader';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
+// Actions.
+import {
+  deleteRecord,
+} from '../Edit/actions';
+
+// Styles.
 import styles from './styles.scss';
+
+// Actions.
 import {
   setCurrentModelName,
   loadRecords,
@@ -27,6 +38,8 @@ import {
   changeSort,
   changeLimit,
 } from './actions';
+
+// Selectors.
 import {
   makeSelectRecords,
   makeSelectLoadingRecords,
@@ -76,6 +89,13 @@ export class List extends React.Component {
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
   }
 
+  handleDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.props.deleteRecord(e.target.id, this.props.currentModelName);
+  }
+
   render() {
     if (!this.props.currentModelName || !this.props.schema) {
       return <div />;
@@ -111,6 +131,7 @@ export class List extends React.Component {
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
+          handleDelete={this.handleDelete}
         />
       );
     }
@@ -129,7 +150,7 @@ export class List extends React.Component {
         addShape: true,
         buttonBackground: 'primary',
         buttonSize: 'buttonLg',
-        // onClick: () => this.context.router.history.push(this.addRoute),
+        onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];
 
@@ -183,6 +204,7 @@ List.propTypes = {
     React.PropTypes.bool,
   ]).isRequired,
   currentPage: React.PropTypes.number.isRequired,
+  deleteRecord: React.PropTypes.func.isRequired,
   history: React.PropTypes.object.isRequired,
   limit: React.PropTypes.number.isRequired,
   loadCount: React.PropTypes.func.isRequired,
@@ -210,6 +232,7 @@ List.propTypes = {
 
 function mapDispatchToProps(dispatch) {
   return {
+    deleteRecord: (id, modelName) => dispatch(deleteRecord(id, modelName)),
     setCurrentModelName: modelName => dispatch(setCurrentModelName(modelName)),
     loadRecords: () => dispatch(loadRecords()),
     loadCount: () => dispatch(loadCount()),

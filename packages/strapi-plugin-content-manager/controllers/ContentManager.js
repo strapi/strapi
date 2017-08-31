@@ -73,7 +73,7 @@ module.exports = {
 
   update: async ctx => {
     // Update an entry using `queries` system
-    const entryUpdated = await queries.update({
+    const entryUpdated = await strapi.query(ctx.params.model).update({
       id: ctx.params.id,
       values: ctx.request.body
     });
@@ -83,7 +83,7 @@ module.exports = {
 
   delete: async ctx => {
     // Delete an entry using `queries` system
-    const entryDeleted = await queries.delete({
+    const entryDeleted = await strapi.query(ctx.params.model).delete({
       id: ctx.params.id
     });
 

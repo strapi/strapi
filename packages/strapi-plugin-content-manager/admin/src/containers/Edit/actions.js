@@ -78,15 +78,18 @@ export function recordEditError() {
   };
 }
 
-export function deleteRecord() {
+export function deleteRecord(id, modelName) {
   return {
     type: DELETE_RECORD,
+    id,
+    modelName,
   };
 }
 
-export function recordDeleted() {
+export function recordDeleted(id) {
   return {
     type: DELETE_RECORD_SUCCESS,
+    id,
   };
 }
 

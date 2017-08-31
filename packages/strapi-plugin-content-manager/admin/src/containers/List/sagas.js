@@ -1,10 +1,23 @@
+// Dependencies.
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { put, select, fork, call, take, cancel, takeLatest } from 'redux-saga/effects';
 
+// Utils.
 import request from 'utils/request';
 
+// Constants.
+import { DELETE_RECORD } from '../Edit/constants';
+
+// Sagas.
+import { deleteRecord } from '../Edit/sagas';
+
+// Actions.
 import { loadedRecord, loadedCount } from './actions';
+
+// Constants.
 import { LOAD_RECORDS, LOAD_COUNT } from './constants';
+
+// Selectors.
 import {
   makeSelectCurrentModelName,
   makeSelectLimit,
@@ -64,11 +77,13 @@ export function* getCount() {
 export function* defaultSaga() {
   const loadRecordsWatcher = yield fork(takeLatest, LOAD_RECORDS, getRecords);
   const loudCountWatcher = yield fork(takeLatest, LOAD_COUNT, getCount);
+  const deleteRecordWatcher = yield fork(takeLatest, DELETE_RECORD, deleteRecord);
 
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
   yield cancel(loadRecordsWatcher);
   yield cancel(loudCountWatcher);
+  yield cancel(deleteRecordWatcher);
 }
 
 // All sagas to be loaded

@@ -24,6 +24,7 @@ class Table extends React.Component {
           record={record}
           history={this.props.history}
           primaryKey={this.props.primaryKey}
+          handleDelete={this.props.handleDelete}
         />
       );
     });
@@ -49,6 +50,7 @@ Table.contextTypes = {
 
 Table.propTypes = {
   changeSort: React.PropTypes.func.isRequired,
+  handleDelete: React.propTypes.func,
   headers: React.PropTypes.array.isRequired,
   history: React.PropTypes.object.isRequired,
   primaryKey: React.PropTypes.string.isRequired,
@@ -56,6 +58,10 @@ Table.propTypes = {
   route: React.PropTypes.object.isRequired,
   routeParams: React.PropTypes.object.isRequired,
   sort: React.PropTypes.string.isRequired,
+};
+
+Table.defaultProps = {
+  handleDelete: () => {},
 };
 
 export default Table;

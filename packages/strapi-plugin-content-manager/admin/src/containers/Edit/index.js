@@ -50,6 +50,9 @@ import {
   makeSelectIsCreating,
 } from './selectors';
 
+import reducer from './reducer';
+import saga from './sagas';
+
 export class Edit extends React.Component {
   componentWillMount() {
     this.props.setInitialState();

@@ -64,31 +64,39 @@ export function* editRecord() {
   }
 }
 
-export function* deleteRecord() {
-  const currentModelName = yield select(makeSelectCurrentModelName());
-  const record = yield select(makeSelectRecord());
-  const recordJSON = record.toJSON();
+export function* deleteRecord({ id, modelName }) {
+  function* httpCall(id, modelName) {
+    try {
+      const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${modelName}/${id}`;
 
-  try {
-    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${recordJSON.id}`;
+      // Call our request helper (see 'utils/request')
+      yield call(request, requestUrl, {
+        method: 'DELETE',
+      });
 
-    // Call our request helper (see 'utils/request')
-    yield call(request, requestUrl, {
-      method: 'DELETE',
-    });
+      yield put(recordDeleted(id));
+      window.Strapi.notification.success(
+        'The entry has been successfully deleted.'
+      );
 
-    yield put(recordDeleted());
-    window.Strapi.notification.success(
-      'The entry has been successfully deleted.'
-    );
+      // Redirect to the list page.
+      router.push(`/plugins/content-manager/${modelName}`);
+    } catch (err) {
+      yield put(recordDeleteError());
+      window.Strapi.notification.error(
+        'An error occurred during record deletion.'
+      );
+    }
+  }
 
-    // Redirect to the list page.
-    router.push(`/plugins/content-manager/${currentModelName}`);
-  } catch (err) {
-    yield put(recordDeleteError());
-    window.Strapi.notification.error(
-      'An error occurred during record deletion.'
-    );
+  if (id && modelName) {
+    yield httpCall(id, modelName);
+  } else {
+    const currentModelName = yield select(makeSelectCurrentModelName());
+    const record = yield select(makeSelectRecord());
+    const recordJSON = record.toJSON();
+
+    yield httpCall(recordJSON.id, currentModelName);
   }
 }
 
