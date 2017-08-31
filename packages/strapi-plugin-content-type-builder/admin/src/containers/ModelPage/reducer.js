@@ -13,6 +13,7 @@ import {
   DELETE_ATTRIBUTE,
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
+  UPDATE_CONTENT_TYPE,
 } from './constants';
 
 const initialState = fromJS({
@@ -49,6 +50,12 @@ function modelPageReducer(state = initialState, action) {
         .setIn(['initialModel', 'attributes'], List(action.model.model.attributes));
     case POST_CONTENT_TYPE_SUCCEEDED:
       return state.set('postContentTypeSuccess', !state.get('postContentTypeSuccess'));
+    case UPDATE_CONTENT_TYPE:
+      return state
+        .set('model', Map(action.data))
+        .set('initialModel', Map(action.data))
+        .setIn(['model', 'attributes'], List(action.data.attributes))
+        .setIn(['initialModel', 'attributes'], List(action.data.attributes));
     default:
       return state;
   }

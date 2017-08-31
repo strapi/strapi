@@ -12,7 +12,6 @@ import {
   CONTENT_TYPE_ACTION_SUCCEEDED,
   CONTENT_TYPE_CREATE,
   CONTENT_TYPE_FETCH_SUCCEEDED,
-  RESET_DID_FETCH_MODEL_PROP,
   RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_FORM,
@@ -32,6 +31,7 @@ const initialState = fromJS({
   isFormSet: false,
   didFetchModel: true,
   shouldRefetchContentType: false,
+  updatedContentType: false,
 });
 
 function formReducer(state = initialState, action) {
@@ -54,20 +54,18 @@ function formReducer(state = initialState, action) {
       return state
         .set('shouldRefetchContentType', !state.get('shouldRefetchContentType'))
         .set('initialDataEdit', state.get('modifiedDataEdit'))
+        .set('updatedContentType', !state.get('updatedContentType'))
         .set('isFormSet', false);
     case CONTENT_TYPE_CREATE:
       return state
         .set('isFormSet', false)
-        .set('didFetchModel', true);
+        .set('didFetchModel', true)
+        .set('updatedContentType', !state.get('updatedContentType'));
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
         .set('didFetchModel', false)
         .set('initialDataEdit', action.data)
         .set('modifiedDataEdit', action.data);
-    case RESET_DID_FETCH_MODEL_PROP:
-      return state
-        .set('didFetchModel', true)
-        .set('isFormSet', false);
     case RESET_IS_FORM_SET:
       return state.set('isFormSet', false);
     case SET_ATTRIBUTE_FORM: {

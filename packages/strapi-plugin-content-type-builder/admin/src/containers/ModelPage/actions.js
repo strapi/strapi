@@ -15,6 +15,7 @@ import {
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
   SUBMIT,
+  UPDATE_CONTENT_TYPE,
 } from './constants';
 
 export function addAttributeToContentType(newAttribute) {
@@ -78,4 +79,11 @@ export function submit() {
   return {
     type: SUBMIT,
   }
+}
+
+export function updateContentType(data) {
+  return {
+    type: UPDATE_CONTENT_TYPE,
+    data,
+  };
 }

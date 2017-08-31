@@ -14,7 +14,7 @@ import { Link } from 'react-router';
 import { router } from 'app';
 
 // Global selectors
-import { makeSelectDidFetchModel } from 'containers/Form/selectors';
+import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
 
 import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
@@ -52,14 +52,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     this.fetchModel();
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.params.modelName !== this.props.params.modelName) {
+  componentWillReceiveProps(nextProps) {
+    if (this.props.updatedContentType !== nextProps.updatedContentType) {
       this.fetchModel();
     }
+  }
 
-    // Refecth content type after editing it
-    if (prevProps.location.hash !== this.props.location.hash && this.props.didFetchModel) {
-      console.log('ok')
+  componentDidUpdate(prevProps) {
+    if (prevProps.params.modelName !== this.props.params.modelName) {
       this.fetchModel();
     }
   }
@@ -233,6 +233,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           menuData={this.props.menu}
           redirectRoute={redirectRoute}
           modelName={this.props.params.modelName}
+          isModelPage
         />
       </div>
     );
@@ -241,7 +242,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
 const mapStateToProps = createStructuredSelector({
   modelPage: selectModelPage(),
-  didFetchModel: makeSelectDidFetchModel(),
+  updatedContentType: makeSelectContentTypeUpdated(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -260,7 +261,6 @@ function mapDispatchToProps(dispatch) {
 ModelPage.propTypes = {
   cancelChanges: React.PropTypes.func,
   deleteAttribute: React.PropTypes.func,
-  didFetchModel: React.PropTypes.bool,
   location: React.PropTypes.object,
   menu: React.PropTypes.array,
   modelFetch: React.PropTypes.func,
@@ -269,6 +269,7 @@ ModelPage.propTypes = {
   params: React.PropTypes.object,
   route: React.PropTypes.object,
   submit: React.PropTypes.func,
+  updatedContentType: React.PropTypes.bool,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModelPage);

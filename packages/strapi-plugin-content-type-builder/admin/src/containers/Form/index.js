@@ -23,7 +23,7 @@ import {
 import { router, store } from 'app';
 
 import { storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType } from 'containers/ModelPage/actions';
+import { addAttributeToContentType, updateContentType } from 'containers/ModelPage/actions';
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
@@ -43,7 +43,6 @@ import {
   contentTypeEdit,
   contentTypeFetch,
   contentTypeFetchSucceeded,
-  resetDidFetchModelProp,
   resetIsFormSet,
   setAttributeForm,
   setForm,
@@ -95,16 +94,20 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       }
 
       // Close Modal
-      const redirectToModelPage = includes(this.props.redirectRoute, 'models') ? `${this.props.modifiedDataEdit.name}` : '';
+      const redirectToModelPage = includes(this.props.redirectRoute, 'models') ? `/${this.props.modifiedDataEdit.name}` : '';
       router.push(`${this.props.redirectRoute}${redirectToModelPage}`);
       // Reset props
-      this.props.resetDidFetchModelProp();
+      this.props.resetIsFormSet();
+
+      // Sagas are cancelled on location change so to update the content type description and collectionName we have to force it
+      if (this.props.isModelPage) {
+        this.props.updateContentType(this.props.modifiedDataEdit);
+      }
     }
   }
 
   addAttributeToContentType = () => {
     this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
-    // this.props.resetDidFetchModelProp();
     this.props.resetIsFormSet();
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
   }
@@ -132,8 +135,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
 
-    // Tell the parent containers to update
-    this.props.resetDidFetchModelProp();
+    this.props.resetIsFormSet();
     // Close modal
     const modelPage = includes(this.props.redirectRoute, 'models') ? '' : '/models';
     router.push(`${this.props.redirectRoute}${modelPage}/${data.name}`);
@@ -213,6 +215,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         replace(split(this.props.hash, '::')[0], '#edit', ''),
         this.createContentType,
         this.props.modifiedDataEdit,
+        // this.props.contentTypeEdit,
         this.props.contentTypeEdit,
       );
     } else if (includes(this.props.hash.split('::')[1], 'attribute')) {
@@ -273,7 +276,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   toggle = () => {
     this.props.toggle();
-    // Set the didFetchModel props to false when the modal is closing so the store is emptied
+    // Set the isFormSet props to false when the modal is closing so the store is emptied
     if (this.state.showModal) {
       this.props.resetIsFormSet();
     }
@@ -348,11 +351,11 @@ function mapDispatchToProps(dispatch) {
       contentTypeEdit,
       contentTypeFetch,
       contentTypeFetchSucceeded,
-      resetDidFetchModelProp,
       resetIsFormSet,
       setAttributeForm,
       setForm,
       storeTemporaryMenu,
+      updateContentType,
     },
     dispatch
   );
@@ -372,6 +375,7 @@ Form.propTypes = {
     React.PropTypes.object.isRequired,
   ]),
   hash: React.PropTypes.string.isRequired,
+  isModelPage: React.PropTypes.bool,
   menuData: React.PropTypes.array.isRequired,
   modelName: React.PropTypes.string,
   modifiedData: React.PropTypes.object,
@@ -380,7 +384,6 @@ Form.propTypes = {
   // noNav: React.PropTypes.bool,
   popUpHeaderNavLinks: React.PropTypes.array,
   redirectRoute: React.PropTypes.string.isRequired,
-  resetDidFetchModelProp: React.PropTypes.func,
   resetIsFormSet: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
@@ -390,32 +393,7 @@ Form.propTypes = {
   shouldRefetchContentType: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
+  updateContentType: React.PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Form);
-
-
-
-// if (!isEmpty(nextProps.hash)) {
-//   this.setState({ showModal: true });
-//
-//   // TODO refacto
-//   if (includes(nextProps.hash, 'contentType')) {
-//
-//     this.props.setForm(nextProps.hash);
-//
-//     if (includes(nextProps.hash, 'edit') && !nextProps.didFetchModel) {
-//       const contentTypeName = replace(split(nextProps.hash, '::')[0], '#edit', '');
-//       this.fetchModel(contentTypeName);
-//     }
-//   }
-//
-//   if (includes(nextProps.hash, 'create') && includes(nextProps.hash, 'attribute')) {
-//     const contentTypeName = replace(split(nextProps.hash, '::')[0], '#create', '');
-//     this.fetchModel(contentTypeName);
-//     this.props.setAttributeForm(nextProps.hash);
-//   }
-//
-// } else {
-//   this.setState({ showModal: false });
-// }

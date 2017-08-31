@@ -46,6 +46,7 @@ module.exports = {
       name: slug,
       description: _.get(model, 'description', 'model.description.missing'),
       connection: model.connection,
+      collectionName: model.collectionName,
       attributes: attributes
     };
   },

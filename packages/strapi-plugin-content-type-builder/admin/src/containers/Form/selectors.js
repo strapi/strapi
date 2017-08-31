@@ -44,6 +44,11 @@ const makeSelectShouldRefetchContentType = () => createSelector(
   (substate) => substate.get('shouldRefetchContentType'),
 );
 
+const makeSelectContentTypeUpdated = () => createSelector(
+  selectFormDomain(),
+  (substate) => substate.get('updatedContentType'),
+);
+
 export default selectForm;
 export {
   selectFormDomain,
@@ -52,4 +57,5 @@ export {
   makeSelectModifiedData,
   makeSelectModifiedDataEdit,
   makeSelectShouldRefetchContentType,
+  makeSelectContentTypeUpdated,
 };
