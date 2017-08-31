@@ -10,6 +10,7 @@ import { storeData } from '../../utils/storeData';
 /* eslint-disable new-cap */
 import {
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
+  EDIT_CONTENT_TYPE_ATTRIBUTE,
   CANCEL_CHANGES,
   DELETE_ATTRIBUTE,
   MODEL_FETCH_SUCCEEDED,
@@ -27,6 +28,7 @@ const initialState = fromJS({
   }),
   postContentTypeSuccess: false,
   showButtons: false,
+  modelLoading: true,
 });
 
 function modelPageReducer(state = initialState, action) {
@@ -35,6 +37,10 @@ function modelPageReducer(state = initialState, action) {
       return state
         .updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute))
         .set('showButtons', true);
+    case EDIT_CONTENT_TYPE_ATTRIBUTE:
+      return state
+        .set('showButtons', true)
+        .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute);
     case CANCEL_CHANGES:
       return state
         .set('showButtons', false)
@@ -50,13 +56,14 @@ function modelPageReducer(state = initialState, action) {
       if (get(storeData.getContentType(), 'name') === state.getIn(['initialModel', 'name'])) {
         showButtons = size(get(storeData.getContentType(), 'attributes')) > 0;
       }
-      
+
       return state
         .set('showButtons', showButtons)
         .updateIn(['model', 'attributes'], (list) => list.splice(action.position, 1));
     }
     case MODEL_FETCH_SUCCEEDED:
       return state
+        .set('modelLoading', false)
         .set('model', Map(action.model.model))
         .set('initialModel', Map(action.model.model))
         .setIn(['model', 'attributes'], List(action.model.model.attributes))

@@ -8,6 +8,7 @@ import { storeData } from '../../utils/storeData';
 
 import {
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
+  EDIT_CONTENT_TYPE_ATTRIBUTE,
   CANCEL_CHANGES,
   DEFAULT_ACTION,
   DELETE_ATTRIBUTE,
@@ -23,6 +24,14 @@ export function addAttributeToContentType(newAttribute) {
   return {
     type: ADD_ATTRIBUTE_TO_CONTENT_TYPE,
     newAttribute,
+  };
+}
+
+export function editContentTypeAttribute(modifiedAttribute, attributePosition) {
+  return {
+    type: EDIT_CONTENT_TYPE_ATTRIBUTE,
+    modifiedAttribute,
+    attributePosition,
   };
 }
 

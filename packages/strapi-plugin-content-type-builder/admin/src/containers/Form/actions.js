@@ -23,6 +23,7 @@ import {
   RESET_DID_FETCH_MODEL_PROP,
   RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
+  SET_ATTRIBUTE_FORM_EDIT,
   SET_FORM,
 } from './constants';
 
@@ -120,6 +121,46 @@ export function resetIsFormSet() {
 }
 
 export function setAttributeForm(hash) {
+  // const hashArray = hash.split('::');
+  // const formType = replace(hashArray[1], 'attribute', '');
+  // const settingsType = hashArray[2];
+  // const form = forms.attribute[formType][settingsType];
+  //
+  // const attribute = Map({
+  //   name: '',
+  //   params: Map({
+  //     type: formType,
+  //     required: false,
+  //     maxLength: false,
+  //     minLength: false,
+  //   }),
+  // });
+  const data = setAttributeFormData(hash);
+
+  return {
+    type: SET_ATTRIBUTE_FORM,
+    form: data.form,
+    attribute: data.attribute,
+  }
+}
+
+export function setAttributeFormEdit(hash, contentType) {
+  const form = setAttributeFormData(hash).form;
+  const contentTypeAttribute = contentType.attributes[hash.split('::')[3]];
+  const attribute = Map({
+    name: contentTypeAttribute.name,
+    params: Map(contentTypeAttribute.params),
+  });
+
+  return {
+    type: SET_ATTRIBUTE_FORM_EDIT,
+    form,
+    attribute,
+  }
+}
+
+
+function setAttributeFormData(hash) {
   const hashArray = hash.split('::');
   const formType = replace(hashArray[1], 'attribute', '');
   const settingsType = hashArray[2];
@@ -136,7 +177,6 @@ export function setAttributeForm(hash) {
   });
 
   return {
-    type: SET_ATTRIBUTE_FORM,
     form,
     attribute,
   }

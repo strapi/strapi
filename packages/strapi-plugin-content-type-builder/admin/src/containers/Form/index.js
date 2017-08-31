@@ -23,7 +23,7 @@ import {
 import { router, store } from 'app';
 
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType, updateContentType } from 'containers/ModelPage/actions';
+import { addAttributeToContentType, editContentTypeAttribute, updateContentType } from 'containers/ModelPage/actions';
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
@@ -45,6 +45,7 @@ import {
   contentTypeFetchSucceeded,
   resetIsFormSet,
   setAttributeForm,
+  setAttributeFormEdit,
   setForm,
 } from './actions';
 
@@ -106,6 +107,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.modelLoading !== this.props.modelLoading && !isEmpty(this.props.hash)) {
+      this.initComponent(this.props, true);
+    }
+  }
+
   addAttributeToContentType = () => {
     // Update the parent container (ModelPage)
     this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
@@ -113,6 +121,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.resetIsFormSet();
     // Close modal
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
+  }
+
+  editContentTypeAttribute = () => {
+    // Update the parent container (ModelPage)
+    this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, this.props.hash.split('::')[3]);
+    // Empty the store
+    this.props.resetIsFormSet();
+    // Close modal
+    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#edit', '')}`);
   }
 
   addAttributeToTempContentType = () => {
@@ -191,7 +208,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Three kinds of values are available modifiedData and modifiedDataEdit
     // Allows the user to start creating a contentType and modifying an existing one at the same time
     switch (true) {
-      case includes(this.props.hash, 'edit'):
+      case includes(this.props.hash, 'edit') && !includes(this.props.hash, 'attributes'):
         values = this.props.modifiedDataEdit;
         break;
       case includes(this.props.hash.split('::')[1], 'attribute'):
@@ -225,7 +242,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleSubmit = () => {
-    if (includes(this.props.hash, 'edit')) {
+    if (includes(this.props.hash, 'edit') && !includes(this.props.hash, 'attribute')) {
       this.testContentType(
         replace(split(this.props.hash, '::')[0], '#edit', ''),
         this.createContentType,
@@ -233,13 +250,21 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         // this.props.contentTypeEdit,
         this.props.contentTypeEdit,
       );
-    } else if (includes(this.props.hash.split('::')[1], 'attribute')) {
+    } else if (includes(this.props.hash.split('::')[1], 'attribute') && includes(this.props.hash, '#create')) {
       this.testContentType(
         replace(split(this.props.hash, '::')[0], '#create', ''),
         this.addAttributeToTempContentType,
         null,
         this.addAttributeToContentType,
       );
+    } else if (includes(this.props.hash.split('::')[1], 'attribute') && includes(this.props.hash, '#edit')) {
+      this.testContentType(
+        replace(split(this.props.hash, '::')[0], '#create', ''),
+        // TODO check
+        this.addAttributeToTempContentType,
+        null,
+        this.editContentTypeAttribute,
+      )
     } else {
       this.createContentType(this.props.modifiedData);
     }
@@ -262,6 +287,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
       if (includes(props.hash, '#create') && includes(props.hash, 'attribute')) {
         this.props.setAttributeForm(props.hash);
+      }
+
+      if (get(props.contentTypeData, 'name') && includes(props.hash, '#edit') && includes(props.hash, 'attribute')) {
+        this.props.setAttributeFormEdit(props.hash, props.contentTypeData);
       }
     } else {
       this.setState({ showModal: false });
@@ -359,6 +388,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       addAttributeToContentType,
+      editContentTypeAttribute,
       changeInput,
       changeInputAttribute,
       connectionsFetch,
@@ -368,6 +398,7 @@ function mapDispatchToProps(dispatch) {
       contentTypeFetchSucceeded,
       resetIsFormSet,
       setAttributeForm,
+      setAttributeFormEdit,
       setForm,
       storeTemporaryMenu,
       temporaryContentTypeFieldsUpdated,
@@ -386,6 +417,7 @@ Form.propTypes = {
   contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
   contentTypeFetchSucceeded: React.PropTypes.func,
+  editContentTypeAttribute: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,
@@ -393,6 +425,7 @@ Form.propTypes = {
   hash: React.PropTypes.string.isRequired,
   isModelPage: React.PropTypes.bool,
   menuData: React.PropTypes.array.isRequired,
+  modelLoading: React.PropTypes.bool,
   modelName: React.PropTypes.string,
   modifiedData: React.PropTypes.object,
   modifiedDataAttribute: React.PropTypes.object,
@@ -405,6 +438,7 @@ Form.propTypes = {
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
   setAttributeForm: React.PropTypes.func,
+  setAttributeFormEdit: React.PropTypes.func,
   setForm: React.PropTypes.func.isRequired,
   shouldRefetchContentType: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,
