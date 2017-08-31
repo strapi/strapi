@@ -24,7 +24,9 @@ import {
   RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_ATTRIBUTE_FORM_EDIT,
+  SET_BUTTON_LOADING,
   SET_FORM,
+  UNSET_BUTTON_LOADING,
 } from './constants';
 
 import forms from './forms.json';
@@ -121,20 +123,6 @@ export function resetIsFormSet() {
 }
 
 export function setAttributeForm(hash) {
-  // const hashArray = hash.split('::');
-  // const formType = replace(hashArray[1], 'attribute', '');
-  // const settingsType = hashArray[2];
-  // const form = forms.attribute[formType][settingsType];
-  //
-  // const attribute = Map({
-  //   name: '',
-  //   params: Map({
-  //     type: formType,
-  //     required: false,
-  //     maxLength: false,
-  //     minLength: false,
-  //   }),
-  // });
   const data = setAttributeFormData(hash);
 
   return {
@@ -159,27 +147,16 @@ export function setAttributeFormEdit(hash, contentType) {
   }
 }
 
-
-function setAttributeFormData(hash) {
-  const hashArray = hash.split('::');
-  const formType = replace(hashArray[1], 'attribute', '');
-  const settingsType = hashArray[2];
-  const form = forms.attribute[formType][settingsType];
-
-  const attribute = Map({
-    name: '',
-    params: Map({
-      type: formType,
-      required: false,
-      maxLength: false,
-      minLength: false,
-    }),
-  });
-
+export function setButtonLoading() {
   return {
-    form,
-    attribute,
-  }
+    type: SET_BUTTON_LOADING,
+  };
+}
+
+export function unsetButtonLoading() {
+  return {
+    type: UNSET_BUTTON_LOADING,
+  };
 }
 
 export function setForm(hash) {
@@ -209,4 +186,26 @@ function getDataFromForm(form) {
   const data = Map(dataArray);
 
   return data;
+}
+
+function setAttributeFormData(hash) {
+  const hashArray = hash.split('::');
+  const formType = replace(hashArray[1], 'attribute', '');
+  const settingsType = hashArray[2];
+  const form = forms.attribute[formType][settingsType];
+
+  const attribute = Map({
+    name: '',
+    params: Map({
+      type: formType,
+      required: false,
+      maxLength: false,
+      minLength: false,
+    }),
+  });
+
+  return {
+    form,
+    attribute,
+  }
 }

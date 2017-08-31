@@ -17,20 +17,23 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     router.push(this.props.editPath);
   }
 
-  renderButtonContainer = () => (
-    <div className={styles.buttonContainer}>
-      <FormattedMessage id="form.button.cancel">
-        {(message) => (
-          <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
-        )}
-      </FormattedMessage>
-      <FormattedMessage id="form.button.save">
-        {(message) => (
-          <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
-        )}
-      </FormattedMessage>
-    </div>
-  )
+  renderButtonContainer = () => {
+    console.log('waiting');
+    return (
+      <div className={styles.buttonContainer}>
+        <FormattedMessage id="form.button.cancel">
+          {(message) => (
+            <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
+          )}
+        </FormattedMessage>
+        <FormattedMessage id="form.button.save">
+          {(message) => (
+            <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+          )}
+        </FormattedMessage>
+      </div>
+    );
+  }
 
   renderContentHeader = () => {
     const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;

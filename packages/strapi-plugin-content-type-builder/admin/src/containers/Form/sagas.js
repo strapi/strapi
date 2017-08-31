@@ -9,6 +9,8 @@ import {
   connectionsFetchSucceeded,
   contentTypeActionSucceeded,
   contentTypeFetchSucceeded,
+  setButtonLoading,
+  unsetButtonLoading,
 } from './actions';
 
 import {
@@ -33,6 +35,7 @@ export function* editContentType() {
     const initialContentType = yield select(makeSelectInitialDataEdit());
     const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
 
+    yield put(setButtonLoading());
     yield call(request, requestUrl, opts);
 
     yield new Promise(resolve => {
@@ -40,7 +43,9 @@ export function* editContentType() {
         resolve();
       }, 5000);
     });
+
     yield put(contentTypeActionSucceeded());
+    yield put(unsetButtonLoading());
 
   } catch(error) {
     console.log(error);

@@ -17,4 +17,6 @@ export const RESET_DID_FETCH_MODEL_PROP = 'ContentTypeBuilder/Form/RESET_DID_FET
 export const RESET_IS_FORM_SET = 'ContentTypeBuilder/Form/RESET_IS_FORM_SET';
 export const SET_ATTRIBUTE_FORM = 'ContentTypeBuilder/Form/SET_ATTRIBUTE_FORM';
 export const SET_ATTRIBUTE_FORM_EDIT = 'ContentTypeBuilder/Form/SET_ATTRIBUTE_FORM_EDIT';
+export const SET_BUTTON_LOADING = 'ContentTypeBuilder/Form/SET_BUTTON_LOADING';
 export const SET_FORM = 'ContentTypeBuilder/Form/SET_FORM';
+export const UNSET_BUTTON_LOADING = 'ContentTypeBuilder/Form/UNSET_BUTTON_LOADING';

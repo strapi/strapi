@@ -16,6 +16,8 @@ import {
   SET_ATTRIBUTE_FORM,
   SET_ATTRIBUTE_FORM_EDIT,
   SET_FORM,
+  SET_BUTTON_LOADING,
+  UNSET_BUTTON_LOADING,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -32,6 +34,7 @@ const initialState = fromJS({
   isFormSet: false,
   shouldRefetchContentType: false,
   updatedContentType: false,
+  showButtonLoading: false,
 });
 
 function formReducer(state = initialState, action) {
@@ -86,6 +89,10 @@ function formReducer(state = initialState, action) {
         .set('form', Map(action.form))
         .set('modifiedDataAttribute', action.attribute);
     }
+    case SET_BUTTON_LOADING:
+      return state.set('showButtonLoading', true);
+    case UNSET_BUTTON_LOADING:
+      return state.set('showButtonLoading', false);
     case SET_FORM: {
       if (state.get('isFormSet')) {
         return state.set('form', Map(action.form));

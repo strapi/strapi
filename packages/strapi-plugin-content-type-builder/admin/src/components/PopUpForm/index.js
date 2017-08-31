@@ -20,7 +20,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
     const value = !isEmpty(this.props.values) && includes(item.target, '.') ? get(this.props.values, [split(item.target, '.')[0], split(item.target, '.')[1]]) : this.props.values[item.target];
-    
+
     if (shouldOverrideRendering) {
       return this.props.overrideRenderInput(item, key);
     }
@@ -71,10 +71,14 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
 
+    const loader = this.props.showLoader ?
+      <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+        : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={this.props.buttonSubmitMessage} /></Button>;
+
     const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
       : <ModalFooter className={styles.modalFooter}>
         <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="form.button.cancel" /></Button>
-        <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={this.props.buttonSubmitMessage} /></Button>{' '}
+        {loader}{' '}
       </ModalFooter>;
     return (
       <div className={styles.popUpForm}>
@@ -125,6 +129,7 @@ PopUpForm.propTypes = {
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
+  showLoader: React.PropTypes.bool,
   toggle: React.PropTypes.func,
   values: React.PropTypes.object,
 };

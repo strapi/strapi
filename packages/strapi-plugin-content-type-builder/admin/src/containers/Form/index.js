@@ -247,7 +247,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         replace(split(this.props.hash, '::')[0], '#edit', ''),
         this.createContentType,
         this.props.modifiedDataEdit,
-        // this.props.contentTypeEdit,
         this.props.contentTypeEdit,
       );
     } else if (includes(this.props.hash.split('::')[1], 'attribute') && includes(this.props.hash, '#create')) {
@@ -376,6 +375,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           overrideRenderInputCondition={this.checkForNestedInput}
           overrideRenderInput={this.renderInput}
           buttonSubmitMessage={buttonSubmitMessage}
+          showLoader={this.props.showButtonLoading}
         />
       </div>
     );
@@ -441,6 +441,7 @@ Form.propTypes = {
   setAttributeFormEdit: React.PropTypes.func,
   setForm: React.PropTypes.func.isRequired,
   shouldRefetchContentType: React.PropTypes.bool,
+  showButtonLoading: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,
   temporaryContentTypeFieldsUpdated: React.PropTypes.func,
   toggle: React.PropTypes.func.isRequired,
