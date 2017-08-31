@@ -10,7 +10,7 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 import { storeData } from '../../utils/storeData';
 
 import { MODEL_FETCH, SUBMIT } from './constants';
-import { modelFetchSucceeded, postContentTypeSucceeded } from './actions';
+import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps } from './actions';
 import { makeSelectModel } from './selectors';
 
 export function* fetchModel(action) {
@@ -32,8 +32,14 @@ export function* submitChanges() {
 
     const body = yield select(makeSelectModel());
     map(body.attributes, (attribute, index) => {
+      // Remove the connection key from attributes
+      if (attribute.connection) {
+        unset(body.attributes[index], 'connection');
+      }
+
       forEach(attribute.params, (value, key) => {
         if (includes(key, 'Value')) {
+          // Remove and set needed keys for params
           set(body.attributes[index].params, replace(key, 'Value', ''), value);
           unset(body.attributes[index].params, key);
         }
@@ -56,6 +62,14 @@ export function* submitChanges() {
       yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
       yield put(postContentTypeSucceeded());
     }
+
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+
+    yield put(resetShowButtonsProps());
 
   } catch(error) {
     console.log(error);

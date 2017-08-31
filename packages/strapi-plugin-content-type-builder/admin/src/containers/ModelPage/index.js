@@ -194,6 +194,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const redirectRoute = replace(this.props.route.path, '/:modelName', '');
     // const addButtons = this.props.modelPage.showButtons;
     const addButtons  = get(storeData.getContentType(), 'name') === this.props.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
+    
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
         <List

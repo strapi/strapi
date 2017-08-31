@@ -19,7 +19,7 @@ import {
   toNumber,
   replace,
 } from 'lodash';
-
+import { FormattedMessage } from 'react-intl';
 import { router, store } from 'app';
 
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
@@ -123,15 +123,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
   }
 
-  editContentTypeAttribute = () => {
-    // Update the parent container (ModelPage)
-    this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, this.props.hash.split('::')[3]);
-    // Empty the store
-    this.props.resetIsFormSet();
-    // Close modal
-    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#edit', '')}`);
-  }
-
   addAttributeToTempContentType = () => {
     // Get the entire content type from the reducer
     const contentType = this.props.modifiedDataEdit;
@@ -155,22 +146,35 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
     // Check if link already exist in the menu to remove it
     const index = findIndex(oldMenu, [ 'name', replace(split(this.props.hash, '::')[0], '#edit', '')]);
-
     // Insert at a specific position or before the add button the not saved contentType
     const position = index !== -1 ? index  : size(oldMenu) - 1;
     oldMenu.splice(position, index !== -1 ? 1 : 0, { icon: 'fa-cube', fields: 0, description: data.description, name: data.name, isTemporary: true });
     const newMenu = oldMenu;
-
     // Store the temporary contentType in the localStorage
     this.props.contentTypeCreate(data);
-
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
-
     this.props.resetIsFormSet();
     // Close modal
     const modelPage = includes(this.props.redirectRoute, 'models') ? '' : '/models';
     router.push(`${this.props.redirectRoute}${modelPage}/${data.name}`);
+  }
+
+  editContentTypeAttribute = () => {
+    // Update the parent container (ModelPage)
+    this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, this.props.hash.split('::')[3]);
+    // Empty the store
+    this.props.resetIsFormSet();
+    // Close modal
+    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#edit', '')}`);
+  }
+
+  editTempContentTypeAttribute = () => {
+    this.editContentTypeAttribute();
+    const contentType = storeData.getContentType();
+    contentType.attributes[this.props.hash.split('::')[3]] = this.props.modifiedDataAttribute;
+    const newContentType = contentType;
+    storeData.setContentType(newContentType);
   }
 
   fetchModel = (contentTypeName) => {
@@ -196,8 +200,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       case includes(type, 'edit') && popUpFormType === 'contentType':
         popUpTitle = `popUpForm.edit.${popUpFormType}.header.title`;
         break;
+      case includes(type, 'create'):
+        popUpTitle = 'popUpForm.create';
+        break;
       default:
-        popUpTitle = 'popUpForm.doing';
+        popUpTitle = 'popUpForm.edit';
     }
 
     return popUpTitle;
@@ -208,7 +215,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Three kinds of values are available modifiedData and modifiedDataEdit
     // Allows the user to start creating a contentType and modifying an existing one at the same time
     switch (true) {
-      case includes(this.props.hash, 'edit') && !includes(this.props.hash, 'attributes'):
+      case includes(this.props.hash, 'edit') && !includes(this.props.hash, 'attribute'):
         values = this.props.modifiedDataEdit;
         break;
       case includes(this.props.hash.split('::')[1], 'attribute'):
@@ -242,30 +249,30 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleSubmit = () => {
-    if (includes(this.props.hash, 'edit') && !includes(this.props.hash, 'attribute')) {
-      this.testContentType(
-        replace(split(this.props.hash, '::')[0], '#edit', ''),
-        this.createContentType,
-        this.props.modifiedDataEdit,
-        this.props.contentTypeEdit,
-      );
-    } else if (includes(this.props.hash.split('::')[1], 'attribute') && includes(this.props.hash, '#create')) {
-      this.testContentType(
-        replace(split(this.props.hash, '::')[0], '#create', ''),
-        this.addAttributeToTempContentType,
-        null,
-        this.addAttributeToContentType,
-      );
-    } else if (includes(this.props.hash.split('::')[1], 'attribute') && includes(this.props.hash, '#edit')) {
-      this.testContentType(
-        replace(split(this.props.hash, '::')[0], '#create', ''),
-        // TODO check
-        this.addAttributeToTempContentType,
-        null,
-        this.editContentTypeAttribute,
-      )
-    } else {
-      this.createContentType(this.props.modifiedData);
+    const hashArray = split(this.props.hash, ('::'));
+    const valueToReplace = includes(this.props.hash, '#create') ? '#create' : '#edit';
+    const contentTypeName = replace(hashArray[0], valueToReplace, '');
+
+    let cbSuccess;
+    let dataSucces = null;
+    let cbFail;
+
+    switch (true) {
+      case includes(hashArray[0], '#edit'): {
+        // Check if the user is editing the attribute
+        const isAttribute = includes(hashArray[1], 'attribute');
+        cbSuccess = isAttribute ? this.editTempContentTypeAttribute : this.createContentType;
+        dataSucces = isAttribute ? null : this.props.modifiedDataEdit;
+        cbFail = isAttribute ? this.editContentTypeAttribute : this.props.contentTypeEdit;
+        return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
+      }
+      case includes(hashArray[0], 'create') && includes(this.props.hash.split('::')[1], 'attribute'): {
+        cbSuccess = this.addAttributeToTempContentType;
+        cbFail = this.addAttributeToContentType;
+        return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
+      }
+      default:
+        return this.createContentType(this.props.modifiedData);
     }
   }
 
@@ -280,6 +287,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         this.fetchModel(contentTypeName);
       }
 
+      // TODO refacto
       if (includes(props.hash, 'contentType')) {
         this.props.setForm(props.hash);
       }
@@ -339,20 +347,27 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     />
   )
 
+  renderCustomPopUpHeader = (startTitle) => (
+    <div>
+      <FormattedMessage id={startTitle} />&nbsp;<FormattedMessage id={replace(split(this.props.hash, ('::'))[1], 'attribute', '')}>
+        {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
+      </FormattedMessage>&nbsp;coo
+    </div>
+  )
+
   render() {
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
-
-    // const values = includes(this.props.hash, 'edit') ? this.props.modifiedDataEdit : this.props.modifiedData;
     const values = this.getValues();
-
     const noNav = includes(this.props.hash, 'choose');
     // Override the default rendering
     const renderModalBody = includes(this.props.hash, '#choose') ? this.renderModalBodyChooseAttributes : false;
-
+    // Hide the button in the modal
     const noButtons = includes(this.props.hash, '#choose');
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
+    const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
+
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -376,6 +391,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           overrideRenderInput={this.renderInput}
           buttonSubmitMessage={buttonSubmitMessage}
           showLoader={this.props.showButtonLoading}
+          renderCustomPopUpHeader={renderCustomPopUpHeader}
         />
       </div>
     );

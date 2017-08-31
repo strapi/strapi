@@ -124,7 +124,7 @@ export function resetIsFormSet() {
 
 export function setAttributeForm(hash) {
   const data = setAttributeFormData(hash);
-
+  
   return {
     type: SET_ATTRIBUTE_FORM,
     form: data.form,
