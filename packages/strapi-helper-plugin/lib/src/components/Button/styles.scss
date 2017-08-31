@@ -1,8 +1,8 @@
 .button {
+  -webkit-font-smoothing: antialiased;
   height: 3rem;
   position: relative;
   border-radius: 0.3rem;
-  text-transform: capitalize;
   margin-right: 1.8rem;
   cursor: pointer;
   font-family: Lato;
@@ -38,7 +38,6 @@
 .primary {
   font-weight: 500;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
-  -webkit-font-smoothing: antialiased;
   color: white;
   &:active {
    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
@@ -66,4 +65,28 @@
   font-size: 1.3rem;
   padding-left: 1.6rem;
   padding-right: 1.6rem;
+}
+
+.back {
+  background: #F6F6F6;
+  color: #323740;
+  font-weight: 500;
+  padding: 0 15px;
+  transition: all .2s ease;
+
+  &:before{
+    content: '\f053';
+    font-family: 'FontAwesome';
+    font-size: 1.2rem;
+    color: #323740;
+    margin-right: 10px;
+  }
+
+  &:hover{
+    background: darken(#F6F6F6, 5%);
+  }
+
+  &:active{
+    box-shadow: inset 1px 1px 5px rgba(0,0,0,.1);
+  }
 }

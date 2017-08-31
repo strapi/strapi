@@ -10,6 +10,7 @@ module.exports = {
   models: async ctx => {
     ctx.body = _.mapValues(strapi.models, model =>
       _.pick(model, [
+        'info',
         'connection',
         'collectionName',
         'attributes',

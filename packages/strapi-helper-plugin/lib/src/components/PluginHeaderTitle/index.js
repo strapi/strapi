@@ -11,7 +11,6 @@ import styles from './styles.scss';
 
 class PluginHeaderTitle extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    console.log(this.props.description);
     return (
       <div>
         <h1 className={styles.pluginHeaderTitleName}>

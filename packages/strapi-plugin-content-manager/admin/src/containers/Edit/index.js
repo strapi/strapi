@@ -4,27 +4,31 @@
  *
  */
 
+// Dependencies.
 import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import _ from 'lodash';
-
+import { get } from 'lodash';
 import { router } from 'app';
 
+// Components.
 import EditForm from 'components/EditForm';
-import { makeSelectSchema } from 'containers/App/selectors';
 import EditFormRelations from 'components/EditFormRelations';
 import PluginHeader from 'components/PluginHeader';
 
+// Selectors.
+import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+
+// Utils.
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+import templateObject from 'utils/templateObject';
 
-import reducer from './reducer';
-import saga from './sagas';
-
+// Styles.
 import styles from './styles.scss';
 
+// Actions.
 import {
   setInitialState,
   setCurrentModelName,
@@ -34,6 +38,8 @@ import {
   editRecord,
   deleteRecord,
 } from './actions';
+
+// Selectors.
 
 import {
   makeSelectRecord,
@@ -57,30 +63,40 @@ export class Edit extends React.Component {
     }
   }
 
-  render() {
-    let content = <p>Loading...</p>;
-    let relations;
+  handleChange = (e) => {
+    this.props.setRecordAttribute(e.target.name, e.target.value);
+  };
 
-    if (!this.props.loading && this.props.schema && this.props.currentModelName) {
-      content = (
-        <EditForm
-          record={this.props.record}
-          currentModelName={this.props.currentModelName}
-          schema={this.props.schema}
-          setRecordAttribute={this.props.setRecordAttribute}
-          editRecord={this.props.editRecord}
-          editing={this.props.editing}
-        />
-      );
-      relations = (
-        <EditFormRelations
-          currentModelName={this.props.currentModelName}
-          record={this.props.record}
-          schema={this.props.schema}
-          setRecordAttribute={this.props.setRecordAttribute}
-        />
-      );
+  handleSubmit = () => {
+    this.props.editRecord();
+  };
+
+  render() {
+    if (this.props.loading || !this.props.schema || !this.props.currentModelName) {
+      return <p>Loading...</p>;
     }
+
+    const content = (
+      <EditForm
+        record={this.props.record}
+        currentModelName={this.props.currentModelName}
+        schema={this.props.schema}
+        setRecordAttribute={this.props.setRecordAttribute}
+        handleChange={this.handleChange}
+        handleSubmit={this.handleSubmit}
+        editing={this.props.editing}
+      />
+    );
+
+    const relations = (
+      <EditFormRelations
+        currentModelName={this.props.currentModelName}
+        record={this.props.record}
+        schema={this.props.schema}
+        setRecordAttribute={this.props.setRecordAttribute}
+      />
+    );
+
 
     // Define plugin header actions
     const pluginHeaderActions = [
@@ -88,10 +104,8 @@ export class Edit extends React.Component {
         label: 'content-manager.containers.Edit.cancel',
         handlei18n: true,
         buttonBackground: 'secondary',
-        buttonSize: 'buttonLg',
-        onClick: () => {
-          router.push(`/plugins/content-manager/${this.props.currentModelName}`);
-        },
+        buttonSize: 'buttonMd',
+        onClick: () => router.push(`/plugins/content-manager/${this.props.currentModelName}`),
       },
       {
         handlei18n: true,
@@ -102,6 +116,15 @@ export class Edit extends React.Component {
         disabled: this.props.editing,
       },
     ];
+
+    const pluginHeaderSubActions = [
+      {
+        label: 'content-manager.containers.Edit.returnList',
+        handlei18n: true,
+        buttonBackground: 'back',
+        onClick: () => router.goBack(),
+      },
+    ]
 
     // Add the `Delete` button only in edit mode
     // if (!this.props.isCreating) {
@@ -114,10 +137,9 @@ export class Edit extends React.Component {
     // }
 
     // Plugin header config
-    const pluginHeaderTitle = _.get(this.props.schema, [this.props.currentModelName, 'label']) || 'Content Manager';
-    const pluginHeaderDescription = this.props.isCreating
-      ? 'New entry'
-      : `#${this.props.record && this.props.record.get('id')}`;
+    const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || this.props.record.first();
+    const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
+    const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get('id')}`;
 
     return (
       <div>
@@ -131,12 +153,15 @@ export class Edit extends React.Component {
               defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={pluginHeaderActions}
+            subActions={pluginHeaderSubActions}
           />
           <div className='row'>
-            <div className='col-lg-8'>
-              {content}
+            <div className={`col-lg-9`}>
+              <div className={styles.main_wrapper}>
+                {content}
+              </div>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               {relations}
             </div>
           </div>
@@ -164,6 +189,10 @@ Edit.propTypes = {
       slug: React.PropTypes.string,
     }),
   }).isRequired,
+  models: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ]).isRequired,
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -186,6 +215,7 @@ const mapStateToProps = createStructuredSelector({
   deleting: makeSelectDeleting(),
   isCreating: makeSelectIsCreating(),
   schema: makeSelectSchema(),
+  models: makeSelectModels(),
 });
 
 function mapDispatchToProps(dispatch) {
