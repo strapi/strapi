@@ -347,13 +347,17 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     />
   )
 
-  renderCustomPopUpHeader = (startTitle) => (
-    <div>
-      <FormattedMessage id={startTitle} />&nbsp;<FormattedMessage id={replace(split(this.props.hash, ('::'))[1], 'attribute', '')}>
-        {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
-      </FormattedMessage>&nbsp;coo
-    </div>
-  )
+  renderCustomPopUpHeader = (startTitle) => {
+    const italicText = replace(split(this.props.hash, ('::'))[1], 'attribute', '');
+    return (
+      <div>
+        <FormattedMessage id={startTitle} />&nbsp;<FormattedMessage id={italicText}>
+          {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
+        </FormattedMessage>&nbsp;
+        <FormattedMessage id="popUpForm.field" />
+      </div>
+    )
+  }
 
   render() {
     // Ensure typeof(popUpFormType) is String

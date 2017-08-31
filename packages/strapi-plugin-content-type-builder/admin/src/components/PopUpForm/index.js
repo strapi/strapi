@@ -121,7 +121,11 @@ PopUpForm.propTypes = {
   // popUpFormType: React.PropTypes.string.isRequired,
   popUpHeaderNavLinks: React.PropTypes.array,
   popUpTitle: React.PropTypes.string,
-  renderCustomPopUpHeader: React.PropTypes.func,
+  renderCustomPopUpHeader: React.PropTypes.oneOfType([
+    React.PropTypes.func,
+    React.PropTypes.object,
+    React.PropTypes.object,
+  ]),
   renderModalBody: React.PropTypes.oneOfType([
     React.PropTypes.bool,
     React.PropTypes.func,

@@ -69,7 +69,9 @@
   "popUpForm.attributes.json.name": "JSON",
   "popUpForm.attributes.media.name": "Media",
   "popUpForm.attributes.relation.name": "relation",
-
+  "popUpForm.create": "Add New",
+  "popUpForm.edit": "Edit",
+  "popUpForm.field": "Field",
   "popUpForm.create.contentType.header.title": "Add New Content Type",
   "popUpForm.choose.attributes.header.title": "Add New Field",
   "popUpForm.edit.contentType.header.title": "Edit Content Type",
