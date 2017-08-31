@@ -95,7 +95,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       }
 
       // Close Modal
-      router.push(`${this.props.redirectRoute}/${this.props.modifiedDataEdit.name}`);
+      const redirectToModelPage = includes(this.props.redirectRoute, 'models') ? `${this.props.modifiedDataEdit.name}` : '';
+      router.push(`${this.props.redirectRoute}${redirectToModelPage}`);
       // Reset props
       this.props.resetDidFetchModelProp();
     }
@@ -134,7 +135,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Tell the parent containers to update
     this.props.resetDidFetchModelProp();
     // Close modal
-    router.push(`${this.props.redirectRoute}/${data.name}`);
+    const modelPage = includes(this.props.redirectRoute, 'models') ? '' : '/models';
+    router.push(`${this.props.redirectRoute}${modelPage}/${data.name}`);
   }
 
   fetchModel = (contentTypeName) => {
