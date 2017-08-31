@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { get } from 'lodash';
+import { forEach, get, includes, map, replace, set, unset } from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
@@ -12,24 +12,6 @@ import { storeData } from '../../utils/storeData';
 import { MODEL_FETCH, SUBMIT } from './constants';
 import { modelFetchSucceeded, postContentTypeSucceeded } from './actions';
 import { makeSelectModel } from './selectors';
-
-// Individual exports for testing
-// export function* attributeDelete(action) {
-//   try {
-//     if (action.sendRequest) {
-//       const body = yield select(makeSelectModel());
-//       const requestUrl = `/content-type-builder/models/${action.modelName}`;
-//       const opts = {
-//         method: 'PUT',
-//         body,
-//       };
-//
-//       yield call(request, requestUrl, opts);
-//     }
-//   } catch(error) {
-//     window.Strapi.notification.error('An error occured');
-//   }
-// }
 
 export function* fetchModel(action) {
   try {
@@ -49,6 +31,18 @@ export function* submitChanges() {
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
+    map(body.attributes, (attribute, index) => {
+      forEach(attribute.params, (value, key) => {
+        if (includes(key, 'Value')) {
+          set(body.attributes[index].params, replace(key, 'Value', ''), value);
+          unset(body.attributes[index].params, key);
+        }
+
+        if (!value) {
+          unset(body.attributes[index].params, key);
+        }
+      });
+    })
 
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';

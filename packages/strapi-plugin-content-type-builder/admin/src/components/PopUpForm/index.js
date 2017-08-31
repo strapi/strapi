@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { map, includes, split } from 'lodash';
+import { map, includes, split, isEmpty } from 'lodash';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/Input';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
@@ -20,7 +20,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
 
-    const value = this.props.values[item.target] && includes(item.target, '.') ? this.props.values[split(item.target, '.')[0]][split(item.target, '.')[1]] : this.props.values[item.target];
+    const value = !isEmpty(this.props.values) && includes(item.target, '.') ? this.props.values[split(item.target, '.')[0]][split(item.target, '.')[1]] : this.props.values[item.target];
 
     if (shouldOverrideRendering) {
       return this.props.overrideRenderInput(item, key);

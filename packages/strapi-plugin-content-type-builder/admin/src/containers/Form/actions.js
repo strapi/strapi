@@ -131,7 +131,7 @@ export function setAttributeForm(hash) {
       type: formType,
       required: true,
       // TODO remove with correct value
-      // minLength: true,
+      minLength: true,
       // minLengthValue: 0,
     }),
   });

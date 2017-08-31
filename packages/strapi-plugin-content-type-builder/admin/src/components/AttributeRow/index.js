@@ -44,7 +44,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     this.setState({ showWarning: false });
   }
 
-  toggleModalWarning = (e) => {
+  toggleModalWarning = () => {
     // e.preventDefault();
     // e.stopPropagation()
     this.setState({ showWarning: !this.state.showWarning });

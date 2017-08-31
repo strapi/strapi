@@ -3,7 +3,7 @@
  * ModelPage actions
  *
  */
-import { get } from 'lodash';
+import { forEach, get, includes, map, set } from 'lodash';
 import { storeData } from '../../utils/storeData';
 
 import {
@@ -62,7 +62,19 @@ export function modelFetch(modelName) {
   };
 }
 
-export function modelFetchSucceeded(model) {
+export function modelFetchSucceeded(data) {
+  const model = data;
+  const defaultKeys = ['required', 'unique', 'type'];
+
+  forEach(model.model.attributes, (attribute, index) => {
+    map(attribute.params, (value, key) => {
+      if (!includes(defaultKeys, key) && value) {
+        set(model.model.attributes[index].params, `${key}Value`, value);
+        set(model.model.attributes[index].params, key, true);
+      }
+    });
+  });
+
   return {
     type: MODEL_FETCH_SUCCEEDED,
     model,
