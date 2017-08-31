@@ -5,7 +5,7 @@
  */
 
 import { fromJS, Map, List } from 'immutable';
-// import { findIndex, differenceWith, isEqual, filter } from 'lodash';
+import { size, differenceBy } from 'lodash';
 /* eslint-disable new-cap */
 import {
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
@@ -38,8 +38,14 @@ function modelPageReducer(state = initialState, action) {
         .set('showButtons', false)
         .set('model', state.get('initialModel'));
     case DELETE_ATTRIBUTE: {
+      const contentTypeAttributes = state.getIn(['model', 'attributes']).toJS();
+      contentTypeAttributes.splice(action.position, 1);
+      const updatedContentTypeAttributes = contentTypeAttributes;
+      const showButtons = size(updatedContentTypeAttributes) !== size(state.getIn(['initialModel', 'attributes']).toJS())
+        || size(differenceBy(state.getIn(['initialModel', 'attributes']).toJS(), updatedContentTypeAttributes, 'name')) > 0;
+
       return state
-        .set('showButtons', true)
+        .set('showButtons', showButtons)
         .updateIn(['model', 'attributes'], (list) => list.splice(action.position, 1));
     }
     case MODEL_FETCH_SUCCEEDED:
