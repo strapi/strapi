@@ -15,8 +15,10 @@ import {
   MODEL_FETCH,
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
+  SET_BUTTON_LOADER,
   SUBMIT,
   RESET_SHOW_BUTTONS_PROPS,
+  UNSET_BUTTON_LOADER,
   UPDATE_CONTENT_TYPE,
 } from './constants';
 
@@ -103,10 +105,22 @@ export function resetShowButtonsProps() {
   };
 }
 
+export function setButtonLoader() {
+  return {
+    type: SET_BUTTON_LOADER,
+  };
+}
+
 export function submit() {
   return {
     type: SUBMIT,
   }
+}
+
+export function unsetButtonLoader() {
+  return {
+    type: UNSET_BUTTON_LOADER,
+  };
 }
 
 export function updateContentType(data) {

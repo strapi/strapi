@@ -67,3 +67,50 @@
   padding-left: 1.6rem;
   padding-right: 1.6rem;
 }
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-top: -2rem;
+  line-height: 3.8rem;
+  font-size: 4rem;
+}
+
+.loader {
+  height: 3rem;
+  padding: 0;
+  border-radius: 0.3rem;
+  letter-spacing: .5rem;
+  font-family: Lato;
+  cursor: not-allowed;
+  opacity: .65;
+  &:focus {
+    outline: 0;
+  }
+}
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  // font-size: 5rem;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: .4s;
+}

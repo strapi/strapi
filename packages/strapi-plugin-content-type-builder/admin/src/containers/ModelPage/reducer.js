@@ -16,6 +16,8 @@ import {
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
   RESET_SHOW_BUTTONS_PROPS,
+  SET_BUTTON_LOADER,
+  UNSET_BUTTON_LOADER,
   UPDATE_CONTENT_TYPE,
 } from './constants';
 
@@ -29,6 +31,7 @@ const initialState = fromJS({
   postContentTypeSuccess: false,
   showButtons: false,
   modelLoading: true,
+  showButtonLoader: false,
 });
 
 function modelPageReducer(state = initialState, action) {
@@ -72,6 +75,10 @@ function modelPageReducer(state = initialState, action) {
       return state.set('postContentTypeSuccess', !state.get('postContentTypeSuccess'));
     case RESET_SHOW_BUTTONS_PROPS:
       return state.set('showButtons', false);
+    case SET_BUTTON_LOADER:
+      return state.set('showButtonLoader', true);
+    case UNSET_BUTTON_LOADER:
+      return state.set('showButtonLoader', false);
     case UPDATE_CONTENT_TYPE:
       return state
         .set('model', Map(action.data))

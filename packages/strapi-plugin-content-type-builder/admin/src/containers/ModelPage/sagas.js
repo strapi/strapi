@@ -10,7 +10,7 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 import { storeData } from '../../utils/storeData';
 
 import { MODEL_FETCH, SUBMIT } from './constants';
-import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps } from './actions';
+import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps, setButtonLoader, unsetButtonLoader } from './actions';
 import { makeSelectModel } from './selectors';
 
 export function* fetchModel(action) {
@@ -28,6 +28,9 @@ export function* fetchModel(action) {
 
 export function* submitChanges() {
   try {
+    // Show button loader
+    yield put(setButtonLoader());
+
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
@@ -70,6 +73,8 @@ export function* submitChanges() {
     });
 
     yield put(resetShowButtonsProps());
+    // Remove loader
+    yield put(unsetButtonLoader());
 
   } catch(error) {
     console.log(error);

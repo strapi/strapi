@@ -124,7 +124,7 @@ PopUpForm.propTypes = {
   renderCustomPopUpHeader: React.PropTypes.oneOfType([
     React.PropTypes.func,
     React.PropTypes.object,
-    React.PropTypes.object,
+    React.PropTypes.bool,
   ]),
   renderModalBody: React.PropTypes.oneOfType([
     React.PropTypes.bool,

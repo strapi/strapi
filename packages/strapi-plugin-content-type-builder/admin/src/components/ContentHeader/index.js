@@ -18,7 +18,18 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
   }
 
   renderButtonContainer = () => {
-    console.log('waiting');
+    if (this.props.isLoading) {
+      return (
+        <div className={styles.buttonContainer}>
+          <FormattedMessage id="form.button.save">
+            {(message) => (
+              <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader />
+            )}
+          </FormattedMessage>
+        </div>
+      );
+    }
+
     return (
       <div className={styles.buttonContainer}>
         <FormattedMessage id="form.button.cancel">
@@ -81,6 +92,7 @@ ContentHeader.propTypes = {
   handleCancel: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,
   icoType: React.PropTypes.string,
+  isLoading: React.PropTypes.bool,
   name: React.PropTypes.string,
   noMargin: React.PropTypes.bool,
 };
