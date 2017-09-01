@@ -35,7 +35,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     };
   }
 
-  edit = () => {
+  edit = (e) => {
+    e.preventDefault();
     this.props.handleEdit(this.props.row.name);
   }
 
@@ -44,6 +45,11 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     this.setState({ showWarning: false });
   }
 
+  showModalWarning = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ showWarning: !this.state.showWarning });
+  }
   toggleModalWarning = () => {
     // e.preventDefault();
     // e.stopPropagation()
@@ -61,7 +67,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     || <div><FormattedMessage id="modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.model)}</span></div>;
 
     return (
-      <li className={styles.attributeRow}>
+      <li className={styles.attributeRow} onClick={this.edit}>
         <div className={styles.flex}>
           <div className={styles.nameContainer}>
             {this.renderAttributesBox()}
@@ -74,7 +80,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
               <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
             </div>
             <div className="ico">
-              <i className="fa fa-trash ico" onClick={this.toggleModalWarning} role="button" />
+              <i className="fa fa-trash ico" onClick={this.showModalWarning} role="button" />
             </div>
           </div>
         </div>

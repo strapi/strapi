@@ -25,7 +25,9 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     router.push(`plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
 
-  delete = () => {
+  delete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     this.props.handleDelete(this.props.rowItem.name)
     this.setState({ showWarning: false });
   }
@@ -34,12 +36,14 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}`);
   }
 
-  toggleModalWarning = (e) => {
-    e.preventDefault();
-    e.stopPropagation()
+  toggleModalWarning = () => {
     this.setState({ showWarning: !this.state.showWarning });
   }
 
+  showModalWarning = (e) => {
+    e.stopPropagation();
+    this.setState({ showWarning: !this.state.showWarning });
+  }
 
   render() {
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id={'contentType.temporaryDisplay'} /> : '';
@@ -56,7 +60,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
                 <i className="fa fa-pencil" onClick={this.edit} role="button" />
               </div>
               <div>
-                <i className="fa fa-trash" onClick={this.toggleModalWarning} role="button" />
+                <i className="fa fa-trash" onClick={this.showModalWarning} role="button" />
               </div>
             </div>
           </div>

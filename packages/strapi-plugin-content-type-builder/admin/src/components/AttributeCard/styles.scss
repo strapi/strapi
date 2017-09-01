@@ -11,9 +11,9 @@
   border-radius: 0.25rem;
   background: #FFFFFF;
   cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
   &:hover, &:active {
     background: #F7F7F7;
-    box-shadow: 1px 1px 1px #68768E;
     .checkContainer {
       color: #0097F6;
       border: 2px solid #0097F6;
@@ -50,7 +50,7 @@
 .checkContainer {
   height: 1.2rem;
   width: 1.2rem;
-  margin-top: .4rem;
+  margin-top: .6rem;
   align-self: center;
   position: relative;
   border-radius: 50%;
@@ -58,8 +58,9 @@
   color: #E3E9F3;
   font-weight: bold;
   > i {
-    font-size: .8rem;
+    font-size: .7rem;
     position: absolute;
-    top: -.1rem;
+    top: -.1px;
+    left: .5px;
   }
 }

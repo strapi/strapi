@@ -54,6 +54,7 @@
   top: 16.8rem;
   > div {
     border:none;
+    border-radius: 2px;
     width: 74.5rem;
   }
 }
@@ -88,6 +89,7 @@
     color: #C3C5C8;
     opacity: 1;
     font-size: 1.8rem;
+    font-weight: 100;
     &:hover, &:focus {
       color: #C3C5C8;
       opacity: 1;

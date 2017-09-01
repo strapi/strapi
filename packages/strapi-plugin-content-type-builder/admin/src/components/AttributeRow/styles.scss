@@ -4,6 +4,7 @@
   margin-top: 0!important;
   font-size: 1.3rem;
   line-height: 5.3rem;
+  cursor: pointer;
   &:last-child .flex {
     border-bottom: none;
   }
@@ -46,6 +47,7 @@
   width: 7rem;
   display: flex;
   justify-content: flex-end;
+  opacity: .75;
   > div {
     height: 100%;
     color: #0E1622;

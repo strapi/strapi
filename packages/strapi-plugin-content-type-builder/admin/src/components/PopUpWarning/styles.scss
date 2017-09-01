@@ -21,6 +21,7 @@
   top: 16.8rem;
   > div {
     border:none;
+    border-radius: 2px;
     width: 37.5rem;
   }
 }
@@ -83,7 +84,7 @@
   font-weight: 500;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
-  color: white;
+  color: white !important;
   &:active {
    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
  }
