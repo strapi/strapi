@@ -220,20 +220,148 @@
       }
     },
     "date": {
-      "baseSettings": {},
-      "advancedSettings": {}
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.date.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          }
+        ]
+      }
     },
     "boolean": {
-      "baseSettings": {},
-      "advancedSettings": {}
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.boolean.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          }
+        ]
+      }
     },
     "json": {
-      "baseSettings": {},
-      "advancedSettings": {}
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.json.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          }
+        ]
+      }
     },
     "media": {
-      "baseSettings": {},
-      "advancedSettings": {}
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.media.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          }
+        ]
+      }
     }
   }
 }

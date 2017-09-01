@@ -63,6 +63,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     super(props);
     this.state = {
       showModal: false,
+      popUpTitleEdit: '',
     };
   }
 
@@ -297,6 +298,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       }
 
       if (get(props.contentTypeData, 'name') && includes(props.hash, '#edit') && includes(props.hash, 'attribute')) {
+
+        this.setState({ popUpTitleEdit: get(props.contentTypeData, ['attributes', split(props.hash, '::')[3], 'name']) });
         this.props.setAttributeFormEdit(props.hash, props.contentTypeData);
       }
     } else {
@@ -348,12 +351,17 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   )
 
   renderCustomPopUpHeader = (startTitle) => {
-    const italicText = replace(split(this.props.hash, ('::'))[1], 'attribute', '');
+    const italicText = !includes(this.props.hash, '#edit') ?
+      <FormattedMessage id={replace(split(this.props.hash, ('::'))[1], 'attribute', '')}>
+        {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
+      </FormattedMessage>
+       : <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{this.state.popUpTitleEdit}</span>;
     return (
       <div>
-        <FormattedMessage id={startTitle} />&nbsp;<FormattedMessage id={italicText}>
-          {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
-        </FormattedMessage>&nbsp;
+        <FormattedMessage id={startTitle} />
+        &nbsp;
+        {italicText}
+        &nbsp;
         <FormattedMessage id="popUpForm.field" />
       </div>
     )

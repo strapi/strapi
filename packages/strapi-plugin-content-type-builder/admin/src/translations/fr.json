@@ -13,6 +13,10 @@
   "button.attributes.add": "Ajouter un champs",
 
   "form.attribute.item.textarea.name": "Nom",
+  "form.attribute.item.date.name": "Nom",
+  "form.attribute.item.boolean.name": "Nom",
+  "form.attribute.item.json.name": "Nom",
+  "form.attribute.item.media.name": "Nom",
   "form.attribute.item.string.name": "Nom",
   "form.attribute.item.settings.name": "Paramètres",
   "form.attribute.item.requiredField": "Champ obligatoire",

@@ -14,6 +14,10 @@
   "button.attributes.add": "Add New Field",
 
   "form.attribute.item.textarea.name": "Name",
+  "form.attribute.item.date.name": "Name",
+  "form.attribute.item.media.name": "Name",
+  "form.attribute.item.json.name": "Name",
+  "form.attribute.item.boolean.name": "Name",
   "form.attribute.item.string.name": "Name",
   "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.requiredField": "Required field",

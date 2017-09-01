@@ -24,7 +24,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     this.asset = {
       'boolean': IcoBoolean,
       'date': IcoDate,
-      'image': IcoImage,
+      'media': IcoImage,
       'json': IcoJson,
       'relation': IcoRelation,
       'string': IcoString,
