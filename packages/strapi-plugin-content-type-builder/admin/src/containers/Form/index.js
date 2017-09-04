@@ -233,6 +233,16 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
   }
 
+  checkForNestedInput = (item) => {
+    const hasNestedInput = item.items && item.type !== 'select';
+    return hasNestedInput;
+  }
+
+  checkInputContentType = (item) => {
+    const shouldOverrideHandleBlur = item.target === 'name' && includes(this.props.hash, 'contentType');
+    return shouldOverrideHandleBlur;
+  }
+
   handleBlur = ({ target }) => {
     if (target.name === 'name') {
       this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
@@ -336,11 +346,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  checkForNestedInput = (item) => {
-    const hasNestedInput = item.items && item.type !== 'select';
-    return hasNestedInput;
-  }
-
   renderInput = (item, key) => (
     <InputCheckboxWithNestedInputs
       key={key}
@@ -404,6 +409,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           buttonSubmitMessage={buttonSubmitMessage}
           showLoader={this.props.showButtonLoading}
           renderCustomPopUpHeader={renderCustomPopUpHeader}
+          overrideHandleBlurCondition={this.checkInputContentType}
         />
       </div>
     );

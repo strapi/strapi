@@ -19,7 +19,11 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6';
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
+    const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
+
     const value = !isEmpty(this.props.values) && includes(item.target, '.') ? get(this.props.values, [split(item.target, '.')[0], split(item.target, '.')[1]]) : this.props.values[item.target];
+
+    const handleBlur = shouldOverrideHandleBlur ? this.props.handleBlur : false;
 
     if (shouldOverrideRendering) {
       return this.props.overrideRenderInput(item, key);
@@ -30,7 +34,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         key={key}
         type={item.type}
         handleChange={this.props.handleChange}
-        handleBlur={this.props.handleBlur}
+        handleBlur={handleBlur}
         name={item.name}
         target={item.target}
         validations={item.validations}
@@ -116,6 +120,7 @@ PopUpForm.propTypes = {
   isOpen: React.PropTypes.bool,
   noButtons: React.PropTypes.bool,
   noNav: React.PropTypes.bool,
+  overrideHandleBlurCondition: React.PropTypes.func,
   overrideRenderInput: React.PropTypes.func,
   overrideRenderInputCondition: React.PropTypes.func,
   // popUpFormType: React.PropTypes.string.isRequired,

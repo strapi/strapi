@@ -13,6 +13,13 @@
   "button.contentType.add": "Add Content Type",
   "button.attributes.add": "Add New Field",
 
+  "error.validation.required": "This value input is required.",
+  "error.validation.regex": "The value not match the regex.",
+  "error.validation.max": "The value is too high.",
+  "error.validation.min": "The value is too low.",
+  "error.validation.maxLength": "The value is too long.",
+  "error.validation.minLength": "The value is too shot.",
+
   "form.attribute.item.textarea.name": "Name",
   "form.attribute.item.date.name": "Name",
   "form.attribute.item.media.name": "Name",

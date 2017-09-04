@@ -12,6 +12,13 @@
   "button.contentType.add": "Ajouter un modèle",
   "button.attributes.add": "Ajouter un champs",
 
+  "error.validation.required": "Ce champ est obligatoire.",
+  "error.validation.regex": "La valeur ne correspond pas au format attendu.",
+  "error.validation.max": "La valeur est trop grande.",
+  "error.validation.min": "La valeur est trop basse.",
+  "error.validation.maxLength": "La valeur est trop longue.",
+  "error.validation.minLength": "La valeur est trop courte.",
+
   "form.attribute.item.textarea.name": "Nom",
   "form.attribute.item.date.name": "Nom",
   "form.attribute.item.boolean.name": "Nom",

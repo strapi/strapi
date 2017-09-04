@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { get, isEmpty, map, isObject } from 'lodash';
+import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -33,6 +33,65 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       this.props.handleChange({ target });
     }
   }
+
+  handleBlur = ({ target }) => {
+    // prevent error display if input is initially empty
+    if (!isEmpty(target.value) || this.state.hasInitialValue) {
+      // validates basic string validations
+      // add custom logic here such as alerts...
+      const errors = this.validate(target.value);
+
+      this.setState({ errors, hasInitialValue: true });
+    }
+  }
+
+  validate = (value) => {
+    let errors = [];
+    // handle i18n
+    const requiredError = { id: 'error.validation.required' };
+    mapKeys(this.props.validations, (validationValue, validationKey) => {
+      switch (validationKey) {
+        case 'max':
+          if (parseInt(value, 10) > validationValue) {
+            errors.push({ id: 'error.validation.max' });
+          }
+          break;
+        case 'maxLength':
+          if (value.length > validationValue) {
+            errors.push({ id: 'error.validation.maxLength' });
+          }
+          break;
+        case 'min':
+          if (parseInt(value, 10) < validationValue) {
+            errors.push({ id: 'error.validation.min' });
+          }
+          break;
+        case 'minLength':
+          if (value.length < validationValue) {
+            errors.push({ id: 'error.validation.minLength' });
+          }
+          break;
+        case 'required':
+          if (value.length === 0) {
+            errors.push({ id: 'error.validation.required' });
+          }
+          break;
+        case 'regex':
+          if (!new RegExp(validationValue).test(value)) {
+            errors.push({ id: 'error.validation.regex' });
+          }
+          break;
+        default:
+          errors = [];
+      }
+    });
+
+    if (includes(errors, requiredError)) {
+      errors = reject(errors, (error) => error !== requiredError);
+    }
+    return errors;
+  }
+
 
   handleChangeCheckbox = (e) => {
     const target = {
@@ -239,7 +298,10 @@ Input.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
   // errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.func,
+  handleBlur: React.PropTypes.oneOfType([
+    React.PropTypes.func,
+    React.PropTypes.bool,
+  ]),
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
