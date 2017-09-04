@@ -384,7 +384,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const noButtons = includes(this.props.hash, '#choose');
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
-
+    // TODO remove
+    const errors = [{ target: 'name', errors: [{ id: 'error.validation.required' }] }];
+    // console.log(this.props.formValidations)
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -410,6 +412,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           showLoader={this.props.showButtonLoading}
           renderCustomPopUpHeader={renderCustomPopUpHeader}
           overrideHandleBlurCondition={this.checkInputContentType}
+          formErrors={errors}
+          didCheckErrors={this.props.didCheckErrors}
         />
       </div>
     );
@@ -451,6 +455,7 @@ Form.propTypes = {
   contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
   contentTypeFetchSucceeded: React.PropTypes.func,
+  didCheckErrors: React.PropTypes.bool,
   editContentTypeAttribute: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,

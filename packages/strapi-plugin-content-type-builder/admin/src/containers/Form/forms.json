@@ -8,7 +8,9 @@
           "type": "select",
           "value": "",
           "items": [{}],
-          "validations": {}
+          "validations": {
+            "required": true
+          }
         },
         {
           "name": "form.contentType.item.name",

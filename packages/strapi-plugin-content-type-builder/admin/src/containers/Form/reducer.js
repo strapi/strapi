@@ -23,9 +23,11 @@ import {
 /* eslint-disable new-cap */
 
 const initialState = fromJS({
+  didCheckErrors: false,
   selectOptionsFetchSucceeded: false,
   selectOptions: List(),
   form: List(),
+  formValidations: List(),
   initialData: Map(),
   initialDataEdit: Map(),
   modifiedDataAttribute: Map(),
@@ -101,6 +103,7 @@ function formReducer(state = initialState, action) {
       return state
         .set('isFormSet', true)
         .set('form', Map(action.form))
+        .set('formValidations', List(action.formValidations))
         .set('initialData', action.data)
         .set('modifiedData', action.data);
     }

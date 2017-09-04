@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
+import { get, isEmpty, map, mapKeys, isObject, reject, includes, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -31,6 +31,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
       const target = { name: nextProps.target, value: nextProps.selectOptions[0].value  };
       this.props.handleChange({ target });
+    }
+
+    // Check if errors have been updated during validations
+    if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
+      // Remove from the state errors that are already set
+      const errors = uniqBy(union(this.state.errors, nextProps.errors), 'id');
+      this.setState({ errors });
     }
   }
 
@@ -177,7 +184,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   }
 
-  renderInputTextArea = (bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription) => {
+  renderInputTextArea = (bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -197,7 +204,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               value={this.props.value}
               name={this.props.target}
               id={this.props.name}
-
+              onBlur={handleBlur}
+              onFocus={this.props.handleFocus}
               placeholder={placeholder}
             />
           )}
@@ -273,7 +281,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       case 'select':
         return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
       case 'textarea':
-        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription);
+        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':
         return this.renderInputCheckbox(requiredClass, inputDescription);
       default:
@@ -297,6 +305,7 @@ Input.propTypes = {
   addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
+  didCheckErrors: React.PropTypes.bool,
   // errors: React.PropTypes.array,
   handleBlur: React.PropTypes.oneOfType([
     React.PropTypes.func,

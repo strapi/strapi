@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { get, map, includes, split, isEmpty } from 'lodash';
+import { get, map, includes, split, isEmpty, findIndex } from 'lodash';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/Input';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
@@ -24,6 +24,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     const value = !isEmpty(this.props.values) && includes(item.target, '.') ? get(this.props.values, [split(item.target, '.')[0], split(item.target, '.')[1]]) : this.props.values[item.target];
 
     const handleBlur = shouldOverrideHandleBlur ? this.props.handleBlur : false;
+    const errorIndex = findIndex(this.props.formErrors, ['target', item.target]);
+    const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
 
     if (shouldOverrideRendering) {
       return this.props.overrideRenderInput(item, key);
@@ -45,6 +47,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
         placeholder={item.placeholder}
         title={item.title}
+        errors={errors}
+        didCheckErrors={this.props.didCheckErrors}
       />
     );
   }
@@ -110,9 +114,14 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
 PopUpForm.propTypes = {
   buttonSubmitMessage: React.PropTypes.string.isRequired,
+  didCheckErrors: React.PropTypes.bool,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,
+  ]),
+  formErrors: React.PropTypes.oneOfType([
+    React.PropTypes.array,
+    React.PropTypes.object,
   ]),
   handleBlur: React.PropTypes.func,
   handleChange: React.PropTypes.func,

@@ -8,6 +8,7 @@
 
 import { map , forEach, replace } from 'lodash';
 import { Map, List } from 'immutable';
+import { getValidationsFromForm } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
 
 import {
@@ -124,17 +125,19 @@ export function resetIsFormSet() {
 
 export function setAttributeForm(hash) {
   const data = setAttributeFormData(hash);
-  
+  const formValidations = getValidationsFromForm(data.form, []);
   return {
     type: SET_ATTRIBUTE_FORM,
     form: data.form,
     attribute: data.attribute,
+    formValidations,
   }
 }
 
 export function setAttributeFormEdit(hash, contentType) {
   const form = setAttributeFormData(hash).form;
   const contentTypeAttribute = contentType.attributes[hash.split('::')[3]];
+  const formValidations = getValidationsFromForm(form, []);
   const attribute = Map({
     name: contentTypeAttribute.name,
     params: Map(contentTypeAttribute.params),
@@ -144,6 +147,7 @@ export function setAttributeFormEdit(hash, contentType) {
     type: SET_ATTRIBUTE_FORM_EDIT,
     form,
     attribute,
+    formValidations,
   }
 }
 
@@ -162,10 +166,13 @@ export function unsetButtonLoading() {
 export function setForm(hash) {
   const form = forms[hash.split('::')[1]][hash.split('::')[2]];
   const data = getDataFromForm(forms[hash.split('::')[1]]);
+  const formValidations = getValidationsFromForm(forms[hash.split('::')[1]], [])
+
   return {
     type: SET_FORM,
     form,
     data,
+    formValidations,
   };
 }
 
