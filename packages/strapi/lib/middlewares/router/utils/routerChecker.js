@@ -88,7 +88,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
       } else if (
         _.startsWith(policy, pluginPolicyPrefix, 0) &&
         strapi.plugins[policySplited[1]] &&
-        !_.isEmpty(
+        !_.isUndefined(
           _.get(
             strapi.plugins,
             policySplited[1] +
@@ -109,7 +109,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
       } else if (
         !_.startsWith(policy, globalPolicyPrefix, 0) &&
         plugin &&
-        !_.isEmpty(
+        !_.isUndefined(
           _.get(
             strapi.plugins,
             plugin + '.config.policies.' + policy.toLowerCase()
@@ -125,7 +125,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
         );
       } else if (
         !_.startsWith(policy, globalPolicyPrefix, 0) &&
-        !_.isEmpty(
+        !_.isUndefined(
           _.get(
             strapi.api,
             currentApiName + '.config.policies.' + policy.toLowerCase()
