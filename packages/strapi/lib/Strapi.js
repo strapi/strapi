@@ -137,6 +137,9 @@ class Strapi extends EventEmitter {
   stop() {
     // Destroy server and available connections.
     this.server.destroy();
+
+    if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('stop');
+
     // Kill process.
     process.exit(0);
   }
@@ -162,7 +165,7 @@ class Strapi extends EventEmitter {
 
   reload() {
     const reload = function() {
-      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('message');
+      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('reload');
     };
 
     reload.isReloading = false;
