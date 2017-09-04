@@ -10,6 +10,8 @@ const _ = require('lodash');
 // Strapi utilities.
 const finder = require('strapi-utils').finder;
 const regex = require('strapi-utils').regex;
+const joijson = require('strapi-utils').joijson;
+
 
 // Middleware used for every routes.
 // Expose the endpoint in `this`.
@@ -28,6 +30,8 @@ function globalPolicy(endpoint, value, route) {
 }
 
 module.exports = strapi => function routerChecker(value, endpoint, plugin) {
+  const Joi = strapi.koaMiddlewares.joiRouter.Joi;
+  const builder = joijson.builder(Joi);
   const route = regex.detectRoute(endpoint);
 
   // Define controller and action names.
