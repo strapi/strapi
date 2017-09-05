@@ -13,7 +13,9 @@ module.exports = {
 
   getModel: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
-    const { model } = ctx.params;
+    let { model } = ctx.params;
+
+    model = _.toLower(model);
 
     if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
@@ -85,8 +87,8 @@ module.exports = {
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
-    if (strapi.models[name] && name !== model) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
-    if (!strapi.models[model]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (strapi.models[_.toLower(name)] && name !== model) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
+    if (!strapi.models[_.toLower(model)]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
@@ -111,7 +113,10 @@ module.exports = {
       const modelJSON = require(modelFilePath);
 
       modelJSON.attributes = formatedAttributes;
-      modelJSON.description = description;
+      modelJSON.info = {
+        name,
+        description
+      };
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
 

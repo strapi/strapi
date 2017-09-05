@@ -1,7 +1,10 @@
 {
   "connection": "<%= connection %>",
-  "description": "<%= description %>",
   "collectionName": "<%= collectionName || idPluralized %>",
+  "info": {
+    "name": "<%= id %>",
+    "description": "<%= description %>"
+  },
   "attributes": {
     <%= attributes %>
   }
