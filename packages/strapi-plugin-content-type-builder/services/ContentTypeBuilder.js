@@ -12,8 +12,8 @@ module.exports = {
     _.forEach(strapi.models, (model, name) => {
       models.push({
         icon: 'fa-cube',
-        name,
-        description: _.get(model, 'description', 'model.description.missing'),
+        name: _.get(model, 'info.name', 'model.name.missing'),
+        description: _.get(model, 'info.description', 'model.description.missing'),
         fields: _.keys(model.attributes).length
       });
     });
@@ -21,8 +21,10 @@ module.exports = {
     return models;
   },
 
-  getModel: slug => {
-    const model = _.get(strapi.models, slug);
+  getModel: name => {
+    name = _.toLower(name);
+
+    const model = _.get(strapi.models, name);
 
     const attributes = [];
     _.forEach(model.attributes, (params, name) => {
@@ -43,8 +45,8 @@ module.exports = {
     });
 
     return {
-      name: slug,
-      description: _.get(model, 'description', 'model.description.missing'),
+      name: _.get(model, 'info.name', 'model.name.missing'),
+      description: _.get(model, 'info.description', 'model.description.missing'),
       connection: model.connection,
       collectionName: model.collectionName,
       attributes: attributes
@@ -82,9 +84,11 @@ module.exports = {
   },
 
   getModelPath: model => {
+    model = _.toLower(model);
+
     let searchFilePath;
     const errors = [];
-    const searchFileName = `${_.toLower(model)}.settings.json`;
+    const searchFileName = `${model}.settings.json`;
     const apiPath = path.join(strapi.config.appPath, 'api');
 
     try {
@@ -165,6 +169,8 @@ module.exports = {
   },
 
   clearRelations: model => {
+    model = _.toLower(model);
+
     const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
 
@@ -236,6 +242,8 @@ module.exports = {
   },
 
   createRelations: (model, attributes) => {
+    model = _.toLower(model);
+
     const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
 
@@ -271,11 +279,11 @@ module.exports = {
                     switch (params.nature) {
                       case 'oneToOne':
                       case 'oneToMany':
-                      attr.model = _.toLower(_.camelCase(model));
+                      attr.model = model;
                       break;
                       case 'manyToOne':
                       case 'manyToMany':
-                      attr.collection = _.toLower(_.camelCase(model));
+                      attr.collection = model;
                       break;
                       default:
                     }
@@ -326,6 +334,8 @@ module.exports = {
   },
 
   removeModel: model => {
+    model = _.toLower(model);
+
     const errors = [];
     const apiPath = path.join(strapi.config.appPath, 'api');
 
