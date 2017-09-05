@@ -43,6 +43,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   constructor(props) {
     super(props);
 
+    this.state = {
+      contentTypeTemporary: false,
+    }
+
     this.popUpHeaderNavLinks = [
       { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
       { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
@@ -50,19 +54,23 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   componentDidMount() {
-    this.fetchModel();
+    this.fetchModel(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.updatedContentType !== nextProps.updatedContentType) {
-      this.fetchModel();
+      if (this.state.contentTypeTemporary) {
+        this.props.modelFetchSucceeded({ model: storeData.getContentType() });
+      } else {
+        this.fetchModel(nextProps);
+      }
     }
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.params.modelName !== this.props.params.modelName) {
       this.props.resetShowButtonsProps();
-      this.fetchModel();
+      this.fetchModel(this.props);
     }
   }
 
@@ -92,11 +100,13 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </div>
   )
 
-  fetchModel = () => {
-    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === this.props.params.modelName) {
+  fetchModel = (props) => {
+    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === props.params.modelName) {
+      this.setState({ contentTypeTemporary: true })
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
     } else {
-      this.props.modelFetch(this.props.params.modelName);
+      this.setState({ contentTypeTemporary: false });
+      this.props.modelFetch(props.params.modelName);
     }
   }
 

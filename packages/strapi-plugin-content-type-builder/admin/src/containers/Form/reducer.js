@@ -5,6 +5,7 @@
  */
 
 import { fromJS, List, Map } from 'immutable';
+import { findIndex } from 'lodash';
 import {
   CHANGE_INPUT,
   CHANGE_INPUT_ATTRIBUTE,
@@ -12,10 +13,13 @@ import {
   CONTENT_TYPE_ACTION_SUCCEEDED,
   CONTENT_TYPE_CREATE,
   CONTENT_TYPE_FETCH_SUCCEEDED,
+  REMOVE_CONTENT_TYPE_REQUIRED_ERROR,
+  RESET_FORM_ERRORS,
   RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_ATTRIBUTE_FORM_EDIT,
   SET_FORM,
+  SET_FORM_ERRORS,
   SET_BUTTON_LOADING,
   UNSET_BUTTON_LOADING,
 } from './constants';
@@ -28,6 +32,7 @@ const initialState = fromJS({
   selectOptions: List(),
   form: List(),
   formValidations: List(),
+  formErrors: List(),
   initialData: Map(),
   initialDataEdit: Map(),
   modifiedDataAttribute: Map(),
@@ -69,26 +74,38 @@ function formReducer(state = initialState, action) {
       return state
         .set('initialDataEdit', action.data)
         .set('modifiedDataEdit', action.data);
+    case REMOVE_CONTENT_TYPE_REQUIRED_ERROR:
+      return state
+        .update('formErrors', (list) => list.splice(findIndex(state.get('formErrors').toJS(), ['target', 'name']), 1))
+        .set('didCheckErrors', !state.get('didCheckErrors'));
+    case RESET_FORM_ERRORS:
+      return state.set('formErrors', List());
     case RESET_IS_FORM_SET:
       return state.set('isFormSet', false);
     case SET_ATTRIBUTE_FORM: {
       if (state.get('isFormSet')) {
-        return state.set('form', Map(action.form));
+        return state
+          .set('form', Map(action.form))
+          .set('didCheckErrors', !state.get('didCheckErrors'));
       }
 
       return state
         .set('isFormSet', true)
         .set('form', Map(action.form))
+        .set('formValidations', List(action.formValidations))
         .set('modifiedDataAttribute', action.attribute);
     }
     case SET_ATTRIBUTE_FORM_EDIT: {
       if (state.get('isFormSet')) {
-        return state.set('form', Map(action.form));
+        return state
+          .set('form', Map(action.form))
+          .set('didCheckErrors', !state.get('didCheckErrors'));
       }
 
       return state
         .set('isFormSet', true)
         .set('form', Map(action.form))
+        .set('formValidations', List(action.formValidations))
         .set('modifiedDataAttribute', action.attribute);
     }
     case SET_BUTTON_LOADING:
@@ -107,6 +124,10 @@ function formReducer(state = initialState, action) {
         .set('initialData', action.data)
         .set('modifiedData', action.data);
     }
+    case SET_FORM_ERRORS:
+      return state
+        .set('formErrors', List(action.formErrors))
+        .set('didCheckErrors', !state.get('didCheckErrors'));
     default:
       return state;
   }

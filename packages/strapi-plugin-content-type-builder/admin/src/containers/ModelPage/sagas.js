@@ -21,6 +21,8 @@ export function* fetchModel(action) {
 
     yield put(modelFetchSucceeded(data));
 
+    yield put(unsetButtonLoader());
+
   } catch(error) {
     window.Strapi.notification.error('An error occured');
   }

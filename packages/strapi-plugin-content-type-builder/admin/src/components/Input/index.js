@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { get, isEmpty, map, mapKeys, isObject, reject, includes, union, uniqBy } from 'lodash';
+import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -25,6 +25,14 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
       this.props.handleChange({ target });
     }
+
+    if (this.props.value && !isEmpty(this.props.value)) {
+      this.setState({ hasInitialValue: true });
+    }
+
+    if (!isEmpty(this.props.errors)) {
+      this.setState({ errors: this.props.errors });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -35,8 +43,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     // Check if errors have been updated during validations
     if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
+
       // Remove from the state errors that are already set
-      const errors = uniqBy(union(this.state.errors, nextProps.errors), 'id');
+      const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
       this.setState({ errors });
     }
   }
@@ -306,7 +315,7 @@ Input.propTypes = {
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
   didCheckErrors: React.PropTypes.bool,
-  // errors: React.PropTypes.array,
+  errors: React.PropTypes.array,
   handleBlur: React.PropTypes.oneOfType([
     React.PropTypes.func,
     React.PropTypes.bool,

@@ -10,14 +10,18 @@ import { connect } from 'react-redux';
 import {
   camelCase,
   findIndex,
+  forEach,
   get,
   includes,
   isEmpty,
+  isNumber,
   map,
+  set,
   size,
   split,
   toNumber,
   replace,
+  unset,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { router, store } from 'app';
@@ -29,7 +33,7 @@ import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInp
 import PopUpForm from 'components/PopUpForm';
 
 import { getAsyncInjectors } from 'utils/asyncInjectors';
-
+import { checkFormValidity } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
 
 import reducer from './reducer';
@@ -43,10 +47,13 @@ import {
   contentTypeEdit,
   contentTypeFetch,
   contentTypeFetchSucceeded,
+  removeContentTypeRequiredError,
+  resetFormErrors,
   resetIsFormSet,
   setAttributeForm,
   setAttributeFormEdit,
   setForm,
+  setFormErrors,
 } from './actions';
 
 import styles from './styles.scss';
@@ -57,6 +64,7 @@ injectReducer('form', reducer);
 injectSagas(sagas);
 
 /* eslint-disable react/sort-comp */
+/* eslint-disable consistent-return */
 
 export class Form extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -108,7 +116,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-
   componentDidUpdate(prevProps) {
     if (prevProps.modelLoading !== this.props.modelLoading && !isEmpty(this.props.hash)) {
       this.initComponent(this.props, true);
@@ -116,19 +123,41 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   addAttributeToContentType = () => {
+    const formErrors = this.checkNestedInputValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
     // Update the parent container (ModelPage)
     this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
     // Empty the store
     this.props.resetIsFormSet();
+    // Empty errors
+    this.props.resetFormErrors();
     // Close modal
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
   }
 
   addAttributeToTempContentType = () => {
+    const formErrors = this.checkNestedInputValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
     // Get the entire content type from the reducer
     const contentType = this.props.modifiedDataEdit;
     // Add the new attribute to the content type attribute list
-    contentType.attributes.push(this.props.modifiedDataAttribute);
+    const newAttribute = this.props.modifiedDataAttribute;
+    forEach(newAttribute.params, (value, key) => {
+      if (includes(key, 'Value')) {
+        set(newAttribute.params, replace(key, 'Value', ''), value);
+        unset(newAttribute.params, key);
+      }
+    });
+
+    contentType.attributes.push(newAttribute);
     // Reset the store and update the parent container
     this.props.contentTypeCreate(contentType);
     // Get the displayed model from the localStorage
@@ -139,11 +168,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.temporaryContentTypeFieldsUpdated(model.fields);
     // Store the updated model in the localStorage
     storeData.setModel(model);
+    this.props.resetFormErrors();
     // Close modal
     router.push(`${this.props.redirectRoute}/${contentType.name}`);
   }
 
   createContentType = (data) => {
+    // Check form errors
+    const formErrors = checkFormValidity(data, this.props.formValidations);
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
     const oldMenu = !isEmpty(this.props.menuData) ? this.props.menuData[0].items : [];
     // Check if link already exist in the menu to remove it
     const index = findIndex(oldMenu, [ 'name', replace(split(this.props.hash, '::')[0], '#edit', '')]);
@@ -155,26 +192,91 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.contentTypeCreate(data);
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
+    // Reset popUp form
     this.props.resetIsFormSet();
+    // Reset formErrors
+    this.props.resetFormErrors();
     // Close modal
     const modelPage = includes(this.props.redirectRoute, 'models') ? '' : '/models';
     router.push(`${this.props.redirectRoute}${modelPage}/${data.name}`);
   }
 
+  checkForNestedInput = (item) => {
+    const hasNestedInput = item.items && item.type !== 'select';
+    return hasNestedInput;
+  }
+
+  checkInputContentType = (item) => {
+    const shouldOverrideHandleBlur = item.target === 'name' && includes(this.props.hash, 'contentType');
+    return shouldOverrideHandleBlur;
+  }
+
+  checkNestedInputValidations = (formErrors) => {
+    if (get(this.props.modifiedDataAttribute, ['params', 'minLength'])) {
+      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', 'minLengthValue']))) {
+        formErrors.push({ target: 'params.minLengthValue', errors: [{ id: 'error.validation.required' }] });
+      }
+    }
+
+    if (get(this.props.modifiedDataAttribute, ['params', 'maxLength'])) {
+      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', 'maxLengthValue']))) {
+        formErrors.push({ target: 'params.maxLengthValue', errors: [{ id: 'error.validation.required' }] });
+      }
+    }
+
+    return formErrors;
+  }
+
+  contentTypeEdit = () => {
+    const formErrors = checkFormValidity(this.props.modifiedDataEdit, this.props.formValidations);
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
+    return this.props.contentTypeEdit();
+  }
+
   editContentTypeAttribute = () => {
+    const formErrors = this.checkNestedInputValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
     // Update the parent container (ModelPage)
     this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, this.props.hash.split('::')[3]);
     // Empty the store
     this.props.resetIsFormSet();
+    // Empty errors
+    this.props.resetFormErrors();
     // Close modal
     router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#edit', '')}`);
   }
 
   editTempContentTypeAttribute = () => {
+    const formErrors = this.checkNestedInputValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setFormErrors(formErrors);
+    }
+
     this.editContentTypeAttribute();
     const contentType = storeData.getContentType();
-    contentType.attributes[this.props.hash.split('::')[3]] = this.props.modifiedDataAttribute;
+    const newAttribute = this.props.modifiedDataAttribute;
+
+    forEach(newAttribute.params, (value, key) => {
+      if (includes(key, 'Value')) {
+        set(newAttribute.params, replace(key, 'Value', ''), value);
+        unset(newAttribute.params, key);
+      }
+    });
+
+    contentType.attributes[this.props.hash.split('::')[3]] = newAttribute;
     const newContentType = contentType;
+
+    // Empty errors
+    this.props.resetFormErrors();
     storeData.setContentType(newContentType);
   }
 
@@ -233,24 +335,18 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
   }
 
-  checkForNestedInput = (item) => {
-    const hasNestedInput = item.items && item.type !== 'select';
-    return hasNestedInput;
-  }
-
-  checkInputContentType = (item) => {
-    const shouldOverrideHandleBlur = item.target === 'name' && includes(this.props.hash, 'contentType');
-    return shouldOverrideHandleBlur;
-  }
-
   handleBlur = ({ target }) => {
     if (target.name === 'name') {
       this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
+      if (!isEmpty(target.value)) {
+        // The input name for content type doesn't have the default handleBlur validation so we need to manually remove the error
+        this.props.removeContentTypeRequiredError();
+      }
     }
   }
 
   handleChange = ({ target }) => {
-    const value = target.type === 'number' ? toNumber(target.value) : target.value;
+    const value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
 
     if (includes(this.props.hash.split('::')[1], 'attribute')) {
       this.props.changeInputAttribute(target.name, value);
@@ -274,7 +370,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         const isAttribute = includes(hashArray[1], 'attribute');
         cbSuccess = isAttribute ? this.editTempContentTypeAttribute : this.createContentType;
         dataSucces = isAttribute ? null : this.props.modifiedDataEdit;
-        cbFail = isAttribute ? this.editContentTypeAttribute : this.props.contentTypeEdit;
+        cbFail = isAttribute ? this.editContentTypeAttribute : this.contentTypeEdit;
+
         return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
       }
       case includes(hashArray[0], 'create') && includes(this.props.hash.split('::')[1], 'attribute'): {
@@ -282,8 +379,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         cbFail = this.addAttributeToContentType;
         return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
       }
-      default:
+      default: {
         return this.createContentType(this.props.modifiedData);
+      }
     }
   }
 
@@ -343,6 +441,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Set the isFormSet props to false when the modal is closing so the store is emptied
     if (this.state.showModal) {
       this.props.resetIsFormSet();
+      this.props.resetFormErrors();
     }
   }
 
@@ -352,6 +451,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       data={item}
       value={this.props.modifiedDataAttribute.params}
       handleChange={this.handleChange}
+      errors={this.props.formErrors}
+      didCheckErrors={this.props.didCheckErrors}
     />
   )
 
@@ -384,9 +485,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const noButtons = includes(this.props.hash, '#choose');
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
-    // TODO remove
-    const errors = [{ target: 'name', errors: [{ id: 'error.validation.required' }] }];
-    // console.log(this.props.formValidations)
+
     return (
       <div className={styles.form}>
         <PopUpForm
@@ -412,7 +511,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           showLoader={this.props.showButtonLoading}
           renderCustomPopUpHeader={renderCustomPopUpHeader}
           overrideHandleBlurCondition={this.checkInputContentType}
-          formErrors={errors}
+          formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
         />
       </div>
@@ -434,10 +533,13 @@ function mapDispatchToProps(dispatch) {
       contentTypeEdit,
       contentTypeFetch,
       contentTypeFetchSucceeded,
+      removeContentTypeRequiredError,
+      resetFormErrors,
       resetIsFormSet,
       setAttributeForm,
       setAttributeFormEdit,
       setForm,
+      setFormErrors,
       storeTemporaryMenu,
       temporaryContentTypeFieldsUpdated,
       updateContentType,
@@ -461,6 +563,8 @@ Form.propTypes = {
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,
   ]),
+  formErrors: React.PropTypes.array,
+  formValidations: React.PropTypes.array,
   hash: React.PropTypes.string.isRequired,
   isModelPage: React.PropTypes.bool,
   menuData: React.PropTypes.array.isRequired,
@@ -472,6 +576,8 @@ Form.propTypes = {
   // noNav: React.PropTypes.bool,
   popUpHeaderNavLinks: React.PropTypes.array,
   redirectRoute: React.PropTypes.string.isRequired,
+  removeContentTypeRequiredError: React.PropTypes.func,
+  resetFormErrors: React.PropTypes.func,
   resetIsFormSet: React.PropTypes.func,
   routePath: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
@@ -479,6 +585,7 @@ Form.propTypes = {
   setAttributeForm: React.PropTypes.func,
   setAttributeFormEdit: React.PropTypes.func,
   setForm: React.PropTypes.func.isRequired,
+  setFormErrors: React.PropTypes.func,
   shouldRefetchContentType: React.PropTypes.bool,
   showButtonLoading: React.PropTypes.bool,
   storeTemporaryMenu: React.PropTypes.func,

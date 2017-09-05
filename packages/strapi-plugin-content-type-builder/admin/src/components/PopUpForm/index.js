@@ -19,6 +19,11 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6';
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
+
+    if (shouldOverrideRendering) {
+      return this.props.overrideRenderInput(item, key);
+    }
+
     const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
 
     const value = !isEmpty(this.props.values) && includes(item.target, '.') ? get(this.props.values, [split(item.target, '.')[0], split(item.target, '.')[1]]) : this.props.values[item.target];
@@ -27,9 +32,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     const errorIndex = findIndex(this.props.formErrors, ['target', item.target]);
     const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
 
-    if (shouldOverrideRendering) {
-      return this.props.overrideRenderInput(item, key);
-    }
 
     return (
       <Input

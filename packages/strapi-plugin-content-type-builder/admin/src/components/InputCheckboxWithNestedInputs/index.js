@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { isEmpty, map } from 'lodash';
+import { isEmpty, map, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Input from 'components/Input';
 import styles from './styles.scss';
@@ -22,20 +22,27 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
 
 
   renderNestedInput = () => {
+
     if (this.props.value[this.props.data.target.split('.')[1]]) {
       return (
         <div className={styles.nestedInputContainer} style={{ marginBottom: '-19px' }}>
-          {map(this.props.data.items, (item, key) => (
-            <Input
-              key={key}
-              type={item.type}
-              handleChange={this.props.handleChange}
-              target={item.target}
-              value={this.props.value[item.target.split('.')[1]]}
-              validations={item.validations}
-              name={item.name}
-            />
-        ))}
+          {map(this.props.data.items, (item, key) => {
+            const errorIndex = findIndex(this.props.errors, ['target', item.target]);
+            const errors = errorIndex !== -1 ? this.props.errors[errorIndex].errors : [];
+            return (
+              <Input
+                key={key}
+                type={item.type}
+                handleChange={this.props.handleChange}
+                target={item.target}
+                value={this.props.value[item.target.split('.')[1]]}
+                validations={item.validations}
+                name={item.name}
+                errors={errors}
+                didCheckErrors={this.props.didCheckErrors}
+              />
+            )
+          })}
         </div>
       );
     }
@@ -62,6 +69,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
             <small>{this.props.data.inputDescription}</small>
           </div>
         </div>
+
         {spacer}
         {this.renderNestedInput()}
       </div>
@@ -71,6 +79,8 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
 
 InputCheckboxWithNestedInputs.propTypes = {
   data: React.PropTypes.object.isRequired,
+  didCheckErrors: React.PropTypes.bool,
+  errors: React.PropTypes.array,
   handleChange: React.PropTypes.func.isRequired,
   value: React.PropTypes.object,
 };

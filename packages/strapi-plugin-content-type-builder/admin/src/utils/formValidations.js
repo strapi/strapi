@@ -1,4 +1,4 @@
-import { forEach, isObject, isArray, map } from 'lodash';
+import { forEach, isObject, isArray, map, mapKeys, includes, reject, isEmpty, findIndex, isUndefined } from 'lodash';
 
 /* eslint-disable consistent-return */
 export function getValidationsFromForm(form, formValidations) {
@@ -27,4 +27,70 @@ export function getValidationsFromForm(form, formValidations) {
   });
 
   return formValidations;
+}
+
+
+export function checkFormValidity(formData, formValidations) {
+  const errors = [];
+  forEach(formData, (value, key) => {
+    const validationValue = formValidations[findIndex(formValidations, ['target', key])];
+
+    if (!isUndefined(validationValue)) {
+      const inputErrors = validate(value, validationValue.validations);
+      if (!isEmpty(inputErrors)) {
+        errors.push({ target: key, errors: inputErrors });
+      }
+
+    }
+
+  });
+
+  return errors;
+}
+
+function validate(value, validations) {
+  let errors = [];
+  // Handle i18n
+  const requiredError = { id: 'error.validation.required' };
+  mapKeys(validations, (validationValue, validationKey) => {
+    switch (validationKey) {
+      case 'max':
+        if (parseInt(value, 10) > validationValue) {
+          errors.push({ id: 'error.validation.max' });
+        }
+        break;
+      case 'min':
+        if (parseInt(value, 10) < validationValue) {
+          errors.push({ id: 'error.validation.min' });
+        }
+        break;
+      case 'maxLength':
+        if (value.length > validationValue) {
+          errors.push({ id: 'error.validation.maxLength' });
+        }
+        break;
+      case 'minLength':
+        if (value.length < validationValue) {
+          errors.push({ id: 'error.validation.minLength' });
+        }
+        break;
+      case 'required':
+        if (value.length === 0) {
+          errors.push({ id: 'error.validation.required' });
+        }
+        break;
+      case 'regex':
+        if (!new RegExp(validationValue).test(value)) {
+          errors.push({ id: 'error.validation.regex' });
+        }
+        break;
+      default:
+        errors = [];
+    }
+  });
+
+  if (includes(errors, requiredError)) {
+    errors = reject(errors, (error) => error !== requiredError);
+  }
+  return errors;
 }

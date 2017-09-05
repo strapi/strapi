@@ -21,12 +21,15 @@ import {
   CONTENT_TYPE_EDIT,
   CONTENT_TYPE_FETCH,
   CONTENT_TYPE_FETCH_SUCCEEDED,
+  REMOVE_CONTENT_TYPE_REQUIRED_ERROR,
   RESET_DID_FETCH_MODEL_PROP,
+  RESET_FORM_ERRORS,
   RESET_IS_FORM_SET,
   SET_ATTRIBUTE_FORM,
   SET_ATTRIBUTE_FORM_EDIT,
   SET_BUTTON_LOADING,
   SET_FORM,
+  SET_FORM_ERRORS,
   UNSET_BUTTON_LOADING,
 } from './constants';
 
@@ -111,9 +114,21 @@ export function contentTypeEdit() {
   };
 }
 
+export function removeContentTypeRequiredError() {
+  return {
+    type: REMOVE_CONTENT_TYPE_REQUIRED_ERROR,
+  };
+}
+
 export function resetDidFetchModelProp() {
   return {
     type: RESET_DID_FETCH_MODEL_PROP,
+  };
+}
+
+export function resetFormErrors() {
+  return {
+    type: RESET_FORM_ERRORS,
   };
 }
 
@@ -157,12 +172,6 @@ export function setButtonLoading() {
   };
 }
 
-export function unsetButtonLoading() {
-  return {
-    type: UNSET_BUTTON_LOADING,
-  };
-}
-
 export function setForm(hash) {
   const form = forms[hash.split('::')[1]][hash.split('::')[2]];
   const data = getDataFromForm(forms[hash.split('::')[1]]);
@@ -175,6 +184,23 @@ export function setForm(hash) {
     formValidations,
   };
 }
+
+
+export function setFormErrors(formErrors) {
+  return {
+    type: SET_FORM_ERRORS,
+    formErrors,
+  };
+}
+
+export function unsetButtonLoading() {
+  return {
+    type: UNSET_BUTTON_LOADING,
+  };
+}
+
+
+
 
 
 /**
