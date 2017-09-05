@@ -63,6 +63,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           message={link.message}
           handleClick={this.changeForm}
           name={link.name}
+          nameToReplace={link.nameToReplace}
           routePath={this.props.routePath}
         />
       ))}

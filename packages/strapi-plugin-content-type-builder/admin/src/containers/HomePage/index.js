@@ -31,8 +31,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     super(props);
 
     this.popUpHeaderNavLinks = [
-      { name: 'baseSettings', message: 'popUpForm.navContainer.base' },
-      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced' },
+      { name: 'baseSettings', message: 'popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
+      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
     ];
   }
 

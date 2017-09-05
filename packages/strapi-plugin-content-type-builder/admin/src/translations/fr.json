@@ -85,6 +85,7 @@
   "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Modèle",
   "popUpForm.choose.attributes.header.title": "Ajouter un Nouveau Champs",
   "popUpForm.edit.contentType.header.title": "Modifier un Modèle",
+  "popUpForm.navContainer.relation": "Définir relation",
   "popUpForm.navContainer.base": "Réglages de base",
   "popUpForm.navContainer.advanced": "Réglages avancés",
 
@@ -92,6 +93,7 @@
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Merci de confirmer",
   "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûre de vouloir supprimer ce modèle?",
+  "popUpRelation.title": "Relation",
 
   "table.contentType.title.plural": "Modèles sont disponibles",
   "table.contentType.title.singular": "Modèle est disponible",

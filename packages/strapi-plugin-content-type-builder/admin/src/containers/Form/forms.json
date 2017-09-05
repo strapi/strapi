@@ -364,6 +364,10 @@
           }
         ]
       }
+    },
+    "relation": {
+      "defineRelation": {},
+      "advancedSettings": {}
     }
   }
 }

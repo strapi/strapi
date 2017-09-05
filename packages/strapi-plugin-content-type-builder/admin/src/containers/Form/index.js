@@ -31,6 +31,7 @@ import { addAttributeToContentType, editContentTypeAttribute, updateContentType 
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
+import PopUpRelations from 'components/PopUpRelations';
 
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import { checkFormValidity } from '../../utils/formValidations';
@@ -332,7 +333,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   goToAttributeTypeView = (attributeType) => {
-    router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::baseSettings`);
+    const settings = attributeType === 'relation' ? 'defineRelation' : 'baseSettings';
+    router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::${settings}`);
   }
 
   handleBlur = ({ target }) => {
@@ -485,6 +487,18 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const noButtons = includes(this.props.hash, '#choose');
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
+
+    if (includes(popUpFormType, 'relation')) {
+      return (
+        <PopUpRelations
+          isOpen={this.state.showModal}
+          toggle={this.toggle}
+          renderCustomPopUpHeader={renderCustomPopUpHeader}
+          popUpTitle={popUpTitle}
+          routePath={`${this.props.routePath}/${this.props.hash}`}
+        />
+      );
+    }
 
     return (
       <div className={styles.form}>

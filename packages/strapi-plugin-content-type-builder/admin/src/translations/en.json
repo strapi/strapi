@@ -86,8 +86,12 @@
   "popUpForm.create.contentType.header.title": "Add New Content Type",
   "popUpForm.choose.attributes.header.title": "Add New Field",
   "popUpForm.edit.contentType.header.title": "Edit Content Type",
+
+  "popUpForm.navContainer.relation": "Define relation",
   "popUpForm.navContainer.base": "Base settings",
   "popUpForm.navContainer.advanced": "Advanced settings",
+
+  "popUpRelation.title": "Relation",
 
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",

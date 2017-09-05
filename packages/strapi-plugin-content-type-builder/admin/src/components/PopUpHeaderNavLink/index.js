@@ -14,8 +14,7 @@ import styles from './styles.scss';
 
 class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   goTo = () => {
-    const name = this.props.name === 'baseSettings' ? 'advancedSettings' : 'baseSettings';
-    router.push(replace(this.props.routePath, name, this.props.name));
+    router.push(replace(this.props.routePath, this.props.nameToReplace, this.props.name));
   }
 
   render() {
@@ -32,6 +31,7 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
 PopUpHeaderNavLink.propTypes = {
   message: React.PropTypes.string,
   name: React.PropTypes.string,
+  nameToReplace: React.PropTypes.string,
   routePath: React.PropTypes.string,
 }
 
