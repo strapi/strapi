@@ -1,3 +1,36 @@
 .relationBox { /* stylelint-disable */
+  height: 13.8rem;
+  width: 21.5rem;
+  background-color: #FCFCFC;
+  box-shadow: 0 1px 2px #CAD2DF;
+}
 
+.headerContainer {
+  height: 3.6rem;
+  width: 100%;
+  background-color: rgba(16, 22, 34, 0.04);
+  line-height: 3.6rem;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  > i {
+    margin-right: 8px;
+    color: rgba(50, 55, 64, 0.75);
+    font-size: 1.3rem;
+    font-weight: 100;
+  }
+}
+
+
+.inputContainer {
+  padding-top: 1rem;
+}
+
+.input {
+  > div {
+    > label {
+      font-weight: 600;
+    }
+  }
 }

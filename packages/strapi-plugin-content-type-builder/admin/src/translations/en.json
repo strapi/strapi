@@ -33,6 +33,7 @@
   "form.attribute.item.maximumLength": "Maximum length",
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
+  "form.attribute.item.defineRelation.fieldName": "Field name",
 
   "form.button.cancel": "Cancel",
   "form.button.continue": "Continue",

@@ -496,6 +496,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           renderCustomPopUpHeader={renderCustomPopUpHeader}
           popUpTitle={popUpTitle}
           routePath={`${this.props.routePath}/${this.props.hash}`}
+          contentType={get(this.props.menuData[0], ['items', findIndex(get(this.props.menuData[0], 'items'), ['name', this.props.modelName])])}
+          form={this.props.form}
+          showRelation={includes(this.props.hash, 'defineRelation')}
+          handleChange={this.handleChange}
+          values={this.props.modifiedDataAttribute}
         />
       );
     }

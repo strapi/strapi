@@ -6,7 +6,7 @@
 
  /* eslint-disable new-cap */
 
-import { map , forEach, replace } from 'lodash';
+import { includes, map , forEach, replace } from 'lodash';
 import { Map, List } from 'immutable';
 import { getValidationsFromForm } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
@@ -140,11 +140,24 @@ export function resetIsFormSet() {
 
 export function setAttributeForm(hash) {
   const data = setAttributeFormData(hash);
+  const attributeRelation = Map({
+    name: '',
+    params: Map({
+      columnName: '',
+      target: '',
+      targetColumnName: "",
+      key: '',
+      nature: '',
+      required: false,
+      unique: false,
+    }),
+  });
+  const attribute = includes(hash, 'defineRelation') ? attributeRelation : data.attribute;
   const formValidations = getValidationsFromForm(data.form, []);
   return {
     type: SET_ATTRIBUTE_FORM,
     form: data.form,
-    attribute: data.attribute,
+    attribute,
     formValidations,
   }
 }

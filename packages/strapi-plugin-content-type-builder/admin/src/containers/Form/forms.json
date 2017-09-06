@@ -83,7 +83,7 @@
           {
             "name": "form.attribute.item.textarea.name",
             "target": "name",
-            "type": "textarea",
+            "type": "string",
             "value": "",
             "validations": {
               "required": true
@@ -366,7 +366,20 @@
       }
     },
     "relation": {
-      "defineRelation": {},
+      "defineRelation": {
+        "items": [
+          {
+            "name": "form.attribute.item.defineRelation.fieldName",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "placeholder": "relation.attributeName.placeholder",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
       "advancedSettings": {}
     }
   }

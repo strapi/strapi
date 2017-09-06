@@ -8,11 +8,12 @@
  }
 
  .modalBody {
-   padding: 2.2rem 1.4rem 0 1.4rem;
+   display: flex;
+   padding: 4.8rem 2.9rem 0 2.9rem;
  }
 
  .modalFooter {
-   padding: 1rem 1rem 2.8rem 1rem;
+   padding: 4.4rem 1rem 2.8rem 1rem;
    border: none;
    > button {
      height: 3rem;
