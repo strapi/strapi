@@ -103,6 +103,12 @@
   "table.contentType.title.singular": "Content Type is available",
   "table.contentType.head.name": "Name",
   "table.contentType.head.description": "Description",
-  "table.contentType.head.fields": "Fields"
+  "table.contentType.head.fields": "Fields",
+
+  "relation.11": "has one",
+  "relation.1n": "belongs to",
+  "relation.n1": "has many",
+  "relation.nn": "has many",
+  "relation.attributeName.placeholder": "Ex: author, category, tag"
 
 }

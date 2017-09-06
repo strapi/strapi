@@ -99,6 +99,12 @@
   "table.contentType.title.singular": "Modèle est disponible",
   "table.contentType.head.name": "Nom",
   "table.contentType.head.description": "Description",
-  "table.contentType.head.fields": "Champs"
+  "table.contentType.head.fields": "Champs",
+
+  "relation.11": "a un ",
+  "relation.1n": "appartient a",
+  "relation.n1": "a plusieurs",
+  "relation.nn": "a plusieurs",
+  "relation.attributeName.placeholder": "Ex: auteur, catégorie, tag"
 
 }
