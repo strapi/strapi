@@ -8,7 +8,7 @@ This document could be influenced by the community feedback, security issues, st
 
 Strapi is a project supported by a company called Strapi Solutions. The purpose of Strapi is to provide a powerful way to manage your content across devices through an API. Strapi does not intend to be a MVC framework. Strapi will stay a free and open-source backend project with an user interface to easily manage content.
 
-Strapi aims to be a Content Management Framework. It let's developers hack and quickly develop custom business logic while keeping an administration interface to see what's is going on in the application. Strapi has been designed to build scalable moderns apps using a service-oriented architecture. Strapi will fit with any web project that requires an API.
+Strapi aims to be a Content Management Framework. It lets developers hack and quickly develop custom business logic while keeping an administration interface to see what's is going on in the application. Strapi has been designed to build scalable moderns apps using a service-oriented architecture. Strapi will fit with any web project that requires an API.
 
 For more details, [please read our blog](http://blog.strapi.io).
 
