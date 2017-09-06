@@ -145,6 +145,14 @@ class Strapi extends EventEmitter {
   }
 
   async load() {
+    strapi.app.use(async (ctx, next) => {
+      if (ctx.request.url === '/_health') {
+        ctx.body = 'heartbeat';
+      } else {
+        await next();
+      }
+    });
+
     // Create AST.
     await Promise.all([
       nestedConfigurations.call(this),
