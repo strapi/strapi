@@ -5,12 +5,69 @@
 */
 
 import React from 'react';
-import { get, isEmpty, startCase } from 'lodash';
-import DropDown from 'components/DropDown';
+import { get, isEmpty, map, startCase } from 'lodash';
+import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Input from 'components/Input';
+
+import Shape from '../../assets/images/dropdow_shape.svg';
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 class RelationBox extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showMenu: false,
+    };
+  }
+
+  handleClick = (e) => {
+    const target = {
+      type: 'string',
+      value: e.target.id,
+      name: 'params.target',
+    };
+
+    this.props.handleChange({ target });
+  }
+
+  toggle = () => this.setState({ showMenu: !this.state.showMenu });
+
+  showDropDown = () => this.setState({ showMenu: !this.state.showMenu });
+
+  renderDropdownMenu = () => (
+    <div className={styles.dropDown}>
+      <ButtonDropdown isOpen={this.state.showMenu} toggle={this.toggle} style={{ backgroundColor: 'transparent' }}>
+        <DropdownToggle caret>
+        </DropdownToggle>
+        <DropdownMenu className={styles.dropDownContent}>
+          {map(this.props.dropDownItems, (value, key) => {
+            const divStyle = get(this.props.header, 'name') === value.name ? { color: '#323740', fontWeight: 'bold'} : { color: 'rgba(50,55,64, 0.75)'};
+            return (
+              <div style={{ height: '3.8rem'}} key={key}>
+                <DropdownItem onClick={this.handleClick} id={value.name}>
+                  <div style={divStyle} id={value.name}>
+                    <i className={`fa ${value.icon}`} style={divStyle} />
+                    {value.name}
+                  </div>
+                </DropdownItem>
+
+              </div>
+
+            )
+          })}
+        </DropdownMenu>
+      </ButtonDropdown>
+    </div>
+  )
+
+  renderShapeDropdown = () => (
+    <div className={styles.dropDown}>
+      <img src={Shape} role="presentation" onClick={this.showDropDown} />
+    </div>
+  )
+
   render() {
     const content = isEmpty(this.props.input) ? <div /> :
       <Input
@@ -25,8 +82,32 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         errors={this.props.errors}
         didCheckErrors={this.props.didCheckErrors}
       />;
-  
-    const dropDown = this.props.dropDownItems ? <DropDown /> : <div />;
+
+    const dropDown = this.props.dropDownItems ? this.renderDropdownMenu() : '';
+    // <div className={styles.dropDown}>
+    //   <ButtonDropdown isOpen={this.state.showMenu} toggle={this.toggle} style={{ backgroundColor: 'transparent' }}>
+    //     <DropdownToggle caret>
+    //     </DropdownToggle>
+    //     <DropdownMenu className={styles.dropDownContent}>
+    //       {map(this.props.dropDownItems, (value, key) => {
+    //         const divStyle = get(this.props.header, 'name') === value.name ? { color: '#323740', fontWeight: 'bold'} : { color: 'rgba(50,55,64, 0.75)'};
+    //         return (
+    //           <div style={{ height: '3.8rem'}} key={key}>
+    //             <DropdownItem onClick={this.handleClick} id={value.name}>
+    //               <div style={divStyle} id={value.name}>
+    //                 <i className={`fa ${value.icon}` } style={divStyle} />
+    //                 {value.name}
+    //               </div>
+    //             </DropdownItem>
+    //
+    //           </div>
+    //
+    //         )
+    //       })}
+    //     </DropdownMenu>
+    //   </ButtonDropdown>
+    // </div> : '';
+
     return (
       <div className={styles.relationBox}>
         <div className={styles.headerContainer}>

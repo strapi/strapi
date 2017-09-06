@@ -127,11 +127,14 @@ PopUpRelations.propTypes = {
   contentType: React.PropTypes.object,
   didCheckErrors: React.PropTypes.bool,
   dropDownItems: React.PropTypes.array,
+  form: React.PropTypes.oneOfType([
+    React.PropTypes.array.isRequired,
+    React.PropTypes.object.isRequired,
+  ]),
   formErrors: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.object,
   ]),
-  formErrors: React.PropTypes.array,
   handleChange: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,
   isOpen: React.PropTypes.bool,

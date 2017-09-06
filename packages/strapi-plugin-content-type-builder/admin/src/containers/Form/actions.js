@@ -166,6 +166,7 @@ export function setAttributeFormEdit(hash, contentType) {
   const form = setAttributeFormData(hash).form;
   const contentTypeAttribute = contentType.attributes[hash.split('::')[3]];
   const formValidations = getValidationsFromForm(form, []);
+
   const attribute = Map({
     name: contentTypeAttribute.name,
     params: Map(contentTypeAttribute.params),

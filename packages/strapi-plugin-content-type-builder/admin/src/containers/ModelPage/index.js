@@ -130,7 +130,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   handleEditAttribute = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
-    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#edit${this.props.params.modelName}::attribute${attribute.params.type}::baseSettings::${index}`);
+    const attributeType = attribute.params.type ? attribute.params.type : 'relation';
+    const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
+    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#edit${this.props.params.modelName}::attribute${attributeType}::${settingsType}::${index}`);
 
   }
 
