@@ -106,10 +106,10 @@
   "table.contentType.head.description": "Description",
   "table.contentType.head.fields": "Fields",
 
-  "relation.11": "has one",
-  "relation.1n": "belongs to",
-  "relation.n1": "has many",
-  "relation.nn": "has many",
+  "relation.oneToOne": "has one",
+  "relation.oneToMany": "belongs to",
+  "relation.manyToOne": "has many",
+  "relation.manyToMany": "has many",
   "relation.attributeName.placeholder": "Ex: author, category, tag"
 
 }

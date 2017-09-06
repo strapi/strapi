@@ -1,0 +1,32 @@
+.relationNaturePicker { /* stylelint-disable */
+  display: flex;
+  width: 25.5rem;
+  position: relative;
+  padding-top: 4.3rem;
+  justify-content: space-around;
+}
+
+.relationNaturePicker::before {
+  content: '';
+  position: absolute;
+  top: 9.2rem;
+  height: 2px;
+  width: 100%;
+  background-color: #1C5DE7;
+  z-index: 0;
+}
+
+.infoContainer {
+  width: 100%;
+  position: absolute;
+  top: 11.8rem;
+  line-height: 1.8rem;
+  text-align: center;
+  font-size: 1.3rem;
+  // > span:first-child {
+  //   text-transform: capitalize;
+  // }
+  > span:nth-child(2) {
+    color: #1C5DE7;
+  }
+}

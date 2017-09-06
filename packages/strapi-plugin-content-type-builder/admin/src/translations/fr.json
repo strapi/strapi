@@ -32,7 +32,7 @@
   "form.attribute.item.maximumLength": "Taille maximum",
   "form.attribute.item.requiredField.description": "Vous ne pourrez pas créer une entrée si ce champ est vide",
   "form.attribute.item.uniqueField.description": "Vous ne pourrez pas créer une entrée s'il existe un champ similaire",
-
+  "form.attribute.item.defineRelation.fieldName": "Nom du Champ",
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continue",
   "form.button.save": "Sauvegarder",
@@ -101,10 +101,10 @@
   "table.contentType.head.description": "Description",
   "table.contentType.head.fields": "Champs",
 
-  "relation.11": "a un ",
-  "relation.1n": "appartient a",
-  "relation.n1": "a plusieurs",
-  "relation.nn": "a plusieurs",
+  "relation.oneToOne": "a un ",
+  "relation.oneToMany": "appartient a",
+  "relation.manyToOne": "a plusieurs",
+  "relation.manyToMany": "a plusieurs",
   "relation.attributeName.placeholder": "Ex: auteur, catégorie, tag"
 
 }

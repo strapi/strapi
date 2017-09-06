@@ -8,10 +8,12 @@
  }
 
  .modalBody {
-   display: flex;
    padding: 4.8rem 2.9rem 0 2.9rem;
  }
 
+.flex {
+  display: flex;
+}
  .modalFooter {
    padding: 4.4rem 1rem 2.8rem 1rem;
    border: none;

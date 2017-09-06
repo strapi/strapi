@@ -377,6 +377,16 @@
             "validations": {
               "required": true
             }
+          },
+          {
+            "name": "form.attribute.item.defineRelation.fieldName",
+            "target": "params.key",
+            "type": "string",
+            "value": "",
+            "placeholder": "relation.attributeName.placeholder",
+            "validations": {
+              "required": true
+            }
           }
         ]
       },

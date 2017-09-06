@@ -3,11 +3,13 @@
   width: 21.5rem;
   background-color: #FCFCFC;
   box-shadow: 0 1px 2px #CAD2DF;
+  z-index: 9999;
 }
 
 .headerContainer {
   height: 3.6rem;
   width: 100%;
+  position: relative;
   background-color: rgba(16, 22, 34, 0.04);
   line-height: 3.6rem;
   text-align: center;

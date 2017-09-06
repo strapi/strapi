@@ -12,6 +12,7 @@ import {
   findIndex,
   forEach,
   get,
+  has,
   includes,
   isEmpty,
   isNumber,
@@ -19,6 +20,7 @@ import {
   set,
   size,
   split,
+  take,
   toNumber,
   replace,
   unset,
@@ -225,6 +227,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       }
     }
 
+    if (has(this.props.modifiedDataAttribute, ['params', 'key'])) {
+      if (isEmpty(this.props.modifiedDataAttribute.params.key)) {
+        formErrors.push({ target: 'params.key', errors: [{ id: 'error.validation.required' }] });
+      }
+    }
     return formErrors;
   }
 
@@ -487,6 +494,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const noButtons = includes(this.props.hash, '#choose');
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
+    const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
 
     if (includes(popUpFormType, 'relation')) {
       return (
@@ -496,11 +504,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           renderCustomPopUpHeader={renderCustomPopUpHeader}
           popUpTitle={popUpTitle}
           routePath={`${this.props.routePath}/${this.props.hash}`}
-          contentType={get(this.props.menuData[0], ['items', findIndex(get(this.props.menuData[0], 'items'), ['name', this.props.modelName])])}
+          contentType={get(dropDownItems, [findIndex(dropDownItems, ['name', this.props.modelName])])}
           form={this.props.form}
           showRelation={includes(this.props.hash, 'defineRelation')}
           handleChange={this.handleChange}
           values={this.props.modifiedDataAttribute}
+          dropDownItems={dropDownItems}
+          handleSubmit={this.handleSubmit}
+          formErrors={this.props.formErrors}
+          didCheckErrors={this.props.didCheckErrors}
         />
       );
     }

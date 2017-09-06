@@ -147,12 +147,12 @@ export function setAttributeForm(hash) {
       target: '',
       targetColumnName: "",
       key: '',
-      nature: '',
+      nature: 'oneToOne',
       required: false,
       unique: false,
     }),
   });
-  const attribute = includes(hash, 'defineRelation') ? attributeRelation : data.attribute;
+  const attribute = includes(hash, 'attributerelation') ? attributeRelation : data.attribute;
   const formValidations = getValidationsFromForm(data.form, []);
   return {
     type: SET_ATTRIBUTE_FORM,
