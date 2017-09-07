@@ -47,6 +47,8 @@ export function* editRecord() {
     return acc;
   }, {});
 
+  console.log(recordCleaned);
+
   const isCreating = yield select(makeSelectIsCreating());
   const id = isCreating ? '' : recordCleaned.id;
 

@@ -1,4 +1,4 @@
-import { isPlainObject, isString } from 'lodash';
+import { isPlainObject, isString, isArray } from 'lodash';
 
 const templateObject = function (obj, variables) {
   // Allow values which looks like such as
@@ -11,7 +11,7 @@ const templateObject = function (obj, variables) {
   }
 
   return Object.keys(obj).reduce((acc, key) => {
-    if (isPlainObject(obj[key])) {
+    if (isPlainObject(obj[key]) || isArray(obj[key])) {
       acc[key] = templateObject(obj[key]);
     } else if (isString(obj[key]) && regex.test(obj[key])) {
       acc[key] = obj[key].replace(regex, replacer);
