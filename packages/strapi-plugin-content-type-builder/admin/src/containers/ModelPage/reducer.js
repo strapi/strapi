@@ -5,7 +5,7 @@
  */
 
 import { fromJS, Map, List } from 'immutable';
-import { get, size, differenceBy } from 'lodash';
+import { get, size, differenceBy, findIndex } from 'lodash';
 import { storeData } from '../../utils/storeData';
 /* eslint-disable new-cap */
 import {
@@ -53,7 +53,7 @@ function modelPageReducer(state = initialState, action) {
           .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
           .updateIn(['model', 'attributes'], (list) => list.splice(action.attributePosition + 1, 0, action.parallelAttribute));
       }
-      
+
       return state
         .set('showButtons', true)
         .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute);
@@ -84,6 +84,15 @@ function modelPageReducer(state = initialState, action) {
 
       if (get(storeData.getContentType(), 'name') === state.getIn(['initialModel', 'name'])) {
         showButtons = size(get(storeData.getContentType(), 'attributes')) > 0;
+      }
+
+      if (action.shouldRemoveParallelAttribute) {
+        const attributeKey = state.getIn(['model', 'attributes', action.position]).params.key;
+
+        return state
+          .set('showButtons', showButtons)
+          .updateIn(['model', 'attributes'], (list) => list.splice(action.position, 1))
+          .updateIn(['model', 'attributes'], (list) => list.splice(findIndex(list.toJS(), ['name', attributeKey]), 1));
       }
 
       return state

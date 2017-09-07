@@ -124,7 +124,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   handleDelete = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
-    this.props.deleteAttribute(index, this.props.params.modelName);
+    const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, (attr) => attr.params.key === attributeName);
+
+    this.props.deleteAttribute(index, this.props.params.modelName, parallelAttributeIndex !== -1);
   }
 
   handleEditAttribute = (attributeName) => {
@@ -132,7 +134,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const attribute = this.props.modelPage.model.attributes[index];
     const attributeType = attribute.params.type ? attribute.params.type : 'relation';
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
-  
+
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
 

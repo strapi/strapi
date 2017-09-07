@@ -9,6 +9,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {
   camelCase,
+  cloneDeep,
   findIndex,
   forEach,
   get,
@@ -168,6 +169,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     });
 
     contentType.attributes.push(newAttribute);
+    if (newAttribute.params.target === this.props.modelName) {
+      const parallelAttribute = cloneDeep(newAttribute);
+      parallelAttribute.name = newAttribute.params.key;
+      parallelAttribute.params.key = newAttribute.name;
+      contentType.attributes.push(parallelAttribute);
+    }
+
     // Reset the store and update the parent container
     this.props.contentTypeCreate(contentType);
     // Get the displayed model from the localStorage
@@ -245,7 +253,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   // Function used when modified the name of the content type and not the attributes
   // Fires Form sagas
   contentTypeEdit = () => {
-    console.log('content type edit')
     const formErrors = checkFormValidity(this.props.modifiedDataEdit, this.props.formValidations);
 
     if (!isEmpty(formErrors)) {
@@ -295,7 +302,21 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       }
     });
 
+    const oldAttribute = contentType.attributes[this.props.hash.split('::')[3]];
+
     contentType.attributes[this.props.hash.split('::')[3]] = newAttribute;
+
+    if (newAttribute.params.target === this.props.modelName) {
+      const parallelAttribute = cloneDeep(newAttribute);
+      parallelAttribute.name = newAttribute.params.key;
+      parallelAttribute.params.key = newAttribute.name;
+      contentType.attributes[findIndex(contentType.attributes, ['name', oldAttribute.params.key])] = parallelAttribute;
+    }
+
+    if (oldAttribute.params.target === this.props.modelName && newAttribute.params.target !== this.props.modelName) {
+      contentType.attributes.splice(findIndex(contentType.attributes, ['name', oldAttribute.params.key]), 1);
+    }
+
     const newContentType = contentType;
 
     // Empty errors

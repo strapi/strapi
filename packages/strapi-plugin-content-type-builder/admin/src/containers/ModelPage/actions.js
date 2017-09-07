@@ -3,7 +3,7 @@
  * ModelPage actions
  *
  */
-import { cloneDeep, forEach, get, includes, map, set } from 'lodash';
+import { cloneDeep, findIndex, forEach, get, includes, map, set } from 'lodash';
 import { storeData } from '../../utils/storeData';
 
 import {
@@ -66,12 +66,17 @@ export function cancelChanges() {
   };
 }
 
-export function deleteAttribute(position, modelName) {
+export function deleteAttribute(position, modelName, shouldRemoveParallelAttribute) {
   const temporaryContentType = storeData.getContentType();
-  let sendRequest = true;
+
   if (get(temporaryContentType, 'name') === modelName) {
-    sendRequest = false;
+    const attributeKey = temporaryContentType.attributes[position].params.key;
     temporaryContentType.attributes.splice(position, 1);
+
+    if (shouldRemoveParallelAttribute) {
+      temporaryContentType.attributes.splice(findIndex(temporaryContentType.attributes, ['name', attributeKey]), 1);
+    }
+    
     const updatedContentType = temporaryContentType;
     storeData.setContentType(updatedContentType);
   }
@@ -79,8 +84,8 @@ export function deleteAttribute(position, modelName) {
   return {
     type: DELETE_ATTRIBUTE,
     position,
-    sendRequest,
     modelName,
+    shouldRemoveParallelAttribute,
   };
 }
 
