@@ -50,7 +50,7 @@ Table.contextTypes = {
 
 Table.propTypes = {
   changeSort: React.PropTypes.func.isRequired,
-  handleDelete: React.propTypes.func,
+  handleDelete: React.PropTypes.func,
   headers: React.PropTypes.array.isRequired,
   history: React.PropTypes.object.isRequired,
   primaryKey: React.PropTypes.string.isRequired,

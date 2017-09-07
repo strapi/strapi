@@ -12,5 +12,10 @@
   "containers.List.pluginHeaderDescription": "Manage your {label}",
   "components.LimitSelect.itemsPerPage": "Number of items per page",
   "containers.List.errorFetchRecords": "Error",
-  "pageNotFound": "Page not found"
+  "pageNotFound": "Page not found",
+
+  "popUpWarning.button.cancel": "Cancel",
+  "popUpWarning.button.confirm": "Confirm",
+  "popUpWarning.title": "Please confirm",
+  "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?"
 }

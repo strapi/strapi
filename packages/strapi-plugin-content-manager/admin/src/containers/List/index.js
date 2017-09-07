@@ -17,6 +17,7 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
 import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -56,6 +57,14 @@ import reducer from './reducer';
 import saga from './sagas';
 
 export class List extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showWarning: false,
+    };
+  }
+
   componentWillMount() {
     // Init the view
     this.init(this.props.match.params.slug);
@@ -93,7 +102,15 @@ export class List extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.deleteRecord(e.target.id, this.props.currentModelName);
+    this.props.deleteRecord(this.state.target, this.props.currentModelName);
+    this.setState({ showWarning: false });
+  }
+
+  toggleModalWarning = (e) => {
+    e.preventDefault();
+    e.stopPropagation()
+
+    this.setState({ showWarning: !this.state.showWarning, target: e.target.id });
   }
 
   render() {
@@ -131,7 +148,7 @@ export class List extends React.Component {
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
-          handleDelete={this.handleDelete}
+          handleDelete={this.toggleModalWarning}
         />
       );
     }
@@ -172,6 +189,18 @@ export class List extends React.Component {
           <div className='row'>
             <div className='col-lg-12'>
               {content}
+              <PopUpWarning
+                isOpen={this.state.showWarning}
+                toggleModal={this.toggleModalWarning}
+                content={{
+                  title: 'content-manager.popUpWarning.title',
+                  message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
+                  cancel: 'content-manager.popUpWarning.button.cancel',
+                  confirm: 'content-manager.popUpWarning.button.confirm',
+                }}
+                popUpWarningType={'danger'}
+                handleConfirm={this.handleDelete}
+              />
               <TableFooter
                 limit={this.props.limit}
                 currentPage={this.props.currentPage}

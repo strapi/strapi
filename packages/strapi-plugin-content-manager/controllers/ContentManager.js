@@ -20,6 +20,7 @@ module.exports = {
         'orm',
         'loadedModel',
         'primaryKey',
+        'associations'
       ])
     );
   },

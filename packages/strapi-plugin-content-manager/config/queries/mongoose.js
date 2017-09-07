@@ -16,7 +16,8 @@ module.exports = {
     return await this
       .findOne({
         [this.primaryKey]: params.id
-      });
+      })
+      .populate(this.associations.map(x => x.alias).join(' '));
   },
 
   create: async function (params) {
@@ -28,7 +29,9 @@ module.exports = {
     return await this
       .update({
         [this.primaryKey]: params.id
-      }, params.values);
+      }, params.values, {
+        strict: false
+      });
   },
 
   delete: async function (params) {

@@ -203,11 +203,11 @@ module.exports = function (strapi) {
             // Add every relationships to the loaded model for Bookshelf.
             // Basic attributes don't need this-- only relations.
             _.forEach(definition.attributes, (details, name) => {
-              const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
+              const verbose = _.get(utilsModels.getNature(details, name, undefined, model), 'verbose') || '';
 
               // Build associations key
               if (!_.isEmpty(verbose)) {
-                utilsModels.defineAssociations(globalName, definition, details, name);
+                utilsModels.defineAssociations(model, definition, details, name);
               } else {
                 definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
               }
@@ -228,7 +228,8 @@ module.exports = function (strapi) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.collection),
-                      via: FK.via
+                      via: FK.via,
+                      justOne: false
                     };
                   } else {
                     definition.loadedModel[name] = [{
@@ -253,15 +254,16 @@ module.exports = function (strapi) {
                       ref: _.capitalize(details.model)
                     };
                   }
+
                   break;
                 case 'belongsToMany':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && _.isUndefined(details.via)) {
+                  if (FK && _.isUndefined(FK.via)) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(FK.collection),
-                      via: utilsModels.getVia(name, details)
+                      via: FK.via
                     };
                   } else {
                     definition.loadedModel[name] = [{

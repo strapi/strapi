@@ -4,6 +4,7 @@
   position: relative;
   border-radius: 0.3rem;
   margin-right: 1.8rem;
+  line-height: 30px;
   cursor: pointer;
   font-family: Lato;
   &:focus {
@@ -28,11 +29,13 @@
 }
 
 .buttonLg {
-  width: 15rem;
+  min-width: 15rem;
+  padding: 0 15px;
 }
 
 .buttonMd {
-  width: 10rem;
+  min-width: 10rem;
+  padding: 0 15px;
 }
 
 .primary {
@@ -68,7 +71,7 @@
 }
 
 .back {
-  background: #F6F6F6;
+  background: #F3F3F3;
   color: #323740;
   font-weight: 500;
   padding: 0 15px;

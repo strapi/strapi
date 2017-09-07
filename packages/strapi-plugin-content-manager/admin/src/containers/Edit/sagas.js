@@ -2,6 +2,7 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 import { call, cancel, fork, put, take, select, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
+import cleanData from 'utils/cleanData';
 import { router } from 'app';
 
 import {
@@ -40,8 +41,14 @@ export function* editRecord() {
   const record = yield select(makeSelectRecord());
   const recordJSON = record.toJSON();
 
+  const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
+    acc[current] = cleanData(recordJSON[current], 'value');
+
+    return acc;
+  }, {});
+
   const isCreating = yield select(makeSelectIsCreating());
-  const id = isCreating ? '' : recordJSON.id;
+  const id = isCreating ? '' : recordCleaned.id;
 
   try {
     const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${id}`;
@@ -49,7 +56,7 @@ export function* editRecord() {
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
       method: isCreating ? 'POST' : 'PUT',
-      body: recordJSON,
+      body: recordCleaned,
     });
 
     yield put(recordEdited());

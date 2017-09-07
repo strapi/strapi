@@ -72,7 +72,7 @@ module.exports = {
    * Find relation nature with verbose
    */
 
-  getNature: (association, key, models) => {
+  getNature: (association, key, models, currentModelName) => {
     const types = {
       current: '',
       other: ''
@@ -98,7 +98,7 @@ module.exports = {
       types.current = 'modelD';
 
       // We have to find if they are a model linked to this key
-      _.forIn(models, model => {
+      _.forIn(_.omit(models, currentModelName || ''), model => {
         _.forIn(model.attributes, attribute => {
           if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection')) {
             types.other = 'collection';
@@ -172,6 +172,11 @@ module.exports = {
         nature: 'oneToMany',
         verbose: 'belongsTo'
       };
+    } else if (types.current === 'modelD' && types.other === 'collection') {
+      return {
+        nature: 'oneToMany',
+        verbose: 'belongsTo'
+      };
     } else if (types.current === 'collection' && types.other === 'model') {
       return {
         nature: 'manyToOne',
@@ -226,7 +231,7 @@ module.exports = {
     }
 
     // Get relation nature
-    const infos = this.getNature(association, key);
+    const infos = this.getNature(association, key, undefined, model);
 
     // Build associations object
     if (association.hasOwnProperty('collection')) {
@@ -236,7 +241,8 @@ module.exports = {
         collection: association.collection,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true
+        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true,
+        dominant: association.dominant === true
       });
     } else if (association.hasOwnProperty('model')) {
       definition.associations.push({
@@ -245,7 +251,8 @@ module.exports = {
         model: association.model,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true
+        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true,
+        dominant: association.dominant === true
       });
     }
   },

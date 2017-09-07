@@ -17,6 +17,7 @@ import {
   DELETE_RECORD,
   DELETE_RECORD_SUCCESS,
   DELETE_RECORD_ERROR,
+  TOGGLE_NULL,
 } from './constants';
 
 export function setInitialState() {
@@ -96,5 +97,11 @@ export function recordDeleted(id) {
 export function recordDeleteError() {
   return {
     type: DELETE_RECORD_ERROR,
+  };
+}
+
+export function toggleNull() {
+  return {
+    type: TOGGLE_NULL,
   };
 }

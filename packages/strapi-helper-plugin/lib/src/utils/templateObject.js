@@ -16,7 +16,7 @@ const templateObject = function (obj, variables) {
     } else if (isString(obj[key]) && regex.test(obj[key])) {
       acc[key] = obj[key].replace(regex, replacer);
     } else {
-      acc[key] = obj[key];
+      acc[key] = variables[obj[key]];
     }
 
     return acc;

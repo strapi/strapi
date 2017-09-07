@@ -94,6 +94,8 @@
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.1.2",
     "react-router-redux": "^5.0.0-alpha.6",
+    "react-transition-group": "1.1.2",
+    "reactstrap": "^4.8.0",
     "redux": "^3.7.2",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.15.6",

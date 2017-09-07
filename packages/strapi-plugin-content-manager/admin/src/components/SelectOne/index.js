@@ -1,37 +1,36 @@
 /**
  *
- * EditFormRelation
+ * SelectOne
  *
  */
 
 import React from 'react';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
-import _ from 'lodash';
+import { map, isArray, isNull, isUndefined } from 'lodash';
 
 import request from 'utils/request';
+import templateObject from 'utils/templateObject';
 
-class EditFormRelation extends React.Component { // eslint-disable-line react/prefer-stateless-function
+import styles from './styles.scss';
+
+class SelectOne extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
-    this.onChange = this.onChange.bind(this);
-    this.getOptions = this.getOptions.bind(this);
-    this.getOptions = this.getOptions.bind(this);
+
     this.state = {
       isLoading: true,
     };
   }
 
-  onChange(value) {
-    this.props.setRecordAttribute(this.props.relation.attribute, value);
+  onChange = (value) => {
+    this.props.setRecordAttribute(this.props.relation.alias, value);
   }
 
-  getOptions(query) {
-    // Init `params` object
-    const params = {};
-
-    // Set results limit
-    params.limit = 20;
+  getOptions = (query) => {
+    const params = {
+      limit: 20,
+    };
 
     // Set `query` parameter if necessary
     if (query) {
@@ -40,7 +39,7 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
     }
 
     // Request URL
-    const requestUrlSuffix = query && this.props.record.get(this.props.relation.attribute) ? this.props.record.get(this.props.relation.attribute) : '';
+    const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
@@ -49,13 +48,13 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
       params,
     })
       .then(response => {
-        const options = _.isArray(response)
-          ? _.map(response, item => ({
-            value: item.id,
+        const options = isArray(response) ?
+          map(response, item => ({
+            value: item,
             label: item[this.props.relation.displayedAttribute],
-          }))
-          : [{
-            value: response.id,
+          })) :
+          [{
+            value: response,
             label: response[this.props.relation.displayedAttribute],
           }];
 
@@ -68,16 +67,21 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
       ? <p>{this.props.relation.description}</p>
       : '';
 
+    const value = this.props.record.get(this.props.relation.alias);
+
     /* eslint-disable jsx-a11y/label-has-for */
     return (
-      <div className="form-group">
-        <label htmlFor={this.props.relation.label}>{this.props.relation.label}</label>
+      <div className={`form-group ${styles.selectOne}`}>
+        <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
         {description}
         <Select.Async
           onChange={this.onChange}
           loadOptions={this.getOptions}
           simpleValue
-          value={this.props.record.get(this.props.relation.attribute)}
+          value={isNull(value) || isUndefined(value) ? null : {
+            value: value.toJS().id,
+            label: templateObject({ mainField: this.props.relation.displayedAttribute }, value.toJS()).mainField,
+          }}
         />
       </div>
     );
@@ -85,7 +89,7 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
   }
 }
 
-EditFormRelation.propTypes = {
+SelectOne.propTypes = {
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
@@ -94,4 +98,4 @@ EditFormRelation.propTypes = {
   setRecordAttribute: React.PropTypes.func.isRequired,
 };
 
-export default EditFormRelation;
+export default SelectOne;

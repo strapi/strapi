@@ -33,6 +33,9 @@ const makeSelectDeleting = () =>
 const makeSelectIsCreating = () =>
   createSelector(selectEditDomain(), substate => substate.get('isCreating'));
 
+const makeSelectIsRelationComponentNull = () =>
+  createSelector(selectEditDomain(), substate => substate.get('isRelationComponentNull'));
+
 export default selectEditDomain;
 export {
   makeSelectRecord,
@@ -41,4 +44,5 @@ export {
   makeSelectEditing,
   makeSelectDeleting,
   makeSelectIsCreating,
+  makeSelectIsRelationComponentNull,
 };

@@ -19,6 +19,7 @@ import {
   DELETE_RECORD,
   DELETE_RECORD_SUCCESS,
   DELETE_RECORD_ERROR,
+  TOGGLE_NULL,
 } from './constants';
 
 const initialState = fromJS({
@@ -28,6 +29,7 @@ const initialState = fromJS({
   editing: false,
   deleting: false,
   isCreating: false,
+  isRelationComponentNull: false,
 });
 
 function editReducer(state = initialState, action) {
@@ -49,7 +51,7 @@ function editReducer(state = initialState, action) {
     case LOAD_RECORD_SUCCESS:
       return state.set('loading', false).set('record', fromJS(action.record));
     case SET_RECORD_ATTRIBUTE:
-      return state.setIn(['record', action.key], action.value);
+      return state.setIn(['record', action.key], fromJS(action.value));
     case EDIT_RECORD:
       return state.set('editing', true);
     case EDIT_RECORD_SUCCESS:
@@ -62,6 +64,8 @@ function editReducer(state = initialState, action) {
       return state.set('deleting', false);
     case DELETE_RECORD_ERROR:
       return state.set('deleting', false);
+    case TOGGLE_NULL:
+      return state.set('isRelationComponentNull', !state.get('isRelationComponentNull'));
     default:
       return state;
   }

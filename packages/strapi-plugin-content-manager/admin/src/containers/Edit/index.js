@@ -37,6 +37,7 @@ import {
   setRecordAttribute,
   editRecord,
   deleteRecord,
+  toggleNull,
 } from './actions';
 
 // Selectors.
@@ -48,6 +49,7 @@ import {
   makeSelectEditing,
   makeSelectDeleting,
   makeSelectIsCreating,
+  makeSelectIsRelationComponentNull,
 } from './selectors';
 
 import reducer from './reducer';
@@ -97,9 +99,10 @@ export class Edit extends React.Component {
         record={this.props.record}
         schema={this.props.schema}
         setRecordAttribute={this.props.setRecordAttribute}
+        isNull={this.props.isRelationComponentNull}
+        toggleNull={this.props.toggleNull}
       />
     );
-
 
     // Define plugin header actions
     const pluginHeaderActions = [
@@ -140,9 +143,10 @@ export class Edit extends React.Component {
     // }
 
     // Plugin header config
-    const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || this.props.record.first();
+    const primaryKey = this.props.models[this.props.currentModelName].primaryKey;
+    const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || primaryKey;
     const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
-    const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get('id')}`;
+    const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get(primaryKey)}`;
 
     return (
       <div>
@@ -157,15 +161,18 @@ export class Edit extends React.Component {
             }}
             actions={pluginHeaderActions}
             subActions={pluginHeaderSubActions}
+            fullWidth={this.props.isRelationComponentNull}
           />
           <div className='row'>
-            <div className={`col-lg-9`}>
+            <div className={this.props.isRelationComponentNull ? `col-lg-12` : `col-lg-8`}>
               <div className={styles.main_wrapper}>
                 {content}
               </div>
             </div>
-            <div className="col-lg-3">
-              {relations}
+            <div className={`col-lg-4 ${this.props.isRelationComponentNull ? 'hidden-xl-down' : ''}`}>
+              <div className={styles.sub_wrapper}>
+                {relations}
+              </div>
             </div>
           </div>
         </div>
@@ -184,6 +191,7 @@ Edit.propTypes = {
   editing: React.PropTypes.bool.isRequired,
   editRecord: React.PropTypes.func.isRequired,
   isCreating: React.PropTypes.bool.isRequired,
+  isRelationComponentNull: React.PropTypes.bool.isRequired,
   loading: React.PropTypes.bool.isRequired,
   loadRecord: React.PropTypes.func.isRequired,
   match: React.PropTypes.shape({
@@ -208,6 +216,7 @@ Edit.propTypes = {
   setInitialState: React.PropTypes.func.isRequired,
   setIsCreating: React.PropTypes.func.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
+  toggleNull: React.PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -219,6 +228,7 @@ const mapStateToProps = createStructuredSelector({
   isCreating: makeSelectIsCreating(),
   schema: makeSelectSchema(),
   models: makeSelectModels(),
+  isRelationComponentNull: makeSelectIsRelationComponentNull(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -238,6 +248,7 @@ function mapDispatchToProps(dispatch) {
         dispatch(deleteRecord());
       }
     },
+    toggleNull: () => dispatch(toggleNull()),
     dispatch,
   };
 }

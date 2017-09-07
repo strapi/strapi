@@ -11,5 +11,10 @@
   "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.pluginHeaderDescription": "Gérér vos {label}",
   "components.LimitSelect.itemsPerPage": "Nombre d'éléments par page",
-  "containers.List.errorFetchRecords": "Erreur"
+  "containers.List.errorFetchRecords": "Erreur",
+
+  "popUpWarning.button.cancel": "Annuler",
+  "popUpWarning.button.confirm": "Confirmer",
+  "popUpWarning.title": "Confirmation requise",
+  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?"
 }
