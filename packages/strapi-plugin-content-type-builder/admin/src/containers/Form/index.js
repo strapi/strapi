@@ -197,6 +197,20 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Check form errors
     const formErrors = checkFormValidity(data, this.props.formValidations);
 
+    if (includes(this.props.hash, '#create') && findIndex(this.props.menuData[0].items, ['name', data.name]) !== -1) {
+      formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+    }
+
+
+    if (includes(this.props.hash, '#edit')) {
+      const allContentTypes = cloneDeep(this.props.menuData[0].items);
+      allContentTypes.splice(findIndex(allContentTypes, ['name', this.props.modelName]));
+      if (findIndex(allContentTypes, ['name', data.name]) !== -1) {
+        formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+      }
+    }
+
+
     if (!isEmpty(formErrors)) {
       return this.props.setFormErrors(formErrors);
     }

@@ -18,6 +18,7 @@
   "error.validation.min": "La valeur est trop basse.",
   "error.validation.maxLength": "La valeur est trop longue.",
   "error.validation.minLength": "La valeur est trop courte.",
+  "error.contentTypeName.taken": "Ce nom existe déjà",
 
   "form.attribute.item.textarea.name": "Nom",
   "form.attribute.item.date.name": "Nom",
