@@ -57,7 +57,7 @@ class App extends React.Component {
 
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        {React.Children.toArray(content, 'fuck')}
+        {React.Children.toArray(content)}
       </div>
     );
   }
