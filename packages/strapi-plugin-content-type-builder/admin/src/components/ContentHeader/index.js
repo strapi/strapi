@@ -21,27 +21,15 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     if (this.props.isLoading) {
       return (
         <div className={styles.buttonContainer}>
-          <FormattedMessage id="form.button.save">
-            {(message) => (
-              <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader />
-            )}
-          </FormattedMessage>
+          <Button type="submit" label="form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader handlei18n />
         </div>
       );
     }
 
     return (
       <div className={styles.buttonContainer}>
-        <FormattedMessage id="form.button.cancel">
-          {(message) => (
-            <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
-          )}
-        </FormattedMessage>
-        <FormattedMessage id="form.button.save">
-          {(message) => (
-            <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
-          )}
-        </FormattedMessage>
+        <Button type="button" label="form.button.cancel" buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} handlei18n />
+        <Button type="submit" label="form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} handlei18n />
       </div>
     );
   }
