@@ -5,9 +5,10 @@
 */
 
 import React from 'react';
-import { findIndex, get, isEmpty, map } from 'lodash';
+import { findIndex, get, isEmpty, map, take, takeRight } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import Input from 'components/Input';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
 import RelationBox from 'components/RelationBox';
 import RelationNaturePicker from 'components/RelationNaturePicker';
@@ -60,6 +61,52 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
     </div>
   )
 
+  renderModalBodyAdvanced = () => (
+    <ModalBody className={`${styles.modalBodyAdvanced}`}>
+      <div className="container-fluid">
+        <div className="row">
+          {map(take(this.props.form.items, 2), (input, key) => (
+            <Input
+              key={key}
+              type={input.type}
+              value={get(this.props.values, ['params', input.target.split('.')[1]])}
+              target={input.target}
+              name={input.name}
+              title={input.title}
+              validations={input.validations}
+              inputDescription={input.inputDescription}
+              {...this.props}
+            />
+          ))}
+          <div className={styles.divider} />
+        </div>
+        <div className={styles.inputContainer}>
+          <div className="row">
+            {map(takeRight(this.props.form.items, 2), (value, index) => {
+              const addon = index === 0 ? get(this.props.values, 'name') : get(this.props.values, ['params', 'key']);
+              return (
+                <Input
+                  key={index}
+                  type={value.type}
+                  value={get(this.props.values, ['params', value.target.split('.')[1]])}
+                  target={value.target}
+                  name={value.name}
+                  title={value.title}
+                  validations={value.validations}
+                  inputDescription={value.inputDescription}
+                  {...this.props}
+                  addon={addon}
+                  placeholder=" "
+                  disabled={isEmpty(addon)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </ModalBody>
+  )
+
   renderModalBodyRelations = () => (
     <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
       <RelationBox
@@ -89,12 +136,11 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   )
 
   render() {
-
     const loader = this.props.showLoader ?
       <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
         : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="form.button.continue" /></Button>;
 
-    const modalBody = this.props.showRelation ? this.renderModalBodyRelations(): <div />;
+    const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
     return (
       <div className={styles.popUpRelations}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>

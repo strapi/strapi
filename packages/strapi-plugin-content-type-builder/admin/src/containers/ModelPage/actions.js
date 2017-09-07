@@ -76,7 +76,7 @@ export function deleteAttribute(position, modelName, shouldRemoveParallelAttribu
     if (shouldRemoveParallelAttribute) {
       temporaryContentType.attributes.splice(findIndex(temporaryContentType.attributes, ['name', attributeKey]), 1);
     }
-    
+
     const updatedContentType = temporaryContentType;
     storeData.setContentType(updatedContentType);
   }
@@ -165,6 +165,8 @@ function setParallelAttribute(data) {
 
   parallelAttribute.params.key = data.name;
   parallelAttribute.name = data.params.key;
+  parallelAttribute.params.columnName = data.params.targetColumnName;
+  parallelAttribute.params.targetColumnName = data.params.columnName;
 
   return parallelAttribute;
 }

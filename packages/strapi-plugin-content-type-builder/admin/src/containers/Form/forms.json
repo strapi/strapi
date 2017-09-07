@@ -390,7 +390,42 @@
           }
         ]
       },
-      "advancedSettings": {}
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          },
+          {
+            "name": "form.attribute.item.customColumnName",
+            "target": "params.columnName",
+            "type": "string",
+            "value": "",
+            "validations": {},
+            "inputDescription": "form.attribute.item.customColumnName.description"
+          },
+          {
+            "name": "",
+            "target": "params.targetColumnName",
+            "type": "string",
+            "value": "",
+            "validations": {}
+          }
+        ]
+      }
     }
   }
 }

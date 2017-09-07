@@ -34,6 +34,9 @@
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
   "form.attribute.item.defineRelation.fieldName": "Field name",
+  "form.attribute.item.customColumnName": "Custom column names",
+  "form.attribute.item.customColumnName.description": "This is useful to rename database column names in a more comprehensive format for the API's responses",
+
 
   "form.button.cancel": "Cancel",
   "form.button.continue": "Continue",

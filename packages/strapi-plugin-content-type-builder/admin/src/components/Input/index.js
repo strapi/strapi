@@ -173,6 +173,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           name={this.props.target}
           onChange={this.props.handleChange}
           value={this.props.value}
+          disabled={this.props.disabled}
         >
           {map(this.props.selectOptions, (option, key) => (
             <FormattedMessage id={`${option.name}`} key={key}>
@@ -216,6 +217,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               onBlur={handleBlur}
               onFocus={this.props.handleFocus}
               placeholder={placeholder}
+              disabled={this.props.disabled}
             />
           )}
         </FormattedMessage>
@@ -242,6 +244,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
           autoComplete="off"
+          disabled={this.props.disabled}
         />
       )}
     </FormattedMessage>
@@ -276,6 +279,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         type={this.props.type}
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
         placeholder={placeholder}
+        disabled={this.props.disabled}
       />;
 
     const inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
@@ -296,10 +300,16 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       default:
     }
 
+    const addonInput = this.props.addon ?
+      <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
+        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} /></span>
+        {input}
+      </div> : input;
     return (
       <div className={`${styles.input} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
         {label}
-        {input}
+
+        {addonInput}
         <div className={styles.inputDescriptionContainer}>
           <small>{inputDescription}</small>
         </div>
@@ -311,10 +321,15 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 }
 
 Input.propTypes = {
+  addon: React.PropTypes.oneOfType([
+    React.PropTypes.bool,
+    React.PropTypes.string,
+  ]),
   addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
   didCheckErrors: React.PropTypes.bool,
+  disabled: React.PropTypes.bool,
   errors: React.PropTypes.array,
   handleBlur: React.PropTypes.oneOfType([
     React.PropTypes.func,
@@ -329,7 +344,7 @@ Input.propTypes = {
   // styles: React.PropTypes.object,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
-  target: React.PropTypes.string,
+  target: React.PropTypes.string.isRequired,
   title: React.PropTypes.string,
   type: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,

@@ -173,6 +173,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       const parallelAttribute = cloneDeep(newAttribute);
       parallelAttribute.name = newAttribute.params.key;
       parallelAttribute.params.key = newAttribute.name;
+      parallelAttribute.params.columnName = newAttribute.params.targetColumnName;
+      parallelAttribute.params.targetColumnName = newAttribute.params.columnName;
       contentType.attributes.push(parallelAttribute);
     }
 
@@ -310,6 +312,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       const parallelAttribute = cloneDeep(newAttribute);
       parallelAttribute.name = newAttribute.params.key;
       parallelAttribute.params.key = newAttribute.name;
+      parallelAttribute.params.columnName = newAttribute.params.targetColumnName;
+      parallelAttribute.params.targetColumnName = newAttribute.params.columnName;
       contentType.attributes[findIndex(contentType.attributes, ['name', oldAttribute.params.key])] = parallelAttribute;
     }
 
