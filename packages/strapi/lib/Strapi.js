@@ -146,8 +146,8 @@ class Strapi extends EventEmitter {
 
   async load() {
     strapi.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health') {
-        ctx.body = 'heartbeat';
+      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
+        ctx.set('strapi', 'heartbeat');
       } else {
         await next();
       }
