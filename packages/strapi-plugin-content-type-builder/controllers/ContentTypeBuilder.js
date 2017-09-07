@@ -12,7 +12,6 @@ module.exports = {
   },
 
   getModel: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     let { model } = ctx.params;
 
     model = _.toLower(model);
