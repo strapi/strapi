@@ -183,7 +183,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const title = availableNumber > 1 ? 'modelPage.contentType.list.title.plural'
       : 'modelPage.contentType.list.title.singular';
 
-    const relationShipNumber = props.listContent.attributes.filter(attr => has(attr.params, 'model')).length;
+    const relationShipNumber = props.listContent.attributes.filter(attr => has(attr.params, 'target')).length;
 
     const relationShipTitle = relationShipNumber > 1 ? 'modelPage.contentType.list.relationShipTitle.plural'
       : 'modelPage.contentType.list.relationShipTitle.singular';
