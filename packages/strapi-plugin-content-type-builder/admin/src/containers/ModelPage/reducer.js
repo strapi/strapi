@@ -9,8 +9,10 @@ import { get, size, differenceBy } from 'lodash';
 import { storeData } from '../../utils/storeData';
 /* eslint-disable new-cap */
 import {
+  ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
   EDIT_CONTENT_TYPE_ATTRIBUTE,
+  EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
   CANCEL_CHANGES,
   DELETE_ATTRIBUTE,
   MODEL_FETCH_SUCCEEDED,
@@ -36,14 +38,38 @@ const initialState = fromJS({
 
 function modelPageReducer(state = initialState, action) {
   switch (action.type) {
+    case ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE:
+      return state
+        .updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute, action.parallelAttribute))
+        .set('showButtons', true);
     case ADD_ATTRIBUTE_TO_CONTENT_TYPE:
       return state
         .updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute))
         .set('showButtons', true);
-    case EDIT_CONTENT_TYPE_ATTRIBUTE:
+    case EDIT_CONTENT_TYPE_ATTRIBUTE: {
+      if (action.shouldAddParralAttribute) {
+        return state
+          .set('showButtons', true)
+          .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
+          .updateIn(['model', 'attributes'], (list) => list.splice(action.attributePosition + 1, 0, action.parallelAttribute));
+      }
+      
       return state
         .set('showButtons', true)
         .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute);
+    }
+    case EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION: {
+      if (action.shouldRemoveParallelAttribute) {
+        return state
+          .set('showButtons', true)
+          .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
+          .updateIn(['model', 'attributes'], (list) => list.splice(action.parallelAttributePosition, 1));
+      }
+      return state
+      .set('showButtons', true)
+      .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
+      .updateIn(['model', 'attributes', action.parallelAttributePosition], () => action.parallelAttribute);
+    }
     case CANCEL_CHANGES:
       return state
         .set('showButtons', false)

@@ -23,7 +23,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   }
 
   componentDidMount() {
-    if (!isEmpty(this.props.dropDownItems)) {
+    if (!isEmpty(this.props.dropDownItems) && !this.props.isEditting) {
       const target = {
         name: 'params.target',
         type: 'string',
@@ -35,7 +35,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   }
 
   componentWillReceiveProps(nextProps) {
-    if (isEmpty(this.props.dropDownItems) && !isEmpty(nextProps.dropDownItems)) {
+    if (isEmpty(this.props.dropDownItems) && !isEmpty(nextProps.dropDownItems) && !this.props.isEditting) {
       const target = {
         name: 'params.target',
         type: 'string',
@@ -137,6 +137,7 @@ PopUpRelations.propTypes = {
   ]),
   handleChange: React.PropTypes.func,
   handleSubmit: React.PropTypes.func,
+  isEditting: React.PropTypes.bool,
   isOpen: React.PropTypes.bool,
   popUpTitle: React.PropTypes.string.isRequired,
   routePath: React.PropTypes.string.isRequired,

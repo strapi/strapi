@@ -16,6 +16,7 @@ import {
   includes,
   isEmpty,
   isNumber,
+  isUndefined,
   map,
   set,
   size,
@@ -29,7 +30,7 @@ import { FormattedMessage } from 'react-intl';
 import { router, store } from 'app';
 
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType, editContentTypeAttribute, updateContentType } from 'containers/ModelPage/actions';
+import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
@@ -132,8 +133,14 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       return this.props.setFormErrors(formErrors);
     }
 
-    // Update the parent container (ModelPage)
-    this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
+    // Check if user is adding a relation with the same content type
+    if (includes(this.props.hash, 'attributerelation') && this.props.modifiedDataAttribute.params.target === this.props.modelName) {
+      // Insert two attributes
+      this.props.addAttributeRelationToContentType(this.props.modifiedDataAttribute);
+    } else {
+      // Update the parent container (ModelPage)
+      this.props.addAttributeToContentType(this.props.modifiedDataAttribute);
+    }
     // Empty the store
     this.props.resetIsFormSet();
     // Empty errors
@@ -235,7 +242,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     return formErrors;
   }
 
+  // Function used when modified the name of the content type and not the attributes
+  // Fires Form sagas
   contentTypeEdit = () => {
+    console.log('content type edit')
     const formErrors = checkFormValidity(this.props.modifiedDataEdit, this.props.formValidations);
 
     if (!isEmpty(formErrors)) {
@@ -252,14 +262,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       return this.props.setFormErrors(formErrors);
     }
 
-    // Update the parent container (ModelPage)
-    this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, this.props.hash.split('::')[3]);
+    const hashArray = split(this.props.hash, '::');
+    if (!isUndefined(hashArray[4])) {
+      // Update the parent container (ModelPage)
+      this.props.editContentTypeAttributeRelation(this.props.modifiedDataAttribute, hashArray[3], hashArray[4], this.props.modifiedDataAttribute.params.target !== this.props.modelName);
+    } else {
+      this.props.editContentTypeAttribute(this.props.modifiedDataAttribute, hashArray[3], this.props.modifiedDataAttribute.params.target === this.props.modelName);
+    }
     // Empty the store
     this.props.resetIsFormSet();
     // Empty errors
     this.props.resetFormErrors();
     // Close modal
-    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#edit', '')}`);
+    router.push(`${this.props.redirectRoute}/${replace(hashArray[0], '#edit', '')}`);
   }
 
   editTempContentTypeAttribute = () => {
@@ -495,6 +510,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const buttonSubmitMessage = includes(this.props.hash.split('::')[1], 'contentType') ? 'form.button.save' : 'form.button.continue';
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
     const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
+    const edit = includes(this.props.hash, '#edit');
 
     if (includes(popUpFormType, 'relation')) {
       return (
@@ -513,6 +529,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           handleSubmit={this.handleSubmit}
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
+          isEditting={edit}
         />
       );
     }
@@ -555,8 +572,10 @@ const mapStateToProps = selectForm();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeRelationToContentType,
       addAttributeToContentType,
       editContentTypeAttribute,
+      editContentTypeAttributeRelation,
       changeInput,
       changeInputAttribute,
       connectionsFetch,
@@ -580,6 +599,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.propTypes = {
+  addAttributeRelationToContentType: React.PropTypes.func,
   addAttributeToContentType: React.PropTypes.func,
   changeInput: React.PropTypes.func.isRequired,
   changeInputAttribute: React.PropTypes.func,
@@ -590,6 +610,7 @@ Form.propTypes = {
   contentTypeFetchSucceeded: React.PropTypes.func,
   didCheckErrors: React.PropTypes.bool,
   editContentTypeAttribute: React.PropTypes.func,
+  editContentTypeAttributeRelation: React.PropTypes.func,
   form: React.PropTypes.oneOfType([
     React.PropTypes.array.isRequired,
     React.PropTypes.object.isRequired,

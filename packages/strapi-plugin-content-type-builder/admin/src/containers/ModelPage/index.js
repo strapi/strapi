@@ -132,7 +132,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const attribute = this.props.modelPage.model.attributes[index];
     const attributeType = attribute.params.type ? attribute.params.type : 'relation';
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
-    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#edit${this.props.params.modelName}::attribute${attributeType}::${settingsType}::${index}`);
+  
+    const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
+    const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
+
+    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#edit${this.props.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
 
   }
 

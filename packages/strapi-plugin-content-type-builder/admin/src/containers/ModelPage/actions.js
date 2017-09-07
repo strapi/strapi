@@ -3,12 +3,14 @@
  * ModelPage actions
  *
  */
-import { forEach, get, includes, map, set } from 'lodash';
+import { cloneDeep, forEach, get, includes, map, set } from 'lodash';
 import { storeData } from '../../utils/storeData';
 
 import {
+  ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
   EDIT_CONTENT_TYPE_ATTRIBUTE,
+  EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
   CANCEL_CHANGES,
   DEFAULT_ACTION,
   DELETE_ATTRIBUTE,
@@ -22,6 +24,14 @@ import {
   UPDATE_CONTENT_TYPE,
 } from './constants';
 
+export function addAttributeRelationToContentType(newAttribute) {
+  return {
+    type: ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
+    newAttribute,
+    parallelAttribute: setParallelAttribute(newAttribute),
+  };
+}
+
 export function addAttributeToContentType(newAttribute) {
   return {
     type: ADD_ATTRIBUTE_TO_CONTENT_TYPE,
@@ -29,11 +39,24 @@ export function addAttributeToContentType(newAttribute) {
   };
 }
 
-export function editContentTypeAttribute(modifiedAttribute, attributePosition) {
+export function editContentTypeAttribute(modifiedAttribute, attributePosition, shouldAddParralAttribute) {
   return {
     type: EDIT_CONTENT_TYPE_ATTRIBUTE,
     modifiedAttribute,
     attributePosition,
+    shouldAddParralAttribute,
+    parallelAttribute: setParallelAttribute(modifiedAttribute),
+  };
+}
+
+export function editContentTypeAttributeRelation(modifiedAttribute, attributePosition, parallelAttributePosition, shouldRemoveParallelAttribute) {
+  return {
+    type: EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
+    modifiedAttribute,
+    attributePosition,
+    parallelAttribute: setParallelAttribute(modifiedAttribute),
+    parallelAttributePosition,
+    shouldRemoveParallelAttribute,
   };
 }
 
@@ -128,4 +151,15 @@ export function updateContentType(data) {
     type: UPDATE_CONTENT_TYPE,
     data,
   };
+}
+
+
+
+function setParallelAttribute(data) {
+  const parallelAttribute = cloneDeep(data);
+
+  parallelAttribute.params.key = data.name;
+  parallelAttribute.name = data.params.key;
+
+  return parallelAttribute;
 }

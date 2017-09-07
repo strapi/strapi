@@ -36,6 +36,7 @@ export function* submitChanges() {
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
+
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
       if (attribute.connection) {
@@ -53,12 +54,14 @@ export function* submitChanges() {
           unset(body.attributes[index].params, key);
         }
       });
-    })
+    });
 
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
+
     const opts = { method, body };
+
 
     yield call(request, requestUrl, opts);
 
