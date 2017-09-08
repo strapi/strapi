@@ -155,6 +155,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
+    const marginBottomInput = isEmpty(this.state.errors) ? '4.3rem' : '2.4rem';
     const input = placeholder
       ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
       : (

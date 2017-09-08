@@ -127,6 +127,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
+    const marginBottomInput = isEmpty(this.state.errors) ? '4.3rem' : '2.4rem';
     const input = placeholder
       ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
       : (
