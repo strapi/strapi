@@ -22,6 +22,7 @@
   "error.contentTypeName.taken": "This name already exists",
   "error.attribute.taken": "This field name already exists",
   "error.attribute.key.taken": "This value already exists",
+  "error.attribute.sameKeyAndName": "Can't be equals",
 
   "form.attribute.item.textarea.name": "Name",
   "form.attribute.item.number.name": "Name",

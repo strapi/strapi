@@ -248,6 +248,8 @@ function setAttributeFormData(hash) {
       required: false,
       maxLength: false,
       minLength: false,
+      min: false,
+      max: false,
     }),
   });
 
