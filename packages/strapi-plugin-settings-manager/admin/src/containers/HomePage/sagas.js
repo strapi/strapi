@@ -1,6 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
-import { forEach, set, join, split, toLower, upperCase } from 'lodash';
+import { forEach, set, join, split, toLower, upperCase, map, replace } from 'lodash';
 import { takeLatest } from 'redux-saga';
 import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
@@ -27,10 +27,13 @@ import {
   editSettingsSucceeded,
   languagesFetchSucceeded,
   languageActionError,
+  languageActionSucceeded,
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
   databaseActionError,
 } from './actions';
+
+/* eslint-disable no-template-curly-in-string */
 
 export function* editDatabase(action) {
   try {
@@ -60,6 +63,10 @@ export function* editDatabase(action) {
     yield put(databaseActionSucceeded());
 
   } catch(error) {
+    const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
+
+    yield put(databaseActionError(formErrors));
+
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
@@ -81,7 +88,7 @@ export function* deleteDatabase(action) {
 
 
   } catch(error) {
-    yield put(databaseActionError());
+    yield put(databaseActionError([]));
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
@@ -191,6 +198,8 @@ export function* postLanguage() {
 
     window.Strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
 
+    yield put(languageActionSucceeded());
+
   } catch(error) {
     yield put(languageActionError());
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
@@ -226,6 +235,15 @@ export function* postDatabase(action) {
     window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
 
   } catch(error) {
+    const formErrors = map(error.response.payload.message, (err) => {
+      const target = err.target ? replace(err.target, err.target.split('.')[2], '${name}') : 'database.connections.${name}.name';
+      return (
+        { target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }
+      );
+    });
+
+    yield put(databaseActionError(formErrors));
+
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }

@@ -103,7 +103,7 @@ module.exports = {
     description: 'form.request.description',
     sections: [
       {
-        name: '',
+        name: 'form.request.item.logger',
         items: [
           {
             name: 'form.request.item.logger.level',

@@ -28,7 +28,7 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, remove } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -49,7 +49,10 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      this.setState({ errors: nextProps.errors });
+      const errors = uniqBy(union(this.state.errors, nextProps.errors), 'id');
+
+      if (isEmpty(nextProps.errors)) remove(errors, (error) => error.id === 'settings-manager.request.error.database.exist');
+      this.setState({ errors });
     }
   }
 
@@ -58,7 +61,11 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     if (!isEmpty(target.value) || this.state.hasInitialValue) {
       // validates basic string validations
       // add custom logic here such as alerts...
-      const errors = this.validate(target.value);
+      // specific check for db
+      const indexErrorDbExist = findIndex(this.props.errors, ['id', 'settings-manager.request.error.database.exist']);
+      const errors = indexErrorDbExist !== -1 ?
+        uniqBy(union(this.props.errors, this.validate(target.value)), 'id') : this.validate(target.value);
+
       this.setState({ errors, hasInitialValue: true });
     }
   }
@@ -109,14 +116,14 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
             ? <FormattedMessage {...error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback">{displayError}</div>
+            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
           );
         })
       );
     }
   }
 
-  renderFormattedInput = (handleBlur, inputValue, placeholder) => (
+  renderFormattedInput = (handleBlur, inputValue, placeholder, marginBottom) => (
     <FormattedMessage id={`settings-manager.${placeholder}`}>
       {(message) => (
         <input
@@ -130,6 +137,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
           autoComplete="off"
+          style={{marginBottom}}
         />
       )}
     </FormattedMessage>
@@ -147,9 +155,8 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
-
     const input = placeholder
-      ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+      ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
       : (
         <input
           name={this.props.target}
@@ -161,17 +168,18 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           type="text"
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={placeholder}
+          style={{marginBottom: marginBottomInput }}
         />
       );
 
-
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
-
+    let marginTopSmall = this.props.inputDescription ? '-3rem' : '-1.5rem';
+    if (!isEmpty(this.state.errors) && this.props.inputDescription) marginTopSmall = '-1.2rem';
     return (
       <div className={`${this.props.styles.inputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`} style={spacer}>
         {label}
         {input}
-        <small>{this.props.inputDescription}</small>
+        <small style={{ marginTop: marginTopSmall }}>{this.props.inputDescription}</small>
         {this.renderErrors()}
       </div>
     );

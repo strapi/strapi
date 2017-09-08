@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.5.5",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -23,14 +23,17 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "sanitize.css": "^4.1.0"
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.17.4",
+    "sanitize.css": "^4.1.0",
+    "strapi-utils": "3.0.0-alpha.5.5"
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
-    "eslint": "^4.5.0",
+    "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
-    "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-config-prettier": "^2.3.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-config-prettier": "^2.4.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-babel": "^4.1.2",
     "eslint-plugin-import": "^2.7.0",
@@ -40,11 +43,11 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
-    "plop": "^1.8.0",
-    "prettier": "^1.5.3",
+    "plop": "^1.8.1",
+    "prettier": "^1.6.1",
     "rimraf": "^2.6.1",
     "strapi-helper-plugin": "file:../strapi-helper-plugin",
-    "webpack": "^3.5.5"
+    "webpack": "^3.5.6"
   },
   "author": {
     "name": "Strapi",

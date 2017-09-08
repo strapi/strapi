@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.5.5",
   "description": "A powerful UI to easily manage your data.",
   "engines": {
     "node": ">= 8.0.0",
@@ -48,20 +48,20 @@
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
-    "eslint": "^4.5.0",
+    "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
-    "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-config-prettier": "^2.3.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-config-prettier": "^2.4.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-babel": "^4.1.2",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.3.0",
     "eslint-plugin-redux-saga": "^0.4.0",
-    "plop": "^1.8.0",
-    "prettier": "^1.5.3",
+    "plop": "^1.8.1",
+    "prettier": "^1.6.1",
     "rimraf": "^2.6.1",
     "strapi-helper-plugin": "file:../strapi-helper-plugin",
-    "webpack": "^3.5.5"
+    "webpack": "^3.5.6"
   }
 }

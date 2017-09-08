@@ -11,6 +11,12 @@ try {
       packageJSON.dependencies[dependency] = 'file:../' + dependency;
     });
 
+    if (packageJSON.devDependencies) {
+      Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+        packageJSON.devDependencies[devDependency] = 'file:../' + devDependency;
+      });
+    }
+
     fs.writeFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf8');
   });
 } catch (error) {

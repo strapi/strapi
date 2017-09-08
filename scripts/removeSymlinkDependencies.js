@@ -11,10 +11,14 @@ try {
     packageJSON.version = pkgJSON.version;
 
     Object.keys(packageJSON.dependencies).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
-      if (packageJSON.dependencies[dependency].indexOf('file:') !== -1) {
-        packageJSON.dependencies[dependency] = '^' + pkgJSON.version;
-      }
+      packageJSON.dependencies[dependency] = pkgJSON.version;
     });
+
+    if (packageJSON.devDependencies) {
+      Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+        packageJSON.devDependencies[devDependency] = pkgJSON.version;
+      });
+    }
 
     fs.writeFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf8');
   });

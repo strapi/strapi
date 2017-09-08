@@ -172,7 +172,7 @@ export function newLanguagePost() {
 }
 
 
-export function languageActionSucceded() {
+export function languageActionSucceeded() {
   return {
     type: LANGUAGE_ACTION_SUCCEEDED,
   };
@@ -240,9 +240,10 @@ export function databaseActionSucceeded() {
   };
 }
 
-export function databaseActionError() {
+export function databaseActionError(formErrors) {
   return {
     type: DATABASE_ACTION_ERROR,
+    formErrors,
   };
 }
 

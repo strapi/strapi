@@ -27,6 +27,7 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
                 {map(this.props.links, (link, key) => {
                   const notifActive = link.active ? <div className={styles.notifPoint} /> : '';
                   linkColor = darken(linkColor, 2);
+
                   return (
                     <Link key={key} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
                       <div></div>

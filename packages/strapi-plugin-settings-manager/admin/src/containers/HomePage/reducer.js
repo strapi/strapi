@@ -57,7 +57,8 @@ function homePageReducer(state = initialState, action) {
         .set('formErrors', [])
         .set('formValidations', action.formValidations);
     case CHANGE_INPUT:
-      return state.updateIn(['modifiedData', action.key], () => action.value);
+      return state
+        .updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state
         .set('modifiedData', state.get('initialData'))
@@ -101,6 +102,7 @@ function homePageReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.configsDisplay))
         .updateIn(['modifiedData', 'language.defaultLocale'], () => action.newLanguage);
     case LANGUAGE_ACTION_SUCCEEDED:
+      return state.set('error', !state.get('error'));
     case LANGUAGE_ACTION_ERROR:
       return state.set('didCreatedNewLanguage', true);
     case DATABASE_ACTION_SUCCEEDED:
@@ -112,7 +114,10 @@ function homePageReducer(state = initialState, action) {
         .set('error', !state.get('error'))
         .set('didCreatedNewDb', true);
     case DATABASE_ACTION_ERROR:
-      return state.set('didCreatedNewDb', true);
+      return state
+        .set('error', !state.get('error'))
+        .set('formErrors', action.formErrors)
+        // .set('didCreatedNewDb', true);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state
         .set('specificDatabase', OrderedMap(action.database))

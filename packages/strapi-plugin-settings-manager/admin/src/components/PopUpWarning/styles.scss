@@ -12,6 +12,9 @@
     font-size: 1.8rem!important;
 
   }
+  > button {
+    margin-right: 0!important;
+  }
 }
 
 .centered {
@@ -29,6 +32,9 @@
   border: none!important;
 }
 
+.modal-content {
+  padding: 0!important;
+}
 .modalFooter {
 
   margin-top: 4.5rem;
@@ -77,6 +83,9 @@
 .modalPosition {
   top: 18.7rem;
   width: 37.5rem;
+  > div {
+    padding: 0!important;
+  }
 }
 
 .modalDangerBodyContainer {
@@ -115,5 +124,5 @@
 
 .modalPosition {
   top: 20.3rem;
-  width: 37.5rm;
+  width: 37.5rem;
 }

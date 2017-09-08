@@ -28,7 +28,7 @@
 */
 
 import React from 'react';
-import { isEmpty, includes, map, mapKeys, isObject, reject } from 'lodash';
+import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -49,7 +49,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
-      this.setState({ errors: nextProps.errors });
+      this.setState({ errors: uniqBy(union(this.state.errors, nextProps.errors), 'id') });
     }
   }
 
@@ -92,14 +92,14 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           const displayError = isObject(error) && error.id ?
             <FormattedMessage {...error} /> : error;
           return (
-            <div key={key} className="form-control-feedback">{displayError}</div>
+            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
           );
         })
       );
     }
   }
 
-  renderFormattedInput = (handleBlur, inputValue, placeholder) => (
+  renderFormattedInput = (handleBlur, inputValue, placeholder, marginBottom) => (
     <FormattedMessage id={`settings-manager.${placeholder}`}>
       {(message) => (
         <input
@@ -112,6 +112,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           type="number"
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
+          style={{marginBottom}}
         />
       )}
     </FormattedMessage>
@@ -126,9 +127,8 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
-
     const input = placeholder
-      ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
+      ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
       : (
         <input
           type="number"
@@ -140,16 +140,19 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           onFocus={this.props.handleFocus}
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={placeholder}
+          style={{marginBottom: marginBottomInput }}
         />
       );
 
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
+    let marginTopSmall = this.props.inputDescription ? '-3rem' : '-1.5rem';
 
+    if (!isEmpty(this.state.errors) && this.props.inputDescription) marginTopSmall = '-1.2rem';
     return (
       <div className={`${this.props.styles.inputNumber} ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label>
         {input}
-        <small>{this.props.inputDescription}</small>
+        <small style={{ marginTop: marginTopSmall }}>{this.props.inputDescription}</small>
         {this.renderErrors()}
       </div>
     );

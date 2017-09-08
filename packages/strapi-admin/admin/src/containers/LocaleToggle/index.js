@@ -17,8 +17,11 @@ import styles from './styles.scss';
 
 export class LocaleToggle extends React.Component { // eslint-disable-line
   render() {
-    const messages = {};
-    languages.forEach((locale) => { messages[locale] = locale.toUpperCase(); });
+    const messages = languages.reduce((result, locale) => {
+      const resultsObj = result;
+      resultsObj[locale] = locale.toUpperCase();
+      return resultsObj;
+    }, {});
 
     return (
       <div className={styles.localeToggle}>
