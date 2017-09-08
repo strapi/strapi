@@ -42,10 +42,17 @@
 
 .dropDown {
   position: absolute;
-  top: -.2rem;
-  right: 0;
+  width: 100%;
+  display: flex;
+  top: .5rem;
+  justify-content: flex-end;
+
   > div {
+    width: 100%;
     > button {
+      width: 100%;
+      text-align: right;
+      cursor: pointer;
       background-color: transparent;
       border: none;
       font-size: 14px;
@@ -71,7 +78,7 @@
 
 .dropDownContent {
   top: 102%;
-  left: -18.2rem;
+  // left: -18.2rem;
   padding: 0;
   border-radius: 0;
   border: none;
@@ -86,6 +93,7 @@
         text-transform: capitalize;
         font-size: 1.3rem;
         color: rgba(50, 55, 64, 0.75);
+        cursor: pointer;
         > i {
           margin-right: 8px;
           color: rgba(50, 55, 64, 0.75);

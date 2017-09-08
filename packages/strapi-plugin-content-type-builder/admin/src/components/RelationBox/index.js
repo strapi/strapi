@@ -32,9 +32,16 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
     this.props.handleChange({ target });
   }
 
-  toggle = () => this.setState({ showMenu: !this.state.showMenu });
+  showDropDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ showMenu: !this.state.showMenu });
+    if (!this.state.showMenu) {
+      console.log('oooo');
+    }
+  }
 
-  showDropDown = () => this.setState({ showMenu: !this.state.showMenu });
+  toggle = () => this.setState({ showMenu: !this.state.showMenu });
 
   renderDropdownMenu = () => (
     <div className={styles.dropDown}>
@@ -62,12 +69,6 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
     </div>
   )
 
-  renderShapeDropdown = () => (
-    <div className={styles.dropDown}>
-      <img src={Shape} role="presentation" onClick={this.showDropDown} />
-    </div>
-  )
-
   render() {
     const content = isEmpty(this.props.input) ? <div /> :
       <Input
@@ -84,29 +85,6 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       />;
 
     const dropDown = this.props.dropDownItems ? this.renderDropdownMenu() : '';
-    // <div className={styles.dropDown}>
-    //   <ButtonDropdown isOpen={this.state.showMenu} toggle={this.toggle} style={{ backgroundColor: 'transparent' }}>
-    //     <DropdownToggle caret>
-    //     </DropdownToggle>
-    //     <DropdownMenu className={styles.dropDownContent}>
-    //       {map(this.props.dropDownItems, (value, key) => {
-    //         const divStyle = get(this.props.header, 'name') === value.name ? { color: '#323740', fontWeight: 'bold'} : { color: 'rgba(50,55,64, 0.75)'};
-    //         return (
-    //           <div style={{ height: '3.8rem'}} key={key}>
-    //             <DropdownItem onClick={this.handleClick} id={value.name}>
-    //               <div style={divStyle} id={value.name}>
-    //                 <i className={`fa ${value.icon}` } style={divStyle} />
-    //                 {value.name}
-    //               </div>
-    //             </DropdownItem>
-    //
-    //           </div>
-    //
-    //         )
-    //       })}
-    //     </DropdownMenu>
-    //   </ButtonDropdown>
-    // </div> : '';
 
     return (
       <div className={styles.relationBox}>
