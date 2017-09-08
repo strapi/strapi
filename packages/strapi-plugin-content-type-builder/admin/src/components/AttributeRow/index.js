@@ -11,6 +11,7 @@ import PopUpWarning from 'components/PopUpWarning';
 import IcoBoolean from '../../assets/images/icon_boolean.svg';
 import IcoDate from '../../assets/images/icon_date.svg';
 import IcoImage from '../../assets/images/icon_image.svg';
+import IcoNumber from '../../assets/images/icon_number.svg';
 import IcoJson from '../../assets/images/icon_json.svg';
 import IcoRelation from '../../assets/images/icon_relation.svg';
 import IcoString from '../../assets/images/icon_string.svg';
@@ -25,6 +26,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'boolean': IcoBoolean,
       'date': IcoDate,
       'media': IcoImage,
+      'number': IcoNumber,
       'json': IcoJson,
       'relation': IcoRelation,
       'string': IcoString,

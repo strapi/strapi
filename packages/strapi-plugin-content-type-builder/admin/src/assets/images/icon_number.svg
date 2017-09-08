@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="20px" viewBox="0 0 35 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.1 (44463) - http://www.bohemiancoding.com/sketch -->
+    <title>Type icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Content-Type-Builder---Content-Type-view" transform="translate(-468.000000, -381.000000)">
+            <g id="Container">
+                <g id="Content">
+                    <g id="Popup---Add-New-Field" transform="translate(427.000000, 233.000000)">
+                        <g id="Forms" transform="translate(30.000000, 85.000000)">
+                            <g id="Number" transform="translate(0.000000, 53.000000)">
+                                <g id="Type-icon" transform="translate(11.000000, 10.000000)">
+                                    <rect id="Rectangle-2" fill="#E8442F" x="0" y="0" width="35" height="20" rx="2"></rect>
+                                    <text id="123" font-family="Lato-Bold, Lato" font-size="12" font-weight="bold" letter-spacing="0.5" fill="#FFFFFF">
+                                        <tspan x="6.2369231" y="14.5">12</tspan>
+                                        <tspan x="21.1569231" y="14.5" letter-spacing="0.646153808">3</tspan>
+                                    </text>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

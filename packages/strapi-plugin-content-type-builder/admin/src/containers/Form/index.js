@@ -11,6 +11,7 @@ import {
   camelCase,
   cloneDeep,
   findIndex,
+  filter,
   forEach,
   get,
   has,
@@ -197,19 +198,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Check form errors
     const formErrors = checkFormValidity(data, this.props.formValidations);
 
-    if (includes(this.props.hash, '#create') && findIndex(this.props.menuData[0].items, ['name', data.name]) !== -1) {
+    // Check if content type name already exists
+    const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === data.name);
+
+    if (size(sameContentTypeNames) > 0 && data.name !== this.props.modelName) {
       formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
     }
-
-
-    if (includes(this.props.hash, '#edit')) {
-      const allContentTypes = cloneDeep(this.props.menuData[0].items);
-      allContentTypes.splice(findIndex(allContentTypes, ['name', this.props.modelName]));
-      if (findIndex(allContentTypes, ['name', data.name]) !== -1) {
-        formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
-      }
-    }
-
 
     if (!isEmpty(formErrors)) {
       return this.props.setFormErrors(formErrors);
@@ -246,15 +240,18 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   checkNestedInputValidations = (formErrors) => {
-    if (get(this.props.modifiedDataAttribute, ['params', 'minLength'])) {
-      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', 'minLengthValue']))) {
-        formErrors.push({ target: 'params.minLengthValue', errors: [{ id: 'error.validation.required' }] });
+    const minKey = get(this.props.modifiedDataAttribute, ['params', 'type']) === 'number' ? 'min' : 'minLength';
+
+    if (get(this.props.modifiedDataAttribute, ['params', minKey])) {
+      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', `${minKey}Value`]))) {
+        formErrors.push({ target: `params.${minKey}Value`, errors: [{ id: 'error.validation.required' }] });
       }
     }
 
-    if (get(this.props.modifiedDataAttribute, ['params', 'maxLength'])) {
-      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', 'maxLengthValue']))) {
-        formErrors.push({ target: 'params.maxLengthValue', errors: [{ id: 'error.validation.required' }] });
+    const maxKey = get(this.props.modifiedDataAttribute, ['params', 'type']) === 'number' ? 'max' : 'maxLength';
+    if (get(this.props.modifiedDataAttribute, ['params', maxKey])) {
+      if (!isNumber(get(this.props.modifiedDataAttribute, ['params', `${maxKey}Value`]))) {
+        formErrors.push({ target: `params.${maxKey}Value`, errors: [{ id: 'error.validation.required' }] });
       }
     }
 
@@ -263,6 +260,20 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         formErrors.push({ target: 'params.key', errors: [{ id: 'error.validation.required' }] });
       }
     }
+
+    const sameAttributes = filter(this.props.contentTypeData.attributes, (attr) => attr.name === this.props.modifiedDataAttribute.name);
+
+    if (size(sameAttributes) > 0 && this.props.modifiedDataAttribute.name !== get(this.props.contentTypeData.attributes, [split(this.props.hash, '::')[3], 'name'])) {
+      formErrors.push({ target: 'name', errors: [{ id: 'error.attribute.taken' }]});
+    }
+
+    const sameParamsKey = filter(this.props.contentTypeData.attributes, (attr) => attr.params.key === this.props.modifiedDataAttribute.params.key);
+
+    if (size(sameParamsKey) > 0 && this.props.modifiedDataAttribute.params.key !== get(this.props.contentTypeData.attributes, [split(this.props.hash, '::')[3], 'params', 'key'])) {
+      formErrors.push({ target: 'params.key', errors: [{ id: 'error.attribute.key.taken' }]});
+    }
+
+
     return formErrors;
   }
 
@@ -270,6 +281,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   // Fires Form sagas
   contentTypeEdit = () => {
     const formErrors = checkFormValidity(this.props.modifiedDataEdit, this.props.formValidations);
+
+    const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === this.props.modifiedDataEdit.name);
+
+    if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== this.props.modelName) {
+      formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+    }
+
 
     if (!isEmpty(formErrors)) {
       return this.props.setFormErrors(formErrors);
@@ -538,6 +556,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     // Ensure typeof(popUpFormType) is String
+    // console.log(this.props)
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
     const values = this.getValues();
@@ -644,6 +663,7 @@ Form.propTypes = {
   changeInputAttribute: React.PropTypes.func,
   connectionsFetch: React.PropTypes.func.isRequired,
   contentTypeCreate: React.PropTypes.func,
+  contentTypeData: React.PropTypes.object,
   contentTypeEdit: React.PropTypes.func,
   contentTypeFetch: React.PropTypes.func,
   contentTypeFetchSucceeded: React.PropTypes.func,

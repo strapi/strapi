@@ -55,6 +55,10 @@
         "description": "popUpForm.attributes.text.description"
       },
       {
+        "type": "number",
+        "description": "popUpForm.attributes.number.description"
+      },
+      {
         "type": "boolean",
         "description": "popUpForm.attributes.boolean.description"
       },
@@ -138,6 +142,78 @@
               {
                 "name": "",
                 "target": "params.maxLengthValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "number": {
+      "baseSettings": {
+        "items": [
+          {
+            "name": "form.attribute.item.number.name",
+            "target": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "form.attribute.item.settings.name",
+            "name": "form.attribute.item.requiredField",
+            "target": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.requiredField.description"
+          },
+          {
+            "name": "form.attribute.item.uniqueField",
+            "target": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "form.attribute.item.uniqueField.description"
+          },
+          {
+            "name": "form.attribute.item.minimum",
+            "target": "params.min",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "name": "",
+                "target": "params.minValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "form.attribute.item.maximum",
+            "target": "params.max",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "name": "",
+                "target": "params.maxValue",
                 "value": "",
                 "type": "number",
                 "validations": {

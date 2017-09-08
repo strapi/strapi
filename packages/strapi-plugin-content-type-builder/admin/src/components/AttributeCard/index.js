@@ -11,6 +11,7 @@ import IcoBoolean from '../../assets/images/icon_boolean.svg';
 import IcoDate from '../../assets/images/icon_date.svg';
 import IcoImage from '../../assets/images/icon_image.svg';
 import IcoJson from '../../assets/images/icon_json.svg';
+import IcoNumber from '../../assets/images/icon_number.svg';
 import IcoRelation from '../../assets/images/icon_relation.svg';
 import IcoString from '../../assets/images/icon_string.svg';
 import IcoText from '../../assets/images/icon_text.svg';
@@ -26,6 +27,7 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
       'boolean': IcoBoolean,
       'date': IcoDate,
       'media': IcoImage,
+      'number': IcoNumber,
       'json': IcoJson,
       'relation': IcoRelation,
       'string': IcoString,
@@ -38,9 +40,8 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
   }
 
   render() {
-    const bootstrapClass = this.props.attribute.type === 'relation' ? 'col-md-6 offset-md-3' : 'col-md-6';
     return (
-      <div className={bootstrapClass}>
+      <div className="col-md-6">
         <div className={styles.attributeCardContainer} onClick={this.goTo}>
           <div className={styles.attributeCard}>
             <img src={this.asset[this.props.attribute.type]} role="presentation" />
