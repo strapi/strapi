@@ -7,12 +7,11 @@
 // Public node modules.
 const _ = require('lodash');
 
-// Local utilities.
-const responsesPolicy = require('../../responses/policy');
-
 // Strapi utilities.
 const finder = require('strapi-utils').finder;
 const regex = require('strapi-utils').regex;
+const joijson = require('strapi-utils').joijson;
+
 
 // Middleware used for every routes.
 // Expose the endpoint in `this`.
@@ -31,6 +30,8 @@ function globalPolicy(endpoint, value, route) {
 }
 
 module.exports = strapi => function routerChecker(value, endpoint, plugin) {
+  const Joi = strapi.koaMiddlewares.joiRouter.Joi;
+  const builder = joijson.builder(Joi);
   const route = regex.detectRoute(endpoint);
 
   // Define controller and action names.
@@ -51,9 +52,6 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
 
   // Add the `globalPolicy`.
   policies.push(globalPolicy(endpoint, value, route));
-
-  // Add the `responsesPolicy`.
-  policies.push(responsesPolicy);
 
   // Allow string instead of array of policies.
   if (

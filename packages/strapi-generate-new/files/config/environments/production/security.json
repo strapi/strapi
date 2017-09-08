@@ -1,12 +1,12 @@
 {
   "csrf": {
-    "enabled": false
+    "enabled": true
   },
   "csp": {
-    "enabled": false
+    "enabled": true
   },
   "p3p": {
-    "enabled": false
+    "enabled": true
   },
   "hsts": {
     "enabled": true,
@@ -18,7 +18,7 @@
     "value": "SAMEORIGIN"
   },
   "xss": {
-    "enabled": false
+    "enabled": true
   },
   "cors": {
     "enabled": true,
@@ -44,11 +44,8 @@
       "X-Frame-Options"
     ]
   },
-  "ssl": {
-    "enabled": false
-  },
   "ip": {
-    "enabled": true,
+    "enabled": false,
     "whiteList": [],
     "blackList": []
   }

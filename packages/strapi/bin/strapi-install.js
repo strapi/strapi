@@ -11,7 +11,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi install`
@@ -65,7 +65,7 @@ module.exports = function (plugin, cliArguments) {
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    exec(`npm install ${pluginId}`, (err) => {
+    exec(`npm install ${pluginId}@alpha --ignore-scripts --no-save`, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginId}`);
         process.exit(1);

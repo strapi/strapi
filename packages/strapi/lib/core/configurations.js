@@ -76,12 +76,15 @@ module.exports.app = async function() {
     // Set current connections.
     this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
 
-    if (this.config.language.enabled) {
+    if (get(this.config, 'language.enabled')) {
       this.config.language.locales = Object.keys(strapi.config.locales);
     }
 
     // Template literal string.
     this.config = templateConfigurations(this.config);
+
+    // Initialize main router to use it in middlewares.
+    this.router = this.koaMiddlewares.joiRouter();
 
     // Define required middlewares categories.
     const middlewareCategories = ['request', 'response', 'security', 'server'];
@@ -105,6 +108,22 @@ module.exports.app = async function() {
 
       return acc;
     }, {});
+
+    // These middlewares cannot be disabled.
+    merge(flattenMiddlewaresConfig, {
+      responses: {
+        enabled: true
+      },
+      router: {
+        enabled: true
+      },
+      logger: {
+        enabled: true
+      },
+      boom: {
+        enabled: true
+      }
+    });
 
     // Exclude database and custom.
     middlewareCategories.push('database');
@@ -245,13 +264,8 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
-    // Set URL.
-    const ssl = get(this.config, 'ssl') || {};
-
-    this.config.url = isString(this.config.proxy)
-      ? this.config.proxy
-      : `${isEmpty(ssl) || ssl.disabled === true ? 'http' : 'https'}://${this
-          .config.host}:${this.config.port}`;
+    this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
+    this.config.url = `http://${this.config.host}:${this.config.port}`;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig) {

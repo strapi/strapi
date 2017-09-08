@@ -9,20 +9,15 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
-import { map } from 'lodash';
+import 'flag-icon-css/css/flag-icon.css';
+import 'react-select/dist/react-select.css';
 import { pluginId } from 'app';
 import PluginLeftMenu from 'components/PluginLeftMenu';
-import { define } from 'i18n';
-import messages from '../../translations/en.json';
 
 import { menuFetch, environmentsFetch } from './actions';
 import { makeSelectSections, makeSelectEnvironments, makeSelectLoading } from './selectors';
 import styles from './styles.scss';
-define(map(messages, (message, id) => ({
-  id,
-  defaultMessage: message,
-}
-)));
+
 
 class App extends React.Component {
   componentDidMount() {
@@ -43,8 +38,7 @@ class App extends React.Component {
 
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        <div className={`container-fluid ${styles.noPadding}`}>
-          <div className={styles.baseline}></div>
+        <div className="container-fluid">
           <div className="row">
             <PluginLeftMenu sections={this.props.sections} environments={this.props.environments} envParams={this.props.params.env} />
             {React.Children.toArray(content)}

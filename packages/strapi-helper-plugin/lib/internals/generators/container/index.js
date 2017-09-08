@@ -2,6 +2,15 @@
  * Container Generator
  */
 
+const path = require('path');
+
+// Plugin identifier based on the package.json `name` value
+const pluginPkg = require(path.resolve(process.cwd(), 'package.json'));
+const pluginId = pluginPkg.name.replace(
+  /^strapi-plugin-/i,
+  ''
+);
+
 const componentExists = require('../utils/componentExists');
 
 module.exports = {
@@ -38,13 +47,13 @@ module.exports = {
     name: 'wantSagas',
     default: true,
     message: 'Do you want sagas for asynchronous flows? (e.g. fetching data)',
-  }, {
-    type: 'confirm',
-    name: 'wantMessages',
-    default: true,
-    message: 'Do you want i18n messages (i.e. will this component use text)?',
   }],
   actions: (data) => {
+    const dataFormatted = data;
+
+    // Expose `pluginId` value
+    dataFormatted.pluginId = pluginId;
+
     // Generate index.js and index.test.js
     const actions = [{
       type: 'add',
@@ -59,7 +68,7 @@ module.exports = {
     }];
 
     // If they want a SCSS file, add styles.scss
-    if (data.wantCSS) {
+    if (dataFormatted.wantCSS) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/styles.scss',
@@ -69,7 +78,7 @@ module.exports = {
     }
 
     // If component wants messages
-    if (data.wantMessages) {
+    if (dataFormatted.wantMessages) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/messages.js',
@@ -80,7 +89,7 @@ module.exports = {
 
     // If they want actions and a reducer, generate actions.js, constants.js,
     // reducer.js and the corresponding tests for actions and the reducer
-    if (data.wantActionsAndReducer) {
+    if (dataFormatted.wantActionsAndReducer) {
       // Actions
       actions.push({
         type: 'add',
@@ -133,7 +142,7 @@ module.exports = {
     }
 
     // Sagas
-    if (data.wantSagas) {
+    if (dataFormatted.wantSagas) {
       actions.push({
         type: 'add',
         path: '../../../../../admin/src/containers/{{properCase name}}/sagas.js',

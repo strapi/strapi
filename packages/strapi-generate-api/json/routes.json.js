@@ -26,7 +26,7 @@ module.exports = scope => {
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:_id',
         handler: scope.globalID + '.findOne',
         config: {
           policies: []
@@ -40,14 +40,14 @@ module.exports = scope => {
         }
       }, {
         method: 'PUT',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:_id',
         handler: scope.globalID + '.update',
         config: {
           policies: []
         }
       }, {
         method: 'DELETE',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:_id',
         handler: scope.globalID + '.destroy',
         config: {
           policies: []

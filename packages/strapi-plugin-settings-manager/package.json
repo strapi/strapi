@@ -1,10 +1,10 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.5.5",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
-    "name": "settings-manager",
-    "icon": "ion-document-text",
+    "name": "Settings Manager",
+    "icon": "wrench",
     "description": "Description of settings-manager plugin."
   },
   "scripts": {
@@ -25,8 +25,11 @@
   },
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
+    "flag-icon-css": "^2.8.0",
+    "koa-send": "^4.1.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-select": "^1.0.0-rc.5",
     "react-transition-group": "^1.2.0",
     "reactstrap": "^4.8.0"
   },
@@ -45,7 +48,7 @@
     "plop": "^1.5.0",
     "prettier": "^1.5.3",
     "rimraf": "^2.5.4",
-    "strapi-helper-plugin": "^3.0.0-alpha.4.5",
+    "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^2.1.0-beta.25"
   },
   "author": {

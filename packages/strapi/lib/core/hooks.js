@@ -16,7 +16,15 @@ module.exports = function() {
       const cwd = '';
 
       // Load configurations.
-      glob('./node_modules/strapi-*', { ignore: ['./node_modules/strapi-plugin-*'] }, (err, files) => {
+      glob('./node_modules/strapi-*', {
+        ignore: [
+          './node_modules/strapi-admin',
+          './node_modules/strapi-utils',
+          './node_modules/strapi-generate*',
+          './node_modules/strapi-plugin-*',
+          './node_modules/strapi-helper-*'
+        ]
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }

@@ -16,7 +16,7 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
     return (
       <div className={`${styles.inputEnum} ${customBootstrapClass}`}>
         <div className={styles.enumLabel}>
-          <FormattedMessage {...{id: this.props.name}} />
+          <FormattedMessage id={`settings-manager.${this.props.name}`} />
         </div>
         <div className="btn-group" data-toggle="buttons">
           {map(this.props.selectOptions, (option, key) => {
@@ -24,7 +24,7 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
             const active = isChecked ? styles.active : "";
             return (
               <label className={`btn ${styles.button} ${active}`} key={key} htmlFor={option.name}>
-                <FormattedMessage {...{id: option.name}} />
+                <FormattedMessage id={`settings-manager.${option.name}`} />
                 <input
                   type="radio"
                   name={this.props.target}

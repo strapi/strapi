@@ -1,30 +1,34 @@
 // Import
 @import "../../styles/variables/variables";
 
+.item {
+  &:not(:first-child) {
+    margin-top: 0;
+  }
+}
+
 .link {
-  padding-top: 1rem;
+  padding-top: 0.8rem;
   padding-bottom: 0.2rem;
   padding-left: 1.6rem;
-  min-height: 4rem;
-  border-left: 0.4rem solid transparent;
+  min-height: 3.6rem;
+  border-left: 0.3rem solid transparent;
   cursor: pointer;
   color: $left-menu-link-color;
   text-decoration: none;
   display: block;
 
   &:hover {
+    color: $white;
     background: $left-menu-link-hover;
-    border-left: 0.4rem solid $strapi-blue;
-  }
-
-  &:hover {
-    color: $left-menu-link-color;
+    border-left: 0.3rem solid $strapi-blue;
     text-decoration: none;
   }
 }
 
 .linkActive {
-  border-left: 0.4rem solid $strapi-blue;
+  color: $white;
+  border-left: 0.3rem solid $strapi-blue;
 }
 
 .linkIcon {
@@ -32,8 +36,9 @@
   margin-right: 1.2rem;
   vertical-align: middle;
   font-size: 1.2rem;
-  width: 1.2rem;
-  padding-bottom: 0.4rem;
+  width: 1.4rem;
+  height: 1.2rem;
+  padding-bottom: 0.2rem;
   text-align: center;
 }
 

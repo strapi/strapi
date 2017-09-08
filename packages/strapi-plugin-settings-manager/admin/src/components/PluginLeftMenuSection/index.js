@@ -27,7 +27,7 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
     return (
       <div className={styles.pluginLeftMenuSection}>
         <p>
-          <FormattedMessage {...{id: this.props.section.name}} />
+          <FormattedMessage id={`settings-manager.${this.props.section.name}`} />
         </p>
         <ul>
           {links}

@@ -8,10 +8,11 @@
 
 .defaultConnection {
   position: absolute;
-  bottom: -9rem;
+  bottom: -5.4rem;
   left: 3rem;
   display: flex;
-
+  color: #27B710;
+  cursor: pointer;
 }
 
 .rounded {
@@ -22,7 +23,7 @@
   border-radius: 50%;
   padding-left: .1rem;
   padding-bottom: .1rem;
-  border: 1px solid black;
+  border: 1px solid #27B710;
   font-size: .4rem;
   vertical-align: middle;
   display: flex;

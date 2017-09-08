@@ -8,12 +8,6 @@
 const _ = require('lodash');
 const Boom = require('boom');
 
-// Local utilities.
-const responsesPolicy = require('../responses/policy');
-
-// Strapi utilities.
-const joijson = require('strapi-utils').joijson;
-
 /**
  * Router hook
  */
@@ -39,18 +33,6 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      const Joi = strapi.koaMiddlewares.joiRouter.Joi;
-      const builder = joijson.builder(Joi);
-
-      // Initialize the router.
-      if (!strapi.router) {
-        strapi.router = strapi.koaMiddlewares.joiRouter();
-        strapi.router.prefix(strapi.config.middleware.settings.router.prefix || '');
-      }
-
-      // Add response policy to the global variable.
-      _.set(strapi.config.policies, 'responsesPolicy', responsesPolicy);
-
       _.forEach(strapi.config.routes, value => {
         composeEndpoint(value, null, strapi.router)(cb);
       });
@@ -64,7 +46,8 @@ module.exports = strapi => {
           composeEndpoint(value, null, router)(cb);
         });
 
-        router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
+        // router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
+        router.prefix('/admin');
 
         // TODO:
         // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
@@ -104,15 +87,6 @@ module.exports = strapi => {
 
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
-      strapi.app.use(
-        strapi.router.router.allowedMethods({
-          throw: false,
-          notImplemented: () => Boom.notImplemented(),
-          methodNotAllowed: () => Boom.methodNotAllowed()
-        })
-      );
-
-      strapi.app.use(responsesPolicy);
 
       cb();
     }

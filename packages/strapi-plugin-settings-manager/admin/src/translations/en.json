@@ -1,24 +1,44 @@
 {
   "menu.section.global-settings": "Global settings",
-  "menu.item.general": "General",
+  "menu.item.application": "Application",
   "menu.item.languages": "Languages",
   "menu.item.advanced": "Advanced",
 
   "menu.section.environments": "Environments",
   "menu.item.database": "Databases",
+  "menu.item.request": "Request",
+  "menu.item.response": "Response",
   "menu.item.security": "Security",
   "menu.item.server": "Server",
 
+  "form.button.cancel": "Cancel",
+  "form.button.save": "Save",
+  "form.button.confirm": "Confim",
 
-  "form.database.name": "Databases",
-  "form.database.description": "Configure your databases settings by environnement",
+  "form.databases.name": "Databases",
+  "form.databases.description": "Configure your databases settings by environnement.",
 
-  "form.general.name": "General",
-  "form.general.description": "Configure your general settings.",
+  "form.database.item.name": "Connection Name",
+  "form.database.item.client": "Client",
+  "form.database.item.connector": "Connector",
+  "form.database.item.host": "Host",
+  "form.database.item.port": "Port",
+  "form.database.item.username": "Username",
+  "form.database.item.password": "Password",
+  "form.database.item.database": "Databases",
+  "form.database.item.default": "Set as default connection",
+  "form.database.item.provider.mongo": "Mongo",
+  "form.database.item.provider.postgres": "PostgresSQL",
+  "form.database.item.provider.mysql": "MySQL",
+  "form.database.item.provider.sqlite3": "SQlite3",
+  "form.database.item.provider.redis": "Redis",
 
-  "form.general.item.name": "Name",
-  "form.general.item.description": "Description",
-  "form.general.item.version": "Version",
+  "form.application.name": "Application",
+  "form.application.description": "Configure your application settings.",
+
+  "form.application.item.name": "Name",
+  "form.application.item.description": "Description",
+  "form.application.item.version": "Version",
 
   "form.advanced.name": "Advanced",
   "form.advanced.description": "Configure your advanced settings.",
@@ -26,19 +46,51 @@
   "form.advanced.item.admin": "Admin dashboard url",
   "form.advanced.item.prefix": "Prefix API",
 
+  "form.request.name": "Request",
+  "form.request.description": "Configure your request settings.",
+  "form.request.item.parser": "Parser",
+  "form.request.item.parser.multipart": "Parser Multipart",
+  "form.request.item.prefix": "Prefix",
+  "form.request.item.prefix.prefix": "Prefix",
+  "form.request.item.logger": "Logger",
+  "form.request.item.logger.level": "Level",
+  "form.request.item.logger.exposeInContext": "Expose in context",
+  "form.request.item.logger.requests": "Requests",
+  "form.request.item.router": "Router",
+  "form.request.item.router.prefix": "Prefix",
+
+  "form.response.name": "Response",
+  "form.response.description": "Configure your response settings.",
+  "form.response.item.gzip.enabled": "Gzip",
+  "form.response.item.responseTime.enabled": "Response Time",
+
   "form.security.name": "Security",
   "form.security.description": "Configure your security settings.",
+
+  "form.security.item.csrf": "CSRF",
+  "form.security.item.p3p": "P3P",
+  "form.security.item.p3p.value": "Value",
+  "form.security.item.hsts": "HOSTS",
+  "form.security.item.csrf.key": "Key",
+  "form.security.item.csrf.secret": "Secret",
+  "form.security.item.csrf.cookie": "Cookie",
+  "form.security.item.csrf.angular": "Angular",
+  "form.security.item.hsts.maxAge": "Max Age",
+  "form.security.item.hsts.includeSubDomains": "Include Sub Domain",
+  "form.security.item.hsts.preload": "Preload",
 
   "form.security.item.session": "Session",
   "form.security.item.session.key": "Secret key",
   "form.security.item.session.maxAge": "Maximum age",
 
   "form.security.item.xframe": "Xframe",
+  "form.security.item.xframe.value": "Options",
   "form.security.item.xframe.deny": "DENY",
   "form.security.item.xframe.sameorigin": "SAMEORIGIN",
   "form.security.item.xframe.allow-from": "ALLOW-FROM",
 
   "form.security.item.xssProtection": "xss Protection",
+  "form.security.item.xssProtection.mode": "Mode",
 
   "form.security.item.cors": "Cors",
   "form.security.item.cors.origin": "Origin",
@@ -48,11 +100,13 @@
 
   "form.server.item.host": "Host",
   "form.server.item.port": "Port",
+  "form.server.item.cron": "Cron",
 
   "form.language.name": "Languages",
   "form.language.description": "Configure your languages.",
-  "form.language.choose": "Choose your language",
+  "form.language.choose": "Choose a language",
 
+  "request.error.database.exist": "This connection already exists",
   "request.error.type.string": "A text is required.",
   "request.error.type.number": "A number is required.",
   "request.error.type.boolean": "A boolean is required.",
@@ -80,6 +134,20 @@
   "list.databases.button.label": "Add a new connection",
   "list.databases.title.singular": "connection in this environment",
   "list.databases.title.plural": "connections in this environment",
+
+  "popUpWarning.title": "Please confirm",
+  "popUpWarning.databases.danger.message": "Content Types are still linked with this connection. By removing it, you could cause criticals issues to your app. Be careful...",
+  "popUpWarning.danger.ok.message": "I Understand",
+  "popUpWarning.databases.delete.message": "Are you sure you want to delete this database ?",
+  "popUpWarning.languages.delete.message": "Are you sure you want to delete this language ?",
+  "strapi.notification.info.settingsEqual": "Settings are equals",
+  "strapi.notification.success.databaseDelete": "The database has been successfully deleted.",
+  "strapi.notification.success.languageDelete": "The language has been successfully deleted.",
+  "strapi.notification.success.languageAdd": "The language has been successfully added.",
+  "strapi.notification.success.databaseAdd": "The database has been successfully added.",
+  "strapi.notification.success.databaseEdit": "The database settings have been successfully updated.",
+  "strapi.notification.success.settingsEdit": "The settings have been successfully updated.",
+  "strapi.notification.error": "An error occurred",
 
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",
@@ -574,5 +642,7 @@
   "language.zh_Hant_MO": "中文（繁體中文，中華人民共和國澳門特別行政區）",
   "language.zh_Hant_TW": "中文（繁體中文，台灣）",
   "language.zu": "isiZulu",
-  "language.zu_ZA": "isiZulu (iNingizimu Afrika)"
+  "language.zu_ZA": "isiZulu (iNingizimu Afrika)",
+
+  "pageNotFound": "Page not found"
 }

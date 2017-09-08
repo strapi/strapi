@@ -8,19 +8,22 @@ li:not(:first-child) {
 }
 
 .link {
-  display: block;
+  display: flex;
   margin-left: 2rem;
-  margin-right: 2rem;
+  margin-right: .5rem;
   padding-top: 1rem;
-  padding-left: .6rem;
+  padding-left: 1rem;
   min-height: 3.4rem;
-  border-left: 0.4rem solid transparent;
   color: #2C3138 !important;
   text-decoration: none !important;
   line-height: 1.6rem;
-
-  > i {
+  > div {
+    width: 1.3rem;
     margin-right: 1rem;
+    > i {
+      color: #666B74;
+      // color: blue;
+    }
   }
 }
 
@@ -31,4 +34,10 @@ li:not(:first-child) {
   font-weight: bold;
   text-decoration: none;
   color: #2D3138 !important;
+  > div {
+
+    > i {
+      color: #2D3138;
+    }
+  }
 }
