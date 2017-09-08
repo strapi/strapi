@@ -1,18 +1,31 @@
 import { createSelector } from 'reselect';
 
 /**
- * Direct selector to the homePage state domain
+ * Direct selector to the home state domain
  */
 const selectHomePageDomain = () => state => state.get('homePage');
 
 /**
- * Default selector used by HomePage
+ * Other specific selectors
  */
 
-const makeSelectLoading = () =>
-  createSelector(selectHomePageDomain(), substate => substate.get('loading'));
 
-const makeSelectData = () =>
-  createSelector(selectHomePageDomain(), substate => substate.get('data'));
+/**
+ * Default selector used by Home
+ */
 
-export { makeSelectLoading, makeSelectData };
+const selectHomePage = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.toJS()
+);
+
+const makeSelectModifiedData = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
+);
+
+export default selectHomePage;
+export {
+  selectHomePageDomain,
+  makeSelectModifiedData,
+};

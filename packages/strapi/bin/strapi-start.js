@@ -17,7 +17,7 @@ const fs = require('fs');
 const semver = require('semver')
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi start`
@@ -28,13 +28,6 @@ const { logger, cli } = require('strapi-utils');
 
 module.exports = function() {
   try {
-    // Use the app's local `strapi` in `node_modules` if it's existant and valid.
-    const localStrapiPath = path.resolve(
-      process.cwd(),
-      'node_modules',
-      'strapi'
-    );
-
     const strapi = function () {
       try {
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
@@ -81,7 +74,7 @@ module.exports = function() {
 
       if (cluster.isMaster) {
         cluster.on('message', () => {
-          strapi.log.info('The server will restart\n');
+          strapi.log.info('The server is restarting\n');
 
           _.forEach(cluster.workers, worker => worker.kill());
 

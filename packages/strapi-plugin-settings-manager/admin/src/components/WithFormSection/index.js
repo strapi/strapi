@@ -5,11 +5,12 @@
 */
 
 import React from 'react';
-import { forEach, has, isObject } from 'lodash';
+import { findIndex, forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
 import InputNumber from 'components/InputNumber';
 import InputText from 'components/InputText';
 import InputToggle from 'components/InputToggle';
+import InputPassword from 'components/InputPassword';
 import InputSelect from 'components/InputSelect';
 import InputEnum from 'components/InputEnum';
 import config from './config.json';
@@ -18,6 +19,9 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
+    addRequiredInputDesign: React.PropTypes.bool,
+    cancelAction: React.PropTypes.bool,
+    formErrors: React.PropTypes.array,
     handleChange: React.PropTypes.func.isRequired,
     section: React.PropTypes.oneOfType([
       React.PropTypes.object,
@@ -36,6 +40,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
 
     this.inputs = {
       string: InputText,
+      password: InputPassword,
       number: InputNumber,
       boolean: InputToggle,
       enum: InputEnum,
@@ -51,7 +56,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.section !== this.props.section) {
+    if (nextProps.section !== this.props.section || nextProps.cancelAction !== this.props.cancelAction) {
       this.setState({ showNestedForm: false, hasNestedInput: false, inputWithNestedForm: '' });
       if (isObject(nextProps.section)) {
         this.checkForNestedForm(nextProps);
@@ -86,15 +91,24 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     // retrieve options for the select input
     const selectOptions = props.type === 'enum' || props.type === 'select' ? props.items : [];
 
+    // custom check for dynamic keys used for databases
+    const dynamicTarget = join(pullAt(split(props.target, '.'),['0', '1', '3', '4']), '.');
+
     // check if the input has a nested form so it is displayed on the entire line
     const customBootstrapClass = this.state.hasNestedInput ?
       // bootstrap class to make the input displayed on the entire line
       'col-md-6 offset-md-6 pull-md-6' :
       // if the input hasn't a nested form but the config requires him to be displayed differently
-      config[props.target] || '';
+      config[props.target] || config[dynamicTarget] || '';
 
     // custom handleChange props for nested input form
     const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
+    let hiddenLabel = includes(props.name, 'enabled');
+
+    if (includes(config.showInputLabel, props.name)) hiddenLabel = false;
+
+    const errorIndex = findIndex(this.props.formErrors, ['target', props.target]);
+    const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
 
     return (
       <Input
@@ -107,6 +121,10 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
         selectOptions={selectOptions}
         validations={props.validations}
         value={inputValue}
+        addRequiredInputDesign={this.props.addRequiredInputDesign}
+        hiddenLabel={hiddenLabel}
+        inputDescription={props.description}
+        errors={errors}
       />
     );
   }

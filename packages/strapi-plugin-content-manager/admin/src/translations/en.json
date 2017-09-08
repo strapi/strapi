@@ -1,1 +1,13 @@
-{}
+{
+  "containers.Home.introduction": "A powerful UI to easily manage your data.",
+  "containers.Home.pluginHeaderDescription": "To edit your content's entries go to the specific link in the left menu.",
+  "containers.Edit.submit": "Submit",
+  "containers.Edit.editing": "Editing...",
+  "containers.Edit.delete": "Delete",
+  "containers.Edit.cancel": "Cancel",
+  "containers.List.addAnEntry": "Add an entry",
+  "containers.List.pluginHeaderDescription": "Manage your {label}",
+  "components.LimitSelect.itemsPerPage": "Number of items per page",
+  "containers.List.errorFetchRecords": "Error",
+  "pageNotFound": "Page not found"
+}

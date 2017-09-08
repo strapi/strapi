@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+import messages from './messages.json';
 import styles from './styles.scss';
 
 export class ComingSoonPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -18,7 +18,7 @@ export class ComingSoonPage extends React.Component { // eslint-disable-line rea
         <Helmet
           title="Coming soon"
         />
-        <p><FormattedMessage {...messages.header} /></p>
+        <p><FormattedMessage {...messages.comingSoon} />.</p>
       </div>
     );
   }

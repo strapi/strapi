@@ -14,8 +14,10 @@ import EditFormSectionNested from 'components/EditFormSectionNested';
 
 class EditFormSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage {...{id: this.props.section.name}} />;
-
+    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage id={`settings-manager.${this.props.section.name}`} />;
+    const spacer = !isEmpty(sectionName) ? <div className={this.props.styles.spacer} /> : '';
+    const sectionNameSpacer = !sectionName ? <div style={{height: '.2rem'}} /> : '';
+    const sectionDescription = this.props.section.description ? <div className={this.props.styles.sectionDescription}>{this.props.section.description}</div> : '';
     return (
       <div className={this.props.styles.editFormSection}>
         <div className="container-fluid">
@@ -24,6 +26,9 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
               <span className={this.props.styles.sectionHeader}>
                 {sectionName}
               </span>
+              {sectionDescription}
+              {spacer}
+              {sectionNameSpacer}
             </div>
             {map(this.props.section.items, (item, key) => {
 
@@ -35,6 +40,8 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                       section={item.items}
                       values={this.props.values}
                       handleChange={this.props.handleChange}
+                      sectionNested
+                      formErrors={this.props.formErrors}
                     />
                   </div>
                 )
@@ -49,6 +56,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 }
 
 EditFormSection.propTypes = {
+  formErrors: React.PropTypes.array,
   handleChange: React.PropTypes.func,
   renderInput: React.PropTypes.func,
   section: React.PropTypes.object,

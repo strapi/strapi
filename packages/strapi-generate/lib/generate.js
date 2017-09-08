@@ -47,9 +47,6 @@ function generate(generator, scope, cb) {
     invalid: sb.invalid,
     success: () => {
 
-      // Emit output.
-      sb.log.verbose('Generating ' + util.inspect(generator) + ' at `' + scope.rootPath + '`...');
-
       // Process all of the generator's targets concurrently.
       async.each(Object.keys(generator.targets), (keyPath, asyncEachCb) => {
         const asyncEachSb = reportback.extend(asyncEachCb);

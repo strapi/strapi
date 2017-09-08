@@ -42,7 +42,6 @@ module.exports = function(strapi) {
     initialize: cb => {
       let globalName;
 
-
       // Initialize collections
       _.set(strapi, 'bookshelf.collections', {});
 

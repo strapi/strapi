@@ -12,19 +12,14 @@ module.exports = {
         name: 'menu.section.global-settings',
         items: [
             {
-            slug: 'general',
-            name: 'menu.item.general',
+            slug: 'application',
+            name: 'menu.item.application',
             icon: 'globe'
           },
           {
             slug: 'languages',
             name: 'menu.item.languages',
             icon: 'language'
-          },
-          {
-            slug: 'advanced',
-            name: 'menu.item.advanced',
-            icon: 'cogs'
           }
         ]
       },
@@ -61,15 +56,15 @@ module.exports = {
     ]
   },
 
-  general: () => ({
-    name: 'form.general.name',
-    description: 'form.general.description',
+  application: () => ({
+    name: 'form.application.name',
+    description: 'form.application.description',
     sections: [
       {
         name: '',
         items: [
           {
-            name: 'form.general.item.name',
+            name: 'form.application.item.name',
             target: 'application.name',
             type: 'string',
             value: _.get(strapi.config, 'name', null),
@@ -79,7 +74,7 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.item.description',
+            name: 'form.application.item.description',
             target: 'application.description',
             type: 'string',
             value: _.get(strapi.config, 'description', null),
@@ -89,34 +84,12 @@ module.exports = {
             }
           },
           {
-            name: 'form.general.item.version',
+            name: 'form.application.item.version',
             target: 'package.version',
             type: 'string',
-            value: _.get(strapi.config, 'version', null),
+            value: _.get(strapi.config, 'info.version', null),
             validations : {
               regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
-              required: true
-            }
-          }
-        ]
-      }
-    ]
-  }),
-
-  advanced: () => ({
-    name: 'form.advanced.name',
-    description: 'form.advanced.description',
-    sections: [
-      {
-        name: '',
-        items: [
-          {
-            name: 'form.advanced.item.admin',
-            target: 'application.admin.path',
-            type: 'string',
-            value: _.get(strapi.config, 'admin.path', null),
-            validations : {
-              maxLength: 255,
               required: true
             }
           }
@@ -130,17 +103,40 @@ module.exports = {
     description: 'form.request.description',
     sections: [
       {
-        name: '',
+        name: 'form.request.item.logger',
         items: [
           {
-            name: 'form.request.item.logger.enabled',
-            target: 'request.logger.enabled',
-            type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.logger.enabled`, null),
+            name: 'form.request.item.logger.level',
+            target: 'request.logger.level',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.request.logger.level`, null),
             validations: {
               required: true
             }
           },
+          {
+            name: 'form.request.item.logger.exposeInContext',
+            target: 'request.logger.exposeInContext',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.request.logger.exposeInContext`, null),
+            validations: {
+              required: true
+            }
+          },
+          {
+            name: 'form.request.item.logger.requests',
+            target: 'request.logger.requests',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.request.logger.requests`, null),
+            validations: {
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        name: 'form.request.item.parser',
+        items: [
           {
             name: 'form.request.item.parser.enabled',
             target: 'request.parser.enabled',
@@ -157,23 +153,20 @@ module.exports = {
                 }
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        name: 'form.request.item.router',
+        items: [
           {
-            name: 'form.request.item.prefix.enabled',
-            target: 'request.router.enabled',
-            type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.router.enabled`, null),
-            items: [
-              {
-                name: 'form.request.item.prefix',
-                target: 'request.router.prefix',
-                type: 'string',
-                value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
-                validations : {
-                  maxLength: 255
-                }
-              }
-            ]
+            name: 'form.request.item.router.prefix',
+            target: 'request.router.prefix',
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
+            validations : {
+              required: true
+            }
           }
         ]
       }
@@ -332,8 +325,8 @@ module.exports = {
             value: _.get(strapi.config, `environments.${env}.security.xframe.enabled`, null),
             items: [
               {
-                name: 'form.security.item.xframe',
-                target: 'security.xframe',
+                name: 'form.security.item.xframe.value',
+                target: 'security.xframe.value',
                 type: 'enum',
                 value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
                 items: [
@@ -350,6 +343,7 @@ module.exports = {
                     value: 'ALLOW-FROM',
                     items: [{
                       name: '',
+                      target: 'security.xframe.value.nested',
                       type: 'string',
                       value: '',
                       validations: {
@@ -461,7 +455,7 @@ module.exports = {
         items: [
           {
             name: 'form.language.choose',
-            target: 'language.language.defaultLocale',
+            target: 'language.defaultLocale',
             type: 'select',
             items: strapi.plugins['settings-manager'].services.languages
           }
@@ -536,20 +530,13 @@ module.exports = {
             }
           },
           {
-            name: 'form.database.item.username',
-            target: `database.connections.${name}.settings.username`,
-            type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.username`, null),
+            name: 'form.database.item.port',
+            target: `database.connections.${name}.settings.port`,
+            type: 'number',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.port`, null),
             validations: {
               required: true
             }
-          },
-          {
-            name: 'form.database.item.password',
-            target: `database.connections.${name}.settings.password`,
-            type: 'password',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
-            validations: {}
           },
           {
             name: 'form.database.item.database',
@@ -559,6 +546,20 @@ module.exports = {
             validations: {
               required: true
             }
+          },
+          {
+            name: 'form.database.item.username',
+            target: `database.connections.${name}.settings.username`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.username`, null),
+            validations: {}
+          },
+          {
+            name: 'form.database.item.password',
+            target: `database.connections.${name}.settings.password`,
+            type: 'password',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
+            validations: {}
           }
         ]
       },
@@ -600,6 +601,11 @@ module.exports = {
   getDatabases: env => {
     const databases = [];
 
+    const databasesUsed = [];
+    _.forEach(strapi.models, model => {
+      databasesUsed.push(model.connection);
+    });
+
     _.forEach(strapi.config.environments[env].database.connections, (connection, name) =>  databases.push({
       connector: _.get(connection, 'connector'),
       letter: strapi.plugins['settings-manager'].services.settingsmanager.getClientLetter(_.get(connection, 'settings.client')),
@@ -607,7 +613,8 @@ module.exports = {
       name,
       host: _.get(connection, 'settings.host'),
       database: _.get(connection, 'settings.database'),
-      active: (_.get(strapi.config, `environments.${env}.database.defaultConnection`) === name)
+      active: (_.get(strapi.config, `environments.${env}.database.defaultConnection`) === name),
+      isUsed: _.includes(databasesUsed, name)
     }));
 
     return databases;
@@ -800,8 +807,10 @@ module.exports = {
 
     _.forEach(items, ({ target }) => {
       if (_.has(params, target)) {
-        const input = _.get(params, target, null);
+        let input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
+
+        if (target === 'language.defaultLocale') input = _.lowerCase(input).replace(/ /g, '_');
 
         const filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
 
@@ -840,6 +849,106 @@ module.exports = {
     const connector = _.get(params, `database.connections.${name}.connector`);
     const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
-    if (connector && !installed) exec(`npm install ${connector} --save`);
+    if (connector && !installed) exec(`npm install ${connector}@alpha`);
+  },
+
+  cleanDependency: (env, config) => {
+    const availableConnectors = ['strapi-mongoose', 'strapi-bookshelf', 'strapi-redis'];
+    let usedConnectors = [];
+    const errors = [];
+
+    _.forEach(_.keys(strapi.config.environments), environment => {
+      let connections = strapi.config.environments[environment].database.connections;
+
+      if (environment === env) {
+        connections = config.database.connections;
+      }
+
+      _.forEach(connections, connection => {
+        if (_.get(connection, 'connector')) {
+          usedConnectors.push(connection.connector);
+        }
+      });
+    });
+
+    usedConnectors = _.uniq(usedConnectors);
+
+    _.forEach(availableConnectors, connector => {
+      const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+      const used = _.indexOf(usedConnectors, connector) !== -1;
+
+      if (installed && !used) {
+        const filePath = path.join(strapi.config.appPath, 'package.json');
+
+        try {
+          const fileContent = require(filePath);
+
+          _.set(fileContent, `dependencies.${connector}`, undefined);
+
+          try {
+            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              target,
+              message: 'request.error.config',
+              params: {
+                filePath: filePath
+              }
+            });
+          }
+        } catch (e) {
+          errors.push({
+            target,
+            message: 'request.error.config',
+            params: {
+              filePath: filePath
+            }
+          });
+        }
+      }
+    });
+
+    return errors;
+  },
+
+  getModelPath: model => {
+    let searchFilePath;
+    const errors = [];
+    const searchFileName = `${model}.settings.json`;
+    const apiPath = path.join(strapi.config.appPath, 'api');
+
+    let apis;
+    try {
+      apis = fs.readdirSync(apiPath);
+
+      _.forEach(apis, api => {
+        const modelsPath = path.join(apiPath, api, 'models');
+
+        let models;
+        try {
+          models = fs.readdirSync(modelsPath);
+
+          const modelIndex = _.indexOf(_.map(models, model => _.toLower(model)), searchFileName);
+
+          if (modelIndex !== -1) searchFilePath = `${modelsPath}/${models[modelIndex]}`;
+        } catch (e) {
+          errors.push({
+            id: 'request.error.folder.read',
+            params: {
+              folderPath: modelsPath
+            }
+          });
+        }
+      });
+    } catch (e) {
+      errors.push({
+        id: 'request.error.folder.read',
+        params: {
+          folderPath: apiPath
+        }
+      });
+    }
+
+    return [searchFilePath, errors];
   }
 };

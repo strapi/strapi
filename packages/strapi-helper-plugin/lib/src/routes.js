@@ -2,7 +2,7 @@
 // They are all wrapped in the App component, which should contain the navbar etc
 // See http://blog.mxstbr.com/2016/01/react-apps-with-pages for more information
 // about the code splitting business
-import { map } from 'lodash';
+import { camelCase, map } from 'lodash';
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import routes from 'routes.json'; // eslint-disable-line
 
@@ -32,7 +32,7 @@ export default function createRoutes(store) {
       const component = tryRequire(`${route.container}/index`); // eslint-disable-line global-require
 
       process.nextTick(() => {
-        if (reducer) injectReducer(route.name, reducer.default);
+        if (reducer) injectReducer(camelCase(route.container), reducer.default);
         if (sagas) injectSagas(sagas.default);
         cb(null, component.default);
       });

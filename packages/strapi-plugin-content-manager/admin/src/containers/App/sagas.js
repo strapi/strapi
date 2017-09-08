@@ -46,13 +46,16 @@ export function* schemaUpdated(action) {
   const displayedModels = _.pickBy(action.schema, model => (model.displayed !== false));
 
   // Map links to format them
-  const leftMenuLinks = _.map(displayedModels, (model, key) => ({
-    label: model.labelPlural || model.label || key,
-    to: key,
-  }));
+  const leftMenuSections = [{
+    name: 'Content Types',
+    links: _.map(displayedModels, (model, key) => ({
+      label: model.labelPlural || model.label || key,
+      destination: key,
+    })),
+  }];
 
   // Update the admin left menu links
-  window.Strapi.refresh('content-manager').leftMenuLinks(leftMenuLinks);
+  window.Strapi.refresh('content-manager').leftMenuSections(leftMenuSections);
 }
 
 // Individual exports for testing

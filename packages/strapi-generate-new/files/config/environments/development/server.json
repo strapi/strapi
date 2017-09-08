@@ -1,10 +1,7 @@
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": false,
-  "proxy": {
-    "enabled": false
-  },
+  "autoReload": true,
   "cron": {
     "enabled": false
   }
