@@ -214,7 +214,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       }
     }
 
-    if (this.props.params.slug === 'databases') {
+    if (this.props.match.params.slug === 'databases') {
       if (name === this.props.home.dbNameTarget) {
         const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
           [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
@@ -235,7 +235,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     e.preventDefault();
     const apiUrl = this.props.match.params.env ? `${this.props.match.params.slug}/${this.props.match.params.env}` : this.props.match.params.slug;
 
-    const isCreatingNewFields = this.props.params.slug === 'security';
+    const isCreatingNewFields = this.props.match.params.slug === 'security';
     // send only updated settings
     const body = this.sendUpdatedParams(isCreatingNewFields);
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
