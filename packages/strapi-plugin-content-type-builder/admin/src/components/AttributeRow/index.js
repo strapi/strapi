@@ -77,7 +77,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
             <div>{this.props.row.name}</div>
           </div>
           <div className={styles.relationContainer}>{relationType}</div>
-          <div className={styles.mainField}>n temporary</div>
+          <div className={styles.mainField}></div>
           <div className={styles.icoContainer}>
             <div className="ico">
               <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
