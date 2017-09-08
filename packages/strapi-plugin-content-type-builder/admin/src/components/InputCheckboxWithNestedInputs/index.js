@@ -37,7 +37,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
                 target={item.target}
                 value={this.props.value[item.target.split('.')[1]]}
                 validations={item.validations}
-                name={item.name}
+                label={item.label}
                 errors={errors}
                 didCheckErrors={this.props.didCheckErrors}
               />
@@ -57,10 +57,10 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
       <div className={`${styles.inputCheckboxWithNestedInputs} col-md-12`}>
         <div className="form-check" style={{ zIndex: '9999' }}>
           {title}
-          <FormattedMessage id={this.props.data.name}>
+          <FormattedMessage id={this.props.data.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.name}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value[this.props.data.target.split('.')[1]]} onChange={this.handleChange} name={this.props.data.target} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.label}>
+                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value[this.props.data.target.split('.')[1]]} onChange={this.handleChange} name={this.props.data.target} />
                 {message}
               </label>
             )}

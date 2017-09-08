@@ -8,8 +8,6 @@ import React from 'react';
 import { get, isEmpty, map, startCase } from 'lodash';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Input from 'components/Input';
-
-import Shape from '../../assets/images/dropdow_shape.svg';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -30,15 +28,6 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
     };
 
     this.props.handleChange({ target });
-  }
-
-  showDropDown = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ showMenu: !this.state.showMenu });
-    if (!this.state.showMenu) {
-      console.log('oooo');
-    }
   }
 
   toggle = () => this.setState({ showMenu: !this.state.showMenu });
@@ -74,7 +63,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       <Input
         type={get(this.props.input, 'type')}
         handleChange={this.props.handleChange}
-        name={get(this.props.input, 'name')}
+        label={get(this.props.input, 'label')}
         target={get(this.props.input, 'target')}
         value={this.props.value}
         placeholder={get(this.props.input, 'placeholder')}

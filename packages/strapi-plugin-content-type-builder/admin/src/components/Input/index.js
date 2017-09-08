@@ -143,9 +143,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
           {title}
-          <FormattedMessage id={this.props.name}>
+          <FormattedMessage id={this.props.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
                 <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.target} />
                 {message}
               </label>
@@ -164,12 +164,12 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
     return (
       <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
-        <label htmlFor={this.props.name}>
-          <FormattedMessage id={`${this.props.name}`} />
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
           className="form-control"
-          id={this.props.name}
+          id={this.props.label}
           name={this.props.target}
           onChange={this.props.handleChange}
           value={this.props.value}
@@ -203,17 +203,17 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     return (
       <div className={`${styles.inputTextArea} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}>
-          <FormattedMessage id={`${this.props.name}`} />
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
-        <FormattedMessage id={this.props.placeholder || this.props.name}>
+        <FormattedMessage id={this.props.placeholder || this.props.label}>
           {(placeholder) => (
             <textarea
               className="form-control"
               onChange={this.props.handleChange}
               value={this.props.value}
               name={this.props.target}
-              id={this.props.name}
+              id={this.props.label}
               onBlur={handleBlur}
               onFocus={this.props.handleFocus}
               placeholder={placeholder}
@@ -235,7 +235,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       {(message) => (
         <input
           name={this.props.target}
-          id={this.props.name}
+          id={this.props.label}
           onBlur={handleBlur}
           onFocus={this.props.handleFocus}
           onChange={this.props.handleChange}
@@ -258,11 +258,11 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
-    const placeholder = this.props.placeholder || this.props.name;
+    const placeholder = this.props.placeholder || this.props.label;
 
-    const label = this.props.name ?
-      <label htmlFor={this.props.name}><FormattedMessage id={`${this.props.name}`} /></label>
-        : <label htmlFor={this.props.name} />;
+    const label = this.props.label ?
+      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} /></label>
+        : <label htmlFor={this.props.label} />;
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
       styles.requiredClass : '';
@@ -271,7 +271,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
         name={this.props.target}
-        id={this.props.name}
+        id={this.props.label}
         onBlur={handleBlur}
         onFocus={this.props.handleFocus}
         onChange={this.props.handleChange}
@@ -338,7 +338,7 @@ Input.propTypes = {
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
-  name: React.PropTypes.string.isRequired,
+  label: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   // styles: React.PropTypes.object,

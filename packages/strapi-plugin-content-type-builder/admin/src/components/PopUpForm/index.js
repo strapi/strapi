@@ -39,7 +39,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         type={item.type}
         handleChange={this.props.handleChange}
         handleBlur={handleBlur}
-        name={item.name}
+        label={item.label}
         target={item.target}
         validations={item.validations}
         inputDescription={item.inputDescription}

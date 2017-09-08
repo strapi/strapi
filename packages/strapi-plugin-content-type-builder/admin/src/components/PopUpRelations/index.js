@@ -71,7 +71,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
               type={input.type}
               value={get(this.props.values, ['params', input.target.split('.')[1]])}
               target={input.target}
-              name={input.name}
+              label={input.label}
               title={input.title}
               validations={input.validations}
               inputDescription={input.inputDescription}
@@ -90,7 +90,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
                   type={value.type}
                   value={get(this.props.values, ['params', value.target.split('.')[1]])}
                   target={value.target}
-                  name={value.name}
+                  label={value.label}
                   title={value.title}
                   validations={value.validations}
                   inputDescription={value.inputDescription}

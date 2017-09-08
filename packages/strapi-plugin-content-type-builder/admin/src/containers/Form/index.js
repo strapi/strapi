@@ -127,7 +127,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   addAttributeToContentType = () => {
-    console.log(this.props.formValidations);
     const formErrors = this.checkAttributeValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
 
     if (!isEmpty(formErrors)) {
