@@ -6,7 +6,7 @@
 
  /* eslint-disable new-cap */
 
-import { includes, map , forEach, replace } from 'lodash';
+import { concat, includes, map, forEach, replace } from 'lodash';
 import { Map, List } from 'immutable';
 import { getValidationsFromForm } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
@@ -153,7 +153,8 @@ export function setAttributeForm(hash) {
     }),
   });
   const attribute = includes(hash, 'attributerelation') ? attributeRelation : data.attribute;
-  const formValidations = getValidationsFromForm(data.form, []);
+  const formValidations = concat(getValidationsFromForm(data.form, []), { target: 'name', validations: { required: true } });
+
   return {
     type: SET_ATTRIBUTE_FORM,
     form: data.form,
