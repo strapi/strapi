@@ -4,7 +4,7 @@
       "items": [
         {
           "label": "form.contentType.item.connections",
-          "target": "connection",
+          "name": "connection",
           "type": "select",
           "value": "",
           "items": [{}],
@@ -14,7 +14,7 @@
         },
         {
           "label": "form.contentType.item.name",
-          "target": "name",
+          "name": "name",
           "value": "",
           "type": "string",
           "validations": {
@@ -23,7 +23,7 @@
         },
         {
           "label": "form.contentType.item.description",
-          "target": "description",
+          "name": "description",
           "value": "",
           "type": "textarea",
           "placeholder": "form.contentType.item.description.placeholder",
@@ -35,7 +35,7 @@
       "items": [
         {
           "label": "form.contentType.item.collectionName",
-          "target": "collectionName",
+          "name": "collectionName",
           "type": "string",
           "value": "",
           "validations": {},
@@ -86,7 +86,7 @@
         "items": [
           {
             "label": "form.attribute.item.textarea.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -100,7 +100,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -108,7 +108,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -116,14 +116,14 @@
           },
           {
             "label": "form.attribute.item.minimumLength",
-            "target": "params.minLength",
+            "name": "params.minLength",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.minLengthValue",
+                "name": "params.minLengthValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -134,14 +134,14 @@
           },
           {
             "label": "form.attribute.item.maximumLength",
-            "target": "params.maxLength",
+            "name": "params.maxLength",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.maxLengthValue",
+                "name": "params.maxLengthValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -158,7 +158,7 @@
         "items": [
           {
             "label": "form.attribute.item.number.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -172,7 +172,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -180,7 +180,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -188,14 +188,14 @@
           },
           {
             "label": "form.attribute.item.minimum",
-            "target": "params.min",
+            "name": "params.min",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.minValue",
+                "name": "params.minValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -206,14 +206,14 @@
           },
           {
             "label": "form.attribute.item.maximum",
-            "target": "params.max",
+            "name": "params.max",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.maxValue",
+                "name": "params.maxValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -230,7 +230,7 @@
         "items": [
           {
             "label": "form.attribute.item.string.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -244,7 +244,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -252,7 +252,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -260,14 +260,14 @@
           },
           {
             "label": "form.attribute.item.minimumLength",
-            "target": "params.minLength",
+            "name": "params.minLength",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.minLengthValue",
+                "name": "params.minLengthValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -278,14 +278,14 @@
           },
           {
             "label": "form.attribute.item.maximumLength",
-            "target": "params.maxLength",
+            "name": "params.maxLength",
             "type": "checkbox",
             "value": false,
             "validations": {},
             "items": [
               {
                 "label": "",
-                "target": "params.maxLengthValue",
+                "name": "params.maxLengthValue",
                 "value": "",
                 "type": "number",
                 "validations": {
@@ -302,7 +302,7 @@
         "items": [
           {
             "label": "form.attribute.item.date.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -316,7 +316,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -324,7 +324,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -338,7 +338,7 @@
         "items": [
           {
             "label": "form.attribute.item.boolean.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -352,7 +352,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -360,7 +360,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -374,7 +374,7 @@
         "items": [
           {
             "label": "form.attribute.item.json.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -388,7 +388,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -396,7 +396,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -410,7 +410,7 @@
         "items": [
           {
             "label": "form.attribute.item.media.name",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "validations": {
@@ -424,7 +424,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -432,7 +432,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -446,7 +446,7 @@
         "items": [
           {
             "label": "form.attribute.item.defineRelation.fieldName",
-            "target": "name",
+            "name": "name",
             "type": "string",
             "value": "",
             "placeholder": "relation.attributeName.placeholder",
@@ -456,7 +456,7 @@
           },
           {
             "label": "form.attribute.item.defineRelation.fieldName",
-            "target": "params.key",
+            "name": "params.key",
             "type": "string",
             "value": "",
             "placeholder": "relation.attributeName.placeholder",
@@ -471,7 +471,7 @@
           {
             "title": "form.attribute.item.settings.name",
             "label": "form.attribute.item.requiredField",
-            "target": "params.required",
+            "name": "params.required",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -479,7 +479,7 @@
           },
           {
             "label": "form.attribute.item.uniqueField",
-            "target": "params.unique",
+            "name": "params.unique",
             "type": "checkbox",
             "value": false,
             "validations": {},
@@ -487,7 +487,7 @@
           },
           {
             "label": "form.attribute.item.customColumnName",
-            "target": "params.columnName",
+            "name": "params.columnName",
             "type": "string",
             "value": "",
             "validations": {},
@@ -495,7 +495,7 @@
           },
           {
             "label": "",
-            "target": "params.targetColumnName",
+            "name": "params.targetColumnName",
             "type": "string",
             "value": "",
             "validations": {}

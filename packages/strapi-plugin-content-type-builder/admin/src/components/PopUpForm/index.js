@@ -26,10 +26,10 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
 
-    const value = !isEmpty(this.props.values) && includes(item.target, '.') ? get(this.props.values, [split(item.target, '.')[0], split(item.target, '.')[1]]) : this.props.values[item.target];
+    const value = !isEmpty(this.props.values) && includes(item.name, '.') ? get(this.props.values, [split(item.name, '.')[0], split(item.name, '.')[1]]) : this.props.values[item.name];
 
     const handleBlur = shouldOverrideHandleBlur ? this.props.handleBlur : false;
-    const errorIndex = findIndex(this.props.formErrors, ['target', item.target]);
+    const errorIndex = findIndex(this.props.formErrors, ['name', item.name]);
     const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
 
 
@@ -40,7 +40,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         handleChange={this.props.handleChange}
         handleBlur={handleBlur}
         label={item.label}
-        target={item.target}
+        name={item.name}
         validations={item.validations}
         inputDescription={item.inputDescription}
         value={value}

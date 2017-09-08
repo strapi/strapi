@@ -69,8 +69,8 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
             <Input
               key={key}
               type={input.type}
-              value={get(this.props.values, ['params', input.target.split('.')[1]])}
-              target={input.target}
+              value={get(this.props.values, ['params', input.name.split('.')[1]])}
+              name={input.name}
               label={input.label}
               title={input.title}
               validations={input.validations}
@@ -88,8 +88,8 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
                 <Input
                   key={index}
                   type={value.type}
-                  value={get(this.props.values, ['params', value.target.split('.')[1]])}
-                  target={value.target}
+                  value={get(this.props.values, ['params', value.name.split('.')[1]])}
+                  name={value.name}
                   label={value.label}
                   title={value.title}
                   validations={value.validations}
@@ -115,7 +115,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         value={get(this.props.values, 'name')}
         handleChange={this.props.handleChange}
         didCheckErrors={this.props.didCheckErrors}
-        errors={findIndex(this.props.formErrors, ['target', get(this.props.form, ['items', '0', 'target'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['target', get(this.props.form, ['items', '0', 'target'])])].errors : []}
+        errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
       />
       <RelationNaturePicker
         selectedIco={get(this.props.values, ['params', 'nature'])}
@@ -129,7 +129,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         value={get(this.props.values, ['params', 'key'])}
         handleChange={this.props.handleChange}
         didCheckErrors={this.props.didCheckErrors}
-        errors={findIndex(this.props.formErrors, ['target', get(this.props.form, ['items', '1', 'target'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['target', get(this.props.form, ['items', '1', 'target'])])].errors : []}
+        errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : []}
         dropDownItems={this.props.dropDownItems}
       />
     </ModalBody>

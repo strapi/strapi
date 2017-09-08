@@ -12,27 +12,27 @@ export default function checkAttributeValidations(errors) {
   // Check if params key is filled
   if (has(this.props.modifiedDataAttribute, ['params', 'key'])) {
     if (isEmpty(this.props.modifiedDataAttribute.params.key)) {
-      formErrors.push({ target: 'params.key', errors: [{ id: 'error.validation.required' }] });
+      formErrors.push({ name: 'params.key', errors: [{ id: 'error.validation.required' }] });
     }
   }
 
   // Check attribute name uniqueness
   if (size(sameAttributes) > 0 && this.props.modifiedDataAttribute.name !== get(this.props.contentTypeData.attributes, [attributeIndex, 'name'])) {
-    formErrors.push({ target: 'name', errors: [{ id: 'error.attribute.taken' }]});
+    formErrors.push({ name: 'name', errors: [{ id: 'error.attribute.taken' }]});
   }
 
   // Check key uniqueness
   if (size(sameParamsKey) > 0 && isEditingParamsKey) {
-    formErrors.push({ target: 'params.key', errors: [{ id: 'error.attribute.key.taken' }]});
+    formErrors.push({ name: 'params.key', errors: [{ id: 'error.attribute.key.taken' }]});
   }
 
   if (size(sameParamsKeyAndName) > 0 && isEditingParamsKey) {
-    formErrors.push({ target: 'params.key', errors: [{ id: 'error.attribute.key.taken' }]});
+    formErrors.push({ name: 'params.key', errors: [{ id: 'error.attribute.key.taken' }]});
   }
 
 
   if (get(this.props.modifiedDataAttribute, 'name') === get(this.props.modifiedDataAttribute.params, 'key') && this.props.modifiedDataAttribute.params.target === this.props.modelName) {
-    formErrors.push({ target: 'params.key', errors: [{ id: 'error.attribute.sameKeyAndName' }]});
+    formErrors.push({ name: 'params.key', errors: [{ id: 'error.attribute.sameKeyAndName' }]});
   }
 
   return formErrors;
@@ -51,7 +51,7 @@ const hasNestedValue = (attributeData) => {
   map(keys, (key) => {
     if (get(attributeData, ['params', key])) {
       if (!isNumber(get(attributeData, ['params', `${key}Value`]))) {
-        formErrors.push({ target: `params.${key}Value`, errors: [{ id: 'error.validation.required' }] });
+        formErrors.push({ name: `params.${key}Value`, errors: [{ id: 'error.validation.required' }] });
       }
     };
   });

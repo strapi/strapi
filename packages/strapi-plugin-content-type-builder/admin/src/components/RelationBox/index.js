@@ -64,7 +64,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         type={get(this.props.input, 'type')}
         handleChange={this.props.handleChange}
         label={get(this.props.input, 'label')}
-        target={get(this.props.input, 'target')}
+        name={get(this.props.input, 'name')}
         value={this.props.value}
         placeholder={get(this.props.input, 'placeholder')}
         customBootstrapClass="col-md-12"

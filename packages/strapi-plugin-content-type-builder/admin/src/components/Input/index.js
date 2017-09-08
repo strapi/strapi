@@ -22,7 +22,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   componentDidMount() {
     // Init the select value if type === "select"
     if (this.props.type === 'select' && !isEmpty(this.props.selectOptions) && this.props.selectOptions[0].value !== '') {
-      const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
+      const target = { name: this.props.name, value: this.props.selectOptions[0].value  };
       this.props.handleChange({ target });
     }
 
@@ -37,7 +37,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   componentWillReceiveProps(nextProps) {
     if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
-      const target = { name: nextProps.target, value: nextProps.selectOptions[0].value  };
+      const target = { name: nextProps.name, value: nextProps.selectOptions[0].value  };
       this.props.handleChange({ target });
     }
 
@@ -146,7 +146,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.target} />
+                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
                 {message}
               </label>
             )}
@@ -170,7 +170,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         <select
           className="form-control"
           id={this.props.label}
-          name={this.props.target}
+          name={this.props.name}
           onChange={this.props.handleChange}
           value={this.props.value}
           disabled={this.props.disabled}
@@ -212,7 +212,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               className="form-control"
               onChange={this.props.handleChange}
               value={this.props.value}
-              name={this.props.target}
+              name={this.props.name}
               id={this.props.label}
               onBlur={handleBlur}
               onFocus={this.props.handleFocus}
@@ -234,7 +234,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     <FormattedMessage id={`${placeholder}`}>
       {(message) => (
         <input
-          name={this.props.target}
+          name={this.props.name}
           id={this.props.label}
           onBlur={handleBlur}
           onFocus={this.props.handleFocus}
@@ -270,7 +270,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
-        name={this.props.target}
+        name={this.props.name}
         id={this.props.label}
         onBlur={handleBlur}
         onFocus={this.props.handleFocus}
@@ -339,12 +339,11 @@ Input.propTypes = {
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   label: React.PropTypes.string.isRequired,
+  name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
-  // styles: React.PropTypes.object,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
-  target: React.PropTypes.string.isRequired,
   title: React.PropTypes.string,
   type: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,

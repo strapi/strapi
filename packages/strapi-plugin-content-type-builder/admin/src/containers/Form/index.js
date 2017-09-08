@@ -183,7 +183,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === data.name);
 
     if (size(sameContentTypeNames) > 0 && data.name !== this.props.modelName) {
-      formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+      formErrors.push({ name: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
     }
 
     if (!isEmpty(formErrors)) {
@@ -215,7 +215,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   checkInputContentType = (item) => {
-    const shouldOverrideHandleBlur = item.target === 'name' && includes(this.props.hash, 'contentType');
+    const shouldOverrideHandleBlur = item.name === 'name' && includes(this.props.hash, 'contentType');
     return shouldOverrideHandleBlur;
   }
 
@@ -226,7 +226,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === this.props.modifiedDataEdit.name);
 
     if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== this.props.modelName) {
-      formErrors.push({ target: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+      formErrors.push({ name: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
     }
 
     if (!isEmpty(formErrors)) {

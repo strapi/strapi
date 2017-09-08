@@ -21,8 +21,8 @@ export function getValidationsFromForm(form, formValidations) {
 
 
     // Push the target and the validation
-    if (value.target) {
-      formValidations.push({ target: value.target, validations: value.validations });
+    if (value.name) {
+      formValidations.push({ name: value.name, validations: value.validations });
     }
   });
 
@@ -33,12 +33,12 @@ export function getValidationsFromForm(form, formValidations) {
 export function checkFormValidity(formData, formValidations) {
   const errors = [];
   forEach(formData, (value, key) => {
-    const validationValue = formValidations[findIndex(formValidations, ['target', key])];
+    const validationValue = formValidations[findIndex(formValidations, ['name', key])];
 
     if (!isUndefined(validationValue)) {
       const inputErrors = validate(value, validationValue.validations);
       if (!isEmpty(inputErrors)) {
-        errors.push({ target: key, errors: inputErrors });
+        errors.push({ name: key, errors: inputErrors });
       }
 
     }

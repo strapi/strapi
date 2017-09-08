@@ -153,7 +153,7 @@ export function setAttributeForm(hash) {
     }),
   });
   const attribute = includes(hash, 'attributerelation') ? attributeRelation : data.attribute;
-  const formValidations = concat(getValidationsFromForm(data.form, []), { target: 'name', validations: { required: true } });
+  const formValidations = concat(getValidationsFromForm(data.form, []), { name: 'name', validations: { required: true } });
 
   return {
     type: SET_ATTRIBUTE_FORM,
@@ -221,14 +221,14 @@ export function unsetButtonLoading() {
 /**
 *
 * @param  {object} form
-* @return {object} data : An object { target: value }
+* @return {object} data : An object { name: value }
 */
 
 function getDataFromForm(form) {
   const dataArray = [['attributes', List()]];
 
   forEach(form, (formSection) => {
-    map(formSection.items, (item) => dataArray.push([item.target, item.value]));
+    map(formSection.items, (item) => dataArray.push([item.name, item.value]));
   });
 
   const data = Map(dataArray);

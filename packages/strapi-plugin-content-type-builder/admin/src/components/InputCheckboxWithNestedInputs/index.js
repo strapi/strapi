@@ -14,7 +14,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
   handleChange = (e) => {
     const target = {
       type: e.target.type,
-      value: !this.props.value[this.props.data.target.split('.')[1]],
+      value: !this.props.value[this.props.data.name.split('.')[1]],
       name: e.target.name,
     };
     this.props.handleChange({ target });
@@ -23,19 +23,19 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
 
   renderNestedInput = () => {
 
-    if (this.props.value[this.props.data.target.split('.')[1]]) {
+    if (this.props.value[this.props.data.name.split('.')[1]]) {
       return (
         <div className={styles.nestedInputContainer} style={{ marginBottom: '-19px' }}>
           {map(this.props.data.items, (item, key) => {
-            const errorIndex = findIndex(this.props.errors, ['target', item.target]);
+            const errorIndex = findIndex(this.props.errors, ['name', item.name]);
             const errors = errorIndex !== -1 ? this.props.errors[errorIndex].errors : [];
             return (
               <Input
                 key={key}
                 type={item.type}
                 handleChange={this.props.handleChange}
-                target={item.target}
-                value={this.props.value[item.target.split('.')[1]]}
+                name={item.name}
+                value={this.props.value[item.name.split('.')[1]]}
                 validations={item.validations}
                 label={item.label}
                 errors={errors}
@@ -60,7 +60,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
           <FormattedMessage id={this.props.data.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value[this.props.data.target.split('.')[1]]} onChange={this.handleChange} name={this.props.data.target} />
+                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value[this.props.data.name.split('.')[1]]} onChange={this.handleChange} name={this.props.data.name} />
                 {message}
               </label>
             )}
