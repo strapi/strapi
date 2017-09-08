@@ -64,7 +64,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: `${isAdmin ? 'http://localhost:1337/admin/' : `/${pluginId}/assets/`}`,
+    publicPath: `${isAdmin ? '/admin/' : `/${pluginId}/assets/`}`,
   },
 
   // In production, we minify our CSS with cssnano
