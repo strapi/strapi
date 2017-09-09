@@ -7,8 +7,8 @@
 import React from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 
-const ToggleOption = ({ value, message, intl, selected }) => (
-  <option value={value} selected={selected}>
+const ToggleOption = ({ value, message, intl }) => (
+  <option value={value}>
     {typeof message === 'string' ? message : intl.formatMessage(message).toUpperCase()}
   </option>
 );
@@ -19,7 +19,6 @@ ToggleOption.propTypes = {
     React.PropTypes.object.isRequired,
     React.PropTypes.string.isRequired,
   ]).isRequired,
-  selected: React.PropTypes.bool.isRequired,
   value: React.PropTypes.string.isRequired,
 };
 

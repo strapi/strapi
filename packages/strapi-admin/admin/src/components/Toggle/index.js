@@ -16,12 +16,12 @@ function Toggle(props) { // eslint-disable-line react/prefer-stateless-function
   // If we have items, render them
   if (props.values) {
     content = props.values.map((value) => (
-      <ToggleOption key={value} value={value} message={props.messages[value]} selected={value === props.value} />
+      <ToggleOption key={value} value={value} message={props.messages[value]} />
     ));
   }
 
   return (
-    <select onChange={props.onToggle} className={styles.toggle}>
+    <select onChange={props.onToggle} className={styles.toggle} defaultValue={props.value}>
       {content}
     </select>
   );
