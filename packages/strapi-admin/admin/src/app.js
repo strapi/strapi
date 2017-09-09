@@ -127,19 +127,21 @@ window.Strapi = {
 };
 
 // Ping each plugins port defined in configuration
-plugins.ports.forEach(pluginPort => {
-  // Define plugin url
-  const pluginUrl = `http://localhost:${pluginPort}/main.js`;
+if (window.location.hostname === 'localhost') {
+  plugins.ports.forEach(pluginPort => {
+    // Define plugin url
+    const pluginUrl = `http://localhost:${pluginPort}/main.js`;
 
-  // Check that the server in running
-  fetch(pluginUrl)
-    .then(() => {
-      // Inject `script` tag in DOM
-      const script = window.document.createElement('script');
-      script.src = pluginUrl;
-      window.document.body.appendChild(script);
-    });
-});
+    // Check that the server in running
+    fetch(pluginUrl)
+      .then(() => {
+        // Inject `script` tag in DOM
+        const script = window.document.createElement('script');
+        script.src = pluginUrl;
+        window.document.body.appendChild(script);
+      });
+  });
+}
 
 const dispatch = store.dispatch;
 export {
