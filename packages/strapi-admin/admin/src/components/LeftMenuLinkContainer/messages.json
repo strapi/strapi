@@ -21,6 +21,6 @@
   },
   "noPluginsInstalled": {
     "id": "app.components.LeftMenuLinkContainer.noPluginsInstalled",
-    "defaultMessage": "No plugins installed yet."
+    "defaultMessage": "No plugins installed yet"
   }
 }
