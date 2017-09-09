@@ -47,7 +47,11 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
           destination={`/plugins/${plugin.get('id')}`}
         />
       ))
-      : <span className={styles.noPluginsInstalled}>No plugins installed yet.</span>;
+      : (
+        <li className={styles.noPluginsInstalled}>
+          <span>No plugins installed yet.</span>
+        </li>
+      );
 
     return (
       <div className={styles.leftMenuLinkContainer}>
