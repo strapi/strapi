@@ -5,6 +5,7 @@
   "app.components.LeftMenuLinkContainer.general": "General",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Install new plugin",
   "app.components.LeftMenuLinkContainer.listPlugins": "List plugins",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet.",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.NotFoundPage.description": ""
 }

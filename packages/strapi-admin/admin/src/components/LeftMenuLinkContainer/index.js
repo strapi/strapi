@@ -49,7 +49,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
       ))
       : (
         <li className={styles.noPluginsInstalled}>
-          <span>No plugins installed yet.</span>
+          <FormattedMessage {...messages.noPluginsInstalled}/>
         </li>
       );
 
