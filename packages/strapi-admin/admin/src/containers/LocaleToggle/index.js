@@ -25,13 +25,14 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
     return (
       <div className={styles.localeToggle}>
-        <Toggle values={languages} messages={messages} onToggle={this.props.onLocaleToggle} />
+        <Toggle values={languages} value={this.props.locale} messages={messages} onToggle={this.props.onLocaleToggle} />
       </div>
     );
   }
 }
 
 LocaleToggle.propTypes = {
+  locale: React.PropTypes.string.isRequired,
   onLocaleToggle: React.PropTypes.func.isRequired,
 };
 
