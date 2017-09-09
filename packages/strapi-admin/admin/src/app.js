@@ -123,8 +123,3 @@ window.Strapi = {
   router: history,
   languages,
 };
-
-const dispatch = store.dispatch;
-export {
-  dispatch,
-};
