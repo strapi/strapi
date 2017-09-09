@@ -3,8 +3,8 @@
   "version": "3.0.0-alpha.5.5",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
-    "name": "content-type-builder",
-    "icon": "ion-document-text",
+    "name": "Content Type Builder",
+    "icon": "paint-brush",
     "description": "Description of content-type-builder plugin."
   },
   "scripts": {
