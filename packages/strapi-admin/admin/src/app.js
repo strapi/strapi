@@ -140,3 +140,8 @@ plugins.ports.forEach(pluginPort => {
       window.document.body.appendChild(script);
     });
 });
+
+const dispatch = store.dispatch;
+export {
+  dispatch,
+};
