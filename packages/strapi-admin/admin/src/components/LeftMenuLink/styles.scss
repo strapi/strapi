@@ -24,10 +24,19 @@
     border-left: 0.3rem solid $strapi-blue;
     text-decoration: none;
   }
+
+  &:focus {
+    color: $white;
+    text-decoration: none;
+  }
+
+  &:visited {
+    color: $left-menu-link-color;
+  }
 }
 
 .linkActive {
-  color: $white;
+  color: $white !important;
   border-left: 0.3rem solid $strapi-blue;
 }
 
