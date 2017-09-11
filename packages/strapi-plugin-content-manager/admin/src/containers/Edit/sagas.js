@@ -42,12 +42,10 @@ export function* editRecord() {
   const recordJSON = record.toJSON();
 
   const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-    acc[current] = cleanData(recordJSON[current], 'value');
+    acc[current] = cleanData(recordJSON[current], 'value', 'id');
 
     return acc;
   }, {});
-
-  console.log(recordCleaned);
 
   const isCreating = yield select(makeSelectIsCreating());
   const id = isCreating ? '' : recordCleaned.id;

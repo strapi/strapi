@@ -12,7 +12,7 @@ const templateObject = function (obj, variables) {
 
   return Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) || isArray(obj[key])) {
-      acc[key] = templateObject(obj[key]);
+      acc[key] = templateObject(obj[key], variables[key]);
     } else if (isString(obj[key]) && regex.test(obj[key])) {
       acc[key] = obj[key].replace(regex, replacer);
     } else {

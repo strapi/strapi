@@ -73,13 +73,60 @@ module.exports = {
   },
 
   update: async ctx => {
-    // Update an entry using `queries` system
-    const entryUpdated = await strapi.query(ctx.params.model).update({
+    const virtualFields = [];
+    const params = {
       id: ctx.params.id,
       values: ctx.request.body
-    });
+    };
 
-    ctx.body = entryUpdated;
+    // Retrieve current record.
+    const response = await strapi.query(ctx.params.model).findOne(params) || {};
+    // Save current model into variable to get virtual and p
+    const model = strapi.models[ctx.params.model];
+
+    // Only update fields which are on this document.
+    const values = Object.keys(params.values).reduce((acc, current) => {
+      if (!model.schema.virtuals.hasOwnProperty(current)) {
+        acc[current] = params.values[current];
+      } else if (response[current] && _.isArray(response[current]) && current !== 'id'){
+        const details = model.attributes[current];
+
+        const toAdd = _.differenceWith(params.values[current], response[current], _.isEqual);
+        const toRemove = _.differenceWith(response[current], params.values[current],  _.isEqual);
+
+        toAdd.forEach(value => {
+          value[details.via] = params.values[model.primaryKey];
+
+          virtualFields.push(strapi.query(details.model || details.collection).update({
+            id: value.id || value[model.primaryKey] || '_id',
+            values: value
+          }));
+        });
+
+        toRemove.forEach(value => {
+          value[details.via] = null;
+
+          virtualFields.push(strapi.query(details.model || details.collection).update({
+            id: value.id || value[model.primaryKey] || '_id',
+            values: value
+          }));
+        });
+      }
+
+      return acc;
+    }, {});
+
+    // Add current model to the flow of updates.
+    virtualFields.push(strapi.query(ctx.params.model).update({
+      id: params.id,
+      values
+    }));
+
+    // Update virtuals fields.
+    const process = await Promise.all(virtualFields);
+
+    // Return the last one which is the current model.
+    ctx.body = process[process.length - 1];
   },
 
   delete: async ctx => {
