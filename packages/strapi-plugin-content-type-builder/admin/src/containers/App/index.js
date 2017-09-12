@@ -8,6 +8,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router';
 import { createStructuredSelector } from 'reselect';
 import { pluginId } from 'app';
 
@@ -19,9 +20,15 @@ import styles from './styles.scss';
 import { modelsFetch } from './actions';
 import { makeSelectMenu } from './selectors';
 
+/* eslint-disable consistent-return */
 class App extends React.Component {
   componentDidMount() {
     this.props.modelsFetch();
+    this.props.router.setRouteLeaveHook(this.props.route, () => {
+      if (storeData.getContentType()) {
+        return 'You have unsaved Content Type, are you sure you wan\'t to leave?';
+      }
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -62,6 +69,8 @@ App.propTypes = {
   exposedComponents: React.PropTypes.object.isRequired,
   menu: React.PropTypes.array,
   modelsFetch: React.PropTypes.func,
+  route: React.PropTypes.object,
+  router: React.PropTypes.object,
   shouldRefetchContentType: React.PropTypes.bool,
 };
 
@@ -80,4 +89,4 @@ const mapStateToProps = createStructuredSelector({
 });
 
 // Wrap the component to inject dispatch and state into it
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

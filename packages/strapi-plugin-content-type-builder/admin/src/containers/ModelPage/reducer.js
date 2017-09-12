@@ -19,6 +19,7 @@ import {
   POST_CONTENT_TYPE_SUCCEEDED,
   RESET_SHOW_BUTTONS_PROPS,
   SET_BUTTON_LOADER,
+  SUBMIT_ACTION_SUCCEEDED,
   UNSET_BUTTON_LOADER,
   UPDATE_CONTENT_TYPE,
 } from './constants';
@@ -112,6 +113,8 @@ function modelPageReducer(state = initialState, action) {
       return state.set('showButtons', false);
     case SET_BUTTON_LOADER:
       return state.set('showButtonLoader', true);
+    case SUBMIT_ACTION_SUCCEEDED:
+      return state.set('initialModel', state.get('model'));
     case UNSET_BUTTON_LOADER:
       return state.set('showButtonLoader', false);
     case UPDATE_CONTENT_TYPE:

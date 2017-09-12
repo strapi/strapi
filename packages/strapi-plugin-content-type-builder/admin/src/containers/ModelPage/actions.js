@@ -19,6 +19,7 @@ import {
   POST_CONTENT_TYPE_SUCCEEDED,
   SET_BUTTON_LOADER,
   SUBMIT,
+  SUBMIT_ACTION_SUCCEEDED,
   RESET_SHOW_BUTTONS_PROPS,
   UNSET_BUTTON_LOADER,
   UPDATE_CONTENT_TYPE,
@@ -143,6 +144,12 @@ export function submit() {
   return {
     type: SUBMIT,
   }
+}
+
+export function submitActionSucceeded() {
+  return {
+    type: SUBMIT_ACTION_SUCCEEDED,
+  };
 }
 
 export function unsetButtonLoader() {

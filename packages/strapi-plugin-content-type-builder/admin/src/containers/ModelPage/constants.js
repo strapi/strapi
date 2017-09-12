@@ -16,6 +16,7 @@ export const MODEL_FETCH_SUCCEEDED = 'ContentTypeBuilder/ModelPage/MODEL_FETCH_S
 export const POST_CONTENT_TYPE_SUCCEEDED = 'ContentTypeBuilder/ModelPage/POST_CONTENT_TYPE_SUCCEEDED';
 export const SET_BUTTON_LOADER = 'ContentTypeBuilder/ModelPage/SET_BUTTON_LOADER';
 export const SUBMIT = 'ContentTypeBuilder/ModelPage/SUBMIT';
+export const SUBMIT_ACTION_SUCCEEDED = 'ContentTypeBuilder/ModelPage/SUBMIT_ACTION_SUCCEEDED';
 export const UPDATE_CONTENT_TYPE = 'ContentTypeBuilder/ModelPage/UPDATE_CONTENT_TYPE';
 export const UNSET_BUTTON_LOADER = 'ContentTypeBuilder/ModelPage/UNSET_BUTTON_LOADER';
 export const RESET_SHOW_BUTTONS_PROPS = 'ContentTypeBuilder/ModelPage/RESET_SHOW_BUTTONS_PROPS';

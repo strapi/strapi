@@ -10,7 +10,7 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 import { storeData } from '../../utils/storeData';
 
 import { MODEL_FETCH, SUBMIT } from './constants';
-import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps, setButtonLoader, unsetButtonLoader } from './actions';
+import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps, setButtonLoader, unsetButtonLoader, submitActionSucceeded } from './actions';
 import { makeSelectModel } from './selectors';
 
 export function* fetchModel(action) {
@@ -65,11 +65,6 @@ export function* submitChanges() {
 
     yield call(request, requestUrl, opts);
 
-    if (method === 'POST') {
-      storeData.clearAppStorage();
-      yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
-      yield put(postContentTypeSucceeded());
-    }
 
     yield new Promise(resolve => {
       setTimeout(() => {
@@ -77,6 +72,14 @@ export function* submitChanges() {
       }, 5000);
     });
 
+    if (method === 'POST') {
+      storeData.clearAppStorage();
+      yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
+      yield put(postContentTypeSucceeded());
+    }
+
+    yield put(submitActionSucceeded());
+    
     yield put(resetShowButtonsProps());
     // Remove loader
     yield put(unsetButtonLoader());
