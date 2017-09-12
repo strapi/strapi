@@ -47,14 +47,6 @@
       "config": {
         "policies": []
       }
-    },
-    {
-      "method": "GET",
-      "path": "/assets/:file",
-      "handler": "ContentTypeBuilder.assets",
-      "config": {
-        "policies": []
-      }
     }
   ]
 }
