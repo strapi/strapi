@@ -6,10 +6,11 @@
 
 // Dependencies.
 import React from 'react';
+import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { get } from 'lodash';
+import { get, isObject } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -69,6 +70,10 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
+    if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
+      e.target.value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    }
+
     this.props.setRecordAttribute(e.target.name, e.target.value);
   };
 

@@ -27,6 +27,9 @@ class EditForm extends React.Component {
         return 'textarea';
       case 'string':
         return 'text';
+      case 'date':
+      case 'datetime':
+        return 'date';
       default:
         return 'text';
     }
@@ -44,8 +47,8 @@ class EditForm extends React.Component {
         <Input
           key={attr}
           type={this.getInputType(details.type)}
-          name={details.label}
-          target={attr}
+          label={details.label}
+          name={attr}
           value={this.props.record.get(attr) || ''}
           placeholder={details.placeholder || details.label || attr || ''}
           handleChange={this.props.handleChange}

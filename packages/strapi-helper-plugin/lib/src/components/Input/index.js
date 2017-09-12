@@ -5,8 +5,11 @@
 */
 
 import React from 'react';
-import { get, isEmpty, map, isObject } from 'lodash';
+import moment from 'moment';
+import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import DateTime from 'react-datetime';
+import DateTimeStyle from 'react-datetime/css/react-datetime.css';
 import styles from './styles.scss';
 
 class Input extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -22,17 +25,92 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   componentDidMount() {
     // Init the select value if type === "select"
     if (this.props.type === 'select' && !isEmpty(this.props.selectOptions) && this.props.selectOptions[0].value !== '') {
-      const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
+      const target = { name: this.props.name, value: this.props.selectOptions[0].value  };
       this.props.handleChange({ target });
+    }
+
+    if (this.props.value && !isEmpty(this.props.value)) {
+      this.setState({ hasInitialValue: true });
+    }
+
+    if (!isEmpty(this.props.errors)) {
+      this.setState({ errors: this.props.errors });
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
-      const target = { name: nextProps.target, value: nextProps.selectOptions[0].value  };
+      const target = { name: nextProps.name, value: nextProps.selectOptions[0].value  };
       this.props.handleChange({ target });
     }
+
+    // Check if errors have been updated during validations
+    if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
+
+      // Remove from the state errors that are already set
+      const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
+      this.setState({ errors });
+    }
   }
+
+  handleBlur = ({ target }) => {
+    // prevent error display if input is initially empty
+    if (!isEmpty(target.value) || this.state.hasInitialValue) {
+      // validates basic string validations
+      // add custom logic here such as alerts...
+      const errors = this.validate(target.value);
+
+      this.setState({ errors, hasInitialValue: true });
+    }
+  }
+
+  validate = (value) => {
+    let errors = [];
+    // handle i18n
+    const requiredError = { id: 'error.validation.required' };
+    mapKeys(this.props.validations, (validationValue, validationKey) => {
+      switch (validationKey) {
+        case 'max':
+          if (parseInt(value, 10) > validationValue) {
+            errors.push({ id: 'error.validation.max' });
+          }
+          break;
+        case 'maxLength':
+          if (value.length > validationValue) {
+            errors.push({ id: 'error.validation.maxLength' });
+          }
+          break;
+        case 'min':
+          if (parseInt(value, 10) < validationValue) {
+            errors.push({ id: 'error.validation.min' });
+          }
+          break;
+        case 'minLength':
+          if (value.length < validationValue) {
+            errors.push({ id: 'error.validation.minLength' });
+          }
+          break;
+        case 'required':
+          if (value.length === 0) {
+            errors.push({ id: 'error.validation.required' });
+          }
+          break;
+        case 'regex':
+          if (!new RegExp(validationValue).test(value)) {
+            errors.push({ id: 'error.validation.regex' });
+          }
+          break;
+        default:
+          errors = [];
+      }
+    });
+
+    if (includes(errors, requiredError)) {
+      errors = reject(errors, (error) => error !== requiredError);
+    }
+    return errors;
+  }
+
 
   handleChangeCheckbox = (e) => {
     const target = {
@@ -68,10 +146,10 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
           {title}
-          <FormattedMessage id={this.props.name}>
+          <FormattedMessage id={this.props.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.target} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
+                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
                 {message}
               </label>
             )}
@@ -89,15 +167,16 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
     return (
       <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
-        <label htmlFor={this.props.name}>
-          <FormattedMessage id={`${this.props.name}`} />
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
           className="form-control"
-          id={this.props.name}
-          name={this.props.target}
+          id={this.props.label}
+          name={this.props.name}
           onChange={this.props.handleChange}
           value={this.props.value}
+          disabled={this.props.disabled}
         >
           {map(this.props.selectOptions, (option, key) => (
             <FormattedMessage id={`${option.name}`} key={key}>
@@ -118,7 +197,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   }
 
-  renderInputTextArea = (bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription) => {
+  renderInputTextArea = (bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -127,19 +206,21 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     return (
       <div className={`${styles.inputTextArea} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
-        <label htmlFor={this.props.name}>
-          <FormattedMessage id={`${this.props.name}`} />
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
-        <FormattedMessage id={this.props.placeholder || this.props.name}>
+        <FormattedMessage id={this.props.placeholder || this.props.label}>
           {(placeholder) => (
             <textarea
               className="form-control"
               onChange={this.props.handleChange}
               value={this.props.value}
-              name={this.props.target}
-              id={this.props.name}
-
+              name={this.props.name}
+              id={this.props.label}
+              onBlur={handleBlur}
+              onFocus={this.props.handleFocus}
               placeholder={placeholder}
+              disabled={this.props.disabled}
             />
           )}
         </FormattedMessage>
@@ -152,12 +233,53 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
+  renderInputDate = (bootStrapClass = '', requiredClass, inputDescription) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
+    const value = isObject(this.props.value) && this.props.value._isAMomentObject === true ?
+      this.props.value :
+      moment(this.props.value);
+
+    return (
+      <div className={`${styles.input} ${bootStrapClass} ${requiredClass}`}>
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} />
+        </label>
+        <DateTime
+          value={value}
+          dateFormat='YYYY-MM-DD'
+          timeFormat='HH:mm:ss'
+          utc={true}
+          inputProps={{
+            placeholder: this.props.placeholder,
+            className: '',
+            name: this.props.name,
+            id: this.props.label,
+          }}
+          onChange={(moment) => this.props.handleChange({ target: {
+            name: this.props.name,
+            value: moment
+          }})}
+         />
+        <div className={styles.inputDescriptionContainer}>
+          <small>{inputDescription}</small>
+        </div>
+        {this.renderErrors(styles.errorContainerTextArea)}
+        {spacer}
+      </div>
+    )
+  }
+
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
     <FormattedMessage id={`${placeholder}`}>
       {(message) => (
         <input
-          name={this.props.target}
-          id={this.props.name}
+          name={this.props.name}
+          id={this.props.label}
           onBlur={handleBlur}
           onFocus={this.props.handleFocus}
           onChange={this.props.handleChange}
@@ -166,6 +288,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
           placeholder={message}
           autoComplete="off"
+          disabled={this.props.disabled}
         />
       )}
     </FormattedMessage>
@@ -179,11 +302,11 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
-    const placeholder = this.props.placeholder || this.props.name;
+    const placeholder = this.props.placeholder || this.props.label;
 
-    const label = this.props.name ?
-      <label htmlFor={this.props.name}><FormattedMessage id={`${this.props.name}`} /></label>
-        : <label htmlFor={this.props.name} />;
+    const label = this.props.label ?
+      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} /></label>
+        : <label htmlFor={this.props.label} />;
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
       styles.requiredClass : '';
@@ -191,8 +314,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
-        name={this.props.target}
-        id={this.props.name}
+        name={this.props.name}
+        id={this.props.label}
         onBlur={handleBlur}
         onFocus={this.props.handleFocus}
         onChange={this.props.handleChange}
@@ -200,6 +323,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         type={this.props.type}
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
         placeholder={placeholder}
+        disabled={this.props.disabled}
       />;
 
     const inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
@@ -214,16 +338,24 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       case 'select':
         return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
       case 'textarea':
-        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription);
+        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':
         return this.renderInputCheckbox(requiredClass, inputDescription);
+      case 'date':
+        return this.renderInputDate(bootStrapClass, requiredClass, inputDescription);
       default:
     }
 
+    const addonInput = this.props.addon ?
+      <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
+        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} /></span>
+        {input}
+      </div> : input;
     return (
       <div className={`${styles.input} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
         {label}
-        {input}
+
+        {addonInput}
         <div className={styles.inputDescriptionContainer}>
           <small>{inputDescription}</small>
         </div>
@@ -235,21 +367,29 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 }
 
 Input.propTypes = {
+  addon: React.PropTypes.oneOfType([
+    React.PropTypes.bool,
+    React.PropTypes.string,
+  ]),
   addRequiredInputDesign: React.PropTypes.bool,
   customBootstrapClass: React.PropTypes.string,
   deactivateErrorHighlight: React.PropTypes.bool,
-  // errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.func,
+  didCheckErrors: React.PropTypes.bool,
+  disabled: React.PropTypes.bool,
+  errors: React.PropTypes.array,
+  handleBlur: React.PropTypes.oneOfType([
+    React.PropTypes.func,
+    React.PropTypes.bool,
+  ]),
   handleChange: React.PropTypes.func.isRequired,
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
+  label: React.PropTypes.string.isRequired,
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
-  // styles: React.PropTypes.object,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
-  target: React.PropTypes.string,
   title: React.PropTypes.string,
   type: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
