@@ -21,22 +21,22 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     if (this.props.isLoading) {
       return (
         <div className={styles.buttonContainer}>
-          <Button type="submit" label="form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader handlei18n />
+          <Button type="submit" label="content-type-builder.form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader handlei18n />
         </div>
       );
     }
 
     return (
       <div className={styles.buttonContainer}>
-        <Button type="button" label="form.button.cancel" buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} handlei18n />
-        <Button type="submit" label="form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} handlei18n />
+        <Button type="button" label="content-type-builder.form.button.cancel" buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} handlei18n />
+        <Button type="submit" label="content-type-builder.form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} handlei18n />
       </div>
     );
   }
 
   renderContentHeader = () => {
     const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
-    const description = this.props.description || <FormattedMessage id="modelPage.contentHeader.emptyDescription.description" />;
+    const description = this.props.description || <FormattedMessage id="content-type-builder.modelPage.contentHeader.emptyDescription.description" />;
     const buttons = this.props.addButtons ? this.renderButtonContainer() : '';
     return (
       <div className={containerClass}>

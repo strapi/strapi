@@ -56,7 +56,7 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
         <div className={styles.infoContainer}>
           <span>{startCase(this.props.contentTypeName)}</span>
           &nbsp;
-          <FormattedMessage id={`relation.${this.props.selectedIco}`} />
+          <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`} />
           &nbsp;
           <span>{startCase(this.props.contentTypeTarget)}</span>
         </div>

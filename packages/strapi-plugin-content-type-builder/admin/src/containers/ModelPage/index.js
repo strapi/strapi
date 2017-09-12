@@ -48,8 +48,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     }
 
     this.popUpHeaderNavLinks = [
-      { name: 'baseSettings', message: 'popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
-      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
+      { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
+      { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
     ];
   }
 
@@ -77,20 +77,20 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   addCustomSection = (sectionStyles) => (
     <div className={sectionStyles.pluginLeftMenuSection}>
       <p>
-        <FormattedMessage id={'menu.section.documentation.name'} />
+        <FormattedMessage id="content-type-builder.menu.section.documentation.name" />
       </p>
       <ul>
         <li>
-          <FormattedMessage id={'menu.section.documentation.guide'} />&nbsp;
-          <FormattedMessage id={'menu.section.documentation.guideLink'}>
+          <FormattedMessage id="content-type-builder.menu.section.documentation.guide" />&nbsp;
+          <FormattedMessage id="content-type-builder.menu.section.documentation.guideLink">
             {(message) => (
               <Link to="#" target="_blank">{message}</Link>
             )}
           </FormattedMessage>
         </li>
         <li>
-          <FormattedMessage id={'menu.section.documentation.tutorial'} />&nbsp;
-          <FormattedMessage id={'menu.section.documentation.tutorialLink'}>
+          <FormattedMessage id="content-type-builder.menu.section.documentation.tutorial" />&nbsp;
+          <FormattedMessage id="content-type-builder.menu.section.documentation.tutorialLink">
             {(mess) => (
               <Link to="#" target="_blank">{mess}</Link>
             )}
@@ -112,7 +112,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   handleAddLinkClick = () => {
     if (storeData.getIsModelTemporary()) {
-      window.Strapi.notification.info('notification.info.contentType.creating.notSaved');
+      window.Strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
     } else {
       this.toggleModal();
     }
@@ -154,7 +154,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         <div>
           <i className={`fa ${props.link.icon}`} />
         </div>
-        <span><FormattedMessage id={props.link.name} /></span>
+        <span><FormattedMessage id={`content-type-builder.${props.link.name}`} /></span>
       </div>
     </li>
   )
@@ -164,7 +164,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
 
-    const temporary = props.link.isTemporary ? <FormattedMessage id={'contentType.temporaryDisplay'} /> : '';
+    const temporary = props.link.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
         <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
@@ -180,20 +180,20 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   renderListTitle = (props, listStyles) => {
     const availableNumber = size(props.listContent.attributes);
-    const title = availableNumber > 1 ? 'modelPage.contentType.list.title.plural'
-      : 'modelPage.contentType.list.title.singular';
+    const title = availableNumber > 1 ? 'content-type-builder.modelPage.contentType.list.title.plural'
+      : 'content-type-builder.modelPage.contentType.list.title.singular';
 
     const relationShipNumber = props.listContent.attributes.filter(attr => has(attr.params, 'target')).length;
 
-    const relationShipTitle = relationShipNumber > 1 ? 'modelPage.contentType.list.relationShipTitle.plural'
-      : 'modelPage.contentType.list.relationShipTitle.singular';
+    const relationShipTitle = relationShipNumber > 1 ? 'content-type-builder.modelPage.contentType.list.relationShipTitle.plural'
+      : 'content-type-builder.modelPage.contentType.list.relationShipTitle.singular';
 
     let fullTitle;
 
     if (relationShipNumber > 0) {
       fullTitle = (
         <div className={listStyles.titleContainer}>
-          {availableNumber} <FormattedMessage id={title} /> <FormattedMessage id={'modelPage.contentType.list.title.including'} /> {relationShipNumber} <FormattedMessage id={relationShipTitle} />
+          {availableNumber} <FormattedMessage id={title} /> <FormattedMessage id={'content-type-builder.modelPage.contentType.list.title.including'} /> {relationShipNumber} <FormattedMessage id={relationShipTitle} />
         </div>
       );
     } else {

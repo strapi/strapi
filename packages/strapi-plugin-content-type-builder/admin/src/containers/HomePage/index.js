@@ -31,14 +31,14 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     super(props);
 
     this.popUpHeaderNavLinks = [
-      { name: 'baseSettings', message: 'popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
-      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
+      { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
+      { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
     ];
   }
 
   handleButtonClick = () => {
     if (storeData.getIsModelTemporary()) {
-      window.Strapi.notification.info('notification.info.contentType.creating.notSaved');
+      window.Strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
     } else {
       this.toggleModal();
     }
@@ -55,13 +55,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   renderTableListComponent = () => {
     const availableNumber = size(this.props.models);
-    const title = availableNumber > 1 ? 'table.contentType.title.plural'
-      : 'table.contentType.title.singular';
+    const title = availableNumber > 1 ? 'content-type-builder.table.contentType.title.plural'
+      : 'content-type-builder.table.contentType.title.singular';
     return (
       <TableList
         availableNumber={availableNumber}
         title={title}
-        buttonLabel={'button.contentType.add'}
+        buttonLabel={'content-type-builder.button.contentType.add'}
         handleButtonClick={this.handleButtonClick}
         rowItems={this.props.models}
         handleDelete={this.handleDelete}
@@ -84,8 +84,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           ]}
         />
         <ContentHeader
-          name={'home.contentTypeBuilder.name'}
-          description={'home.contentTypeBuilder.description'}
+          name={'content-type-builder.home.contentTypeBuilder.name'}
+          description={'content-type-builder.home.contentTypeBuilder.description'}
           noMargin
         />
         {component}

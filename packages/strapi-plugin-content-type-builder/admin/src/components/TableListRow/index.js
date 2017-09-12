@@ -46,7 +46,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   }
 
   render() {
-    const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id={'contentType.temporaryDisplay'} /> : '';
+    const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     return (
       <li>
         <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
@@ -68,7 +68,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'popUpWarning.bodyMessage.contentType.delete'}
+          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
           popUpWarningType={'danger'}
           handleConfirm={this.delete}
         />

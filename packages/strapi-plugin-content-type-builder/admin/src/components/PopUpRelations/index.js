@@ -18,8 +18,8 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   constructor(props) {
     super(props);
     this.popUpHeaderNavLinks = [
-      { name: 'defineRelation', message: 'popUpForm.navContainer.relation', nameToReplace: 'advancedSettings' },
-      { name: 'advancedSettings', message: 'popUpForm.navContainer.advanced', nameToReplace: 'defineRelation' },
+      { name: 'defineRelation', message: 'content-type-builder.popUpForm.navContainer.relation', nameToReplace: 'advancedSettings' },
+      { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'defineRelation' },
     ];
   }
 
@@ -138,7 +138,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   render() {
     const loader = this.props.showLoader ?
       <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="form.button.continue" /></Button>;
+        : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
 
     const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
     return (
@@ -150,7 +150,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
               <div>
                 <FormattedMessage id={this.props.popUpTitle} />
                 &nbsp;
-                <FormattedMessage id="popUpRelation.title" />
+                <FormattedMessage id="content-type-builder.popUpRelation.title" />
               </div>
             </div>
 
@@ -160,7 +160,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           {modalBody}
 
           <ModalFooter className={styles.modalFooter}>
-            <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="form.button.cancel" /></Button>
+            <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
             {loader}{' '}
           </ModalFooter>
         </Modal>

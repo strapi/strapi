@@ -303,19 +303,19 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     switch (true) {
       case isCreating && popUpFormType === 'contentType':
-        popUpTitle = `popUpForm.create.${popUpFormType}.header.title`;
+        popUpTitle = `content-type-builder.popUpForm.create.${popUpFormType}.header.title`;
         break;
       case isCreating:
-        popUpTitle = 'popUpForm.create';
+        popUpTitle = 'content-type-builder.popUpForm.create';
         break;
       case includes(type, 'choose'):
-        popUpTitle = `popUpForm.choose.${popUpFormType}.header.title`;
+        popUpTitle = `content-type-builder.popUpForm.choose.${popUpFormType}.header.title`;
         break;
       case includes(type, 'edit') && popUpFormType === 'contentType':
-        popUpTitle = `popUpForm.edit.${popUpFormType}.header.title`;
+        popUpTitle = `content-type-builder.popUpForm.edit.${popUpFormType}.header.title`;
         break;
       default:
-        popUpTitle = 'popUpForm.edit';
+        popUpTitle = 'content-type-builder.popUpForm.edit';
     }
 
     return popUpTitle;
@@ -477,7 +477,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         &nbsp;
         {italicText}
         &nbsp;
-        <FormattedMessage id="popUpForm.field" />
+        <FormattedMessage id="content-type-builder.popUpForm.field" />
       </div>
     )
   }

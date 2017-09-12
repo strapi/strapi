@@ -22,7 +22,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
           <div className={styles.buttonContainer}>
             <ButtonPrimaryHotline
               buttonBackground={'secondaryAddType'}
-              label={'button.attributes.add'}
+              label={'content-type-builder.button.attributes.add'}
               handlei18n
               addShape
               onClick={this.props.handleButtonClick}

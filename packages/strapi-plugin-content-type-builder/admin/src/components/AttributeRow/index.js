@@ -66,7 +66,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 
   render() {
     const relationType = capitalize(this.props.row.params.type)
-    || <div><FormattedMessage id="modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.target)}</span></div>;
+    || <div><FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.target)}</span></div>;
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
     return (
@@ -90,7 +90,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'popUpWarning.bodyMessage.contentType.delete'}
+          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
           popUpWarningType={'danger'}
           handleConfirm={this.delete}
         />

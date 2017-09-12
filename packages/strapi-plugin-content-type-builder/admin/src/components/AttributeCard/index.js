@@ -45,7 +45,7 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
         <div className={styles.attributeCardContainer} onClick={this.goTo}>
           <div className={styles.attributeCard}>
             <img src={this.asset[this.props.attribute.type]} role="presentation" />
-            <FormattedMessage id={`popUpForm.attributes.${this.props.attribute.type}.name`}>
+            <FormattedMessage id={`content-type-builder.popUpForm.attributes.${this.props.attribute.type}.name`}>
               {(message) => <span className={styles.attributeType}>{message}</span>}
             </FormattedMessage>
             <FormattedMessage id={this.props.attribute.description} />

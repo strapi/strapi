@@ -51,37 +51,37 @@ export function checkFormValidity(formData, formValidations) {
 function validate(value, validations) {
   let errors = [];
   // Handle i18n
-  const requiredError = { id: 'error.validation.required' };
+  const requiredError = { id: 'content-type-builder.error.validation.required' };
   mapKeys(validations, (validationValue, validationKey) => {
     switch (validationKey) {
       case 'max':
         if (parseInt(value, 10) > validationValue) {
-          errors.push({ id: 'error.validation.max' });
+          errors.push({ id: 'content-type-builder.error.validation.max' });
         }
         break;
       case 'min':
         if (parseInt(value, 10) < validationValue) {
-          errors.push({ id: 'error.validation.min' });
+          errors.push({ id: 'content-type-builder.error.validation.min' });
         }
         break;
       case 'maxLength':
         if (value.length > validationValue) {
-          errors.push({ id: 'error.validation.maxLength' });
+          errors.push({ id: 'content-type-builder.error.validation.maxLength' });
         }
         break;
       case 'minLength':
         if (value.length < validationValue) {
-          errors.push({ id: 'error.validation.minLength' });
+          errors.push({ id: 'content-type-builder.error.validation.minLength' });
         }
         break;
       case 'required':
         if (value.length === 0) {
-          errors.push({ id: 'error.validation.required' });
+          errors.push({ id: 'content-type-builder.error.validation.required' });
         }
         break;
       case 'regex':
         if (!new RegExp(validationValue).test(value)) {
-          errors.push({ id: 'error.validation.regex' });
+          errors.push({ id: 'content-type-builder.error.validation.regex' });
         }
         break;
       default:

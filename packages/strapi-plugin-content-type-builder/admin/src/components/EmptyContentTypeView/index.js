@@ -16,17 +16,17 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
       <div className={styles.emptyContentTypeView}>
         <img src={Brush} role="presentation" />
         <div>
-          <FormattedMessage id="home.emptyContentType.title">
+          <FormattedMessage id="content-type-builder.home.emptyContentType.title">
             {(title) => <div className={styles.title}>{title}</div>}
           </FormattedMessage>
-          <FormattedMessage id="home.emptyContentType.description">
+          <FormattedMessage id="content-type-builder.home.emptyContentType.description">
             {(description) => <div className={styles.description}>{description}</div>}
           </FormattedMessage>
           <div className={styles.buttonContainer}>
             <Button
               onClick={this.props.handleButtonClick}
               buttonBackground={'primary'}
-              label={'button.contentType.create'}
+              label={'content-type-builder.button.contentType.create'}
               addShape
               handlei18n
             />

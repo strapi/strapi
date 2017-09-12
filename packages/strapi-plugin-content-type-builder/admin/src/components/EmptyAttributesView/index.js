@@ -14,17 +14,17 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
     return (
       <div className={styles.emptyAttributesView}>
         <div>
-          <FormattedMessage id="home.emptyAttributes.title">
+          <FormattedMessage id="content-type-builder.home.emptyAttributes.title">
             {(title) => <div className={styles.title}>{title}</div>}
           </FormattedMessage>
-          <FormattedMessage id="home.emptyAttributes.description">
+          <FormattedMessage id="content-type-builder.home.emptyAttributes.description">
             {(description) => <div className={styles.description}>{description}</div>}
           </FormattedMessage>
           <div className={styles.buttonContainer}>
             <Button
               onClick={this.props.handleClick}
               buttonBackground={'primary'}
-              label={'button.attributes.add'}
+              label={'content-type-builder.button.attributes.add'}
               addShape
               handlei18n
             />
