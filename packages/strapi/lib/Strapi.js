@@ -7,7 +7,7 @@ const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
 const { includes } = require('lodash');
-const { logger } = require('strapi-utils');
+const { logger, models } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -35,6 +35,11 @@ class Strapi extends EventEmitter {
 
     // Logger.
     this.log = logger;
+
+    // Utils.
+    this.utils = {
+      models
+    };
 
     // Exclude EventEmitter, Koa and HTTP server to be freezed.
     this.propertiesToNotFreeze = Object.keys(this);

@@ -252,5 +252,47 @@ module.exports = {
 
   getVia: (attribute, association) => {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
+  },
+
+  convertParams: (model, params) => {
+    if (!model) {
+      return this.log.error(`You can't call the convert params method without passing the model as a first argument.`);
+    }
+
+    const convertor = strapi.hook[model.orm].load().getQueryParams;
+    const convertParams = {
+      where: {},
+      sort: {},
+      start: 0,
+      limit: 100
+    };
+
+    _.forEach(params, (value, key)  => {
+      let result;
+
+      if (_.includes(['_start', '_limit'], key)) {
+        result = convertor(value, key);
+      } else if (key === '_sort') {
+        const [attr, order] = value.split(':');
+        result = convertor(order, key, attr);
+      } else {
+        const suffix = key.split('_');
+
+        let type;
+
+        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte'], _.last(suffix))) {
+          type = `_${_.last(suffix)}`;
+          key = _.dropRight(suffix).join('_');
+        } else {
+          type = '=';
+        }
+
+        result = convertor(value, type, key);
+      }
+
+      _.set(convertParams, result.key, result.value);
+    });
+
+    return convertParams;
   }
 };
