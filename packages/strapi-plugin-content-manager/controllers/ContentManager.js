@@ -92,7 +92,8 @@ module.exports = {
         const details = model.attributes[current];
 
         const toAdd = _.differenceWith(params.values[current], response[current], _.isEqual);
-        const toRemove = _.differenceWith(response[current], params.values[current],  _.isEqual);
+        const toRemove = _.differenceWith(response[current], params.values[current],  _.isEqual)
+          .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 
         toAdd.forEach(value => {
           value[details.via] = params.values[model.primaryKey];

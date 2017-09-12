@@ -7,7 +7,7 @@
 import React from 'react';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
-import { isArray, isNull } from 'lodash';
+import { isArray, isNull, isUndefined } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -78,7 +78,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           onChange={this.onChange}
           loadOptions={this.getOptions}
           multi
-          value={isNull(value) || value.size === 0 ? null : value.toJS().map(item => ({
+          value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => ({
             value: item,
             label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
           }))}

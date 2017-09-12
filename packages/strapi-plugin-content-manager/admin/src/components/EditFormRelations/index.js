@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { pickBy, map } from 'lodash';
+import { map } from 'lodash';
 
 import SelectOne from 'components/SelectOne';
 import SelectMany from 'components/SelectMany';
@@ -13,32 +13,38 @@ import styles from './styles.scss';
 
 class EditFormRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const relations = map(pickBy(this.props.schema[this.props.currentModelName].relations, { dominant: true }), (relation, i) => {
+    const relations = map(this.props.schema[this.props.currentModelName].relations, (relation, i) => {
       switch (relation.nature) {
         case 'oneToOne':
         case 'oneToMany':
-          return (
-            <SelectOne
-              currentModelName={this.props.currentModelName}
-              key={i}
-              record={this.props.record}
-              relation={relation}
-              schema={this.props.schema}
-              setRecordAttribute={this.props.setRecordAttribute}
-            />
-          );
+          if (relation.dominant) {
+            return (
+              <SelectOne
+                currentModelName={this.props.currentModelName}
+                key={i}
+                record={this.props.record}
+                relation={relation}
+                schema={this.props.schema}
+                setRecordAttribute={this.props.setRecordAttribute}
+              />
+            );
+          }
+          break;
         case 'manyToOne':
         case 'manyToMany':
-          return (
-            <SelectMany
-              currentModelName={this.props.currentModelName}
-              key={i}
-              record={this.props.record}
-              relation={relation}
-              schema={this.props.schema}
-              setRecordAttribute={this.props.setRecordAttribute}
-            />
-          );
+          if (relation.dominant === true || relation.nature === 'manyToMany') {
+            return (
+              <SelectMany
+                currentModelName={this.props.currentModelName}
+                key={i}
+                record={this.props.record}
+                relation={relation}
+                schema={this.props.schema}
+                setRecordAttribute={this.props.setRecordAttribute}
+              />
+            );
+          }
+          break;
         default:
           break;
       }

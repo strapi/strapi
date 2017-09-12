@@ -259,7 +259,8 @@ module.exports = function (strapi) {
                 case 'belongsToMany':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && _.isUndefined(FK.via)) {
+                  // One-side of the relationship has to be a virtual field to be bidirectional.
+                  if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(FK.collection),
