@@ -64,37 +64,37 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   validate = (value) => {
     let errors = [];
     // handle i18n
-    const requiredError = { id: 'error.validation.required' };
+    const requiredError = { id: `${this.props.pluginId}.error.validation.required` };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'max':
           if (parseInt(value, 10) > validationValue) {
-            errors.push({ id: 'error.validation.max' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.max` });
           }
           break;
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push({ id: 'error.validation.maxLength' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.maxLength` });
           }
           break;
         case 'min':
           if (parseInt(value, 10) < validationValue) {
-            errors.push({ id: 'error.validation.min' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.min` });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push({ id: 'error.validation.minLength' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.minLength` });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push({ id: 'error.validation.required' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.required` });
           }
           break;
         case 'regex':
           if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: 'error.validation.regex' });
+            errors.push({ id: `${this.props.pluginId}.error.validation.regex` });
           }
           break;
         default:
@@ -342,6 +342,7 @@ Input.propTypes = {
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
+  pluginId: React.PropTypes.string,
   selectOptions: React.PropTypes.array,
   selectOptionsFetchSucceeded: React.PropTypes.bool,
   title: React.PropTypes.string,

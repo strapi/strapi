@@ -56,5 +56,15 @@ const hasNestedValue = (attributeData) => {
     };
   });
 
+  if (get(attributeData.params, ['minValue']) > get(attributeData.params, 'maxValue')) {
+    formErrors.push({ name: 'params.minValue', errors: [{ id: 'content-type-builder.error.validation.minSupMax' } ] });
+  }
+
+  if (get(attributeData.params, ['minLengthValue']) > get(attributeData.params, 'maxLengthValue')) {
+    formErrors.push({ name: 'params.minLengthValue', errors: [{ id: 'content-type-builder.error.validation.minSupMax' } ] });
+  }
+
+
+
   return formErrors;
 }

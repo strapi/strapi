@@ -22,6 +22,7 @@
   "error.attribute.taken": "Ce champ existe déjà",
   "error.attribute.key.taken": "Cette valeur existe déjà",
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
+  "error.validation.minSupMax": "Ne peut pas être plus grand",
 
   "form.attribute.item.textarea.name": "Nom",
   "form.attribute.item.date.name": "Nom",
