@@ -196,8 +196,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const position = index !== -1 ? index  : size(oldMenu) - 1;
     oldMenu.splice(position, index !== -1 ? 1 : 0, { icon: 'fa-cube', fields: 0, description: data.description, name: data.name, isTemporary: true });
     const newMenu = oldMenu;
+    const contentType = data;
+
+    map(contentType.attributes, (attr, key) => {
+      if (get(attr.params, 'target') === this.props.modelName) {
+        contentType.attributes[key].params.target = data.name;
+      }
+    });
     // Store the temporary contentType in the localStorage
-    this.props.contentTypeCreate(data);
+    this.props.contentTypeCreate(contentType);
     // Store new menu in localStorage and update App leftMenu
     this.props.storeTemporaryMenu(newMenu, position, index !== -1 ? 1 : 0);
     // Reset popUp form
@@ -225,12 +232,25 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const formErrors = checkFormValidity(this.props.modifiedDataEdit, this.props.formValidations);
     const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === this.props.modifiedDataEdit.name);
 
-    if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== this.props.modelName) {
+
+    if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== replace(split(this.props.hash, '::')[0], '#edit', '')) {
+    // if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== this.props.modelName) {
       formErrors.push({ name: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
     }
 
     if (!isEmpty(formErrors)) {
       return this.props.setFormErrors(formErrors);
+    }
+
+    const contentType = storeData.getContentType();
+
+    if (contentType) {
+      map(contentType.attributes, (attr, key) => {
+        if (get(attr.params, 'target') === replace(split(this.props.hash, '::')[0], '#edit', '')) {
+          contentType.attributes[key].params.target = this.props.modifiedDataEdit.name;
+        }
+      });
+      this.props.contentTypeCreate(contentType);
     }
 
     return this.props.contentTypeEdit();

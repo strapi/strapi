@@ -1,8 +1,5 @@
-// import { LOCATION_CHANGE } from 'react-router-redux';
-
 import { takeLatest } from 'redux-saga';
 import { call, put, fork, select } from 'redux-saga/effects';
-
 import request from 'utils/request';
 
 import {
@@ -26,16 +23,16 @@ import {
 
 export function* editContentType() {
   try {
+    const initialContentType = yield select(makeSelectInitialDataEdit());
+    const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
     const body = yield select(makeSelectModifiedDataEdit());
     const opts = {
       method: 'PUT',
       body,
     };
 
-    const initialContentType = yield select(makeSelectInitialDataEdit());
-    const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
-
     yield put(setButtonLoading());
+
     yield call(request, requestUrl, opts);
 
     yield new Promise(resolve => {
@@ -82,14 +79,8 @@ export function* fetchContentType(action) {
 // Individual exports for testing
 export function* defaultSaga() {
   yield fork(takeLatest, CONNECTIONS_FETCH, fetchConnections);
-
   yield fork(takeLatest, CONTENT_TYPE_EDIT, editContentType);
   yield fork(takeLatest, CONTENT_TYPE_FETCH, fetchContentType);
-
-
-  // yield take(LOCATION_CHANGE);
-
-  // yield cancel(loadConnectionsWatcher);
 }
 
 // All sagas to be loaded
