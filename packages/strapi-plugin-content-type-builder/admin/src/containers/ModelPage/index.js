@@ -51,6 +51,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
       { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
     ];
+
+    this.contentHeaderButtons = [
+      { label: 'content-type-builder.form.button.cancel', handleClick: this.props.cancelChanges, size: 'buttonMd', background: 'secondary', handlei18n: true, type: 'button' },
+      { label: 'content-type-builder.form.button.save', handleClick: this.props.submit, size: 'buttonLg', background: 'primary', handlei18n: true, type: 'submit' },
+    ];
   }
 
   componentDidMount() {
@@ -213,6 +218,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     // const addButtons = this.props.modelPage.showButtons;
     const addButtons  = get(storeData.getContentType(), 'name') === this.props.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
 
+    const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
         <List
@@ -222,6 +228,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           renderCustomLi={this.renderCustomLi}
           handleButtonClick={this.handleClickAddAttribute}
         />;
+
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">
@@ -235,14 +242,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
               <div className={styles.componentsContainer}>
                 <ContentHeader
                   name={this.props.modelPage.model.name}
-                  description={this.props.modelPage.model.description}
+                  description={contentHeaderDescription}
                   icoType="pencil"
                   editIcon
                   editPath={`${redirectRoute}/${this.props.params.modelName}#edit${this.props.params.modelName}::contentType::baseSettings`}
                   addButtons={addButtons}
                   handleSubmit={this.props.submit}
-                  handleCancel={this.props.cancelChanges}
                   isLoading={this.props.modelPage.showButtonLoader}
+                  buttonsContent={this.contentHeaderButtons}
+
                 />
                 {content}
               </div>

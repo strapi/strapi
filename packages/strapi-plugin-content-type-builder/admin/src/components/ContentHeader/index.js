@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { isEmpty, startCase } from 'lodash';
+import { isEmpty, map, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { router } from 'app';
 import Button from 'components/Button';
@@ -21,25 +21,25 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     if (this.props.isLoading) {
       return (
         <div className={styles.buttonContainer}>
-          <Button type="submit" label="content-type-builder.form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} loader handlei18n />
+          <Button type="submit" buttonSize={"buttonLg"} buttonBackground={"primary"} loader handlei18n />
         </div>
       );
     }
 
     return (
       <div className={styles.buttonContainer}>
-        <Button type="button" label="content-type-builder.form.button.cancel" buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} handlei18n />
-        <Button type="submit" label="content-type-builder.form.button.save" buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} handlei18n />
+        {map(this.props.buttonsContent, (button, key) => (
+          <Button key={key} type={button.type} label={button.label} buttonSize={button.size} buttonBackground={button.background} onClick={button.handleClick} handlei18n={button.handlei18n} />
+        ))}
       </div>
-    );
+    )
   }
 
   renderContentHeader = () => {
-    const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
-    const description = this.props.description || <FormattedMessage id="content-type-builder.modelPage.contentHeader.emptyDescription.description" />;
+    const description = isEmpty(this.props.description) ? '' : <FormattedMessage id={this.props.description} />;
     const buttons = this.props.addButtons ? this.renderButtonContainer() : '';
     return (
-      <div className={containerClass}>
+      <div className={styles.contentHeader} style={this.props.styles}>
         <div>
           <div className={`${styles.title} ${styles.flex}`}>
             <span>{startCase(this.props.name)}</span>
@@ -53,13 +53,12 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
   }
 
   render() {
-    const containerClass = this.props.noMargin ? styles.contentHeaderNoMargin : styles.contentHeader;
     const description = isEmpty(this.props.description) ? '' : <FormattedMessage id={this.props.description} />;
     const buttons = this.props.addButtons ? this.renderButtonContainer() : '';
 
     if (this.props.editIcon) return this.renderContentHeader();
     return (
-      <div className={containerClass}>
+      <div className={styles.contentHeader} style={this.props.styles}>
         <div>
           <div className={styles.title}>
             <FormattedMessage id={this.props.name} />
@@ -74,15 +73,14 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 
 ContentHeader.propTypes = {
   addButtons: React.PropTypes.bool,
+  buttonsContent: React.PropTypes.array,
   description: React.PropTypes.string,
   editIcon: React.PropTypes.bool,
   editPath: React.PropTypes.string,
-  handleCancel: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
   icoType: React.PropTypes.string,
   isLoading: React.PropTypes.bool,
   name: React.PropTypes.string,
-  noMargin: React.PropTypes.bool,
+  styles: React.PropTypes.object,
 };
 
 export default ContentHeader;
