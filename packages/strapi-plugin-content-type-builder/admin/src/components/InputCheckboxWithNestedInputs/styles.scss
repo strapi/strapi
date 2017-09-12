@@ -15,8 +15,10 @@
 
 .checkboxLabel {
   // padding-top: .1rem;
+  cursor: inherit;
   font-weight: 500;
   > input {
+    cursor: pointer;
     margin-right: 1.2rem;
   }
 }

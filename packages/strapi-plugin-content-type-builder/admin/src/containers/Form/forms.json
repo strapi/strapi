@@ -71,10 +71,6 @@
         "description": "content-type-builder.popUpForm.attributes.json.description"
       },
       {
-        "type": "media",
-        "description": "content-type-builder.popUpForm.attributes.media.description"
-      },
-      {
         "type": "relation",
         "description": "content-type-builder.popUpForm.attributes.relation.description"
       }

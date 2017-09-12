@@ -72,7 +72,7 @@
   "modelPage.attribute.relationWith": "Relation avec",
 
   "notification.error.message": "Une erreur est survenue",
-  "notification.info.contentType.creating.notSaved": "Une creation de Modèle est déjà en cours",
+  "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
 
   "popUpForm.attributes.string.description": "Titres, noms, paragraphes, listes de noms",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",

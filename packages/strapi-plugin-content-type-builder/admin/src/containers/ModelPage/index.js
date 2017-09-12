@@ -89,7 +89,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           <FormattedMessage id="content-type-builder.menu.section.documentation.guide" />&nbsp;
           <FormattedMessage id="content-type-builder.menu.section.documentation.guideLink">
             {(message) => (
-              <Link to="#" target="_blank">{message}</Link>
+              <a href="http://strapi.io/documentation" target="_blank">{message}</a>
             )}
           </FormattedMessage>
         </li>

@@ -182,8 +182,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Check if content type name already exists
     const sameContentTypeNames = filter(this.props.menuData[0].items, (contentType) => contentType.name === data.name);
 
-    if (size(sameContentTypeNames) > 0 && data.name !== this.props.modelName) {
-      formErrors.push({ name: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+    if (size(sameContentTypeNames) > 0 && (includes(this.props.hash, '#create') || data.name !== replace(split(this.props.hash, '::')[0], '#edit', ''))) {
+      formErrors.push({ name: 'name', errors: [{ id: 'content-type-builder.error.contentTypeName.taken' }]});
     }
 
     if (!isEmpty(formErrors)) {
@@ -235,7 +235,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== replace(split(this.props.hash, '::')[0], '#edit', '')) {
     // if (size(sameContentTypeNames) > 0 && this.props.modifiedDataEdit.name !== this.props.modelName) {
-      formErrors.push({ name: 'name', errors: [{ id: 'error.contentTypeName.taken' }]});
+      formErrors.push({ name: 'name', errors: [{ id: 'content-type-builder.error.contentTypeName.taken' }]});
     }
 
     if (!isEmpty(formErrors)) {
@@ -384,7 +384,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
+    e.preventDefault();
     const hashArray = split(this.props.hash, ('::'));
     const valueToReplace = includes(this.props.hash, '#create') ? '#create' : '#edit';
     const contentTypeName = replace(hashArray[0], valueToReplace, '');

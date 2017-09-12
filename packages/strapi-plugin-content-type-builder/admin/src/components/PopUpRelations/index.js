@@ -113,6 +113,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         header={this.props.contentType}
         input={get(this.props.form, ['items', '0'])}
         value={get(this.props.values, 'name')}
+        handleSubmit={this.props.handleSubmit}
         handleChange={this.props.handleChange}
         didCheckErrors={this.props.didCheckErrors}
         errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
@@ -124,6 +125,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         contentTypeTarget={get(this.props.values, ['params', 'target'])}
       />
       <RelationBox
+        handleSubmit={this.props.handleSubmit}
         header={get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])])}
         input={get(this.props.form, ['items', '1'])}
         value={get(this.props.values, ['params', 'key'])}

@@ -83,11 +83,13 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
           {dropDown}
         </div>
         <div className={styles.inputContainer}>
-          <div className="container-fluid">
-            <div className={`row ${styles.input}`}>
-              {content}
+          <form onSubmit={this.props.handleSubmit}>
+            <div className="container-fluid">
+              <div className={`row ${styles.input}`}>
+                {content}
+              </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     );
@@ -99,6 +101,7 @@ RelationBox.propTypes = {
   dropDownItems: React.PropTypes.array,
   errors: React.PropTypes.array,
   handleChange: React.PropTypes.func,
+  handleSubmit: React.PropTypes.func,
   header: React.PropTypes.object,
   input: React.PropTypes.object,
   value: React.PropTypes.string,

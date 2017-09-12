@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-import { startCase } from 'lodash';
+import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PopUpWarning from 'components/PopUpWarning';
 import styles from 'components/TableList/styles.scss';
@@ -47,12 +47,13 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
 
   render() {
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
+    const description = isEmpty(this.props.rowItem.description) ? '-' :  this.props.rowItem.description;
     return (
       <li>
         <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
           <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
           <div className={`col-md-3 ${styles.italic}`}>{startCase(this.props.rowItem.name)} {temporary}</div>
-          <div className="col-md-5 text-center">{this.props.rowItem.description}</div>
+          <div className="col-md-5 text-center">{description}</div>
           <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
           <div className="col-md-1">
             <div className={styles.icContainer}>

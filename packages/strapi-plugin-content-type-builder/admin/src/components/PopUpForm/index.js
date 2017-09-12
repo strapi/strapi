@@ -102,11 +102,13 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             {navContainer}
           </div>
           <ModalBody className={styles.modalBody}>
-            <div className="container-fluid">
-              <div className="row">
-                {modalBody}
+            <form onSubmit={this.props.handleSubmit}>
+              <div className="container-fluid">
+                <div className="row">
+                  {modalBody}
+                </div>
               </div>
-            </div>
+            </form>
           </ModalBody>
           {modalFooter}
         </Modal>

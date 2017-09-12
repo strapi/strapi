@@ -80,9 +80,11 @@
 
 .checkboxLabel {
   // padding-top: .1rem;
+  cursor: inherit;
   font-weight: 500;
   > input {
     margin-right: 1.2rem;
+    cursor: pointer;
   }
 }
 
