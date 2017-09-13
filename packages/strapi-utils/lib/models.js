@@ -254,12 +254,24 @@ module.exports = {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
   },
 
-  convertParams: (model, params) => {
-    if (!model) {
-      return this.log.error(`You can't call the convert params method without passing the model as a first argument.`);
+  convertParams: (entity, params) => {
+    if (!entity) {
+      return this.log.error(`You can't call the convert params method without passing the model's name as a first argument.`);
     }
 
-    const convertor = strapi.hook[model.orm].load().getQueryParams;
+    const model = entity.toLowerCase();
+
+    if (!this.models.hasOwnProperty(model)) {
+      return this.log.error(`The model ${model} can't be found.`);
+    }
+
+    const connector = this.models[model].orm;
+
+    if (!connector) {
+      return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
+    }
+
+    const convertor = strapi.hook[connector].load().getQueryParams;
     const convertParams = {
       where: {},
       sort: {},
