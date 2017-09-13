@@ -52,6 +52,8 @@
 
   "form.contentType.item.connections": "Connection",
   "form.contentType.item.name": "Name",
+  "form.contentType.item.name.description": "Content type name's should be singular",
+  "form.contentType.item.name.link.description": "check out our documentation",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Write your little description here...",
   "form.contentType.item.collectionName": "Collection Name",

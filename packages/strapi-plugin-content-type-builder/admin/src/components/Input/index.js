@@ -282,7 +282,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         disabled={this.props.disabled}
       />;
 
-    const inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+    const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
+
+    let inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+
+    if (!isEmpty(this.props.linkContent) && !isEmpty(this.props.inputDescription)) {
+      inputDescription = <FormattedMessage id='input.description' defaultMessage={`{description}, {link}`} values={{link, description: <FormattedMessage id={this.props.inputDescription} /> }} />;
+    }
 
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
@@ -339,6 +345,10 @@ Input.propTypes = {
   handleFocus: React.PropTypes.func,
   inputDescription: React.PropTypes.string,
   label: React.PropTypes.string.isRequired,
+  linkContent: React.PropTypes.shape({
+    link: React.PropTypes.string,
+    description: React.PropTypes.string.isRequired,
+  }),
   name: React.PropTypes.string.isRequired,
   noErrorsDescription: React.PropTypes.bool,
   placeholder: React.PropTypes.string,

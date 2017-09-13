@@ -169,7 +169,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
 
-    const temporary = props.link.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
+    const temporary = props.link.isTemporary || this.props.modelPage.showButtons ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
         <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>

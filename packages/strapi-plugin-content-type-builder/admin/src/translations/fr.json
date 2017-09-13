@@ -50,6 +50,8 @@
 
   "form.contentType.item.connections": "Connexion",
   "form.contentType.item.name": "Nom",
+  "form.contentType.item.name.description": "Les noms de modèles doivent être au singulier",
+  "form.contentType.item.name.link.description": "regardez la documentation",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Ecrivez votre petite description ici...",
   "form.contentType.item.collectionName": "Nom de la Collection",
