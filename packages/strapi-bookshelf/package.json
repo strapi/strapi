@@ -17,9 +17,10 @@
   "main": "./lib",
   "dependencies": {
     "bookshelf": "^0.10.3",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0",
-    "strapi-bookshelf": "3.0.0-alpha.5.5",
+    "strapi-knex": "3.0.0-alpha.5.5",
     "strapi-utils": "3.0.0-alpha.5.5"
   },
   "strapi": {

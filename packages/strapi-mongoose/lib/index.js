@@ -314,8 +314,9 @@ module.exports = function (strapi) {
           result.value = value;
           break;
         case '_sort':
-          result.key = `sort.${key}`;
-          result.value = value;
+          result.key = `sort`;
+          result.value = (value === 'desc') ? '-' : '';
+          result.value += key;
           break;
         case '_start':
           result.key = `start`;

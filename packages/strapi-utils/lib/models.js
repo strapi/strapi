@@ -256,25 +256,25 @@ module.exports = {
 
   convertParams: (entity, params) => {
     if (!entity) {
-      return this.log.error(`You can't call the convert params method without passing the model's name as a first argument.`);
+      return strapi.log.error(`You can't call the convert params method without passing the model's name as a first argument.`);
     }
 
     const model = entity.toLowerCase();
 
-    if (!this.models.hasOwnProperty(model)) {
+    if (!strapi.models.hasOwnProperty(model)) {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
-    const connector = this.models[model].orm;
+    const connector = strapi.models[model].orm;
 
     if (!connector) {
-      return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
+      return strapi.log.error(`Impossible to determine the use ORM for the model ${model}.`);
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;
     const convertParams = {
       where: {},
-      sort: {},
+      sort: '',
       start: 0,
       limit: 100
     };

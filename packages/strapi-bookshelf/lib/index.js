@@ -415,6 +415,72 @@ module.exports = function(strapi) {
           });
         });
       });
+    },
+
+    getQueryParams: (value, type, key) => {
+      const result = {};
+
+      switch (type) {
+        case '=':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '=',
+            value
+          };
+          break;
+        case '_ne':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '!=',
+            value
+          };
+          break;
+        case '_lt':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '<',
+            value
+          };
+          break;
+        case '_gt':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '>',
+            value
+          };
+          break;
+        case '_lte':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '<=',
+            value
+          };
+          break;
+        case '_gte':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: '>=',
+            value
+          };
+          break;
+        case '_sort':
+          result.key = `sort`;
+          result.value = (value === 'desc') ? '-' : '';
+          result.value += key;
+          break;
+        case '_start':
+          result.key = `start`;
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = `limit`;
+          result.value = parseFloat(value);
+          break;
+        default:
+          result = undefined;
+      }
+
+      return result;
     }
   };
 
