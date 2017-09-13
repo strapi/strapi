@@ -122,9 +122,9 @@
   "table.contentType.head.fields": "Fields",
 
   "relation.oneToOne": "has one",
-  "relation.oneToMany": "belongs to",
+  "relation.oneToMany": "belongs to many",
   "relation.manyToOne": "has many",
-  "relation.manyToMany": "has many",
+  "relation.manyToMany": "has and belongs to many",
   "relation.attributeName.placeholder": "Ex: author, category, tag"
 
 }

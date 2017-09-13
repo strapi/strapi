@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { map, startCase } from 'lodash';
-
+import pluralize from 'pluralize';
 import { FormattedMessage } from 'react-intl';
+
 import RelationIco from 'components/RelationIco';
 
 import ManyToMany from '../../assets/images/many_to_many.svg';
@@ -48,17 +49,35 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
     ]
   }
   render() {
+    let contentTypeName = startCase(this.props.contentTypeName);
+    let contentTypeTarget = startCase(this.props.contentTypeTarget);
+    switch (this.props.selectedIco) {
+      case 'oneToMany':
+        contentTypeTarget = pluralize(contentTypeTarget);
+        break;
+      case 'manyToOne':
+        contentTypeName = contentTypeTarget;
+        contentTypeTarget = pluralize(startCase(this.props.contentTypeName));
+        break;
+      case 'manyToMany':
+        contentTypeName = pluralize(contentTypeName);
+        contentTypeTarget = pluralize(contentTypeTarget);
+        break;
+      default:
+
+    }
+
     return (
       <div className={styles.relationNaturePicker}>
         {map(this.icos, (value, key) => (
           <RelationIco key={key} ico={this.props.selectedIco === value.name ? value.icoSelected : value.ico} name={value.name} handleChange={this.props.handleChange} />
         ))}
         <div className={styles.infoContainer}>
-          <span>{startCase(this.props.contentTypeName)}</span>
+          {contentTypeName}
           &nbsp;
           <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`} />
           &nbsp;
-          <span>{startCase(this.props.contentTypeTarget)}</span>
+          {contentTypeTarget}
         </div>
       </div>
     );

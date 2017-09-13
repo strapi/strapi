@@ -110,6 +110,9 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   renderModalBodyRelations = () => (
     <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
       <RelationBox
+        relationType={get(this.props.values, ['params', 'nature'])}
+        contentTypeTargetPlaceholder={get(this.props.values, ['params', 'target'])}
+        isFirstContentType
         header={this.props.contentType}
         input={get(this.props.form, ['items', '0'])}
         value={get(this.props.values, 'name')}
@@ -125,6 +128,8 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         contentTypeTarget={get(this.props.values, ['params', 'target'])}
       />
       <RelationBox
+        contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
+        relationType={get(this.props.values, ['params', 'nature'])}
         handleSubmit={this.props.handleSubmit}
         header={get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])])}
         input={get(this.props.form, ['items', '1'])}

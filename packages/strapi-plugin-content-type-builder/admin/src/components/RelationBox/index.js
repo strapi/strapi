@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { get, isEmpty, map, startCase } from 'lodash';
+import pluralize from 'pluralize';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Input from 'components/Input';
 import styles from './styles.scss';
@@ -59,6 +60,22 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
   )
 
   render() {
+    let placeholder;
+
+    switch (true) {
+      case this.props.relationType === 'oneToMany' && this.props.isFirstContentType:
+        placeholder = pluralize(this.props.contentTypeTargetPlaceholder);
+        break;
+      case this.props.relationType === 'manyToOne' && !this.props.isFirstContentType:
+        placeholder = pluralize(this.props.contentTypeTargetPlaceholder);
+        break;
+      case this.props.relationType === 'manyToMany':
+        placeholder = pluralize(this.props.contentTypeTargetPlaceholder);
+        break;
+      default:
+        placeholder = this.props.contentTypeTargetPlaceholder;
+    }
+
     const content = isEmpty(this.props.input) ? <div /> :
       <Input
         type={get(this.props.input, 'type')}
@@ -66,7 +83,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         label={get(this.props.input, 'label')}
         name={get(this.props.input, 'name')}
         value={this.props.value}
-        placeholder={get(this.props.input, 'placeholder')}
+        placeholder={placeholder}
         customBootstrapClass="col-md-12"
         validations={get(this.props.input, 'validations')}
         errors={this.props.errors}
@@ -98,6 +115,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationBox.propTypes = {
+  contentTypeTargetPlaceholder: React.PropTypes.string,
   didCheckErrors: React.PropTypes.bool,
   dropDownItems: React.PropTypes.array,
   errors: React.PropTypes.array,
@@ -105,6 +123,8 @@ RelationBox.propTypes = {
   handleSubmit: React.PropTypes.func,
   header: React.PropTypes.object,
   input: React.PropTypes.object,
+  isFirstContentType: React.PropTypes.bool,
+  relationType: React.PropTypes.string,
   value: React.PropTypes.string,
 }
 
