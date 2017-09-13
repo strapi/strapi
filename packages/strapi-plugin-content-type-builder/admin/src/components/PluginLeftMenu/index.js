@@ -11,8 +11,6 @@
 *
 */
 
-
-
 import React from 'react';
 import { map } from 'lodash';
 import PluginLeftMenuSection from 'components/PluginLeftMenuSection';

@@ -7,7 +7,7 @@
 import React from 'react';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import ButtonPrimaryHotline from 'components/Button';
+import Button from 'components/Button';
 import TableListRow from 'components/TableListRow';
 import styles from './styles.scss';
 
@@ -23,11 +23,9 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                 {this.props.availableNumber}&nbsp;<FormattedMessage {...{ id: this.props.title }} />
               </div>
               <div className={styles.buttonContainer}>
-                <ButtonPrimaryHotline
-                  buttonBackground={'secondaryAddType'}
+                <Button
+                  secondaryHotlineAdd
                   label={this.props.buttonLabel}
-                  handlei18n
-                  addShape
                   onClick={this.props.handleButtonClick}
                 />
               </div>

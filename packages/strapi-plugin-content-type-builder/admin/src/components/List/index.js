@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { map } from 'lodash';
-import ButtonPrimaryHotline from 'components/Button';
+import Button from 'components/Button';
 import styles from './styles.scss';
 
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -20,12 +20,10 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
         <div className={styles.flex}>
           {title}
           <div className={styles.buttonContainer}>
-            <ButtonPrimaryHotline
-              buttonBackground={'secondaryAddType'}
-              label={'content-type-builder.button.attributes.add'}
-              handlei18n
-              addShape
+            <Button
               onClick={this.props.handleButtonClick}
+              secondaryHotlineAdd
+              label={'content-type-builder.button.attributes.add'}
             />
           </div>
         </div>

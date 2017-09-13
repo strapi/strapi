@@ -28,15 +28,19 @@ import { FormattedMessage } from 'react-intl';
 import { router, store } from 'app';
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
 import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
+
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
 import PopUpForm from 'components/PopUpForm';
 import PopUpRelations from 'components/PopUpRelations';
+
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import { checkFormValidity } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
+
 import checkAttributeValidations from './utils/attributeValidations';
 import setParallelAttribute, { setTempAttribute } from './utils/setAttribute';
+
 import reducer from './reducer';
 import sagas from './sagas';
 import selectForm from './selectors';

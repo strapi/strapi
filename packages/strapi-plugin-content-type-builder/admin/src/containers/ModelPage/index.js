@@ -53,8 +53,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     ];
 
     this.contentHeaderButtons = [
-      { label: 'content-type-builder.form.button.cancel', handleClick: this.props.cancelChanges, size: 'buttonMd', background: 'secondary', handlei18n: true, type: 'button' },
-      { label: 'content-type-builder.form.button.save', handleClick: this.props.submit, size: 'buttonLg', background: 'primary', handlei18n: true, type: 'submit' },
+      { label: 'content-type-builder.form.button.cancel', handleClick: this.props.cancelChanges, kind: 'secondary', type: 'button' },
+      { label: 'content-type-builder.form.button.save', handleClick: this.props.submit, kind: 'primary', type: 'submit' },
     ];
   }
 

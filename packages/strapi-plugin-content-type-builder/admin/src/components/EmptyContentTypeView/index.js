@@ -24,11 +24,9 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
           </FormattedMessage>
           <div className={styles.buttonContainer}>
             <Button
-              onClick={this.props.handleButtonClick}
-              buttonBackground={'primary'}
+              primaryAddShape
               label={'content-type-builder.button.contentType.create'}
-              addShape
-              handlei18n
+              onClick={this.props.handleButtonClick}
             />
           </div>
         </div>

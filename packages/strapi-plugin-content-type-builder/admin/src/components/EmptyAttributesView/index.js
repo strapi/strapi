@@ -23,10 +23,8 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
           <div className={styles.buttonContainer}>
             <Button
               onClick={this.props.handleClick}
-              buttonBackground={'primary'}
+              primaryAddShape
               label={'content-type-builder.button.attributes.add'}
-              addShape
-              handlei18n
             />
           </div>
         </div>

@@ -21,7 +21,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     if (this.props.isLoading) {
       return (
         <div className={styles.buttonContainer}>
-          <Button type="submit" buttonSize={"buttonLg"} buttonBackground={"primary"} loader handlei18n />
+          <Button type="submit" lg primary loader />
         </div>
       );
     }
@@ -29,7 +29,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     return (
       <div className={styles.buttonContainer}>
         {map(this.props.buttonsContent, (button, key) => (
-          <Button key={key} type={button.type} label={button.label} buttonSize={button.size} buttonBackground={button.background} onClick={button.handleClick} handlei18n={button.handlei18n} />
+          <Button key={key} type={button.type} label={button.label} kind={button.kind} onClick={button.handleClick} />
         ))}
       </div>
     )
