@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { map } from 'lodash';
 
 import LeftMenuLink from 'components/LeftMenuLink';
 
@@ -17,20 +18,11 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
     // Generate the list of sections
     const linkSections = this.props.plugins.valueSeq().map(plugin => (
       plugin.get('leftMenuSections').map((leftMenuSection, j) => {
-        const sectionlinks = leftMenuSection.get('links').map((sectionLink, k) => (
-          <LeftMenuLink
-            key={k}
-            icon={sectionLink.get('icon') || 'link'}
-            label={sectionLink.get('label')}
-            destination={`/plugins/${plugin.get('id')}/${sectionLink.get('destination')}`}
-          />
-        ));
-
         return (
           <div key={j}>
             <p className={styles.title}>{leftMenuSection.get('name')}</p>
             <ul className={styles.list}>
-              {sectionlinks}
+              {map(this.links, (link, k) => <LeftMenuLink key={k} icon={link.get('icon') || 'link'} label={link.get('label')} destination={`/plugins/${plugin.get('id')}/${link.get('destination')}`} /> )}
             </ul>
           </div>
         );
