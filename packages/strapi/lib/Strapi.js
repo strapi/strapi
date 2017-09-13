@@ -6,7 +6,7 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes } = require('lodash');
+const { includes, get } = require('lodash');
 const { logger } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -138,7 +138,7 @@ class Strapi extends EventEmitter {
     // Destroy server and available connections.
     this.server.destroy();
 
-    if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('stop');
+    if (cluster.isWorker && process.env.NODE_ENV === 'development' && get(this.config, 'currentEnvironment.server.autoReload') === true) process.send('stop');
 
     // Kill process.
     process.exit(0);
@@ -173,7 +173,7 @@ class Strapi extends EventEmitter {
 
   reload() {
     const reload = function() {
-      if (cluster.isWorker && process.env.NODE_ENV === 'development' && this.config.currentEnvironment.server.autoReload === true) process.send('reload');
+      if (cluster.isWorker && process.env.NODE_ENV === 'development' && get(this.config, 'currentEnvironment.server.autoReload') === true) process.send('reload');
     };
 
     reload.isReloading = false;

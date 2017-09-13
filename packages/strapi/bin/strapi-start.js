@@ -74,21 +74,22 @@ module.exports = function() {
 
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
-          if (message !== 'reload') return;
+          switch (message) {
+            case 'reload':
+              strapi.log.info('The server is restarting\n');
 
-          strapi.log.info('The server is restarting\n');
+              _.forEach(cluster.workers, worker => worker.kill());
 
-          _.forEach(cluster.workers, worker => worker.kill());
+              cluster.fork();
+              break;
+            case 'stop':
+              _.forEach(cluster.workers, worker => worker.kill());
 
-          cluster.fork();
-        });
-
-        cluster.on('message', (worker, message) => {
-          if (message !== 'stop') return;
-
-          _.forEach(cluster.workers, worker => worker.kill());
-
-          process.exit(0);
+              process.exit(0);ter.fork();
+              break;
+            default:
+              return;
+          }
         });
 
         cluster.fork();
