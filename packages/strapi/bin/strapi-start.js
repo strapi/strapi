@@ -73,12 +73,23 @@ module.exports = function() {
       setFilesToWatch(process.cwd());
 
       if (cluster.isMaster) {
-        cluster.on('message', () => {
-          strapi.log.info('The server is restarting\n');
+        cluster.on('message', (worker, message) => {
+          switch (message) {
+            case 'reload':
+              strapi.log.info('The server is restarting\n');
 
-          _.forEach(cluster.workers, worker => worker.kill());
+              _.forEach(cluster.workers, worker => worker.kill());
 
-          cluster.fork();
+              cluster.fork();
+              break;
+            case 'stop':
+              _.forEach(cluster.workers, worker => worker.kill());
+
+              process.exit(0);
+              break;
+            default:
+              return;
+          }
         });
 
         cluster.fork();
