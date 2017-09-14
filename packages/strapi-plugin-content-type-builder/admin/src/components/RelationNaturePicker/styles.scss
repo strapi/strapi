@@ -3,6 +3,8 @@
   width: 25.5rem;
   position: relative;
   padding-top: 4.5rem;
+  padding-left: 10px;
+  padding-right: 10px;
   justify-content: space-around;
 }
 
@@ -17,15 +19,13 @@
 }
 
 .infoContainer {
-  width: 100%;
+  width: 95%;
   position: absolute;
+  word-wrap: break-word;
   top: 11.8rem;
   line-height: 1.8rem;
   text-align: center;
   font-size: 1.3rem;
-  // > span:first-child {
-  //   text-transform: capitalize;
-  // }
   > span:nth-child(2) {
     color: #1C5DE7;
   }

@@ -16,13 +16,20 @@ li:not(:first-child) {
   color: #2C3138 !important;
   text-decoration: none !important;
   line-height: 1.6rem;
-  > div {
+  > div:first-child {
     width: 1.3rem;
     margin-right: 1rem;
     font-size: 11px;
     > i {
       color: #666B74;
     }
+  }
+  > span {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

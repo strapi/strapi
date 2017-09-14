@@ -48,11 +48,12 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   render() {
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const description = isEmpty(this.props.rowItem.description) ? '-' :  this.props.rowItem.description;
+    const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
     return (
       <li>
         <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
           <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
-          <div className={`col-md-3 ${styles.italic}`}>{startCase(this.props.rowItem.name)} {temporary}</div>
+          <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)}</span> {temporary}</div>
           <div className="col-md-5 text-center">{description}</div>
           <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
           <div className="col-md-1">

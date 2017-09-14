@@ -60,7 +60,10 @@ function Button(props) {
 Button.propTypes = {
   children: React.PropTypes.node,
   className: React.PropTypes.any,
-  kind: React.PropTypes.bool,
+  kind: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.bool,
+  ]),
   label: React.PropTypes.string,
   loader: React.PropTypes.bool,
   primary: React.PropTypes.bool,

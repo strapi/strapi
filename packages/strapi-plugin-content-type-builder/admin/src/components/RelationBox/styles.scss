@@ -19,6 +19,10 @@
   font-size: 1.4rem;
   font-weight: bold;
   text-transform: capitalize;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   > i {
     margin-right: 8px;

@@ -73,11 +73,17 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
           <RelationIco key={key} ico={this.props.selectedIco === value.name ? value.icoSelected : value.ico} name={value.name} handleChange={this.props.handleChange} />
         ))}
         <div className={styles.infoContainer}>
-          {contentTypeName}
+          <span>
+
+            {contentTypeName}
+          </span>
           &nbsp;
-          <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`} />
+          <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`}  />
           &nbsp;
-          {contentTypeTarget}
+          <span>
+
+            {contentTypeTarget}
+          </span>
         </div>
       </div>
     );

@@ -113,7 +113,19 @@
 }
 
 .italic {
-  > span {
+  > span:nth-child(2) {
     font-style: italic;
+  }
+}
+
+.nameContainer {
+  display: flex;
+  justify-content: space-between;
+  > span:first-child {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
   }
 }

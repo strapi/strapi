@@ -6,3 +6,19 @@
 .componentsContainer {
   padding: 0 1.5rem 0 1.5rem;
 }
+
+.leftMenuSpan {
+  display: block;
+  width: calc(100% - 95px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contentContainer {
+  display: flex;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
