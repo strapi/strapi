@@ -14,7 +14,7 @@ class PluginHeaderTitle extends React.Component { // eslint-disable-line react/p
     return (
       <div>
         <h1 className={styles.pluginHeaderTitleName}>
-          <FormattedMessage {...this.props.title} />
+          <FormattedMessage {...this.props.title} defaultMessage={this.props.title.id} />
         </h1>
         <p className={styles.pluginHeaderTitleDescription}>
           <FormattedMessage {...this.props.description} />

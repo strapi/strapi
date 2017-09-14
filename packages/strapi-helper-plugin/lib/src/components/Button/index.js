@@ -15,7 +15,10 @@ class Button extends React.Component {
     const addShape = this.props.addShape ? <i className="fa fa-plus" /> : '';
 
     return (
-      <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...this.props}>
+      <button
+        className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`}
+        onClick={this.props.onClick}
+        >
         {addShape}{label}
       </button>
     );

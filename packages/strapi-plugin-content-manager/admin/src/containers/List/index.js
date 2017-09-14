@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import _ from 'lodash';
 
@@ -65,17 +65,14 @@ export class List extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     // Init the view
     this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
-    // Check if the current slug changed in the url
-    const locationChanged =
-      nextProps.location.pathname !== this.props.location.pathname;
+    const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
-    // If the location changed, init the view
     if (locationChanged) {
       this.init(nextProps.match.params.slug);
     }
@@ -85,7 +82,6 @@ export class List extends React.Component {
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    // Set default sort value
     this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'desc');
 
     // Load records
@@ -102,7 +98,7 @@ export class List extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.deleteRecord(this.state.target, this.props.currentModelName);
+    this.props.deleteRecord(this.state, this.props.currentModelName);
     this.setState({ showWarning: false });
   }
 
@@ -207,7 +203,7 @@ export class List extends React.Component {
                 changePage={this.props.changePage}
                 count={this.props.count}
                 className="push-lg-right"
-                onLimitChange={this.props.onLimitChange}
+                handleLimit={this.props.changeLimit}
               />
             </div>
           </div>
@@ -222,6 +218,7 @@ List.contextTypes = {
 };
 
 List.propTypes = {
+  changeLimit: React.PropTypes.func.isRequired,
   changePage: React.PropTypes.func.isRequired,
   changeSort: React.PropTypes.func.isRequired,
   count: React.PropTypes.oneOfType([
@@ -245,7 +242,6 @@ List.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]).isRequired,
-  onLimitChange: React.PropTypes.func.isRequired,
   records: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.bool,
@@ -260,29 +256,18 @@ List.propTypes = {
 };
 
 function mapDispatchToProps(dispatch) {
-  return {
-    deleteRecord: (id, modelName) => dispatch(deleteRecord(id, modelName)),
-    setCurrentModelName: modelName => dispatch(setCurrentModelName(modelName)),
-    loadRecords: () => dispatch(loadRecords()),
-    loadCount: () => dispatch(loadCount()),
-    changePage: page => {
-      dispatch(changePage(page));
-      dispatch(loadRecords());
-      dispatch(loadCount());
+  return bindActionCreators(
+    {
+      deleteRecord,
+      setCurrentModelName,
+      loadRecords,
+      loadCount,
+      changePage,
+      changeSort,
+      changeLimit,
     },
-    changeSort: sort => {
-      dispatch(changeSort(sort));
-      dispatch(loadRecords());
-    },
-    onLimitChange: e => {
-      const newLimit = Number(e.target.value);
-      dispatch(changeLimit(newLimit));
-      dispatch(changePage(1));
-      dispatch(loadRecords());
-      e.target.blur();
-    },
-    dispatch,
-  };
+    dispatch
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

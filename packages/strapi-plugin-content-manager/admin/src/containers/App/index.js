@@ -21,7 +21,7 @@ import List from 'containers/List';
 import { loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
 
-import saga from './sagas';
+import saga, { generateMenu } from './sagas';
 
 const tryRequire = (path) => {
   try {
@@ -31,8 +31,19 @@ const tryRequire = (path) => {
   }
 };
 
+// This method is executed before the load of the plugin.
+export const bootstrap = (plugin) => new Promise((resolve, reject) => {
+  generateMenu()
+    .then(menu => {
+      plugin.leftMenuSections = menu;
+
+      resolve(plugin);
+    })
+    .catch(e => reject(e));
+});
+
 class App extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     const config = tryRequire('../../../../config/admin.json');
 
     if (!_.isEmpty(_.get(config, 'admin.schema'))) {
@@ -82,7 +93,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
 const withSaga = injectSaga({ key: 'global', saga });
 
 export default compose(

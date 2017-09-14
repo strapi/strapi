@@ -18,7 +18,7 @@ class TableFooter extends React.Component {
         <div className="col-lg-6">
           <LimitSelect
             className="push-lg-right"
-            onLimitChange={this.props.onLimitChange}
+            handleLimit={this.props.handleLimit}
             limit={this.props.limit}
           />
         </div>
@@ -42,8 +42,8 @@ TableFooter.propTypes = {
     React.PropTypes.bool,
   ]).isRequired,
   currentPage: React.PropTypes.number.isRequired,
+  handleLimit: React.PropTypes.func.isRequired,
   limit: React.PropTypes.number.isRequired,
-  onLimitChange: React.PropTypes.func.isRequired,
 };
 
 export default TableFooter;

@@ -1,7 +1,6 @@
 module.exports = {
 
   find: async function (params) {
-    console.log(params);
     const entries = await this
       .forge()
       .query((qb) => {

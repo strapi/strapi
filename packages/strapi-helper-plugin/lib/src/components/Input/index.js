@@ -146,7 +146,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
           {title}
-          <FormattedMessage id={this.props.label}>
+          <FormattedMessage id={this.props.label} defaultMessage={this.props.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
                 <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
@@ -168,7 +168,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
         <select
           className="form-control"
@@ -179,7 +179,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           disabled={this.props.disabled}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`${option.name}`} key={key}>
+            <FormattedMessage id={`${option.name}`} defaultMessage={option.name} key={key}>
               {(message) => (
                 <option value={option.value}>
                   {message}
@@ -207,9 +207,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.inputTextArea} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
-        <FormattedMessage id={this.props.placeholder || this.props.label}>
+        <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
           {(placeholder) => (
             <textarea
               className="form-control"
@@ -247,7 +247,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.input} ${bootStrapClass} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
         <DateTime
           value={value}
@@ -275,7 +275,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
-    <FormattedMessage id={`${placeholder}`}>
+    <FormattedMessage id={`${placeholder}`} defaultMessage={placeholder}>
       {(message) => (
         <input
           name={this.props.name}
@@ -305,7 +305,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const placeholder = this.props.placeholder || this.props.label;
 
     const label = this.props.label ?
-      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} /></label>
+      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} /></label>
         : <label htmlFor={this.props.label} />;
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?

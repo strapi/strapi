@@ -26,7 +26,7 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 
 import Header from 'components/Header/index';
 
-import styles from './syles.scss';
+import styles from './styles.scss';
 
 export class AdminPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

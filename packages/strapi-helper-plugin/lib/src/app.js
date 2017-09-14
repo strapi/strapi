@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import App from 'containers/App'; // eslint-disable-line
+import App, { bootstrap } from 'containers/App'; // eslint-disable-line
 
 import configureStore from './store';
 import { translationMessages } from './i18n';
@@ -27,7 +27,6 @@ const router = window.Strapi.router;
 // Create redux store with Strapi admin history
 const store = configureStore({}, window.Strapi.router);
 
-
 // Define the plugin root component
 function Comp(props) {
   return (
@@ -36,11 +35,6 @@ function Comp(props) {
     </Provider>
   );
 }
-
-// Add contextTypes to get access to the admin router
-Comp.contextTypes = {
-  router: React.PropTypes.object.isRequired.isRequired,
-};
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -58,7 +52,7 @@ if (module.hot) {
   });
 }
 
-// Register the plugin
+// Register the plugin.
 window.Strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   icon: pluginPkg.strapi.icon,
@@ -66,8 +60,8 @@ window.Strapi.registerPlugin({
   leftMenuLinks: [],
   mainComponent: Comp,
   translationMessages,
+  bootstrap,
 });
-
 
 // Export store
 export { store, apiUrl, pluginId, pluginName, pluginDescription, router };

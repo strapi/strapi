@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { get, isObject } from 'lodash';
 import { router } from 'app';
@@ -37,7 +37,6 @@ import {
   loadRecord,
   setRecordAttribute,
   editRecord,
-  deleteRecord,
   toggleNull,
 } from './actions';
 
@@ -57,7 +56,11 @@ import reducer from './reducer';
 import saga from './sagas';
 
 export class Edit extends React.Component {
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
     this.props.setInitialState();
     this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
 
@@ -65,8 +68,13 @@ export class Edit extends React.Component {
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
     } else {
+      console.log("LOAD RECORD");
       this.props.loadRecord(this.props.match.params.id);
     }
+  }
+
+  componentWillUnmount() {
+    console.log("UNMOUNTED");
   }
 
   handleChange = (e) => {
@@ -237,25 +245,18 @@ const mapStateToProps = createStructuredSelector({
 });
 
 function mapDispatchToProps(dispatch) {
-  return {
-    setInitialState: () => dispatch(setInitialState()),
-    setCurrentModelName: currentModelName =>
-      dispatch(setCurrentModelName(currentModelName)),
-    setIsCreating: () => dispatch(setIsCreating()),
-    loadRecord: id => dispatch(loadRecord(id)),
-    setRecordAttribute: (key, value) =>
-      dispatch(setRecordAttribute(key, value)),
-    editRecord: () => dispatch(editRecord()),
-    deleteRecord: () => {
-      // TODO: improve confirmation UX.
-      if (window.confirm('Are you sure ?')) {
-        // eslint-disable-line no-alert
-        dispatch(deleteRecord());
-      }
+  return bindActionCreators(
+    {
+      setInitialState,
+      setCurrentModelName,
+      setIsCreating,
+      loadRecord,
+      setRecordAttribute,
+      editRecord,
+      toggleNull,
     },
-    toggleNull: () => dispatch(toggleNull()),
-    dispatch,
-  };
+    dispatch
+  );
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

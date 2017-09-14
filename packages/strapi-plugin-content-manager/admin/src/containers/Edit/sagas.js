@@ -26,7 +26,7 @@ export function* getRecord(params) {
     const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModelName}/${params.id}`;
 
     // Call our request helper (see 'utils/request')
-    const response = yield call(request, requestUrl, {
+    const response = yield request(requestUrl, {
       method: 'GET',
     });
 
@@ -110,14 +110,11 @@ export function* deleteRecord({ id, modelName }) {
 export function* defaultSaga() {
   const loadRecordWatcher = yield fork(takeLatest, LOAD_RECORD, getRecord);
   const editRecordWatcher = yield fork(takeLatest, EDIT_RECORD, editRecord);
-  const deleteRecordWatcher = yield fork(
-    takeLatest,
-    DELETE_RECORD,
-    deleteRecord
-  );
+  const deleteRecordWatcher = yield fork(takeLatest, DELETE_RECORD, deleteRecord);
 
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
+
   yield cancel(loadRecordWatcher);
   yield cancel(editRecordWatcher);
   yield cancel(deleteRecordWatcher);
