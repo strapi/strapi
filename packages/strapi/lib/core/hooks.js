@@ -18,7 +18,9 @@ module.exports = function() {
       // Load configurations.
       glob('./node_modules/strapi-*', {
         ignore: [
+          './node_modules/strapi-admin',
           './node_modules/strapi-utils',
+          './node_modules/strapi-generate*',
           './node_modules/strapi-plugin-*',
           './node_modules/strapi-helper-*'
         ]

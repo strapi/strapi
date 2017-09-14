@@ -7,7 +7,7 @@
         "client": "mongo",
         "host": "localhost",
         "port": 27017,
-        "database": "strapi-${strapi.config.name}",
+        "database": "test",
         "username": "",
         "password": ""
       },

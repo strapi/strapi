@@ -4,70 +4,69 @@
 .notification {
   position: relative;
   display: flex;
-  width: 45rem;
+  width: 28.6rem;
   align-items: stretch;
-  background: #5fc2a3;
+  background: $white;
   margin-bottom: 1.4rem;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
   border-radius: 0.1rem;
-  box-shadow: 0 2px 6px $gray-light;
-  color: $white;
-}
-
-.notificationWarning {
-  background: $brand-warning;
-}
-
-.notificationError {
-  background: $brand-danger;
-}
-
-.notificationInfo {
-  background: $brand-info;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+  color: #333740;
 }
 
 .notification:hover {
-  box-shadow: 0 1px 4px $gray-light;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
 }
 
 .notificationIcon {
   position: relative;
   display: block;
-  float: left;
   width: 18%;
   text-align: center;
   font-size: 2.4rem;
-}
 
-.notificationIcon:before {
-  position: absolute;
-  top: calc(50% - 1rem);
-  left: calc(50% - 1rem);
+  &:before {
+    position: absolute;
+    top: calc(50% - 1rem);
+    left: calc(50% - 1rem);
+    border-radius: 100%;
+    border: 1px solid $brand-success;
+    color: $brand-success;
+    height: 2rem;
+    width: 2rem;
+    font-size: 1.2rem;
+    padding-top: .3rem;
+    padding-left: 0.1rem;
+    text-align: center;
+  }
 }
 
 .notificationContent {
   display: block;
-  float: left;
   margin: 0;
-  padding-top: 1.4rem;
-  padding-bottom: 1.4rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   padding-right: 1rem;
   border-right: 1px solid rgba(255, 255, 255, 0.3);
   width: 70%;
 }
 
 .notificationTitle {
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 1.4rem;
+  margin-bottom: 0;
 }
+
 
 .notificationClose {
   position: relative;
   display: block;
-  float: left;
   cursor: pointer;
   width: 12%;
   opacity: 0.6;
   transition: opacity 0.1s ease;
+  font-size: 1.6rem;
+  color: #c2c4c7;
 
   &:hover {
     opacity: 1;
@@ -75,8 +74,30 @@
 
   &:before {
     position: absolute;
-    top: calc(50% - 1.5rem);
+    top: calc(50% - .9rem);
     left: calc(50% - 0.5rem);
-    font-size: 3rem;
+  }
+}
+
+.notificationWarning {
+  .notificationIcon:before {
+    border-color: $brand-warning;
+    color: $brand-warning;
+    padding-top: .4rem;
+  }
+}
+
+.notificationError {
+  .notificationIcon:before {
+    border-color: $brand-danger;
+    color: $brand-danger;
+    padding-top: .4rem;
+  }
+}
+
+.notificationInfo {
+  .notificationIcon:before {
+    border-color: $brand-primary;
+    color: $brand-primary;
   }
 }

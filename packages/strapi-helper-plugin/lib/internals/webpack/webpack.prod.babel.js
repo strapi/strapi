@@ -9,7 +9,7 @@ const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
-const pluginId = pkg.name.replace(/^strapi-/i, '');
+const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 
@@ -64,7 +64,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: `${isAdmin ? 'http://localhost:1337/admin/' : `/${pluginId}/`}`,
+    publicPath: `${isAdmin ? '/admin/' : `/${pluginId}/assets/`}`,
   },
 
   // In production, we minify our CSS with cssnano

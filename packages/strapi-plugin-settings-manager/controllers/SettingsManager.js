@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
+const send = require('koa-send');
 
 module.exports = {
   menu: async ctx => {
@@ -153,9 +154,10 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+
     const [name] = _.keys(params.database.connections);
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
     if (!name || _.find(Service.getDatabases(env), { name })) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.exist' }] }]);
 
     const model = Service.databases(name, env);
@@ -209,14 +211,18 @@ module.exports = {
     if (!_.isEmpty(validationErrors)) return ctx.badRequest(null, Service.formatErrors(validationErrors));
 
     const newName = _.get(params, `database.connections.${name}.name`);
+    const defaultConnection = params.database.defaultConnection;
 
-    const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
-    params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
-    params.settings = settings;
+    if (params.database.connections) {
+      const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
+      params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
+      params.settings = settings;
+    }
 
     delete params.name;
 
     const connections = _.clone(strapi.config.environments[env].database.connections);
+
 
     if (newName && newName !== name) {
       connections[newName] = params;
@@ -254,7 +260,7 @@ module.exports = {
           }
         }
       });
-    } else {
+    } else if (params.settings) {
       connections[name] = params;
     }
 
@@ -264,6 +270,11 @@ module.exports = {
 
     if (newName && newName !== name && strapi.config.environments[env].database.defaultConnection === name) {
       params.database.defaultConnection = newName;
+      items.push({
+        target: 'database.defaultConnection'
+      });
+    } else if (defaultConnection) {
+      params.database.defaultConnection = defaultConnection;
       items.push({
         target: 'database.defaultConnection'
       });
@@ -317,5 +328,13 @@ module.exports = {
     !_.isEmpty(updateErrors) ? ctx.badRequest(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
 
     strapi.reload();
+  },
+
+  assets: async ctx => {
+    try {
+      await send(ctx, `plugins/settings-manager/admin/build/${ctx.params.file}`);
+    } catch (err) {
+      ctx.body = ctx.notFound();
+    }
   }
 };

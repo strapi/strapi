@@ -1,4 +1,4 @@
-import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty, size, remove } from 'lodash';
+import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpty, size, remove, union } from 'lodash';
 
 /*
 * @method : check invalid inputs
@@ -9,7 +9,7 @@ import { findIndex, mapKeys, forEach, includes, has, isUndefined, reject, isEmpt
 *
 */
 
-export function checkFormValidity(formData, formValidations) {
+export function checkFormValidity(formData, formValidations, formErrors) {
   const errors = [];
   forEach(formData, (value, key) => { // eslint-disable-line consistent-return
     let valueValidations = formValidations[findIndex(formValidations, ['target', key])];
@@ -41,12 +41,12 @@ export function checkFormValidity(formData, formValidations) {
 
     if (!isEmpty(inputErrors)) errors.push({ target: key, errors: inputErrors });
 
-    if (formData['security.xframe.value'] && formData['security.xframe.value'] === 'ALLOW-FROM.ALLOW-FROM ') {
+    if (formData['security.xframe.value'] && formData['security.xframe.value'] === 'ALLOW-FROM' || formData['security.xframe.value'] === 'ALLOW-FROM.ALLOW-FROM ') {
       errors.push({ target: 'security.xframe.value.nested', errors: [{ id: 'settings-manager.request.error.validation.required' }] });
     }
   });
 
-  return errors;
+  return union(formErrors, errors);
 }
 
 
@@ -151,7 +151,7 @@ export function getInputsValidationsFromConfigs(configs) {
 */
 
 
-export function getRequiredInputsDb(data) {
+export function getRequiredInputsDb(data, dbExistsErrors) {
   const formErrors = [
     { target: 'database.connections.${name}.name', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
     { target: 'database.connections.${name}.settings.host', errors: [{ id: 'settings-manager.request.error.validation.required' }] },
@@ -163,8 +163,10 @@ export function getRequiredInputsDb(data) {
   if (size(data) === 2) return formErrors;
 
   forEach(data, (value, target) => {
-    remove(formErrors, (object) => object.target === target);
+    if (value !== '') {
+      remove(formErrors, (object) => object.target === target);
+    }
   });
 
-  return formErrors;
+  return union(dbExistsErrors, formErrors);
 }

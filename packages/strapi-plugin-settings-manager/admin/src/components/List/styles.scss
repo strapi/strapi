@@ -12,7 +12,7 @@
 }
 
 .paddedTopList {
-  margin-top: 2.8rem!important;
+  margin-top: 2.7rem!important;
 }
 
 .flex {
@@ -30,6 +30,13 @@
   align-items: flex-start;
 }
 
+button {
+  &:focus {
+
+    outline: 0!important;
+  }
+}
+
 .ulContainer {
   padding-top: 1.3rem;
   margin: 0 3.3rem;
@@ -39,10 +46,16 @@
     list-style: none;
     padding: 0;
     > li {
-      height: 5.2rem;
+      min-height: 5.2rem;
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
+      &:first-child .language {
+        margin-top: .3rem;
+      }
+      .language {
+        margin-top: .1rem;
+      }
       &:last-child .borderBottom {
         border-bottom: none;
       }
@@ -50,16 +63,19 @@
         .hoveredLanguage {
           position: absolute;
           top: -.2rem;
-          height: 5.4rem;
+          min-height: 5.4rem;
           width: 100%;
           background-color: rgba(14,22,34,0.03);
         }
       }
     }
+
   }
 }
 
-
+.li:first-child .language {
+  margin-top: 11rem;
+}
 .liSpacer {
   height: .2rem!important;
 }
@@ -75,6 +91,17 @@
   margin: 0 4.1rem 0 2.8rem;
   position: relative;
   align-items: center;
+}
+
+.flexLiLanguage {
+  display: flex;
+  // justify-content: space-between;
+  margin: 0 4.1rem 0 2.8rem;
+  position: relative;
+  align-items: center;
+  > div:last-child {
+    justify-content: flex-end;
+  }
 }
 
 .flexLeft {
@@ -107,6 +134,10 @@
 .centered {
   width: 25rem;
   text-align: right;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   > button {
     padding: 0;
   }
@@ -119,7 +150,7 @@
   height: 100%;
   height: 5.2rem;
   line-height: 5.2rem;
-  padding-right: .3rem;
+  padding-right: 1rem;
 }
 
 .normal {
@@ -217,7 +248,6 @@
 }
 
 .modalFooter {
-
   margin-top: 1.1rem;
   margin-bottom: 1.1rem;
   > input {
@@ -276,7 +306,8 @@
 }
 
 .trashContainer {
-  margin-left: 4rem;
+  // width: 5rem;
+  margin-left: 6rem;
   cursor: pointer;
 }
 
@@ -303,20 +334,15 @@
 .databaseFont {
   font-size: 1.3rem;
   &:hover {
-    .hovered {
-      position: absolute;
-      top: 0rem!important;
-      height: 5.2rem;
-      margin-right: 13rem!important;
-      width: 100%;
-      background-color: rgba(14,22,34,0.03);
-    }
+    height: 5.2rem;
+    background-color: rgba(14,22,34,0.03);
   }
 }
 
 .flagContainer {
+  width: 33%;
   margin-left: 1rem;
-  margin-right: 10rem;
+  // margin-right: 10rem;
   height: 5.2rem;
   line-height: 5.2rem;
 }
@@ -324,4 +350,37 @@
 .bottomSpacer {
   height: 1.2rem;
   background-color: #FFFFFF;
+}
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-top: -1.2rem;
+}
+
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  font-size: 5rem;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: .4s;
 }

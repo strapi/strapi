@@ -18,5 +18,9 @@
   "general": {
     "id": "app.components.LeftMenuLinkContainer.general",
     "defaultMessage": "General"
+  },
+  "noPluginsInstalled": {
+    "id": "app.components.LeftMenuLinkContainer.noPluginsInstalled",
+    "defaultMessage": "No plugins installed yet"
   }
 }

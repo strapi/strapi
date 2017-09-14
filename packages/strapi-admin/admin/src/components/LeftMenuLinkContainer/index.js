@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { map } from 'lodash';
 
 import LeftMenuLink from 'components/LeftMenuLink';
 
@@ -15,43 +16,34 @@ import messages from './messages.json';
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     // Generate the list of sections
-    const linkSections = this.props.plugins.valueSeq().map(plugin => (
-      plugin.get('leftMenuSections').map((leftMenuSection, j) => {
-        const sectionlinks = leftMenuSection.get('links').map((sectionLink, k) => (
-          <LeftMenuLink
-            key={k}
-            icon={sectionLink.get('icon') || 'link'}
-            label={sectionLink.get('label')}
-            destination={`/plugins/${plugin.get('id')}/${sectionLink.get('destination')}`}
-          />
-        ));
-
-        return (
-          <div key={j}>
-            <p className={styles.title}>{leftMenuSection.get('name')}</p>
-            <ul className={styles.list}>
-              {sectionlinks}
-            </ul>
-          </div>
-        );
-      })
-    ));
-
-
-    // List of links
-    let pluginsLinks = this.props.plugins.valueSeq().map((plugin) => (
-      <LeftMenuLink
-        key={plugin.get('id')}
-        icon={plugin.get('icon') || 'plug'}
-        label={plugin.get('name')}
-        destination={`/plugins/${plugin.get('id')}`}
-      />
+    const linkSections = map(this.props.plugins.toJS(), plugin => (
+      plugin.leftMenuSections.map((leftMenuSection, j) => (
+        <div key={j}>
+          <p className={styles.title}>{leftMenuSection.name}</p>
+          <ul className={styles.list}>
+            {leftMenuSection.links.map((link, k) =>
+              <LeftMenuLink key={k} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${plugin.id}/${link.destination}`} />
+            )}
+          </ul>
+        </div>
+      ))
     ));
 
     // Check if the plugins list is empty or not
-    if (!pluginsLinks.size) {
-      pluginsLinks = <span className={styles.noPluginsInstalled}>No plugins installed yet.</span>;
-    }
+    const pluginsLinks = this.props.plugins.size
+      ? this.props.plugins.valueSeq().map((plugin) => (
+        <LeftMenuLink
+          key={plugin.get('id')}
+          icon={plugin.get('icon') || 'plug'}
+          label={plugin.get('name')}
+          destination={`/plugins/${plugin.get('id')}`}
+        />
+      ))
+      : (
+        <li className={styles.noPluginsInstalled}>
+          <FormattedMessage {...messages.noPluginsInstalled} />.
+        </li>
+      );
 
     return (
       <div className={styles.leftMenuLinkContainer}>

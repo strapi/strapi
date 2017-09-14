@@ -103,6 +103,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/:file",
+      "handler": "SettingsManager.assets",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

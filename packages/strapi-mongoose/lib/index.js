@@ -13,7 +13,7 @@ const mongooseUtils = require('mongoose/lib/utils');
 const utils = require('./utils/');
 
 // Strapi helpers for models.
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, logger }  = require('strapi-utils');
 
 /**
  * Bookshelf hook
@@ -63,6 +63,10 @@ module.exports = function (strapi) {
 
         // Handle error
         db.on('error', error => {
+          if (error.message.indexOf(`:${port}`)) {
+            return cb('Make sure your MongoDB database is running...');
+          }
+
           cb(error);
         });
 

@@ -98,7 +98,7 @@ export class List extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.deleteRecord(this.state, this.props.currentModelName);
+    this.props.deleteRecord(this.state.target, this.props.currentModelName);
     this.setState({ showWarning: false });
   }
 

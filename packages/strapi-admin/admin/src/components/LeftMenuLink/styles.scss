@@ -8,7 +8,7 @@
 }
 
 .link {
-  padding-top: 0.8rem;
+  padding-top: .9rem;
   padding-bottom: 0.2rem;
   padding-left: 1.6rem;
   min-height: 3.6rem;
@@ -24,10 +24,19 @@
     border-left: 0.3rem solid $strapi-blue;
     text-decoration: none;
   }
+
+  &:focus {
+    color: $white;
+    text-decoration: none;
+  }
+
+  &:visited {
+    color: $left-menu-link-color;
+  }
 }
 
 .linkActive {
-  color: $white;
+  color: $white !important;
   border-left: 0.3rem solid $strapi-blue;
 }
 

@@ -52,12 +52,11 @@ function formatQueryParams(params) {
  * @return {object}           The response data
  */
 export default function request(url, options) {
-  console.log(url, options);
   const optionsObj = options || {};
 
   // Set headers
   optionsObj.headers = {
-    'Content-Type': 'text/plain',
+    'Content-Type': 'application/json',
   };
 
   // Add parameters to url

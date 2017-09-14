@@ -23,6 +23,7 @@ module.exports = {
   },
 
   create: async function (params) {
+    console.log(params);
     return await this
       .create(params.values);
   },

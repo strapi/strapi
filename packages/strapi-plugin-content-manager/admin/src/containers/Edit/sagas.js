@@ -72,6 +72,7 @@ export function* editRecord() {
 }
 
 export function* deleteRecord({ id, modelName }) {
+  console.log(id, modelName);
   function* httpCall(id, modelName) {
     try {
       const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${modelName}/${id}`;

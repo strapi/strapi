@@ -14,6 +14,7 @@ import { ConnectedRouter } from 'react-router-redux';
 import createHistory from 'history/createBrowserHistory';
 import { merge, isFunction } from 'lodash';
 import 'sanitize.css/sanitize.css';
+import 'whatwg-fetch';
 
 import LanguageProvider from 'containers/LanguageProvider';
 
@@ -21,6 +22,7 @@ import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 
+import { plugins } from '../../config/admin.json';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
 
@@ -129,6 +131,23 @@ window.Strapi = {
   router: history,
   languages,
 };
+
+// Ping each plugins port defined in configuration
+if (window.location.hostname === 'localhost') {
+  plugins.ports.forEach(pluginPort => {
+    // Define plugin url
+    const pluginUrl = `http://localhost:${pluginPort}/main.js`;
+
+    // Check that the server in running
+    fetch(pluginUrl)
+      .then(() => {
+        // Inject `script` tag in DOM
+        const script = window.document.createElement('script');
+        script.src = pluginUrl;
+        window.document.body.appendChild(script);
+      });
+  });
+}
 
 const dispatch = store.dispatch;
 export {

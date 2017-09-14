@@ -43,7 +43,7 @@ export class HomePage extends React.Component {
     return (
       <div className={styles.homePage}>
         <div className="row">
-          <div className="col-md-12">eiuaei
+          <div className="col-md-12">
             <p>This is an example of a fake API call.</p>
             <p>Loading: {this.props.loading ? 'yes' : 'no'}.</p>
             {dataBlock}

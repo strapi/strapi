@@ -142,12 +142,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       }
     });
 
-    // If size of modifiedData === 2 the user hasn't filled any inputs
-    // TODO change
-    const formErrors = getRequiredInputsDb(this.props.home.modifiedData);
-    // const formErrors = size(this.props.home.modifiedData)  === 2 ?
-    //   getRequiredInputsDb() :
-    //   checkFormValidity(this.props.home.modifiedData, this.props.home.formValidations);
+    const formErrors = getRequiredInputsDb(this.props.home.modifiedData, this.props.home.formErrors);
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
@@ -218,6 +213,17 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         value = target.value;
       }
     }
+
+    if (this.props.match.params.slug === 'databases') {
+      if (name === this.props.home.dbNameTarget) {
+        const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
+          [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
+        this.props.setErrors(formErrors);
+      } else {
+        this.props.setErrors([]);
+      }
+
+    }
     this.props.changeInput(name, value);
   }
 
@@ -229,8 +235,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     e.preventDefault();
     const apiUrl = this.props.match.params.env ? `${this.props.match.params.slug}/${this.props.match.params.env}` : this.props.match.params.slug;
 
+    const isCreatingNewFields = this.props.match.params.slug === 'security';
     // send only updated settings
-    const body = this.sendUpdatedParams();
+    const body = this.sendUpdatedParams(isCreatingNewFields);
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
@@ -244,9 +251,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
-    const apiUrl = `${databaseName}/${this.props.match.params.env}`;
-    const formErrors = checkFormValidity(body, this.props.home.formValidations);
+    const apiUrl = `${databaseName}/${this.props.params.env}`;
+    const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+
 
     if (isEmpty(formErrors)) {
       this.props.databaseEdit(body, apiUrl);
@@ -327,7 +335,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
             valueComponent={this.valueComponent}
             optionComponent={this.optionComponent}
             clearable={false}
-
           />
           <div className={styles.popUpSpacer} />
         </div>
@@ -348,6 +355,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       handleSubmit={this.handleSubmitEditDatabase}
       formErrors={this.props.home.formErrors}
       error={this.props.home.error}
+      resetToggleDefaultConnection={this.resetToggleDefaultConnection}
     />
   )
 
@@ -443,6 +451,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
   }
 
+  // Set the toggleDefaultConnection to false
+  resetToggleDefaultConnection = () => this.setState({ toggleDefaultConnection: false });
+
   // Hide database modal
   toggle = () => this.setState({ modal: !this.state.modal });
 
@@ -535,6 +546,7 @@ HomePage.propTypes = {
   menuSections: React.PropTypes.array.isRequired,
   newDatabasePost: React.PropTypes.func.isRequired,
   newLanguagePost: React.PropTypes.func.isRequired,
+  params: React.PropTypes.func.isRequired,
   setErrors: React.PropTypes.func.isRequired,
   specificDatabaseFetch: React.PropTypes.func.isRequired,
 };

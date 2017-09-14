@@ -59,7 +59,9 @@ module.exports = strapi => {
         path: '/*.*',
         handler: [
           async (ctx, next) => {
-            ctx.url = path.basename(ctx.url);
+            const parse = path.parse(ctx.url);
+
+            ctx.url = path.join(parse.dir, parse.base);
 
             await next();
           },

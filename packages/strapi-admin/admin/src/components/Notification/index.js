@@ -16,22 +16,22 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
 
   options = {
     success: {
-      icon: 'ion-ios-checkmark-outline',
+      icon: 'fa-check',
       title: 'Success',
       class: 'notificationSuccess',
     },
     warning: {
-      icon: 'ion-ios-information-outline',
+      icon: 'fa-exclamation',
       title: 'Warning',
       class: 'notificationWarning',
     },
     error: {
-      icon: 'ion-ios-close-outline',
+      icon: 'fa-exclamation',
       title: 'Error',
       class: 'notificationError',
     },
     info: {
-      icon: 'ion-ios-information-outline',
+      icon: 'fa-info',
       title: 'Info',
       class: 'notificationInfo',
     },
@@ -42,12 +42,11 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
 
     return (
       <li key={this.props.notification.id} className={`${styles.notification} ${styles[options.class]}`}>
-        <icon className={`ion ${options.icon} ${styles.notificationIcon}`}></icon>
-        <p className={styles.notificationContent}>
-          <span className={styles.notificationTitle}>{options.title}: </span>
-          <span><FormattedMessage id={this.props.notification.message} /></span>
-        </p>
-        <icon className={`ion ion-ios-close-empty pull-right ${styles.notificationClose}`} onClick={this.onCloseClicked}></icon>
+        <icon className={`fa ${options.icon} ${styles.notificationIcon}`}></icon>
+        <div className={styles.notificationContent}>
+          <p className={styles.notificationTitle}><FormattedMessage id={this.props.notification.message} /></p>
+        </div>
+        <icon className={`fa fa-close ${styles.notificationClose}`} onClick={this.onCloseClicked}></icon>
       </li>
     );
   }

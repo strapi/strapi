@@ -21,7 +21,7 @@ function Toggle(props) { // eslint-disable-line react/prefer-stateless-function
   }
 
   return (
-    <select onChange={props.onToggle} className={styles.toggle}>
+    <select onChange={props.onToggle} className={styles.toggle} defaultValue={props.value}>
       {content}
     </select>
   );
@@ -30,6 +30,7 @@ function Toggle(props) { // eslint-disable-line react/prefer-stateless-function
 Toggle.propTypes = {
   messages: React.PropTypes.object.isRequired,
   onToggle: React.PropTypes.func.isRequired,
+  value: React.PropTypes.string.isRequired,
   values: React.PropTypes.array.isRequired,
 };
 
