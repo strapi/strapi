@@ -84,11 +84,29 @@ module.exports = {
     // Save current model into variable to get virtual and p
     const model = strapi.models[ctx.params.model];
 
-
     // Only update fields which are on this document.
     const values = Object.keys(params.values).reduce((acc, current) => {
-      if (!model.schema.virtuals.hasOwnProperty(current)) {
+      const association = model.associations.filter(x => x.alias === current)[0];
+
+      if (_.get(model._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
         acc[current] = params.values[current];
+      } else if (!_.isUndefined(response[current]) && _.isPlainObject(association) && association.nature === 'oneToOne') {
+        if (response[current] !== params.values[current]) {
+
+          const details = model.attributes[current];
+          const value = _.isNull(response[current]) ? params.values : response[current];
+
+          delete value[details.via];
+
+          virtualFields.push(strapi.query(details.model || details.collection).update({
+            id: value[model.primaryKey] || value.id || value._id,
+            values: {
+              [details.via]: params.values[current]
+            }
+          }));
+
+          acc[current] = _.isNull(params.values[current]) ? null : value[model.primaryKey] || value.id || value._id;
+        }
       } else if (response[current] && _.isArray(response[current]) && current !== 'id'){
         const details = model.attributes[current];
 
@@ -103,18 +121,20 @@ module.exports = {
         toAdd.forEach(value => {
           value[details.via] = params.values[model.primaryKey];
 
-          virtualFields.push(strapi.query(details.model || details.collection).update({
-            id: value.id || value[model.primaryKey] || value._id,
-            values: value
+          virtualFields.push(strapi.query(details.model || details.collection).addRelation({
+            id: value[model.primaryKey] || value.id || value._id,
+            values: value,
+            foreignKey: current
           }));
         });
 
         toRemove.forEach(value => {
           value[details.via] = null;
 
-          virtualFields.push(strapi.query(details.model || details.collection).update({
-            id: value.id || value[model.primaryKey] || value._id,
-            values: value
+          virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
+            id: value[model.primaryKey] || value.id || value._id,
+            values: value,
+            foreignKey: current
           }));
         });
       }

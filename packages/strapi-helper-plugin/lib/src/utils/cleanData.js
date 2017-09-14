@@ -5,8 +5,6 @@ function cleanData(value, key, secondKey) {
     return value.map(obj => {
       if (obj[key]) {
         return obj[key];
-      } else if (obj[secondKey]) {
-        return obj[secondKey];
       }
 
       return obj;

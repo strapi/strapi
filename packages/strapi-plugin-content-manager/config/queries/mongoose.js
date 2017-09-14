@@ -23,7 +23,6 @@ module.exports = {
   },
 
   create: async function (params) {
-    console.log(params);
     return await this
       .create(params.values);
   },
@@ -42,5 +41,13 @@ module.exports = {
       .remove({
         [this.primaryKey]: params.id
       });
+  },
+
+  addRelation: async function (params) {
+    return module.exports.update.call(this, params);
+  },
+
+  removeRelation: async function (params) {
+    return module.exports.update.call(this, params);
   }
 };

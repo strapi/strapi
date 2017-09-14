@@ -261,7 +261,7 @@ module.exports = function(strapi) {
           // Basic attributes don't need this-- only relations.
           _.forEach(definition.attributes, (details, name) => {
             const verbose = _.get(
-              utilsModels.getNature(details, name),
+              utilsModels.getNature(details, name, undefined, model.toLowerCase()),
               'verbose'
             ) || '';
 
@@ -316,6 +316,9 @@ module.exports = function(strapi) {
                   strapi.models[globalId.toLowerCase()].attributes,
                   `${details.via}.columnName`
                 ) || details.via;
+
+                // Set this info to be able to see if this field is a real database's field.
+                details.isVirtual = true;
 
                 loadedModel[name] = function() {
                   return this.hasMany(global[globalId], FKTarget);
@@ -387,6 +390,9 @@ module.exports = function(strapi) {
                   strapi.models,
                   `${details.collection.toLowerCase()}.globalId`
                 );
+
+                // Set this info to be able to see if this field is a real database's field.
+                details.isVirtual = true;
 
                 loadedModel[name] = function() {
                   if (

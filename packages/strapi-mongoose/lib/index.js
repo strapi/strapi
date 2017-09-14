@@ -207,7 +207,7 @@ module.exports = function (strapi) {
             // Add every relationships to the loaded model for Bookshelf.
             // Basic attributes don't need this-- only relations.
             _.forEach(definition.attributes, (details, name) => {
-              const verbose = _.get(utilsModels.getNature(details, name, undefined, model), 'verbose') || '';
+              const verbose = _.get(utilsModels.getNature(details, name, undefined, model.toLowerCase()), 'verbose') || '';
 
               // Build associations key
               if (!_.isEmpty(verbose)) {
@@ -235,6 +235,9 @@ module.exports = function (strapi) {
                       via: FK.via,
                       justOne: false
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
                       type: mongoose.Schema.Types.ObjectId,
@@ -270,6 +273,9 @@ module.exports = function (strapi) {
                       ref: _.capitalize(FK.collection),
                       via: FK.via
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
                       type: mongoose.Schema.Types.ObjectId,

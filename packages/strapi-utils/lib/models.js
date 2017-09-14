@@ -231,7 +231,7 @@ module.exports = {
     }
 
     // Get relation nature
-    const infos = this.getNature(association, key, undefined, model);
+    const infos = this.getNature(association, key, undefined, model.toLowerCase());
     const details = _.get(strapi.models, `${association.model || association.collection}.attributes.${association.via}`, {});
 
     // Build associations object
