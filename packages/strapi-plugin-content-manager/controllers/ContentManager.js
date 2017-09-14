@@ -84,6 +84,7 @@ module.exports = {
     // Save current model into variable to get virtual and p
     const model = strapi.models[ctx.params.model];
 
+
     // Only update fields which are on this document.
     const values = Object.keys(params.values).reduce((acc, current) => {
       if (!model.schema.virtuals.hasOwnProperty(current)) {
@@ -91,15 +92,19 @@ module.exports = {
       } else if (response[current] && _.isArray(response[current]) && current !== 'id'){
         const details = model.attributes[current];
 
-        const toAdd = _.differenceWith(params.values[current], response[current], _.isEqual);
-        const toRemove = _.differenceWith(response[current], params.values[current],  _.isEqual)
+        const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
+          a[model.primaryKey].toString() === b[model.primaryKey].toString()
+        );
+        const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
+          a[model.primaryKey].toString() === b[model.primaryKey].toString()
+        )
           .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 
         toAdd.forEach(value => {
           value[details.via] = params.values[model.primaryKey];
 
           virtualFields.push(strapi.query(details.model || details.collection).update({
-            id: value.id || value[model.primaryKey] || '_id',
+            id: value.id || value[model.primaryKey] || value._id,
             values: value
           }));
         });
@@ -108,7 +113,7 @@ module.exports = {
           value[details.via] = null;
 
           virtualFields.push(strapi.query(details.model || details.collection).update({
-            id: value.id || value[model.primaryKey] || '_id',
+            id: value.id || value[model.primaryKey] || value._id,
             values: value
           }));
         });

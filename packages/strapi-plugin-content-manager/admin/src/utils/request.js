@@ -51,28 +51,26 @@ function formatQueryParams(params) {
  *
  * @return {object}           The response data
  */
-export default function request(url, options) {
-  const optionsObj = options || {};
-
+export default function request(url, options = {}) {
   // Set headers
-  optionsObj.headers = {
+  options.headers = {
     'Content-Type': 'application/json',
   };
 
   // Add parameters to url
-  let urlFormatted = _.startsWith(url, '/')
+  url = _.startsWith(url, '/')
     ? `${Strapi.apiUrl}${url}`
     : url;
 
-  if (optionsObj && optionsObj.params) {
-    const params = formatQueryParams(optionsObj.params);
-    urlFormatted = `${url}?${params}`;
+  if (options && options.params) {
+    const params = formatQueryParams(options.params);
+    url = `${url}?${params}`;
   }
 
   // Stringify body object
-  if (optionsObj && optionsObj.body) {
-    optionsObj.body = JSON.stringify(optionsObj.body);
+  if (options && options.body) {
+    options.body = JSON.stringify(options.body);
   }
 
-  return fetch(urlFormatted, optionsObj).then(checkStatus).then(parseJSON);
+  return fetch(url, options).then(checkStatus).then(parseJSON);
 }

@@ -42,7 +42,7 @@ export function* editRecord() {
   const recordJSON = record.toJSON();
 
   const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-    acc[current] = cleanData(recordJSON[current], 'value', 'id');
+    acc[current] = cleanData(recordJSON[current], 'value');
 
     return acc;
   }, {});
