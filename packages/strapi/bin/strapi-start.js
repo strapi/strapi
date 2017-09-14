@@ -85,7 +85,7 @@ module.exports = function() {
             case 'stop':
               _.forEach(cluster.workers, worker => worker.kill());
 
-              process.exit(0);ter.fork();
+              process.exit(0);
               break;
             default:
               return;
