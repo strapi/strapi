@@ -1,10 +1,10 @@
 /*
- *
- * Form actions
- *
- */
+*
+* Form actions
+*
+*/
 
- /* eslint-disable new-cap */
+/* eslint-disable new-cap */
 
 import { concat, includes, map, forEach, replace } from 'lodash';
 import { Map, List } from 'immutable';

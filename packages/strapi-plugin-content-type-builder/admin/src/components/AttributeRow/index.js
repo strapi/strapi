@@ -61,7 +61,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
   renderAttributesBox = () => {
     const attributeType = this.props.row.params.type || 'relation';
     const src = this.asset[attributeType];
-    return <img src={src} role="presentation" />;
+    return <img src={src} alt="ico" />;
   }
 
   render() {

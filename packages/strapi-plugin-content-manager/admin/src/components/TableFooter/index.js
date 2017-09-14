@@ -42,7 +42,7 @@ TableFooter.propTypes = {
   count: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   currentPage: React.PropTypes.number.isRequired,
   limit: React.PropTypes.number.isRequired,
   onLimitChange: React.PropTypes.func.isRequired,

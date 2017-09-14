@@ -70,7 +70,11 @@ class EditFormRelation extends React.Component { // eslint-disable-line react/pr
 
     return (
       <div className="form-group">
-        <label htmlFor={this.props.relation.label}>{this.props.relation.label}</label>
+        <label // eslint-disable-line jsx-a11y/label-has-for
+          htmlFor={this.props.relation.label}
+        >
+          {this.props.relation.label}
+        </label>
         {description}
         <Select.Async
           onChange={this.onChange}
@@ -87,7 +91,7 @@ EditFormRelation.propTypes = {
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   relation: React.PropTypes.object.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };

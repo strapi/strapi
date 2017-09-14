@@ -145,7 +145,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   render() {
     const loader = this.props.showLoader ?
       <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
+      : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
 
     const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
     return (

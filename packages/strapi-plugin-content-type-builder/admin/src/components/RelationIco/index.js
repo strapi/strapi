@@ -22,7 +22,7 @@ class RelationIco extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     return (
-      <img src={this.props.ico} role="presentation" onClick={this.handleClick} className={styles.relationIco} />
+      <img src={this.props.ico} alt="ico" onClick={this.handleClick} className={styles.relationIco} />
     );
   }
 }

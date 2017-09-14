@@ -73,7 +73,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   render() {
     const component = size(this.props.models) === 0 ?
       <EmptyContentTypeView handleButtonClick={this.toggleModal} />
-        : this.renderTableListComponent();
+      : this.renderTableListComponent();
 
     return (
       <div className={styles.homePage}>
@@ -116,7 +116,7 @@ function mapDispatchToProps(dispatch) {
     },
     dispatch,
   );
-};
+}
 
 HomePage.propTypes =  {
   deleteContentType: React.PropTypes.func,

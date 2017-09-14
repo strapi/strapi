@@ -70,6 +70,7 @@ injectSagas(sagas);
 
 /* eslint-disable react/sort-comp */
 /* eslint-disable consistent-return */
+/* eslint-disable react/jsx-wrap-multilines */
 
 export class Form extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -495,7 +496,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       <FormattedMessage id={replace(split(this.props.hash, ('::'))[1], 'attribute', '')}>
         {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
       </FormattedMessage>
-       : <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{this.state.popUpTitleEdit}</span>;
+      : <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{this.state.popUpTitleEdit}</span>;
     return (
       <div>
         <FormattedMessage id={startTitle} />
@@ -629,6 +630,7 @@ Form.propTypes = {
   formErrors: React.PropTypes.array,
   formValidations: React.PropTypes.array,
   hash: React.PropTypes.string.isRequired,
+  isFormSet: React.PropTypes.bool,
   isModelPage: React.PropTypes.bool,
   menuData: React.PropTypes.array.isRequired,
   modelLoading: React.PropTypes.bool,

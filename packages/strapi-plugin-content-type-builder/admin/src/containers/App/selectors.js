@@ -12,8 +12,8 @@ const makeSelectLoading = () => createSelector(
 );
 
 const makeSelectModels = () => createSelector(
- selectGlobalDomain(),
- (globalSate) => globalSate.get('models').toJS(),
+  selectGlobalDomain(),
+  (globalSate) => globalSate.get('models').toJS(),
 );
 
 const makeSelectMenu = () => createSelector(

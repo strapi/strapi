@@ -1,0 +1,26 @@
+{
+  "listPlugins": {
+    "id": "app.components.LeftMenuLinkContainer.listPlugins",
+    "defaultMessage": "List plugins"
+  },
+  "installNewPlugin": {
+    "id": "app.components.LeftMenuLinkContainer.installNewPlugin",
+    "defaultMessage": "Install new plugin"
+  },
+  "configuration": {
+    "id": "app.components.LeftMenuLinkContainer.configuration",
+    "defaultMessage": "Configuration"
+  },
+  "plugins": {
+    "id": "app.components.LeftMenuLinkContainer.plugins",
+    "defaultMessage": "Plugins"
+  },
+  "general": {
+    "id": "app.components.LeftMenuLinkContainer.general",
+    "defaultMessage": "General"
+  },
+  "noPluginsInstalled": {
+    "id": "app.components.LeftMenuLinkContainer.noPluginsInstalled",
+    "defaultMessage": "No plugins installed yet"
+  }
+}

@@ -67,9 +67,9 @@ function modelPageReducer(state = initialState, action) {
           .updateIn(['model', 'attributes'], (list) => list.splice(action.parallelAttributePosition, 1));
       }
       return state
-      .set('showButtons', true)
-      .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
-      .updateIn(['model', 'attributes', action.parallelAttributePosition], () => action.parallelAttribute);
+        .set('showButtons', true)
+        .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
+        .updateIn(['model', 'attributes', action.parallelAttributePosition], () => action.parallelAttribute);
     }
     case CANCEL_CHANGES:
       return state

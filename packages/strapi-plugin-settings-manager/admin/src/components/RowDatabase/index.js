@@ -62,13 +62,15 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
-    const loader = this.state.loader ?
-      <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <FormattedMessage id="settings-manager.form.button.save">
+    const loader = this.state.loader
+      ? <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      : (
+        <FormattedMessage id="settings-manager.form.button.save">
           {(message) => (
             <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
           )}
-        </FormattedMessage>;
+        </FormattedMessage>
+      );
     return (
       <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
         <div className={styles.flexLi}>
@@ -130,10 +132,11 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 
 RowDatabase.propTypes = {
   data: React.PropTypes.object.isRequired,
-  error: React.PropTypes.bool,
-  getDatabase: React.PropTypes.func,
-  handleDatabaseDelete: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
-}
+  error: React.PropTypes.bool.isRequired,
+  formErrors: React.PropTypes.array.isRequired,
+  getDatabase: React.PropTypes.func.isRequired,
+  handleDatabaseDelete: React.PropTypes.func.isRequired,
+  handleSubmit: React.PropTypes.func.isRequired,
+};
 
 export default RowDatabase;

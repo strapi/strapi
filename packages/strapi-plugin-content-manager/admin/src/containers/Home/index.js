@@ -7,14 +7,13 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 
+import PluginHeader from 'components/PluginHeader';
 import Container from 'components/Container';
 
 import styles from './styles.scss';
 
 export class Home extends React.Component {
   render() {
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
-
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
@@ -36,7 +35,7 @@ export class Home extends React.Component {
 }
 
 Home.propTypes = {
-  exposedComponents: React.PropTypes.object.isRequired,
+  // exposedComponents: React.PropTypes.object.isRequired,
 };
 
 export function mapDispatchToProps() {

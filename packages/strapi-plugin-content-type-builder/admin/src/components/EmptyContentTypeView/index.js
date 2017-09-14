@@ -14,7 +14,7 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
   render() {
     return (
       <div className={styles.emptyContentTypeView}>
-        <img src={Brush} role="presentation" />
+        <img src={Brush} alt="" />
         <div>
           <FormattedMessage id="content-type-builder.home.emptyContentType.title">
             {(title) => <div className={styles.title}>{title}</div>}

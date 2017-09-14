@@ -49,9 +49,9 @@ PopUpForm.propTypes = {
   renderPopUpForm: React.PropTypes.oneOfType([
     React.PropTypes.func,
     React.PropTypes.bool,
-  ]),
-  resetToggleDefaultConnection: React.PropTypes.func,
-  sections: React.PropTypes.array,
+  ]).isRequired,
+  resetToggleDefaultConnection: React.PropTypes.func.isRequired,
+  sections: React.PropTypes.array.isRequired,
 };
 
 export default WithFormSection(PopUpForm); // eslint-disable-line new-cap

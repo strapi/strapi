@@ -9,6 +9,8 @@ import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-wrap-multilines */
+
 class Input extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -262,7 +264,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     const label = this.props.label ?
       <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} /></label>
-        : <label htmlFor={this.props.label} />;
+      : <label htmlFor={this.props.label} />; // eslint-disable-line jsx-a11y/label-has-for
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
       styles.requiredClass : '';

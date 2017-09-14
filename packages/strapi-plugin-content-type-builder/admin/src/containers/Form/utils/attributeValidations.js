@@ -53,7 +53,7 @@ const hasNestedValue = (attributeData) => {
       if (!isNumber(get(attributeData, ['params', `${key}Value`]))) {
         formErrors.push({ name: `params.${key}Value`, errors: [{ id: 'content-type-builder.error.validation.required' }] });
       }
-    };
+    }
   });
 
   if (get(attributeData.params, ['minValue']) > get(attributeData.params, 'maxValue')) {

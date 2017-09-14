@@ -6,6 +6,9 @@ const path = require('path');
 
 const webpack = require('webpack');
 
+const pkg = require(path.resolve(process.cwd(), 'package.json'));
+const pluginId = pkg.name.replace(/^strapi-/i, '');
+
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
@@ -16,7 +19,7 @@ module.exports = (options) => ({
     loaders: [{
       test: /\.js$/, // Transform all .js files required somewhere with Babel
       use: {
-        loader: 'babel',
+        loader: 'babel-loader',
         options: {
           presets: options.babelPresets,
           env: {
@@ -46,9 +49,26 @@ module.exports = (options) => ({
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
-      exclude: /node_modules/,
-      // loader: 'null-loader'
-      use: options.cssLoaders,
+      use: [{
+        loader: 'style-loader',
+      }, {
+        loader: 'css-loader',
+        options: {
+          localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
+          modules: true,
+          importLoaders: 1,
+          sourceMap: true,
+        },
+      }, {
+        loader: 'postcss-loader',
+        options: {
+          config: {
+            path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+          },
+        },
+      }, {
+        loader: 'sass-loader',
+      }],
     }, {
       // Do not transform vendor's CSS with CSS-modules
       // The point is that they remain in global scope.
@@ -65,8 +85,28 @@ module.exports = (options) => ({
       test: /\.(jpg|png|gif)$/,
       loaders: [
         'file-loader',
-        'image-webpack?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
+        {
+          loader: 'image-webpack-loader',
+          query: {
+            mozjpeg: {
+              progressive: true,
+            },
+            gifsicle: {
+              interlaced: false,
+            },
+            optipng: {
+              optimizationLevel: 4,
+            },
+            pngquant: {
+              quality: '65-90',
+              speed: 4,
+            },
+          },
+        },
       ],
+    }, {
+      test: /\.html$/,
+      loader: 'html-loader',
     }, {
       test: /\.json$/,
       loader: 'json-loader',
@@ -78,7 +118,7 @@ module.exports = (options) => ({
   plugins: options.plugins.concat([
     new webpack.ProvidePlugin({
       // make fetch available
-      fetch: 'exports?self.fetch!whatwg-fetch',
+      fetch: 'exports-loader?self.fetch!whatwg-fetch',
     }),
 
     // Always expose NODE_ENV to webpack, in order to use `process.env.NODE_ENV`

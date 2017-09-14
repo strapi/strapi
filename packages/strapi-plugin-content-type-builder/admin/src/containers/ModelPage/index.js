@@ -38,6 +38,7 @@ import selectModelPage from './selectors';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable react/jsx-wrap-multilines */
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -230,13 +231,13 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
-        <List
-          listContent={this.props.modelPage.model}
-          renderCustomListTitle={this.renderListTitle}
-          listContentMappingKey={'attributes'}
-          renderCustomLi={this.renderCustomLi}
-          handleButtonClick={this.handleClickAddAttribute}
-        />;
+      <List
+        listContent={this.props.modelPage.model}
+        renderCustomListTitle={this.renderListTitle}
+        listContentMappingKey={'attributes'}
+        renderCustomLi={this.renderCustomLi}
+        handleButtonClick={this.handleClickAddAttribute}
+      />;
 
     return (
       <div className={styles.modelPage}>

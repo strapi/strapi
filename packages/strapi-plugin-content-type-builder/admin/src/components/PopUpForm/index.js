@@ -12,6 +12,8 @@ import Input from 'components/Input';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-wrap-multilines */
+
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   renderInput = (item, key) => {
     // const customBootstrapClass = 'col-md-6'
@@ -86,7 +88,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const loader = this.props.showLoader ?
       <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${this.props.buttonSubmitMessage}`} /></Button>;
+      : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${this.props.buttonSubmitMessage}`} /></Button>;
 
     const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
       : <ModalFooter className={styles.modalFooter}>

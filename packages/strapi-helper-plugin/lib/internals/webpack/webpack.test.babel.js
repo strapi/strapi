@@ -29,7 +29,7 @@ module.exports = {
     ],
     preLoaders: [
       { test: /\.js$/,
-        loader: 'isparta',
+        loader: 'isparta-loader',
         include: path.resolve('src/'),
       },
     ],
@@ -45,7 +45,7 @@ module.exports = {
         loader: 'imports?define=>false,require=>false',
       },
       { test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: [/node_modules/],
       },
       { test: /\.jpe?g$|\.gif$|\.png$|\.svg$/i,

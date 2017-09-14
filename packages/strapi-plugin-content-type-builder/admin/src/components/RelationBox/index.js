@@ -12,6 +12,7 @@ import Input from 'components/Input';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable react/jsx-wrap-multilines */
 class RelationBox extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -76,7 +77,8 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         placeholder = this.props.contentTypeTargetPlaceholder;
     }
 
-    const content = isEmpty(this.props.input) ? <div /> :
+    const content = isEmpty(this.props.input) ?
+      <div /> :
       <Input
         type={get(this.props.input, 'type')}
         handleChange={this.props.handleChange}
