@@ -45,7 +45,7 @@ module.exports = {
     const count = await strapi.query(ctx.params.model).count();
 
     ctx.body = {
-      count,
+      count: _.isNumber(count) ? count : _.toNumber(count)
     };
   },
 

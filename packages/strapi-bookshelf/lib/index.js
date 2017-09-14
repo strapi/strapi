@@ -104,6 +104,10 @@ module.exports = function(strapi) {
         _.forEach(models, (definition, model) => {
           globalName = _.upperFirst(_.camelCase(definition.globalId));
 
+          _.defaults(definition, {
+            primaryKey: 'id'
+          });
+
           // Make sure the model has a table name.
           // If not, use the model name.
           if (_.isEmpty(definition.collectionName)) {

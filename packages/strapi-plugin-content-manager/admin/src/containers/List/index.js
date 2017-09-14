@@ -82,7 +82,7 @@ export class List extends React.Component {
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'desc');
+    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'id');
 
     // Load records
     this.props.loadRecords();

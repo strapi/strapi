@@ -1,70 +1,47 @@
 module.exports = {
-
   find: async function (params) {
-    const entries = await this
+    return await this
       .forge()
-      .query((qb) => {
-        qb.limit(Number(params.limit));
-        qb.orderBy(params.sort);
-        qb.offset(Number(params.skip));
-
-        if (params.query && params.queryAttribute) {
-          qb.whereRaw(`LOWER(${params.queryAttribute}) LIKE '%' || LOWER(?) || '%'`, params.query);
-        }
-      })
       .fetchAll({
-        withRelated: _.map(params.model.associations, 'alias')
+        withRelated: this.associations.map(x => x.alias).join(' ')
       });
-
-    return entries;
   },
 
   count: async function (params) {
-    const count = await this
+    return await this
       .forge()
       .count();
-
-    return Number(count);
   },
 
-  findOne: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .forge(where)
+  findOne: async function (params) {
+    return await this
+      .forge({
+        [this.primaryKey]: params[this.primaryKey]
+      })
       .fetch();
-
-    return entry;
   },
 
-  create: async (params) => {
-    const entry = await params.model
+  create: async function (params) {
+    return await this
       .forge()
       .save(params.values);
-
-    return entry;
   },
 
-  update: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .forge(where)
-      .save(params.values, {patch: true});
-
-    return entry;
+  update: async function (params) {
+    return await this
+      .forge({
+        [this.primaryKey]: params[this.primaryKey]
+      })
+      .save(params.values, {
+        patch: true
+      });
   },
 
-  delete: async (params) => {
-    const where = {};
-    where[params.primaryKey] = params.id;
-
-    const entry = await params.model
-      .forge(where)
+  delete: async function (params) {
+    return await params.model
+      .forge({
+        [this.primaryKey]: params[this.primaryKey]
+      })
       .destroy();
-
-    return entry;
   }
 };

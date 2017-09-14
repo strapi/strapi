@@ -19,7 +19,6 @@
     "bookshelf": "^0.10.3",
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0",
-    "strapi-bookshelf": "3.0.0-alpha.5.5",
     "strapi-utils": "3.0.0-alpha.5.5"
   },
   "strapi": {
