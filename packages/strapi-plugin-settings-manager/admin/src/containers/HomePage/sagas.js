@@ -255,7 +255,7 @@ export function* settingsEdit(action) {
       method: 'PUT',
     };
 
-    const requestUrl = `settings-manager/configurations/${action.endPoint}`;
+    const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
 
     yield  call(request, requestUrl, opts);
 
@@ -312,6 +312,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default defaultSaga;

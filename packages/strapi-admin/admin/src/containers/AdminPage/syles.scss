@@ -1,0 +1,10 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.adminPage { /* stylelint-disable */
+  display: flex;
+}
+
+.adminPageRightWrapper {
+  width: calc(100% - #{$left-menu-width});
+}

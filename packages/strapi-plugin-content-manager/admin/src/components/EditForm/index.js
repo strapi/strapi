@@ -104,7 +104,11 @@ class EditForm extends React.Component {
 
     return (
       <div key={attributeKey} className="form-group">
-        <label htmlFor={attributeKey}>{attributeValue.label || attributeKey}</label>
+        <label // eslint-disable-line jsx-a11y/label-has-for
+          htmlFor={attributeKey}
+        >
+          {attributeValue.label || attributeKey}
+        </label>
         {description}
         {input}
       </div>
@@ -139,7 +143,7 @@ EditForm.propTypes = {
   record: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ]),
+  ]).isRequired,
   schema: React.PropTypes.object.isRequired,
   setRecordAttribute: React.PropTypes.func.isRequired,
 };

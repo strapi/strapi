@@ -1,0 +1,103 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.notification {
+  position: relative;
+  display: flex;
+  width: 28.6rem;
+  align-items: stretch;
+  background: $white;
+  margin-bottom: 1.4rem;
+  transition: all 0.2s ease;
+  border-radius: 0.1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+  color: #333740;
+}
+
+.notification:hover {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.notificationIcon {
+  position: relative;
+  display: block;
+  width: 18%;
+  text-align: center;
+  font-size: 2.4rem;
+
+  &:before {
+    position: absolute;
+    top: calc(50% - 1rem);
+    left: calc(50% - 1rem);
+    border-radius: 100%;
+    border: 1px solid $brand-success;
+    color: $brand-success;
+    height: 2rem;
+    width: 2rem;
+    font-size: 1.2rem;
+    padding-top: .3rem;
+    padding-left: 0.1rem;
+    text-align: center;
+  }
+}
+
+.notificationContent {
+  display: block;
+  margin: 0;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-right: 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  width: 70%;
+}
+
+.notificationTitle {
+  font-weight: 500;
+  font-size: 1.4rem;
+  margin-bottom: 0;
+}
+
+
+.notificationClose {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  width: 12%;
+  opacity: 0.6;
+  transition: opacity 0.1s ease;
+  font-size: 1.6rem;
+  color: #c2c4c7;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:before {
+    position: absolute;
+    top: calc(50% - .9rem);
+    left: calc(50% - 0.5rem);
+  }
+}
+
+.notificationWarning {
+  .notificationIcon:before {
+    border-color: $brand-warning;
+    color: $brand-warning;
+    padding-top: .4rem;
+  }
+}
+
+.notificationError {
+  .notificationIcon:before {
+    border-color: $brand-danger;
+    color: $brand-danger;
+    padding-top: .4rem;
+  }
+}
+
+.notificationInfo {
+  .notificationIcon:before {
+    border-color: $brand-primary;
+    color: $brand-primary;
+  }
+}

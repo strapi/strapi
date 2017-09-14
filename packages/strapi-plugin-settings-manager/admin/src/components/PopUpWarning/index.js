@@ -68,13 +68,13 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 }
 
 PopUpWarning.propTypes = {
-  dangerMessage: React.PropTypes.string,
-  handleConfirm: React.PropTypes.func,
-  handleConfirmDanger: React.PropTypes.func,
+  dangerMessage: React.PropTypes.string.isRequired,
+  handleConfirm: React.PropTypes.func.isRequired,
+  handleConfirmDanger: React.PropTypes.func.isRequired,
   isOpen: React.PropTypes.bool.isRequired,
-  showDanger: React.PropTypes.bool,
+  showDanger: React.PropTypes.bool.isRequired,
   toggleModal: React.PropTypes.func.isRequired,
-  warningMessage: React.PropTypes.string,
+  warningMessage: React.PropTypes.string.isRequired,
 }
 
 export default PopUpWarning;

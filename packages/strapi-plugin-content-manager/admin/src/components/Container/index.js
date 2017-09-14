@@ -24,7 +24,7 @@ Container.propTypes = {
   children: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,
-  ]),
+  ]).isRequired,
 };
 
 export default Container;

@@ -39,9 +39,9 @@ class SelectOptionLanguage extends React.Component { // eslint-disable-line reac
 }
 
 SelectOptionLanguage.propTypes = {
-  isFocused: React.PropTypes.bool,
-  onFocus: React.PropTypes.func,
-  onSelect: React.PropTypes.func,
+  isFocused: React.PropTypes.bool.isRequired,
+  onFocus: React.PropTypes.func.isRequired,
+  onSelect: React.PropTypes.func.isRequired,
   option: React.PropTypes.object.isRequired,
 };
 

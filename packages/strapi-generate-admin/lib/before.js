@@ -22,7 +22,10 @@ const fs = require('fs-extra');
 module.exports = function (scope, cb) {
 
   // Copy the admin files.
-  fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-admin', 'files'), path.resolve(scope.rootPath, 'admin'));
+  fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), {
+    // Skip `node_modules` folder.
+    filter: (file) => (!_.includes(file, 'node_modules') && !_.includes(file, 'package-lock.json'))
+  });
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {

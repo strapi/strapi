@@ -144,20 +144,20 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
 }
 
 InputPassword.propTypes = {
-  customBootstrapClass: React.PropTypes.string,
-  deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.func,
+  customBootstrapClass: React.PropTypes.string.isRequired,
+  deactivateErrorHighlight: React.PropTypes.bool.isRequired,
+  errors: React.PropTypes.array.isRequired,
+  handleBlur: React.PropTypes.func.isRequired,
   handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func,
-  inputDescription: React.PropTypes.string,
+  handleFocus: React.PropTypes.func.isRequired,
+  inputDescription: React.PropTypes.string.isRequired,
   name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  styles: React.PropTypes.object,
+  noErrorsDescription: React.PropTypes.bool.isRequired,
+  placeholder: React.PropTypes.string.isRequired,
+  styles: React.PropTypes.object.isRequired,
   target: React.PropTypes.string.isRequired,
   validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
+  value: React.PropTypes.string.isRequired,
 };
 
 export default WithInput(InputPassword); // eslint-disable-line new-cap

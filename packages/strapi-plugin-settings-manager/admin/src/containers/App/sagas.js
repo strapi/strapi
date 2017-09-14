@@ -46,7 +46,6 @@ function* defaultSaga() {
   yield cancel(loadMenu);
   yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
   yield cancel(loadEnvironments);
-
 }
 
-export default [defaultSaga];
+export default defaultSaga;
