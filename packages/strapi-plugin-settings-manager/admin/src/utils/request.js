@@ -1,4 +1,5 @@
 import 'whatwg-fetch';
+import _ from 'lodash';
 
 /**
  * Parses the JSON returned by a network request
@@ -61,7 +62,10 @@ export default function request(url, options) {
   };
 
   // Add parameters to url
-  let urlFormatted = url;
+  let urlFormatted = _.startsWith(url, '/')
+    ? `${Strapi.apiUrl}${url}`
+    : url;
+
   if (optionsObj && optionsObj.params) {
     const params = formatQueryParams(optionsObj.params);
     urlFormatted = `${url}?${params}`;

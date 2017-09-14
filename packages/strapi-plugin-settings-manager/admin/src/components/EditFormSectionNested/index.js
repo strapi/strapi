@@ -47,7 +47,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
               this.setState({ showNestedForm: false });
             }
           }
-        })
+        });
       }
     });
   }
@@ -81,15 +81,16 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 }
 
 EditFormSectionNested.propTypes = {
-  formErrors: React.PropTypes.array,
-  handleChange: React.PropTypes.func,
-  renderInput: React.PropTypes.func,
+  formErrors: React.PropTypes.array.isRequired,
+  handleChange: React.PropTypes.func.isRequired,
+  renderInput: React.PropTypes.func.isRequired,
   section: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object,
-  ]),
-  styles: React.PropTypes.object,
-  values: React.PropTypes.object,
+    React.PropTypes.array.isRequired,
+    React.PropTypes.object.isRequired,
+  ]).isRequired,
+  styles: React.PropTypes.object.isRequired,
+  value: React.PropTypes.object.isRequired,
+  values: React.PropTypes.object.isRequired,
 };
 
 export default WithFormSection(EditFormSectionNested); // eslint-disable-line new-cap

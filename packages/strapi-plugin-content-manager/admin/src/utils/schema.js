@@ -33,15 +33,15 @@ const generateSchema = (models) => {
 
     // Model relations
     schemaModel.relations = _.mapValues(_.pickBy(model.attributes, attribute =>
-        attribute.model
-      ), (value, attribute) => ({
-        columnName: attribute,
-        model: value.model,
-        attribute,
-        label: _.upperFirst(attribute),
-        description: '',
-        displayedAttribute: _.findKey(models[value.model].attributes, { type: 'string' }) || 'id',
-      })
+      attribute.model
+    ), (value, attribute) => ({
+      columnName: attribute,
+      model: value.model,
+      attribute,
+      label: _.upperFirst(attribute),
+      descripion: '',
+      displayedAttribute: _.findKey(models[value.model].attributes, { type: 'string' }) || 'id',
+    })
     );
 
     // Set the formatted model to the schema
