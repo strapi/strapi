@@ -28,19 +28,12 @@ import { storeData } from '../../utils/storeData';
 
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
-import { makeSelectMenu } from './selectors';
 import saga from './sagas';
 
 /* eslint-disable consistent-return */
 class App extends React.Component {
   componentDidMount() {
     this.props.modelsFetch();
-    // TODO change to router V4
-    // this.props.router.setRouteLeaveHook(this.props.route, () => {
-    //   if (storeData.getContentType()) {
-    //     return 'You have unsaved Content Type, are you sure you wan\'t to leave?';
-    //   }
-    // });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -56,24 +49,11 @@ class App extends React.Component {
   }
 
   render() {
-    // Assign plugin component to children
-    // const content = React.Children.map(this.props.children, child =>
-    //   React.cloneElement(child, {
-    //     exposedComponents: this.props.exposedComponents,
-    //     menu: this.props.menu,
-    //   })
-    // );
-
-    // return (
-    //   <div className={`${pluginId} ${styles.app}`}>
-    //     {React.Children.toArray(content)}
-    //   </div>
-    // );
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>
-          <Route exact path="/plugins/content-type-builder" component={HomePage} menu={this.props.menu} />
-          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} menu={this.props.menu} />
+          <Route exact path="/plugins/content-type-builder" component={HomePage} />
+          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
         </Switch>
       </div>
     );
@@ -85,7 +65,6 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  menu: PropTypes.array,
   modelsFetch: PropTypes.func,
   shouldRefetchContentType: PropTypes.bool,
 };
@@ -100,7 +79,6 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  menu: makeSelectMenu(),
   shouldRefetchContentType: makeSelectShouldRefetchContentType(),
 });
 
