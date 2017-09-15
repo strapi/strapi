@@ -51,11 +51,11 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         const options = isArray(response) ?
           map(response, item => ({
             value: item,
-            label: item[this.props.relation.displayedAttribute],
+            label: templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
           })) :
           [{
             value: response,
-            label: response[this.props.relation.displayedAttribute],
+            label: templateObject({ mainField: this.props.relation.displayedAttribute }, response).mainField,
           }];
 
         return {options};
@@ -79,7 +79,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           loadOptions={this.getOptions}
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {
-            value: value.toJS().id,
+            value: value.toJS(),
             label: templateObject({ mainField: this.props.relation.displayedAttribute }, value.toJS()).mainField,
           }}
         />

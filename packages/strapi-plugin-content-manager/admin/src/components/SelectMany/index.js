@@ -7,7 +7,7 @@
 import React from 'react';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
-import { isArray, isNull, isUndefined } from 'lodash';
+import { isArray, isNull, isUndefined, get } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -58,6 +58,8 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
             label: response[this.props.relation.displayedAttribute],
           }];
 
+        console.log(options);
+
         return { options };
       });
   }
@@ -79,7 +81,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           loadOptions={this.getOptions}
           multi
           value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => ({
-            value: item,
+            value: get(item, 'value') || item,
             label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
           }))}
         />

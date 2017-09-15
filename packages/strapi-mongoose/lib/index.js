@@ -147,8 +147,10 @@ module.exports = function (strapi) {
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];
 
+                console.log(collection.associations);
+
                 // Push attributes to be aware of model schema.
-                collection._attributes = definition.attributes;
+                strapi.models[model]._attributes = definition.attributes;
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -248,13 +250,18 @@ module.exports = function (strapi) {
                 case 'belongsTo':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && FK.nature === 'oneToOne') {
+                  console.log(name, FK);
+
+                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'oneToMany') {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.model),
                       via: FK.via,
                       justOne: true
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = {
                       type: mongoose.Schema.Types.ObjectId,

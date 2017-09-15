@@ -42,6 +42,7 @@ export function* editRecord() {
   const recordJSON = record.toJSON();
 
   const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
+    console.log(recordJSON[current]);
     acc[current] = cleanData(recordJSON[current], 'value', 'id');
 
     return acc;
@@ -72,7 +73,6 @@ export function* editRecord() {
 }
 
 export function* deleteRecord({ id, modelName }) {
-  console.log(id, modelName);
   function* httpCall(id, modelName) {
     try {
       const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${modelName}/${id}`;
