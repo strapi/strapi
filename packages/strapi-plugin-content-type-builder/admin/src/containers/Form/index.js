@@ -469,10 +469,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   toggle = () => {
     this.props.toggle();
     // Set the isFormSet props to false when the modal is closing so the store is emptied
-    if (this.state.showModal) {
-      this.props.resetIsFormSet();
-      this.props.resetFormErrors();
-    }
+    this.props.resetIsFormSet();
+    this.props.resetFormErrors();
   }
 
   renderInput = (item, key) => (

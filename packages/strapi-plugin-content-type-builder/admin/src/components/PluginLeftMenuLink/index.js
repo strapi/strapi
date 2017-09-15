@@ -11,7 +11,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import styles from './styles.scss';
 
 class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -21,12 +21,12 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
     const icon = this.props.customIcon || this.props.link.icon;
     return (
       <li className={styles.pluginLeftMenuLink}>
-        <Link className={styles.link} to={`/plugins/${this.props.basePath}/${this.props.link.name}`} activeClassName={styles.linkActive}>
+        <NavLink className={styles.link} to={`/plugins/${this.props.basePath}/${this.props.link.name}`} activeClassName={styles.linkActive}>
           <div>
             <i className={`fa ${icon}`} />
           </div>
           <span>{this.props.link.name}</span>
-        </Link>
+        </NavLink>
       </li>
     );
   }

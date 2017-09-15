@@ -10,7 +10,7 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { router } from 'app';
 
@@ -156,7 +156,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
 
-    router.push(`plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
+    router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
 
   }
 
@@ -184,9 +184,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     const temporary = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? styles.leftMenuSpan : '';
+
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
-        <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
+        <NavLink className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
           <div>
             <i className={`fa fa-caret-square-o-right`} />
           </div>
@@ -196,7 +197,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
             <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>{temporary}</span>
           </div>
 
-        </Link>
+        </NavLink>
       </li>
     );
   }

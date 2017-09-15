@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 // import { withRouter } from 'react-router';
 import { createStructuredSelector } from 'reselect';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { pluginId } from 'app';
 
@@ -73,7 +73,7 @@ class App extends React.Component {
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>
           <Route exact path="/plugins/content-type-builder" component={HomePage} menu={this.props.menu} />
-          <Route path="/plugins/content-type-builder/models/:modelName" component={ModelPage} menu={this.props.menu} />
+          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} menu={this.props.menu} />
         </Switch>
       </div>
     );
@@ -112,5 +112,6 @@ export default compose(
   withFormReducer,
   withFormSaga,
   withSaga,
+  withRouter,
   withConnect,
 )(App);

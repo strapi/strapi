@@ -23,7 +23,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   edit = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
+    router.push(`/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
 
   delete = (e) => {
