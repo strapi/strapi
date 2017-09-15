@@ -11,6 +11,8 @@ const generateSchema = (models) => {
   // Init `schema` object
   const schema = {};
 
+  console.log(models);
+
   forEach(models, (model, name) => {
     // Model data
     const schemaModel = {
@@ -31,18 +33,20 @@ const generateSchema = (models) => {
     // Select fields displayed in list view
     schemaModel.list = slice(keys(schemaModel.fields), 0, 4);
 
-    // Model relations
-    schemaModel.relations = model.associations.reduce((acc, current) => {
-      acc[current.alias] = {
-        ...current,
-        description: '',
-        displayedAttribute: get(models[current.model || current.collection], 'info.mainField') ||
-          findKey(models[current.model || current.collection].attributes, { type : 'string'}) ||
-          'id',
-      };
+    if (model.associations) {
+      // Model relations
+      schemaModel.relations = model.associations.reduce((acc, current) => {
+        acc[current.alias] = {
+          ...current,
+          description: '',
+          displayedAttribute: get(models[current.model || current.collection], 'info.mainField') ||
+            findKey(models[current.model || current.collection].attributes, { type : 'string'}) ||
+            'id',
+        };
 
-      return acc;
-    }, {});
+        return acc;
+      }, {});
+    }
 
     // Set the formatted model to the schema
     schema[name] = schemaModel;

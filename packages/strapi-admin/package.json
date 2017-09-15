@@ -44,10 +44,10 @@
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "plop": "^1.8.1",
-    "prettier": "^1.6.1",
-    "rimraf": "^2.6.1",
-    "strapi-helper-plugin": "3.0.0-alpha.5.5",
-    "webpack": "^3.5.6"
+    "prettier": "^1.7.0",
+    "rimraf": "^2.6.2",
+    "strapi-helper-plugin": "file:../strapi-helper-plugin",
+    "webpack": "^3.6.0"
   },
   "author": {
     "name": "Strapi",
