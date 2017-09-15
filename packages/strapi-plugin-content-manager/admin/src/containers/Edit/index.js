@@ -68,13 +68,8 @@ export class Edit extends React.Component {
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
     } else {
-      console.log("LOAD RECORD");
       this.props.loadRecord(this.props.match.params.id);
     }
-  }
-
-  componentWillUnmount() {
-    console.log("UNMOUNTED");
   }
 
   handleChange = (e) => {
