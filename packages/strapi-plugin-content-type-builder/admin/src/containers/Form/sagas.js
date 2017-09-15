@@ -45,14 +45,13 @@ export function* editContentType() {
     yield put(unsetButtonLoading());
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error(error);
   }
 }
 
 export function* fetchConnections() {
   try {
     const requestUrl = '/content-type-builder/connections';
-
     const data = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(connectionsFetchSucceeded(data));
@@ -77,13 +76,10 @@ export function* fetchContentType(action) {
 }
 
 // Individual exports for testing
-export function* defaultSaga() {
+function* defaultSaga() {
   yield fork(takeLatest, CONNECTIONS_FETCH, fetchConnections);
   yield fork(takeLatest, CONTENT_TYPE_EDIT, editContentType);
   yield fork(takeLatest, CONTENT_TYPE_FETCH, fetchContentType);
 }
 
-// All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default defaultSaga;

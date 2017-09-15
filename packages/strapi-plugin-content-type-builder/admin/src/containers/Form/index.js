@@ -25,7 +25,7 @@ import {
   replace,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { router, store } from 'app';
+import { router } from 'app';
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
 import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
 
@@ -34,16 +34,12 @@ import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInp
 import PopUpForm from 'components/PopUpForm';
 import PopUpRelations from 'components/PopUpRelations';
 
-import { getAsyncInjectors } from 'utils/asyncInjectors';
+// Utils
 import { checkFormValidity } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
 
 import checkAttributeValidations from './utils/attributeValidations';
 import setParallelAttribute, { setTempAttribute } from './utils/setAttribute';
-
-import reducer from './reducer';
-import sagas from './sagas';
-import selectForm from './selectors';
 import {
   changeInput,
   changeInputAttribute,
@@ -60,13 +56,10 @@ import {
   setForm,
   setFormErrors,
 } from './actions';
+import selectForm from './selectors';
 
 import styles from './styles.scss';
 import forms from './forms.json';
-
-const { injectReducer, injectSagas } = getAsyncInjectors(store);
-injectReducer('form', reducer);
-injectSagas(sagas);
 
 /* eslint-disable react/sort-comp */
 /* eslint-disable consistent-return */
@@ -658,4 +651,13 @@ Form.propTypes = {
   updateContentType: React.PropTypes.func,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Form);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+// const withSaga = injectSaga({ key: 'form', saga });
+// const withReducer = injectReducer({ key: 'form', reducer });
+
+export default withConnect(Form);
+// export default compose(
+//   withReducer,
+//   withSaga,
+//   withConnect,
+// )(Form);

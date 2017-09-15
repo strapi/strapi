@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { size } from 'lodash';
 import Helmet from 'react-helmet';
@@ -21,10 +21,14 @@ import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
 import TableList from 'components/TableList';
 
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 
 import selectHomePage from './selectors';
 import styles from './styles.scss';
+import saga from './sagas';
+import reducer from './reducer';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -50,7 +54,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
-    router.push(`plugins/content-type-builder/${locationHash}`);
+    router.push(`/plugins/content-type-builder/${locationHash}`);
   }
 
   renderTableListComponent = () => {
@@ -92,10 +96,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <Form
           hash={this.props.location.hash}
           toggle={this.toggleModal}
-          routePath={this.props.route.path}
+          routePath={this.props.match.path}
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
-          redirectRoute={`${this.props.route.path}`}
+          redirectRoute={`${this.props.match.path}`}
         />
       </div>
     );
@@ -121,12 +125,20 @@ function mapDispatchToProps(dispatch) {
 HomePage.propTypes =  {
   deleteContentType: React.PropTypes.func,
   location: React.PropTypes.object,
+  match: React.PropTypes.object,
   menu: React.PropTypes.array,
   models: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.array,
   ]),
-  route: React.PropTypes.object,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'homePage', reducer });
+const withSaga = injectSaga({ key: 'homePage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(HomePage);

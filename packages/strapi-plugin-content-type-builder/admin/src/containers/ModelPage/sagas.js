@@ -79,17 +79,17 @@ export function* submitChanges() {
     }
 
     yield put(submitActionSucceeded());
-    
+
     yield put(resetShowButtonsProps());
     // Remove loader
     yield put(unsetButtonLoader());
 
   } catch(error) {
-    console.log(error);
+    window.Strapi.notification.error(error);
   }
 }
 
-export function* defaultSaga() {
+function* defaultSaga() {
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
   // const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
@@ -101,7 +101,4 @@ export function* defaultSaga() {
   yield cancel(loadSubmitChanges);
 }
 
-// All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default defaultSaga;

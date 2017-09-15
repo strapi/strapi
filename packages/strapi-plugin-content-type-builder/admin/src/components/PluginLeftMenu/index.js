@@ -18,7 +18,7 @@ import styles from './styles.scss';
 
 class PluginLeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const customSection = this.props.addCustomSection(styles) || '';
+    const customSection = this.props.addCustomSection ? this.props.addCustomSection(styles) : '';
     return (
       <div className={`${styles.pluginLeftMenu} col-md-3`}>
         {map(this.props.sections, (section, index) => (

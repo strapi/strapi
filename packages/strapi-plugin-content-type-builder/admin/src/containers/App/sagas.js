@@ -33,11 +33,10 @@ export function* fetchModels() {
 
 
 // Individual exports for testing
-export function* defaultSaga() {
+function* defaultSaga() {
   yield fork(takeLatest, DELETE_CONTENT_TYPE, deleteContentType);
   yield fork(takeLatest, MODELS_FETCH, fetchModels);
 
 }
 
-// All sagas to be loaded
-export default [defaultSaga];
+export default defaultSaga;

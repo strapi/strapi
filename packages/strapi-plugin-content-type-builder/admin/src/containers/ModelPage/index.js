@@ -7,13 +7,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { router } from 'app';
 
 // Global selectors
+import { makeSelectMenu } from 'containers/App/selectors';
 import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
 
 import AttributeRow from 'components/AttributeRow';
@@ -22,6 +23,9 @@ import EmptyAttributesView from 'components/EmptyAttributesView';
 import Form from 'containers/Form';
 import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 
 import { storeData } from '../../utils/storeData';
 
@@ -34,6 +38,8 @@ import {
   submit,
 } from './actions';
 
+import saga from './sagas';
+import reducer from './reducer';
 import selectModelPage from './selectors';
 import styles from './styles.scss';
 
@@ -74,7 +80,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.params.modelName !== this.props.params.modelName) {
+    if (prevProps.match.params.modelName !== this.props.match.params.modelName) {
       this.props.resetShowButtonsProps();
       this.fetchModel(this.props);
     }
@@ -111,12 +117,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   )
 
   fetchModel = (props) => {
-    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === props.params.modelName) {
+    if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === props.match.params.modelName) {
       this.setState({ contentTypeTemporary: true })
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
     } else {
       this.setState({ contentTypeTemporary: false });
-      this.props.modelFetch(props.params.modelName);
+      this.props.modelFetch(props.match.params.modelName);
     }
   }
 
@@ -129,14 +135,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleClickAddAttribute = () => {
-    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#choose::attributes`);
+    // Open the modal
+    router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#choose::attributes`);
   }
 
   handleDelete = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, (attr) => attr.params.key === attributeName);
 
-    this.props.deleteAttribute(index, this.props.params.modelName, parallelAttributeIndex !== -1);
+    this.props.deleteAttribute(index, this.props.match.params.modelName, parallelAttributeIndex !== -1);
   }
 
   handleEditAttribute = (attributeName) => {
@@ -148,14 +155,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
 
-    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}#edit${this.props.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
+    router.push(`plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
 
   }
 
 
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
-    router.push(`plugins/content-type-builder/models/${this.props.params.modelName}${locationHash}`);
+    router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}${locationHash}`);
   }
 
   renderAddLink = (props, customLinkStyles) => (
@@ -174,8 +181,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
 
-    const temporary = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
-    const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.params.modelName ? styles.leftMenuSpan : '';
+    const temporary = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
+    const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? styles.leftMenuSpan : '';
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
         <Link className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
@@ -224,9 +231,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   render() {
     // Url to redirects the user if he modifies the temporary content type name
-    const redirectRoute = replace(this.props.route.path, '/:modelName', '');
-    // const addButtons = this.props.modelPage.showButtons;
-    const addButtons  = get(storeData.getContentType(), 'name') === this.props.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
+    const redirectRoute = replace(this.props.match.path, '/:modelName', '');
+    const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
 
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
@@ -245,9 +251,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           <div className="row">
             <PluginLeftMenu
               sections={this.props.menu}
-              addCustomSection={this.addCustomSection}
               renderCustomLink={this.renderCustomLink}
+              addCustomSection={this.addCustomSection}
             />
+
             <div className="col-md-9">
               <div className={styles.componentsContainer}>
                 <ContentHeader
@@ -255,7 +262,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   description={contentHeaderDescription}
                   icoType="pencil"
                   editIcon
-                  editPath={`${redirectRoute}/${this.props.params.modelName}#edit${this.props.params.modelName}::contentType::baseSettings`}
+                  editPath={`${redirectRoute}/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::contentType::baseSettings`}
                   addButtons={addButtons}
                   handleSubmit={this.props.submit}
                   isLoading={this.props.modelPage.showButtonLoader}
@@ -270,11 +277,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         <Form
           hash={this.props.location.hash}
           toggle={this.toggleModal}
-          routePath={`${redirectRoute}/${this.props.params.modelName}`}
+          routePath={`${redirectRoute}/${this.props.match.params.modelName}`}
           popUpHeaderNavLinks={this.popUpHeaderNavLinks}
           menuData={this.props.menu}
           redirectRoute={redirectRoute}
-          modelName={this.props.params.modelName}
+          modelName={this.props.match.params.modelName}
           contentTypeData={this.props.modelPage.model}
           isModelPage
           modelLoading={this.props.modelPage.modelLoading}
@@ -285,6 +292,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 }
 
 const mapStateToProps = createStructuredSelector({
+  menu: makeSelectMenu(),
   modelPage: selectModelPage(),
   updatedContentType: makeSelectContentTypeUpdated(),
 });
@@ -307,15 +315,23 @@ ModelPage.propTypes = {
   cancelChanges: React.PropTypes.func,
   deleteAttribute: React.PropTypes.func,
   location: React.PropTypes.object,
+  match: React.PropTypes.object,
   menu: React.PropTypes.array,
   modelFetch: React.PropTypes.func,
   modelFetchSucceeded: React.PropTypes.func,
   modelPage: React.PropTypes.object,
   params: React.PropTypes.object,
   resetShowButtonsProps: React.PropTypes.func,
-  route: React.PropTypes.object,
   submit: React.PropTypes.func,
   updatedContentType: React.PropTypes.bool,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelPage);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withSaga = injectSaga({ key: 'modelPage', saga });
+const withReducer = injectReducer({ key: 'modelPage', reducer });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(ModelPage);

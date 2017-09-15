@@ -7,28 +7,39 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { withRouter } from 'react-router';
+import { bindActionCreators, compose } from 'redux';
+// import { withRouter } from 'react-router';
 import { createStructuredSelector } from 'reselect';
+import { Switch, Route } from 'react-router-dom';
 import { pluginId } from 'app';
+
+import HomePage from 'containers/HomePage';
+import ModelPage from 'containers/ModelPage';
+import formSaga from 'containers/Form/sagas';
+import formReducer from 'containers/Form/reducer';
 
 import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
 
+// Utils
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
 import { makeSelectMenu } from './selectors';
+import saga from './sagas';
 
 /* eslint-disable consistent-return */
 class App extends React.Component {
   componentDidMount() {
     this.props.modelsFetch();
-    this.props.router.setRouteLeaveHook(this.props.route, () => {
-      if (storeData.getContentType()) {
-        return 'You have unsaved Content Type, are you sure you wan\'t to leave?';
-      }
-    });
+    // TODO change to router V4
+    // this.props.router.setRouteLeaveHook(this.props.route, () => {
+    //   if (storeData.getContentType()) {
+    //     return 'You have unsaved Content Type, are you sure you wan\'t to leave?';
+    //   }
+    // });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -45,16 +56,24 @@ class App extends React.Component {
 
   render() {
     // Assign plugin component to children
-    const content = React.Children.map(this.props.children, child =>
-      React.cloneElement(child, {
-        exposedComponents: this.props.exposedComponents,
-        menu: this.props.menu,
-      })
-    );
+    // const content = React.Children.map(this.props.children, child =>
+    //   React.cloneElement(child, {
+    //     exposedComponents: this.props.exposedComponents,
+    //     menu: this.props.menu,
+    //   })
+    // );
 
+    // return (
+    //   <div className={`${pluginId} ${styles.app}`}>
+    //     {React.Children.toArray(content)}
+    //   </div>
+    // );
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        {React.Children.toArray(content)}
+        <Switch>
+          <Route exact path="/plugins/content-type-builder" component={HomePage} menu={this.props.menu} />
+          <Route path="/plugins/content-type-builder/models/:modelName" component={ModelPage} menu={this.props.menu} />
+        </Switch>
       </div>
     );
   }
@@ -65,12 +84,8 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  children: React.PropTypes.node,
-  exposedComponents: React.PropTypes.object.isRequired,
   menu: React.PropTypes.array,
   modelsFetch: React.PropTypes.func,
-  route: React.PropTypes.object,
-  router: React.PropTypes.object,
   shouldRefetchContentType: React.PropTypes.bool,
 };
 
@@ -88,5 +103,13 @@ const mapStateToProps = createStructuredSelector({
   shouldRefetchContentType: makeSelectShouldRefetchContentType(),
 });
 
-// Wrap the component to inject dispatch and state into it
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withSaga = injectSaga({ key: 'global', saga });
+const withFormReducer = injectReducer({ key: 'form', reducer: formReducer });
+const withFormSaga = injectSaga({ key: 'form', saga: formSaga });
+export default compose(
+  withFormReducer,
+  withFormSaga,
+  withSaga,
+  withConnect,
+)(App);
