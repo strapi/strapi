@@ -1,7 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { forEach, get, includes, map, replace, set, size, unset } from 'lodash';
-import { takeLatest } from 'redux-saga';
-import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
+import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
 

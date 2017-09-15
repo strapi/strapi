@@ -1,5 +1,4 @@
-import { takeLatest } from 'redux-saga';
-import { call, put, fork } from 'redux-saga/effects';
+import { takeLatest, call, put, fork } from 'redux-saga/effects';
 import request from 'utils/request';
 import { DELETE_CONTENT_TYPE, MODELS_FETCH } from './constants';
 import { modelsFetchSucceeded } from './actions';
