@@ -25,7 +25,9 @@ import {
   replace,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import PropTypes from 'prop-types';
 import { router } from 'app';
+
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
 import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
 
@@ -604,60 +606,53 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.propTypes = {
-  addAttributeRelationToContentType: React.PropTypes.func,
-  addAttributeToContentType: React.PropTypes.func,
-  changeInput: React.PropTypes.func.isRequired,
-  changeInputAttribute: React.PropTypes.func,
-  connectionsFetch: React.PropTypes.func.isRequired,
-  contentTypeCreate: React.PropTypes.func,
-  contentTypeEdit: React.PropTypes.func,
-  contentTypeFetch: React.PropTypes.func,
-  contentTypeFetchSucceeded: React.PropTypes.func,
-  didCheckErrors: React.PropTypes.bool,
-  editContentTypeAttribute: React.PropTypes.func,
-  editContentTypeAttributeRelation: React.PropTypes.func,
-  form: React.PropTypes.oneOfType([
-    React.PropTypes.array.isRequired,
-    React.PropTypes.object.isRequired,
+  addAttributeRelationToContentType: PropTypes.func,
+  addAttributeToContentType: PropTypes.func,
+  changeInput: PropTypes.func.isRequired,
+  changeInputAttribute: PropTypes.func,
+  connectionsFetch: PropTypes.func.isRequired,
+  contentTypeCreate: PropTypes.func,
+  contentTypeEdit: PropTypes.func,
+  contentTypeFetch: PropTypes.func,
+  contentTypeFetchSucceeded: PropTypes.func,
+  didCheckErrors: PropTypes.bool,
+  editContentTypeAttribute: PropTypes.func,
+  editContentTypeAttributeRelation: PropTypes.func,
+  form: PropTypes.oneOfType([
+    PropTypes.array.isRequired,
+    PropTypes.object.isRequired,
   ]),
-  formErrors: React.PropTypes.array,
-  formValidations: React.PropTypes.array,
-  hash: React.PropTypes.string.isRequired,
-  isFormSet: React.PropTypes.bool,
-  isModelPage: React.PropTypes.bool,
-  menuData: React.PropTypes.array.isRequired,
-  modelLoading: React.PropTypes.bool,
-  modelName: React.PropTypes.string,
-  modifiedData: React.PropTypes.object,
-  modifiedDataAttribute: React.PropTypes.object,
-  modifiedDataEdit: React.PropTypes.object,
-  popUpHeaderNavLinks: React.PropTypes.array,
-  redirectRoute: React.PropTypes.string.isRequired,
-  removeContentTypeRequiredError: React.PropTypes.func,
-  resetFormErrors: React.PropTypes.func,
-  resetIsFormSet: React.PropTypes.func,
-  routePath: React.PropTypes.string,
-  selectOptions: React.PropTypes.array,
-  selectOptionsFetchSucceeded: React.PropTypes.bool,
-  setAttributeForm: React.PropTypes.func,
-  setAttributeFormEdit: React.PropTypes.func,
-  setForm: React.PropTypes.func.isRequired,
-  setFormErrors: React.PropTypes.func,
-  shouldRefetchContentType: React.PropTypes.bool,
-  showButtonLoading: React.PropTypes.bool,
-  storeTemporaryMenu: React.PropTypes.func,
-  temporaryContentTypeFieldsUpdated: React.PropTypes.func,
-  toggle: React.PropTypes.func.isRequired,
-  updateContentType: React.PropTypes.func,
+  formErrors: PropTypes.array,
+  formValidations: PropTypes.array,
+  hash: PropTypes.string.isRequired,
+  isFormSet: PropTypes.bool,
+  isModelPage: PropTypes.bool,
+  menuData: PropTypes.array.isRequired,
+  modelLoading: PropTypes.bool,
+  modelName: PropTypes.string,
+  modifiedData: PropTypes.object,
+  modifiedDataAttribute: PropTypes.object,
+  modifiedDataEdit: PropTypes.object,
+  popUpHeaderNavLinks: PropTypes.array,
+  redirectRoute: PropTypes.string.isRequired,
+  removeContentTypeRequiredError: PropTypes.func,
+  resetFormErrors: PropTypes.func,
+  resetIsFormSet: PropTypes.func,
+  routePath: PropTypes.string,
+  selectOptions: PropTypes.array,
+  selectOptionsFetchSucceeded: PropTypes.bool,
+  setAttributeForm: PropTypes.func,
+  setAttributeFormEdit: PropTypes.func,
+  setForm: PropTypes.func.isRequired,
+  setFormErrors: PropTypes.func,
+  shouldRefetchContentType: PropTypes.bool,
+  showButtonLoading: PropTypes.bool,
+  storeTemporaryMenu: PropTypes.func,
+  temporaryContentTypeFieldsUpdated: PropTypes.func,
+  toggle: PropTypes.func.isRequired,
+  updateContentType: PropTypes.func,
 };
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-// const withSaga = injectSaga({ key: 'form', saga });
-// const withReducer = injectReducer({ key: 'form', reducer });
 
 export default withConnect(Form);
-// export default compose(
-//   withReducer,
-//   withSaga,
-//   withConnect,
-// )(Form);

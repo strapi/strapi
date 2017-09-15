@@ -9,6 +9,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
@@ -40,10 +41,10 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
-  basePath: React.PropTypes.string,
-  customIcon: React.PropTypes.string,
-  renderCustomLink: React.PropTypes.func,
-  section: React.PropTypes.object.isRequired,
+  basePath: PropTypes.string,
+  customIcon: PropTypes.string,
+  renderCustomLink: PropTypes.func,
+  section: PropTypes.object.isRequired,
 };
 
 export default PluginLeftMenuSection;

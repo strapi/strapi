@@ -5,8 +5,10 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+
 import Button from 'components/Button';
 import TableListRow from 'components/TableListRow';
 import styles from './styles.scss';
@@ -57,12 +59,12 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 TableList.propTypes = {
-  availableNumber: React.PropTypes.number.isRequired,
-  buttonLabel: React.PropTypes.string.isRequired,
-  handleButtonClick: React.PropTypes.func,
-  handleDelete: React.PropTypes.func,
-  rowItems: React.PropTypes.array.isRequired,
-  title: React.PropTypes.string.isRequired,
+  availableNumber: PropTypes.number.isRequired,
+  buttonLabel: PropTypes.string.isRequired,
+  handleButtonClick: PropTypes.func,
+  handleDelete: PropTypes.func,
+  rowItems: PropTypes.array.isRequired,
+  title: PropTypes.string.isRequired,
 };
 
 export default TableList;

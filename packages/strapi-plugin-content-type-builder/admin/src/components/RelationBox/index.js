@@ -5,8 +5,10 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { get, isEmpty, map, startCase } from 'lodash';
 import pluralize from 'pluralize';
+
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Input from 'components/Input';
 import styles from './styles.scss';
@@ -117,17 +119,17 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationBox.propTypes = {
-  contentTypeTargetPlaceholder: React.PropTypes.string,
-  didCheckErrors: React.PropTypes.bool,
-  dropDownItems: React.PropTypes.array,
-  errors: React.PropTypes.array,
-  handleChange: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
-  header: React.PropTypes.object,
-  input: React.PropTypes.object,
-  isFirstContentType: React.PropTypes.bool,
-  relationType: React.PropTypes.string,
-  value: React.PropTypes.string,
+  contentTypeTargetPlaceholder: PropTypes.string,
+  didCheckErrors: PropTypes.bool,
+  dropDownItems: PropTypes.array,
+  errors: PropTypes.array,
+  handleChange: PropTypes.func,
+  handleSubmit: PropTypes.func,
+  header: PropTypes.object,
+  input: PropTypes.object,
+  isFirstContentType: PropTypes.bool,
+  relationType: PropTypes.string,
+  value: PropTypes.string,
 }
 
 export default RelationBox;

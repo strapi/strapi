@@ -11,6 +11,7 @@ import { bindActionCreators, compose } from 'redux';
 import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { router } from 'app';
 
 // Global selectors
@@ -312,18 +313,18 @@ function mapDispatchToProps(dispatch) {
 }
 
 ModelPage.propTypes = {
-  cancelChanges: React.PropTypes.func,
-  deleteAttribute: React.PropTypes.func,
-  location: React.PropTypes.object,
-  match: React.PropTypes.object,
-  menu: React.PropTypes.array,
-  modelFetch: React.PropTypes.func,
-  modelFetchSucceeded: React.PropTypes.func,
-  modelPage: React.PropTypes.object,
-  params: React.PropTypes.object,
-  resetShowButtonsProps: React.PropTypes.func,
-  submit: React.PropTypes.func,
-  updatedContentType: React.PropTypes.bool,
+  cancelChanges: PropTypes.func,
+  deleteAttribute: PropTypes.func,
+  location: PropTypes.object,
+  match: PropTypes.object,
+  menu: PropTypes.array,
+  modelFetch: PropTypes.func,
+  modelFetchSucceeded: PropTypes.func,
+  modelPage: PropTypes.object,
+  params: PropTypes.object,
+  resetShowButtonsProps: PropTypes.func,
+  submit: PropTypes.func,
+  updatedContentType: PropTypes.bool,
 };
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

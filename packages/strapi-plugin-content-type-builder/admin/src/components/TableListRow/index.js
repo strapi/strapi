@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PopUpWarning from 'components/PopUpWarning';
@@ -80,8 +81,8 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 TableListRow.propTypes = {
-  handleDelete: React.PropTypes.func,
-  rowItem: React.PropTypes.object.isRequired,
+  handleDelete: PropTypes.func,
+  rowItem: PropTypes.object.isRequired,
 };
 
 export default TableListRow;

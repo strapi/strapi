@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import IcoBoolean from '../../assets/images/icon_boolean.svg';
@@ -61,8 +62,8 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
 }
 
 AttributeCard.propTypes = {
-  attribute: React.PropTypes.object.isRequired,
-  handleClick: React.PropTypes.func,
+  attribute: PropTypes.object.isRequired,
+  handleClick: PropTypes.func,
 }
 
 export default AttributeCard;

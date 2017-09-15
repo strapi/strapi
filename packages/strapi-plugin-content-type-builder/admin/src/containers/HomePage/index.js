@@ -10,7 +10,9 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { size } from 'lodash';
 import Helmet from 'react-helmet';
+import PropTypes from 'prop-types';
 import { router } from 'app';
+
 import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
 import { deleteContentType } from 'containers/App/actions';
 
@@ -123,13 +125,13 @@ function mapDispatchToProps(dispatch) {
 }
 
 HomePage.propTypes =  {
-  deleteContentType: React.PropTypes.func,
-  location: React.PropTypes.object,
-  match: React.PropTypes.object,
-  menu: React.PropTypes.array,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.array,
+  deleteContentType: PropTypes.func,
+  location: PropTypes.object,
+  match: PropTypes.object,
+  menu: PropTypes.array,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
   ]),
 };
 

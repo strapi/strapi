@@ -5,9 +5,12 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
+
 import PopUpWarning from 'components/PopUpWarning';
+
 import IcoBoolean from '../../assets/images/icon_boolean.svg';
 import IcoDate from '../../assets/images/icon_date.svg';
 import IcoImage from '../../assets/images/icon_image.svg';
@@ -100,9 +103,9 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 AttributeRow.propTypes = {
-  handleDelete: React.PropTypes.func,
-  handleEdit: React.PropTypes.func,
-  row: React.PropTypes.object,
+  handleDelete: PropTypes.func,
+  handleEdit: PropTypes.func,
+  row: PropTypes.object,
 }
 
 export default AttributeRow;

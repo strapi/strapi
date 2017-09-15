@@ -10,6 +10,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import styles from './styles.scss';
 
@@ -32,10 +33,10 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 }
 
 PluginLeftMenuLink.propTypes = {
-  basePath: React.PropTypes.string,
-  customIcon: React.PropTypes.string,
-  link: React.PropTypes.object.isRequired,
-  renderCustomLink: React.PropTypes.func,
+  basePath: PropTypes.string,
+  customIcon: PropTypes.string,
+  link: PropTypes.object.isRequired,
+  renderCustomLink: PropTypes.func,
 };
 
 export default PluginLeftMenuLink;

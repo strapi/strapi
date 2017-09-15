@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, map, includes, split, isEmpty, findIndex } from 'lodash';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -122,43 +123,43 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 PopUpForm.propTypes = {
-  buttonSubmitMessage: React.PropTypes.string.isRequired,
-  didCheckErrors: React.PropTypes.bool,
-  form: React.PropTypes.oneOfType([
-    React.PropTypes.array.isRequired,
-    React.PropTypes.object.isRequired,
+  buttonSubmitMessage: PropTypes.string.isRequired,
+  didCheckErrors: PropTypes.bool,
+  form: PropTypes.oneOfType([
+    PropTypes.array.isRequired,
+    PropTypes.object.isRequired,
   ]),
-  formErrors: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object,
+  formErrors: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
   ]),
-  handleBlur: React.PropTypes.func,
-  handleChange: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
-  isOpen: React.PropTypes.bool,
-  noButtons: React.PropTypes.bool,
-  noNav: React.PropTypes.bool,
-  overrideHandleBlurCondition: React.PropTypes.func,
-  overrideRenderInput: React.PropTypes.func,
-  overrideRenderInputCondition: React.PropTypes.func,
-  pluginId: React.PropTypes.string,
-  popUpHeaderNavLinks: React.PropTypes.array,
-  popUpTitle: React.PropTypes.string,
-  renderCustomPopUpHeader: React.PropTypes.oneOfType([
-    React.PropTypes.func,
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleSubmit: PropTypes.func,
+  isOpen: PropTypes.bool,
+  noButtons: PropTypes.bool,
+  noNav: PropTypes.bool,
+  overrideHandleBlurCondition: PropTypes.func,
+  overrideRenderInput: PropTypes.func,
+  overrideRenderInputCondition: PropTypes.func,
+  pluginId: PropTypes.string,
+  popUpHeaderNavLinks: PropTypes.array,
+  popUpTitle: PropTypes.string,
+  renderCustomPopUpHeader: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.object,
+    PropTypes.bool,
   ]),
-  renderModalBody: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.func,
+  renderModalBody: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
   ]),
-  routePath: React.PropTypes.string,
-  selectOptions: React.PropTypes.array,
-  selectOptionsFetchSucceeded: React.PropTypes.bool,
-  showLoader: React.PropTypes.bool,
-  toggle: React.PropTypes.func,
-  values: React.PropTypes.object,
+  routePath: PropTypes.string,
+  selectOptions: PropTypes.array,
+  selectOptionsFetchSucceeded: PropTypes.bool,
+  showLoader: PropTypes.bool,
+  toggle: PropTypes.func,
+  values: PropTypes.object,
 };
 
 export default PopUpForm;

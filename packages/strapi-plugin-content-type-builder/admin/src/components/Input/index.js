@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
@@ -329,41 +330,41 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 }
 
 Input.propTypes = {
-  addon: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.string,
+  addon: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
   ]),
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  deactivateErrorHighlight: React.PropTypes.bool,
-  didCheckErrors: React.PropTypes.bool,
-  disabled: React.PropTypes.bool,
-  errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.oneOfType([
-    React.PropTypes.func,
-    React.PropTypes.bool,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  didCheckErrors: PropTypes.bool,
+  disabled: PropTypes.bool,
+  errors: PropTypes.array,
+  handleBlur: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
   ]),
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func,
-  inputDescription: React.PropTypes.string,
-  label: React.PropTypes.string.isRequired,
-  linkContent: React.PropTypes.shape({
-    link: React.PropTypes.string,
-    description: React.PropTypes.string.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  linkContent: PropTypes.shape({
+    link: PropTypes.string,
+    description: PropTypes.string.isRequired,
   }),
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  pluginId: React.PropTypes.string,
-  selectOptions: React.PropTypes.array,
-  selectOptionsFetchSucceeded: React.PropTypes.bool,
-  title: React.PropTypes.string,
-  type: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
-    React.PropTypes.number,
+  name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  pluginId: PropTypes.string,
+  selectOptions: PropTypes.array,
+  selectOptionsFetchSucceeded: PropTypes.bool,
+  title: PropTypes.string,
+  type: PropTypes.string.isRequired,
+  validations: PropTypes.object.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
+    PropTypes.number,
   ]),
 };
 

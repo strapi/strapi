@@ -5,9 +5,11 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, map, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { router } from 'app';
+
 import Button from 'components/Button';
 import styles from './styles.scss';
 
@@ -72,15 +74,15 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 }
 
 ContentHeader.propTypes = {
-  addButtons: React.PropTypes.bool,
-  buttonsContent: React.PropTypes.array,
-  description: React.PropTypes.string,
-  editIcon: React.PropTypes.bool,
-  editPath: React.PropTypes.string,
-  icoType: React.PropTypes.string,
-  isLoading: React.PropTypes.bool,
-  name: React.PropTypes.string,
-  styles: React.PropTypes.object,
+  addButtons: PropTypes.bool,
+  buttonsContent: PropTypes.array,
+  description: PropTypes.string,
+  editIcon: PropTypes.bool,
+  editPath: PropTypes.string,
+  icoType: PropTypes.string,
+  isLoading: PropTypes.bool,
+  name: PropTypes.string,
+  styles: PropTypes.object,
 };
 
 export default ContentHeader;

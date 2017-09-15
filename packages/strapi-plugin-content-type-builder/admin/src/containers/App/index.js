@@ -11,6 +11,7 @@ import { bindActionCreators, compose } from 'redux';
 // import { withRouter } from 'react-router';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { pluginId } from 'app';
 
 import HomePage from 'containers/HomePage';
@@ -80,13 +81,13 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  menu: React.PropTypes.array,
-  modelsFetch: React.PropTypes.func,
-  shouldRefetchContentType: React.PropTypes.bool,
+  menu: PropTypes.array,
+  modelsFetch: PropTypes.func,
+  shouldRefetchContentType: PropTypes.bool,
 };
 
 export function mapDispatchToProps(dispatch) {

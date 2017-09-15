@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, map, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Input from 'components/Input';
@@ -79,11 +80,11 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
 }
 
 InputCheckboxWithNestedInputs.propTypes = {
-  data: React.PropTypes.object.isRequired,
-  didCheckErrors: React.PropTypes.bool,
-  errors: React.PropTypes.array,
-  handleChange: React.PropTypes.func.isRequired,
-  value: React.PropTypes.object,
+  data: PropTypes.object.isRequired,
+  didCheckErrors: PropTypes.bool,
+  errors: PropTypes.array,
+  handleChange: PropTypes.func.isRequired,
+  value: PropTypes.object,
 };
 
 export default InputCheckboxWithNestedInputs;

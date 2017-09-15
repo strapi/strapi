@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map, startCase } from 'lodash';
 import pluralize from 'pluralize';
 import { FormattedMessage } from 'react-intl';
@@ -91,10 +92,10 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
 }
 
 RelationNaturePicker.propTypes = {
-  contentTypeName: React.PropTypes.string,
-  contentTypeTarget: React.PropTypes.string,
-  handleChange: React.PropTypes.func,
-  selectedIco: React.PropTypes.string,
+  contentTypeName: PropTypes.string,
+  contentTypeTarget: PropTypes.string,
+  handleChange: PropTypes.func,
+  selectedIco: PropTypes.string,
 
 }
 

@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -28,9 +28,9 @@ class RelationIco extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationIco.propTypes = {
-  handleChange: React.PropTypes.func,
-  ico: React.PropTypes.any,
-  name: React.PropTypes.string,
+  handleChange: PropTypes.func,
+  ico: PropTypes.any,
+  name: PropTypes.string,
 }
 
 export default RelationIco;

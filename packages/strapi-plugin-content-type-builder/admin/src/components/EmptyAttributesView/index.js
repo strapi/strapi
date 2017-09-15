@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Button from 'components/Button';
 import styles from './styles.scss';
@@ -34,7 +35,7 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
 }
 
 EmptyAttributesView.propTypes = {
-  handleClick: React.PropTypes.func,
+  handleClick: PropTypes.func,
 };
 
 export default EmptyAttributesView;

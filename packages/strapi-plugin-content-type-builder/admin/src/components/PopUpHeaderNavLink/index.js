@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { replace, includes } from 'lodash';
 import { router } from 'app';
@@ -29,10 +30,10 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
 }
 
 PopUpHeaderNavLink.propTypes = {
-  message: React.PropTypes.string,
-  name: React.PropTypes.string,
-  nameToReplace: React.PropTypes.string,
-  routePath: React.PropTypes.string,
+  message: PropTypes.string,
+  name: PropTypes.string,
+  nameToReplace: PropTypes.string,
+  routePath: PropTypes.string,
 }
 
 export default PopUpHeaderNavLink;

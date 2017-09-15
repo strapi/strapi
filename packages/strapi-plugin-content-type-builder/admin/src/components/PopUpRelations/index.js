@@ -5,8 +5,10 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { findIndex, get, isEmpty, map, take, takeRight } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/Input';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
@@ -177,27 +179,27 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 }
 
 PopUpRelations.propTypes = {
-  contentType: React.PropTypes.object,
-  didCheckErrors: React.PropTypes.bool,
-  dropDownItems: React.PropTypes.array,
-  form: React.PropTypes.oneOfType([
-    React.PropTypes.array.isRequired,
-    React.PropTypes.object.isRequired,
+  contentType: PropTypes.object,
+  didCheckErrors: PropTypes.bool,
+  dropDownItems: PropTypes.array,
+  form: PropTypes.oneOfType([
+    PropTypes.array.isRequired,
+    PropTypes.object.isRequired,
   ]),
-  formErrors: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object,
+  formErrors: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
   ]),
-  handleChange: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
-  isEditting: React.PropTypes.bool,
-  isOpen: React.PropTypes.bool,
-  popUpTitle: React.PropTypes.string.isRequired,
-  routePath: React.PropTypes.string.isRequired,
-  showLoader: React.PropTypes.bool,
-  showRelation: React.PropTypes.bool,
-  toggle: React.PropTypes.func,
-  values: React.PropTypes.object,
+  handleChange: PropTypes.func,
+  handleSubmit: PropTypes.func,
+  isEditting: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  popUpTitle: PropTypes.string.isRequired,
+  routePath: PropTypes.string.isRequired,
+  showLoader: PropTypes.bool,
+  showRelation: PropTypes.bool,
+  toggle: PropTypes.func,
+  values: PropTypes.object,
 }
 
 export default PopUpRelations;

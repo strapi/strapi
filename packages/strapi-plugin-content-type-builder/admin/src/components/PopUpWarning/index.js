@@ -5,8 +5,11 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+
 // modal
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
+
 import { FormattedMessage } from 'react-intl';
 import IcoDanger from '../../assets/icons/icon_danger.svg';
 import IcoNotFound from '../../assets/icons/icon_flag_not_found.svg';
@@ -65,11 +68,11 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 }
 
 PopUpWarning.propTypes = {
-  bodyMessage: React.PropTypes.string,
-  handleConfirm: React.PropTypes.func,
-  isOpen: React.PropTypes.bool.isRequired,
-  popUpWarningType: React.PropTypes.string,
-  toggleModal: React.PropTypes.func.isRequired,
+  bodyMessage: PropTypes.string,
+  handleConfirm: PropTypes.func,
+  isOpen: PropTypes.bool.isRequired,
+  popUpWarningType: PropTypes.string,
+  toggleModal: PropTypes.func.isRequired,
 }
 
 export default PopUpWarning;

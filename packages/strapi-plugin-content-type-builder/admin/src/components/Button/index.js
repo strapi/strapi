@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
@@ -58,20 +59,20 @@ function Button(props) {
 }
 
 Button.propTypes = {
-  children: React.PropTypes.node,
-  className: React.PropTypes.any,
-  kind: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
+  children: PropTypes.node,
+  className: PropTypes.any,
+  kind: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
   ]),
-  label: React.PropTypes.string,
-  loader: React.PropTypes.bool,
-  primary: React.PropTypes.bool,
-  primaryAddShape: React.PropTypes.bool,
-  secondary: React.PropTypes.bool,
-  secondaryHotline: React.PropTypes.bool,
-  secondaryHotlineAdd: React.PropTypes.bool,
-  type: React.PropTypes.string,
+  label: PropTypes.string,
+  loader: PropTypes.bool,
+  primary: PropTypes.bool,
+  primaryAddShape: PropTypes.bool,
+  secondary: PropTypes.bool,
+  secondaryHotline: PropTypes.bool,
+  secondaryHotlineAdd: PropTypes.bool,
+  type: PropTypes.string,
 };
 
 export default Button;
