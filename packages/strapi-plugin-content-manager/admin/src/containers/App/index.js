@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
@@ -71,21 +72,23 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  loading: React.PropTypes.bool.isRequired,
-  loadModels: React.PropTypes.func.isRequired,
-  updateSchema: React.PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+  loadModels: PropTypes.func.isRequired,
+  updateSchema: PropTypes.func.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
-  return {
-    loadModels: () => dispatch(loadModels()),
-    updateSchema: (schema) => dispatch(updateSchema(schema)),
+  return bindActionCreators(
+    {
+      loadModels,
+      updateSchema,
+    },
     dispatch,
-  };
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

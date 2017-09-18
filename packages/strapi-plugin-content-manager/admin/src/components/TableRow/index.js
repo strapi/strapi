@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 import styles from './styles.scss';
@@ -70,14 +71,14 @@ class TableRow extends React.Component {
 }
 
 TableRow.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 TableRow.propTypes = {
-  destination: React.PropTypes.string.isRequired,
-  handleDelete: React.PropTypes.func,
-  headers: React.PropTypes.array.isRequired,
-  record: React.PropTypes.object.isRequired,
+  destination: PropTypes.string.isRequired,
+  handleDelete: PropTypes.func,
+  headers: PropTypes.array.isRequired,
+  record: PropTypes.object.isRequired,
 };
 
 TableRow.defaultProps = {

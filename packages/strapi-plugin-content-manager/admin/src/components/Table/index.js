@@ -5,7 +5,7 @@
 */
 
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
 
@@ -45,19 +45,19 @@ class Table extends React.Component {
 }
 
 Table.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 Table.propTypes = {
-  changeSort: React.PropTypes.func.isRequired,
-  handleDelete: React.PropTypes.func,
-  headers: React.PropTypes.array.isRequired,
-  history: React.PropTypes.object.isRequired,
-  primaryKey: React.PropTypes.string.isRequired,
-  records: React.PropTypes.array.isRequired,
-  route: React.PropTypes.object.isRequired,
-  routeParams: React.PropTypes.object.isRequired,
-  sort: React.PropTypes.string.isRequired,
+  changeSort: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
+  headers: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
+  primaryKey: PropTypes.string.isRequired,
+  records: PropTypes.array.isRequired,
+  route: PropTypes.object.isRequired,
+  routeParams: PropTypes.object.isRequired,
+  sort: PropTypes.string.isRequired,
 };
 
 Table.defaultProps = {

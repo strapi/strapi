@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 
 import SelectOne from 'components/SelectOne';
@@ -70,21 +71,21 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
 
 
 EditFormRelations.propTypes = {
-  currentModelName: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.string,
+  currentModelName: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
   ]).isRequired,
-  isNull: React.PropTypes.bool.isRequired,
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  isNull: PropTypes.bool.isRequired,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  schema: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  schema: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
-  toggleNull: React.PropTypes.func.isRequired,
+  setRecordAttribute: PropTypes.func.isRequired,
+  toggleNull: PropTypes.func.isRequired,
 };
 
 

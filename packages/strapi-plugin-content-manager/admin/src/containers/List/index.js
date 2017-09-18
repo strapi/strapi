@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 // Selectors.
@@ -214,45 +215,45 @@ export class List extends React.Component {
 }
 
 List.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 List.propTypes = {
-  changeLimit: React.PropTypes.func.isRequired,
-  changePage: React.PropTypes.func.isRequired,
-  changeSort: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
+  changeLimit: PropTypes.func.isRequired,
+  changePage: PropTypes.func.isRequired,
+  changeSort: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
   ]).isRequired,
-  currentModelName: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
+  currentModelName: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
   ]).isRequired,
-  currentPage: React.PropTypes.number.isRequired,
-  deleteRecord: React.PropTypes.func.isRequired,
-  history: React.PropTypes.object.isRequired,
-  limit: React.PropTypes.number.isRequired,
-  loadCount: React.PropTypes.func.isRequired,
-  loadingRecords: React.PropTypes.bool.isRequired,
-  loadRecords: React.PropTypes.func.isRequired,
-  location: React.PropTypes.object.isRequired,
-  match: React.PropTypes.object.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  currentPage: PropTypes.number.isRequired,
+  deleteRecord: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  limit: PropTypes.number.isRequired,
+  loadCount: PropTypes.func.isRequired,
+  loadingRecords: PropTypes.bool.isRequired,
+  loadRecords: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  records: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.bool,
+  records: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.bool,
   ]).isRequired,
-  // route: React.PropTypes.object.isRequired,
-  schema: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.object,
+  // route: PropTypes.object.isRequired,
+  schema: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
   ]).isRequired,
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  sort: React.PropTypes.string.isRequired,
+  setCurrentModelName: PropTypes.func.isRequired,
+  sort: PropTypes.string.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

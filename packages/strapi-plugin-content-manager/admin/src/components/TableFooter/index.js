@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import LimitSelect from '../LimitSelect';
 import Pagination from '../Pagination';
@@ -36,14 +37,14 @@ class TableFooter extends React.Component {
 }
 
 TableFooter.propTypes = {
-  changePage: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
+  changePage: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
   ]).isRequired,
-  currentPage: React.PropTypes.number.isRequired,
-  handleLimit: React.PropTypes.func.isRequired,
-  limit: React.PropTypes.number.isRequired,
+  currentPage: PropTypes.number.isRequired,
+  handleLimit: PropTypes.func.isRequired,
+  limit: PropTypes.number.isRequired,
 };
 
 export default TableFooter;

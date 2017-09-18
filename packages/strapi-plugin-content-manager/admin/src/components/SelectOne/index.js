@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Select from 'react-select';
+import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
 import { map, isArray, isNull, isUndefined } from 'lodash';
 
@@ -90,12 +91,12 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 SelectOne.propTypes = {
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  relation: React.PropTypes.object.isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
+  relation: PropTypes.object.isRequired,
+  setRecordAttribute: PropTypes.func.isRequired,
 };
 
 export default SelectOne;
