@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
 
