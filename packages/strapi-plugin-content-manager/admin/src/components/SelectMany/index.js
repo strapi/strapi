@@ -59,8 +59,6 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
             label: response[this.props.relation.displayedAttribute],
           }];
 
-        console.log(options);
-
         return { options };
       });
   }

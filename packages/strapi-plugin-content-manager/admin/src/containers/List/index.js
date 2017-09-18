@@ -9,7 +9,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { isEmpty, map, replace, split } from 'lodash';
+import { router } from 'app';
 
 // Selectors.
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
@@ -68,22 +69,51 @@ export class List extends React.Component {
 
   componentDidMount() {
     // Init the view
-    this.init(this.props.match.params.slug);
+    this.init(this.props);
+    // this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
     const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
     if (locationChanged) {
-      this.init(nextProps.match.params.slug);
+      this.init(nextProps);
+      // this.init(nextProps.match.params.slug);
     }
+
+    if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
+      this.props.loadRecords();
+    }
+
   }
 
-  init(slug) {
+  changePage = (page) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
+    });
+    this.props.changePage(page);
+  }
+  
+  init(props) {
+    const slug = props.match.params.slug;
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'id');
+    const searchParams = split(replace(props.location.search, '?', ''), '&');
+
+    const sort = isEmpty(props.location.search) ?
+      this.props.models[slug.toLowerCase()].primaryKey || 'id' :
+      replace(searchParams[2], 'sort=', '');
+
+
+    if (!isEmpty(this.props.location.search)) {
+      this.props.changePage(replace(searchParams[0], 'page=', ''));
+      this.props.changeLimit(replace(searchParams[1], 'limit=', ''));
+    }
+
+    this.props.changeSort(sort);
+
 
     // Load records
     this.props.loadRecords();
@@ -129,7 +159,7 @@ export class List extends React.Component {
       const currentModel = this.props.models[this.props.currentModelName];
 
       // Define table headers
-      const tableHeaders = _.map(this.props.schema[this.props.currentModelName].list, (value) => ({
+      const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
         name: value,
         label: this.props.schema[this.props.currentModelName].fields[value].label,
         type: this.props.schema[this.props.currentModelName].fields[value].type,
@@ -201,7 +231,7 @@ export class List extends React.Component {
               <TableFooter
                 limit={this.props.limit}
                 currentPage={this.props.currentPage}
-                changePage={this.props.changePage}
+                changePage={this.changePage}
                 count={this.props.count}
                 className="push-lg-right"
                 handleLimit={this.props.changeLimit}

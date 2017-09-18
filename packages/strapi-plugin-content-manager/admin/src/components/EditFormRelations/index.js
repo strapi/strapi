@@ -15,7 +15,7 @@ import styles from './styles.scss';
 class EditFormRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const relations = map(this.props.schema[this.props.currentModelName].relations, (relation, i) => {
-      console.log(relation);
+      
       switch (relation.nature) {
         case 'oneToOne':
         case 'oneToMany':

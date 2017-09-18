@@ -42,7 +42,6 @@ export function* editRecord() {
   const recordJSON = record.toJSON();
 
   const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-    console.log(recordJSON[current]);
     acc[current] = cleanData(recordJSON[current], 'value', 'id');
 
     return acc;
