@@ -82,6 +82,7 @@ export class List extends React.Component {
     }
 
     if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
+      console.log('fuck');
       this.props.loadRecords();
     }
 
@@ -106,8 +107,7 @@ export class List extends React.Component {
       this.props.models[slug.toLowerCase()].primaryKey || 'id' :
       replace(searchParams[2], 'sort=', '');
 
-
-    if (!isEmpty(this.props.location.search)) {
+    if (!isEmpty(props.location.search)) {
       this.props.changePage(parseInt(replace(searchParams[0], 'page=', ''), 10));
       this.props.changeLimit(parseInt(replace(searchParams[1], 'limit=', ''), 10));
     }

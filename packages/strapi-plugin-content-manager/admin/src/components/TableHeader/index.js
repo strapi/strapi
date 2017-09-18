@@ -14,7 +14,7 @@ class TableHeader extends React.Component {
     if (this.props.sort === name) {
       this.props.changeSort(`-${name}`);
     } else if (this.props.sort === `-${name}`) {
-      this.props.changeSort('id');
+      this.props.changeSort(this.props.primaryKey);
     } else {
       this.props.changeSort(name);
     }
@@ -26,9 +26,9 @@ class TableHeader extends React.Component {
       // Define sort icon
       let icon;
       if (this.props.sort === header.name) {
-        icon = <i className={`ion ion-arrow-up-b ${styles.icon}`} />;
+        icon = <i className={`fa fa-sort-asc ${styles.icon}`} />;
       } else if (this.props.sort === `-${header.name}`) {
-        icon = <i className={`ion ion-arrow-down-b ${styles.icon}`} />;
+        icon = <i className={`fa fa-sort-desc ${styles.icon}`} />;
       }
 
       return (
@@ -37,8 +37,11 @@ class TableHeader extends React.Component {
           onClick={() => this.changeSort(header.name)}
         >
           <span>
-            {header.label} {icon}
+            {header.label}
+            &nbsp;
+            {icon}
           </span>
+
         </th>
       );
     });
@@ -59,6 +62,7 @@ class TableHeader extends React.Component {
 TableHeader.propTypes = {
   changeSort: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
+  primaryKey: React.PropTypes.string.isRequired,
   sort: PropTypes.string.isRequired,
 };
 
