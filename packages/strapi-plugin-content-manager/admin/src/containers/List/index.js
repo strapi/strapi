@@ -132,7 +132,15 @@ export class List extends React.Component {
       search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
     });
   }
-  
+
+  handleChangeSort = (sort) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}`,
+    });
+    this.props.changeSort(sort);
+  }
+
   handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -173,13 +181,15 @@ export class List extends React.Component {
         type: this.props.schema[this.props.currentModelName].fields[value].type,
       }));
 
+      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'ID', type: 'string' });
+
       content = (
         <Table
           records={this.props.records}
           route={this.props.match}
           routeParams={this.props.match.params}
           headers={tableHeaders}
-          changeSort={this.props.changeSort}
+          changeSort={this.handleChangeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}

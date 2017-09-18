@@ -11,8 +11,6 @@ const generateSchema = (models) => {
   // Init `schema` object
   const schema = {};
 
-  console.log(models);
-
   forEach(models, (model, name) => {
     // Model data
     const schemaModel = {

@@ -36,7 +36,9 @@ class TableHeader extends React.Component {
           key={i}
           onClick={() => this.changeSort(header.name)}
         >
-          {header.label} {icon}
+          <span>
+            {header.label} {icon}
+          </span>
         </th>
       );
     });
