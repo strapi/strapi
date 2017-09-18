@@ -233,15 +233,8 @@ module.exports = function(strapi) {
               // Expose ORM functions through the `strapi.models` object.
               strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
 
-              // Push model to strapi global variables.
-              strapi.bookshelf.collections[globalName.toLowerCase()] = global[
-                globalName
-              ];
-
               // Push attributes to be aware of model schema.
-              strapi.bookshelf.collections[
-                globalName.toLowerCase()
-              ]._attributes = definition.attributes;
+              strapi.models[model]._attributes = definition.attributes;
 
               loadedHook();
             } catch (err) {

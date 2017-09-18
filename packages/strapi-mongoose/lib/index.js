@@ -147,8 +147,6 @@ module.exports = function (strapi) {
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];
 
-                console.log(collection.associations);
-
                 // Push attributes to be aware of model schema.
                 strapi.models[model]._attributes = definition.attributes;
               } catch (err) {

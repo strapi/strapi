@@ -34,10 +34,9 @@ module.exports = {
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
-      values: {
-        id: entry[this.primaryKey],
-        ...params.values
-      }
+      values: _.merge({
+        id: entry[this.primaryKey]
+      }, params.values)
     });
   },
 
