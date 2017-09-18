@@ -82,7 +82,6 @@ export class List extends React.Component {
     }
 
     if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
-      console.log('fuck');
       this.props.loadRecords();
     }
 
