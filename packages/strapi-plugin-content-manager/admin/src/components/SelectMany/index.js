@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Select from 'react-select';
+import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
 import { isArray, isNull, isUndefined, get } from 'lodash';
 
@@ -58,8 +59,6 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
             label: response[this.props.relation.displayedAttribute],
           }];
 
-        console.log(options);
-
         return { options };
       });
   }
@@ -92,12 +91,12 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 SelectMany.propTypes = {
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  relation: React.PropTypes.object.isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
+  relation: PropTypes.object.isRequired,
+  setRecordAttribute: PropTypes.func.isRequired,
 };
 
 export default SelectMany;

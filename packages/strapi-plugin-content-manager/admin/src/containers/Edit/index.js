@@ -10,6 +10,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
 import { get, isObject } from 'lodash';
 import { router } from 'app';
 
@@ -190,41 +191,41 @@ export class Edit extends React.Component {
 }
 
 Edit.propTypes = {
-  currentModelName: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.string,
+  currentModelName: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
   ]).isRequired,
-  // deleteRecord: React.PropTypes.func.isRequired,
-  // deleting: React.PropTypes.bool.isRequired,
-  editing: React.PropTypes.bool.isRequired,
-  editRecord: React.PropTypes.func.isRequired,
-  isCreating: React.PropTypes.bool.isRequired,
-  isRelationComponentNull: React.PropTypes.bool.isRequired,
-  loading: React.PropTypes.bool.isRequired,
-  loadRecord: React.PropTypes.func.isRequired,
-  match: React.PropTypes.shape({
-    params: React.PropTypes.shape({
-      id: React.PropTypes.string,
-      slug: React.PropTypes.string,
+  // deleteRecord: PropTypes.func.isRequired,
+  // deleting: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
+  editRecord: PropTypes.func.isRequired,
+  isCreating: PropTypes.bool.isRequired,
+  isRelationComponentNull: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
+  loadRecord: PropTypes.func.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string,
+      slug: PropTypes.string,
     }),
   }).isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  schema: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  schema: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  setInitialState: React.PropTypes.func.isRequired,
-  setIsCreating: React.PropTypes.func.isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
-  toggleNull: React.PropTypes.func.isRequired,
+  setCurrentModelName: PropTypes.func.isRequired,
+  setInitialState: PropTypes.func.isRequired,
+  setIsCreating: PropTypes.func.isRequired,
+  setRecordAttribute: PropTypes.func.isRequired,
+  toggleNull: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

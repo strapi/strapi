@@ -65,7 +65,6 @@ export function changePage(page) {
 }
 
 export function changeSort(sort) {
-  console.log("COUCOU", sort);
   return {
     type: CHANGE_SORT,
     sort,

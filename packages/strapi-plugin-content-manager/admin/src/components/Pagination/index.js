@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
@@ -236,13 +237,13 @@ class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
-  changePage: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
+  changePage: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
   ]).isRequired,
-  currentPage: React.PropTypes.number.isRequired,
-  limit: React.PropTypes.number.isRequired,
+  currentPage: PropTypes.number.isRequired,
+  limit: PropTypes.number.isRequired,
 };
 
 export default Pagination;

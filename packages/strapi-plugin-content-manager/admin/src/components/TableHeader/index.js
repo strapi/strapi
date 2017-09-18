@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
@@ -54,9 +55,9 @@ class TableHeader extends React.Component {
 }
 
 TableHeader.propTypes = {
-  changeSort: React.PropTypes.func.isRequired,
-  headers: React.PropTypes.array.isRequired,
-  sort: React.PropTypes.string.isRequired,
+  changeSort: PropTypes.func.isRequired,
+  headers: PropTypes.array.isRequired,
+  sort: PropTypes.string.isRequired,
 };
 
 export default TableHeader;

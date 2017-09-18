@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class Container extends React.Component {
   render() {
@@ -17,9 +18,9 @@ class Container extends React.Component {
 }
 
 Container.propTypes = {
-  children: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.array,
+  children: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
   ]).isRequired,
 };
 

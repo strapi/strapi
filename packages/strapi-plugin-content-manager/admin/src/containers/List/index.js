@@ -8,7 +8,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import _ from 'lodash';
+import PropTypes from 'prop-types';
+import { isEmpty, map, replace, split } from 'lodash';
+import { router } from 'app';
 
 // Selectors.
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
@@ -67,22 +69,51 @@ export class List extends React.Component {
 
   componentDidMount() {
     // Init the view
-    this.init(this.props.match.params.slug);
+    this.init(this.props);
+    // this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
     const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
     if (locationChanged) {
-      this.init(nextProps.match.params.slug);
+      this.init(nextProps);
+      // this.init(nextProps.match.params.slug);
     }
+
+    if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
+      this.props.loadRecords();
+    }
+
   }
 
-  init(slug) {
+  changePage = (page) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
+    });
+    this.props.changePage(page);
+  }
+  
+  init(props) {
+    const slug = props.match.params.slug;
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey || 'id');
+    const searchParams = split(replace(props.location.search, '?', ''), '&');
+
+    const sort = isEmpty(props.location.search) ?
+      this.props.models[slug.toLowerCase()].primaryKey || 'id' :
+      replace(searchParams[2], 'sort=', '');
+
+
+    if (!isEmpty(this.props.location.search)) {
+      this.props.changePage(replace(searchParams[0], 'page=', ''));
+      this.props.changeLimit(replace(searchParams[1], 'limit=', ''));
+    }
+
+    this.props.changeSort(sort);
+
 
     // Load records
     this.props.loadRecords();
@@ -128,7 +159,7 @@ export class List extends React.Component {
       const currentModel = this.props.models[this.props.currentModelName];
 
       // Define table headers
-      const tableHeaders = _.map(this.props.schema[this.props.currentModelName].list, (value) => ({
+      const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
         name: value,
         label: this.props.schema[this.props.currentModelName].fields[value].label,
         type: this.props.schema[this.props.currentModelName].fields[value].type,
@@ -200,7 +231,7 @@ export class List extends React.Component {
               <TableFooter
                 limit={this.props.limit}
                 currentPage={this.props.currentPage}
-                changePage={this.props.changePage}
+                changePage={this.changePage}
                 count={this.props.count}
                 className="push-lg-right"
                 handleLimit={this.props.changeLimit}
@@ -214,45 +245,45 @@ export class List extends React.Component {
 }
 
 List.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 List.propTypes = {
-  changeLimit: React.PropTypes.func.isRequired,
-  changePage: React.PropTypes.func.isRequired,
-  changeSort: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
+  changeLimit: PropTypes.func.isRequired,
+  changePage: PropTypes.func.isRequired,
+  changeSort: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
   ]).isRequired,
-  currentModelName: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
+  currentModelName: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
   ]).isRequired,
-  currentPage: React.PropTypes.number.isRequired,
-  deleteRecord: React.PropTypes.func.isRequired,
-  history: React.PropTypes.object.isRequired,
-  limit: React.PropTypes.number.isRequired,
-  loadCount: React.PropTypes.func.isRequired,
-  loadingRecords: React.PropTypes.bool.isRequired,
-  loadRecords: React.PropTypes.func.isRequired,
-  location: React.PropTypes.object.isRequired,
-  match: React.PropTypes.object.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  currentPage: PropTypes.number.isRequired,
+  deleteRecord: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  limit: PropTypes.number.isRequired,
+  loadCount: PropTypes.func.isRequired,
+  loadingRecords: PropTypes.bool.isRequired,
+  loadRecords: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  records: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.bool,
+  records: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.bool,
   ]).isRequired,
-  // route: React.PropTypes.object.isRequired,
-  schema: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.object,
+  // route: PropTypes.object.isRequired,
+  schema: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
   ]).isRequired,
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  sort: React.PropTypes.string.isRequired,
+  setCurrentModelName: PropTypes.func.isRequired,
+  sort: PropTypes.string.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

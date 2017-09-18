@@ -6,6 +6,7 @@
 
 // Dependencies.
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 // Components.
@@ -68,13 +69,13 @@ class EditForm extends React.Component {
 }
 
 EditForm.propTypes = {
-  currentModelName: React.PropTypes.string.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  currentModelName: PropTypes.string.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  schema: React.PropTypes.object.isRequired,
+  schema: PropTypes.object.isRequired,
 };
 
 export default EditForm;

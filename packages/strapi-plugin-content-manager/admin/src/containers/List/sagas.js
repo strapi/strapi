@@ -26,13 +26,10 @@ import {
 } from './selectors';
 
 export function* getRecords() {
-  console.log("GET RECORDS");
   const currentModel = yield select(makeSelectCurrentModelName());
   const limit = yield select(makeSelectLimit());
   const currentPage = yield select(makeSelectCurrentPage());
   const sort = yield select(makeSelectSort());
-  console.log(sort);
-  console.log("#1");
   // Calculate the number of values to be skip
   const skip = (currentPage - 1) * limit;
 
@@ -45,17 +42,13 @@ export function* getRecords() {
 
   try {
     const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}`;
-    console.log("#1.5");
     // Call our request helper (see 'utils/request')
     const response = yield call(request, requestUrl, {
       method: 'GET',
       params,
     });
 
-    console.log("#2");
-
     yield put(loadedRecord(response));
-    console.log("#3");
   } catch (err) {
     window.Strapi.notification.error('An error occurred during records fetch.');
   }

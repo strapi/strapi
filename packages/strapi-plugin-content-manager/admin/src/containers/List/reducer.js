@@ -33,7 +33,7 @@ const initialState = fromJS({
   loadingCount: true,
   count: false,
   currentPage: 1,
-  limit: 10,
+  limit: 2,
   sort: 'id',
 });
 

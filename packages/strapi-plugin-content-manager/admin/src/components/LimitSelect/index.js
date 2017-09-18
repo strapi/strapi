@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+// import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 class LimitSelect extends React.Component {
@@ -59,7 +60,7 @@ class LimitSelect extends React.Component {
 }
 
 LimitSelect.propTypes = {
-  // onLimitChange: React.PropTypes.func.isRequired,
+  // onLimitChange: PropTypes.func.isRequired,
 };
 
 export default LimitSelect;
