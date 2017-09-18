@@ -12,23 +12,27 @@ import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    let pluginName;
+
     // Detect plugin id from url params
     const pluginId = this.props.match.params.pluginId;
+    const plugins = this.props.plugins.toJS();
 
-    const containers = this.props.plugins.valueSeq().map((plugin) => {
-      if (plugin.get('id') === pluginId) {
-        const Elem = plugin.get('mainComponent');
-        return <Elem key={plugin.get('id')} {...this.props} />;
+    const containers = Object.keys(plugins).map((name) => {
+      const plugin = plugins[name];
+
+      if (plugin.id === pluginId) {
+        pluginName = plugin.name;
+
+        const Elem = plugin.mainComponent;
+        return <Elem key={plugin.id} {...this.props} />;
       }
     });
 
     return (
       <div>
         <Helmet
-          title="Strapi - Plugin"
-          meta={[
-            { name: 'description', content: 'Description of PluginPage' },
-          ]}
+          title={`Strapi - ${pluginName}`}
         />
         {containers}
       </div>
