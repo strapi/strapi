@@ -36,7 +36,7 @@ const logger = new (winston.Logger)({
 module.exports = function () {
 
   // First, check the internet connectivity.
-  dns.resolve('google.com', function (err) {
+  dns.lookup('studio.strapi.io', function (err) {
     if (err) {
       logger.error('No internet access...');
       process.exit(1);
