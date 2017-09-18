@@ -125,6 +125,14 @@ export class List extends React.Component {
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
   }
 
+  handleChangeLimit = ({ target }) => {
+    this.props.changeLimit(parseInt(target.value));
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
+    });
+  }
+  
   handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -234,7 +242,7 @@ export class List extends React.Component {
                 changePage={this.changePage}
                 count={this.props.count}
                 className="push-lg-right"
-                handleLimit={this.props.changeLimit}
+                handleChangeLimit={this.handleChangeLimit}
               />
             </div>
           </div>
