@@ -94,7 +94,7 @@ export class List extends React.Component {
     });
     this.props.changePage(page);
   }
-  
+
   init(props) {
     const slug = props.match.params.slug;
     // Set current model name
@@ -108,8 +108,8 @@ export class List extends React.Component {
 
 
     if (!isEmpty(this.props.location.search)) {
-      this.props.changePage(replace(searchParams[0], 'page=', ''));
-      this.props.changeLimit(replace(searchParams[1], 'limit=', ''));
+      this.props.changePage(parseInt(replace(searchParams[0], 'page=', ''), 10));
+      this.props.changeLimit(parseInt(replace(searchParams[1], 'limit=', ''), 10));
     }
 
     this.props.changeSort(sort);
