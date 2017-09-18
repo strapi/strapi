@@ -45,13 +45,6 @@ module.exports = {
     const virtualFields = [];
     const response = await module.exports.findOne.call(this, params);
 
-    console.log();
-    console.log("UPDATE");
-    console.log(params);
-    console.log('---');
-    console.log(response);
-    console.log();
-
     // Only update fields which are on this document.
     const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
       const association = this.associations.filter(x => x.alias === current)[0];
@@ -83,17 +76,7 @@ module.exports = {
               virtualFields.push(
                 strapi.query(details.model || details.collection).findOne({ id : recordId })
                   .then(record => {
-                    console.log("RECORD");
-                    console.log(details.via);
-                    console.log(record);
                     if (record && _.isObject(record[details.via])) {
-                      console.log({
-                        id: record[details.via][this.primaryKey] || record[details.via].id,
-                        values: {
-                          [current]: null
-                        },
-                        parseRelationships: false
-                      });
                       return module.exports.update.call(this, {
                         id: record[details.via][this.primaryKey] || record[details.via].id,
                         values: {
@@ -117,14 +100,6 @@ module.exports = {
                 parseRelationships: false
               }));
 
-              console.log({
-                id: recordId,
-                values: {
-                  [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
-                },
-                parseRelationships: false
-              });
-
               acc[current] = _.isNull(params.values[current]) ? null : value[current];
             }
 
@@ -145,16 +120,10 @@ module.exports = {
               )
                 .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 
-              console.log("ADD");
-              console.log(toAdd);
-              console.log("REMOVE");
-              console.log(toRemove);
-              console.log('-----------');
-
               // Push the work into the flow process.
               toAdd.forEach(value => {
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
-                  value[details.via] = (response[current] === null ? [] : response[current]).concat([params.values[this.primaryKey]]);
+                  value[details.via] = (value[details.via] || []).concat([params.values[this.primaryKey]]);
                 } else {
                   value[details.via] = params.values[this.primaryKey];
                 }
@@ -170,7 +139,7 @@ module.exports = {
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
                   value[details.via] = value[details.via].filter(x => x.toString() !== params.values[this.primaryKey].toString());
                 } else {
-                  value[details.via] = params.values[this.primaryKey];
+                  value[details.via] = null;
                 }
 
                 virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
@@ -190,13 +159,6 @@ module.exports = {
 
       return acc;
     }, {});
-
-    console.log("FINAL");
-    console.log({
-      [this.primaryKey]: params[this.primaryKey] || params.id
-    }, values, {
-      strict: false
-    });
 
     virtualFields.push(this
       .update({
