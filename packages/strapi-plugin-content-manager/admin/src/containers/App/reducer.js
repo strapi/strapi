@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 
 import { LOAD_MODELS, LOADED_MODELS, UPDATE_SCHEMA } from './constants';
 
@@ -12,6 +12,7 @@ const initialState = fromJS({
   loading: true,
   models: false,
   schema: false,
+  formValidations: List(),
 });
 
 function appReducer(state = initialState, action) {
