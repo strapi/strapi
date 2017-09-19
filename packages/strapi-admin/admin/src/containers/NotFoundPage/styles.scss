@@ -2,24 +2,29 @@
 @import "../../styles/variables/variables";
 
 .notFound { /* stylelint-ignore */
-  height: 100vh;
-  background: $strapi-blue-darker;
   display: -webkit-flex;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
+  padding-top: 114px;
 
-.notFoundTitle {
-  color: $white;
-  font-size: 20rem;
-  margin-bottom: 2rem;
-  text-shadow: 0 1rem 4rem rgba(255, 255, 255, 0.8);
-  letter-spacing: 2rem;
-}
+  h1{
+    margin-bottom: 12px;
+    text-shadow: 0 1rem 4rem rgba(255, 255, 255, 0.8);
+    color: #2C3138;
+    font-size: 6.4rem;
+    letter-spacing: 2px;
+  }
 
-.notFoundDescription {
-  color: $white;
-  margin-bottom: 2rem;
+  h2{
+    color: #2C3138;
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin-bottom: 50px;
+  }
+
+  button{
+    margin: 0;
+  }
 }

@@ -246,7 +246,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       moment(this.props.value);
 
     return (
-      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
+      <div className={`${styles.inputDate} ${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
@@ -257,7 +257,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           utc={true}
           inputProps={{
             placeholder: this.props.placeholder,
-            className: '',
+            className: 'form-control',
             name: this.props.name,
             id: this.props.label,
           }}

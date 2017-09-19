@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
+
+import Button from 'components/Button';
 
 import styles from './styles.scss';
 import messages from './messages.json';
@@ -28,8 +29,24 @@ export default class NotFound extends React.Component { // eslint-disable-line r
         <h2 className={styles.notFoundDescription}>
           <FormattedMessage {...messages.description} />
         </h2>
-        <Link to="/admin">Back to home page.</Link>
+        <Button
+          label="Back to home page"
+          buttonBackground="back"
+          onClick={(e) => {
+            e.stopPropagation();
+
+            this.props.history.goBack();
+          }}
+        >
+          Back to home page.
+        </Button>
       </div>
     );
   }
 }
+
+NotFound.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};

@@ -1,5 +1,6 @@
 {
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
+  "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
   "app.components.HomePage.welcome": "Welcome to the home page",
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",

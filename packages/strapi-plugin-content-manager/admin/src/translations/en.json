@@ -1,8 +1,7 @@
 {
-  "containers.Home.pluginHeaderTitle": "Content Types",
-  "containers.Home.pluginHeaderDescription": "Create and update your content types",
-  "containers.Home.introduction": "A powerful UI to easily manage your data.",
-  "containers.Home.pluginHeaderDescription": "To edit your content's entries go to the specific link in the left menu.",
+  "containers.Home.pluginHeaderTitle": "Content Manager",
+  "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
+  "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Edit.submit": "Save",
   "containers.Edit.editing": "Editing...",
   "containers.Edit.delete": "Delete",

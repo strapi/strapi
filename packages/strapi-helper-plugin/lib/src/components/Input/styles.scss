@@ -149,6 +149,16 @@
   }
 }
 
+.inputDate{
+  input {
+    width: 100%;
+
+    &:focus{
+      outline: none;
+    }
+  }
+}
+
 .inputTitle {
   margin-bottom: 1.7rem;
   font-weight: 500;

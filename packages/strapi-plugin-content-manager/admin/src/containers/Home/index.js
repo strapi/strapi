@@ -7,7 +7,6 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 
-import Container from 'components/Container';
 import PluginHeader from 'components/PluginHeader';
 
 import styles from './styles.scss';
@@ -26,11 +25,9 @@ export class Home extends React.Component {
             }}
             actions={[]}
           />
-          <Container>
-            <p>
-              <FormattedMessage id="content-manager.containers.Home.introduction" />
-            </p>
-          </Container>
+          <p>
+            <FormattedMessage id="content-manager.containers.Home.introduction" />
+          </p>
         </div>
       </div>
     );
