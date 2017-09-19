@@ -50,7 +50,7 @@ module.exports = function() {
       'server.json'
     ));
 
-    if (process.env.NODE_ENV === 'development' && server.autoReload === true) {
+    if (process.env.NODE_ENV === 'development' && _.get(server, 'autoReload.enabled') === true) {
       const restart = path => {
         if (strapi.reload.isWatching && cluster.isWorker && !strapi.reload.isReloading) {
           strapi.reload.isReloading = true;

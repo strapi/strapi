@@ -20,7 +20,7 @@
 module.exports = function reload() {
   try {
     const reload = function() {
-      if (cluster.isWorker && process.env.NODE_ENV === 'development' && get(this.config, 'currentEnvironment.server.autoReload') === true) process.send('reload');
+      if (cluster.isWorker && process.env.NODE_ENV === 'development' && get(this.config, 'currentEnvironment.server.autoReload.enabled') === true) process.send('reload');
     };
 
     reload.isReloading = false;
