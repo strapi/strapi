@@ -26,13 +26,13 @@ class TableRow extends React.Component {
    * @returns {*}
    */
   getDisplayedValue(type, value) {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'string':
-        return !isEmpty(value) ? value.toString() : '-';
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'integer':
-        return !isEmpty(value) ? value.toString() : '-';
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
-        return !isEmpty(value) ? value.toString() : '-';
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       default:
         return '-';
     }

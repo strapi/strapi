@@ -14,7 +14,7 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
   render() {
     return (
       <div className={`${styles.pluginHeader} row`}>
-        <div className="col-lg-6">
+        <div className="col-lg-7">
           <PluginHeaderTitle
             title={this.props.title}
             description={this.props.description}
@@ -25,7 +25,7 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
             actions={this.props.subActions || []}
           />
         </div>
-        <div className="col-lg-4 justify-content-end">
+        <div className="col-lg-3 justify-content-end">
           <PluginHeaderActions
             actions={this.props.actions || []}
           />

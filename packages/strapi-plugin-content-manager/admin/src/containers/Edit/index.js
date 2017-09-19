@@ -174,7 +174,7 @@ export class Edit extends React.Component {
             fullWidth={this.props.isRelationComponentNull}
           />
           <div className='row'>
-            <div className={this.props.isRelationComponentNull ? `col-lg-12` : `col-lg-8`}>
+            <div className={this.props.isRelationComponentNull ? `col-lg-12` : `col-lg-9`}>
               <div className={styles.main_wrapper}>
                 <EditForm
                   record={this.props.record}
@@ -190,7 +190,7 @@ export class Edit extends React.Component {
                 />
               </div>
             </div>
-            <div className={`col-lg-4 ${this.props.isRelationComponentNull ? 'hidden-xl-down' : ''}`}>
+            <div className={`col-lg-3 ${this.props.isRelationComponentNull ? 'hidden-xl-down' : ''}`}>
               <div className={styles.sub_wrapper}>
                 <EditFormRelations
                   currentModelName={this.props.currentModelName}
