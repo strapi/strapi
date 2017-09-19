@@ -115,7 +115,7 @@ export function setFormErrors(formErrors) {
 
 export function setFormValidations(data) {
   const form = Object.keys(data).map(attr => {
-    return { name: attr,  validations: get(data[attr], ['params']) || {} }
+    return { name: attr,  validations: get(data, attr) || {} }
   });
 
   const formValidations = getValidationsFromForm(form, []);
