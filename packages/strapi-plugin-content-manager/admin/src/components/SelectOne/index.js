@@ -24,10 +24,6 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     };
   }
 
-  onChange = (value) => {
-    this.props.setRecordAttribute(this.props.relation.alias, value);
-  }
-
   getOptions = (query) => {
     const params = {
       limit: 20,
@@ -63,6 +59,10 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       });
   }
 
+  handleChange = (value) => {
+    this.props.setRecordAttribute(this.props.relation.alias, value);
+  }
+
   render() {
     const description = this.props.relation.description
       ? <p>{this.props.relation.description}</p>
@@ -76,7 +76,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
         {description}
         <Select.Async
-          onChange={this.onChange}
+          onChange={this.handleChange}
           loadOptions={this.getOptions}
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {

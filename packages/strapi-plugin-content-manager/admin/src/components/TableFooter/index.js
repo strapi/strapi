@@ -18,11 +18,11 @@ class TableFooter extends React.Component {
       <div className={`row ${styles.tableFooter}`}>
         <div className="col-lg-6">
           <LimitSelect
-
             handleChange={this.props.handleChangeLimit}
             limit={this.props.limit}
           />
         </div>
+        
         <div className="col-lg-6">
           <Pagination
             limit={this.props.limit}

@@ -35,6 +35,8 @@ const initialState = fromJS({
   currentPage: 1,
   limit: 10,
   sort: 'id',
+  initLimit: 10,
+  initSort: 'id',
 });
 
 function listReducer(state = initialState, action) {

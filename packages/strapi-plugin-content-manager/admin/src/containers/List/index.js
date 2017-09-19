@@ -105,7 +105,6 @@ export class List extends React.Component {
 
     this.props.changeSort(sort);
 
-
     // Load records
     this.props.loadRecords();
 
@@ -180,7 +179,7 @@ export class List extends React.Component {
         type: this.props.schema[this.props.currentModelName].fields[value].type,
       }));
 
-      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'ID', type: 'string' });
+      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'Id', type: 'string' });
 
       content = (
         <Table

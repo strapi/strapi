@@ -48,6 +48,7 @@ import {
   setFormValidations,
   setForm,
   setFormErrors,
+  recordEdited,
 } from './actions';
 
 // Selectors.
@@ -123,6 +124,7 @@ export class Edit extends React.Component {
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleSubmitOnEnterPress);
+    this.props.recordEdited();
   }
 
   handleChange = (e) => {
@@ -140,6 +142,7 @@ export class Edit extends React.Component {
 
     if (isEmpty(formErrors)) {
       this.props.editRecord();
+      router.goBack();
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -250,6 +253,7 @@ Edit.propTypes = {
     PropTypes.object,
     PropTypes.bool,
   ]).isRequired,
+  recordEdited: PropTypes.func,
   schema: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,
@@ -294,6 +298,7 @@ function mapDispatchToProps(dispatch) {
       setFormValidations,
       setForm,
       setFormErrors,
+      recordEdited,
     },
     dispatch
   );
