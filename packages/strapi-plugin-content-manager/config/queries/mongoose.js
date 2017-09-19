@@ -25,7 +25,6 @@ module.exports = {
   create: async function (params) {
     const entry = await this.create(Object.keys(params.values).reduce((acc, current) => {
       if (this._attributes[current].type) {
-        console.log(current);
         acc[current] = params.values[current];
       }
 

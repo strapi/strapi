@@ -210,9 +210,9 @@ module.exports = function (strapi) {
               const verbose = _.get(utilsModels.getNature(details, name, undefined, model.toLowerCase()), 'verbose') || '';
 
               // Build associations key
-              if (!_.isEmpty(verbose)) {
-                utilsModels.defineAssociations(model, definition, details, name);
-              } else {
+              utilsModels.defineAssociations(model, definition, details, name);
+
+              if (_.isEmpty(verbose)) {
                 definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
               }
 

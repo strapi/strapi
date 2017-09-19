@@ -259,14 +259,12 @@ module.exports = function(strapi) {
             ) || '';
 
             // Build associations key
-            if (!_.isEmpty(verbose)) {
-              utilsModels.defineAssociations(
-                globalName,
-                definition,
-                details,
-                name
-              );
-            }
+            utilsModels.defineAssociations(
+              globalName,
+              definition,
+              details,
+              name
+            );
 
             switch (verbose) {
               case 'hasOne': {

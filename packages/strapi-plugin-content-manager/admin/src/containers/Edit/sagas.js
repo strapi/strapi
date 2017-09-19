@@ -61,7 +61,7 @@ export function* editRecord() {
 
     yield put(recordEdited());
     window.Strapi.notification.success(
-      `The entry has been successfully ${isCreating ? 'created' : 'updated'}.`
+      `Saved`
     );
   } catch (err) {
     yield put(recordEditError());
@@ -83,7 +83,7 @@ export function* deleteRecord({ id, modelName }) {
 
       yield put(recordDeleted(id));
       window.Strapi.notification.success(
-        'The entry has been successfully deleted.'
+        'Deleted'
       );
 
       // Redirect to the list page.
