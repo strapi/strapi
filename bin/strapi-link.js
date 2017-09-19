@@ -53,7 +53,7 @@ module.exports = function () {
   }
 
   // Check the internet connectivity.
-  dns.resolve('google.com', function (noInternetAccess) {
+  dns.lookup('studio.strapi.io', function (noInternetAccess) {
     if (noInternetAccess) {
       logger.warn('No internet access...');
       logger.warn('Your application can not be linked to the Strapi Studio.');

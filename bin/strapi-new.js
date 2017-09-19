@@ -81,7 +81,7 @@ module.exports = function () {
     success: function returnSuccess() {
       const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 
-      dns.resolve('google.com', function (noInternetAccess) {
+      dns.lookup('studio.strapi.io', function (noInternetAccess) {
         if (noInternetAccess) {
           logger.warn('No internet access...');
           logger.warn('Your application can not be linked to the Strapi Studio.');
