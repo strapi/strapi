@@ -7,7 +7,7 @@
 // Dependencies.
 import React from 'react';
 import PropTypes from 'prop-types';
-import { findIndex, get, omit } from 'lodash';
+import { findIndex, get, omit, isFunction, merge } from 'lodash';
 
 // Components.
 import Input from 'components/Input';
@@ -38,7 +38,7 @@ class EditForm extends React.Component {
 
   render() {
     // Remove `id` field
-    const displayedFields = omit(this.props.schema[this.props.currentModelName].fields, 'id');
+    const displayedFields = merge(this.props.layout[this.props.currentModelName], omit(this.props.schema[this.props.currentModelName].fields, 'id'));
 
     // List fields inputs
     const fields = Object.keys(displayedFields).map(attr => {
@@ -48,16 +48,25 @@ class EditForm extends React.Component {
       const validationsIndex = findIndex(this.props.formValidations, ['name', attr]);
       const validations = get(this.props.formValidations[validationsIndex], 'validations') || {};
 
+      const layout = Object.keys(get(this.props.layout[this.props.currentModelName], attr, {})).reduce((acc, current) => {
+        acc[current] = isFunction(this.props.layout[this.props.currentModelName][attr][current]) ?
+          this.props.layout[this.props.currentModelName][attr][current](this) :
+          this.props.layout[this.props.currentModelName][attr][current];
+
+        return acc;
+      }, {});
+
       return (
         <Input
           key={attr}
           type={this.getInputType(details.type)}
-          label={details.label}
+          label={get(layout, 'label') || details.label || ''}
           name={attr}
+          customBootstrapClass={get(layout, 'className') || false}
           value={this.props.record.get(attr) || ''}
-          placeholder={details.placeholder || details.label || attr || ''}
+          placeholder={get(layout, 'placeholder') || details.placeholder || details.label || attr || ''}
           handleChange={this.props.handleChange}
-          validations={validations}
+          validations={get(layout, 'validations') || validations}
           errors={errors}
           didCheckErrors={this.props.didCheckErrors}
           pluginID="content-manager"
@@ -66,11 +75,11 @@ class EditForm extends React.Component {
     });
 
     return (
-      <div>
-        <form className={styles.form}>
+      <form className={styles.form}>
+        <div className='row'>
           {fields}
-        </form>
-      </div>
+        </div>
+      </form>
     );
   }
 }
@@ -81,6 +90,7 @@ EditForm.propTypes = {
   formErrors: PropTypes.array.isRequired,
   formValidations: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
+  layout: PropTypes.object.isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,

@@ -144,7 +144,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}}></div>;
 
     return (
-      <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
+      <div className={`${styles.inputCheckbox} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-3'}`}>
         <div className="form-check">
           {title}
           <FormattedMessage id={this.props.label} defaultMessage={this.props.label}>
@@ -164,10 +164,10 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputSelect = (bootStrapClass, requiredClass, inputDescription) => {
+  renderInputSelect = (requiredClass, inputDescription) => {
     const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
     return (
-      <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
+      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-4'}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
@@ -198,7 +198,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   }
 
-  renderInputTextArea = (bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur) => {
+  renderInputTextArea = (requiredClass, bootStrapClassDanger, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -206,7 +206,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     }
 
     return (
-      <div className={`${styles.inputTextArea} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
+      <div className={`${styles.inputTextArea} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
@@ -234,7 +234,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputDate = (bootStrapClass = '', requiredClass, inputDescription) => {
+  renderInputDate = (requiredClass, inputDescription) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -246,7 +246,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       moment(this.props.value);
 
     return (
-      <div className={`${styles.input} ${bootStrapClass} ${requiredClass}`}>
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
@@ -300,7 +300,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     // override default onBlur
     const handleBlur = this.props.handleBlur || this.handleBlur;
     // override bootStrapClass
-    const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.label;
@@ -337,13 +336,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     switch (this.props.type) {
       case 'select':
-        return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
+        return this.renderInputSelect(requiredClass, inputDescription);
       case 'textarea':
-        return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
+        return this.renderInputTextArea(requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':
         return this.renderInputCheckbox(requiredClass, inputDescription);
       case 'date':
-        return this.renderInputDate(bootStrapClass, requiredClass, inputDescription);
+        return this.renderInputDate(requiredClass, inputDescription);
       default:
     }
 
@@ -353,7 +352,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         {input}
       </div> : input;
     return (
-      <div className={`${styles.input} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}>
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass} ${bootStrapClassDanger}`}>
         {label}
 
         {addonInput}

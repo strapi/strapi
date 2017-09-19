@@ -27,6 +27,10 @@ import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import templateObject from 'utils/templateObject';
 import { checkFormValidity } from '../../utils/formValidations';
+import { bindLayout } from '../../utils/bindLayout';
+
+// Layout
+import layout from '../../../../config/layout';
 
 // Styles.
 import styles from './styles.scss';
@@ -68,6 +72,7 @@ import saga from './sagas';
 export class Edit extends React.Component {
   constructor(props) {
     super(props);
+
     this.pluginHeaderActions = [
       {
         label: 'content-manager.containers.Edit.cancel',
@@ -97,6 +102,8 @@ export class Edit extends React.Component {
         type: 'button',
       },
     ];
+
+    this.layout = bindLayout.call(this, layout);
   }
 
   componentDidMount() {
@@ -172,7 +179,7 @@ export class Edit extends React.Component {
           />
           <div className='row'>
             <div className={this.props.isRelationComponentNull ? `col-lg-12` : `col-lg-9`}>
-              <div className={styles.main_wrapper}>
+              <div className={`${styles.main_wrapper}`}>
                 <EditForm
                   record={this.props.record}
                   currentModelName={this.props.currentModelName}
@@ -184,6 +191,7 @@ export class Edit extends React.Component {
                   formErrors={this.props.formErrors.toJS()}
                   didCheckErrors={this.props.didCheckErrors}
                   formValidations={this.props.formValidations.toJS()}
+                  layout={this.layout}
                 />
               </div>
             </div>
