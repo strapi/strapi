@@ -3,40 +3,46 @@
  * Edit actions
  *
  */
+import { get } from 'lodash';
+import { getValidationsFromForm } from '../../utils/formValidations';
 
 import {
-  SET_INITIAL_STATE,
+  CANCEL_CHANGES,
+  DELETE_RECORD,
+  DELETE_RECORD_ERROR,
+  DELETE_RECORD_SUCCESS,
+  EDIT_RECORD,
+  EDIT_RECORD_ERROR,
+  EDIT_RECORD_SUCCESS,
   SET_CURRENT_MODEL_NAME,
   SET_IS_CREATING,
+  SET_INITIAL_STATE,
   LOAD_RECORD,
   LOAD_RECORD_SUCCESS,
   SET_RECORD_ATTRIBUTE,
-  EDIT_RECORD,
-  EDIT_RECORD_SUCCESS,
-  EDIT_RECORD_ERROR,
-  DELETE_RECORD,
-  DELETE_RECORD_SUCCESS,
-  DELETE_RECORD_ERROR,
   TOGGLE_NULL,
-  CANCEL_CHANGES,
+  SET_FORM_VALIDATIONS,
+  SET_FORM,
+  SET_FORM_ERRORS,
 } from './constants';
 
-export function setInitialState() {
+export function cancelChanges() {
   return {
-    type: SET_INITIAL_STATE,
+    type: CANCEL_CHANGES,
   };
 }
 
-export function setCurrentModelName(currentModelName) {
+export function deleteRecord(id, modelName) {
   return {
-    type: SET_CURRENT_MODEL_NAME,
-    currentModelName,
+    type: DELETE_RECORD,
+    id,
+    modelName,
   };
 }
 
-export function setIsCreating() {
+export function editRecord() {
   return {
-    type: SET_IS_CREATING,
+    type: EDIT_RECORD,
   };
 }
 
@@ -47,24 +53,17 @@ export function loadRecord(id) {
   };
 }
 
-export function recordLoaded(record) {
+
+export function recordDeleted(id) {
   return {
-    type: LOAD_RECORD_SUCCESS,
-    record,
+    type: DELETE_RECORD_SUCCESS,
+    id,
   };
 }
 
-export function setRecordAttribute(key, value) {
+export function recordDeleteError() {
   return {
-    type: SET_RECORD_ATTRIBUTE,
-    key,
-    value,
-  };
-}
-
-export function editRecord() {
-  return {
-    type: EDIT_RECORD,
+    type: DELETE_RECORD_ERROR,
   };
 }
 
@@ -80,35 +79,76 @@ export function recordEditError() {
   };
 }
 
-export function deleteRecord(id, modelName) {
+export function recordLoaded(record) {
   return {
-    type: DELETE_RECORD,
-    id,
-    modelName,
+    type: LOAD_RECORD_SUCCESS,
+    record,
   };
 }
 
-export function recordDeleted(id) {
+export function setCurrentModelName(currentModelName) {
   return {
-    type: DELETE_RECORD_SUCCESS,
-    id,
+    type: SET_CURRENT_MODEL_NAME,
+    currentModelName,
   };
 }
 
-export function recordDeleteError() {
+export function setForm(data) {
+  const form = [];
+  Object.keys(data).map(attr => {
+    form.push([attr, '']);
+  });
+
   return {
-    type: DELETE_RECORD_ERROR,
+    type: SET_FORM,
+    form,
+  }
+
+}
+
+export function setFormErrors(formErrors) {
+  return {
+    type: SET_FORM_ERRORS,
+    formErrors,
+  };
+}
+
+export function setFormValidations(data) {
+  const form = Object.keys(data).map(attr => {
+    return { name: attr,  validations: get(data[attr], ['params']) || {} }
+  });
+
+  const formValidations = getValidationsFromForm(form, []);
+
+  return {
+    type: SET_FORM_VALIDATIONS,
+    formValidations,
+  }
+}
+
+export function setInitialState() {
+  return {
+    type: SET_INITIAL_STATE,
+  };
+}
+
+
+export function setIsCreating() {
+  return {
+    type: SET_IS_CREATING,
+  };
+}
+
+export function setRecordAttribute(key, value) {
+  return {
+    type: SET_RECORD_ATTRIBUTE,
+    key,
+    value,
   };
 }
 
 export function toggleNull() {
   return {
     type: TOGGLE_NULL,
-  };
-}
-
-export function cancelChanges() {
-  return {
-    type: CANCEL_CHANGES,
   };
 }

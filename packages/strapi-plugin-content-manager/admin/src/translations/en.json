@@ -12,6 +12,19 @@
   "containers.List.pluginHeaderDescription": "Manage your {label}",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+
+  "error.validation.required": "This value input is required.",
+  "error.validation.regex": "The value not match the regex.",
+  "error.validation.max": "The value is too high.",
+  "error.validation.min": "The value is too low.",
+  "error.validation.maxLength": "The value is too long.",
+  "error.validation.minLength": "The value is too shot.",
+  "error.contentTypeName.taken": "This name already exists",
+  "error.attribute.taken": "This field name already exists",
+  "error.attribute.key.taken": "This value already exists",
+  "error.attribute.sameKeyAndName": "Can't be equals",
+  "error.validation.minSupMax": "Can't be superior",
+
   "pageNotFound": "Page not found",
 
   "popUpWarning.button.cancel": "Cancel",

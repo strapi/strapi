@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, isObject } from 'lodash';
+import { map, get, isObject, isEmpty } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -26,6 +26,7 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import templateObject from 'utils/templateObject';
+import { checkFormValidity } from '../../utils/formValidations';
 
 // Styles.
 import styles from './styles.scss';
@@ -40,6 +41,9 @@ import {
   editRecord,
   toggleNull,
   cancelChanges,
+  setFormValidations,
+  setForm,
+  setFormErrors,
 } from './actions';
 
 // Selectors.
@@ -52,6 +56,10 @@ import {
   makeSelectDeleting,
   makeSelectIsCreating,
   makeSelectIsRelationComponentNull,
+  makeSelectForm,
+  makeSelectFormValidations,
+  makeSelectFormErrors,
+  makeSelectDidCheckErrors,
 } from './selectors';
 
 import reducer from './reducer';
@@ -74,7 +82,7 @@ export class Edit extends React.Component {
         buttonBackground: 'primary',
         buttonSize: 'buttonLg',
         label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
-        onClick: this.props.editRecord,
+        onClick: this.handleSubmit,
         disabled: this.props.editing,
         type: 'submit',
       },
@@ -94,7 +102,8 @@ export class Edit extends React.Component {
   componentDidMount() {
     this.props.setInitialState();
     this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
-
+    this.props.setFormValidations(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
+    this.props.setForm(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
     // Detect that the current route is the `create` route or not
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
@@ -118,12 +127,20 @@ export class Edit extends React.Component {
   }
 
   handleSubmit = () => {
-    this.props.editRecord();
+    const form = this.props.form.toJS();
+    map(this.props.record.toJS(), (value, key) => form[key] = value);
+    const formErrors = checkFormValidity(form, this.props.formValidations.toJS());
+
+    if (isEmpty(formErrors)) {
+      this.props.editRecord();
+    } else {
+      this.props.setFormErrors(formErrors);
+    }
   }
 
   handleSubmitOnEnterPress = (e) => {
     if (e.keyCode === 13) {
-      this.props.editRecord();
+      this.handleSubmit();
     }
   }
 
@@ -164,6 +181,9 @@ export class Edit extends React.Component {
                   handleChange={this.handleChange}
                   handleSubmit={this.handleSubmit}
                   editing={this.props.editing}
+                  formErrors={this.props.formErrors.toJS()}
+                  didCheckErrors={this.props.didCheckErrors}
+                  formValidations={this.props.formValidations.toJS()}
                 />
               </div>
             </div>
@@ -185,17 +205,25 @@ export class Edit extends React.Component {
     );
   }
 }
-
+/* eslint-disable react/require-default-props */
 Edit.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   currentModelName: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
   ]).isRequired,
-  // deleteRecord: PropTypes.func.isRequired,
-  // deleting: PropTypes.bool.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
   editing: PropTypes.bool.isRequired,
   editRecord: PropTypes.func.isRequired,
+  form: PropTypes.object.isRequired,
+  formErrors: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+  ]),
+  formValidations: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+  ]),
   isCreating: PropTypes.bool.isRequired,
   isRelationComponentNull: PropTypes.bool.isRequired,
   loading: PropTypes.bool.isRequired,
@@ -219,6 +247,9 @@ Edit.propTypes = {
     PropTypes.bool,
   ]).isRequired,
   setCurrentModelName: PropTypes.func.isRequired,
+  setForm: PropTypes.func.isRequired,
+  setFormErrors: PropTypes.func.isRequired,
+  setFormValidations: PropTypes.func.isRequired,
   setInitialState: PropTypes.func.isRequired,
   setIsCreating: PropTypes.func.isRequired,
   setRecordAttribute: PropTypes.func.isRequired,
@@ -235,6 +266,10 @@ const mapStateToProps = createStructuredSelector({
   schema: makeSelectSchema(),
   models: makeSelectModels(),
   isRelationComponentNull: makeSelectIsRelationComponentNull(),
+  form: makeSelectForm(),
+  formValidations: makeSelectFormValidations(),
+  formErrors: makeSelectFormErrors(),
+  didCheckErrors: makeSelectDidCheckErrors(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -248,6 +283,9 @@ function mapDispatchToProps(dispatch) {
       editRecord,
       toggleNull,
       cancelChanges,
+      setFormValidations,
+      setForm,
+      setFormErrors,
     },
     dispatch
   );

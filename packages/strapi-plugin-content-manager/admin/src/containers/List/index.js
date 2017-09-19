@@ -87,14 +87,6 @@ export class List extends React.Component {
 
   }
 
-  changePage = (page) => {
-    router.push({
-      pathname: this.props.location.pathname,
-      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
-    });
-    this.props.changePage(page);
-  }
-
   init(props) {
     const slug = props.match.params.slug;
     // Set current model name
@@ -130,6 +122,14 @@ export class List extends React.Component {
       pathname: this.props.location.pathname,
       search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
     });
+  }
+
+  handleChangePage = (page) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
+    });
+    this.props.changePage(page);
   }
 
   handleChangeSort = (sort) => {
@@ -248,7 +248,7 @@ export class List extends React.Component {
               <TableFooter
                 limit={this.props.limit}
                 currentPage={this.props.currentPage}
-                changePage={this.changePage}
+                changePage={this.handleChangePage}
                 count={this.props.count}
                 className="push-lg-right"
                 handleChangeLimit={this.handleChangeLimit}

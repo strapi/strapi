@@ -7,7 +7,7 @@
 // Dependencies.
 import React from 'react';
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
+import { findIndex, get, omit } from 'lodash';
 
 // Components.
 import Input from 'components/Input';
@@ -43,6 +43,10 @@ class EditForm extends React.Component {
     // List fields inputs
     const fields = Object.keys(displayedFields).map(attr => {
       const details = displayedFields[attr];
+      const errorIndex = findIndex(this.props.formErrors, ['name', attr]);
+      const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
+      const validationsIndex = findIndex(this.props.formValidations, ['name', attr]);
+      const validations = get(this.props.formValidations[validationsIndex], 'validations') || {};
 
       return (
         <Input
@@ -53,7 +57,10 @@ class EditForm extends React.Component {
           value={this.props.record.get(attr) || ''}
           placeholder={details.placeholder || details.label || attr || ''}
           handleChange={this.props.handleChange}
-          validations={{}}
+          validations={validations}
+          errors={errors}
+          didCheckErrors={this.props.didCheckErrors}
+          pluginID="content-manager"
         />
       );
     });
@@ -70,6 +77,9 @@ class EditForm extends React.Component {
 
 EditForm.propTypes = {
   currentModelName: PropTypes.string.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
+  formValidations: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,
