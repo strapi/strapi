@@ -94,7 +94,7 @@ export class List extends React.Component {
     });
     this.props.changePage(page);
   }
-  
+
   init(props) {
     const slug = props.match.params.slug;
     // Set current model name
@@ -106,10 +106,9 @@ export class List extends React.Component {
       this.props.models[slug.toLowerCase()].primaryKey || 'id' :
       replace(searchParams[2], 'sort=', '');
 
-
-    if (!isEmpty(this.props.location.search)) {
-      this.props.changePage(replace(searchParams[0], 'page=', ''));
-      this.props.changeLimit(replace(searchParams[1], 'limit=', ''));
+    if (!isEmpty(props.location.search)) {
+      this.props.changePage(parseInt(replace(searchParams[0], 'page=', ''), 10));
+      this.props.changeLimit(parseInt(replace(searchParams[1], 'limit=', ''), 10));
     }
 
     this.props.changeSort(sort);
@@ -123,6 +122,22 @@ export class List extends React.Component {
 
     // Define the `create` route url
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
+  }
+
+  handleChangeLimit = ({ target }) => {
+    this.props.changeLimit(parseInt(target.value));
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
+    });
+  }
+
+  handleChangeSort = (sort) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}`,
+    });
+    this.props.changeSort(sort);
   }
 
   handleDelete = (e) => {
@@ -165,13 +180,15 @@ export class List extends React.Component {
         type: this.props.schema[this.props.currentModelName].fields[value].type,
       }));
 
+      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'ID', type: 'string' });
+
       content = (
         <Table
           records={this.props.records}
           route={this.props.match}
           routeParams={this.props.match.params}
           headers={tableHeaders}
-          changeSort={this.props.changeSort}
+          changeSort={this.handleChangeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
@@ -234,7 +251,7 @@ export class List extends React.Component {
                 changePage={this.changePage}
                 count={this.props.count}
                 className="push-lg-right"
-                handleLimit={this.props.changeLimit}
+                handleChangeLimit={this.handleChangeLimit}
               />
             </div>
           </div>

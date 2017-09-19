@@ -36,6 +36,7 @@ class Table extends React.Component {
           headers={this.props.headers}
           changeSort={this.props.changeSort}
           sort={this.props.sort}
+          primaryKey={this.props.primaryKey}
         />
         <tbody>
           {tableRows}

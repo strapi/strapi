@@ -10,7 +10,7 @@
   "containers.Edit.returnList": "Retourner à la liste",
   "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.pluginHeaderDescription": "Gérér vos {label}",
-  "components.LimitSelect.itemsPerPage": "Nombre d'éléments par page",
+  "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
   "popUpWarning.button.cancel": "Annuler",

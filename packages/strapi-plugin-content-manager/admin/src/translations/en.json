@@ -10,7 +10,7 @@
   "containers.Edit.returnList": "Return to list",
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.pluginHeaderDescription": "Manage your {label}",
-  "components.LimitSelect.itemsPerPage": "Number of items per page",
+  "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
   "pageNotFound": "Page not found",
 

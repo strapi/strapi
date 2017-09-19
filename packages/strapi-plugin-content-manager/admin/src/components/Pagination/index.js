@@ -5,18 +5,12 @@
  */
 
 import React from 'react';
+import { map } from 'lodash';
 import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
 class Pagination extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onGoPreviousPageClicked = this.onGoPreviousPageClicked.bind(this);
-    this.onGoNextPageClicked = this.onGoNextPageClicked.bind(this);
-    this.onGoFirstPageClicked = this.onGoFirstPageClicked.bind(this);
-    this.onGoLastPageClicked = this.onGoLastPageClicked.bind(this);
-  }
   /**
    * Triggered on dots click
    *
@@ -24,7 +18,7 @@ class Pagination extends React.Component {
    *
    * @param e {Object} Click event
    */
-  onDotsClicked(e) {
+  onDotsClicked = (e) => {
     e.preventDefault();
   }
 
@@ -35,7 +29,7 @@ class Pagination extends React.Component {
    *
    * @param e {Object} Click event
    */
-  onGoPreviousPageClicked(e) {
+  onGoPreviousPageClicked = (e) => {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
@@ -50,7 +44,7 @@ class Pagination extends React.Component {
    *
    * @param e {Object} Click event
    */
-  onGoNextPageClicked(e) {
+  onGoNextPageClicked = (e) => {
     e.preventDefault();
 
     if (!this.isLastPage()) {
@@ -64,7 +58,7 @@ class Pagination extends React.Component {
    *
    * @param e {Object} Click event
    */
-  onGoFirstPageClicked(e) {
+  onGoFirstPageClicked = (e) => {
     e.preventDefault();
 
     this.props.changePage(1);
@@ -77,7 +71,7 @@ class Pagination extends React.Component {
    *
    * @param e {Object} Click event
    */
-  onGoLastPageClicked(e) {
+  onGoLastPageClicked = (e) => {
     e.preventDefault();
 
     this.props.changePage(this.getLastPageNumber());
@@ -88,7 +82,7 @@ class Pagination extends React.Component {
    *
    * @returns {number}
    */
-  getLastPageNumber() {
+  getLastPageNumber = () => {
     return Math.ceil(this.props.count / this.props.limit);
   }
 
@@ -97,7 +91,7 @@ class Pagination extends React.Component {
    *
    * @returns {boolean}
    */
-  isFirstPage() {
+  isFirstPage = () => {
     return this.props.currentPage === 1;
   }
 
@@ -107,7 +101,7 @@ class Pagination extends React.Component {
    *
    * @returns {boolean}
    */
-  needPreviousLinksDots() {
+  needPreviousLinksDots = () => {
     return this.props.currentPage > 3;
   }
   /**
@@ -116,7 +110,7 @@ class Pagination extends React.Component {
    *
    * @returns {boolean}
    */
-  needAfterLinksDots() {
+  needAfterLinksDots = () => {
     return this.props.currentPage < this.getLastPageNumber() - 1;
   }
 
@@ -125,11 +119,11 @@ class Pagination extends React.Component {
    *
    * @returns {boolean}
    */
-  isLastPage() {
+  isLastPage = () => {
     return this.props.currentPage === this.getLastPageNumber();
   }
 
-  render() {
+  renderLinks = () => {
     // Init variables
     const linksOptions = [];
 
@@ -189,17 +183,21 @@ class Pagination extends React.Component {
     }
 
     // Generate links
-    const links = linksOptions.map((linksOption, i) => (
-      <li
-        className={`${linksOption.isActive && styles.navLiActive}`}
-        key={i}
-      >
-        <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
-          {linksOption.value}
-        </a>
-      </li>
-    ));
+    return (
+      map(linksOptions, (linksOption, key) => (
+        <li
+          className={`${linksOption.isActive && styles.navLiActive}`}
+          key={key}
+        >
+          <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
+            {linksOption.value}
+          </a>
+        </li>
+      ))
+    );
+  }
 
+  render() {
     return (
       <div className={styles.pagination}>
         <div>
@@ -216,7 +214,7 @@ class Pagination extends React.Component {
           </a>
           <nav className={styles.nav}>
             <ul className={styles.navUl}>
-              {links}
+              {this.renderLinks()}
             </ul>
           </nav>
           <a

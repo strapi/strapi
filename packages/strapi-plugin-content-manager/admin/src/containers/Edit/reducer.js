@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, Map } from 'immutable';
 
 import {
   SET_INITIAL_STATE,
@@ -20,6 +20,7 @@ import {
   DELETE_RECORD_SUCCESS,
   DELETE_RECORD_ERROR,
   TOGGLE_NULL,
+  CANCEL_CHANGES,
 } from './constants';
 
 const initialState = fromJS({
@@ -66,6 +67,8 @@ function editReducer(state = initialState, action) {
       return state.set('deleting', false);
     case TOGGLE_NULL:
       return state.set('isRelationComponentNull', !state.get('isRelationComponentNull'));
+    case CANCEL_CHANGES:
+      return state.set('record', Map({}));
     default:
       return state;
   }
