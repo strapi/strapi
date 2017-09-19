@@ -25,6 +25,7 @@ class TableHeader extends React.Component {
     const headers = this.props.headers.map((header, i) => {
       // Define sort icon
       let icon;
+      
       if (this.props.sort === header.name) {
         icon = <i className={`fa fa-sort-asc ${styles.icon}`} />;
       } else if (this.props.sort === `-${header.name}`) {

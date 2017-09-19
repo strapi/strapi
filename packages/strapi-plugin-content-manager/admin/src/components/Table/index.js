@@ -14,22 +14,6 @@ import styles from './styles.scss';
 
 class Table extends React.Component {
   render() {
-    const tableRows = this.props.records.map((record, key) => {
-      const destination = `${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`;
-
-      return (
-        <TableRow
-          key={key}
-          destination={destination}
-          headers={this.props.headers}
-          record={record}
-          history={this.props.history}
-          primaryKey={this.props.primaryKey}
-          handleDelete={this.props.handleDelete}
-        />
-      );
-    });
-
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
@@ -39,7 +23,17 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
         />
         <tbody>
-          {tableRows}
+          {this.props.records.map((record, key) => (
+            <TableRow
+              key={key}
+              destination={`${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`}
+              headers={this.props.headers}
+              record={record}
+              history={this.props.history}
+              primaryKey={this.props.primaryKey}
+              handleDelete={this.props.handleDelete}
+            />
+          ))}
         </tbody>
       </table>
     );
