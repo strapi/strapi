@@ -16,7 +16,8 @@ module.exports = strapi => {
 
     defaults: {
       p3p: {
-        enabled: false
+        enabled: false,
+        value: ''
       }
     },
 

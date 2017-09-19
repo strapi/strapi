@@ -16,7 +16,9 @@ module.exports = strapi => {
 
     defaults: {
       csrf: {
-        enabled: false
+        enabled: false,
+        key: '_csrf',
+        secret: '_csrfSecret'
       }
     },
 

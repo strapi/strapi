@@ -16,7 +16,8 @@ module.exports = strapi => {
 
     defaults: {
       xss: {
-        enabled: false
+        enabled: false,
+        mode: 'block'
       }
     },
 
