@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './styles.scss';
 
@@ -28,11 +28,11 @@ class TableRow extends React.Component {
   getDisplayedValue(type, value) {
     switch (type) {
       case 'string':
-        return !_.isEmpty(value) ? value.toString() : '-';
+        return !isEmpty(value) ? value.toString() : '-';
       case 'integer':
-        return !_.isEmpty(value) ? value.toString() : '-';
+        return !isEmpty(value) ? value.toString() : '-';
       case 'boolean':
-        return !_.isEmpty(value) ? value.toString() : '-';
+        return !isEmpty(value) ? value.toString() : '-';
       default:
         return '-';
     }

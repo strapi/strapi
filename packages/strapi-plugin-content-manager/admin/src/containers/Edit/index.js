@@ -39,6 +39,7 @@ import {
   setRecordAttribute,
   editRecord,
   toggleNull,
+  cancelChanges,
 } from './actions';
 
 // Selectors.
@@ -59,6 +60,35 @@ import saga from './sagas';
 export class Edit extends React.Component {
   constructor(props) {
     super(props);
+    this.pluginHeaderActions = [
+      {
+        label: 'content-manager.containers.Edit.cancel',
+        handlei18n: true,
+        buttonBackground: 'secondary',
+        buttonSize: 'buttonMd',
+        onClick: this.props.cancelChanges,
+        type: 'button',
+      },
+      {
+        handlei18n: true,
+        buttonBackground: 'primary',
+        buttonSize: 'buttonLg',
+        label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
+        onClick: this.props.editRecord,
+        disabled: this.props.editing,
+        type: 'submit',
+      },
+    ];
+
+    this.pluginHeaderSubActions = [
+      {
+        label: 'content-manager.containers.Edit.returnList',
+        handlei18n: true,
+        buttonBackground: 'back',
+        onClick: () => router.goBack(),
+        type: 'button',
+      },
+    ];
   }
 
   componentDidMount() {
@@ -71,6 +101,12 @@ export class Edit extends React.Component {
     } else {
       this.props.loadRecord(this.props.match.params.id);
     }
+
+    document.addEventListener('keydown', this.handleSubmitOnEnterPress);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleSubmitOnEnterPress);
   }
 
   handleChange = (e) => {
@@ -79,77 +115,22 @@ export class Edit extends React.Component {
     }
 
     this.props.setRecordAttribute(e.target.name, e.target.value);
-  };
+  }
 
   handleSubmit = () => {
     this.props.editRecord();
-  };
+  }
+
+  handleSubmitOnEnterPress = (e) => {
+    if (e.keyCode === 13) {
+      this.props.editRecord();
+    }
+  }
 
   render() {
     if (this.props.loading || !this.props.schema || !this.props.currentModelName) {
       return <p>Loading...</p>;
     }
-
-    const content = (
-      <EditForm
-        record={this.props.record}
-        currentModelName={this.props.currentModelName}
-        schema={this.props.schema}
-        setRecordAttribute={this.props.setRecordAttribute}
-        handleChange={this.handleChange}
-        handleSubmit={this.handleSubmit}
-        editing={this.props.editing}
-      />
-    );
-
-    const relations = (
-      <EditFormRelations
-        currentModelName={this.props.currentModelName}
-        record={this.props.record}
-        schema={this.props.schema}
-        setRecordAttribute={this.props.setRecordAttribute}
-        isNull={this.props.isRelationComponentNull}
-        toggleNull={this.props.toggleNull}
-      />
-    );
-
-    // Define plugin header actions
-    const pluginHeaderActions = [
-      {
-        label: 'content-manager.containers.Edit.cancel',
-        handlei18n: true,
-        buttonBackground: 'secondary',
-        buttonSize: 'buttonMd',
-        onClick: () => router.push(`/plugins/content-manager/${this.props.currentModelName}`),
-      },
-      {
-        handlei18n: true,
-        buttonBackground: 'primary',
-        buttonSize: 'buttonLg',
-        label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
-        onClick: this.props.editRecord,
-        disabled: this.props.editing,
-      },
-    ];
-
-    const pluginHeaderSubActions = [
-      {
-        label: 'content-manager.containers.Edit.returnList',
-        handlei18n: true,
-        buttonBackground: 'back',
-        onClick: () => router.goBack(),
-      },
-    ]
-
-    // Add the `Delete` button only in edit mode
-    // if (!this.props.isCreating) {
-    //   pluginHeaderActions.push({
-    //     label: 'content-manager.containers.Edit.delete',
-    //     class: 'btn-danger',
-    //     onClick: this.props.deleteRecord,
-    //     disabled: this.props.deleting,
-    //   });
-    // }
 
     // Plugin header config
     const primaryKey = this.props.models[this.props.currentModelName].primaryKey;
@@ -168,19 +149,34 @@ export class Edit extends React.Component {
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`,
             }}
-            actions={pluginHeaderActions}
-            subActions={pluginHeaderSubActions}
+            actions={this.pluginHeaderActions}
+            subActions={this.pluginHeaderSubActions}
             fullWidth={this.props.isRelationComponentNull}
           />
           <div className='row'>
             <div className={this.props.isRelationComponentNull ? `col-lg-12` : `col-lg-8`}>
               <div className={styles.main_wrapper}>
-                {content}
+                <EditForm
+                  record={this.props.record}
+                  currentModelName={this.props.currentModelName}
+                  schema={this.props.schema}
+                  setRecordAttribute={this.props.setRecordAttribute}
+                  handleChange={this.handleChange}
+                  handleSubmit={this.handleSubmit}
+                  editing={this.props.editing}
+                />
               </div>
             </div>
             <div className={`col-lg-4 ${this.props.isRelationComponentNull ? 'hidden-xl-down' : ''}`}>
               <div className={styles.sub_wrapper}>
-                {relations}
+                <EditFormRelations
+                  currentModelName={this.props.currentModelName}
+                  record={this.props.record}
+                  schema={this.props.schema}
+                  setRecordAttribute={this.props.setRecordAttribute}
+                  isNull={this.props.isRelationComponentNull}
+                  toggleNull={this.props.toggleNull}
+                />
               </div>
             </div>
           </div>
@@ -191,6 +187,7 @@ export class Edit extends React.Component {
 }
 
 Edit.propTypes = {
+  cancelChanges: PropTypes.func.isRequired,
   currentModelName: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
@@ -250,6 +247,7 @@ function mapDispatchToProps(dispatch) {
       setRecordAttribute,
       editRecord,
       toggleNull,
+      cancelChanges,
     },
     dispatch
   );

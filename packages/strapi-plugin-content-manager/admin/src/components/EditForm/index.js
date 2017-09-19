@@ -7,7 +7,7 @@
 // Dependencies.
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { omit } from 'lodash';
 
 // Components.
 import Input from 'components/Input';
@@ -38,7 +38,7 @@ class EditForm extends React.Component {
 
   render() {
     // Remove `id` field
-    const displayedFields = _.omit(this.props.schema[this.props.currentModelName].fields, 'id');
+    const displayedFields = omit(this.props.schema[this.props.currentModelName].fields, 'id');
 
     // List fields inputs
     const fields = Object.keys(displayedFields).map(attr => {
