@@ -28,9 +28,22 @@ module.exports = {
   },
 
   create: async function (params) {
-    return await this
+    const entry = await this
       .forge()
-      .save(params.values);
+      .save(Object.keys(params.values).reduce((acc, current) => {
+      if (this._attributes[current].type) {
+        acc[current] = params.values[current];
+      }
+
+      return acc;
+    }, {}));
+
+    return module.exports.update.call(this, {
+      [this.primaryKey]: entry[this.primaryKey],
+      values: _.merge({
+        id: entry[this.primaryKey]
+      }, params.values)
+    });
   },
 
   update: async function (params) {
@@ -114,29 +127,21 @@ module.exports = {
 
               // Push the work into the flow process.
               toAdd.forEach(value => {
-                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
-                  value[details.via] = (value[details.via] || []).concat([params.values[this.primaryKey]]);
-                } else {
-                  value[details.via] = params.values[this.primaryKey];
-                }
+                value[details.via] = params.values[this.primaryKey];
 
                 virtualFields.push(strapi.query(details.model || details.collection).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
                 }));
               });
 
               toRemove.forEach(value => {
-                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
-                  value[details.via] = value[details.via].filter(x => x.toString() !== params.values[this.primaryKey].toString());
-                } else {
-                  value[details.via] = null;
-                }
+                value[details.via] = null;
 
                 virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
                 }));
               });
@@ -156,7 +161,7 @@ module.exports = {
       .forge({
         [this.primaryKey]: params[this.primaryKey]
       })
-      .save(params.values, {
+      .save(values, {
         patch: true
       }));
 
@@ -167,7 +172,7 @@ module.exports = {
   },
 
   delete: async function (params) {
-    return await params.model
+    return await this
       .forge({
         [this.primaryKey]: params[this.primaryKey]
       })
@@ -189,7 +194,7 @@ module.exports = {
       case 'manyToMany':
         return this.forge({
           [this.primaryKey]: params[this.primaryKey]
-        })[association.alias]().attach(params.values.id);
+        })[association.alias]().attach(params.values[this.primaryKey]);
       default:
         // Resolve silently.
         return Promise.resolve();
@@ -211,7 +216,7 @@ module.exports = {
       case 'manyToMany':
         return this.forge({
           [this.primaryKey]: params[this.primaryKey]
-        })[association.alias]().detach(params.values.id);
+        })[association.alias]().detach(params.values[this.primaryKey]);
       default:
         // Resolve silently.
         return Promise.resolve();
