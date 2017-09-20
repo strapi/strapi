@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { isEmpty, map, replace, split } from 'lodash';
+import { isEmpty, isUndefined, map, replace, split } from 'lodash';
 import { router } from 'app';
 
 // Selectors.
@@ -148,10 +148,17 @@ export class List extends React.Component {
   }
 
   toggleModalWarning = (e) => {
-    e.preventDefault();
-    e.stopPropagation()
+    if (!isUndefined(e)) {
 
-    this.setState({ showWarning: !this.state.showWarning, target: e.target.id });
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.setState({
+        target: e.target.id,
+      });
+    }
+
+    this.setState({ showWarning: !this.state.showWarning });
   }
 
   render() {
