@@ -87,7 +87,7 @@ module.exports = {
     const params = ctx.params;
     const response = await strapi.query(params.model).findOne({
       id: params.id
-    })
+    });
 
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
       const association = strapi.models[params.model].associations.filter(x => x.alias === current)[0];
@@ -100,8 +100,10 @@ module.exports = {
       return acc;
     }, {});
 
-    // Run update to remove all relationships.
-    await strapi.query(params.model).update(params);
+    if (!_.isEmpty(params.values)) {
+      // Run update to remove all relationships.
+      await strapi.query(params.model).update(params);
+    }
 
     // Delete an entry using `queries` system
     const entryDeleted = await strapi.query(params.model).delete({

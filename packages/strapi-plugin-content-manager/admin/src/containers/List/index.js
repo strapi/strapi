@@ -190,7 +190,7 @@ export class List extends React.Component {
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
           handleDelete={this.toggleModalWarning}
-          redirectUrl={`?redirectUrl=/plugins/content-manager/category/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
+          redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
         />
       );
     }

@@ -142,6 +142,7 @@ export class Edit extends React.Component {
 
     if (isEmpty(formErrors)) {
       this.props.editRecord();
+
       if (!isEmpty(this.props.location.search)) {
         router.push(replace(this.props.location.search, '?redirectUrl=', ''));
       } else {
