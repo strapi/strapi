@@ -48,6 +48,9 @@ const makeSelectFormErrors = () =>
 const makeSelectDidCheckErrors = () =>
   createSelector(selectEditDomain(), substate => substate.get('didCheckErrors'));
 
+const makeSelectEditSuccess = () =>
+  createSelector(selectEditDomain(), substate => substate.get('editSuccess'));
+
 export default selectEditDomain;
 export {
   makeSelectRecord,
@@ -61,4 +64,5 @@ export {
   makeSelectFormValidations,
   makeSelectFormErrors,
   makeSelectDidCheckErrors,
+  makeSelectEditSuccess,
 };

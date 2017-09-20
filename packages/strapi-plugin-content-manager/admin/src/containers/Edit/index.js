@@ -49,6 +49,7 @@ import {
   setForm,
   setFormErrors,
   recordEdited,
+  resetEditSuccess,
 } from './actions';
 
 // Selectors.
@@ -65,6 +66,7 @@ import {
   makeSelectFormValidations,
   makeSelectFormErrors,
   makeSelectDidCheckErrors,
+  makeSelectEditSuccess,
 } from './selectors';
 
 import reducer from './reducer';
@@ -122,9 +124,20 @@ export class Edit extends React.Component {
     document.addEventListener('keydown', this.handleSubmitOnEnterPress);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.editSuccess !== nextProps.editSuccess) {
+      if (!isEmpty(this.props.location.search)) {
+        router.push(replace(this.props.location.search, '?redirectUrl=', ''));
+      } else {
+        router.push(replace(this.props.location.pathname, 'create', ''));
+      }
+    }
+  }
+
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleSubmitOnEnterPress);
     this.props.recordEdited();
+    this.props.resetEditSuccess();
   }
 
   handleChange = (e) => {
@@ -135,18 +148,14 @@ export class Edit extends React.Component {
     this.props.setRecordAttribute(e.target.name, e.target.value);
   }
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
+    e.preventDefault();
     const form = this.props.form.toJS();
     map(this.props.record.toJS(), (value, key) => form[key] = value);
     const formErrors = checkFormValidity(form, this.props.formValidations.toJS());
 
     if (isEmpty(formErrors)) {
       this.props.editRecord();
-      if (!isEmpty(this.props.location.search)) {
-        router.push(replace(this.props.location.search, '?redirectUrl=', ''));
-      } else {
-        router.push(replace(this.props.location.pathname, 'create', ''));
-      }
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -230,6 +239,7 @@ Edit.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   editing: PropTypes.bool.isRequired,
   editRecord: PropTypes.func.isRequired,
+  editSuccess: PropTypes.bool.isRequired,
   form: PropTypes.object.isRequired,
   formErrors: PropTypes.oneOfType([
     PropTypes.array,
@@ -259,6 +269,7 @@ Edit.propTypes = {
     PropTypes.bool,
   ]).isRequired,
   recordEdited: PropTypes.func,
+  resetEditSuccess: PropTypes.func,
   schema: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,
@@ -287,6 +298,7 @@ const mapStateToProps = createStructuredSelector({
   formValidations: makeSelectFormValidations(),
   formErrors: makeSelectFormErrors(),
   didCheckErrors: makeSelectDidCheckErrors(),
+  editSuccess: makeSelectEditSuccess(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -304,6 +316,7 @@ function mapDispatchToProps(dispatch) {
       setForm,
       setFormErrors,
       recordEdited,
+      resetEditSuccess,
     },
     dispatch
   );
