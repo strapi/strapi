@@ -10,13 +10,15 @@
     font-size: 1.3rem;
     vertical-align: middle !important;
     > span {
+      position: relative;
       cursor: pointer;
     }
   }
 }
 
 .iconAsc{
-  margin-left: 5px;
+  position: absolute;
+  top: 3px; right: -12px;
 
   &:before{
     vertical-align: sub;
@@ -24,6 +26,7 @@
 }
 
 .iconDesc{
-  margin-left: 5px;
+  position: absolute;
+  top: 3px; right: -12px;
   transform: translateY(-3px) rotateZ(180deg);
 }
