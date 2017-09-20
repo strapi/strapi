@@ -550,7 +550,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           form={this.props.form}
           values={values}
           selectOptions={this.props.selectOptions}
-          selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
           handleChange={this.handleChange}
           handleBlur={this.handleBlur}
           handleSubmit={this.handleSubmit}
@@ -638,7 +637,6 @@ Form.propTypes = {
   resetIsFormSet: PropTypes.func,
   routePath: PropTypes.string,
   selectOptions: PropTypes.array,
-  selectOptionsFetchSucceeded: PropTypes.bool,
   setAttributeForm: PropTypes.func,
   setAttributeFormEdit: PropTypes.func,
   setForm: PropTypes.func.isRequired,

@@ -65,6 +65,7 @@ export function connectionsFetch() {
 
 export function connectionsFetchSucceeded(data) {
   const connections = map(data.connections, (connection) => ({ name: connection, value: connection }));
+  connections.splice(0,0, { name: '', value: '' });
   return {
     type: CONNECTIONS_FETCH_SUCCEEDED,
     connections,

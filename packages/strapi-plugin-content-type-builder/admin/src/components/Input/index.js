@@ -23,12 +23,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
 
   componentDidMount() {
-    // Init the select value if type === "select"
-    if (this.props.type === 'select' && !isEmpty(this.props.selectOptions) && this.props.selectOptions[0].value !== '') {
-      const target = { name: this.props.name, value: this.props.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     if (this.props.value && !isEmpty(this.props.value)) {
       this.setState({ hasInitialValue: true });
     }
@@ -39,11 +33,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
-      const target = { name: nextProps.name, value: nextProps.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     // Check if errors have been updated during validations
     if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
 
@@ -163,10 +152,15 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputSelect = (bootStrapClass, requiredClass, inputDescription) => {
-    const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+  renderInputSelect = (bootStrapClass, requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
     return (
-      <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
+      <div className={`${styles.input} ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} />
         </label>
@@ -177,20 +171,24 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           onChange={this.props.handleChange}
           value={this.props.value}
           disabled={this.props.disabled}
+          onBlur={handleBlur}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`${option.name}`} key={key}>
-              {(message) => (
-                <option value={option.value}>
-                  {message}
-                </option>
-              )}
-            </FormattedMessage>
+            option.name ?
+              <FormattedMessage id={`${option.name}`} key={key}>
+                {(message) => (
+                  <option value={option.value}>
+                    {message}
+                  </option>
+                )}
+              </FormattedMessage> :
+              <option value={option.value} key={key}>{option.name}</option>
           ))}
         </select>
         <div className={styles.inputDescriptionContainer}>
           <small>{inputDescription}</small>
         </div>
+        {this.renderErrors()}
         {spacer}
       </div>
     );
@@ -301,7 +299,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     switch (this.props.type) {
       case 'select':
-        return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription);
+        return this.renderInputSelect(bootStrapClass, requiredClass, inputDescription, bootStrapClassDanger, handleBlur);
       case 'textarea':
         return this.renderInputTextArea(bootStrapClass, requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':
@@ -357,7 +355,6 @@ Input.propTypes = {
   placeholder: PropTypes.string,
   pluginId: PropTypes.string,
   selectOptions: PropTypes.array,
-  selectOptionsFetchSucceeded: PropTypes.bool,
   title: PropTypes.string,
   type: PropTypes.string.isRequired,
   validations: PropTypes.object.isRequired,

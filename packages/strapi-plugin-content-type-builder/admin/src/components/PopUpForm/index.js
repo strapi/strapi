@@ -49,7 +49,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         value={value}
         customBootstrapClass={customBootstrapClass}
         selectOptions={this.props.selectOptions || []}
-        selectOptionsFetchSucceeded={this.props.selectOptionsFetchSucceeded}
         placeholder={item.placeholder}
         title={item.title}
         errors={errors}
@@ -156,7 +155,6 @@ PopUpForm.propTypes = {
   ]),
   routePath: PropTypes.string,
   selectOptions: PropTypes.array,
-  selectOptionsFetchSucceeded: PropTypes.bool,
   showLoader: PropTypes.bool,
   toggle: PropTypes.func,
   values: PropTypes.object,
