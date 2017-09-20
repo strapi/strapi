@@ -21,6 +21,7 @@ import {
   LOAD_RECORD_SUCCESS,
   SET_RECORD_ATTRIBUTE,
   TOGGLE_NULL,
+  RESET_EDIT_SUCCESS,
   SET_FORM_VALIDATIONS,
   SET_FORM,
   SET_FORM_ERRORS,
@@ -83,6 +84,12 @@ export function recordLoaded(record) {
   return {
     type: LOAD_RECORD_SUCCESS,
     record,
+  };
+}
+
+export function resetEditSuccess() {
+  return {
+    type: RESET_EDIT_SUCCESS,
   };
 }
 

@@ -21,6 +21,7 @@ import {
   DELETE_RECORD_ERROR,
   TOGGLE_NULL,
   CANCEL_CHANGES,
+  RESET_EDIT_SUCCESS,
   SET_FORM_VALIDATIONS,
   SET_FORM,
   SET_FORM_ERRORS,
@@ -38,6 +39,7 @@ const initialState = fromJS({
   formErrors: List(),
   form: Map({}),
   didCheckErrors: false,
+  editSuccess: false,
 });
 
 function editReducer(state = initialState, action) {
@@ -66,7 +68,9 @@ function editReducer(state = initialState, action) {
     case EDIT_RECORD:
       return state.set('editing', true);
     case EDIT_RECORD_SUCCESS:
-      return state.set('editing', false);
+      return state
+        .set('editSuccess', true)
+        .set('editing', false);
     case EDIT_RECORD_ERROR:
       return state.set('editing', false);
     case DELETE_RECORD:
@@ -88,6 +92,8 @@ function editReducer(state = initialState, action) {
       return state
         .set('formErrors', List(action.formErrors))
         .set('didCheckErrors', !state.didCheckErrors);
+    case RESET_EDIT_SUCCESS:
+      return state.set('editSuccess', false);
     default:
       return state;
   }

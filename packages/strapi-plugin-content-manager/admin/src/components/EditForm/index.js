@@ -75,7 +75,7 @@ class EditForm extends React.Component {
     });
 
     return (
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={this.props.handleSubmit}>
         <div className='row'>
           {fields}
         </div>
@@ -90,6 +90,7 @@ EditForm.propTypes = {
   formErrors: PropTypes.array.isRequired,
   formValidations: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
   layout: PropTypes.object.isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,

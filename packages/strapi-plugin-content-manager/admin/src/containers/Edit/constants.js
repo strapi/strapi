@@ -26,3 +26,4 @@ export const DELETE_RECORD_ERROR = 'app/Edit/DELETE_RECORD_ERROR';
 export const CANCEL_CHANGES = 'app/Edit/CANCEL_CHANGES';
 
 export const TOGGLE_NULL = 'app/Edit/TOGGLE_NULL';
+export const RESET_EDIT_SUCCESS = 'app/Edit/RESET_EDIT_SUCCESS';
