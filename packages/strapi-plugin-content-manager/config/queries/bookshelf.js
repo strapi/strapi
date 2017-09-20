@@ -157,13 +157,17 @@ module.exports = {
       return acc;
     }, {});
 
-    virtualFields.push(this
-      .forge({
-        [this.primaryKey]: params[this.primaryKey]
-      })
-      .save(values, {
-        patch: true
-      }));
+    if (!_.isEmpty(values)) {
+      virtualFields.push(this
+        .forge({
+          [this.primaryKey]: params[this.primaryKey]
+        })
+        .save(values, {
+          patch: true
+        }));
+    } else {
+      virtualFields.push(Promise.resolve(_.assign(response, params.values)));
+    }
 
     // Update virtuals fields.
     const process = await Promise.all(virtualFields);

@@ -175,7 +175,7 @@ module.exports = {
     // Delete entry.
     return this
       .remove({
-        [this.primaryKey]: params.id
+        [this.primaryKey]: params[this.primaryKey] || params._id
       });
   },
 
