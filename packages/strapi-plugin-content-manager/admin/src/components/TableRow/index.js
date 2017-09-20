@@ -40,7 +40,7 @@ class TableRow extends React.Component {
 
   // Redirect to the edit page
   handleClick() {
-    this.context.router.history.push(this.props.destination);
+    this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
   }
 
   render() {
@@ -79,6 +79,7 @@ TableRow.propTypes = {
   handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
   record: PropTypes.object.isRequired,
+  redirectUrl: PropTypes.string.isRequired,
 };
 
 TableRow.defaultProps = {
