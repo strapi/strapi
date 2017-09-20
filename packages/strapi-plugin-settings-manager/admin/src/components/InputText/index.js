@@ -28,6 +28,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, remove } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
@@ -188,21 +189,21 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputText.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool.isRequired,
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  deactivateErrorHighlight: React.PropTypes.bool.isRequired,
-  errors: React.PropTypes.array.isRequired,
-  handleBlur: React.PropTypes.func.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func.isRequired,
-  inputDescription: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool.isRequired,
-  placeholder: React.PropTypes.string.isRequired,
-  styles: React.PropTypes.object.isRequired,
-  target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string.isRequired,
+  addRequiredInputDesign: PropTypes.bool.isRequired,
+  customBootstrapClass: PropTypes.string.isRequired,
+  deactivateErrorHighlight: PropTypes.bool.isRequired,
+  errors: PropTypes.array.isRequired,
+  handleBlur: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleFocus: PropTypes.func.isRequired,
+  inputDescription: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  styles: PropTypes.object.isRequired,
+  target: PropTypes.string.isRequired,
+  validations: PropTypes.object.isRequired,
+  value: PropTypes.string.isRequired,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

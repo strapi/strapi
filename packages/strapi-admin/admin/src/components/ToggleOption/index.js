@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 
 const ToggleOption = ({ value, message, intl }) => (
@@ -15,11 +16,11 @@ const ToggleOption = ({ value, message, intl }) => (
 
 ToggleOption.propTypes = {
   intl: intlShape.isRequired,
-  message: React.PropTypes.oneOfType([
-    React.PropTypes.object.isRequired,
-    React.PropTypes.string.isRequired,
+  message: PropTypes.oneOfType([
+    PropTypes.object.isRequired,
+    PropTypes.string.isRequired,
   ]).isRequired,
-  value: React.PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
 };
 
 export default injectIntl(ToggleOption);

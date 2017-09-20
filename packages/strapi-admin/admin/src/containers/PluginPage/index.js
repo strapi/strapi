@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createSelector } from 'reselect';
@@ -41,8 +42,8 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
 }
 
 PluginPage.propTypes = {
-  match: React.PropTypes.object.isRequired,
-  plugins: React.PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createSelector(

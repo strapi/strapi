@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import PluginHeaderTitle from 'components/PluginHeaderTitle';
 import PluginHeaderActions from 'components/PluginHeaderActions';
 
@@ -36,10 +37,10 @@ class PluginHeader extends React.Component { // eslint-disable-line react/prefer
 }
 
 PluginHeader.propTypes = {
-  actions: React.PropTypes.array.isRequired,
-  subActions: React.PropTypes.array,
-  description: React.PropTypes.object.isRequired,
-  title: React.PropTypes.object.isRequired,
+  actions: PropTypes.array.isRequired,
+  subActions: PropTypes.array,
+  description: PropTypes.object.isRequired,
+  title: PropTypes.object.isRequired,
 };
 
 export default PluginHeader;

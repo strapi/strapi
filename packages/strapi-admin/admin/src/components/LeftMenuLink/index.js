@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 
@@ -36,9 +37,9 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
 }
 
 LeftMenuLink.propTypes = {
-  destination: React.PropTypes.string.isRequired,
-  icon: React.PropTypes.string.isRequired,
-  label: React.PropTypes.string.isRequired,
+  destination: PropTypes.string.isRequired,
+  icon: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
 };
 
 export default LeftMenuLink;

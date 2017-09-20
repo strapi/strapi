@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import styles from './styles.scss';
 
@@ -39,10 +40,10 @@ class SelectOptionLanguage extends React.Component { // eslint-disable-line reac
 }
 
 SelectOptionLanguage.propTypes = {
-  isFocused: React.PropTypes.bool.isRequired,
-  onFocus: React.PropTypes.func.isRequired,
-  onSelect: React.PropTypes.func.isRequired,
-  option: React.PropTypes.object.isRequired,
+  isFocused: PropTypes.bool.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  option: PropTypes.object.isRequired,
 };
 
 export default SelectOptionLanguage;

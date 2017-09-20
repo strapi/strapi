@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { join, map, take } from 'lodash';
 import EditForm from 'components/EditForm';
@@ -49,8 +50,8 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 HeaderNav.propTypes = {
-  links: React.PropTypes.array.isRequired,
-  path: React.PropTypes.string.isRequired,
-  renderListComponent: React.PropTypes.bool.isRequired,
+  links: PropTypes.array.isRequired,
+  path: PropTypes.string.isRequired,
+  renderListComponent: PropTypes.bool.isRequired,
 }
 export default HeaderNav;

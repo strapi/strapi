@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Notification from 'components/Notification';
 
@@ -38,8 +39,8 @@ class NotificationsContainer extends React.Component { // eslint-disable-line re
 }
 
 NotificationsContainer.propTypes = {
-  notifications: React.PropTypes.object.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired,
+  notifications: PropTypes.object.isRequired,
+  onHideNotification: PropTypes.func.isRequired,
 };
 
 export default NotificationsContainer;

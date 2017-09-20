@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
@@ -25,8 +26,8 @@ class PluginHeaderTitle extends React.Component { // eslint-disable-line react/p
 }
 
 PluginHeaderTitle.propTypes = {
-  description: React.PropTypes.object.isRequired,
-  title: React.PropTypes.object.isRequired,
+  description: PropTypes.object.isRequired,
+  title: PropTypes.object.isRequired,
 };
 
 export default PluginHeaderTitle;

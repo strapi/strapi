@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
@@ -53,11 +54,11 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 }
 
 AdminPage.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 AdminPage.propTypes = {
-  plugins: React.PropTypes.object.isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

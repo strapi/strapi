@@ -25,7 +25,7 @@ class TableHeader extends React.Component {
     const headers = this.props.headers.map((header, i) => {
       // Define sort icon
       let icon;
-      
+
       if (this.props.sort === header.name) {
         icon = <i className={`fa fa-sort-asc ${styles.icon}`} />;
       } else if (this.props.sort === `-${header.name}`) {
@@ -63,7 +63,7 @@ class TableHeader extends React.Component {
 TableHeader.propTypes = {
   changeSort: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
-  primaryKey: React.PropTypes.string.isRequired,
+  primaryKey: PropTypes.string.isRequired,
   sort: PropTypes.string.isRequired,
 };
 

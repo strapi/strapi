@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
@@ -50,17 +51,17 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputSelect.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool.isRequired,
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  name: React.PropTypes.string.isRequired,
-  selectOptions: React.PropTypes.oneOfType([
-    React.PropTypes.array.isRequired,
-    React.PropTypes.object.isRequired, // TODO remove
+  addRequiredInputDesign: PropTypes.bool.isRequired,
+  customBootstrapClass: PropTypes.string.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  selectOptions: PropTypes.oneOfType([
+    PropTypes.array.isRequired,
+    PropTypes.object.isRequired, // TODO remove
   ]).isRequired,
-  target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string.isRequired,
+  target: PropTypes.string.isRequired,
+  validations: PropTypes.object.isRequired,
+  value: PropTypes.string.isRequired,
 };
 
 export default InputSelect;

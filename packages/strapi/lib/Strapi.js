@@ -78,7 +78,7 @@ class Strapi extends EventEmitter {
     this.loadFile = utils.loadFile.bind(this);
   }
 
-  async start(cb) {
+  async start(config = {}, cb) {
     try {
       // Enhance app.
       await this.enhancer();
@@ -89,7 +89,7 @@ class Strapi extends EventEmitter {
       // Freeze object.
       await this.freeze();
       // Launch server.
-      this.server.listen(this.config.port, err => {
+      this.server.listen(config.port || this.config.port, err => {
         if (err) {
           console.log(err);
         }

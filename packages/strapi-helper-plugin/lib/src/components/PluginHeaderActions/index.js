@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Button from 'components/Button';
 
@@ -30,7 +31,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
 }
 
 PluginHeaderActions.propTypes = {
-  actions: React.PropTypes.array.isRequired,
+  actions: PropTypes.array.isRequired,
 };
 
 export default PluginHeaderActions;

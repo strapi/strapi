@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -26,11 +27,11 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  addShape: React.PropTypes.bool,
-  buttonBackground: React.PropTypes.string,
-  buttonSize: React.PropTypes.string,
-  handlei18n: React.PropTypes.bool,
-  label: React.PropTypes.string.isRequired,
+  addShape: PropTypes.bool,
+  buttonBackground: PropTypes.string,
+  buttonSize: PropTypes.string,
+  handlei18n: PropTypes.bool,
+  label: PropTypes.string.isRequired,
 };
 
 export default Button;

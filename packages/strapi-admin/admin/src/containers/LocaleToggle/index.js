@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -32,8 +33,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 }
 
 LocaleToggle.propTypes = {
-  locale: React.PropTypes.string.isRequired,
-  onLocaleToggle: React.PropTypes.func.isRequired,
+  locale: PropTypes.string.isRequired,
+  onLocaleToggle: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createSelector(
