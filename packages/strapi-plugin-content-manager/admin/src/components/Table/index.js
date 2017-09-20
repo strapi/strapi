@@ -9,11 +9,31 @@ import PropTypes from 'prop-types';
 
 import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
+import TableEmpty from '../TableEmpty';
 
 import styles from './styles.scss';
 
 class Table extends React.Component {
   render() {
+    const rows = this.props.records.length === 0 ?
+      (
+        <TableEmpty
+          colspan={this.props.headers.length}
+          contentType={this.props.routeParams.slug}
+        />
+      ) :
+      this.props.records.map((record, key) => (
+        <TableRow
+          key={key}
+          destination={`${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`}
+          headers={this.props.headers}
+          record={record}
+          history={this.props.history}
+          primaryKey={this.props.primaryKey}
+          handleDelete={this.props.handleDelete}
+        />
+      ));
+
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
@@ -23,17 +43,7 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
         />
         <tbody>
-          {this.props.records.map((record, key) => (
-            <TableRow
-              key={key}
-              destination={`${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`}
-              headers={this.props.headers}
-              record={record}
-              history={this.props.history}
-              primaryKey={this.props.primaryKey}
-              handleDelete={this.props.handleDelete}
-            />
-          ))}
+          {rows}
         </tbody>
       </table>
     );

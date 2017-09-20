@@ -150,11 +150,30 @@
 }
 
 .inputDate{
-  input {
-    width: 100%;
+  > div:first-of-type{
+    &:before{
+      position: absolute;
+      left: 1px; top: 1px;
+      content: '\f073';
+      width: 32px;
+      height: 32px;
+      background: #FAFAFB;
+      border-radius: 3px 0px 0px 3px;
+      font-family: 'FontAwesome';
+      font-size: 1.4rem;
+      line-height: 32px;
+      text-align: center;
+      color: #B3B5B9;
+      -webkit-font-smoothing: none;
+    }
 
-    &:focus{
-      outline: none;
+    input {
+      width: 100%;
+      padding-left: 42px;
+
+      &:focus{
+        outline: none;
+      }
     }
   }
 }
