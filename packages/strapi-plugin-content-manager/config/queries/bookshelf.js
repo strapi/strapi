@@ -178,7 +178,7 @@ module.exports = {
   delete: async function (params) {
     return await this
       .forge({
-        [this.primaryKey]: params[this.primaryKey]
+        [this.primaryKey]: params.id
       })
       .destroy();
   },
