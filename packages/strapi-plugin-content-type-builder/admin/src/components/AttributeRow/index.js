@@ -34,6 +34,9 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'relation': IcoRelation,
       'string': IcoString,
       'text': IcoText,
+      'integer': IcoNumber,
+      'float': IcoNumber,
+      'decimal': IcoNumber,
     };
     this.state = {
       showWarning: false,

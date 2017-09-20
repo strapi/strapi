@@ -242,11 +242,11 @@ function setAttributeFormData(hash) {
   const formType = replace(hashArray[1], 'attribute', '');
   const settingsType = hashArray[2];
   const form = forms.attribute[formType][settingsType];
-
+  const type = formType === 'number' ? 'integer' : formType;
   const attribute = Map({
     name: '',
     params: Map({
-      type: formType,
+      type,
       required: false,
       maxLength: false,
       minLength: false,

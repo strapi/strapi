@@ -150,11 +150,26 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   handleEditAttribute = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
-    const attributeType = attribute.params.type ? attribute.params.type : 'relation';
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
 
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
+
+    let attributeType = attribute.params.type ? attribute.params.type : 'relation';
+
+    switch (attributeType) {
+      case 'integer':
+        attributeType = 'number';
+        break;
+      case 'float':
+        attributeType = 'number';
+        break;
+      case 'decimal':
+        attributeType = 'number';
+        break;
+      default:
+
+    }
 
     router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
 

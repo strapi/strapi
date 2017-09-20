@@ -18,13 +18,17 @@ import styles from './styles.scss';
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   renderInput = (item, key) => {
     // const customBootstrapClass = 'col-md-6'
-    const customBootstrapClass = item.type === 'textarea' ?
+    let customBootstrapClass = item.type === 'textarea' ?
       'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6';
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
 
     if (shouldOverrideRendering) {
       return this.props.overrideRenderInput(item, key);
+    }
+
+    if (this.props.overrideCustomBootstrapClass) {
+      customBootstrapClass = this.props.customBootstrapClass;
     }
 
     const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
@@ -123,6 +127,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
 PopUpForm.propTypes = {
   buttonSubmitMessage: PropTypes.string.isRequired,
+  customBootstrapClass: PropTypes.string,
   didCheckErrors: PropTypes.bool,
   form: PropTypes.oneOfType([
     PropTypes.array.isRequired,
@@ -138,6 +143,7 @@ PopUpForm.propTypes = {
   isOpen: PropTypes.bool,
   noButtons: PropTypes.bool,
   noNav: PropTypes.bool,
+  overrideCustomBootstrapClass: PropTypes.bool,
   overrideHandleBlurCondition: PropTypes.func,
   overrideRenderInput: PropTypes.func,
   overrideRenderInputCondition: PropTypes.func,

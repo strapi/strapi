@@ -285,7 +285,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       return this.props.setFormErrors(formErrors);
     }
 
-    this.editContentTypeAttribute();
     const contentType = storeData.getContentType();
     const newAttribute = this.setTempAttribute();
     const oldAttribute = contentType.attributes[this.props.hash.split('::')[3]];
@@ -299,6 +298,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     if (oldAttribute.params.target === this.props.modelName && newAttribute.params.target !== this.props.modelName) {
       contentType.attributes.splice(findIndex(contentType.attributes, ['name', oldAttribute.params.key]), 1);
     }
+
+    this.editContentTypeAttribute();
+
     const newContentType = contentType;
     // Empty errors
     this.props.resetFormErrors();
@@ -473,6 +475,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.resetFormErrors();
   }
 
+  overrideCustomBootstrapClass = () => {
+    return includes(this.props.hash, 'attributenumber');
+  }
+
   renderInput = (item, key) => (
     <InputCheckboxWithNestedInputs
       key={key}
@@ -515,6 +521,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
     const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
     const edit = includes(this.props.hash, '#edit');
+    const selectOptions = includes(this.props.hash, 'attributenumber') ? get(this.props.form, ['items', '1', 'items']) : this.props.selectOptions;
 
     if (includes(popUpFormType, 'relation')) {
       return (
@@ -549,7 +556,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           popUpHeaderNavLinks={this.props.popUpHeaderNavLinks}
           form={this.props.form}
           values={values}
-          selectOptions={this.props.selectOptions}
+          selectOptions={selectOptions}
           handleChange={this.handleChange}
           handleBlur={this.handleBlur}
           handleSubmit={this.handleSubmit}
@@ -565,6 +572,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           pluginId="content-type-builder"
+          overrideCustomBootstrapClass={includes(this.props.hash, 'attributenumber')}
+          customBootstrapClass='col-md-6'
         />
       </div>
     );

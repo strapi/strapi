@@ -44,7 +44,10 @@
   "form.attribute.item.defineRelation.fieldName": "Field name",
   "form.attribute.item.customColumnName": "Custom column names",
   "form.attribute.item.customColumnName.description": "This is useful to rename database column names in a more comprehensive format for the API's responses",
-
+  "form.attribute.item.number.type": "Number format",
+  "form.attribute.item.number.type.integer": "integer (ex: 10)",
+  "form.attribute.item.number.type.float": "float (ex: 3.33333333)",
+  "form.attribute.item.number.type.decimal": "decimal (ex: 2.22)",
 
   "form.button.cancel": "Cancel",
   "form.button.continue": "Continue",
