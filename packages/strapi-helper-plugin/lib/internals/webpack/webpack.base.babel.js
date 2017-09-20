@@ -138,6 +138,9 @@ module.exports = (options) => ({
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],
+    alias: {
+      moment: 'moment/moment.js',
+    },
     symlinks: false,
     extensions: [
       '.js',
