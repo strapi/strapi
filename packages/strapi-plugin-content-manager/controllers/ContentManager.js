@@ -84,9 +84,28 @@ module.exports = {
   },
 
   delete: async ctx => {
+    const params = ctx.params;
+    const response = await strapi.query(params.model).findOne({
+      id: params.id
+    })
+
+    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
+      const association = strapi.models[params.model].associations.filter(x => x.alias === current)[0];
+
+      // Remove relationships.
+      if (association) {
+        acc[current] = _.isArray(response[current]) ? [] : null;
+      }
+
+      return acc;
+    }, {});
+
+    // Run update to remove all relationships.
+    await strapi.query(params.model).update(params);
+
     // Delete an entry using `queries` system
-    const entryDeleted = await strapi.query(ctx.params.model).delete({
-      id: ctx.params.id
+    const entryDeleted = await strapi.query(params.model).delete({
+      id: params.id
     });
 
     ctx.body = entryDeleted;

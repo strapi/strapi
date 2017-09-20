@@ -123,7 +123,7 @@ module.exports = {
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
                   value[details.via] = (value[details.via] || []).concat([params.values[this.primaryKey]]);
                 } else {
-                  value[details.via] = params.values[this.primaryKey];
+                  value[details.via] = params[this.primaryKey];
                 }
 
                 virtualFields.push(strapi.query(details.model || details.collection).addRelation({
@@ -172,6 +172,7 @@ module.exports = {
   },
 
   delete: async function (params) {
+    // Delete entry.
     return this
       .remove({
         [this.primaryKey]: params.id

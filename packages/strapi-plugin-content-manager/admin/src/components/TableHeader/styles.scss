@@ -10,8 +10,20 @@
     font-size: 1.3rem;
     vertical-align: middle !important;
     > span {
-
       cursor: pointer;
     }
   }
+}
+
+.iconAsc{
+  margin-left: 5px;
+
+  &:before{
+    vertical-align: sub;
+  }
+}
+
+.iconDesc{
+  margin-left: 5px;
+  transform: translateY(-3px) rotateZ(180deg);
 }

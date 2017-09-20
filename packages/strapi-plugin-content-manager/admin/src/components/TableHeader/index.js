@@ -27,9 +27,9 @@ class TableHeader extends React.Component {
       let icon;
 
       if (this.props.sort === header.name) {
-        icon = <i className={`fa fa-sort-asc ${styles.icon}`} />;
+        icon = <i className={`fa fa-sort-asc ${styles.iconAsc}`} />;
       } else if (this.props.sort === `-${header.name}`) {
-        icon = <i className={`fa fa-sort-desc ${styles.icon}`} />;
+        icon = <i className={`fa fa-sort-asc ${styles.iconDesc}`} />;
       }
 
       return (
@@ -39,7 +39,6 @@ class TableHeader extends React.Component {
         >
           <span>
             {header.label}
-            &nbsp;
             {icon}
           </span>
 
