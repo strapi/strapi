@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty } from 'lodash';
+import { map, get, isObject, isEmpty, replace } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -142,7 +142,11 @@ export class Edit extends React.Component {
 
     if (isEmpty(formErrors)) {
       this.props.editRecord();
-      router.goBack();
+      if (!isEmpty(this.props.location.search)) {
+        router.push(replace(this.props.location.search, '?redirectUrl=', ''));
+      } else {
+        router.push(replace(this.props.location.pathname, 'create', ''));
+      }
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -239,6 +243,7 @@ Edit.propTypes = {
   isRelationComponentNull: PropTypes.bool.isRequired,
   loading: PropTypes.bool.isRequired,
   loadRecord: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.string,

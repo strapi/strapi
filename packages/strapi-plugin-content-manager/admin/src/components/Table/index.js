@@ -31,6 +31,7 @@ class Table extends React.Component {
           history={this.props.history}
           primaryKey={this.props.primaryKey}
           handleDelete={this.props.handleDelete}
+          redirectUrl={this.props.redirectUrl}
         />
       ));
 
@@ -61,6 +62,7 @@ Table.propTypes = {
   history: PropTypes.object.isRequired,
   primaryKey: PropTypes.string.isRequired,
   records: PropTypes.array.isRequired,
+  redirectUrl: PropTypes.string.isRequired,
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
   sort: PropTypes.string.isRequired,
