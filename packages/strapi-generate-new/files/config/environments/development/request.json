@@ -10,16 +10,12 @@
     },
     "key": "strapi.sid",
     "prefix": "strapi:sess:",
-    "ttl": 86400000,
-    "rolling": false,
     "secretKeys": ["mySecretKey1", "mySecretKey2"],
-    "cookie": {
-      "path": "/",
-      "httpOnly": true,
-      "maxAge": 86400000,
-      "rewrite": true,
-      "signed": false
-    }
+    "httpOnly": true,
+    "maxAge": 86400000,
+    "overwrite": true,
+    "signed": false,
+    "rolling": false
   },
   "logger": {
     "level": "debug",

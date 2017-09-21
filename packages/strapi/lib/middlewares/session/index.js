@@ -49,7 +49,8 @@ module.exports = strapi => {
 
       if (
         strapi.config.middleware.settings.session.hasOwnProperty('client') &&
-        _.isString(strapi.config.middleware.settings.session.client)
+        _.isString(strapi.config.middleware.settings.session.client) &&
+        strapi.config.middleware.settings.session.client !== 'cookie'
       ) {
         const store = hook.defineStore(strapi.config.middleware.settings.session);
 
@@ -62,17 +63,12 @@ module.exports = strapi => {
                 store
               },
               strapi.config.hook.session,
-              _.pick(strapi.config.middleware.settings.session, [
-                'genSid',
-                'errorHandler',
-                'valid',
-                'beforeSave'
-              ])
+              strapi.config.middleware.settings.session
             );
 
             strapi.app.use(
               strapi.koaMiddlewares.convert(
-                strapi.koaMiddlewares.genericSession(options)
+                strapi.koaMiddlewares.session(options, strapi.app)
               )
             );
             strapi.app.use((ctx, next) => {
@@ -84,6 +80,31 @@ module.exports = strapi => {
           } catch (err) {
             return cb(err);
           }
+        }
+      } else if (
+        strapi.config.middleware.settings.session.hasOwnProperty('client') &&
+        _.isString(strapi.config.middleware.settings.session.client) &&
+        strapi.config.middleware.settings.session.client === 'cookie'
+      ) {
+        try {
+          const options = _.assign(
+            strapi.config.hook.session,
+            strapi.config.middleware.settings.session
+          );
+
+          strapi.app.use(
+            strapi.koaMiddlewares.convert(
+              strapi.koaMiddlewares.session(options, strapi.app)
+            )
+          );
+          strapi.app.use((ctx, next) => {
+            ctx.state = ctx.state || {};
+            ctx.state.session = ctx.session || {};
+
+            return next();
+          });
+        } catch (err) {
+          return cb(err);
         }
       }
 

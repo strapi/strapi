@@ -26,9 +26,13 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      strapi.app.use(strapi.middlewares.convert(strapi.middlewares.lusca.p3p({
-        value: strapi.config.hook.settings.p3p.value
-      })));
+      strapi.app.use(
+        strapi.koaMiddlewares.convert(
+          strapi.koaMiddlewares.lusca.p3p({
+            value: strapi.config.middleware.settings.p3p.value
+          })
+        )
+      );
 
       cb();
     }
