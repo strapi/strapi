@@ -45,7 +45,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
           {map(this.props.dropDownItems, (value, key) => {
             const divStyle = get(this.props.header, 'name') === value.name ? { color: '#323740', fontWeight: 'bold'} : { color: 'rgba(50,55,64, 0.75)'};
             return (
-              <div style={{ height: '3.8rem'}} key={key}>
+              <div style={{ height: '3.6rem'}} key={key}>
                 <DropdownItem onClick={this.handleClick} id={value.name}>
                   <div style={divStyle} id={value.name}>
                     <i className={`fa ${value.icon}`} style={divStyle} />

@@ -136,8 +136,7 @@ module.exports = {
         const attr = {
           required: relation.required,
           columnName: relation.columnName,
-          unique: relation.unique,
-          via: relation.key
+          unique: relation.unique
         };
 
         switch (relation.nature) {
@@ -151,6 +150,8 @@ module.exports = {
             break;
           default:
         }
+
+        attr.via = relation.key;
 
         attrs[attribute.name] = attr;
       }
