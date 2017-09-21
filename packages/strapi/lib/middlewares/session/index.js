@@ -23,6 +23,7 @@ module.exports = strapi => {
     defaults: {
       session: {
         enabled: true,
+        client: 'cookie',
         key: 'strapi.sid',
         prefix: 'strapi:sess:',
         ttl: 24 * 60 * 60 * 1000, // One day in ms
@@ -114,9 +115,13 @@ module.exports = strapi => {
     defineStore: session => {
       if (_.isEmpty(_.get(session, 'client'))) {
         return strapi.log.error('(middleware:session) please provide a valid client to store session');
-      } else if (_.isEmpty(_.get(session, 'settings'))) {
-        return strapi.log.error('(middleware:session) please provide settings for the session store');
+      } else if (_.isEmpty(_.get(session, 'connection'))) {
+        return strapi.log.error('(middleware:session) please provide connection for the session store');
+      } else if (!_.get(strapi, `config.currentEnvironment.database.connections.${session.connection}`)) {
+        return strapi.log.error('(middleware:session) please provide a valid connection for the session store');
       }
+
+      session.settings = _.get(strapi, `config.currentEnvironment.database.connections.${session.connection}`);
 
       // Define correct store name to avoid require to failed.
       switch (session.client.toLowerCase()) {

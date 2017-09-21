@@ -36,6 +36,12 @@ module.exports = function(strapi) {
      */
 
     initialize: cb => {
+      if (_.isEmpty(strapi.models) || !_.pickBy(strapi.config.connections, {
+        connector: 'strapi-redis'
+      })) {
+        return cb();
+      }
+
       const connections = _.pickBy(strapi.config.connections, {
         connector: 'strapi-redis'
       });

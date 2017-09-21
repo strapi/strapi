@@ -1,13 +1,7 @@
 {
   "session": {
     "enabled": false,
-    "client": "redis",
-    "settings": {
-      "host": "localhost",
-      "port": 6379,
-      "database": 10,
-      "password": ""
-    },
+    "client": "cookie",
     "key": "strapi.sid",
     "prefix": "strapi:sess:",
     "secretKeys": ["mySecretKey1", "mySecretKey2"],

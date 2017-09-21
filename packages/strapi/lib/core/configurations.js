@@ -38,7 +38,7 @@ module.exports.nested = function() {
         utils.loadConfig.call(this, files).then(resolve).catch(reject);
       });
     }),
-    // Load plugins configurations.
+    // Load admin configurations.
     new Promise((resolve, reject) => {
       glob('./admin/config/**/*.*(js|json)', {}, (err, files) => {
         if (err) {
