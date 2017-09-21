@@ -42,7 +42,7 @@ li:not(:first-child) {
   color: #2D3138 !important;
   > div {
     > i {
-      color: #2D3138;
+      color: #2D3138 !important
     }
   }
 }
