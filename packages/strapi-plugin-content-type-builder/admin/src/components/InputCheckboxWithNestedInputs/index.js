@@ -12,11 +12,11 @@ import Input from 'components/Input';
 import styles from './styles.scss';
 
 class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  handleChange = (e) => {
+  handleChange = () => {
     const target = {
-      type: e.target.type,
+      type: 'checkbox',
       value: !this.props.value[this.props.data.name.split('.')[1]],
-      name: e.target.name,
+      name: this.props.data.name,
     };
     this.props.handleChange({ target });
   }
@@ -61,8 +61,8 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
           {title}
           <FormattedMessage id={this.props.data.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value[this.props.data.name.split('.')[1]]} onChange={this.handleChange} name={this.props.data.name} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.label} onClick={this.handleChange} style={{ cursor: 'pointer' }}>
+                <input className="form-check-input" type="checkbox" checked={this.props.value[this.props.data.name.split('.')[1]]} name={this.props.data.name} />
                 {message}
               </label>
             )}

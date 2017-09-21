@@ -249,6 +249,7 @@ function setAttributeFormData(hash) {
     params: Map({
       type,
       required: false,
+      unique: false,
       maxLength: false,
       minLength: false,
       min: false,

@@ -101,11 +101,11 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
 
-  handleChangeCheckbox = (e) => {
+  handleChangeCheckbox = () => {
     const target = {
-      type: e.target.type,
+      type: 'checkbox',
       value: !this.props.value,
-      name: e.target.name,
+      name: this.props.name,
     };
 
     this.props.handleChange({ target });
@@ -130,15 +130,15 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   renderInputCheckbox = (requiredClass,  inputDescription) => {
     const title = !isEmpty(this.props.title) ? <div className={styles.inputTitle}><FormattedMessage id={this.props.title} /></div> : '';
     const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}}></div>;
-
+  
     return (
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
           {title}
           <FormattedMessage id={this.props.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label} onClick={this.handleChangeCheckbox}  style={{ cursor: 'pointer' }}>
+                <input className="form-check-input" type="checkbox" checked={this.props.value} name={this.props.name} />
                 {message}
               </label>
             )}
