@@ -75,6 +75,9 @@ export function* submitChanges() {
       storeData.clearAppStorage();
       yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
       yield put(postContentTypeSucceeded());
+      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
+    } else {
+      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
     }
 
     yield put(submitActionSucceeded());

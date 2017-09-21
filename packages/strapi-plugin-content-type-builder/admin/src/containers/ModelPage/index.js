@@ -183,7 +183,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   renderAddLink = (props, customLinkStyles) => (
     <li className={customLinkStyles.pluginLeftMenuLink}>
-      <div className={customLinkStyles.liInnerContainer} onClick={this.handleAddLinkClick}>
+      <div className={`${customLinkStyles.liInnerContainer} ${styles.iconPlus}`} onClick={this.handleAddLinkClick}>
         <div>
           <i className={`fa ${props.link.icon}`} />
         </div>

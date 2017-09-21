@@ -81,6 +81,8 @@
 
   "notification.error.message": "An error occured",
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
+  "notification.success.message.contentType.edit": "Your content type has been updated",
+  "notification.success.message.contentType.create": "Your content type has been created",
 
   "popUpForm.attributes.string.description": "Titles, names, paragraphs, list of names",
   "popUpForm.attributes.text.description": "Descriptions, text paragraphs, articles ",
