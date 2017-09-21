@@ -4,6 +4,7 @@
 
 .header {
   border: none!important;
+  position: relative;
   > h4 {
     width: 100%;
     text-align: center;
@@ -13,12 +14,23 @@
 
   }
   > button {
+    margin-top: -1.6rem;
     margin-right: 0!important;
+    z-index: 999;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0;
+    }
   }
 }
 
 .modalPosition {
-  top: 16.8rem;
+  // top: 16.8rem;
   > div {
     border:none;
     border-radius: 2px;
@@ -48,7 +60,7 @@
   width: 100%;
   padding: 0 .5rem;
   display: flex;
-  margin-top: 3.5rem;
+  margin-top: 3rem;
   justify-content: space-between;
 
   > button {
