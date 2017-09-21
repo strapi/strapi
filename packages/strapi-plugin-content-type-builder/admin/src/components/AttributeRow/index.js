@@ -11,14 +11,14 @@ import { capitalize } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
 
-import IcoBoolean from '../../assets/images/icon_boolean.svg';
-import IcoDate from '../../assets/images/icon_date.svg';
-import IcoImage from '../../assets/images/icon_image.svg';
-import IcoNumber from '../../assets/images/icon_number.svg';
-import IcoJson from '../../assets/images/icon_json.svg';
-import IcoRelation from '../../assets/images/icon_relation.svg';
-import IcoString from '../../assets/images/icon_string.svg';
-import IcoText from '../../assets/images/icon_text.svg';
+import IcoBoolean from '../../assets/images/icon_boolean.png';
+import IcoDate from '../../assets/images/icon_date.png';
+import IcoImage from '../../assets/images/icon_image.png';
+import IcoNumber from '../../assets/images/icon_number.png';
+import IcoJson from '../../assets/images/icon_json.png';
+import IcoRelation from '../../assets/images/icon_relation.png';
+import IcoString from '../../assets/images/icon_string.png';
+import IcoText from '../../assets/images/icon_text.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */

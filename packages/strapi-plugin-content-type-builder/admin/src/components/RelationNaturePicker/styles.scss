@@ -3,9 +3,13 @@
   width: 25.5rem;
   position: relative;
   padding-top: 4.5rem;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 25px;
+  padding-right: 25px;
   justify-content: space-around;
+
+  img:hover{
+    cursor: pointer;
+  }
 }
 
 .relationNaturePicker::before {

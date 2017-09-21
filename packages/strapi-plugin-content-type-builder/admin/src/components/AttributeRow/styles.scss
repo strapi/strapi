@@ -1,13 +1,15 @@
 .attributeRow { /* stylelint-disable */
-  list-style: none;
+  cursor: pointer;
   min-height: 5.3rem;
   margin-top: 0!important;
+  list-style: none;
   font-size: 1.3rem;
   line-height: 5.3rem;
-  cursor: pointer;
+
   &:last-child .flex {
     border-bottom: none;
   }
+
   &:hover {
     background-color: #F7F8F8;
   }
@@ -24,6 +26,15 @@
 .nameContainer {
   display: flex;
   width: 30rem;
+  align-items: center;
+
+  > img{
+    display: inline-block;
+    width: 35px;
+    height: 20px;
+    margin-top: -2px;
+  }
+
   > div {
     margin-left: 3.9rem;
     color: #333740;

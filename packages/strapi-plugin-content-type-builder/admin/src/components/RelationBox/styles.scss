@@ -4,6 +4,7 @@
   background-color: #FCFCFC;
   box-shadow: 0 1px 2px #CAD2DF;
   z-index: 9999;
+  border-radius: 2px;
 }
 
 .headerContainer {
@@ -21,12 +22,12 @@
   text-transform: capitalize;
   display: block;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  overflow: visible;
 
   > i {
     margin-right: 8px;
-    color: rgba(50, 55, 64, 0.75);
+    color: #323740;
     font-size: 1.3rem;
     font-weight: 100;
   }
@@ -48,16 +49,17 @@
 .dropDown {
   position: absolute;
   width: 100%;
+  height: 100%;
   display: flex;
-  top: .5rem;
+  top: 0; left: 0;
   justify-content: flex-end;
 
   > div {
     width: 100%;
     > button {
+      cursor: pointer;
       width: 100%;
       text-align: right;
-      cursor: pointer;
       background-color: transparent;
       border: none;
       font-size: 14px;
@@ -82,28 +84,33 @@
 }
 
 .dropDownContent {
-  top: 102%;
-  // left: -18.2rem;
+  top: 100%;
   padding: 0;
   border-radius: 0;
   border: none;
   font-family: Lato;
+  box-shadow: 0 2px 4px rgba(203, 211, 224, .5);
+
   > div {
     min-width: 21.5rem;
 
     > button {
+      padding: 0 15px;
+
       > div {
-        border-bottom: 1px solid #F6F6F6;
-        font-family: Lato;
-        text-transform: capitalize;
-        font-size: 1.3rem;
-        color: rgba(50, 55, 64, 0.75);
         cursor: pointer;
+        border-bottom: 1px solid #F6F6F6;
+        font-size: 1.3rem;
+        font-family: Lato;
+        font-weight: 400;
+        text-transform: capitalize;
+        color: #323740;
+
         > i {
           margin-right: 8px;
-          color: rgba(50, 55, 64, 0.75);
-          font-size: 1.3rem;
-          font-weight: 100;
+          font-size: 1.2rem;
+          font-weight: 100 !important;
+          color: #323740;
         }
       }
     }
