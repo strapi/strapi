@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject } = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach } = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -270,13 +270,24 @@ module.exports.app = async function() {
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig) {
   if (!this.hook[name]) {
-      this.log.warn(`(hook:${name}) \`strapi-${name}\` is missing in your dependencies. Please run \`npm install strapi-${name}\``);
+    this.log.warn(`(hook:${name}) \`strapi-${name}\` is missing in your dependencies. Please run \`npm install strapi-${name}\``);
   }
 
   // Couldn't find configurations for this hook.
   if (isEmpty(get(flattenHooksConfig, name, true))) {
+
+    // Check if database connector is used
+    let isUsed = false;
+    forEach(get(strapi, 'api', {}), api => {
+      if (!api.models) return;
+
+      forEach(api.models, model => {
+        if (get(strapi.connection, model.connection, {}).connector === name) isUsed = true;
+      });
+    });
+
     flattenHooksConfig[name] = {
-      enabled: true
+      enabled: isUsed
     };
 
     // Enabled dependencies.
