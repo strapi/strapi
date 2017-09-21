@@ -16,6 +16,7 @@ import RelationBox from 'components/RelationBox';
 import RelationNaturePicker from 'components/RelationNaturePicker';
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/tabindex-no-positive */
 class PopUpRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -112,6 +113,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   renderModalBodyRelations = () => (
     <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
       <RelationBox
+        tabIndex="1"
         relationType={get(this.props.values, ['params', 'nature'])}
         contentTypeTargetPlaceholder={get(this.props.values, ['params', 'target'])}
         isFirstContentType
@@ -130,6 +132,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         contentTypeTarget={get(this.props.values, ['params', 'target'])}
       />
       <RelationBox
+        tabIndex="2"
         contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
         relationType={get(this.props.values, ['params', 'nature'])}
         handleSubmit={this.props.handleSubmit}

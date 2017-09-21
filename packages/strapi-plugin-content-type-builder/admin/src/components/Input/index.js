@@ -130,7 +130,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   renderInputCheckbox = (requiredClass,  inputDescription) => {
     const title = !isEmpty(this.props.title) ? <div className={styles.inputTitle}><FormattedMessage id={this.props.title} /></div> : '';
     const spacer = !inputDescription ? <div /> : <div style={{ marginBottom: '.5rem'}}></div>;
-  
+
     return (
       <div className={`${styles.inputCheckbox} col-md-12 ${requiredClass}`}>
         <div className="form-check">
@@ -138,7 +138,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label} onClick={this.handleChangeCheckbox}  style={{ cursor: 'pointer' }}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value} name={this.props.name} />
+                <input className="form-check-input" type="checkbox" checked={this.props.value} name={this.props.name} tabIndex={this.props.tabIndex} />
                 {message}
               </label>
             )}
@@ -172,6 +172,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           value={this.props.value}
           disabled={this.props.disabled}
           onBlur={handleBlur}
+          tabIndex={this.props.tabIndex}
         >
           {map(this.props.selectOptions, (option, key) => (
             option.name ?
@@ -219,6 +220,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               onFocus={this.props.handleFocus}
               placeholder={placeholder}
               disabled={this.props.disabled}
+              tabIndex={this.props.tabIndex}
             />
           )}
         </FormattedMessage>
@@ -246,6 +248,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           placeholder={message}
           autoComplete="off"
           disabled={this.props.disabled}
+          tabIndex={this.props.tabIndex}
         />
       )}
     </FormattedMessage>
@@ -281,6 +284,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
         placeholder={placeholder}
         disabled={this.props.disabled}
+        tabIndex={this.props.tabIndex}
       />;
 
     const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
@@ -355,6 +359,7 @@ Input.propTypes = {
   placeholder: PropTypes.string,
   pluginId: PropTypes.string,
   selectOptions: PropTypes.array,
+  tabIndex: PropTypes.string,
   title: PropTypes.string,
   type: PropTypes.string.isRequired,
   validations: PropTypes.object.isRequired,

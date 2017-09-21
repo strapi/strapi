@@ -82,6 +82,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
     const content = isEmpty(this.props.input) ?
       <div /> :
       <Input
+        tabIndex={this.props.tabIndex}
         type={get(this.props.input, 'type')}
         handleChange={this.props.handleChange}
         label={get(this.props.input, 'label')}
@@ -129,6 +130,7 @@ RelationBox.propTypes = {
   input: PropTypes.object,
   isFirstContentType: PropTypes.bool,
   relationType: PropTypes.string,
+  tabIndex: PropTypes.string,
   value: PropTypes.string,
 }
 

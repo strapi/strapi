@@ -20,11 +20,7 @@
           "validations": {
             "required": true
           },
-          "inputDescription": "content-type-builder.form.contentType.item.name.description",
-          "linkContent": {
-            "link": "http://strapi.io/documentation",
-            "description": "content-type-builder.form.contentType.item.name.link.description"
-          }
+          "inputDescription": "content-type-builder.form.contentType.item.name.description"
         },
         {
           "label": "content-type-builder.form.contentType.item.description",
