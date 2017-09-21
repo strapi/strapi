@@ -2,6 +2,7 @@
   font-size: 1.3rem;
   font-family: Lato;
   margin-bottom: 1.5rem;
+  -webkit-font-smoothing: antialiased;
   > div {
     margin-bottom: 0;
   }
@@ -17,6 +18,7 @@
   // padding-top: .1rem;
   cursor: inherit;
   font-weight: 500;
+  -webkit-font-smoothing: antialiased;
   > input {
     cursor: pointer;
     margin-right: 1.2rem;
@@ -28,7 +30,9 @@
   padding-top: .2rem;
   padding-left: 2.5rem;
   line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
   > small {
+    -webkit-font-smoothing: antialiased;
     color: #9EA7B8;
     font-family: Lato;
     font-size: 1.2rem;

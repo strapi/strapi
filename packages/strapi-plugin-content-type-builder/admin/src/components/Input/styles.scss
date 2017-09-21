@@ -32,6 +32,7 @@
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
   font-family: Lato;
+  -webkit-font-smoothing: antialiased;
   > label {
     margin-bottom: 0;
     font-weight: 500;
@@ -92,8 +93,9 @@
   padding-top: .2rem;
   padding-left: 2.5rem;
   line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
   > small {
-    color: #9EA7B8;
+    color: darken(#9EA7B8, 10%);
     font-family: Lato;
     font-size: 1.2rem;
     font-weight: 400;
@@ -105,8 +107,9 @@
   // width: 150%;
   margin-top: 1.3rem;
   line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
   > small {
-    color: #9EA7B8;
+    color: darken(#9EA7B8, 10%);
     font-family: Lato;
     font-size: 1.2rem;
     font-weight: 400;
@@ -116,8 +119,9 @@
 .inputTextAreaDescriptionContainer {
   margin-top: 1.3rem;
   line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
   > small {
-    color: #9EA7B8;
+    color: darken(#9EA7B8, 10%);
     font-family: Lato;
     font-size: 1.2rem;
     font-weight: 400;
