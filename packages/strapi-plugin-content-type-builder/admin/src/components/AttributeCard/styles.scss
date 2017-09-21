@@ -1,22 +1,23 @@
 .attributeCardContainer { /* stylelint-disable */
+  cursor: pointer;
   display: flex;
-  height: 3.9rem;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
   margin-top: .6rem;
   margin-bottom: .9rem;
   padding: 0 1rem 0 1rem;
-  justify-content: space-between;
-
-  line-height: 3.9rem;
   border: 1px solid #E3E9F3;
   border-radius: 0.25rem;
+  line-height: 4rem;
   background: #FFFFFF;
-  cursor: pointer;
   box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
+
   &:hover, &:active {
     background: #F7F7F7;
-    .checkContainer {
+
+    > div:after{
       color: #0097F6;
-      border: 2px solid #0097F6;
     }
   }
 }
@@ -24,17 +25,33 @@
 .attributeCard {
   font-size: 1.3rem;
 
-  > img {
-    margin-top: -.3rem;
-    margin-right: 1rem;
+  &:hover{
+    background: none;
   }
+
+  &:after{
+    position: absolute;
+    top: 7px; right: 26px;
+    content: '\f05d';
+    font-size: 1.4rem;
+    font-family: 'FontAwesome';
+    color: #E3E9F3;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  > img{
+    display: inline-block;
+    width: 35px;
+    height: 20px;
+    margin-top: -3px;
+  }
+
   > span {
     color: #9EA7B8;
     font-size: 1.2rem;
     font-style: italic;
-  }
-  &:hover {
-    background: #F7F7F7
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -42,25 +59,8 @@
   color: #323740 !important;
   margin-right: 1.2rem;
   font-style: normal !important;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.3rem !important;
+  font-weight: 500 !important;
   text-transform: capitalize;
-}
-
-.checkContainer {
-  height: 1.2rem;
-  width: 1.2rem;
-  margin-top: .3rem;
-  align-self: center;
-  position: relative;
-  border-radius: 50%;
-  border: 2px solid #E3E9F3;
-  color: #E3E9F3;
-  font-weight: bold;
-  > i {
-    font-size: .7rem;
-    position: absolute;
-    top: -.9px;
-    left: .5px;
-  }
+  -webkit-font-smoothing: subpixel-antialiased !important;
 }

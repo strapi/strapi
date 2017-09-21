@@ -8,14 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import IcoBoolean from '../../assets/images/icon_boolean.svg';
-import IcoDate from '../../assets/images/icon_date.svg';
-import IcoImage from '../../assets/images/icon_image.svg';
-import IcoJson from '../../assets/images/icon_json.svg';
-import IcoNumber from '../../assets/images/icon_number.svg';
-import IcoRelation from '../../assets/images/icon_relation.svg';
-import IcoString from '../../assets/images/icon_string.svg';
-import IcoText from '../../assets/images/icon_text.svg';
+import IcoBoolean from '../../assets/images/icon_boolean.png';
+import IcoDate from '../../assets/images/icon_date.png';
+import IcoImage from '../../assets/images/icon_image.png';
+import IcoJson from '../../assets/images/icon_json.png';
+import IcoNumber from '../../assets/images/icon_number.png';
+import IcoRelation from '../../assets/images/icon_relation.png';
+import IcoString from '../../assets/images/icon_string.png';
+import IcoText from '../../assets/images/icon_text.png';
 
 import styles from './styles.scss';
 
@@ -51,9 +51,6 @@ class AttributeCard extends React.Component { // eslint-disable-line react/prefe
               {(message) => <span className={styles.attributeType}>{message}</span>}
             </FormattedMessage>
             <FormattedMessage id={this.props.attribute.description} />
-          </div>
-          <div className={styles.checkContainer}>
-            <i className="fa fa-check" />
           </div>
         </div>
       </div>
