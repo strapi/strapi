@@ -1,7 +1,0 @@
-
-// "jsonb" column named `<%= attribute %>`.
-// Works similar to `table.json()`, but uses native "jsonb" type if possible.
-// Note that when setting an "array" (or a value that could be an array) as the
-// value, you should use `JSON.stringify()` to convert your value to a "string"
-// prior to passing it to the query builder.
-table.jsonb('<%= attribute %>')

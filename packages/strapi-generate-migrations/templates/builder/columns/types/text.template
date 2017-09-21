@@ -1,5 +1,0 @@
-
-// Adds a "text" column named `<%= attribute %>`, with optional `textType`
-// for MySQL text datatype preference.
-// `textType` may be "mediumtext" or "longtext", otherwise defaults to "text".
-table.text('<%= attribute %>', '<%= details.textType || 'text' %>')

@@ -1,5 +1,0 @@
-
-// Adds an auto incrementing column, in PostgreSQL this is a serial.
-// This will be used as the primary key for the column. Also available is a
-// "bigIncrements" if you wish to add a "bigint" incrementing number (in PostgreSQL "bigserial").
-table.increments()
