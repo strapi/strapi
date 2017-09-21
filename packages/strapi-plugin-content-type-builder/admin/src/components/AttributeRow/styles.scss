@@ -60,6 +60,7 @@
   justify-content: flex-end;
   opacity: .75;
   > div {
+    width: 23px;
     height: 100%;
     color: #0E1622;
   >  i {
@@ -68,7 +69,7 @@
     }
   }
   > div:last-child {
-    margin-left: 1.3rem;
+    margin-left: 0;
   }
 }
 

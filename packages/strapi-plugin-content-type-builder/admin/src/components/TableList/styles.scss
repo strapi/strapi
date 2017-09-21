@@ -99,16 +99,19 @@
   justify-content: flex-end;
   z-index: 9999;
   opacity: .75;
+
   > div {
+    width: 23px;
     height: 100%;
     color: #0E1622;
+
   >  i {
       z-index: 0;
       font-size: 1.1rem;
     }
   }
   > div:last-child {
-    margin-left: 1.3rem;
+    margin-left: 0;
   }
 }
 
