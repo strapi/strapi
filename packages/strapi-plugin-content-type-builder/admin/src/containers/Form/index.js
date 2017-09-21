@@ -381,6 +381,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     if (includes(this.props.hash.split('::')[1], 'attribute')) {
       this.props.changeInputAttribute(target.name, value);
+
+      if (target.name === 'params.nature' && target.value === "manyToMany") {
+        this.props.changeInputAttribute('params.dominant', true);
+      }
+
     } else {
       this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
     }

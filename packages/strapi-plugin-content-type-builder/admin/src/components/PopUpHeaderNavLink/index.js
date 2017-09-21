@@ -22,7 +22,7 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
     const activeClass = includes(this.props.routePath, this.props.name) ? styles.popUpHeaderNavLink : '';
 
     return (
-      <div className={activeClass} onClick={this.goTo}>
+      <div className={activeClass} onClick={this.goTo} style={{ cursor: 'pointer' }}>
         <FormattedMessage id={this.props.message} />
       </div>
     );

@@ -9,6 +9,7 @@ export default function setParallelAttribute(newAttribute) {
     parallelAttribute.params.key = newAttribute.name;
     parallelAttribute.params.columnName = newAttribute.params.targetColumnName;
     parallelAttribute.params.targetColumnName = newAttribute.params.columnName;
+    parallelAttribute.params.dominant = false;
     return parallelAttribute;
   }
   return;

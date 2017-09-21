@@ -151,6 +151,7 @@ export function setAttributeForm(hash) {
       nature: 'oneToOne',
       required: false,
       unique: false,
+      dominant: false,
     }),
   });
   const attribute = includes(hash, 'attributerelation') ? attributeRelation : data.attribute;
@@ -248,6 +249,7 @@ function setAttributeFormData(hash) {
     params: Map({
       type,
       required: false,
+      unique: false,
       maxLength: false,
       minLength: false,
       min: false,

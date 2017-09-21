@@ -498,7 +498,7 @@
             "type": "checkbox",
             "value": false,
             "validations": {},
-            "inputDescription": "content-type-builder.orm.attribute.item.uniqueField.description"
+            "inputDescription": "content-type-builder.form.attribute.item.uniqueField.description"
           },
           {
             "label": "content-type-builder.form.attribute.item.customColumnName",

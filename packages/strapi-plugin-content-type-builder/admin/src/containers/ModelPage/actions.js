@@ -174,6 +174,7 @@ function setParallelAttribute(data) {
   parallelAttribute.name = data.params.key;
   parallelAttribute.params.columnName = data.params.targetColumnName;
   parallelAttribute.params.targetColumnName = data.params.columnName;
+  parallelAttribute.params.dominant = false;
 
   return parallelAttribute;
 }
