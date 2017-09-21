@@ -14,7 +14,7 @@
 
   }
   > button {
-    margin-top: -1.6rem;
+    margin-top: -2rem;
     margin-right: 0!important;
     z-index: 999;
     color: #C3C5C8;
@@ -25,6 +25,17 @@
       color: #C3C5C8;
       opacity: 1;
       outline: 0;
+    }
+    > span {
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
     }
   }
 }

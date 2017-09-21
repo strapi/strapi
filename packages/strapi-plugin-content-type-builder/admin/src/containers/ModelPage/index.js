@@ -249,7 +249,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.match.path, '/:modelName', '');
-    const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
+    const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || !this.props.modelPage.showButtons;
 
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
@@ -282,7 +282,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   editPath={`${redirectRoute}/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::contentType::baseSettings`}
                   addButtons={addButtons}
                   handleSubmit={this.props.submit}
-                  isLoading={this.props.modelPage.showButtonLoader}
+                  isLoading={!this.props.modelPage.showButtonLoader}
                   buttonsContent={this.contentHeaderButtons}
 
                 />
