@@ -152,6 +152,7 @@ module.exports = {
         }
 
         attr.via = relation.key;
+        attr.dominant = relation.dominant;
 
         attrs[attribute.name] = attr;
       }
@@ -274,20 +275,21 @@ module.exports = {
                   _.forEach(relationsToCreate, ({ name, params }) => {
                     const attr = {
                       columnName: params.targetColumnName,
-                      via: name
                     };
 
                     switch (params.nature) {
                       case 'oneToOne':
                       case 'oneToMany':
-                      attr.model = model;
-                      break;
+                        attr.model = model;
+                        break;
                       case 'manyToOne':
                       case 'manyToMany':
-                      attr.collection = model;
-                      break;
+                        attr.collection = model;
+                        break;
                       default:
                     }
+
+                    attr.via = name;
 
                     modelJSON.attributes[params.key] = attr;
 
