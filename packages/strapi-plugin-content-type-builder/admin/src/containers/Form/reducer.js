@@ -66,10 +66,15 @@ function formReducer(state = initialState, action) {
         .set('initialDataEdit', state.get('modifiedDataEdit'))
         .set('updatedContentType', !state.get('updatedContentType'))
         .set('isFormSet', false);
-    case CONTENT_TYPE_CREATE:
-      return state
-        .set('isFormSet', false)
-        .set('updatedContentType', !state.get('updatedContentType'));
+    case CONTENT_TYPE_CREATE: {
+      if (action.shouldSetUpdatedContentTypeProp) {
+        return state
+          .set('isFormSet', false)
+          .set('updatedContentType', !state.get('updatedContentType'));
+      }
+
+      return state.set('isFormSet', false);
+    }
     case CONTENT_TYPE_FETCH_SUCCEEDED:
       return state
         .set('initialDataEdit', action.data)

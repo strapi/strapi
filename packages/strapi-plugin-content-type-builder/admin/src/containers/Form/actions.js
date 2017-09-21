@@ -79,10 +79,12 @@ export function contentTypeActionSucceeded() {
 }
 
 export function contentTypeCreate(newModel) {
+  const shouldSetUpdatedContentTypeProp = storeData.getIsModelTemporary() || false;
   storeData.setContentType(newModel);
 
   return {
     type: CONTENT_TYPE_CREATE,
+    shouldSetUpdatedContentTypeProp,
   };
 }
 

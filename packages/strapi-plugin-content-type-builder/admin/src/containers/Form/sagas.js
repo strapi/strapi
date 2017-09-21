@@ -43,6 +43,7 @@ export function* editContentType() {
     yield put(contentTypeActionSucceeded());
     yield put(unsetButtonLoading());
 
+    window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
   } catch(error) {
     window.Strapi.notification.error(error);
   }
@@ -56,7 +57,7 @@ export function* fetchConnections() {
     yield put(connectionsFetchSucceeded(data));
 
   } catch(error) {
-    window.Strapi.notification.error('notification.error.message')
+    window.Strapi.notification.error('content-type-builder.notification.error.message')
   }
 }
 

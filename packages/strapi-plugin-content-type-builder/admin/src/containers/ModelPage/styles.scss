@@ -22,3 +22,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.iconPlus {
+  > div {
+
+    > i {
+      -webkit-font-smoothing: subpixel-antialiased;
+    }
+  }
+}

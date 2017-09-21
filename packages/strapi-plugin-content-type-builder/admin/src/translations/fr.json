@@ -80,6 +80,8 @@
 
   "notification.error.message": "Une erreur est survenue",
   "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
+  "notification.success.message.contentType.edit": "Votre modèle a bien été modifié",
+  "notification.success.message.contentType.create": "Votre modèle a bien été créée",
 
   "popUpForm.attributes.string.description": "Titres, noms, paragraphes, listes de noms",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
