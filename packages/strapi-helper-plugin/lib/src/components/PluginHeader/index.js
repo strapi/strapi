@@ -4,7 +4,6 @@
  *
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import PluginHeaderTitle from 'components/PluginHeaderTitle';
 import PluginHeaderActions from 'components/PluginHeaderActions';

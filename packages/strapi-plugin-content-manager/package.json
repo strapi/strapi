@@ -34,7 +34,7 @@
     "prebuild": "npm run build:clean && npm run test",
     "build": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",
-    "start": "cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
+    "start": "cross-env NODE_ENV=development PLUGIN=true node node_modules/strapi-helper-plugin/lib/server",
     "generate": "node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "pretest": "npm run lint",
@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
-    "eslint": "^4.7.1",
+    "eslint": "^4.7.2",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-config-prettier": "^2.5.0",

@@ -9,7 +9,6 @@
  * the linting exception.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { defineMessages, FormattedMessage } from 'react-intl';
 

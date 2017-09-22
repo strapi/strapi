@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 
 import LimitSelect from '../LimitSelect';
@@ -22,7 +21,7 @@ class TableFooter extends React.Component {
             limit={this.props.limit}
           />
         </div>
-        
+
         <div className="col-lg-6">
           <Pagination
             limit={this.props.limit}

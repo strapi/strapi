@@ -16,8 +16,13 @@ module.exports = (options) => ({
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
+    // Comment
+    noParse: [
+      /\/react\//g,
+      /\/react-dom\//g,
+    ],
     loaders: [{
-      test: /\.js$/, // Transform all .js files required somewhere with Babel
+      test: /\.js$/, // Transform all .js files required somewhere with Babel,
       use: {
         loader: 'babel-loader',
         options: {
@@ -140,6 +145,8 @@ module.exports = (options) => ({
     ],
     alias: {
       moment: 'moment/moment.js',
+      'react': 'React',
+      'react-dom': 'React-DOM',
     },
     symlinks: false,
     extensions: [
@@ -153,7 +160,7 @@ module.exports = (options) => ({
       'main',
     ],
   },
-
+  externals: generateExternals(),
   resolveLoader: {
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),
@@ -163,3 +170,10 @@ module.exports = (options) => ({
   devtool: options.devtool,
   target: 'web', // Make web variables accessible to webpack, e.g. window
 });
+
+function generateExternals() {
+  return {
+    'react': 'React',
+    'react-dom': 'ReactDOM',
+  };
+}

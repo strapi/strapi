@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Notification from 'components/Notification';

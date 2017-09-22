@@ -4,7 +4,6 @@
  *
  */
 
-import React from 'react';
 import { map } from 'lodash';
 import PropTypes from 'prop-types';
 

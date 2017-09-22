@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';

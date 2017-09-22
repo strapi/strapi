@@ -7,8 +7,6 @@
 import 'babel-polyfill';
 
 // Import all the third party stuff
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import createHistory from 'history/createBrowserHistory';
@@ -121,7 +119,6 @@ window.Strapi = {
   apiUrl,
   refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
-      console.log(translationMessagesUpdated);
       render(merge({}, translationMessages, translationMessagesUpdated));
     },
     leftMenuSections: (leftMenuSectionsUpdated) => {
