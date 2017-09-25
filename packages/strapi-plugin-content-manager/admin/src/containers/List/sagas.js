@@ -50,7 +50,7 @@ export function* getRecords() {
 
     yield put(loadedRecord(response));
   } catch (err) {
-    window.Strapi.notification.error('error.records.fetch');
+    window.Strapi.notification.error('content-manager.error.records.fetch');
   }
 }
 
@@ -65,7 +65,7 @@ export function* getCount() {
 
     yield put(loadedCount(response.count));
   } catch (err) {
-    window.Strapi.notification.error('error.records.count');
+    window.Strapi.notification.error('content-manager.error.records.count');
   }
 }
 

@@ -32,7 +32,7 @@ export function* getRecord(params) {
 
     yield put(recordLoaded(response));
   } catch (err) {
-    window.Strapi.notification.error('error.record.fetch');
+    window.Strapi.notification.error('content-manager.error.record.fetch');
   }
 }
 
@@ -78,13 +78,13 @@ export function* deleteRecord({ id, modelName }) {
       });
 
       yield put(recordDeleted(id));
-      window.Strapi.notification.success('success.record.delete');
+      window.Strapi.notification.success('content-manager.success.record.delete');
 
       // Redirect to the list page.
       router.push(`/plugins/content-manager/${modelName}`);
     } catch (err) {
       yield put(recordDeleteError());
-      window.Strapi.notification.error('error.record.delete');
+      window.Strapi.notification.error('content-manager.error.record.delete');
     }
   }
 

@@ -23,7 +23,7 @@ export const generateMenu = function () {
       }];
     })
     .catch(() => {
-      window.Strapi.notification.error('error.model.fetch');
+      window.Strapi.notification.error('content-manager.error.model.fetch');
     });
 }
 
@@ -36,7 +36,7 @@ export function* getModels() {
 
     yield put(loadedModels(response));
   } catch (err) {
-    window.Strapi.notification.error('error.model.fetch');
+    window.Strapi.notification.error('content-manager.error.model.fetch');
   }
 }
 
@@ -47,7 +47,7 @@ export function* modelsLoaded() {
   try {
     schema = generateSchema(models);
   } catch (err) {
-    window.Strapi.notification.error('error.schema.generation');
+    window.Strapi.notification.error('content-manager.error.schema.generation');
     throw new Error(err);
   }
 

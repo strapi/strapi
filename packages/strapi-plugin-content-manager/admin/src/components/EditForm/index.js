@@ -19,7 +19,7 @@ class EditForm extends React.Component {
     super(props);
   }
 
-  getInputType = (type) => {
+  getInputType = (type = '') => {
     switch (type.toLowerCase()) {
       case 'boolean':
         return 'checkbox';
