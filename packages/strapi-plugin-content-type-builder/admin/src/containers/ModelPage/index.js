@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, size, replace, startCase, findIndex, includes } from 'lodash';
+import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
