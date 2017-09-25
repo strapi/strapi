@@ -16,6 +16,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
@@ -141,22 +142,22 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  actionBeforeOpenPopUp: React.PropTypes.func.isRequired,
-  addListTitleMarginTop: React.PropTypes.bool.isRequired,
-  error: React.PropTypes.bool.isRequired,
-  formErrors: React.PropTypes.array.isRequired,
-  handlei18n: React.PropTypes.bool.isRequired,
-  handleListPopUpSubmit: React.PropTypes.func.isRequired,
-  listButtonLabel: React.PropTypes.string.isRequired,
-  listItems: React.PropTypes.array.isRequired,
-  listTitle: React.PropTypes.oneOfType([
-    React.PropTypes.string.isRequired,
-    React.PropTypes.object.isRequired,
+  actionBeforeOpenPopUp: PropTypes.func.isRequired,
+  addListTitleMarginTop: PropTypes.bool.isRequired,
+  error: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
+  handlei18n: PropTypes.bool.isRequired,
+  handleListPopUpSubmit: PropTypes.func.isRequired,
+  listButtonLabel: PropTypes.string.isRequired,
+  listItems: PropTypes.array.isRequired,
+  listTitle: PropTypes.oneOfType([
+    PropTypes.string.isRequired,
+    PropTypes.object.isRequired,
   ]).isRequired,
-  noListButtonPopUp: React.PropTypes.bool.isRequired,
-  renderRow: React.PropTypes.oneOfType([
-    React.PropTypes.bool.isRequired,
-    React.PropTypes.func.isRequired,
+  noListButtonPopUp: PropTypes.bool.isRequired,
+  renderRow: PropTypes.oneOfType([
+    PropTypes.bool.isRequired,
+    PropTypes.func.isRequired,
   ]).isRequired,
 }
 

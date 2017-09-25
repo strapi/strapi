@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map } from 'lodash';
 
@@ -16,17 +16,17 @@ import messages from './messages.json';
 class LeftMenuLinkContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     // Generate the list of sections
-    const linkSections = this.props.plugins.valueSeq().map(plugin => (
-      plugin.get('leftMenuSections').map((leftMenuSection, j) => {
-        return (
-          <div key={j}>
-            <p className={styles.title}>{leftMenuSection.get('name')}</p>
-            <ul className={styles.list}>
-              {map(this.links, (link, k) => <LeftMenuLink key={k} icon={link.get('icon') || 'link'} label={link.get('label')} destination={`/plugins/${plugin.get('id')}/${link.get('destination')}`} /> )}
-            </ul>
-          </div>
-        );
-      })
+    const linkSections = map(this.props.plugins.toJS(), plugin => (
+      plugin.leftMenuSections.map((leftMenuSection, j) => (
+        <div key={j}>
+          <p className={styles.title}>{leftMenuSection.name}</p>
+          <ul className={styles.list}>
+            {leftMenuSection.links.map((link, k) =>
+              <LeftMenuLink key={k} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${plugin.id}/${link.destination}`} />
+            )}
+          </ul>
+        </div>
+      ))
     ));
 
     // Check if the plugins list is empty or not
@@ -80,7 +80,7 @@ class LeftMenuLinkContainer extends React.Component { // eslint-disable-line rea
 }
 
 LeftMenuLinkContainer.propTypes = {
-  plugins: React.PropTypes.object.isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 export default LeftMenuLinkContainer;

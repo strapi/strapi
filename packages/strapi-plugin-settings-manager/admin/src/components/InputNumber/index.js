@@ -28,6 +28,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
@@ -161,26 +162,26 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool.isRequired,
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  deactivateErrorHighlight: React.PropTypes.bool.isRequired,
-  errors: React.PropTypes.oneOfType([
-    React.PropTypes.bool.isRequired,
-    React.PropTypes.array.isRequired,
+  addRequiredInputDesign: PropTypes.bool.isRequired,
+  customBootstrapClass: PropTypes.string.isRequired,
+  deactivateErrorHighlight: PropTypes.bool.isRequired,
+  errors: PropTypes.oneOfType([
+    PropTypes.bool.isRequired,
+    PropTypes.array.isRequired,
   ]).isRequired,
-  handleBlur: React.PropTypes.func.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func.isRequired,
-  inputDescription: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool.isRequired,
-  placeholder: React.PropTypes.string.isRequired,
-  styles: React.PropTypes.object.isRequired,
-  target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.oneOfType([
-    React.PropTypes.number.isRequired,
-    React.PropTypes.string.isRequired,
+  handleBlur: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleFocus: PropTypes.func.isRequired,
+  inputDescription: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  styles: PropTypes.object.isRequired,
+  target: PropTypes.string.isRequired,
+  validations: PropTypes.object.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.number.isRequired,
+    PropTypes.string.isRequired,
   ]).isRequired,
 }
 

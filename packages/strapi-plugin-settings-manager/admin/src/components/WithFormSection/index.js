@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { findIndex, forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
 import InputNumber from 'components/InputNumber';
@@ -19,15 +20,15 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
-    addRequiredInputDesign: React.PropTypes.bool.isRequired,
-    cancelAction: React.PropTypes.bool.isRequired,
-    formErrors: React.PropTypes.array.isRequired,
-    handleChange: React.PropTypes.func.isRequired,
-    section: React.PropTypes.oneOfType([
-      React.PropTypes.object.isRequired,
-      React.PropTypes.array.isRequired,
+    addRequiredInputDesign: PropTypes.bool.isRequired,
+    cancelAction: PropTypes.bool.isRequired,
+    formErrors: PropTypes.array.isRequired,
+    handleChange: PropTypes.func.isRequired,
+    section: PropTypes.oneOfType([
+      PropTypes.object.isRequired,
+      PropTypes.array.isRequired,
     ]).isRequired,
-    values: React.PropTypes.object.isRequired,
+    values: PropTypes.object.isRequired,
   }
 
   constructor(props) {

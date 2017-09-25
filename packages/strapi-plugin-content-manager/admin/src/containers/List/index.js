@@ -4,23 +4,34 @@
  *
  */
 
-import React from 'react';
 import { connect } from 'react-redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
-import _ from 'lodash';
+import PropTypes from 'prop-types';
+import { isEmpty, isUndefined, map, replace, split } from 'lodash';
 import { router } from 'app';
 
+// Selectors.
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
-import Container from 'components/Container';
+
+// Components.
 import Table from 'components/Table';
 import TableFooter from 'components/TableFooter';
 import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
+// Actions.
+import {
+  deleteRecord,
+} from '../Edit/actions';
+
+// Styles.
 import styles from './styles.scss';
+
+// Actions.
 import {
   setCurrentModelName,
   loadRecords,
@@ -29,6 +40,8 @@ import {
   changeSort,
   changeLimit,
 } from './actions';
+
+// Selectors.
 import {
   makeSelectRecords,
   makeSelectLoadingRecords,
@@ -40,32 +53,56 @@ import {
   makeSelectSort,
   makeSelectLoadingCount,
 } from './selectors';
+
 import reducer from './reducer';
 import saga from './sagas';
 
 export class List extends React.Component {
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showWarning: false,
+    };
+  }
+
+  componentDidMount() {
     // Init the view
-    this.init(this.props.match.params.slug);
+    this.init(this.props);
+    // this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
-    // Check if the current slug changed in the url
-    const locationChanged =
-      nextProps.location.pathname !== this.props.location.pathname;
+    const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
-    // If the location changed, init the view
     if (locationChanged) {
-      this.init(nextProps.params.slug);
+      this.init(nextProps);
+      // this.init(nextProps.match.params.slug);
     }
+
+    if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
+      this.props.loadRecords();
+    }
+
   }
 
-  init(slug) {
+  init(props) {
+    const slug = props.match.params.slug;
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    // Set default sort value
-    this.props.changeSort(this.props.models[slug.toLowerCase()].primaryKey);
+    const searchParams = split(replace(props.location.search, '?', ''), '&');
+
+    const sort = isEmpty(props.location.search) ?
+      this.props.models[slug.toLowerCase()].primaryKey || 'id' :
+      replace(searchParams[2], 'sort=', '');
+
+    if (!isEmpty(props.location.search)) {
+      this.props.changePage(parseInt(replace(searchParams[0], 'page=', ''), 10));
+      this.props.changeLimit(parseInt(replace(searchParams[1], 'limit=', ''), 10));
+    }
+
+    this.props.changeSort(sort);
 
     // Load records
     this.props.loadRecords();
@@ -75,6 +112,52 @@ export class List extends React.Component {
 
     // Define the `create` route url
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
+  }
+
+  handleChangeLimit = ({ target }) => {
+    this.props.changeLimit(parseInt(target.value));
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
+    });
+  }
+
+  handleChangePage = (page) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
+    });
+    this.props.changePage(page);
+  }
+
+  handleChangeSort = (sort) => {
+    router.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}`,
+    });
+    this.props.changeSort(sort);
+  }
+
+  handleDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.props.deleteRecord(this.state.target, this.props.currentModelName);
+    this.setState({ showWarning: false });
+  }
+
+  toggleModalWarning = (e) => {
+    if (!isUndefined(e)) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.setState({
+        target: e.target.id,
+      });
+    }
+
+    this.setState({ showWarning: !this.state.showWarning });
   }
 
   render() {
@@ -89,50 +172,60 @@ export class List extends React.Component {
           <p>Loading...</p>
         </div>
       );
-    } else if (!this.props.records.length) {
-      content = <p>No results.</p>;
     } else {
       // Detect current model structure from models list
       const currentModel = this.props.models[this.props.currentModelName];
 
       // Define table headers
-      const tableHeaders = _.map(this.props.schema[this.props.currentModelName].list, (value) => ({
+      const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
         name: value,
         label: this.props.schema[this.props.currentModelName].fields[value].label,
         type: this.props.schema[this.props.currentModelName].fields[value].type,
       }));
 
+      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'Id', type: 'string' });
+
       content = (
         <Table
           records={this.props.records}
-          route={this.props.route}
+          route={this.props.match}
+          routeParams={this.props.match.params}
           headers={tableHeaders}
-          changeSort={this.props.changeSort}
+          changeSort={this.handleChangeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
-          match={this.props.match}
+          handleDelete={this.toggleModalWarning}
+          redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
         />
       );
     }
+
+    // Plugin header config
+    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
 
     // Define plugin header actions
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
-        class: 'btn-primary',
-        onClick: () => router.push(this.addRoute),
+        labelValues: {
+          entity: pluginHeaderTitle,
+        },
+        handlei18n: true,
+        addShape: true,
+        buttonBackground: 'primary',
+        buttonSize: 'buttonLg',
+        onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];
-
-    // Plugin header config
-    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
 
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
-            title={pluginHeaderTitle}
+            title={{
+              id: pluginHeaderTitle,
+            }}
             description={{
               id: 'content-manager.containers.List.pluginHeaderDescription',
               values: {
@@ -141,17 +234,31 @@ export class List extends React.Component {
             }}
             actions={pluginHeaderActions}
           />
-          <Container>
-            {content}
-            <TableFooter
-              limit={this.props.limit}
-              currentPage={this.props.currentPage}
-              changePage={this.props.changePage}
-              count={this.props.count}
-              className="push-lg-right"
-              onLimitChange={this.props.onLimitChange}
-            />
-          </Container>
+          <div className='row'>
+            <div className='col-lg-12'>
+              {content}
+              <PopUpWarning
+                isOpen={this.state.showWarning}
+                toggleModal={this.toggleModalWarning}
+                content={{
+                  title: 'content-manager.popUpWarning.title',
+                  message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
+                  cancel: 'content-manager.popUpWarning.button.cancel',
+                  confirm: 'content-manager.popUpWarning.button.confirm',
+                }}
+                popUpWarningType={'danger'}
+                handleConfirm={this.handleDelete}
+              />
+              <TableFooter
+                limit={this.props.limit}
+                currentPage={this.props.currentPage}
+                changePage={this.handleChangePage}
+                count={this.props.count}
+                className="push-lg-right"
+                handleChangeLimit={this.handleChangeLimit}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -159,70 +266,60 @@ export class List extends React.Component {
 }
 
 List.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 List.propTypes = {
-  changePage: React.PropTypes.func.isRequired,
-  changeSort: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
+  changeLimit: PropTypes.func.isRequired,
+  changePage: PropTypes.func.isRequired,
+  changeSort: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
   ]).isRequired,
-  currentModelName: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.bool,
+  currentModelName: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
   ]).isRequired,
-  currentPage: React.PropTypes.number.isRequired,
-  history: React.PropTypes.object.isRequired,
-  limit: React.PropTypes.number.isRequired,
-  loadCount: React.PropTypes.func.isRequired,
-  loadingRecords: React.PropTypes.bool.isRequired,
-  loadRecords: React.PropTypes.func.isRequired,
-  location: React.PropTypes.object.isRequired,
-  match: React.PropTypes.object.isRequired,
-  models: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  currentPage: PropTypes.number.isRequired,
+  deleteRecord: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  limit: PropTypes.number.isRequired,
+  loadCount: PropTypes.func.isRequired,
+  loadingRecords: PropTypes.bool.isRequired,
+  loadRecords: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
   ]).isRequired,
-  onLimitChange: React.PropTypes.func.isRequired,
-  params: React.PropTypes.object.isRequired,
-  records: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.bool,
+  records: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.bool,
   ]).isRequired,
-  route: React.PropTypes.object.isRequired,
-  schema: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
+  // route: PropTypes.object.isRequired,
+  schema: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
   ]).isRequired,
-  setCurrentModelName: React.PropTypes.func.isRequired,
-  sort: React.PropTypes.string.isRequired,
+  setCurrentModelName: PropTypes.func.isRequired,
+  sort: PropTypes.string.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
-  return {
-    setCurrentModelName: modelName => dispatch(setCurrentModelName(modelName)),
-    loadRecords: () => dispatch(loadRecords()),
-    loadCount: () => dispatch(loadCount()),
-    changePage: page => {
-      dispatch(changePage(page));
-      dispatch(loadRecords());
-      dispatch(loadCount());
+  return bindActionCreators(
+    {
+      deleteRecord,
+      setCurrentModelName,
+      loadRecords,
+      loadCount,
+      changePage,
+      changeSort,
+      changeLimit,
     },
-    changeSort: sort => {
-      dispatch(changeSort(sort));
-      dispatch(loadRecords());
-    },
-    onLimitChange: e => {
-      const newLimit = Number(e.target.value);
-      dispatch(changeLimit(newLimit));
-      dispatch(changePage(1));
-      dispatch(loadRecords());
-      e.target.blur();
-    },
-    dispatch,
-  };
+    dispatch
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

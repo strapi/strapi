@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -23,7 +23,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 }
 
 Content.propTypes = {
-  children: React.PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 const mapStateToProps = createSelector(

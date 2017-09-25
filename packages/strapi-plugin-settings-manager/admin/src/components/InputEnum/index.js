@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map } from 'lodash';
 import styles from './styles.scss';
@@ -44,12 +45,12 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputEnum.propTypes = {
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  name: React.PropTypes.string.isRequired,
-  selectOptions: React.PropTypes.array.isRequired,
-  target: React.PropTypes.string.isRequired,
-  value: React.PropTypes.any.isRequired,
+  customBootstrapClass: PropTypes.string.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  selectOptions: PropTypes.array.isRequired,
+  target: PropTypes.string.isRequired,
+  value: PropTypes.any.isRequired,
 }
 
 export default InputEnum;

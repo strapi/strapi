@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, findIndex } from 'lodash';
@@ -46,10 +47,10 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 }
 
 PluginLeftMenuLink.propTypes = {
-  environments: React.PropTypes.array.isRequired,
-  environmentsRequired: React.PropTypes.bool.isRequired,
-  envParams: React.PropTypes.string.isRequired,
-  link: React.PropTypes.object.isRequired,
+  environments: PropTypes.array.isRequired,
+  environmentsRequired: PropTypes.bool.isRequired,
+  envParams: PropTypes.string.isRequired,
+  link: PropTypes.object.isRequired,
 };
 
 export default PluginLeftMenuLink;

@@ -4,17 +4,16 @@
  *
  */
 
-import React from 'react';
-import { Link } from 'react-router';
-import _ from 'lodash';
-import { router } from 'app';
+import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 
 import styles from './styles.scss';
 
 class TableRow extends React.Component {
   constructor(props) {
     super(props);
-    this.goEditPage = this.goEditPage.bind(this);
+
+    this.handleClick = this.handleClick.bind(this);
   }
 
   /**
@@ -26,58 +25,44 @@ class TableRow extends React.Component {
    * @returns {*}
    */
   getDisplayedValue(type, value) {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'string':
-        return !_.isEmpty(value.toString()) ? value.toString() : '-';
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'integer':
-        return !_.isEmpty(value.toString()) ? value.toString() : '-';
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
-        return value.toString();
+        return value && !isEmpty(value.toString()) ? value.toString() : '-';
       default:
         return '-';
     }
   }
 
-  /**
-   * Redirect to the edit page
-   */
-  goEditPage() {
-    router.push(this.props.destination);
+  // Redirect to the edit page
+  handleClick() {
+    this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
   }
 
   render() {
     // Generate cells
-    const cells = this.props.headers.map((header, i) => {
-      // Default content
-      let content = this.getDisplayedValue(
-        header.type,
-        this.props.record[header.name]
-      );
+    const cells = this.props.headers.map((header, i) => (
+      <td key={i}>
+        {this.getDisplayedValue(
+          header.type,
+          this.props.record[header.name]
+        )}
+      </td>
+    ));
 
-      // Display a link if the current column is the `id` column
-      if (header.name === this.props.primaryKey) {
-        content = (
-          <Link to={this.props.destination} className={styles.idLink}>
-            {this.getDisplayedValue(
-              header.type,
-              this.props.record[header.name]
-            )}
-          </Link>
-        );
-      }
-
-      return (
-        <td key={i} className={styles.tableRowCell}>
-          {content}
-        </td>
-      );
-    });
+    // Add actions cell.
+    cells.push(
+      <td key='action' className={styles.actions}>
+        <i className="fa fa-pencil" aria-hidden="true"></i>
+        <i onClick={this.props.handleDelete} id={this.props.record.id} className="fa fa-trash" aria-hidden="true"></i>
+      </td>
+    );
 
     return (
-      <tr // eslint-disable-line jsx-a11y/no-static-element-interactions
-        className={styles.tableRow}
-        onClick={() => this.goEditPage(this.props.destination)}
-      >
+      <tr className={styles.tableRow} onClick={() => this.handleClick(this.props.destination)}>
         {cells}
       </tr>
     );
@@ -85,14 +70,19 @@ class TableRow extends React.Component {
 }
 
 TableRow.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 TableRow.propTypes = {
-  destination: React.PropTypes.string.isRequired,
-  headers: React.PropTypes.array.isRequired,
-  primaryKey: React.PropTypes.string.isRequired,
-  record: React.PropTypes.object.isRequired,
+  destination: PropTypes.string.isRequired,
+  handleDelete: PropTypes.func,
+  headers: PropTypes.array.isRequired,
+  record: PropTypes.object.isRequired,
+  redirectUrl: PropTypes.string.isRequired,
+};
+
+TableRow.defaultProps = {
+  handleDelete: () => {},
 };
 
 export default TableRow;

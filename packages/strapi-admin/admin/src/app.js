@@ -7,12 +7,10 @@
 import 'babel-polyfill';
 
 // Import all the third party stuff
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import createHistory from 'history/createBrowserHistory';
-import _ from 'lodash';
+import { merge, isFunction } from 'lodash';
 import 'sanitize.css/sanitize.css';
 import 'whatwg-fetch';
 
@@ -79,14 +77,19 @@ window.onload = function onLoad() {
  * @param params
  */
 const registerPlugin = (plugin) => {
-  const formattedPlugin = plugin;
-
   // Merge admin translation messages
-  _.merge(translationMessages, formattedPlugin.translationMessages);
+  merge(translationMessages, plugin.translationMessages);
 
-  formattedPlugin.leftMenuSections = formattedPlugin.leftMenuSections || [];
+  plugin.leftMenuSections = plugin.leftMenuSections || [];
 
-  store.dispatch(pluginLoaded(formattedPlugin));
+  // Execute bootstrap function.
+  if (isFunction(plugin.bootstrap)) {
+    plugin.bootstrap(plugin).then(plugin => {
+      store.dispatch(pluginLoaded(plugin));
+    });
+  } else {
+    store.dispatch(pluginLoaded(plugin));
+  }
 };
 
 const displayNotification = (message, status) => {
@@ -116,7 +119,7 @@ window.Strapi = {
   apiUrl,
   refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
-      render(_.merge({}, translationMessages, translationMessagesUpdated));
+      render(merge({}, translationMessages, translationMessagesUpdated));
     },
     leftMenuSections: (leftMenuSectionsUpdated) => {
       store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));

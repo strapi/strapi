@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
@@ -60,17 +61,17 @@ export class HomePage extends React.Component {
 }
 
 HomePage.contextTypes = {
-  router: React.PropTypes.object,
+  router: PropTypes.object,
 };
 
 HomePage.propTypes = {
-  data: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.object,
+  data: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
   ]),
-  exposedComponents: React.PropTypes.object,
-  loadData: React.PropTypes.func,
-  loading: React.PropTypes.bool,
+  exposedComponents: PropTypes.object,
+  loadData: PropTypes.func,
+  loading: PropTypes.bool,
 };
 
 function mapDispatchToProps(dispatch) {

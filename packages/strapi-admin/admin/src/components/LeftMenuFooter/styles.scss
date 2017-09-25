@@ -6,11 +6,17 @@
   width: 100%;
   bottom: 0;
   height: 3rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 15px;
+  padding-right: 15px;
   line-height: 3rem;
+  font-family: 'Lato';
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.05rem;
   vertical-align: middle;
   color: $strapi-gray-light;
-  border-top: 1px solid $strapi-gray;
-  font-size: $font-size-xs;
+
+  select{
+    outline: none;
+  }
 }

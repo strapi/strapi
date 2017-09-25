@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -528,27 +529,27 @@ function mapDispatchToProps(dispatch) {
 }
 
 HomePage.propTypes = {
-  cancelChanges: React.PropTypes.func.isRequired,
-  changeDefaultLanguage: React.PropTypes.func.isRequired,
-  changeInput: React.PropTypes.func.isRequired,
-  configFetch: React.PropTypes.func.isRequired,
-  databaseDelete: React.PropTypes.func.isRequired,
-  databaseEdit: React.PropTypes.func.isRequired,
-  databasesFetch: React.PropTypes.func.isRequired,
-  editSettings: React.PropTypes.func.isRequired,
-  emptyDbModifiedData: React.PropTypes.func.isRequired,
-  environments: React.PropTypes.array.isRequired,
-  home: React.PropTypes.object.isRequired,
-  languageDelete: React.PropTypes.func.isRequired,
-  languagesFetch: React.PropTypes.func.isRequired,
-  location: React.PropTypes.object.isRequired,
-  match: React.PropTypes.object.isRequired,
-  menuSections: React.PropTypes.array.isRequired,
-  newDatabasePost: React.PropTypes.func.isRequired,
-  newLanguagePost: React.PropTypes.func.isRequired,
-  params: React.PropTypes.func.isRequired,
-  setErrors: React.PropTypes.func.isRequired,
-  specificDatabaseFetch: React.PropTypes.func.isRequired,
+  cancelChanges: PropTypes.func.isRequired,
+  changeDefaultLanguage: PropTypes.func.isRequired,
+  changeInput: PropTypes.func.isRequired,
+  configFetch: PropTypes.func.isRequired,
+  databaseDelete: PropTypes.func.isRequired,
+  databaseEdit: PropTypes.func.isRequired,
+  databasesFetch: PropTypes.func.isRequired,
+  editSettings: PropTypes.func.isRequired,
+  emptyDbModifiedData: PropTypes.func.isRequired,
+  environments: PropTypes.array.isRequired,
+  home: PropTypes.object.isRequired,
+  languageDelete: PropTypes.func.isRequired,
+  languagesFetch: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  menuSections: PropTypes.array.isRequired,
+  newDatabasePost: PropTypes.func.isRequired,
+  newLanguagePost: PropTypes.func.isRequired,
+  params: PropTypes.func.isRequired,
+  setErrors: PropTypes.func.isRequired,
+  specificDatabaseFetch: PropTypes.func.isRequired,
 };
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

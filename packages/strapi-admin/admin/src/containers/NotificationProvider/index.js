@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -25,8 +25,8 @@ export class NotificationProvider extends React.Component { // eslint-disable-li
 }
 
 NotificationProvider.propTypes = {
-  notifications: React.PropTypes.object.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired,
+  notifications: PropTypes.object.isRequired,
+  onHideNotification: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

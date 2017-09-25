@@ -20,7 +20,7 @@ export function showNotification(message, status) {
   ((id) => {
     setTimeout(() => {
       dispatch(hideNotification(id));
-    }, 5000);
+    }, 2500);
   })(nextNotificationId);
 
   return {
