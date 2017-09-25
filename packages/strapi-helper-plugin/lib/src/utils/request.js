@@ -8,12 +8,7 @@ import 'whatwg-fetch';
  * @return {object}          The parsed JSON from the request
  */
 function parseJSON(response) {
-  if (response.json) {
-    return response.json();
-  }
-
-  return response;
-}
+  return response.json : response.json() : response;
 
 /**
  * Checks if a network request came back fine, and throws an error if not

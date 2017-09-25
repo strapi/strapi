@@ -9,25 +9,22 @@ import { LOAD_MODELS, LOADED_MODELS } from './constants';
 import { makeSelectModels } from './selectors';
 
 export const generateMenu = function () {
-  try {
-    return request(`${window.Strapi.apiUrl}/content-manager/models`, {
-      method: 'GET',
+  return request(`${window.Strapi.apiUrl}/content-manager/models`, {
+    method: 'GET',
+  })
+    .then(response => generateSchema(response))
+    .then(displayedModels => {
+      return [{
+        name: 'Content Types',
+        links: _.map(displayedModels, (model, key) => ({
+          label: model.labelPlural || model.label || key,
+          destination: key,
+        })),
+      }];
     })
-      .then(response => generateSchema(response))
-      .then(displayedModels => {
-        return [{
-          name: 'Content Types',
-          links: _.map(displayedModels, (model, key) => ({
-            label: model.labelPlural || model.label || key,
-            destination: key,
-          })),
-        }];
-      });
-  } catch (err) {
-    window.Strapi.notification.error(
-      'An error occurred during models config fetch.'
-    );
-  }
+    .catch(() => {
+      window.Strapi.notification.error('error.model.fetch');
+    });
 }
 
 export function* getModels() {
@@ -39,9 +36,7 @@ export function* getModels() {
 
     yield put(loadedModels(response));
   } catch (err) {
-    window.Strapi.notification.error(
-      'An error occurred during models config fetch.'
-    );
+    window.Strapi.notification.error('error.model.fetch');
   }
 }
 
@@ -52,9 +47,7 @@ export function* modelsLoaded() {
   try {
     schema = generateSchema(models);
   } catch (err) {
-    window.Strapi.notification.error(
-      'An error occurred during schema generation.'
-    );
+    window.Strapi.notification.error('error.schema.generation');
     throw new Error(err);
   }
 

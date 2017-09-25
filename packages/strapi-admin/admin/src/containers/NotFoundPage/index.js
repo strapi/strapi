@@ -30,16 +30,15 @@ export default class NotFound extends React.Component { // eslint-disable-line r
           <FormattedMessage {...messages.description} />
         </h2>
         <Button
-          label="Back to home page"
+          label="app.components.NotFoundPage.back"
+          handlei18n
           buttonBackground="back"
           onClick={(e) => {
             e.stopPropagation();
 
             this.props.history.goBack();
           }}
-        >
-          Back to home page.
-        </Button>
+        />
       </div>
     );
   }

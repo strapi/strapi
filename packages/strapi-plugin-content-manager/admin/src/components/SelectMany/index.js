@@ -55,6 +55,9 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           }];
 
         return { options };
+      })
+      .catch(() => {
+        window.Strapi.notification.error('An error occurred during relationship fetch.');
       });
   }
 

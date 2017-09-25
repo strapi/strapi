@@ -1,19 +1,13 @@
-import { isArray } from 'lodash';
+import { isArray, isObject } from 'lodash';
 
-function cleanData(value, key, secondKey) {
+const cleanData = (value, key, secondKey) => {
   if (isArray(value)) {
-    return value.map(obj => {
-      if (obj[key]) {
-        return obj[key];
-      }
-
-      return obj;
-    });
-  } else if (_.isObject(value)) {
+    return value.map(obj => obj[key] ? obj[key] : obj);
+  } else if (isObject(value)) {
     return value[key] || value[secondKey];
+  } else {
+    return value;
   }
-
-  return value;
 }
 
 export default cleanData;

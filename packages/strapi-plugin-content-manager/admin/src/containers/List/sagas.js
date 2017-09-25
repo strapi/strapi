@@ -50,7 +50,7 @@ export function* getRecords() {
 
     yield put(loadedRecord(response));
   } catch (err) {
-    window.Strapi.notification.error('An error occurred during records fetch.');
+    window.Strapi.notification.error('error.records.fetch');
   }
 }
 
@@ -65,9 +65,7 @@ export function* getCount() {
 
     yield put(loadedCount(response.count));
   } catch (err) {
-    window.Strapi.notification.error(
-      'An error occurred during count records fetch.'
-    );
+    window.Strapi.notification.error('error.records.count');
   }
 }
 

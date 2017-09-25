@@ -12,6 +12,14 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 
+  "error.schema.generation": "An error occurred during schema generation.",
+  "error.records.count": "An error occurred during count records fetch.",
+  "error.records.fetch": "An error occurred during records fetch.",
+  "error.record.fetch": "An error occurred during record fetch.",
+  "error.record.create": "An error occurred during record creation.",
+  "error.record.update": "An error occurred during record update.",
+  "error.record.delete": "An error occurred during record deletion.",
+  "error.model.fetch": "An error occurred during models config fetch.",
   "error.validation.required": "This value input is required.",
   "error.validation.regex": "The value not match the regex.",
   "error.validation.max": "The value is too high.",
@@ -23,6 +31,9 @@
   "error.attribute.key.taken": "This value already exists",
   "error.attribute.sameKeyAndName": "Can't be equals",
   "error.validation.minSupMax": "Can't be superior",
+
+  "success.record.delete": "Deleted",
+  "success.record.save": "Saved",
 
   "pageNotFound": "Page not found",
 

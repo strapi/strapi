@@ -32,7 +32,7 @@ export function* getRecord(params) {
 
     yield put(recordLoaded(response));
   } catch (err) {
-    window.Strapi.notification.error('An error occurred during record fetch.');
+    window.Strapi.notification.error('error.record.fetch');
   }
 }
 
@@ -60,14 +60,10 @@ export function* editRecord() {
     });
 
     yield put(recordEdited());
-    window.Strapi.notification.success(
-      `Saved`
-    );
+    window.Strapi.notification.success('content-manager.success.record.save');
   } catch (err) {
     yield put(recordEditError());
-    window.Strapi.notification.error(
-      `An error occurred during record ${isCreating ? 'creation' : 'update'}.`
-    );
+    window.Strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
   }
 }
 
@@ -82,17 +78,13 @@ export function* deleteRecord({ id, modelName }) {
       });
 
       yield put(recordDeleted(id));
-      window.Strapi.notification.success(
-        'Deleted'
-      );
+      window.Strapi.notification.success('success.record.delete');
 
       // Redirect to the list page.
       router.push(`/plugins/content-manager/${modelName}`);
     } catch (err) {
       yield put(recordDeleteError());
-      window.Strapi.notification.error(
-        'An error occurred during record deletion.'
-      );
+      window.Strapi.notification.error('error.record.delete');
     }
   }
 

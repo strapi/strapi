@@ -55,6 +55,9 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           }];
 
         return {options};
+      })
+      .catch(() => {
+        window.Strapi.notification.error('An error occurred during relationship fetch.');
       });
   }
 
