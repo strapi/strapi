@@ -49,6 +49,12 @@ shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
 
+shell.cd('../strapi-plugin-content-type-builder');
+shell.exec('npm install ../strapi-helper-plugin');
+shell.rm('-f', 'package-lock.json');
+shell.exec('npm link');
+shell.exec('npm link strapi-generate-api');
+
 // Log installation duration.
 const installationEndDate = new Date();
 const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;

@@ -58,6 +58,7 @@
     ],
     "jsx-a11y/aria-props": 2,
     "jsx-a11y/heading-has-content": 0,
+    "jsx-a11y/interactive-supports-focus": 0,
     "jsx-a11y/label-has-for": 2,
     "jsx-a11y/mouse-events-have-key-events": 2,
     "jsx-a11y/role-has-required-aria-props": 2,
@@ -87,6 +88,7 @@
     "react/no-unescaped-entities": 0,
     "react/prefer-stateless-function": 0,
     "react/sort-prop-types": 2,
+    "react/require-default-props": 0,
     "no-undef": 0,
     "react/no-array-index-key": 0
   },

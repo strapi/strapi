@@ -1,6 +1,7 @@
 {
   "connection": "<%= connection %>",
-  "collectionName": "<%= idPluralized %>",
+  "description": "<%= description %>",
+  "collectionName": "<%= collectionName || idPluralized %>",
   "options": {
     "increments": true,
     "timestamps": true,
