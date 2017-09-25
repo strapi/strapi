@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, size, replace, startCase, findIndex } from 'lodash';
+import { get, has, size, replace, startCase, findIndex, includes } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -155,24 +155,19 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
 
-    let attributeType = attribute.params.type ? attribute.params.type : 'relation';
+    let attributeType;
 
-    switch (attributeType) {
+    switch (attribute.params.type) {
       case 'integer':
-        attributeType = 'number';
-        break;
       case 'float':
-        attributeType = 'number';
-        break;
       case 'decimal':
         attributeType = 'number';
         break;
       default:
-
+        attributeType = attribute.params.type ? attribute.params.type : 'relation';
     }
 
     router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
-
   }
 
 
