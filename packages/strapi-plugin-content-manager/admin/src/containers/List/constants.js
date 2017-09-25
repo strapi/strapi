@@ -15,3 +15,5 @@ export const LOADED_COUNT = 'app/List/LOADED_COUNT';
 export const CHANGE_PAGE = 'app/List/CHANGE_PAGE';
 export const CHANGE_SORT = 'app/List/CHANGE_SORT';
 export const CHANGE_LIMIT = 'app/List/CHANGE_LIMIT';
+
+export const DELETE_RECORD = 'app/List/DELETE_RECORD';

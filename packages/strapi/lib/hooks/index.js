@@ -47,7 +47,7 @@ module.exports = function() {
           }
 
           const module = this.hook[hook].load;
-          let dependencies =  this.hook[hook].dependencies || [];
+          let dependencies =  this.hook[hook].dependencies.map(x => x.replace('strapi-', '')) || [];
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.hook, `settings.${hook}`))) {

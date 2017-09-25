@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import LeftMenuHeader from 'components/LeftMenuHeader';
@@ -26,7 +26,7 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
 }
 
 LeftMenu.propTypes = {
-  plugins: React.PropTypes.object.isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

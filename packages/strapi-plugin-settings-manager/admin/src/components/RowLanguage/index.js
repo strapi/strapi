@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { find, get, join, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PopUpWarning from 'components/PopUpWarning';
@@ -91,12 +92,12 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowLanguage.propTypes = {
-  active: React.PropTypes.bool.isRequired,
-  changeDefaultLanguage: React.PropTypes.func.isRequired,
-  handleLanguageDelete: React.PropTypes.func.isRequired,
-  listLanguages: React.PropTypes.object.isRequired,
-  liStyles: React.PropTypes.object.isRequired,
-  name: React.PropTypes.string.isRequired,
+  active: PropTypes.bool.isRequired,
+  changeDefaultLanguage: PropTypes.func.isRequired,
+  handleLanguageDelete: PropTypes.func.isRequired,
+  listLanguages: PropTypes.object.isRequired,
+  liStyles: PropTypes.object.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 export default RowLanguage;

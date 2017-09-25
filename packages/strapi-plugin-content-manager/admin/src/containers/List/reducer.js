@@ -4,7 +4,14 @@
  *
  */
 
+// Dependencies.
 import { fromJS } from 'immutable';
+
+// Constants.
+
+import {
+  DELETE_RECORD_SUCCESS,
+} from '../Edit/constants';
 
 import {
   SET_CURRENT_MODEL_NAME,
@@ -16,8 +23,10 @@ import {
   CHANGE_SORT,
   CHANGE_LIMIT,
 } from './constants';
+
 const initialState = fromJS({
   currentModel: false,
+  currentModelName: false,
   currentModelNamePluralized: false,
   loadingRecords: true,
   records: false,
@@ -26,6 +35,8 @@ const initialState = fromJS({
   currentPage: 1,
   limit: 10,
   sort: 'id',
+  initLimit: 10,
+  initSort: 'id',
 });
 
 function listReducer(state = initialState, action) {
@@ -48,6 +59,8 @@ function listReducer(state = initialState, action) {
       return state.set('sort', action.sort);
     case CHANGE_LIMIT:
       return state.set('limit', action.limit);
+    case DELETE_RECORD_SUCCESS:
+      return state.set('records', state.get('records').filter(o => o._id !== action.id));
     default:
       return state;
   }

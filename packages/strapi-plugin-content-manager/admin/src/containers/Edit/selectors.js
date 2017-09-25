@@ -33,6 +33,24 @@ const makeSelectDeleting = () =>
 const makeSelectIsCreating = () =>
   createSelector(selectEditDomain(), substate => substate.get('isCreating'));
 
+const makeSelectIsRelationComponentNull = () =>
+  createSelector(selectEditDomain(), substate => substate.get('isRelationComponentNull'));
+
+const makeSelectForm = () =>
+  createSelector(selectEditDomain(), substate => substate.get('form'));
+
+const makeSelectFormValidations = () =>
+  createSelector(selectEditDomain(), substate => substate.get('formValidations'));
+
+const makeSelectFormErrors = () =>
+  createSelector(selectEditDomain(), substate => substate.get('formErrors'));
+
+const makeSelectDidCheckErrors = () =>
+  createSelector(selectEditDomain(), substate => substate.get('didCheckErrors'));
+
+const makeSelectEditSuccess = () =>
+  createSelector(selectEditDomain(), substate => substate.get('editSuccess'));
+
 export default selectEditDomain;
 export {
   makeSelectRecord,
@@ -41,4 +59,10 @@ export {
   makeSelectEditing,
   makeSelectDeleting,
   makeSelectIsCreating,
+  makeSelectIsRelationComponentNull,
+  makeSelectForm,
+  makeSelectFormValidations,
+  makeSelectFormErrors,
+  makeSelectDidCheckErrors,
+  makeSelectEditSuccess,
 };

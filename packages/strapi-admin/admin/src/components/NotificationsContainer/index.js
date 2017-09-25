@@ -4,42 +4,47 @@
 *
 */
 
-import React from 'react';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import PropTypes from 'prop-types';
 import Notification from 'components/Notification';
 
 import styles from './styles.scss';
 
+const { CSSTransition, TransitionGroup } = ReactTransitionGroup;
+
 class NotificationsContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    let notifications;
+    if (this.props.notifications.length === 0) {
+      return (false);
+    }
 
-    if (this.props.notifications) {
-      notifications = this.props.notifications.map((notification) => (
+    const notifications = this.props.notifications.map((notification, i) => (
+      <CSSTransition
+        key={i}
+        classNames="notification"
+        timeout={{
+          enter: 500,
+          exit: 300,
+        }}
+      >
         <Notification
           key={notification.id}
           onHideNotification={this.props.onHideNotification}
           notification={notification}
-        />));
-    }
+        />
+      </CSSTransition>
+    ));
 
     return (
-      <ul className={styles.notificationsContainer}>
-        <ReactCSSTransitionGroup
-          transitionName="notification"
-          transitionEnterTimeout={0}
-          transitionLeaveTimeout={0}
-        >
-          {notifications}
-        </ReactCSSTransitionGroup>
-      </ul>
+      <TransitionGroup className={styles.notificationsContainer}>
+        {notifications}
+      </TransitionGroup>
     );
   }
 }
 
 NotificationsContainer.propTypes = {
-  notifications: React.PropTypes.object.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired,
+  notifications: PropTypes.object.isRequired,
+  onHideNotification: PropTypes.func.isRequired,
 };
 
 export default NotificationsContainer;

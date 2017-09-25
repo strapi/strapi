@@ -16,11 +16,11 @@
   "main": "./lib",
   "dependencies": {
     "lodash": "^4.17.4",
-    "mongoose": "^4.11.3",
+    "mongoose": "^4.11.10",
     "mongoose-double": "0.0.1",
     "mongoose-float": "^1.0.2",
     "pluralize": "^6.0.0",
-    "strapi-utils": "3.0.0-alpha.5.5"
+    "strapi-utils": "file:../strapi-utils"
   },
   "strapi": {
     "isHook": true

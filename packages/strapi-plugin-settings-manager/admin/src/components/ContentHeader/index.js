@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -22,8 +23,8 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 }
 
 ContentHeader.propTypes = {
-  description: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 export default ContentHeader;

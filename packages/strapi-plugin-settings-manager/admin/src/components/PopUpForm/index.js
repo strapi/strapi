@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import WithFormSection from 'components/WithFormSection';
 import styles from './styles.scss';
@@ -45,13 +46,13 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 PopUpForm.propTypes = {
-  renderInput: React.PropTypes.func.isRequired,
-  renderPopUpForm: React.PropTypes.oneOfType([
-    React.PropTypes.func,
-    React.PropTypes.bool,
+  renderInput: PropTypes.func.isRequired,
+  renderPopUpForm: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
   ]).isRequired,
-  resetToggleDefaultConnection: React.PropTypes.func.isRequired,
-  sections: React.PropTypes.array.isRequired,
+  resetToggleDefaultConnection: PropTypes.func.isRequired,
+  sections: PropTypes.array.isRequired,
 };
 
 export default WithFormSection(PopUpForm); // eslint-disable-line new-cap

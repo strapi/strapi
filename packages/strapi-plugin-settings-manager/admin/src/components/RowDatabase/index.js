@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 // modal
@@ -131,12 +132,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowDatabase.propTypes = {
-  data: React.PropTypes.object.isRequired,
-  error: React.PropTypes.bool.isRequired,
-  formErrors: React.PropTypes.array.isRequired,
-  getDatabase: React.PropTypes.func.isRequired,
-  handleDatabaseDelete: React.PropTypes.func.isRequired,
-  handleSubmit: React.PropTypes.func.isRequired,
+  data: PropTypes.object.isRequired,
+  error: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
+  getDatabase: PropTypes.func.isRequired,
+  handleDatabaseDelete: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
 };
 
 export default RowDatabase;
