@@ -16,7 +16,7 @@ module.exports = (api, controller) => {
   }
 
   if (_.isObject(controller) && controller.hasOwnProperty('identity')) {
-    controller = controller.identity;
+    controller = controller.identity.toLowerCase();
   } else if (_.isString(controller)) {
     controller = controller.toLowerCase();
   } else {
