@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace } from 'lodash';
+import { map, get, isObject, isEmpty, replace, lowerCase } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -110,9 +110,9 @@ export class Edit extends React.Component {
 
   componentDidMount() {
     this.props.setInitialState();
-    this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
-    this.props.setFormValidations(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
-    this.props.setForm(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
+    this.props.setCurrentModelName(lowerCase(this.props.match.params.slug));
+    this.props.setFormValidations(this.props.models[lowerCase(this.props.match.params.slug)].attributes);
+    this.props.setForm(this.props.models[lowerCase(this.props.match.params.slug)].attributes);
     // Detect that the current route is the `create` route or not
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
