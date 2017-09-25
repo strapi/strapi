@@ -1,0 +1,11 @@
+{
+  "/": {
+    "container": "Home"
+  },
+  "/:slug": {
+    "container": "List"
+  },
+  "/:slug/:id": {
+    "container": "Edit"
+  }
+}

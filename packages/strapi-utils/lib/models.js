@@ -167,7 +167,7 @@ module.exports = {
         nature: 'oneToOne',
         verbose: 'hasOne'
       };
-    } else if (types.current === 'model' && types.other === 'collection') {
+    } else if ((types.current === 'model' || types.current === 'modelD') && types.other === 'collection') {
       return {
         nature: 'oneToMany',
         verbose: 'belongsTo'

@@ -1,0 +1,6 @@
+{
+  "itemsPerPage": {
+    "id": "contentManager.components.LimitSelect.itemsPerPage",
+    "defaultMessage": "Items per page"
+  }
+}

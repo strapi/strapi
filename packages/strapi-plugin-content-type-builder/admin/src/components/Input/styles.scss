@@ -1,0 +1,163 @@
+ /* stylelint-disable */
+
+.errorContainer {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+  line-height: 1.3rem;
+}
+
+.errorContainerTextArea {
+  margin-top: .5rem;
+  line-height: 1.3rem;
+  margin-bottom: .5rem;
+}
+
+.addon {
+  margin-top: .9rem;
+  height: 3.4rem;
+  background-color: rgba(16, 22, 34, 0.02);
+  color: rgba(16, 22, 34, 0.5);
+  border: 1px solid #E3E9F3;
+  border-radius: 0.25rem;
+  line-height: 3.2rem;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  font-size: 1.3rem;
+  font-family: Lato;
+  font-weight: 600!important;
+  text-transform: capitalize;
+}
+
+.input {
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
+  > label {
+    margin-bottom: 0;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  > input {
+    margin-top: .9rem;
+    padding-left: 1rem;
+    height: 3.4rem;
+    border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
+    line-height: 3.4rem;
+    font-size: 1.3rem;
+    font-family: Lato !important;
+    background-size: 0 !important;
+  }
+
+  > select {
+    margin-top: .9rem;
+    padding-top: 0rem;
+    padding-left: 1rem;
+    height: 3.4rem !important;
+    line-height: 3.2rem;
+    border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    font-size: 1.3rem;
+    font-family: Lato !important;
+    background-position: right -1px center;
+    background-repeat: no-repeat;
+    background-image: url('../../assets/images/background_input.svg');
+  }
+
+}
+
+.inputCheckbox {
+  font-size: 1.3rem;
+  font-family: Lato;
+  margin-bottom: 1.5rem;
+  > div {
+    margin-bottom: 0;
+  }
+}
+
+.checkboxLabel {
+  // padding-top: .1rem;
+  cursor: inherit;
+  font-weight: 500;
+  > input {
+    margin-right: 1.2rem;
+    cursor: pointer;
+  }
+}
+
+.inputCheckboxDescriptionContainer {
+  width: 150%;
+  padding-top: .2rem;
+  padding-left: 2.5rem;
+  line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
+  > small {
+    color: darken(#9EA7B8, 10%);
+    font-family: Lato;
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+}
+
+.inputDescriptionContainer {
+  width: 200%;
+  // width: 150%;
+  margin-top: 1.3rem;
+  line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
+  > small {
+    color: darken(#9EA7B8, 10%);
+    font-family: Lato;
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+}
+
+.inputTextAreaDescriptionContainer {
+  margin-top: 1.3rem;
+  line-height: 1.2rem;
+  -webkit-font-smoothing: antialiased;
+  > small {
+    color: darken(#9EA7B8, 10%);
+    font-family: Lato;
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+}
+
+
+
+.inputTextArea {
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-family: Lato;
+  > label {
+    margin-bottom: 0;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  > textarea {
+    margin-top: .9rem;
+    padding: .7rem 1rem .3rem 1rem;
+    height: 10.6rem;
+    border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
+    line-height: 1.8rem;
+    font-size: 1.3rem;
+    font-family: Lato !important;
+    background-size: 0 !important;
+  }
+}
+
+.inputTitle {
+  margin-bottom: 1.7rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.spacer {
+  height: .5rem;
+}
