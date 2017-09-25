@@ -145,8 +145,9 @@ module.exports = (options) => ({
     ],
     alias: {
       moment: 'moment/moment.js',
-      'react': 'React',
-      'react-dom': 'React-DOM',
+      'react': 'react',
+      'react-dom': 'react-dom',
+      'react-transition-group': 'react-transition-group',
     },
     symlinks: false,
     extensions: [
@@ -175,5 +176,6 @@ function generateExternals() {
   return {
     'react': 'React',
     'react-dom': 'ReactDOM',
+    'react-transition-group': 'ReactTransitionGroup',
   };
 }

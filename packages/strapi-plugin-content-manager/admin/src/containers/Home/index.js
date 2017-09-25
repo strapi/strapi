@@ -11,7 +11,7 @@ import PluginHeader from 'components/PluginHeader';
 import styles from './styles.scss';
 
 export class Home extends React.Component {
-  render() {
+  render() {  
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>

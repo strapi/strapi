@@ -61,7 +61,7 @@ class EditForm extends React.Component {
           type={this.getInputType(details.type)}
           label={get(layout, 'label') || details.label || ''}
           name={attr}
-          customBootstrapClass={get(layout, 'className') || false}
+          customBootstrapClass={get(layout, 'className') || ''}
           value={this.props.record.get(attr) || ''}
           placeholder={get(layout, 'placeholder') || details.placeholder || details.label || attr || ''}
           handleChange={this.props.handleChange}
