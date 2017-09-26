@@ -19,6 +19,7 @@ const pluginFolders = plugins.reduce((acc, current) => {
   return acc;
 }, {});
 
+
 module.exports = (options) => ({
   entry: Object.assign(options.entry, plugins.reduce((acc, current) => {
     acc[current] = path.resolve(pluginFolders[current], 'app.js');
@@ -131,7 +132,7 @@ module.exports = (options) => ({
       loader: 'url-loader?limit=10000',
     }],
   },
-  plugins: options.plugins.concat([
+  plugins: [
     new webpack.ProvidePlugin({
       // make fetch available
       fetch: 'exports-loader?self.fetch!whatwg-fetch',
@@ -146,7 +147,7 @@ module.exports = (options) => ({
       },
     }),
     new webpack.NamedModulesPlugin(),
-  ]),
+  ].concat(options.plugins),
   resolve: {
     modules: [
       'admin/src',
@@ -156,6 +157,12 @@ module.exports = (options) => ({
     ],
     alias: {
       moment: 'moment/moment.js',
+      'lodash': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+      'immutable': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+      'react-intl': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+      'react': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+      'react-dom': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+      'react-transition-group': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
     },
     symlinks: false,
     extensions: [
