@@ -497,7 +497,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   renderCustomPopUpHeader = (startTitle) => {
     const italicText = !includes(this.props.hash, '#edit') ?
-      <FormattedMessage id={replace(split(this.props.hash, ('::'))[1], 'attribute', '')}>
+      <FormattedMessage id='popUpForm.header' defaultMessage='{title}' values={{ title: replace(split(this.props.hash, ('::'))[1], 'attribute', '') }}>
         {(message) => <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{message}</span>}
       </FormattedMessage>
       : <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{this.state.popUpTitleEdit}</span>;

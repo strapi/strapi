@@ -138,7 +138,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label} onClick={this.handleChangeCheckbox}  style={{ cursor: 'pointer' }}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value} name={this.props.name} tabIndex={this.props.tabIndex} />
+                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} tabIndex={this.props.tabIndex} />
                 {message}
               </label>
             )}
@@ -176,7 +176,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         >
           {map(this.props.selectOptions, (option, key) => (
             option.name ?
-              <FormattedMessage id={`${option.name}`} key={key}>
+              <FormattedMessage id='select.option.message' defaultMessage='{option}' values={{ option: option.name }} key={key}>
                 {(message) => (
                   <option value={option.value}>
                     {message}
