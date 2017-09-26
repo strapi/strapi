@@ -92,11 +92,11 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 
 RowLanguage.propTypes = {
   active: PropTypes.bool,
-  changeDefaultLanguage: PropTypes.func.isRequired,
-  handleLanguageDelete: PropTypes.func.isRequired,
-  listLanguages: PropTypes.object.isRequired,
-  liStyles: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
+  changeDefaultLanguage: PropTypes.func,
+  handleLanguageDelete: PropTypes.func,
+  listLanguages: PropTypes.object,
+  liStyles: PropTypes.object,
+  name: PropTypes.string,
 };
 
 export default RowLanguage;

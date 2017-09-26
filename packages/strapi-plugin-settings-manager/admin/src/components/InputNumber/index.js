@@ -169,19 +169,19 @@ InputNumber.propTypes = {
     PropTypes.array,
   ]).isRequired,
   handleBlur: PropTypes.func,
-  handleChange: PropTypes.func.isRequired,
+  handleChange: PropTypes.func,
   handleFocus: PropTypes.func,
   inputDescription: PropTypes.string,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   noErrorsDescription: PropTypes.bool,
   placeholder: PropTypes.string,
   styles: PropTypes.object,
-  target: PropTypes.string.isRequired,
-  validations: PropTypes.object.isRequired,
+  target: PropTypes.string,
+  validations: PropTypes.object,
   value: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.string,
-  ]).isRequired,
+  ]),
 }
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

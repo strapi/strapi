@@ -45,13 +45,13 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 PopUpForm.propTypes = {
-  renderInput: PropTypes.func.isRequired,
+  renderInput: PropTypes.func,
   renderPopUpForm: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.bool,
-  ]).isRequired,
-  resetToggleDefaultConnection: PropTypes.func.isRequired,
-  sections: PropTypes.array.isRequired,
+  ]),
+  resetToggleDefaultConnection: PropTypes.func,
+  sections: PropTypes.array,
 };
 
 export default WithFormSection(PopUpForm); // eslint-disable-line new-cap

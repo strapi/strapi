@@ -81,13 +81,13 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 }
 
 EditFormSectionNested.propTypes = {
-  formErrors: PropTypes.array.isRequired,
-  handleChange: PropTypes.func.isRequired,
+  formErrors: PropTypes.array,
+  handleChange: PropTypes.func,
   renderInput: PropTypes.func,
   section: PropTypes.oneOfType([
     PropTypes.array,
     PropTypes.object,
-  ]).isRequired,
+  ]),
   styles: PropTypes.object,
   value: PropTypes.object,
   values: PropTypes.object,

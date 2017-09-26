@@ -23,7 +23,7 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? styles.requiredClass : '';
 
     return (
-      <div className={`${styles.inputSelect} ${requiredClass} ${bootStrapClass}`}>
+      <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>
           <FormattedMessage id={`settings-manager.${this.props.name}`} />
         </label>
@@ -35,13 +35,15 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
           value={this.props.value}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
-              {(message) => (
-                <option value={option.value}>
-                  {message}
-                </option>
-              )}
-            </FormattedMessage>
+            option.name ?
+              <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
+                {(message) => (
+                  <option value={option.value}>
+                    {message}
+                  </option>
+                )}
+              </FormattedMessage> :
+              <option value={option.value} key={key}>{option.name}</option>
           ))}
         </select>
       </div>
@@ -50,17 +52,17 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputSelect.propTypes = {
-  addRequiredInputDesign: PropTypes.bool.isRequired,
-  customBootstrapClass: PropTypes.string.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  handleChange: PropTypes.func,
+  name: PropTypes.string,
   selectOptions: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired, // TODO remove
-  ]).isRequired,
-  target: PropTypes.string.isRequired,
-  validations: PropTypes.object.isRequired,
-  value: PropTypes.string.isRequired,
+    PropTypes.array,
+    PropTypes.object,
+  ]),
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.string,
 };
 
 export default InputSelect;

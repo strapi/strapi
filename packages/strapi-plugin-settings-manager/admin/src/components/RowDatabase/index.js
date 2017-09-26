@@ -131,12 +131,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowDatabase.propTypes = {
-  data: PropTypes.object.isRequired,
-  error: PropTypes.bool.isRequired,
-  formErrors: PropTypes.array.isRequired,
-  getDatabase: PropTypes.func.isRequired,
-  handleDatabaseDelete: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  data: PropTypes.object,
+  error: PropTypes.bool,
+  formErrors: PropTypes.array,
+  getDatabase: PropTypes.func,
+  handleDatabaseDelete: PropTypes.func,
+  handleSubmit: PropTypes.func,
 };
 
 export default RowDatabase;

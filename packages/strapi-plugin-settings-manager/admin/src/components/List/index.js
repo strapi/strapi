@@ -147,17 +147,17 @@ List.propTypes = {
   formErrors: PropTypes.array,
   handlei18n: PropTypes.bool,
   handleListPopUpSubmit: PropTypes.func,
-  listButtonLabel: PropTypes.string.isRequired,
+  listButtonLabel: PropTypes.string,
   listItems: PropTypes.array,
   listTitle: PropTypes.oneOfType([
-    PropTypes.string.isRequired,
-    PropTypes.object.isRequired,
-  ]).isRequired,
+    PropTypes.string,
+    PropTypes.object,
+  ]),
   noListButtonPopUp: PropTypes.bool,
   renderRow: PropTypes.oneOfType([
-    PropTypes.bool.isRequired,
-    PropTypes.func.isRequired,
-  ]).isRequired,
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
 }
 
 export default List;

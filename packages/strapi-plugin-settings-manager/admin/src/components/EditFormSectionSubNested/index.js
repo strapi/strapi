@@ -24,11 +24,11 @@ class EditFormSectionSubNested extends React.Component { // eslint-disable-line 
 }
 
 EditFormSectionSubNested.propTypes = {
-  renderInput: PropTypes.func.isRequired,
+  renderInput: PropTypes.func,
   section: PropTypes.oneOfType([
     PropTypes.array,
     PropTypes.object,
-  ]).isRequired,
+  ]),
   styles: PropTypes.object,
 };
 

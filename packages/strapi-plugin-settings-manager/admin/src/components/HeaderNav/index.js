@@ -49,8 +49,8 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 HeaderNav.propTypes = {
-  links: PropTypes.array.isRequired,
-  path: PropTypes.string.isRequired,
-  renderListComponent: PropTypes.bool.isRequired,
+  links: PropTypes.array,
+  path: PropTypes.string,
+  renderListComponent: PropTypes.bool,
 }
 export default HeaderNav;
