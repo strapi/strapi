@@ -162,26 +162,26 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
-  addRequiredInputDesign: PropTypes.bool.isRequired,
-  customBootstrapClass: PropTypes.string.isRequired,
-  deactivateErrorHighlight: PropTypes.bool.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
   errors: PropTypes.oneOfType([
-    PropTypes.bool.isRequired,
-    PropTypes.array.isRequired,
+    PropTypes.bool,
+    PropTypes.array,
   ]).isRequired,
-  handleBlur: PropTypes.func.isRequired,
+  handleBlur: PropTypes.func,
   handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func.isRequired,
-  inputDescription: PropTypes.string.isRequired,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
   name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  styles: PropTypes.object.isRequired,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
   target: PropTypes.string.isRequired,
   validations: PropTypes.object.isRequired,
   value: PropTypes.oneOfType([
-    PropTypes.number.isRequired,
-    PropTypes.string.isRequired,
+    PropTypes.number,
+    PropTypes.string,
   ]).isRequired,
 }
 

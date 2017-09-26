@@ -142,19 +142,19 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  actionBeforeOpenPopUp: PropTypes.func.isRequired,
-  addListTitleMarginTop: PropTypes.bool.isRequired,
-  error: PropTypes.bool.isRequired,
-  formErrors: PropTypes.array.isRequired,
-  handlei18n: PropTypes.bool.isRequired,
-  handleListPopUpSubmit: PropTypes.func.isRequired,
+  actionBeforeOpenPopUp: PropTypes.func,
+  addListTitleMarginTop: PropTypes.bool,
+  error: PropTypes.bool,
+  formErrors: PropTypes.array,
+  handlei18n: PropTypes.bool,
+  handleListPopUpSubmit: PropTypes.func,
   listButtonLabel: PropTypes.string.isRequired,
-  listItems: PropTypes.array.isRequired,
+  listItems: PropTypes.array,
   listTitle: PropTypes.oneOfType([
     PropTypes.string.isRequired,
     PropTypes.object.isRequired,
   ]).isRequired,
-  noListButtonPopUp: PropTypes.bool.isRequired,
+  noListButtonPopUp: PropTypes.bool,
   renderRow: PropTypes.oneOfType([
     PropTypes.bool.isRequired,
     PropTypes.func.isRequired,

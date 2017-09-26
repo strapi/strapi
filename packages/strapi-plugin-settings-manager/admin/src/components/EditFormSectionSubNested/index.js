@@ -27,10 +27,10 @@ class EditFormSectionSubNested extends React.Component { // eslint-disable-line 
 EditFormSectionSubNested.propTypes = {
   renderInput: PropTypes.func.isRequired,
   section: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
+    PropTypes.array,
+    PropTypes.object,
   ]).isRequired,
-  styles: PropTypes.object.isRequired,
+  styles: PropTypes.object,
 };
 
 export default WithFormSection(EditFormSectionSubNested); // eslint-disable-line new-cap

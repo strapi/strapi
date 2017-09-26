@@ -49,7 +49,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 PluginLeftMenuLink.propTypes = {
   environments: PropTypes.array.isRequired,
   environmentsRequired: PropTypes.bool.isRequired,
-  envParams: PropTypes.string.isRequired,
+  envParams: PropTypes.string,
   link: PropTypes.object.isRequired,
 };
 

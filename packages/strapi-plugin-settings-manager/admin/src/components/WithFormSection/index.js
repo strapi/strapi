@@ -20,14 +20,14 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
-    addRequiredInputDesign: PropTypes.bool.isRequired,
+    addRequiredInputDesign: PropTypes.bool,
     cancelAction: PropTypes.bool.isRequired,
     formErrors: PropTypes.array.isRequired,
     handleChange: PropTypes.func.isRequired,
     section: PropTypes.oneOfType([
-      PropTypes.object.isRequired,
-      PropTypes.array.isRequired,
-    ]).isRequired,
+      PropTypes.object,
+      PropTypes.array,
+    ]),
     values: PropTypes.object.isRequired,
   }
 

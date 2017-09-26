@@ -59,10 +59,10 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 EditFormSection.propTypes = {
   formErrors: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
-  renderInput: PropTypes.func.isRequired,
+  renderInput: PropTypes.func,
   section: PropTypes.object.isRequired,
-  showNestedForm: PropTypes.bool.isRequired,
-  styles: PropTypes.object.isRequired,
+  showNestedForm: PropTypes.bool,
+  styles: PropTypes.object,
   values: PropTypes.object.isRequired,
 };
 

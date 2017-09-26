@@ -24,7 +24,7 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
 
 PluginLeftMenu.propTypes = {
   environments: PropTypes.array.isRequired,
-  envParams: PropTypes.string.isRequired,
+  envParams: PropTypes.string,
   sections: PropTypes.array.isRequired,
 };
 

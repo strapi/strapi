@@ -57,8 +57,8 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 EditForm.propTypes = {
-  cancelAction: PropTypes.bool.isRequired,
-  formErrors: PropTypes.array.isRequired,
+  cancelAction: PropTypes.bool,
+  formErrors: PropTypes.array,
   handleCancel: PropTypes.func.isRequired,
   handleChange: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,

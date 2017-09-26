@@ -252,8 +252,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
-    const apiUrl = `${databaseName}/${this.props.params.env}`;
+    const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
+    
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
 
@@ -474,7 +475,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.home.loading) {
       return <div />;
     }
-
+    console.log(this.props)
     return (
       <div className="container-fluid">
         <div className="row">
@@ -547,7 +548,7 @@ HomePage.propTypes = {
   menuSections: PropTypes.array.isRequired,
   newDatabasePost: PropTypes.func.isRequired,
   newLanguagePost: PropTypes.func.isRequired,
-  params: PropTypes.func.isRequired,
+  // params: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   specificDatabaseFetch: PropTypes.func.isRequired,
 };
