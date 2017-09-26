@@ -527,7 +527,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
     const edit = includes(this.props.hash, '#edit');
     const selectOptions = includes(this.props.hash, 'attributenumber') ? get(this.props.form, ['items', '1', 'items']) : this.props.selectOptions;
-
+    
     if (includes(popUpFormType, 'relation')) {
       return (
         <PopUpRelations

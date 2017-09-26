@@ -234,7 +234,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
-    <FormattedMessage id={`${placeholder}`}>
+    <FormattedMessage id={`${placeholder}`} defaultMessage='{placeholder}' values={{ placeholder }}>
       {(message) => (
         <input
           name={this.props.name}
@@ -313,7 +313,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     const addonInput = this.props.addon ?
       <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
-        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} /></span>
+        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} values={{ addon: this.props.addon }} defaultMessage='{addon}' /></span>
         {input}
       </div> : input;
     return (
