@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, findIndex } from 'lodash';
 import styles from './styles.scss';
@@ -35,12 +35,12 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
 
     return (
       <li className={styles.pluginLeftMenuLink}>
-        <Link className={styles.link} to={`/plugins/settings-manager/${url}`} activeClassName={styles.linkActive}>
+        <NavLink className={styles.link} to={`/plugins/settings-manager/${url}`} activeClassName={styles.linkActive}>
           <div>
             <i className={`fa fa-${this.props.link.icon}`} />
           </div>
           <span><FormattedMessage id={`settings-manager.${this.props.link.name}`} /></span>
-        </Link>
+        </NavLink>
       </li>
     );
   }
