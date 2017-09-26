@@ -11,7 +11,6 @@
 *  - isChecked: bool
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';

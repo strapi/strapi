@@ -4,7 +4,6 @@
  *
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -29,7 +28,6 @@ import { router } from 'app';
 
 // design
 import ContentHeader from 'components/ContentHeader';
-import Debug from 'components/Debug';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
@@ -82,7 +80,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       defaultComponent: EditForm,
       list: List,
       defaultComponentWithEnvironments: HeaderNav,
-      debug: Debug,
     };
 
     // allowing state only for database modal purpose
@@ -254,7 +251,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
-    
+
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
 
