@@ -289,6 +289,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const availableContentNumber = this.props.home.configsDisplay.sections.length;
     const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
+
     return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
   }
 
@@ -320,7 +321,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   renderPopUpFormLanguage = (section) => (
     map(section.items, (item) => {
       const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
-
+  
       return (
         <div className={`col-md-6`}>
           <div className={styles.modalLanguageLabel}>
@@ -460,10 +461,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   valueComponent = (props) => {
     const flagName = formatLanguageLocale(props.value.value);
     const flag = getFlag(flagName);
-
+    // <FormattedMessage id={props.value.label} className={styles.marginLeft} />
     return (
       <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
-        <FormattedMessage id={props.value.label} className={styles.marginLeft} />
+        <FormattedMessage id="settings-manager.selectValue" defaultMessage='{language}' values={{ language: props.value.label}} className={styles.marginLeft} />
       </span>
     );
   }
