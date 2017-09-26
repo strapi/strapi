@@ -18,7 +18,6 @@ const plugins = [
     name: 'vendor',
     children: true,
     minChunks: 2,
-    async: true,
   }),
 
   // Minify and optimize the JavaScript
@@ -45,6 +44,7 @@ if (isAdmin) {
       minifyCSS: true,
       minifyURLs: true,
     },
+    chunksSortMode: 'auto',
     inject: true,
   }));
   plugins.push(new ExtractTextPlugin('[name].[contenthash].css'));

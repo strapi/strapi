@@ -88,16 +88,17 @@
     "postcss-smart-import": "^0.7.5",
     "precss": "^2.0.0",
     "prettier": "^1.5.3",
-    "react": "^15.6.1",
+    "react": "^15.6.2",
+    "react-css-transition": "^0.7.4",
     "react-datetime": "^2.8.6",
-    "react-dom": "^15.6.1",
+    "react-dom": "^15.6.2",
     "react-helmet": "^5.1.3",
     "react-intl": "^2.3.0",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.1.2",
     "react-router-redux": "^5.0.0-alpha.6",
     "react-transition-group": "1.1.2",
-    "reactstrap": "^4.8.0",
+    "reactstrap": "^5.0.0-alpha.1",
     "redux": "^3.7.2",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.15.6",
@@ -113,5 +114,7 @@
     "webpack-hot-middleware": "^2.18.2",
     "whatwg-fetch": "^2.0.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^2.9.0"
+  }
 }

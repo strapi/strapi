@@ -2,6 +2,7 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
+const fs = require('fs');
 const path = require('path');
 
 const webpack = require('webpack');
@@ -9,18 +10,26 @@ const webpack = require('webpack');
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
+const plugins = process.env.IS_ADMIN === 'true' ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
+  .filter(x => x[0] !== '.') : [];
+
+const pluginFolders = plugins.reduce((acc, current) => {
+  acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+
+  return acc;
+}, {});
+
 module.exports = (options) => ({
-  entry: options.entry,
+  entry: Object.assign(options.entry, plugins.reduce((acc, current) => {
+    acc[current] = path.resolve(pluginFolders[current], 'app.js');
+
+    return acc;
+  }, {})),
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'admin', 'build'),
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
-    // Comment
-    noParse: [
-      /\/react\//g,
-      /\/react-dom\//g,
-    ],
     loaders: [{
       test: /\.js$/, // Transform all .js files required somewhere with Babel,
       use: {
@@ -46,11 +55,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [
-        path.join(process.cwd(), 'admin', 'src'),
-        // Add the `strapi-helper-plugin` folders watched by babel
-        path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src'),
-      ],
+      include: [path.join(process.cwd(), 'admin', 'src')]
+        .concat(plugins.reduce((acc, current) => {
+          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), pluginFolders[current]);
+
+          return acc;
+        }, []))
+        .concat([path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
@@ -145,9 +156,6 @@ module.exports = (options) => ({
     ],
     alias: {
       moment: 'moment/moment.js',
-      'react': 'react',
-      'react-dom': 'react-dom',
-      'react-transition-group': 'react-transition-group',
     },
     symlinks: false,
     extensions: [
@@ -161,7 +169,7 @@ module.exports = (options) => ({
       'main',
     ],
   },
-  externals: generateExternals(),
+  externals: {},
   resolveLoader: {
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),
@@ -169,13 +177,5 @@ module.exports = (options) => ({
     ],
   },
   devtool: options.devtool,
-  target: 'web', // Make web variables accessible to webpack, e.g. window
+  target: 'web', // Make web variables accessible to webpack, e.g. window,
 });
-
-function generateExternals() {
-  return {
-    'react': 'React',
-    'react-dom': 'ReactDOM',
-    'react-transition-group': 'ReactTransitionGroup',
-  };
-}
