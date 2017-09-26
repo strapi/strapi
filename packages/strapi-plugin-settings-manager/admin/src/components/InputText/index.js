@@ -202,7 +202,7 @@ InputText.propTypes = {
   styles: PropTypes.object,
   target: PropTypes.string.isRequired,
   validations: PropTypes.object.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

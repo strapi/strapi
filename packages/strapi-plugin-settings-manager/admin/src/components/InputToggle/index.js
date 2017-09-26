@@ -75,7 +75,7 @@ InputToggle.propTypes = {
   customBootstrapClass: PropTypes.string.isRequired,
   handleChange: PropTypes.func.isRequired,
   hiddenLabel: PropTypes.bool.isRequired,
-  isChecked: PropTypes.bool.isRequired,
+  isChecked: PropTypes.bool,
   name: PropTypes.string.isRequired,
   target: PropTypes.string.isRequired,
 }

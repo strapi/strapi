@@ -472,11 +472,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.home.loading) {
       return <div />;
     }
-    console.log(this.props)
+
     return (
       <div className="container-fluid">
         <div className="row">
-          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.environment} />
+          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.env} />
           <div className={`${styles.home} col-md-9`}>
             <Helmet
               title="Settings Manager"

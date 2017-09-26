@@ -5,7 +5,7 @@
 */
 
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { join, map, take } from 'lodash';
 import EditForm from 'components/EditForm';
 import List from 'components/List';
@@ -29,13 +29,13 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
                   linkColor = darken(linkColor, 2);
 
                   return (
-                    <Link key={key} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
+                    <NavLink key={key} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
                       <div></div>
                       <div className={`${styles.linkText} text-center`}>
                         {link.name}
                         {notifActive}
                       </div>
-                    </Link>
+                    </NavLink>
                   );
                 })}
               </div>
