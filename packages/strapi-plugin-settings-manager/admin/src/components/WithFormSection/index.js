@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { findIndex, forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
@@ -20,15 +19,15 @@ import styles from './styles.scss';
 
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
-    addRequiredInputDesign: PropTypes.bool.isRequired,
-    cancelAction: PropTypes.bool.isRequired,
-    formErrors: PropTypes.array.isRequired,
-    handleChange: PropTypes.func.isRequired,
+    addRequiredInputDesign: PropTypes.bool,
+    cancelAction: PropTypes.bool,
+    formErrors: PropTypes.array,
+    handleChange: PropTypes.func,
     section: PropTypes.oneOfType([
-      PropTypes.object.isRequired,
-      PropTypes.array.isRequired,
-    ]).isRequired,
-    values: PropTypes.object.isRequired,
+      PropTypes.object,
+      PropTypes.array,
+    ]),
+    values: PropTypes.object,
   }
 
   constructor(props) {

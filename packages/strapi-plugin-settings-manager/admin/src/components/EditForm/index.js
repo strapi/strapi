@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -57,13 +56,13 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 EditForm.propTypes = {
-  cancelAction: PropTypes.bool.isRequired,
-  formErrors: PropTypes.array.isRequired,
-  handleCancel: PropTypes.func.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
-  sections: PropTypes.array.isRequired,
-  values: PropTypes.object.isRequired,
+  cancelAction: PropTypes.bool,
+  formErrors: PropTypes.array,
+  handleCancel: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleSubmit: PropTypes.func,
+  sections: PropTypes.array,
+  values: PropTypes.object,
 };
 
 export default EditForm;

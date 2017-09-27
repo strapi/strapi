@@ -243,12 +243,12 @@ button {
 
 .modalBody {
   padding: 0;
-  padding-top: 2rem;
+  padding-top: 2.1rem;
 
 }
 
 .modalFooter {
-  margin-top: 1.1rem;
+  margin-top: 1.5rem;
   margin-bottom: 1.1rem;
   > input {
     margin-top: 1.3rem!important;
@@ -270,8 +270,28 @@ button {
 
   }
   > button {
+    z-index: 999;
+    margin-top: -2rem;
+    margin-right: -1.5rem;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0;
+    }
     > span {
-      color: #0E1622!important;
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
     }
   }
 }

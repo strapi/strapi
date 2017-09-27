@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { has, map, forEach } from 'lodash';
 
@@ -82,16 +81,16 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 }
 
 EditFormSectionNested.propTypes = {
-  formErrors: PropTypes.array.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  renderInput: PropTypes.func.isRequired,
+  formErrors: PropTypes.array,
+  handleChange: PropTypes.func,
+  renderInput: PropTypes.func,
   section: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
-  ]).isRequired,
-  styles: PropTypes.object.isRequired,
-  value: PropTypes.object.isRequired,
-  values: PropTypes.object.isRequired,
+    PropTypes.array,
+    PropTypes.object,
+  ]),
+  styles: PropTypes.object,
+  value: PropTypes.object,
+  values: PropTypes.object,
 };
 
 export default WithFormSection(EditFormSectionNested); // eslint-disable-line new-cap

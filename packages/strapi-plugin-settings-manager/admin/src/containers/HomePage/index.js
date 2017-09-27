@@ -4,7 +4,6 @@
  *
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -29,7 +28,6 @@ import { router } from 'app';
 
 // design
 import ContentHeader from 'components/ContentHeader';
-import Debug from 'components/Debug';
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
@@ -82,7 +80,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       defaultComponent: EditForm,
       list: List,
       defaultComponentWithEnvironments: HeaderNav,
-      debug: Debug,
     };
 
     // allowing state only for database modal purpose
@@ -252,8 +249,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
-    const apiUrl = `${databaseName}/${this.props.params.env}`;
+    const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
+
     if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
 
 
@@ -291,6 +289,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const availableContentNumber = this.props.home.configsDisplay.sections.length;
     const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
+
     return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
   }
 
@@ -322,7 +321,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   renderPopUpFormLanguage = (section) => (
     map(section.items, (item) => {
       const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
-
+  
       return (
         <div className={`col-md-6`}>
           <div className={styles.modalLanguageLabel}>
@@ -462,10 +461,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   valueComponent = (props) => {
     const flagName = formatLanguageLocale(props.value.value);
     const flag = getFlag(flagName);
-
+    // <FormattedMessage id={props.value.label} className={styles.marginLeft} />
     return (
       <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
-        <FormattedMessage id={props.value.label} className={styles.marginLeft} />
+        <FormattedMessage id="settings-manager.selectValue" defaultMessage='{language}' values={{ language: props.value.label}} className={styles.marginLeft} />
       </span>
     );
   }
@@ -478,7 +477,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     return (
       <div className="container-fluid">
         <div className="row">
-          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.environment} />
+          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.env} />
           <div className={`${styles.home} col-md-9`}>
             <Helmet
               title="Settings Manager"
@@ -547,7 +546,7 @@ HomePage.propTypes = {
   menuSections: PropTypes.array.isRequired,
   newDatabasePost: PropTypes.func.isRequired,
   newLanguagePost: PropTypes.func.isRequired,
-  params: PropTypes.func.isRequired,
+  // params: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   specificDatabaseFetch: PropTypes.func.isRequired,
 };
