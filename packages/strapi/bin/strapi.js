@@ -43,6 +43,7 @@ program
 // `$ strapi new`
 program
   .command('new')
+  .option('-d, --dev', 'Development mode')
   .description('create a new application ')
   .action(require('./strapi-new'));
 
