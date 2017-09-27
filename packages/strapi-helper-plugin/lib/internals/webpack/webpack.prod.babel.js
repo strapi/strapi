@@ -7,28 +7,35 @@ const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
+const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 
 const plugins = [
-  new webpack.optimize.CommonsChunkPlugin({
-    name: 'vendor',
-    children: true,
-    minChunks: 2,
+  new webpack.DllReferencePlugin({
+    manifest: require(path.join(__dirname, 'manifest.json')),
   }),
-
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
+    sourceMap: true,
     compress: {
-      warnings: false, // ...but do not show warnings in the console (there is a lot of them)
+      warnings: false
     },
   }),
+  new webpack.LoaderOptionsPlugin({
+    minimize: true
+  }),
+  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+  // new BundleAnalyzerPlugin(),
 ];
 
-// Build the `index.htm file`
+// Build the `index.html file`
 if (isAdmin) {
   plugins.push(new HtmlWebpackPlugin({
     template: 'admin/src/index.html',
@@ -44,10 +51,14 @@ if (isAdmin) {
       minifyCSS: true,
       minifyURLs: true,
     },
-    chunksSortMode: 'auto',
+    chunksSortMode: 'manual',
+    chunks: ['main'],
     inject: true,
   }));
   plugins.push(new ExtractTextPlugin('[name].[contenthash].css'));
+  plugins.push(new AddAssetHtmlPlugin({
+    filepath: path.resolve(__dirname, 'dist/*.dll.js')
+  }));
 }
 
 const appPath = isAdmin
@@ -56,9 +67,9 @@ const appPath = isAdmin
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
-  entry: [
-    appPath,
-  ],
+  entry: {
+    main: appPath
+  },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
   output: {
@@ -94,4 +105,16 @@ module.exports = require('./webpack.base.babel')({
     require.resolve('babel-preset-react'),
     require.resolve('babel-preset-stage-0'),
   ],
+
+  alias: {
+    moment: 'moment/moment.js',
+    'lodash': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'),
+    'immutable': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'),
+    'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
+    'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
+    'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
+    'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group')
+  },
+
+  devtool: 'cheap-module-source-map',
 });

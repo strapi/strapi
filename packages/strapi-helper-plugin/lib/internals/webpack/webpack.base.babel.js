@@ -19,13 +19,8 @@ const pluginFolders = plugins.reduce((acc, current) => {
   return acc;
 }, {});
 
-
 module.exports = (options) => ({
-  entry: Object.assign(options.entry, plugins.reduce((acc, current) => {
-    acc[current] = path.resolve(pluginFolders[current], 'app.js');
-
-    return acc;
-  }, {})),
+  entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'admin', 'build'),
     publicPath: '/',
@@ -75,6 +70,7 @@ module.exports = (options) => ({
           modules: true,
           importLoaders: 1,
           sourceMap: true,
+          minimize: process.env.NODE_ENV === 'production'
         },
       }, {
         loader: 'postcss-loader',
@@ -94,7 +90,13 @@ module.exports = (options) => ({
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader'],
+      loaders: ['style-loader', {
+        loader: 'css-loader',
+        options: {
+          minimize: process.env.NODE_ENV === 'production',
+          sourceMap: true,
+        }
+      }],
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader',
@@ -146,7 +148,7 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
-    new webpack.NamedModulesPlugin(),
+    new webpack.NamedModulesPlugin()
   ].concat(options.plugins),
   resolve: {
     modules: [
@@ -155,15 +157,7 @@ module.exports = (options) => ({
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],
-    alias: {
-      moment: 'moment/moment.js',
-      'lodash': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-      'immutable': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-      'react-intl': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-      'react': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-      'react-dom': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-      'react-transition-group': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    },
+    alias: options.alias,
     symlinks: false,
     extensions: [
       '.js',
@@ -176,7 +170,7 @@ module.exports = (options) => ({
       'main',
     ],
   },
-  externals: {},
+  externals: options.externals,
   resolveLoader: {
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),

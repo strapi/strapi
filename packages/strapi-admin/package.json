@@ -11,6 +11,7 @@
     "preanalyze": "npm run analyze:clean",
     "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "build": "cross-env NODE_ENV=production IS_ADMIN=true webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:dll": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.dll.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",
     "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node node_modules/strapi-helper-plugin/lib/server",
     "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",

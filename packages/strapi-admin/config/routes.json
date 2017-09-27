@@ -10,7 +10,7 @@
     },
     {
       "method": "GET",
-      "path": "/:plugin/main.js",
+      "path": "/:plugin/:file",
       "handler": "Admin.pluginFile",
       "config": {
         "policies": []
