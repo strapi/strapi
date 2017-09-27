@@ -4,6 +4,7 @@
 *
 */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { find, get, join, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
