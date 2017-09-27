@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace } from 'lodash';
+import { map, get, isObject, isEmpty, replace, toNumber } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -141,11 +141,15 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
+    let formattedValue = e.target.value;
+
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      e.target.value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+      formattedValue = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    } else if (['float', 'integer', 'bigint'].indexOf(this.props.schema[this.props.currentModelName].fields[e.target.name].type) !== -1) {
+      formattedValue = toNumber(e.target.value);
     }
 
-    this.props.setRecordAttribute(e.target.name, e.target.value);
+    this.props.setRecordAttribute(e.target.name, formattedValue);
   }
 
   handleSubmit = (e) => {
