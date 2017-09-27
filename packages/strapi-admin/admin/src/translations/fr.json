@@ -10,5 +10,7 @@
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.NotFoundPage.description": "Page introuvable",
-  "app.components.NotFoundPage.back": "Retourner à la page d'accueil"
+  "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
+  "components.AutoReloadBlocker.header": "L' autoReload doit être activé pour ce plugin.",
+  "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité."
 }

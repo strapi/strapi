@@ -85,9 +85,9 @@ const registerPlugin = (plugin) => {
   switch (true) {
     // Execute bootstrap function and check if plugin can be rendered
     case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
-      plugin.bootstrap(plugin)
+      plugin.pluginRequirements(plugin)
         .then(plugin => {
-          plugin.pluginRequirements(plugin)
+          plugin.bootstrap(plugin)
             .then(plugin => {
               store.dispatch(pluginLoaded(plugin));
             });
