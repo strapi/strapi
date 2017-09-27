@@ -12,6 +12,8 @@
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.NotFoundPage.back": "Back to homepage",
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
-  "components.AutoReloadBlocker.description": "Open the following file and enable the feature."
+  "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
+  "components.ProductionBlocker.header": "This plugin is only available in development.",
+  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments."
 
 }
