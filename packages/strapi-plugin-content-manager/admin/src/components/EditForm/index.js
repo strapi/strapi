@@ -31,6 +31,10 @@ class EditForm extends React.Component {
       case 'date':
       case 'datetime':
         return 'date';
+      case 'float':
+      case 'integer':
+      case 'bigint':
+        return 'number';
       default:
         return 'text';
     }

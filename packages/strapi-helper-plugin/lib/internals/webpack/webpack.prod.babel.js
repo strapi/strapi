@@ -8,7 +8,6 @@ const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));

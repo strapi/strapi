@@ -27,7 +27,6 @@
 * - styles are retrieved from the HOC
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, remove } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -189,21 +188,21 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputText.propTypes = {
-  addRequiredInputDesign: PropTypes.bool.isRequired,
-  customBootstrapClass: PropTypes.string.isRequired,
-  deactivateErrorHighlight: PropTypes.bool.isRequired,
-  errors: PropTypes.array.isRequired,
-  handleBlur: PropTypes.func.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func.isRequired,
-  inputDescription: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  styles: PropTypes.object.isRequired,
-  target: PropTypes.string.isRequired,
-  validations: PropTypes.object.isRequired,
-  value: PropTypes.string.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  errors: PropTypes.array,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  name: PropTypes.string,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.string,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

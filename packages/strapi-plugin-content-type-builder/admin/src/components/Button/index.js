@@ -13,6 +13,11 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function Button(props) {
+  const buttonProps = Object.assign({}, props);
+  const propsToDelete = ['loader', 'primary', 'primaryAddShape', 'secondary', 'secondaryHotline', 'secondaryHotlineAdd', 'kind'];
+
+  propsToDelete.map((value) => delete buttonProps[value]);
+
   if (props.loader) {
     return (
       <button
@@ -28,7 +33,7 @@ function Button(props) {
 
         )}
         disabled
-        {...props}
+        {...buttonProps}
       >
         <div className={styles.saving}>
           <span>.</span><span>.</span><span>.</span>
@@ -51,7 +56,7 @@ function Button(props) {
         props.className,
       )}
       type={props.type || 'button'}
-      {...props}
+      {...buttonProps}
     >
       {label}
     </button>

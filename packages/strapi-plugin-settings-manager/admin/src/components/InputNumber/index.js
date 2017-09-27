@@ -27,7 +27,6 @@
 * - styles are retrieved from the HOC
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -162,27 +161,27 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
-  addRequiredInputDesign: PropTypes.bool.isRequired,
-  customBootstrapClass: PropTypes.string.isRequired,
-  deactivateErrorHighlight: PropTypes.bool.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
   errors: PropTypes.oneOfType([
-    PropTypes.bool.isRequired,
-    PropTypes.array.isRequired,
+    PropTypes.bool,
+    PropTypes.array,
   ]).isRequired,
-  handleBlur: PropTypes.func.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func.isRequired,
-  inputDescription: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  styles: PropTypes.object.isRequired,
-  target: PropTypes.string.isRequired,
-  validations: PropTypes.object.isRequired,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  name: PropTypes.string,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
+  target: PropTypes.string,
+  validations: PropTypes.object,
   value: PropTypes.oneOfType([
-    PropTypes.number.isRequired,
-    PropTypes.string.isRequired,
-  ]).isRequired,
+    PropTypes.number,
+    PropTypes.string,
+  ]),
 }
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

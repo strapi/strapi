@@ -6,6 +6,9 @@
 
 import React from 'react';
 
+// Uncomment to use PropTypes
+// import PropTypes from 'prop-types';
+
 {{#if wantMessages}}
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
@@ -29,5 +32,10 @@ class {{ properCase name }} extends React.Component { // eslint-disable-line rea
     );
   }
 }
+
+// Uncomment to use PropTypes
+// {{ properCase name }}.proptypes = {
+  // foo: PropTypes.string,
+};
 
 export default {{ properCase name }};

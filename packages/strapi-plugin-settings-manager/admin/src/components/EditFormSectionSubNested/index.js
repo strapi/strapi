@@ -4,7 +4,6 @@
 *
 */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import WithFormSection from 'components/WithFormSection';
@@ -25,12 +24,12 @@ class EditFormSectionSubNested extends React.Component { // eslint-disable-line 
 }
 
 EditFormSectionSubNested.propTypes = {
-  renderInput: PropTypes.func.isRequired,
+  renderInput: PropTypes.func,
   section: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
-  ]).isRequired,
-  styles: PropTypes.object.isRequired,
+    PropTypes.array,
+    PropTypes.object,
+  ]),
+  styles: PropTypes.object,
 };
 
 export default WithFormSection(EditFormSectionSubNested); // eslint-disable-line new-cap

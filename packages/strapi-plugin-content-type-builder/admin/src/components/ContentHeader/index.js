@@ -38,7 +38,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
   }
 
   renderContentHeader = () => {
-    const description = isEmpty(this.props.description) ? '' : <FormattedMessage id={this.props.description} />;
+    const description = isEmpty(this.props.description) ? '' : <FormattedMessage id={this.props.description} defaultMessage='{description}' values={{ description: this.props.description}} />;
     const buttons = this.props.addButtons ? this.renderButtonContainer() : '';
     return (
       <div className={styles.contentHeader} style={this.props.styles}>

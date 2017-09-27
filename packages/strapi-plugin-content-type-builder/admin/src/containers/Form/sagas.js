@@ -71,7 +71,7 @@ export function* fetchContentType(action) {
     yield put(contentTypeFetchSucceeded(data));
 
   } catch(error) {
-    window.Strapi.notification.error('notification.error.message')
+    window.Strapi.notification.error('content-type-builder.notification.error.message')
   }
 }
 

@@ -138,7 +138,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={this.props.label}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label} onClick={this.handleChangeCheckbox}  style={{ cursor: 'pointer' }}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value} name={this.props.name} tabIndex={this.props.tabIndex} />
+                <input className="form-check-input" type="checkbox" checked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} tabIndex={this.props.tabIndex} />
                 {message}
               </label>
             )}
@@ -176,7 +176,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         >
           {map(this.props.selectOptions, (option, key) => (
             option.name ?
-              <FormattedMessage id={`${option.name}`} key={key}>
+              <FormattedMessage id={option.name} defaultMessage={option.name} values={{ option: option.name }} key={key}>
                 {(message) => (
                   <option value={option.value}>
                     {message}
@@ -234,7 +234,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
-    <FormattedMessage id={`${placeholder}`}>
+    <FormattedMessage id={`${placeholder}`} defaultMessage='{placeholder}' values={{ placeholder }}>
       {(message) => (
         <input
           name={this.props.name}
@@ -313,7 +313,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     const addonInput = this.props.addon ?
       <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
-        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} /></span>
+        <span className={`input-group-addon ${styles.addon}`}><FormattedMessage id={this.props.addon} values={{ addon: this.props.addon }} defaultMessage='{addon}' /></span>
         {input}
       </div> : input;
     return (
