@@ -2,6 +2,7 @@
  * Home
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
@@ -11,7 +12,7 @@ import PluginHeader from 'components/PluginHeader';
 import styles from './styles.scss';
 
 export class Home extends React.Component {
-  render() {  
+  render() {
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>

@@ -4,6 +4,7 @@
 *
 */
 
+import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 
 import LocaleToggle from 'containers/LocaleToggle';

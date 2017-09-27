@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { map } from 'lodash';
 import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
@@ -16,7 +16,7 @@ export const generateMenu = function () {
     .then(displayedModels => {
       return [{
         name: 'Content Types',
-        links: _.map(displayedModels, (model, key) => ({
+        links: map(displayedModels, (model, key) => ({
           label: model.labelPlural || model.label || key,
           destination: key,
         })),

@@ -5,11 +5,12 @@
  *
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { isEmpty, get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
 import injectSaga from 'utils/injectSaga';
@@ -46,7 +47,7 @@ class App extends React.Component {
   componentDidMount() {
     const config = tryRequire('../../../../config/admin.json');
 
-    if (!_.isEmpty(_.get(config, 'admin.schema'))) {
+    if (!isEmpty(get(config, 'admin.schema'))) {
       this.props.updateSchema(config.admin.schema);
     } else {
       this.props.loadModels();

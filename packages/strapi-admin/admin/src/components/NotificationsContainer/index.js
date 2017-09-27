@@ -4,12 +4,13 @@
 *
 */
 
+import React from 'react';
 import PropTypes from 'prop-types';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
 import Notification from 'components/Notification';
 
 import styles from './styles.scss';
-
-const { CSSTransition, TransitionGroup } = ReactTransitionGroup;
 
 class NotificationsContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

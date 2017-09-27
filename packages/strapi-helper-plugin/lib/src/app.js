@@ -5,6 +5,7 @@
  * only setup and plugin code.
  */
 
+import React from 'react';
 import { Provider } from 'react-redux';
 
 import App, { bootstrap } from 'containers/App'; // eslint-disable-line
