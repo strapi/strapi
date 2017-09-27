@@ -3,9 +3,19 @@
 const glob = require('glob');
 const path = require('path');
 const { parallel } = require('async');
-const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union } = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, keys } = require('lodash');
 
 module.exports = function() {
+  // Set if is admin destination for middleware application.
+  // TODO: Use dynamic config for admin url.
+  strapi.app.use(async (ctx, next) => {
+    const accepted = keys(strapi.plugins).map(url => `^\/${url}`);
+    accepted.push('^\/admin');
+    const isMatch = accepted.some(rx => new RegExp(rx).test(ctx.request.url));
+    set(ctx, 'admin', isMatch);
+    return next();
+  });
+
   // Method to initialize middlewares and emit an event.
   const initialize = (module, middleware) => (resolve, reject) => {
     let timeout = true;

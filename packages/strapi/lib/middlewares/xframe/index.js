@@ -27,11 +27,15 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       strapi.app.use(
-        strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.lusca.xframe({
-            value: strapi.config.middleware.settings.xframe.value
-          })
-        )
+        async (ctx, next) => {
+          if (ctx.admin) return next();
+
+          strapi.koaMiddlewares.convert(
+            strapi.koaMiddlewares.lusca.xframe({
+              value: strapi.config.middleware.settings.xframe.value
+            })
+          )(ctx, next);
+        }
       );
 
       cb();

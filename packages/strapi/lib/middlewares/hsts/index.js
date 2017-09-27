@@ -28,12 +28,16 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       strapi.app.use(
-        strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.lusca.hsts({
-            maxAge: strapi.config.middleware.settings.hsts.maxAge,
-            includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains
-          })
-        )
+        async (ctx, next) => {
+          if (ctx.admin) return next();
+
+          strapi.koaMiddlewares.convert(
+            strapi.koaMiddlewares.lusca.hsts({
+              maxAge: strapi.config.middleware.settings.hsts.maxAge,
+              includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains
+            })
+          )(ctx, next);
+        }
       );
 
       cb();

@@ -46,15 +46,21 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      strapi.app.use(strapi.koaMiddlewares.kcors({
-        origin: strapi.config.middleware.settings.cors.origin,
-        exposeHeaders: strapi.config.middleware.settings.cors.expose,
-        maxAge: strapi.config.middleware.settings.cors.maxAge,
-        credentials: strapi.config.middleware.settings.cors.credentials,
-        allowMethods: strapi.config.middleware.settings.cors.methods,
-        allowHeaders: strapi.config.middleware.settings.cors.headers,
-        keepHeadersOnError: strapi.config.middleware.settings.cors.keepHeadersOnError
-      }));
+      strapi.app.use(
+        async (ctx, next) => {
+          if (ctx.admin) return next();
+
+          await strapi.koaMiddlewares.kcors({
+            origin: strapi.config.middleware.settings.cors.origin,
+            exposeHeaders: strapi.config.middleware.settings.cors.expose,
+            maxAge: strapi.config.middleware.settings.cors.maxAge,
+            credentials: strapi.config.middleware.settings.cors.credentials,
+            allowMethods: strapi.config.middleware.settings.cors.methods,
+            allowHeaders: strapi.config.middleware.settings.cors.headers,
+            keepHeadersOnError: strapi.config.middleware.settings.cors.keepHeadersOnError
+          })(ctx, next);
+        }
+      );
 
       cb();
     }

@@ -27,12 +27,16 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       strapi.app.use(
-        strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.lusca.xssProtection({
-            enabled: strapi.config.middleware.settings.xss.enabled,
-            mode: strapi.config.middleware.settings.xss.mode
-          })
-        )
+        async (ctx, next) => {
+          if (ctx.admin) return next();
+
+          strapi.koaMiddlewares.convert(
+            strapi.koaMiddlewares.lusca.xssProtection({
+              enabled: strapi.config.middleware.settings.xss.enabled,
+              mode: strapi.config.middleware.settings.xss.mode
+            })
+          )(ctx, next);
+        }
       );
 
       cb();

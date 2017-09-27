@@ -26,9 +26,13 @@ module.exports = strapi => {
 
     initialize: function(cb) {
       strapi.app.use(
-        strapi.koaMiddlewares.convert(
-          strapi.koaMiddlewares.lusca.csp(strapi.config.middleware.settings.csp)
-        )
+        async (ctx, next) => {
+          if (ctx.admin) return next();
+
+          strapi.koaMiddlewares.convert(
+            strapi.koaMiddlewares.lusca.csp(strapi.config.middleware.settings.csp)
+          )(ctx, next);
+        }
       );
 
       cb();
