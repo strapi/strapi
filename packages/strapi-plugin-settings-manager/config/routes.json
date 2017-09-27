@@ -111,6 +111,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/autoReload",
+      "handler": "SettingsManager.autoReload",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

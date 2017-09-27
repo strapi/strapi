@@ -3,7 +3,7 @@
  * PluginPage
  *
  */
- 
+
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
@@ -24,7 +24,8 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
       if (plugin.id === pluginId) {
         pluginName = plugin.name;
 
-        const Elem = plugin.mainComponent;
+        const Elem = plugin.preventComponentRendering ? plugin.blockerComponent : plugin.mainComponent;
+
         return <Elem key={plugin.id} {...this.props} />;
       }
     });

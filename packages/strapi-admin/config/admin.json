@@ -1,6 +1,6 @@
 {
   "languages": ["en", "fr"],
   "plugins": {
-    "ports": [3000]
+    "ports": [3000, 5000, 8000]
   }
 }

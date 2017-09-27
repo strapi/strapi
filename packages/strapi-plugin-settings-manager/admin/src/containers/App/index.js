@@ -35,7 +35,7 @@ class App extends React.Component {
     if (this.props.loading) {
       return <div />;
     }
-
+    
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>

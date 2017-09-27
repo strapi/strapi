@@ -12,6 +12,17 @@ import App, { bootstrap } from 'containers/App'; // eslint-disable-line
 import configureStore from './store';
 import { translationMessages } from './i18n';
 
+const tryRequire = () => {
+  try {
+    const config = require('pluginRequirements');
+    return config.shouldRenderCompo;
+  } catch(err) {
+    return null;
+  }
+};
+
+const pluginRequirements = tryRequire();
+
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
 const pluginId = pluginPkg.name.replace(
@@ -60,6 +71,9 @@ window.Strapi.registerPlugin({
   mainComponent: Comp,
   translationMessages,
   bootstrap,
+  pluginRequirements,
+  preventComponentRendering: false,
+  blockerComponent: null, 
 });
 
 // Export store
