@@ -97,12 +97,12 @@ module.exports = require('./webpack.base.babel')({
   ],
   alias: {
     moment: 'moment/moment.js',
-    'lodash': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group')
+    'lodash': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'),
+    'immutable': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'),
+    'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
+    'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
+    'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
+    'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group')
   },
 
   // Emit a source map for easier debugging
