@@ -16,7 +16,7 @@ import { FormattedMessage } from 'react-intl';
 {{#if wantActionsAndReducer}}
 import { createStructuredSelector } from 'reselect';
 {{/if}}
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 
 {{#if wantSaga}}
 import injectSaga from 'utils/injectSaga';
@@ -62,19 +62,27 @@ const mapStateToProps = createStructuredSelector({
 {{/if}}
 
 function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
+  return bindActionCreators(
+    {},
+    dispatch
+  );
 }
 
 {{#if wantActionsAndReducer}}
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
+/* Remove this line if the container doesn't have a route and
+*  check the documentation to see how to create the container's store
+*/
 const withReducer = injectReducer({ key: '{{ camelCase name }}', reducer });
 {{else}}
 const withConnect = connect(null, mapDispatchToProps);
 {{/if}}
 {{#if wantSaga}}
+
+/* Remove the line below the container doesn't have a route and
+*  check the documentation to see how to create the container's store
+*/
 const withSaga = injectSaga({ key: '{{ camelCase name }}', saga });
 {{/if}}
 

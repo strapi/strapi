@@ -8,7 +8,7 @@ import 'whatwg-fetch';
  * @return {object}          The parsed JSON from the request
  */
 function parseJSON(response) {
-  return response.json();
+  return response.json ? response.json() : response;
 }
 
 /**
@@ -51,28 +51,26 @@ function formatQueryParams(params) {
  *
  * @return {object}           The response data
  */
-export default function request(url, options) {
-  const optionsObj = options || {};
+ export default function request(url, options = {}) {
+   // Set headers
+   options.headers = {
+     'Content-Type': 'application/json',
+   };
 
-  // Set headers
-  optionsObj.headers = {
-    'Content-Type': 'text/plain',
-  };
+   // Add parameters to url
+   url = _.startsWith(url, '/')
+     ? `${Strapi.apiUrl}${url}`
+     : url;
 
-  // Add parameters to url
-  let urlFormatted = _.startsWith(url, '/')
-    ? `${Strapi.apiUrl}${url}`
-    : url;
+   if (options && options.params) {
+     const params = formatQueryParams(options.params);
+     url = `${url}?${params}`;
+   }
 
-  if (optionsObj && optionsObj.params) {
-    const params = formatQueryParams(optionsObj.params);
-    urlFormatted = `${url}?${params}`;
-  }
+   // Stringify body object
+   if (options && options.body) {
+     options.body = JSON.stringify(options.body);
+   }
 
-  // Stringify body object
-  if (optionsObj && optionsObj.body) {
-    optionsObj.body = JSON.stringify(optionsObj.body);
-  }
-
-  return fetch(urlFormatted, optionsObj).then(checkStatus).then(parseJSON);
-}
+   return fetch(url, options).then(checkStatus).then(parseJSON);
+ }

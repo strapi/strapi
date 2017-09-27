@@ -1,0 +1,33 @@
+.modelPage { /* stylelint-disable */
+  min-height: calc(100vh - 6rem);
+  background: rgba(14,22,34,0.02);
+}
+
+.componentsContainer {
+  padding: 0 1.5rem 0 1.5rem;
+}
+
+.leftMenuSpan {
+  display: block;
+  width: calc(100% - 95px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contentContainer {
+  display: flex;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iconPlus {
+  > div {
+
+    > i {
+      -webkit-font-smoothing: subpixel-antialiased;
+    }
+  }
+}

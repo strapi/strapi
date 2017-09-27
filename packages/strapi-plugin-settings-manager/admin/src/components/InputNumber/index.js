@@ -27,7 +27,7 @@
 * - styles are retrieved from the HOC
 */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
@@ -161,27 +161,27 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool.isRequired,
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  deactivateErrorHighlight: React.PropTypes.bool.isRequired,
-  errors: React.PropTypes.oneOfType([
-    React.PropTypes.bool.isRequired,
-    React.PropTypes.array.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  errors: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.array,
   ]).isRequired,
-  handleBlur: React.PropTypes.func.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func.isRequired,
-  inputDescription: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool.isRequired,
-  placeholder: React.PropTypes.string.isRequired,
-  styles: React.PropTypes.object.isRequired,
-  target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.oneOfType([
-    React.PropTypes.number.isRequired,
-    React.PropTypes.string.isRequired,
-  ]).isRequired,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  name: PropTypes.string,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
 }
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

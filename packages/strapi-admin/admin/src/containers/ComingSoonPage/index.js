@@ -4,21 +4,33 @@
  *
  */
 
-import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages.json';
+
+import PluginHeader from 'components/PluginHeader';
+
 import styles from './styles.scss';
 
 export class ComingSoonPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={styles.wrapper}>
+      <div>
         <Helmet
           title="Coming soon"
         />
-        <p><FormattedMessage {...messages.comingSoon} />.</p>
+        <div>
+          <div className={`container-fluid ${styles.containerFluid}`}>
+            <PluginHeader
+              title={{
+                id: 'app.components.ComingSoonPage.comingSoon',
+              }}
+              description={{
+                id: 'app.components.ComingSoonPage.featuresNotAvailable',
+              }}
+              actions={[]}
+            />
+          </div>
+        </div>
       </div>
     );
   }

@@ -1,0 +1,95 @@
+.button {
+  -webkit-font-smoothing: antialiased;
+  height: 3rem;
+  position: relative;
+  border-radius: 0.3rem;
+  margin-right: 1.8rem;
+  line-height: 30px;
+  cursor: pointer;
+  font-family: Lato;
+  &:focus {
+    outline: 0;
+  }
+  > i {
+    margin-right: 1.3rem;
+  }
+  &:hover {
+   &::after {
+     position: absolute;
+     width: 100%;
+     height: 100%;
+     top: 0;
+     left: 0;
+     border-radius: 0.3rem;
+     content: '';
+     opacity: 0.1;
+     background: #FFFFFF;
+   }
+ }
+}
+
+.buttonLg {
+  min-width: 15rem;
+  padding: 0 15px;
+}
+
+.buttonMd {
+  min-width: 10rem;
+  padding: 0 15px;
+}
+
+.primary {
+  font-weight: 500;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  color: white;
+  &:active {
+   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+ }
+}
+
+.secondary {
+  // height: 32px !important;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+  &:active {
+   border: 0.15rem solid #F64D0A;
+ }
+}
+
+.secondaryAddType {
+  height: 2.6rem;
+  color: #1C5DE7;
+  line-height: 1.6rem;
+  border: 0.1rem solid #1C5DE7;
+  font-weight: 500;
+  font-size: 1.3rem;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
+}
+
+.back {
+  background: #F3F3F3;
+  color: #323740;
+  font-weight: 500;
+  padding: 0 15px;
+  transition: all .2s ease;
+
+  &:before{
+    content: '\f053';
+    font-family: 'FontAwesome';
+    font-size: 1.2rem;
+    color: #323740;
+    margin-right: 10px;
+  }
+
+  &:hover{
+    background: darken(#F6F6F6, 5%);
+  }
+
+  &:active{
+    box-shadow: inset 1px 1px 5px rgba(0,0,0,.1);
+  }
+}

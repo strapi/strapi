@@ -51,6 +51,7 @@
     "lodash": "^4.16.5",
     "node-schedule": "^1.2.0",
     "semver": "^5.4.1",
+    "stack-trace": "0.0.10",
     "strapi-generate": "3.0.0-alpha.5.5",
     "strapi-generate-admin": "3.0.0-alpha.5.5",
     "strapi-generate-api": "3.0.0-alpha.5.5",

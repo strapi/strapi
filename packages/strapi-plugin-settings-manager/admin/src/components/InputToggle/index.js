@@ -11,7 +11,7 @@
 *  - isChecked: bool
 */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -72,12 +72,12 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputToggle.propTypes = {
-  customBootstrapClass: React.PropTypes.string.isRequired,
-  handleChange: React.PropTypes.func.isRequired,
-  hiddenLabel: React.PropTypes.bool.isRequired,
-  isChecked: React.PropTypes.bool.isRequired,
-  name: React.PropTypes.string.isRequired,
-  target: React.PropTypes.string.isRequired,
+  customBootstrapClass: PropTypes.string,
+  handleChange: PropTypes.func,
+  hiddenLabel: PropTypes.bool,
+  isChecked: PropTypes.bool,
+  name: PropTypes.string,
+  target: PropTypes.string,
 }
 
 export default InputToggle;

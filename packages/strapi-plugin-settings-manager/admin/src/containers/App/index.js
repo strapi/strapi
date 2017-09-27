@@ -5,7 +5,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
@@ -49,13 +49,13 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  environmentsFetch: React.PropTypes.func.isRequired,
-  loading: React.PropTypes.bool.isRequired,
-  menuFetch: React.PropTypes.func.isRequired,
+  environmentsFetch: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+  menuFetch: PropTypes.func.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {

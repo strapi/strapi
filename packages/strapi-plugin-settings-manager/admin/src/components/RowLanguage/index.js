@@ -4,7 +4,7 @@
 *
 */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { find, get, join, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PopUpWarning from 'components/PopUpWarning';
@@ -28,7 +28,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     // assign the target id the language name to prepare for delete
-    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75);'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
+    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75)'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
 
     // format the locale to
     const defaultLanguageArray = formatLanguageLocale(this.props.name);
@@ -91,12 +91,12 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowLanguage.propTypes = {
-  active: React.PropTypes.bool.isRequired,
-  changeDefaultLanguage: React.PropTypes.func.isRequired,
-  handleLanguageDelete: React.PropTypes.func.isRequired,
-  listLanguages: React.PropTypes.object.isRequired,
-  liStyles: React.PropTypes.object.isRequired,
-  name: React.PropTypes.string.isRequired,
+  active: PropTypes.bool,
+  changeDefaultLanguage: PropTypes.func,
+  handleLanguageDelete: PropTypes.func,
+  listLanguages: PropTypes.object,
+  liStyles: PropTypes.object,
+  name: PropTypes.string,
 };
 
 export default RowLanguage;

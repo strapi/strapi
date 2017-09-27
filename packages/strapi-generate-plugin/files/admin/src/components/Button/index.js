@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
@@ -20,7 +21,7 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  label: React.PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
 };
 
 export default Button;

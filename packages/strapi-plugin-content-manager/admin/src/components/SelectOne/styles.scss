@@ -1,0 +1,30 @@
+.selectOne { /* stylelint-disable */
+  label{
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    margin-top: 3px;
+  }
+
+  label + div{
+    height: 34px;
+    margin: 3px 0 26px;
+
+    >div{
+      box-shadow: none !important;
+      border-color: #E3E9F3 !important;
+
+      >span:first-of-type{
+        >div:first-of-type{
+          color: #9EA7B8;
+        }
+      }
+
+      >span:last-of-type{
+        span{
+          border-color: #B3B5B9 transparent transparent;
+        }
+      }
+    }
+  }
+}

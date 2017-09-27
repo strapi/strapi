@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="20px" viewBox="0 0 35 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.1 (44463) - http://www.bohemiancoding.com/sketch -->
+    <title>Type icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Content-Type-Builder---Content-Type-view" transform="translate(-577.000000, -616.000000)">
+            <g id="Container">
+                <g id="Content">
+                    <g id="Forms" transform="translate(539.000000, 180.000000)">
+                        <g id="4" transform="translate(38.000000, 436.000000)">
+                            <g id="Type-icon">
+                                <rect id="Rectangle-2" fill="#69BA05" x="0" y="0" width="35" height="20" rx="2"></rect>
+                                <rect id="Rectangle-3" fill="#FFFFFF" x="8" y="5" width="19" height="10" rx="5"></rect>
+                                <rect id="Rectangle-4" fill="#69BA05" x="9" y="6" width="8" height="8" rx="4"></rect>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

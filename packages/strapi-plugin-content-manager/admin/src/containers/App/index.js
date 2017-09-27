@@ -5,22 +5,23 @@
  *
  */
 
-import React from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
+import injectSaga from 'utils/injectSaga';
+
+import Home from 'containers/Home';
 import Edit from 'containers/Edit';
 import List from 'containers/List';
-import Home from 'containers/Home';
-
-import injectSaga from 'utils/injectSaga';
-import saga from './sagas';
 
 import { loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
+
+import saga, { generateMenu } from './sagas';
 
 const tryRequire = (path) => {
   try {
@@ -30,9 +31,21 @@ const tryRequire = (path) => {
   }
 };
 
+// This method is executed before the load of the plugin.
+export const bootstrap = (plugin) => new Promise((resolve, reject) => {
+  generateMenu()
+    .then(menu => {
+      plugin.leftMenuSections = menu;
+
+      resolve(plugin);
+    })
+    .catch(e => reject(e));
+});
+
 class App extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     const config = tryRequire('../../../../config/admin.json');
+
     if (!_.isEmpty(_.get(config, 'admin.schema'))) {
       this.props.updateSchema(config.admin.schema);
     } else {
@@ -58,31 +71,30 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 App.propTypes = {
-  loading: React.PropTypes.bool.isRequired,
-  loadModels: React.PropTypes.func.isRequired,
-  updateSchema: React.PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+  loadModels: PropTypes.func.isRequired,
+  updateSchema: PropTypes.func.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
-  return {
-    loadModels: () => dispatch(loadModels()),
-    updateSchema: (schema) => dispatch(updateSchema(schema)),
+  return bindActionCreators(
+    {
+      loadModels,
+      updateSchema,
+    },
     dispatch,
-  };
+  );
 }
 
 const mapStateToProps = createStructuredSelector({
   loading: makeSelectLoading(),
 });
 
-
-// Wrap the component to inject dispatch and state into it
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
 const withSaga = injectSaga({ key: 'global', saga });
 
 export default compose(

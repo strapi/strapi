@@ -30,7 +30,6 @@ module.exports = strapi => {
           'PUT',
           'PATCH',
           'DELETE',
-          'OPTIONS',
           'HEAD'
         ],
         headers: [

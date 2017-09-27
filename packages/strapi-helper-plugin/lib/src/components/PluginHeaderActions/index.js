@@ -4,36 +4,33 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import Button from 'components/Button';
 
 import styles from './styles.scss';
 
 class PluginHeaderActions extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const actions = this.props.actions && this.props.actions.map((action) => (
-      <button
+      <Button
+        {...action}
         key={action.label}
-        className={`btn ${action.class} ${styles.btn}`}
-        onClick={action.onClick}
-        disabled={action.disabled}
       >
-        <FormattedMessage id={action.label} />
-      </button>
+        <FormattedMessage id={action.label} defaultMessage={action.label} />
+      </Button>
     ));
 
     return (
       <div className={styles.pluginHeaderActions}>
-        <div className="pull-xs-right">
           {actions}
-        </div>
       </div>
     );
   }
 }
 
 PluginHeaderActions.propTypes = {
-  actions: React.PropTypes.array.isRequired,
+  actions: PropTypes.array.isRequired,
 };
 
 export default PluginHeaderActions;

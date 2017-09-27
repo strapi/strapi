@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
@@ -28,7 +29,7 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  match: React.PropTypes.object,
+  match: PropTypes.object,
 };
 
 export function mapDispatchToProps(dispatch) {

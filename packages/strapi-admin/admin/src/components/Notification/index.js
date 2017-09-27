@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
@@ -53,8 +53,8 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
 }
 
 Notification.propTypes = {
-  notification: React.PropTypes.object.isRequired,
-  onHideNotification: React.PropTypes.func.isRequired,
+  notification: PropTypes.object.isRequired,
+  onHideNotification: PropTypes.func.isRequired,
 };
 
 export default Notification;

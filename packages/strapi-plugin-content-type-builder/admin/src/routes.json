@@ -1,0 +1,10 @@
+{
+  "/": {
+    "name": "homePage",
+    "container": "HomePage"
+  },
+  "/models/:modelName": {
+    "name": "modelPage",
+    "container": "ModelPage"
+  }
+}

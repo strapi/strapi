@@ -11,7 +11,7 @@
  * the linting exception.
  */
 
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 
 import AdminPage from 'containers/AdminPage';
@@ -20,6 +20,7 @@ import NotFoundPage from 'containers/NotFoundPage';
 import NotificationProvider from 'containers/NotificationProvider';
 
 import '../../styles/main.scss';
+
 import styles from './styles.scss';
 
 export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -39,7 +40,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.contextTypes = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
 
 App.propTypes = {};
