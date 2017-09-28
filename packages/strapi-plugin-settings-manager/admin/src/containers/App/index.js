@@ -4,6 +4,7 @@
  * contain code that should be seen on all pages. (e.g. navigation bar)
  *
  */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';

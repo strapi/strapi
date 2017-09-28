@@ -22,8 +22,9 @@ export const generateMenu = function () {
         })),
       }];
     })
-    .catch(() => {
+    .catch((error) => {
       window.Strapi.notification.error('content-manager.error.model.fetch');
+      throw Error(error);
     });
 }
 

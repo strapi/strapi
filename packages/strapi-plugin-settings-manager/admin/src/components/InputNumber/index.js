@@ -26,6 +26,7 @@
 *
 * - styles are retrieved from the HOC
 */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';

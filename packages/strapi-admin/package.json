@@ -23,6 +23,7 @@
     "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^0.30.0",
     "sanitize.css": "^4.1.0",
     "strapi-utils": "3.0.0-alpha.5.5"

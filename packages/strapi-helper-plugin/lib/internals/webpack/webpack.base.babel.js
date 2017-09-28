@@ -10,14 +10,33 @@ const webpack = require('webpack');
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
-const plugins = process.env.IS_ADMIN === 'true' ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
-  .filter(x => x[0] !== '.') : [];
+let noPlugin = false;
+let plugins = [];
+let pluginFolders = {};
 
-const pluginFolders = plugins.reduce((acc, current) => {
-  acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+if (process.env.npm_lifecycle_event === 'start') {
+  try {
+    fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
+  } catch (e) {
+    try {
+      fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
 
-  return acc;
-}, {});
+      // Allow app without plugins.
+      noPlugin = true;
+    } catch (e) {
+      throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
+    }
+  }
+
+  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
+    .filter(x => x[0] !== '.') : [];
+
+  pluginFolders = plugins.reduce((acc, current) => {
+    acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+
+    return acc;
+  }, {});
+}
 
 module.exports = (options) => ({
   entry: options.entry,
