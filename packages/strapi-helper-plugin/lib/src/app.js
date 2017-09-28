@@ -7,21 +7,24 @@
 
 import { Provider } from 'react-redux';
 
-import App, { bootstrap } from 'containers/App'; // eslint-disable-line
+import App from 'containers/App'; // eslint-disable-line
 
 import configureStore from './store';
 import { translationMessages } from './i18n';
 
-const tryRequire = () => {
+const tryRequire = (bootstrap = false) => {
   try {
-    const config = require('pluginRequirements');
-    return config.shouldRenderCompo;
+    const path = 'bootstrap';
+    const config = bootstrap ? require('bootstrap').bootstrap : require('pluginRequirements').shouldRenderCompo;
+    return config;
   } catch(err) {
     return null;
   }
 };
 
+const bootstrap = tryRequire(true);
 const pluginRequirements = tryRequire();
+
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -73,7 +76,7 @@ window.Strapi.registerPlugin({
   bootstrap,
   pluginRequirements,
   preventComponentRendering: false,
-  blockerComponent: null, 
+  blockerComponent: null,
 });
 
 // Export store
