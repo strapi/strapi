@@ -20,7 +20,7 @@ module.exports = {
 
   pluginFile: async ctx => {
     try {
-      const file = fs.readFileSync(path.resolve(process.cwd(), 'plugins', ctx.params.plugin, 'admin', 'build', 'main.js'));
+      const file = fs.readFileSync(path.resolve(process.cwd(), 'plugins', ctx.params.plugin, 'admin', 'build', `${ctx.params.file}`));
       ctx.body = file;
     } catch (err) {
       ctx.body = ctx.notFound();

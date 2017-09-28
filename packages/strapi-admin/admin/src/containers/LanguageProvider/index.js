@@ -6,6 +6,7 @@
  * IntlProvider component and i18n messages (loaded from `app/translations`)
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';

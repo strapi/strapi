@@ -4,6 +4,7 @@
  *
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -11,7 +12,6 @@ import { createStructuredSelector } from 'reselect';
 import NotificationsContainer from 'components/NotificationsContainer';
 import { selectNotifications } from './selectors';
 import { hideNotification } from './actions';
-
 
 export class NotificationProvider extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

@@ -176,7 +176,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         >
           {map(this.props.selectOptions, (option, key) => (
             option.name ?
-              <FormattedMessage id='select.option.message' defaultMessage='{option}' values={{ option: option.name }} key={key}>
+              <FormattedMessage id={option.name} defaultMessage={option.name} values={{ option: option.name }} key={key}>
                 {(message) => (
                   <option value={option.value}>
                     {message}

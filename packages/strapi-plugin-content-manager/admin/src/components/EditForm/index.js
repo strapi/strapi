@@ -5,6 +5,7 @@
  */
 
 // Dependencies.
+import React from 'react';
 import PropTypes from 'prop-types';
 import { findIndex, get, omit, isFunction, merge } from 'lodash';
 
@@ -30,6 +31,10 @@ class EditForm extends React.Component {
       case 'date':
       case 'datetime':
         return 'date';
+      case 'float':
+      case 'integer':
+      case 'bigint':
+        return 'number';
       default:
         return 'text';
     }
