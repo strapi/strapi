@@ -2,10 +2,10 @@ import AutoReloadBlocker from 'components/AutoReloadBlocker';
 import ProductionBlocker from 'components/ProductionBlocker';
 import request from 'utils/request';
 
-export const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
+const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
   request('/settings-manager/autoReload')
     .then(response => {
-      plugin.preventComponentRendering = response.autoReload;
+      plugin.preventComponentRendering = !response.autoReload;
       plugin.blockerComponent = AutoReloadBlocker;
 
       if (response.environment !== 'development') {
@@ -17,3 +17,5 @@ export const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
     })
     .catch(err => reject(err));
 });
+
+export default shouldRenderCompo;
