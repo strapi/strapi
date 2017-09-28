@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import PluginLeftMenuSection from 'components/PluginLeftMenuSection';
 import styles from './styles.scss';
@@ -22,9 +23,9 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
 }
 
 PluginLeftMenu.propTypes = {
-  environments: React.PropTypes.array,
-  envParams: React.PropTypes.string,
-  sections: React.PropTypes.array.isRequired,
+  environments: PropTypes.array.isRequired,
+  envParams: PropTypes.string,
+  sections: PropTypes.array.isRequired,
 };
 
 export default PluginLeftMenu;

@@ -12,7 +12,9 @@ const strapi = require('../lib/');
   describe('middleware', () => {
     before(function(done) {
       // runs before all tests in this block
-      strapi.start(() => {
+      strapi.start({
+        port: 1338
+      }, () => {
         done();
       });
     });

@@ -15,9 +15,14 @@ const path = require('path');
  */
 
 module.exports =  (scope, cb) => {
-  exec('npm install', {
+  if (scope.developerMode) {
+    return cb();
+  }
+  
+  // Install back-end admin `node_modules`.
+  exec('npm install --production --ignore-scripts', {
     cwd: path.resolve(scope.rootPath, 'admin')
-  }, (err, stdout) => {
+  }, (err) => {
     if (err) {
       return cb(err);
     }

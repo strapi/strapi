@@ -1,0 +1,10 @@
+{
+  "pluginHeaderDescription": {
+    "id": "contentManager.containers.Home.pluginHeaderDescription",
+    "defaultMessage": "A powerful UI to easily manage your data."
+  },
+  "introduction": {
+    "id": "contentManager.containers.Home.introduction",
+    "defaultMessage": "To edit your content's entries go to the specific link in the left menu."
+  }
+}

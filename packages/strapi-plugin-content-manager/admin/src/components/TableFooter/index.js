@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import LimitSelect from '../LimitSelect';
 import Pagination from '../Pagination';
@@ -15,7 +16,14 @@ class TableFooter extends React.Component {
   render() {
     return (
       <div className={`row ${styles.tableFooter}`}>
-        <div className="col-md-6">
+        <div className="col-lg-6">
+          <LimitSelect
+            handleChange={this.props.handleChangeLimit}
+            limit={this.props.limit}
+          />
+        </div>
+
+        <div className="col-lg-6">
           <Pagination
             limit={this.props.limit}
             currentPage={this.props.currentPage}
@@ -23,29 +31,20 @@ class TableFooter extends React.Component {
             count={this.props.count}
           />
         </div>
-        <div className="col-md-6">
-          <div className="pull-xs-right">
-            <LimitSelect
-              className="push-lg-right"
-              onLimitChange={this.props.onLimitChange}
-              limit={this.props.limit}
-            />
-          </div>
-        </div>
       </div>
     );
   }
 }
 
 TableFooter.propTypes = {
-  changePage: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
-  ]),
-  currentPage: React.PropTypes.number.isRequired,
-  limit: React.PropTypes.number.isRequired,
-  onLimitChange: React.PropTypes.func.isRequired,
+  changePage: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
+  ]).isRequired,
+  currentPage: PropTypes.number.isRequired,
+  handleChangeLimit: PropTypes.func.isRequired,
+  limit: PropTypes.number.isRequired,
 };
 
 export default TableFooter;

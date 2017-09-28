@@ -1,0 +1,22 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuFooter { /* stylelint-disable */
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  height: 3rem;
+  padding-left: 15px;
+  padding-right: 15px;
+  line-height: 3rem;
+  font-family: 'Lato';
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.05rem;
+  vertical-align: middle;
+  color: $strapi-gray-light;
+
+  select{
+    outline: none;
+  }
+}

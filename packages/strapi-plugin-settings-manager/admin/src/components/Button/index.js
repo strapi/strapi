@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -13,8 +14,13 @@ class Button extends React.Component {
   render() {
     const label = this.props.handlei18n ? <FormattedMessage id={`settings-manager.${this.props.label}`} /> : this.props.label;
     const addShape = this.props.addShape ? <i className="fa fa-plus" /> : '';
+
+    const buttonProps = Object.assign({}, this.props);
+    const propsToDelete = ['addShape', 'buttonBackground', 'buttonSize', 'handlei18n', 'label'];
+
+    propsToDelete.map((value) => delete buttonProps[value]);
     return (
-      <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...this.props}>
+      <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...buttonProps}>
         {addShape}{label}
       </button>
     );
@@ -22,11 +28,11 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  addShape: React.PropTypes.bool,
-  buttonBackground: React.PropTypes.string,
-  buttonSize: React.PropTypes.string,
-  handlei18n: React.PropTypes.bool,
-  label: React.PropTypes.string.isRequired,
+  addShape: PropTypes.bool,
+  buttonBackground: PropTypes.string,
+  buttonSize: PropTypes.string,
+  handlei18n: PropTypes.bool,
+  label: PropTypes.string,
 };
 
 export default Button;

@@ -93,7 +93,7 @@ module.exports = strapi => {
             password: _.get(connection.settings, 'password'),
             database: _.get(connection.settings, 'database'),
             charset: _.get(connection.settings, 'charset'),
-            schema: _.get(connection.settings, 'schema'),
+            schema: _.get(connection.settings, 'schema') || 'public',
             port: _.get(connection.settings, 'port'),
           },
           debug: _.get(connection.options, 'debug') || false,

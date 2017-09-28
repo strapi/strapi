@@ -1,8 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 
 import { forEach, set, join, split, toLower, upperCase, map, replace } from 'lodash';
-import { takeLatest } from 'redux-saga';
-import { call, take, put, fork, cancel, select } from 'redux-saga/effects';
+import { call, take, put, fork, cancel, select, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
 // selectors
@@ -255,7 +254,7 @@ export function* settingsEdit(action) {
       method: 'PUT',
     };
 
-    const requestUrl = `settings-manager/configurations/${action.endPoint}`;
+    const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
 
     yield  call(request, requestUrl, opts);
 
@@ -312,6 +311,4 @@ export function* defaultSaga() {
 }
 
 // All sagas to be loaded
-export default [
-  defaultSaga,
-];
+export default defaultSaga;

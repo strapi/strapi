@@ -13,6 +13,9 @@ const addDevMiddlewares = (app, webpackConfig) => {
     publicPath: webpackConfig.output.publicPath,
     silent: true,
     stats: 'errors-only',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    }
   });
 
   app.use(middleware);

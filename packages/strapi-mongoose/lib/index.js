@@ -148,7 +148,7 @@ module.exports = function (strapi) {
                 collection = global[definition.globalName];
 
                 // Push attributes to be aware of model schema.
-                collection._attributes = definition.attributes;
+                strapi.models[model]._attributes = definition.attributes;
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -207,12 +207,12 @@ module.exports = function (strapi) {
             // Add every relationships to the loaded model for Bookshelf.
             // Basic attributes don't need this-- only relations.
             _.forEach(definition.attributes, (details, name) => {
-              const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
+              const verbose = _.get(utilsModels.getNature(details, name, undefined, model.toLowerCase()), 'verbose') || '';
 
               // Build associations key
-              if (!_.isEmpty(verbose)) {
-                utilsModels.defineAssociations(globalName, definition, details, name);
-              } else {
+              utilsModels.defineAssociations(model, definition, details, name);
+
+              if (_.isEmpty(verbose)) {
                 definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
               }
 
@@ -232,8 +232,12 @@ module.exports = function (strapi) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.collection),
-                      via: FK.via
+                      via: FK.via,
+                      justOne: false
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
                       type: mongoose.Schema.Types.ObjectId,
@@ -244,29 +248,37 @@ module.exports = function (strapi) {
                 case 'belongsTo':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && FK.nature === 'oneToOne') {
+                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'oneToMany') {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.model),
                       via: FK.via,
                       justOne: true
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = {
                       type: mongoose.Schema.Types.ObjectId,
                       ref: _.capitalize(details.model)
                     };
                   }
+
                   break;
                 case 'belongsToMany':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && _.isUndefined(details.via)) {
+                  // One-side of the relationship has to be a virtual field to be bidirectional.
+                  if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(FK.collection),
-                      via: utilsModels.getVia(name, details)
+                      via: FK.via
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
                       type: mongoose.Schema.Types.ObjectId,

@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 // modal
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
@@ -68,13 +69,13 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 }
 
 PopUpWarning.propTypes = {
-  dangerMessage: React.PropTypes.string,
-  handleConfirm: React.PropTypes.func,
-  handleConfirmDanger: React.PropTypes.func,
-  isOpen: React.PropTypes.bool.isRequired,
-  showDanger: React.PropTypes.bool,
-  toggleModal: React.PropTypes.func.isRequired,
-  warningMessage: React.PropTypes.string,
+  dangerMessage: PropTypes.string,
+  handleConfirm: PropTypes.func,
+  handleConfirmDanger: PropTypes.func,
+  isOpen: PropTypes.bool,
+  showDanger: PropTypes.bool,
+  toggleModal: PropTypes.func,
+  warningMessage: PropTypes.string,
 }
 
 export default PopUpWarning;

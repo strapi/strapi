@@ -4,144 +4,103 @@
  *
  */
 
+// Dependencies.
 import React from 'react';
-import _ from 'lodash';
+import PropTypes from 'prop-types';
+import { findIndex, get, omit, isFunction, merge } from 'lodash';
+
+// Components.
+import Input from 'components/Input';
+
+// Styles.
+import styles from './styles.scss';
 
 class EditForm extends React.Component {
   constructor(props) {
     super(props);
-    this.onFormSubmit = this.onFormSubmit.bind(this);
   }
 
-  onFormSubmit(e) {
-    e.preventDefault();
-    this.props.editRecord();
-  }
-
-  generateField(attributeValue, attributeKey) {
-    let input;
-    const value = this.props.record && this.props.record.get(attributeKey);
-
-    // Generate fields according to attribute type
-    switch (attributeValue.type) {
+  getInputType = (type = '') => {
+    switch (type.toLowerCase()) {
       case 'boolean':
-        input = (
-          <select
-            className="form-control"
-            onChange={e =>
-              this.props.setRecordAttribute(
-                attributeKey,
-                e.target.value === 'null'
-                  ? null
-                  : e.target.value === 'true'
-              )}
-          >
-            <option value={'null'} selected={value !== true && value !== false}>Select an option</option>
-            <option value selected={value === true}>True</option>
-            <option value={false} selected={value === false}>False</option>
-          </select>
-        );
-        break;
-      case 'integer':
-        input = (
-          <input
-            type="number"
-            className="form-control"
-            id={attributeKey}
-            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
-            value={value}
-            onChange={e =>
-              this.props.setRecordAttribute(attributeKey, e.target.value)}
-          />
-        );
-        break;
+        return 'checkbox';
+      case 'text':
+        return 'textarea';
       case 'string':
-        input = (
-          <input
-            type="text"
-            className="form-control"
-            id={attributeKey}
-            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
-            value={value}
-            onChange={e =>
-              this.props.setRecordAttribute(attributeKey, e.target.value)}
-          />
-        );
-        break;
-      case 'url':
-        input = (
-          <div>
-            <input
-              type="url"
-              className="form-control"
-              id={attributeKey}
-              placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
-              value={value}
-              onChange={e =>
-                this.props.setRecordAttribute(attributeKey, e.target.value)}
-            />
-            {value ? <a href={value} target="_blank">{value}</a> : ''}
-          </div>
-        );
-        break;
+        return 'text';
+      case 'date':
+      case 'datetime':
+        return 'date';
+      case 'float':
+      case 'integer':
+      case 'bigint':
+        return 'number';
       default:
-        input = (
-          <input
-            type="text"
-            className="form-control"
-            id={attributeKey}
-            placeholder={attributeValue.placeholder || attributeValue.label || attributeKey}
-            value={value}
-            onChange={e =>
-              this.props.setRecordAttribute(attributeKey, e.target.value)}
-          />
-        );
+        return 'text';
     }
-
-    const description = attributeValue.description
-      ? <p>{attributeValue.description}</p>
-      : '';
-
-    return (
-      <div key={attributeKey} className="form-group">
-        <label htmlFor={attributeKey}>{attributeValue.label || attributeKey}</label>
-        {description}
-        {input}
-      </div>
-    );
   }
 
   render() {
     // Remove `id` field
-    const displayedFields = _.pickBy(this.props.schema[this.props.currentModelName].fields, (value, key) => (key !== 'id'))
+    const displayedFields = merge(this.props.layout[this.props.currentModelName], omit(this.props.schema[this.props.currentModelName].fields, 'id'));
 
     // List fields inputs
-    const fields = _.map(
-      displayedFields,
-      (attributeValue, attributeKey) =>
-        this.generateField(attributeValue, attributeKey)
-    );
+    const fields = Object.keys(displayedFields).map(attr => {
+      const details = displayedFields[attr];
+      const errorIndex = findIndex(this.props.formErrors, ['name', attr]);
+      const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
+      const validationsIndex = findIndex(this.props.formValidations, ['name', attr]);
+      const validations = get(this.props.formValidations[validationsIndex], 'validations') || {};
+
+      const layout = Object.keys(get(this.props.layout[this.props.currentModelName], attr, {})).reduce((acc, current) => {
+        acc[current] = isFunction(this.props.layout[this.props.currentModelName][attr][current]) ?
+          this.props.layout[this.props.currentModelName][attr][current](this) :
+          this.props.layout[this.props.currentModelName][attr][current];
+
+        return acc;
+      }, {});
+
+      return (
+        <Input
+          key={attr}
+          type={this.getInputType(details.type)}
+          label={get(layout, 'label') || details.label || ''}
+          name={attr}
+          customBootstrapClass={get(layout, 'className') || ''}
+          value={this.props.record.get(attr) || ''}
+          placeholder={get(layout, 'placeholder') || details.placeholder || details.label || attr || ''}
+          handleChange={this.props.handleChange}
+          validations={get(layout, 'validations') || validations}
+          errors={errors}
+          didCheckErrors={this.props.didCheckErrors}
+          pluginID="content-manager"
+        />
+      );
+    });
 
     return (
-      <div>
-        <form onSubmit={this.onFormSubmit}>
+      <form className={styles.form} onSubmit={this.props.handleSubmit}>
+        <div className='row'>
           {fields}
-          <input type="submit" className="hidden-xs-up" />
-        </form>
-      </div>
+        </div>
+      </form>
     );
   }
 }
 
 EditForm.propTypes = {
-  currentModelName: React.PropTypes.string.isRequired,
-  editRecord: React.PropTypes.func.isRequired,
-  record: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  schema: React.PropTypes.object.isRequired,
-  setRecordAttribute: React.PropTypes.func.isRequired,
+  currentModelName: PropTypes.string.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
+  formValidations: PropTypes.array.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  layout: PropTypes.object.isRequired,
+  record: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
+  ]).isRequired,
+  schema: PropTypes.object.isRequired,
 };
 
 export default EditForm;

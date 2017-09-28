@@ -1,5 +1,4 @@
-import { takeLatest } from 'redux-saga';
-import { call, put, fork, take, cancel } from 'redux-saga/effects';
+import { takeLatest, call, put, fork, take, cancel } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
@@ -46,7 +45,6 @@ function* defaultSaga() {
   yield cancel(loadMenu);
   yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
   yield cancel(loadEnvironments);
-
 }
 
-export default [defaultSaga];
+export default defaultSaga;

@@ -1,0 +1,22 @@
+.modal {
+  .modal-dialog {
+    margin-top: 23.4rem;
+  }
+}
+
+.modal-content {
+  border-radius: .2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.modal-backdrop.show {
+  opacity: 0.3;
+}
+
+button {
+  &.close {
+    margin-top: -.8rem;
+    margin-right: -2rem;
+  }
+}

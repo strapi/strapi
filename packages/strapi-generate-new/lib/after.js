@@ -79,7 +79,7 @@ module.exports = (scope, cb) => {
   }
 
   function pluginsInstallation() {
-    exec('strapi install settings-manager', (err, stdout) => {
+    exec(`strapi install settings-manager ${scope.developerMode ? '--dev': ''}`, (err, stdout) => {
       logger.info('Installing plugin `Settings Manager`...');
 
       if (err) {

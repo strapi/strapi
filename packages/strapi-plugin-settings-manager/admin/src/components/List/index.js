@@ -16,6 +16,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
@@ -54,25 +55,30 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
   }
 
   render() {
-    const button = this.props.noListButtonPopUp ? '' :
-      <ButtonPrimaryHotline
-        buttonBackground={'secondaryAddType'}
-        label={this.props.listButtonLabel}
-        handlei18n={this.props.handlei18n}
-        addShape
-        onClick={this.toggle}
-      />;
+    const button = this.props.noListButtonPopUp
+      ? ''
+      : (
+        <ButtonPrimaryHotline
+          buttonBackground={'secondaryAddType'}
+          label={this.props.listButtonLabel}
+          handlei18n={this.props.handlei18n}
+          addShape
+          onClick={this.toggle}
+        />
+      );
 
     const addListTitleMarginTop = this.props.addListTitleMarginTop ? styles.paddedTopList : '';
     const titleSpacer = this.props.addListTitleMarginTop ? <div style={{ height: '.1rem'}} /> : '';
 
-    const loader = this.state.loader ?
-      <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <FormattedMessage id="settings-manager.form.button.save">
+    const loader = this.state.loader
+      ? <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      : (
+        <FormattedMessage id="settings-manager.form.button.save">
           {(message) => (
             <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
           )}
-        </FormattedMessage>;
+        </FormattedMessage>
+      );
     return (
       <div className={styles.listContainer}>
         <div className={styles.listSubContainer}>
@@ -136,21 +142,22 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  actionBeforeOpenPopUp: React.PropTypes.func,
-  addListTitleMarginTop: React.PropTypes.bool,
-  error: React.PropTypes.bool,
-  handlei18n: React.PropTypes.bool,
-  handleListPopUpSubmit: React.PropTypes.func,
-  listButtonLabel: React.PropTypes.string,
-  listItems: React.PropTypes.array,
-  listTitle: React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.object,
+  actionBeforeOpenPopUp: PropTypes.func,
+  addListTitleMarginTop: PropTypes.bool,
+  error: PropTypes.bool,
+  formErrors: PropTypes.array,
+  handlei18n: PropTypes.bool,
+  handleListPopUpSubmit: PropTypes.func,
+  listButtonLabel: PropTypes.string,
+  listItems: PropTypes.array,
+  listTitle: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
   ]),
-  noListButtonPopUp: React.PropTypes.bool,
-  renderRow: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.func,
+  noListButtonPopUp: PropTypes.bool,
+  renderRow: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
   ]),
 }
 

@@ -28,6 +28,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, remove } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
@@ -156,20 +157,22 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
     const label = this.props.name ? <label htmlFor={this.props.name}><FormattedMessage id={`settings-manager.${this.props.name}`} /></label> : '';
     const spacer = !this.props.name ? {marginTop: '2.4rem'} : {marginTop: ''};
     const marginBottomInput = isEmpty(this.state.errors) ? '4.3rem' : '2.4rem';
-    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
-      : <input
-        name={this.props.target}
-        id={this.props.name}
-        onBlur={handleBlur}
-        onFocus={this.props.handleFocus}
-        onChange={this.props.handleChange}
-        value={inputValue}
-        type="text"
-        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-        placeholder={placeholder}
-        style={{marginBottom: marginBottomInput }}
-      />;
-
+    const input = placeholder
+      ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
+      : (
+        <input
+          name={this.props.target}
+          id={this.props.name}
+          onBlur={handleBlur}
+          onFocus={this.props.handleFocus}
+          onChange={this.props.handleChange}
+          value={inputValue}
+          type="text"
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          placeholder={placeholder}
+          style={{marginBottom: marginBottomInput }}
+        />
+      );
 
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
     let marginTopSmall = this.props.inputDescription ? '-3rem' : '-1.5rem';
@@ -186,21 +189,21 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 InputText.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.array,
-  handleBlur: React.PropTypes.func,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func,
-  inputDescription: React.PropTypes.string,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  styles: React.PropTypes.object,
-  target: React.PropTypes.string,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  errors: PropTypes.array,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  name: PropTypes.string,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.string,
 }
 
 export default WithInput(InputText); // eslint-disable-line new-cap

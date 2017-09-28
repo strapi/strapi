@@ -61,9 +61,9 @@ function homePageReducer(state = initialState, action) {
         .updateIn(['modifiedData', action.key], () => action.value);
     case CANCEL_CHANGES:
       return state
-      .set('modifiedData', state.get('initialData'))
-      .set('formErrors', [])
-      .set('cancelAction', !state.get('cancelAction'));
+        .set('modifiedData', state.get('initialData'))
+        .set('formErrors', [])
+        .set('cancelAction', !state.get('cancelAction'));
     case DATABASES_FETCH_SUCCEEDED:
       return state
         .set('configsDisplay', OrderedMap(action.configsDisplay))
@@ -128,10 +128,10 @@ function homePageReducer(state = initialState, action) {
     case EMPTY_DB_MODIFIED_DATA:
       const defaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
       return state
-      .set('modifiedData', Map())
-      .set('dbNameTarget', 'database.connections.${name}.name') // eslint-disable-line no-template-curly-in-string
-      .set('formErrors', [])
-      .setIn(['modifiedData', 'database.defaultConnection'], defaultDbConnection);
+        .set('modifiedData', Map())
+        .set('dbNameTarget', 'database.connections.${name}.name') // eslint-disable-line no-template-curly-in-string
+        .set('formErrors', [])
+        .setIn(['modifiedData', 'database.defaultConnection'], defaultDbConnection);
     case NEW_LANGUAGE_POST:
       const sections = state.getIn(['configsDisplay', 'sections']);
       sections.push({ active: false, name: state.getIn(['modifiedData', 'language.defaultLocale']) });

@@ -5,36 +5,21 @@
  */
 
 import React from 'react';
+import { map } from 'lodash';
+import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
 class Pagination extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onGoPreviousPageClicked = this.onGoPreviousPageClicked.bind(this);
-    this.onGoNextPageClicked = this.onGoNextPageClicked.bind(this);
-    this.onGoFirstPageClicked = this.onGoFirstPageClicked.bind(this);
-    this.onGoLastPageClicked = this.onGoLastPageClicked.bind(this);
+  getLastPageNumber = () => {
+    return Math.ceil(this.props.count / this.props.limit);
   }
-  /**
-   * Triggered on dots click
-   *
-   * Simply prevent link default behavior
-   *
-   * @param e {Object} Click event
-   */
-  onDotsClicked(e) {
+
+  handleDotsClick = (e) => {
     e.preventDefault();
   }
 
-  /**
-   * Triggered on previous page click
-   *
-   * Prevent link default behavior and go to previous page
-   *
-   * @param e {Object} Click event
-   */
-  onGoPreviousPageClicked(e) {
+  handlePreviousPageClick = (e) => {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
@@ -42,93 +27,43 @@ class Pagination extends React.Component {
     }
   }
 
-  /**
-   * Triggered on next page click
-   *
-   * Prevent link default behavior and go to next page
-   *
-   * @param e {Object} Click event
-   */
-  onGoNextPageClicked(e) {
+  handleNextPageClick = (e) => {
     e.preventDefault();
 
     if (!this.isLastPage()) {
       this.props.changePage(this.props.currentPage + 1);
     }
   }
-  /**
-   * Triggered on first page click
-   *
-   * Prevent link default behavior and go to first page
-   *
-   * @param e {Object} Click event
-   */
-  onGoFirstPageClicked(e) {
+
+  handleFirstPageClick = (e) => {
     e.preventDefault();
 
     this.props.changePage(1);
   }
 
-  /**
-   * Triggered on last page click
-   *
-   * Prevent link default behavior and go to last page
-   *
-   * @param e {Object} Click event
-   */
-  onGoLastPageClicked(e) {
+  handleLastPageClick = (e) => {
     e.preventDefault();
 
     this.props.changePage(this.getLastPageNumber());
   }
 
-  /**
-   * Return the last page number
-   *
-   * @returns {number}
-   */
-  getLastPageNumber() {
-    return Math.ceil(this.props.count / this.props.limit);
-  }
-
-  /**
-   * Check if the current page is the first one or not
-   *
-   * @returns {boolean}
-   */
-  isFirstPage() {
+  isFirstPage = () => {
     return this.props.currentPage === 1;
   }
 
-  /**
-   * Check if the previous links dots
-   * should be displayed or not
-   *
-   * @returns {boolean}
-   */
-  needPreviousLinksDots() {
-    return this.props.currentPage > 3;
-  }
-  /**
-   * Check if the after links dots
-   * should be displayed or not
-   *
-   * @returns {boolean}
-   */
-  needAfterLinksDots() {
-    return this.props.currentPage < this.getLastPageNumber() - 1;
-  }
-
-  /**
-   * Check if the current page is the last one
-   *
-   * @returns {boolean}
-   */
-  isLastPage() {
+  isLastPage = () => {
     return this.props.currentPage === this.getLastPageNumber();
   }
 
-  render() {
+  needAfterLinksDots = () => {
+    return this.props.currentPage < this.getLastPageNumber() - 1;
+  }
+
+  needPreviousLinksDots = () => {
+    return this.props.currentPage > 3;
+  }
+
+  renderLinks = () => {
     // Init variables
     const linksOptions = [];
 
@@ -146,7 +81,7 @@ class Pagination extends React.Component {
       linksOptions.unshift({
         value: this.props.currentPage - 1,
         isActive: false,
-        onClick: this.onGoPreviousPageClicked,
+        onClick: this.handlePreviousPageClick,
       });
     }
 
@@ -155,7 +90,7 @@ class Pagination extends React.Component {
       linksOptions.push({
         value: this.props.currentPage + 1,
         isActive: false,
-        onClick: this.onGoNextPageClicked,
+        onClick: this.handleNextPageClick,
       });
     }
 
@@ -164,12 +99,12 @@ class Pagination extends React.Component {
       linksOptions.unshift({
         value: '...',
         isActive: false,
-        onClick: this.onDotsClicked,
+        onClick: this.handleDotsClick,
       });
       linksOptions.unshift({
         value: 1,
         isActive: false,
-        onClick: this.onGoFirstPageClicked,
+        onClick: this.handleFirstPageClick,
       });
     }
 
@@ -178,72 +113,75 @@ class Pagination extends React.Component {
       linksOptions.push({
         value: '...',
         isActive: false,
-        onClick: this.onDotsClicked,
+        onClick: this.handleDotsClick,
       });
       linksOptions.push({
         value: this.getLastPageNumber(),
         isActive: false,
-        onClick: this.onGoLastPageClicked,
+        onClick: this.handleLastPageClick,
       });
     }
 
     // Generate links
-    const links = linksOptions.map((linksOption, i) => (
-      <li
-        className={`${styles.navLi} ${linksOption.isActive && styles.navLiActive}`}
-        key={i}
-      >
-        <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
-          {linksOption.value}
-        </a>
-      </li>
-    ));
+    return (
+      map(linksOptions, (linksOption, key) => (
+        <li
+          className={`${linksOption.isActive && styles.navLiActive}`}
+          key={key}
+        >
+          <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
+            {linksOption.value}
+          </a>
+        </li>
+      ))
+    );
+  }
 
+  render() {
     return (
       <div className={styles.pagination}>
-        <a
-          href
-          className={`
-             ${styles.paginationNavigator}
-             ${styles.paginationNavigatorPrevious}
-             ${this.isFirstPage() && styles.paginationNavigatorDisabled}
-           `}
-          onClick={this.onGoPreviousPageClicked}
-          disabled={this.isFirstPage()}
-        >
-          <i className="ion ion-chevron-left" />
-        </a>
-        <div className={styles.separator} />
-        <nav className={styles.nav}>
-          <ul className={styles.navUl}>
-            {links}
-          </ul>
-        </nav>
-        <a
-          href
-          className={`
-             ${styles.paginationNavigator}
-             ${styles.paginationNavigatorNext}
-             ${this.isLastPage() && styles.paginationNavigatorDisabled}
-           `}
-          onClick={this.onGoNextPageClicked}
-          disabled={this.isLastPage()}
-        >
-          <i className="ion ion-chevron-right" />
-        </a>
+        <div>
+          <a
+            href
+            className={`
+               ${styles.paginationNavigator}
+               ${this.isFirstPage() && styles.paginationNavigatorDisabled}
+             `}
+            onClick={this.handlePreviousPageClick}
+            disabled={this.isFirstPage()}
+          >
+            <i className="fa fa-angle-left" aria-hidden="true"></i>
+          </a>
+          <nav className={styles.nav}>
+            <ul className={styles.navUl}>
+              {this.renderLinks()}
+            </ul>
+          </nav>
+          <a
+            href
+            className={`
+               ${styles.paginationNavigator}
+               ${this.isLastPage() && styles.paginationNavigatorDisabled}
+             `}
+            onClick={this.handleNextPageClick}
+            disabled={this.isLastPage()}
+          >
+            <i className="fa fa-angle-right" aria-hidden="true"></i>
+          </a>
+        </div>
       </div>
     );
   }
 }
 
 Pagination.propTypes = {
-  changePage: React.PropTypes.func.isRequired,
-  count: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.bool,
-  ]),
-  currentPage: React.PropTypes.number.isRequired,
-  limit: React.PropTypes.number.isRequired,
+  changePage: PropTypes.func.isRequired,
+  count: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.bool,
+  ]).isRequired,
+  currentPage: PropTypes.number.isRequired,
+  limit: PropTypes.number.isRequired,
 };
 
 export default Pagination;

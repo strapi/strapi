@@ -1,0 +1,74 @@
+{
+  "name": "strapi-plugin-content-type-builder",
+  "version": "3.0.0-alpha.5.5",
+  "description": "Strapi plugin to create content type (API).",
+  "strapi": {
+    "name": "Content Type Builder",
+    "icon": "paint-brush",
+    "description": "Description of content-type-builder plugin."
+  },
+  "scripts": {
+    "analyze:clean": "rimraf stats.json",
+    "preanalyze": "npm run analyze:clean",
+    "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "prebuild": "npm run build:clean && npm run test",
+    "build": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "rimraf admin/build",
+    "start": "cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
+    "generate": "node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "pretest": "npm run lint",
+    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
+    "test": "echo Tests are not implemented.",
+    "prepublish": "npm run build",
+    "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
+  },
+  "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
+    "classnames": "^2.2.5",
+    "koa-send": "^4.1.0",
+    "pluralize": "^7.0.0",
+    "prop-types": "^15.5.10",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-transition-group": "^1.2.0",
+    "reactstrap": "^4.8.0",
+    "strapi-generate": "3.0.0-alpha.5.5",
+    "strapi-generate-api": "3.0.0-alpha.5.5"
+  },
+  "devDependencies": {
+    "cross-env": "^5.0.5",
+    "eslint": "^4.7.2",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-import-resolver-webpack": "^0.8.3",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.4.0",
+    "eslint-plugin-redux-saga": "^0.4.0",
+    "plop": "^1.8.1",
+    "prettier": "^1.7.0",
+    "rimraf": "^2.6.2",
+    "strapi-helper-plugin": "3.0.0-alpha.5.5",
+    "webpack": "^3.6.0"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

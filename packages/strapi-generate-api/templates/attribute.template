@@ -1,3 +1,1 @@
-    "<%= name %>": {
-      "type": "<%= type %>"
-    }
+"<%= name %>": <%= JSON.stringify(params, null, 2) %>

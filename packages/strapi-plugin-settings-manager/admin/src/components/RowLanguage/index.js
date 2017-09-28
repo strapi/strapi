@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { find, get, join, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PopUpWarning from 'components/PopUpWarning';
@@ -28,7 +29,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 
   render() {
     // assign the target id the language name to prepare for delete
-    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75);'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
+    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75)'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
 
     // format the locale to
     const defaultLanguageArray = formatLanguageLocale(this.props.name);
@@ -38,23 +39,27 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     // apply i18n
     const languageDisplay = isObject(languageObject) ? <FormattedMessage {...{ id: `settings-manager.${languageObject.name}` }} /> : '';
 
-    const languageLabel = this.props.active ?
-      <FormattedMessage id="settings-manager.list.languages.default.languages">
-        {(message) => (
+    const languageLabel = this.props.active
+      ? (
+        <FormattedMessage id="settings-manager.list.languages.default.languages">
+          {(message) => (
 
-          <div className={this.props.liStyles.italicText} >
-            {message}
-          </div>
-        )}
-      </FormattedMessage> :
-      // set the span's id with the language name to retrieve it
+            <div className={this.props.liStyles.italicText} >
+              {message}
+            </div>
+          )}
+        </FormattedMessage>
+      )
+      : (
+        // set the span's id with the language name to retrieve it
         <FormattedMessage id="settings-manager.list.languages.set.languages">
           {(message) => (
             <button className={this.props.liStyles.normal} onClick={this.props.changeDefaultLanguage} id={this.props.name}>
               {message}
             </button>
           )}
-        </FormattedMessage>;
+        </FormattedMessage>
+      );
 
     return (
       <li style={{marginTop: '0'}}>
@@ -87,12 +92,12 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowLanguage.propTypes = {
-  active: React.PropTypes.bool,
-  changeDefaultLanguage: React.PropTypes.func.isRequired,
-  handleLanguageDelete: React.PropTypes.func.isRequired,
-  listLanguages: React.PropTypes.object.isRequired,
-  liStyles: React.PropTypes.object,
-  name: React.PropTypes.string.isRequired,
+  active: PropTypes.bool,
+  changeDefaultLanguage: PropTypes.func,
+  handleLanguageDelete: PropTypes.func,
+  listLanguages: PropTypes.object,
+  liStyles: PropTypes.object,
+  name: PropTypes.string,
 };
 
 export default RowLanguage;

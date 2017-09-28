@@ -1,0 +1,35 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "Admin.index",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:plugin/:file",
+      "handler": "Admin.pluginFile",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:file",
+      "handler": "Admin.file",
+      "config": {
+        "policies": []
+      }
+    }, {
+      "method": "GET",
+      "path": "/*",
+      "handler": "Admin.index",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
@@ -38,9 +39,9 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
 }
 
 PluginLeftMenuSection.propTypes = {
-  environments: React.PropTypes.array,
-  envParams: React.PropTypes.string,
-  section: React.PropTypes.object.isRequired,
+  environments: PropTypes.array,
+  envParams: PropTypes.string,
+  section: PropTypes.object,
 };
 
 export default PluginLeftMenuSection;

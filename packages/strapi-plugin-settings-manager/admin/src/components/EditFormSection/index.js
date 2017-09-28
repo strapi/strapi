@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 // HOC Form
@@ -56,13 +57,13 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 }
 
 EditFormSection.propTypes = {
-  formErrors: React.PropTypes.array,
-  handleChange: React.PropTypes.func,
-  renderInput: React.PropTypes.func,
-  section: React.PropTypes.object,
-  showNestedForm: React.PropTypes.bool,
-  styles: React.PropTypes.object,
-  values: React.PropTypes.object,
+  formErrors: PropTypes.array,
+  handleChange: PropTypes.func,
+  renderInput: PropTypes.func,
+  section: PropTypes.object,
+  showNestedForm: PropTypes.bool,
+  styles: PropTypes.object,
+  values: PropTypes.object,
 };
 
 export default WithFormSection(EditFormSection); // eslint-disable-line new-cap

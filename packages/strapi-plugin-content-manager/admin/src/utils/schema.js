@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { forEach, upperFirst, mapValues, pickBy, slice, findKey, keys, get } from 'lodash';
 import pluralize from 'pluralize';
 
 /**
@@ -11,38 +11,40 @@ const generateSchema = (models) => {
   // Init `schema` object
   const schema = {};
 
-  _.forEach(models, (model, name) => {
+  forEach(models, (model, name) => {
     // Model data
     const schemaModel = {
-      label: _.upperFirst(name),
-      labelPlural: _.upperFirst(pluralize(name)),
+      label: upperFirst(name),
+      labelPlural: upperFirst(pluralize(name)),
       orm: model.orm || 'mongoose',
     };
 
     // Fields (non relation)
-    schemaModel.fields = _.mapValues(_.pickBy(model.attributes, attribute =>
+    schemaModel.fields = mapValues(pickBy(model.attributes, attribute =>
       !attribute.model && !attribute.collection
     ), (value, attribute) => ({
-      label: _.upperFirst(attribute),
+      label: upperFirst(attribute),
       description: '',
       type: value.type || 'string',
     }));
 
     // Select fields displayed in list view
-    schemaModel.list = _.slice(_.keys(schemaModel.fields), 0, 4);
+    schemaModel.list = slice(keys(schemaModel.fields), 0, 4);
 
-    // Model relations
-    schemaModel.relations = _.mapValues(_.pickBy(model.attributes, attribute =>
-        attribute.model
-      ), (value, attribute) => ({
-        columnName: attribute,
-        model: value.model,
-        attribute,
-        label: _.upperFirst(attribute),
-        description: '',
-        displayedAttribute: _.findKey(models[value.model].attributes, { type: 'string' }) || 'id',
-      })
-    );
+    if (model.associations) {
+      // Model relations
+      schemaModel.relations = model.associations.reduce((acc, current) => {
+        acc[current.alias] = {
+          ...current,
+          description: '',
+          displayedAttribute: get(models[current.model || current.collection], 'info.mainField') ||
+            findKey(models[current.model || current.collection].attributes, { type : 'string'}) ||
+            'id',
+        };
+
+        return acc;
+      }, {});
+    }
 
     // Set the formatted model to the schema
     schema[name] = schemaModel;

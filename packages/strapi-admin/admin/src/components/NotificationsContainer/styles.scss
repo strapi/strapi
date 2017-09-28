@@ -1,0 +1,10 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.notificationsContainer { /* stylelint-disable */
+  position: absolute;
+  top: 72px;
+  right: 15px;
+  z-index: 1000;
+  list-style: none;
+}

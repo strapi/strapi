@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 // modal
@@ -62,13 +63,15 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
-    const loader = this.state.loader ?
-      <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-        : <FormattedMessage id="settings-manager.form.button.save">
+    const loader = this.state.loader
+      ? <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      : (
+        <FormattedMessage id="settings-manager.form.button.save">
           {(message) => (
             <Button onClick={this.handleSubmit} className={styles.primary}>{message}</Button>
           )}
-        </FormattedMessage>;
+        </FormattedMessage>
+      );
     return (
       <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
         <div className={styles.flexLi}>
@@ -129,11 +132,12 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RowDatabase.propTypes = {
-  data: React.PropTypes.object.isRequired,
-  error: React.PropTypes.bool,
-  getDatabase: React.PropTypes.func,
-  handleDatabaseDelete: React.PropTypes.func,
-  handleSubmit: React.PropTypes.func,
-}
+  data: PropTypes.object,
+  error: PropTypes.bool,
+  formErrors: PropTypes.array,
+  getDatabase: PropTypes.func,
+  handleDatabaseDelete: PropTypes.func,
+  handleSubmit: PropTypes.func,
+};
 
 export default RowDatabase;

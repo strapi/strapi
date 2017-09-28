@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
@@ -23,7 +24,7 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? styles.requiredClass : '';
 
     return (
-      <div className={`${styles.inputSelect} ${requiredClass} ${bootStrapClass}`}>
+      <div className={`${styles.input} ${requiredClass} ${bootStrapClass}`}>
         <label htmlFor={this.props.name}>
           <FormattedMessage id={`settings-manager.${this.props.name}`} />
         </label>
@@ -35,13 +36,15 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
           value={this.props.value}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
-              {(message) => (
-                <option value={option.value}>
-                  {message}
-                </option>
-              )}
-            </FormattedMessage>
+            option.name ?
+              <FormattedMessage id={`settings-manager.${option.name}`} key={key}>
+                {(message) => (
+                  <option value={option.value}>
+                    {message}
+                  </option>
+                )}
+              </FormattedMessage> :
+              <option value={option.value} key={key}>{option.name}</option>
           ))}
         </select>
       </div>
@@ -50,17 +53,17 @@ class InputSelect extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputSelect.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  handleChange: React.PropTypes.func.isRequired,
-  name: React.PropTypes.string.isRequired,
-  selectOptions: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object, // TODO remove
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  handleChange: PropTypes.func,
+  name: PropTypes.string,
+  selectOptions: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
   ]),
-  target: React.PropTypes.string,
-  validations: React.PropTypes.object,
-  value: React.PropTypes.string,
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.string,
 };
 
 export default InputSelect;

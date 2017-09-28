@@ -104,6 +104,10 @@ module.exports = function(strapi) {
         _.forEach(models, (definition, model) => {
           globalName = _.upperFirst(_.camelCase(definition.globalId));
 
+          _.defaults(definition, {
+            primaryKey: 'id'
+          });
+
           // Make sure the model has a table name.
           // If not, use the model name.
           if (_.isEmpty(definition.collectionName)) {
@@ -229,15 +233,8 @@ module.exports = function(strapi) {
               // Expose ORM functions through the `strapi.models` object.
               strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
 
-              // Push model to strapi global variables.
-              strapi.bookshelf.collections[globalName.toLowerCase()] = global[
-                globalName
-              ];
-
               // Push attributes to be aware of model schema.
-              strapi.bookshelf.collections[
-                globalName.toLowerCase()
-              ]._attributes = definition.attributes;
+              strapi.models[model]._attributes = definition.attributes;
 
               loadedHook();
             } catch (err) {
@@ -257,19 +254,17 @@ module.exports = function(strapi) {
           // Basic attributes don't need this-- only relations.
           _.forEach(definition.attributes, (details, name) => {
             const verbose = _.get(
-              utilsModels.getNature(details, name),
+              utilsModels.getNature(details, name, undefined, model.toLowerCase()),
               'verbose'
             ) || '';
 
             // Build associations key
-            if (!_.isEmpty(verbose)) {
-              utilsModels.defineAssociations(
-                globalName,
-                definition,
-                details,
-                name
-              );
-            }
+            utilsModels.defineAssociations(
+              globalName,
+              definition,
+              details,
+              name
+            );
 
             switch (verbose) {
               case 'hasOne': {
@@ -312,6 +307,9 @@ module.exports = function(strapi) {
                   strapi.models[globalId.toLowerCase()].attributes,
                   `${details.via}.columnName`
                 ) || details.via;
+
+                // Set this info to be able to see if this field is a real database's field.
+                details.isVirtual = true;
 
                 loadedModel[name] = function() {
                   return this.hasMany(global[globalId], FKTarget);
@@ -383,6 +381,9 @@ module.exports = function(strapi) {
                   strapi.models,
                   `${details.collection.toLowerCase()}.globalId`
                 );
+
+                // Set this info to be able to see if this field is a real database's field.
+                details.isVirtual = true;
 
                 loadedModel[name] = function() {
                   if (

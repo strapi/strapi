@@ -24,21 +24,19 @@ const logger = require('strapi-utils').logger;
  * Generate a new Strapi application.
  */
 
-module.exports = function () {
+module.exports = function (name, cliArguments) {
   logger.info('Creating your application... It might take a few seconds.');
 
-  // Pass the original CLI arguments down to the generator
-  // (but first, remove commander's extra argument).
-  const cliArguments = Array.prototype.slice.call(arguments);
-  cliArguments.pop();
+  const developerMode = cliArguments.dev !== undefined;
 
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
     generatorType: 'new',
-    name: cliArguments[0],
-    strapiPackageJSON: packageJSON
+    name,
+    strapiPackageJSON: packageJSON,
+    developerMode
   };
 
   // Return the scope and the response (`error` or `success`).

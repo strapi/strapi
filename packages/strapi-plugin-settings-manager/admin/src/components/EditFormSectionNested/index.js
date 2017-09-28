@@ -5,6 +5,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { has, map, forEach } from 'lodash';
 
 // HOC
@@ -47,7 +48,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
               this.setState({ showNestedForm: false });
             }
           }
-        })
+        });
       }
     });
   }
@@ -81,15 +82,16 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 }
 
 EditFormSectionNested.propTypes = {
-  formErrors: React.PropTypes.array,
-  handleChange: React.PropTypes.func,
-  renderInput: React.PropTypes.func,
-  section: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.object,
+  formErrors: PropTypes.array,
+  handleChange: PropTypes.func,
+  renderInput: PropTypes.func,
+  section: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
   ]),
-  styles: React.PropTypes.object,
-  values: React.PropTypes.object,
+  styles: PropTypes.object,
+  value: PropTypes.object,
+  values: PropTypes.object,
 };
 
 export default WithFormSection(EditFormSectionNested); // eslint-disable-line new-cap

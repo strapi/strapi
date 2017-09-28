@@ -28,6 +28,7 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
@@ -128,19 +129,22 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.name;
     const marginBottomInput = isEmpty(this.state.errors) ? '4.3rem' : '2.4rem';
-    const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
-      : <input
-        type="number"
-        name={this.props.target}
-        id={this.props.name}
-        value={inputValue}
-        onBlur={handleBlur}
-        onChange={this.props.handleChange}
-        onFocus={this.props.handleFocus}
-        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
-        placeholder={placeholder}
-        style={{marginBottom: marginBottomInput }}
-      />;
+    const input = placeholder
+      ? this.renderFormattedInput(handleBlur, inputValue, placeholder, marginBottomInput)
+      : (
+        <input
+          type="number"
+          name={this.props.target}
+          id={this.props.name}
+          value={inputValue}
+          onBlur={handleBlur}
+          onChange={this.props.handleChange}
+          onFocus={this.props.handleFocus}
+          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          placeholder={placeholder}
+          style={{marginBottom: marginBottomInput }}
+        />
+      );
 
     const requiredClass = this.props.validations.required && this.props.addRequiredInputDesign ? this.props.styles.requiredClass : '';
     let marginTopSmall = this.props.inputDescription ? '-3rem' : '-1.5rem';
@@ -158,26 +162,26 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
 }
 
 InputNumber.propTypes = {
-  addRequiredInputDesign: React.PropTypes.bool,
-  customBootstrapClass: React.PropTypes.string,
-  deactivateErrorHighlight: React.PropTypes.bool,
-  errors: React.PropTypes.oneOfType([
-    React.PropTypes.bool,
-    React.PropTypes.array,
-  ]),
-  handleBlur: React.PropTypes.func,
-  handleChange: React.PropTypes.func.isRequired,
-  handleFocus: React.PropTypes.func,
-  inputDescription: React.PropTypes.string,
-  name: React.PropTypes.string.isRequired,
-  noErrorsDescription: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  styles: React.PropTypes.object,
-  target: React.PropTypes.string.isRequired,
-  validations: React.PropTypes.object.isRequired,
-  value: React.PropTypes.oneOfType([
-    React.PropTypes.number.isRequired,
-    React.PropTypes.string.isRequired,
+  addRequiredInputDesign: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  errors: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.array,
+  ]).isRequired,
+  handleBlur: PropTypes.func,
+  handleChange: PropTypes.func,
+  handleFocus: PropTypes.func,
+  inputDescription: PropTypes.string,
+  name: PropTypes.string,
+  noErrorsDescription: PropTypes.bool,
+  placeholder: PropTypes.string,
+  styles: PropTypes.object,
+  target: PropTypes.string,
+  validations: PropTypes.object,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
   ]),
 }
 
