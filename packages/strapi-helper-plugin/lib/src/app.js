@@ -15,7 +15,6 @@ import { translationMessages } from './i18n';
 
 const tryRequire = (bootstrap = false) => {
   try {
-    const path = 'bootstrap';
     const config = bootstrap ? require('bootstrap').bootstrap : require('pluginRequirements').shouldRenderCompo;
     return config;
   } catch(err) {

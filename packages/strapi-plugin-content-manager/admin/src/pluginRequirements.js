@@ -1,3 +1,1 @@
-export const shouldRenderCompo = (plugin) => new Promise((resolve) => {
-  return resolve(plugin);
-});
+export const shouldRenderCompo = (plugin) => Promise.resolve(plugin);

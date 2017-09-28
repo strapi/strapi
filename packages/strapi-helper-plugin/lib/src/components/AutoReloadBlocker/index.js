@@ -23,20 +23,33 @@ function AutoReloadBlocker() {
           <div className={styles.ide}>
             <p>./config/environments/development/server.json</p>
             <div>
-              {'{'}
-              <ul>
-                <li>"host":&nbsp;&nbsp;&nbsp;"localhost"</li>
-                <li>"port":&nbsp;&nbsp;&nbsp;1337,</li>
-                <li>"autoReload":&nbsp;&nbsp;&nbsp;true,</li>
-                <li>"proxi":&nbsp;&nbsp;&nbsp;{'{'}</li>
-                <li>&nbsp;&nbsp;&nbsp;"enabled":&nbsp;&nbsp;&nbsp;true</li>
-                <li>{'}'},</li>
-                <li>"cron":&nbsp;&nbsp;&nbsp;{'{'}</li>
-                <li>&nbsp;&nbsp;&nbsp;"enabled":&nbsp;&nbsp;&nbsp;false</li>
-                <li>{'}'},</li>
-              </ul>
-              {'}'}
-
+              <pre style={{ whiteSpace: 'pre-wrap'}}>
+                <code>
+                  &#123;
+                  <br />
+                  &nbsp;"host": "localhost",
+                  <br />
+                  &nbsp;"port": 1337,
+                  <br />
+                  <span style={{ color: '#006EE7'}}>
+                    &nbsp;"autoReload": true,
+                  </span>
+                  <br />
+                  &nbsp;"proxi": &#123;
+                  <br />
+                  &nbsp;&nbsp;"enabled": true
+                  <br />
+                  &nbsp;&#125;,
+                  <br />
+                  &nbsp;"cron": &#123;
+                  <br />
+                  &nbsp;&nbsp;"enabled": false
+                  <br />
+                  &nbsp;&#125;
+                  <br />
+                  &#125;
+                </code>
+              </pre>
             </div>
           </div>
         </div>

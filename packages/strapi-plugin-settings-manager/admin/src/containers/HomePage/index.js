@@ -3,7 +3,7 @@
  * HomePage
  *
  */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -321,7 +321,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   renderPopUpFormLanguage = (section) => (
     map(section.items, (item) => {
       const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
-  
+
       return (
         <div className={`col-md-6`}>
           <div className={styles.modalLanguageLabel}>

@@ -3,7 +3,7 @@
 * EditFormSectionNested
 *
 */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import { has, map, forEach } from 'lodash';
 

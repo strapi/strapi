@@ -5,7 +5,7 @@ import request from 'utils/request';
 export const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
   request('/settings-manager/autoReload')
     .then(response => {
-      plugin.preventComponentRendering = !response.autoReload;
+      plugin.preventComponentRendering = response.autoReload;
       plugin.blockerComponent = AutoReloadBlocker;
 
       if (response.environment !== 'development') {

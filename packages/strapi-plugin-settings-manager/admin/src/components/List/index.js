@@ -14,7 +14,7 @@
 *  - handleListPopButtonSave: func
 *
 */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';

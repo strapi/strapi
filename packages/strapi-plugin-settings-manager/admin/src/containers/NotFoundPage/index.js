@@ -8,7 +8,7 @@
  * reloading is not a neccessity for you then you can refactor it and remove
  * the linting exception.
  */
-
+import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
 export default class NotFound extends React.Component {

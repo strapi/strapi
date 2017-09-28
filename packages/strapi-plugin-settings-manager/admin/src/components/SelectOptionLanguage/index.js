@@ -3,7 +3,7 @@
 * SelectOption
 *
 */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import styles from './styles.scss';

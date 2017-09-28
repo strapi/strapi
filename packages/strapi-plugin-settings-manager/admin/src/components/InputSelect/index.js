@@ -3,7 +3,7 @@
 * InputSelect
 *
 */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
