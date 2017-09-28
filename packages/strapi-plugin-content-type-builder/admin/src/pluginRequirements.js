@@ -6,6 +6,7 @@ export const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
     .then(response => {
       plugin.preventComponentRendering = !response.autoReload;
       plugin.blockerComponent = AutoReloadBlocker;
+
       return resolve(plugin);
     })
     .catch(err => reject(err));

@@ -341,6 +341,7 @@ module.exports = {
   autoReload: async ctx => {
     ctx.send({
       autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
+      environment: strapi.config.environment,
     });
   }
 };
