@@ -191,5 +191,11 @@ module.exports = {
     } catch (err) {
       ctx.body = ctx.notFound();
     }
+  },
+
+  autoReload: async ctx => {
+    ctx.send({
+      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
+    });
   }
 };

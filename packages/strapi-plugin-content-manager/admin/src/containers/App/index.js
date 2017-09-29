@@ -22,7 +22,7 @@ import List from 'containers/List';
 import { loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
 
-import saga, { generateMenu } from './sagas';
+import saga from './sagas';
 
 const tryRequire = (path) => {
   try {
@@ -31,17 +31,6 @@ const tryRequire = (path) => {
     return null;
   }
 };
-
-// This method is executed before the load of the plugin.
-export const bootstrap = (plugin) => new Promise((resolve, reject) => {
-  generateMenu()
-    .then(menu => {
-      plugin.leftMenuSections = menu;
-
-      resolve(plugin);
-    })
-    .catch(e => reject(e));
-});
 
 class App extends React.Component {
   componentDidMount() {

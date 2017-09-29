@@ -55,6 +55,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/autoReload",
+      "handler": "ContentTypeBuilder.autoReload",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

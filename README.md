@@ -1,11 +1,23 @@
-![Logo](https://cldup.com/7umchwdUBh.png)
+<p align="center"><img src="https://cldup.com/7umchwdUBh.png" /></p>
+<h3 align="center">API creation made simple, secure and fast.</h3>
+<p align="center">The most advanced open-source Content Management Framework to build powerful API with no effort.</p>
+<br />
+<p align="center">
+  <a href="https://www.npmjs.org/package/strapi">
+    <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
+  </a>
+  <a href="https://www.npmjs.org/package/strapi">
+    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Dependency Status" />
+  </a>
+  <a href="https://travis-ci.org/strapi/strapi">
+    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Dependency Status" />
+  </a>
+  <a href="http://slack.strapi.io">
+    <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
+  </a>
+</p>
 
-[![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi)
-[![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
-[![Build status](https://travis-ci.org/strapi/strapi.svg?branch=master)](https://travis-ci.org/strapi/strapi)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
-
-[Strapi](http://strapi.io) is an open source solution to create, deploy and manage your own API. It provides a powerful dashboard and features to make your life easier.
+<br>
 
 ## v3.0.0 coming soon...
 We've been working on a major update to Strapi for several months now, rewriting the core framework and the dashboard. Some parts of this work have been merged into our master branch. Currently, this is not stable and ready.
