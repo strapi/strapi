@@ -120,6 +120,7 @@ module.exports = (scope, cb) => {
 
   // Set description
   scope.description = _.get(scope.args, 'description', undefined);
+  if (typeof scope.description === 'function') scope.description = undefined;
 
   // Get default connection
   try {
