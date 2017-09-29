@@ -34,7 +34,6 @@ final say on releasing new versions.
 
 Strapi lead maintainers include Wistity employees and welcome other active
 community members:
-- Loïc Saint-Roch ([@loicsaintroch](https://github.com/loicsaintroch)) (Wistity)
 - Aurélien Georget ([@aurelsicoko](https://github.com/aurelsicoko)) (Wistity)
 - Jim Laurie ([@lauriejim](https://github.com/lauriejim)) (Wistity)
 - Pierre Burgy ([@pierreburgy](https://github.com/pierreburgy)) (Wistity)
@@ -64,7 +63,7 @@ All contributions are welcome!
   The title of the pull request should start with "WIP" for "work in progress"
   when the pull request is not complete yet.
 9. Request a code review. Add a specific committer to speed up this process
-  (for example, `@loicsaintroch`, `@aurelsicoko`).
+  (for example, `@aurelsicoko`).
 10. Make any requested changes and push to your fork. Make sure your changes are still based
   on the latest code (use `git rebase upstream/master`).
 
