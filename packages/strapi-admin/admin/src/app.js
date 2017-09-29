@@ -83,13 +83,31 @@ const registerPlugin = (plugin) => {
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
 
-  // Execute bootstrap function.
-  if (isFunction(plugin.bootstrap)) {
-    plugin.bootstrap(plugin).then(plugin => {
+  switch (true) {
+    // Execute bootstrap function and check if plugin can be rendered
+    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
+      plugin.pluginRequirements(plugin)
+        .then(plugin => {
+          return plugin.bootstrap(plugin);
+        })
+        .then(plugin => {
+          store.dispatch(pluginLoaded(plugin));
+        });
+      break;
+    // Check if plugin can be rendered
+    case isFunction(plugin.pluginRequirements):
+      plugin.pluginRequirements(plugin).then(plugin => {
+        store.dispatch(pluginLoaded(plugin));
+      })
+      break;
+    // Execute bootstrap function
+    case isFunction(plugin.bootstrap):
+      plugin.bootstrap(plugin).then(plugin => {
+        store.dispatch(pluginLoaded(plugin));
+      });
+      break;
+    default:
       store.dispatch(pluginLoaded(plugin));
-    });
-  } else {
-    store.dispatch(pluginLoaded(plugin));
   }
 };
 

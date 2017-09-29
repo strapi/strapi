@@ -44,7 +44,7 @@
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "plop": "^1.8.1",
-    "prettier": "^1.7.0",
+    "prettier": "^1.7.2",
     "rimraf": "^2.6.2",
     "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^3.6.0"

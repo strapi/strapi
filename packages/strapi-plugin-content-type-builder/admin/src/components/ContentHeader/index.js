@@ -23,7 +23,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     if (this.props.isLoading) {
       return (
         <div className={styles.buttonContainer}>
-          <Button type="submit" lg primary loader />
+          <Button type="submit" primary loader />
         </div>
       );
     }
