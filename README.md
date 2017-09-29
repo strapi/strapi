@@ -19,18 +19,51 @@
 
 <br>
 
-## v3.0.0 coming soon...
-We've been working on a major update to Strapi for several months now, rewriting the core framework and the dashboard. Some parts of this work have been merged into our master branch. Currently, this is not stable and ready.
+![Content Manager Plugin - Screenshot](http://blog.strapi.io/content/images/2017/07/preview-readme-9.png)
 
-**Please DON'T use the `master` branch in production. To run and start your current project, we strongly recommend to use the v1.6.3.**
+<br>
+
+## Quick start
+
+We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel. Performances has been increased, Developer eXperience has been improved and a brand new plugins
+ecosystem has been introduced. Both versions are available, we recommend v1 for production use.
+
+#### Alpha
+
+The alpha has support for the latest version of Node.js (v8) and is going to be ready for production for the end of the year.
+```bash
+npm install strapi@alpha -g
+```
+
+#### Stable
+This is the stable version of Strapi (v1). However, the migration to v3 will not be easy due to many breaking changes.
+```bash
+npm install strapi -g
+```
+
+Read the [Getting started](http://strapi.io/documentation#getting-started) page to create your first project using Strapi.
+
+## Features
+
+- **Modern Admin Panel:** Elegant, entirely customizable and fully extensible admin panel.
+- **Secure by default:** Several security layers included: reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
+- **Plugins Oriented:** Extensible plugins system included. Install auth system, content management, custom plugins, and more, in seconds.
+- **Blazing Fast:** Built on top of Node.js platform, Strapi delivers amazing performances. Offer the high speed to your API.
+- **Front-end Agnostic:** Use any front-end strategy: frameworks (React, Vue, Angular, etc.), third parties, mobile apps or even IoT.
+- **Powerful CLI:** Scaffold projects and APIs on the fly.
+- **SQL & NoSQL databases:** Work with Mongo as a main database but also supports Postgres, MySQL, etc.
+
+## Should I use v3 or v1?
+We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel. Performances has been increased, Developer eXperience has been improved and a brand new plugins
+ecosystem has been introduced.
+
+The v3 is not ready for production use yet. However, if you're planning to build a new project, we recommend to start using the latest version available (v3). There will be minor changes and the migration time will be lower than migrating from v1 to v3.
 
 For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
 
-Also, we need your opinion about the next features you would like. Please answer our [latest survey about Strapi v3](http://bit.ly/2v7MAdn).
-
 ![Content Manager Plugin - Screenshot](http://blog.strapi.io/content/images/2017/07/preview-readme-9.png)
 
-## Why Strapi ?
+## Philosophy ?
 
 > At [Strapi](http://strapi.io), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
 
@@ -38,23 +71,9 @@ Web and mobile applications needed a powerful, simple to use and production-read
 
 Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A powerful dashboard to easily manage your content with a flexible framework layer to develop and integrate specific features.
 
-## Features
-
-- **Dashboard**, is a complete UI to manage your app. If you try it, you'll like it!
-- **100% JavaScript**, the language you probably already are using for the front-end.
-- **Useful CLI** that let you scaffold projects and APIs on the fly.
-- **Front-end agnostic** and can be used with React, Vue, Angular, Backbone, Ember, iOS, Android, etc.
-- **Security layers** that just work and ships reusable security policies.
-- **WebSockets** to handle realtime connections and events.
-- **Mongo** as a main database to store your data with efficiency.
-
-## Plugins
-
-> Only what you need. No more. No less.
-
-Thanks to the plugins, you will be able to create the perfect app without useless features. The Strapi ecosystem has been thought to be the most granular as possible. Please [read our blog](http://blog.strapi.io/everything-you-need-to-know-about-strapi-v3/) to get more details about them.
-
 ## Support
+
+For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
 
 ### Community support
 
