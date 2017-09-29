@@ -277,17 +277,13 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig) {
   if (isEmpty(get(flattenHooksConfig, name, true))) {
 
     // Check if database connector is used
-    let isUsed = false;
-    forEach(get(strapi, 'api', {}), api => {
-      if (!api.models) return;
-
-      forEach(api.models, model => {
-        if (get(strapi.connection, model.connection, {}).connector === name) isUsed = true;
-      });
-    });
+    const modelUsed = Object.keys(this.api || {})
+      .filter(x => isObject(this.api[x].models)) // Filter API with models
+      .map(x => this.api[x].models) // Keep models
+      .filter(model => get(this.connection, model.connection, {}).connector === name) || 0; // Filter model with the right connector
 
     flattenHooksConfig[name] = {
-      enabled: isUsed
+      enabled: modelUsed.length > 0 // Will return false if there is no model, else true.
     };
 
     // Enabled dependencies.

@@ -47,7 +47,7 @@ module.exports = strapi => {
     initialize: function(cb) {
       strapi.app.use(
         async (ctx, next) => {
-          if (ctx.admin) return next();
+          if (ctx.request.admin) return next();
 
           await strapi.koaMiddlewares.kcors({
             origin: strapi.config.middleware.settings.cors.origin,

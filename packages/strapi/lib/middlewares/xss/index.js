@@ -28,7 +28,7 @@ module.exports = strapi => {
     initialize: function(cb) {
       strapi.app.use(
         async (ctx, next) => {
-          if (ctx.admin) return next();
+          if (ctx.request.admin) return next();
 
           strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.xssProtection({
