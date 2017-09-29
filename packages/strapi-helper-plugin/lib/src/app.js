@@ -5,12 +5,26 @@
  * only setup and plugin code.
  */
 
+import React from 'react';
 import { Provider } from 'react-redux';
 
-import App, { bootstrap } from 'containers/App'; // eslint-disable-line
+import App from 'containers/App'; // eslint-disable-line
 
 import configureStore from './store';
 import { translationMessages } from './i18n';
+
+const tryRequire = (bootstrap = false) => {
+  try {
+    const config = bootstrap ? require('bootstrap').default : require('requirements').default;
+    return config;
+  } catch(err) {
+    return null;
+  }
+};
+
+const bootstrap = tryRequire(true);
+const pluginRequirements = tryRequire();
+
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -60,6 +74,9 @@ window.Strapi.registerPlugin({
   mainComponent: Comp,
   translationMessages,
   bootstrap,
+  pluginRequirements,
+  preventComponentRendering: false,
+  blockerComponent: null,
 });
 
 // Export store

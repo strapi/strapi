@@ -4,7 +4,8 @@
  *
  */
 
-import _ from 'lodash';
+import React from 'react';
+import { startsWith } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -15,7 +16,7 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
   render() {
     // We need to create our own active url checker,
     // because of the two levels router.
-    const isLinkActive = _.startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
+    const isLinkActive = startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
 
     return (
       <li className={styles.item}>

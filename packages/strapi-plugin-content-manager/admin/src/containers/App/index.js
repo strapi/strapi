@@ -5,11 +5,12 @@
  *
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { isEmpty, get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
 import injectSaga from 'utils/injectSaga';
@@ -21,7 +22,7 @@ import List from 'containers/List';
 import { loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
 
-import saga, { generateMenu } from './sagas';
+import saga from './sagas';
 
 const tryRequire = (path) => {
   try {
@@ -31,22 +32,11 @@ const tryRequire = (path) => {
   }
 };
 
-// This method is executed before the load of the plugin.
-export const bootstrap = (plugin) => new Promise((resolve, reject) => {
-  generateMenu()
-    .then(menu => {
-      plugin.leftMenuSections = menu;
-
-      resolve(plugin);
-    })
-    .catch(e => reject(e));
-});
-
 class App extends React.Component {
   componentDidMount() {
     const config = tryRequire('../../../../config/admin.json');
 
-    if (!_.isEmpty(_.get(config, 'admin.schema'))) {
+    if (!isEmpty(get(config, 'admin.schema'))) {
       this.props.updateSchema(config.admin.schema);
     } else {
       this.props.loadModels();

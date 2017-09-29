@@ -11,6 +11,7 @@
     "preanalyze": "npm run analyze:clean",
     "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "build": "cross-env NODE_ENV=production IS_ADMIN=true webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:dll": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.dll.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",
     "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node node_modules/strapi-helper-plugin/lib/server",
     "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
@@ -24,7 +25,6 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^0.30.0",
-    "lodash": "^4.17.4",
     "sanitize.css": "^4.1.0",
     "strapi-utils": "3.0.0-alpha.5.5"
   },
@@ -44,7 +44,7 @@
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "plop": "^1.8.1",
-    "prettier": "^1.7.0",
+    "prettier": "^1.7.2",
     "rimraf": "^2.6.2",
     "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^3.6.0"

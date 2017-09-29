@@ -28,8 +28,8 @@
     "mode": "block"
   },
   "cors": {
-    "enabled": false,
-    "origin": "http://localhost",
+    "enabled": true,
+    "origin": "*",
     "expose": [
       "WWW-Authenticate",
       "Server-Authorization"
@@ -48,7 +48,8 @@
     "headers": [
       "Content-Type",
       "Authorization",
-      "X-Frame-Options"
+      "X-Frame-Options",
+      "Origin"
     ]
   },
   "ip": {

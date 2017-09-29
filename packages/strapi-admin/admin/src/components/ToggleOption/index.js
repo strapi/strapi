@@ -4,6 +4,7 @@
 *
 */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 

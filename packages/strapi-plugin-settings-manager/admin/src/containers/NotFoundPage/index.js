@@ -9,6 +9,7 @@
  * the linting exception.
  */
 
+import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
 export default class NotFound extends React.Component {

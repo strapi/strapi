@@ -2,12 +2,41 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
+const fs = require('fs');
 const path = require('path');
 
 const webpack = require('webpack');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
+
+let noPlugin = false;
+let plugins = [];
+let pluginFolders = {};
+
+if (process.env.npm_lifecycle_event === 'start') {
+  try {
+    fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
+  } catch (e) {
+    try {
+      fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
+
+      // Allow app without plugins.
+      noPlugin = true;
+    } catch (e) {
+      throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
+    }
+  }
+
+  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
+    .filter(x => x[0] !== '.') : [];
+
+  pluginFolders = plugins.reduce((acc, current) => {
+    acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+
+    return acc;
+  }, {});
+}
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -16,11 +45,6 @@ module.exports = (options) => ({
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
-    // Comment
-    noParse: [
-      /\/react\//g,
-      /\/react-dom\//g,
-    ],
     loaders: [{
       test: /\.js$/, // Transform all .js files required somewhere with Babel,
       use: {
@@ -46,11 +70,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [
-        path.join(process.cwd(), 'admin', 'src'),
-        // Add the `strapi-helper-plugin` folders watched by babel
-        path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src'),
-      ],
+      include: [path.join(process.cwd(), 'admin', 'src')]
+        .concat(plugins.reduce((acc, current) => {
+          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), pluginFolders[current]);
+
+          return acc;
+        }, []))
+        .concat([path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
@@ -63,6 +89,7 @@ module.exports = (options) => ({
           modules: true,
           importLoaders: 1,
           sourceMap: true,
+          minimize: process.env.NODE_ENV === 'production'
         },
       }, {
         loader: 'postcss-loader',
@@ -82,7 +109,13 @@ module.exports = (options) => ({
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader'],
+      loaders: ['style-loader', {
+        loader: 'css-loader',
+        options: {
+          minimize: process.env.NODE_ENV === 'production',
+          sourceMap: true,
+        }
+      }],
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader',
@@ -120,7 +153,7 @@ module.exports = (options) => ({
       loader: 'url-loader?limit=10000',
     }],
   },
-  plugins: options.plugins.concat([
+  plugins: [
     new webpack.ProvidePlugin({
       // make fetch available
       fetch: 'exports-loader?self.fetch!whatwg-fetch',
@@ -134,8 +167,8 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
-    new webpack.NamedModulesPlugin(),
-  ]),
+    new webpack.NamedModulesPlugin()
+  ].concat(options.plugins),
   resolve: {
     modules: [
       'admin/src',
@@ -143,12 +176,7 @@ module.exports = (options) => ({
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],
-    alias: {
-      moment: 'moment/moment.js',
-      'react': 'react',
-      'react-dom': 'react-dom',
-      'react-transition-group': 'react-transition-group',
-    },
+    alias: options.alias,
     symlinks: false,
     extensions: [
       '.js',
@@ -161,7 +189,7 @@ module.exports = (options) => ({
       'main',
     ],
   },
-  externals: generateExternals(),
+  externals: options.externals,
   resolveLoader: {
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),
@@ -169,13 +197,5 @@ module.exports = (options) => ({
     ],
   },
   devtool: options.devtool,
-  target: 'web', // Make web variables accessible to webpack, e.g. window
+  target: 'web', // Make web variables accessible to webpack, e.g. window,
 });
-
-function generateExternals() {
-  return {
-    'react': 'React',
-    'react-dom': 'ReactDOM',
-    'react-transition-group': 'ReactTransitionGroup',
-  };
-}
