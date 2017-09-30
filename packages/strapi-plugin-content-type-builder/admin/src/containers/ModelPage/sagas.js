@@ -58,33 +58,27 @@ export function* submitChanges() {
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
-
     const opts = { method, body };
+    const shouldWatchServerRestart = true;
 
+    const response = yield call(request, requestUrl, opts, shouldWatchServerRestart);
 
-    yield call(request, requestUrl, opts);
+    if (response.ok) {
+      if (method === 'POST') {
+        storeData.clearAppStorage();
+        yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
+        yield put(postContentTypeSucceeded());
+        window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
+      } else {
+        window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+      }
 
+      yield put(submitActionSucceeded());
 
-    yield new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    if (method === 'POST') {
-      storeData.clearAppStorage();
-      yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
-      yield put(postContentTypeSucceeded());
-      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
-    } else {
-      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+      yield put(resetShowButtonsProps());
+      // Remove loader
+      yield put(unsetButtonLoader());
     }
-
-    yield put(submitActionSucceeded());
-
-    yield put(resetShowButtonsProps());
-    // Remove loader
-    yield put(unsetButtonLoader());
 
   } catch(error) {
     window.Strapi.notification.error(error);

@@ -44,6 +44,19 @@ function formatQueryParams(params) {
 }
 
 /**
+* Server restart watcher
+* @param response
+* @returns {object} the response data 
+*/
+function serverRestartWatcher(response) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(response);
+    }, 3000);
+  });
+}
+
+/**
  * Requests a URL, returning a promise
  *
  * @param  {string} url       The URL we want to request

@@ -29,21 +29,17 @@ export function* editContentType() {
       method: 'PUT',
       body,
     };
+    const shouldWatchServerRestart = true;
 
     yield put(setButtonLoading());
 
-    yield call(request, requestUrl, opts);
+    const response = yield call(request, requestUrl, opts, shouldWatchServerRestart);
 
-    yield new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    yield put(contentTypeActionSucceeded());
-    yield put(unsetButtonLoading());
-
-    window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+    if (response.ok) {
+      yield put(contentTypeActionSucceeded());
+      yield put(unsetButtonLoading());
+      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+    }
   } catch(error) {
     window.Strapi.notification.error(error);
   }

@@ -9,6 +9,7 @@ export function* deleteContentType(action) {
       const requestUrl = `/content-type-builder/models/${action.itemToDelete}`;
 
       yield call(request, requestUrl, { method: 'DELETE' });
+      window.Strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
     }
 
   } catch(error) {
@@ -34,7 +35,6 @@ export function* fetchModels() {
 function* defaultSaga() {
   yield fork(takeLatest, DELETE_CONTENT_TYPE, deleteContentType);
   yield fork(takeLatest, MODELS_FETCH, fetchModels);
-
 }
 
 export default defaultSaga;

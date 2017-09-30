@@ -82,6 +82,7 @@
   "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
   "notification.success.message.contentType.edit": "Votre modèle a bien été modifié",
   "notification.success.message.contentType.create": "Votre modèle a bien été créée",
+  "notification.success.contentTypeDeleted": "Le modèle a bien été supprimé.",
 
   "popUpForm.attributes.string.description": "Titres, noms, paragraphes, listes de noms",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
