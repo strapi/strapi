@@ -77,6 +77,7 @@ window.Strapi.registerPlugin({
   pluginRequirements,
   preventComponentRendering: false,
   blockerComponent: null,
+  blockerComponentProps: {},
 });
 
 // Export store

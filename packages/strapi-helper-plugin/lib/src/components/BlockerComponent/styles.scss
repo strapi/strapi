@@ -1,4 +1,4 @@
-.productionBlocker {
+.blockerComponent {
   padding-top: 5.5rem;
 }
 
@@ -20,15 +20,35 @@
       color: #919BAE;
     }
   }
-   &:before{
-     content: '\f05e';
-     font-family: 'FontAwesome';
-     font-size: 4.2rem;
-     color: #323740;
-     margin-right: 20px;
-     line-height: 9.3rem;
-   }
+}
 
+.icoContainer {
+  padding-top: 0 !important;
+  font-size: 4.2rem;
+  color: #323740;
+  margin-right: 20px;
+  line-height: 9.3rem;
+}
+
+.ide {
+  padding-top: 2.3rem;
+  > p {
+    color: #006EE7;
+    font-size: 14px;
+  }
+  > div {
+    width: 455px;
+    background: #FFFFFF;
+    color: #787E8F;
+    font-size: 12px;
+    > ul {
+      padding-left: 20px;
+      list-style: none;
+      > li {
+        list-style: none;
+      }
+    }
+  }
 }
 
 .buttonContainer {
@@ -69,16 +89,16 @@
   }
   &:hover {
     color: white;
-    &::after {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      border-radius: 0.3rem;
-      content: '';
-      opacity: 0.1;
-      background: #FFFFFF;
-    }
+    // &::after {
+    //   position: absolute;
+    //   width: 100%;
+    //   height: 100%;
+    //   top: 0;
+    //   left: 0;
+    //   border-radius: 0.3rem;
+    //   content: '';
+    //   opacity: 0.1;
+    //   background: #FFFFFF;
+    // }
   }
 }
