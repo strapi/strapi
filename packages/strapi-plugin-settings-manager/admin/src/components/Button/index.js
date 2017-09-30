@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
@@ -16,9 +17,23 @@ class Button extends React.Component {
     const addShape = this.props.addShape ? <i className="fa fa-plus" /> : '';
 
     const buttonProps = Object.assign({}, this.props);
-    const propsToDelete = ['addShape', 'buttonBackground', 'buttonSize', 'handlei18n', 'label'];
+    const propsToDelete = ['addShape', 'buttonBackground', 'buttonSize', 'handlei18n', 'label', 'loader'];
 
     propsToDelete.map((value) => delete buttonProps[value]);
+
+    if (this.props.loader) {
+      return (
+        <button
+          type="button"
+          className={cn(styles.loader, styles.primary)}
+          disabled
+        >
+          <div className={styles.saving}>
+            <p></p><p></p><p></p>
+          </div>
+        </button>
+      )
+    }
     return (
       <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...buttonProps}>
         {addShape}{label}
@@ -33,6 +48,7 @@ Button.propTypes = {
   buttonSize: PropTypes.string,
   handlei18n: PropTypes.bool,
   label: PropTypes.string,
+  loader: PropTypes.bool,
 };
 
 export default Button;

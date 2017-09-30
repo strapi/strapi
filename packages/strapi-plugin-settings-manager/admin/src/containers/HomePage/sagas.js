@@ -30,6 +30,8 @@ import {
   databaseActionSucceeded,
   specificDatabaseFetchSucceeded,
   databaseActionError,
+  unsetLoader,
+  setLoader,
 } from './actions';
 
 /* eslint-disable no-template-curly-in-string */
@@ -240,6 +242,9 @@ export function* postDatabase(action) {
 
 export function* settingsEdit(action) {
   try {
+    // Show button loader
+    yield put(setLoader());
+
     const opts = {
       body: action.newSettings,
       method: 'PUT',
@@ -252,11 +257,13 @@ export function* settingsEdit(action) {
     if (resp.ok) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
       yield put(editSettingsSucceeded());
+      yield put(unsetLoader());
     }
 
 
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    yield put(unsetLoader());
   }
 }
 

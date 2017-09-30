@@ -14,6 +14,7 @@ import styles from './styles.scss';
 
 class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const buttonStyle = this.props.showLoader ? { display: 'none' } : {};
     return (
       <div className={styles.editForm}>
         <form onSubmit={this.props.handleSubmit} autoComplete="nope">
@@ -41,12 +42,12 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <div className={styles.buttonContainer}>
             <FormattedMessage id="settings-manager.form.button.cancel">
               {(message) => (
-                <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} />
+                <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} style={buttonStyle} />
               )}
             </FormattedMessage>
             <FormattedMessage id="settings-manager.form.button.save">
               {(message) => (
-                <Button type="submit" label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+                <Button type="submit" loader={this.props.showLoader} label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
               )}
             </FormattedMessage>
           </div>
@@ -63,6 +64,7 @@ EditForm.propTypes = {
   handleChange: PropTypes.func,
   handleSubmit: PropTypes.func,
   sections: PropTypes.array,
+  showLoader: PropTypes.bool,
   values: PropTypes.object,
 };
 
