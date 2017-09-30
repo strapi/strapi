@@ -59,9 +59,7 @@ export function* submitChanges() {
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
-    const shouldWatchServerRestart = true;
-
-    const response = yield call(request, requestUrl, opts, shouldWatchServerRestart);
+    const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
       if (method === 'POST') {

@@ -218,8 +218,8 @@ export function* postDatabase(action) {
     };
 
     const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
-    const shouldWatchServerRestart = true;
-    const resp = yield call(request, requestUrl, opts, shouldWatchServerRestart);
+
+    const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
       yield put(databaseActionSucceeded());
@@ -253,8 +253,8 @@ export function* settingsEdit(action) {
     };
 
     const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
-    const shouldWatchServerRestart = true;
-    const resp = yield  call(request, requestUrl, opts, shouldWatchServerRestart);
+
+    const resp = yield  call(request, requestUrl, opts, true);
 
     if (resp.ok) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');

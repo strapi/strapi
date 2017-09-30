@@ -29,11 +29,10 @@ export function* editContentType() {
       method: 'PUT',
       body,
     };
-    const shouldWatchServerRestart = true;
 
     yield put(setButtonLoading());
 
-    const response = yield call(request, requestUrl, opts, shouldWatchServerRestart);
+    const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
       yield put(contentTypeActionSucceeded());
