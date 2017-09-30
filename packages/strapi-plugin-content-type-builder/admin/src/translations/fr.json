@@ -1,4 +1,15 @@
 {
+  "attribute.string": "Chaîne de caractères",
+  "attribute.text": "Text",
+  "attribute.boolean": "Booléen",
+  "attribute.float": "Décimal approximatif",
+  "attribute.integer": "Entier",
+  "attribute.decimal": "Décimal",
+  "attribute.date": "Date",
+  "attribute.json": "JSON",
+  "attribute.media": "Media",
+  "attribute.relation": "Relation",
+
   "contentType.temporaryDisplay": "(Non sauvegardé)",
   "home.contentTypeBuilder.name": "Content Types",
   "home.contentTypeBuilder.description": "Créez, éditer vos modèles.",
@@ -45,8 +56,8 @@
   "form.attribute.item.customColumnName.description": "Pratique pour renommer la colonne de la db dans un format plus comprehensible pour les responses de l'API",
   "form.attribute.item.number.type": "Format nombre",
   "form.attribute.item.number.type.integer": "entier (ex: 10)",
-  "form.attribute.item.number.type.float": "float (ex: 3,33333)",
-  "form.attribute.item.number.type.decimal": "decimal (ex: 2,22)",
+  "form.attribute.item.number.type.float": "décimal approximatif (ex: 3,33333)",
+  "form.attribute.item.number.type.decimal": "décimal (ex: 2,22)",
 
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continue",
@@ -84,7 +95,7 @@
   "notification.success.message.contentType.create": "Votre modèle a bien été créée",
   "notification.success.contentTypeDeleted": "Le modèle a bien été supprimé.",
 
-  "popUpForm.attributes.string.description": "Titres, noms, paragraphes, listes de noms",
+  "popUpForm.attributes.string.description": "Titres, noms,...",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
   "popUpForm.attributes.number.description": "Tout ce qui est nombre",
   "popUpForm.attributes.boolean.description": "Oui ou non, 1 ou 0, vrai ou faux",

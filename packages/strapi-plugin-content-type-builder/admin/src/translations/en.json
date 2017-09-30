@@ -1,4 +1,14 @@
 {
+  "attribute.string": "String",
+  "attribute.text": "Text",
+  "attribute.boolean": "Boolean",
+  "attribute.float": "Float",
+  "attribute.integer": "integer",
+  "attribute.decimal": "Decimal",
+  "attribute.date": "Date",
+  "attribute.json": "JSON",
+  "attribute.media": "Media",
+  "attribute.relation": "Relation",
 
   "contentType.temporaryDisplay": "(Not saved)",
   "home.contentTypeBuilder.name": "Content Types",
