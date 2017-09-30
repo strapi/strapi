@@ -150,6 +150,7 @@
   "strapi.notification.success.databaseDeleted": "La base de données a bien été supprimée",
   "strapi.notification.success.settingsEdit": "Les modifications ont été effectuées",
   "strapi.notification.error": "Une erreur est apparue",
+  "strapi.notification.info.serverRestart": "Le serveur va redémarrer",
 
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",

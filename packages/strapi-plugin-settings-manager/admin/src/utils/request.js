@@ -49,7 +49,7 @@ function serverRestartWatcher(response) {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(response);
-    }, 5000);
+    }, 3000);
   });
 }
 

@@ -245,6 +245,8 @@ export function* settingsEdit(action) {
     // Show button loader
     yield put(setLoader());
 
+    window.Strapi.notification.info('settings-manager.strapi.notification.info.serverRestart');
+
     const opts = {
       body: action.newSettings,
       method: 'PUT',
