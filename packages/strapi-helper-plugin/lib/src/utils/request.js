@@ -51,7 +51,7 @@ function formatQueryParams(params) {
  *
  * @return {object}           The response data
  */
- export default function request(url, options = {}) {
+ export default function request(url, options = {}, shouldWatchServerRestart = false) {
    // Set headers
    options.headers = {
      'Content-Type': 'application/json',
@@ -72,5 +72,14 @@ function formatQueryParams(params) {
      options.body = JSON.stringify(options.body);
    }
 
-   return fetch(url, options).then(checkStatus).then(parseJSON);
+   return fetch(url, options)
+    .then(checkStatus)
+    .then(parseJSON)
+    .then((response) => {
+      if (shouldWatchServerRestart) {
+        return serverRestartWatcher(response);
+      }
+
+      return response;
+    });
  }
