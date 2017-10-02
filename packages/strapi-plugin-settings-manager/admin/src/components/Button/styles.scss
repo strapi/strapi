@@ -46,7 +46,6 @@
 }
 
 .secondary {
-  // height: 32px !important;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   position: relative;
@@ -66,4 +65,59 @@
   font-size: 1.3rem;
   padding-left: 1.6rem;
   padding-right: 1.6rem;
+}
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.loader {
+  height: 3rem;
+  padding: 0 0 0 1.2rem;
+  line-height: 3.2rem;
+  border-radius: 0.3rem;
+  letter-spacing: 1rem;
+  font-family: Lato;
+  cursor: not-allowed;
+  position: relative;
+  opacity: .65;
+  width: 15rem;
+  font-size: 1rem;
+  &:focus {
+    outline: 0;
+  }
+}
+
+.saving p {
+  margin-bottom: 0;
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  &::before {
+    content: '\F111';
+    font-family: 'FontAwesome';
+  }
+}
+
+.saving p:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving p:nth-child(3) {
+  animation-delay: .4s;
 }

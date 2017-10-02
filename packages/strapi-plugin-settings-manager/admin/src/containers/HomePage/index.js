@@ -439,6 +439,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         addListTitleMarginTop={addListTitleMarginTop}
         formErrors={this.props.home.formErrors}
         error={this.props.home.error}
+        showLoader={this.props.home.showLoader}
       />
     );
   }
@@ -547,7 +548,6 @@ HomePage.propTypes = {
   menuSections: PropTypes.array.isRequired,
   newDatabasePost: PropTypes.func.isRequired,
   newLanguagePost: PropTypes.func.isRequired,
-  // params: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   specificDatabaseFetch: PropTypes.func.isRequired,
 };

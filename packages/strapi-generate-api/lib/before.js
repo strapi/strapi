@@ -116,11 +116,10 @@ module.exports = (scope, cb) => {
   }).join(',\n');
 
   // Set collectionName
-  scope.collectionName = _.get(scope.args, 'collectionName', undefined);
+  scope.collectionName = _.has(scope.args, 'collectionName') ? scope.args.collectionName : undefined;
 
   // Set description
-  scope.description = _.get(scope.args, 'description', undefined);
-  if (typeof scope.description === 'function') scope.description = undefined;
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
   // Get default connection
   try {

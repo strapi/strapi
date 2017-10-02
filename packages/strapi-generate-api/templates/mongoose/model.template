@@ -68,6 +68,6 @@ module.exports = {
   // After destroying a value.
   // Fired after a `delete` query.
   // afterDestroy: (doc, next) => {
-  //   next();;
+  //   next();
   // }
 };

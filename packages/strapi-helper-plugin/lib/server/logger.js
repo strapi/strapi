@@ -20,7 +20,7 @@ const logger = {
     console.log(`
 Strapi plugin succesfully started in development mode. ${chalk.green('✓')}
 ${divider}
-${chalk.bold('Access URL:')} ${chalk.magenta(`http://localhost:${port}`)}${divider}
+${chalk.bold('Access URL:')} ${chalk.magenta(`http://localhost:${port}${process.env.IS_ADMIN === 'true' ? '/admin' : '' }`)}${divider}
 ${chalk.blue(`Press ${chalk.italic('CTRL-C')} to stop`)}
     `);
   },

@@ -15,6 +15,9 @@ shell.cd('../strapi-generate');
 shell.exec('npm install ../strapi-utils');
 shell.exec('npm link');
 
+shell.cd('../strapi-generate-api');
+shell.exec('npm link');
+
 shell.cd('../strapi-helper-plugin');
 shell.exec('npm link');
 
@@ -53,6 +56,7 @@ shell.cd('../strapi-plugin-content-type-builder');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm link strapi-generate');
 shell.exec('npm link strapi-generate-api');
 
 // Log installation duration.
