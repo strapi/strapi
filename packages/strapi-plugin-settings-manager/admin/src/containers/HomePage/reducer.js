@@ -24,6 +24,8 @@ import {
   NEW_LANGUAGE_POST,
   EMPTY_DB_MODIFIED_DATA,
   SET_ERRORS,
+  SET_LOADER,
+  UNSET_LOADER,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -43,6 +45,7 @@ const initialState = fromJS({
   formValidations: [],
   formErrors: [],
   error: false,
+  showLoader: false,
 });
 /* eslint-disable no-case-declarations */
 
@@ -140,6 +143,10 @@ function homePageReducer(state = initialState, action) {
     case SET_ERRORS:
       return state
         .set('formErrors', action.errors)
+    case SET_LOADER:
+      return state.set('showLoader', true);
+    case UNSET_LOADER:
+      return state.set('showLoader', false);
     default:
       return state;
   }

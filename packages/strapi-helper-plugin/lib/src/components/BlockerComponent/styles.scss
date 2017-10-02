@@ -1,0 +1,104 @@
+.blockerComponent {
+  padding-top: 5.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  font-family: Lato;
+  > div {
+    padding-top: 2.5rem;
+    > h4 {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 24px;
+      margin-bottom: 0;
+    }
+    > p {
+      margin-top: -1px;
+      font-size: 14px;
+      color: #919BAE;
+    }
+  }
+}
+
+.icoContainer {
+  padding-top: 0 !important;
+  font-size: 4.2rem;
+  color: #323740;
+  margin-right: 20px;
+  line-height: 9.3rem;
+}
+
+.ide {
+  padding-top: 2.3rem;
+  > p {
+    color: #006EE7;
+    font-size: 14px;
+  }
+  > div {
+    width: 455px;
+    background: #FFFFFF;
+    color: #787E8F;
+    font-size: 12px;
+    > ul {
+      padding-left: 20px;
+      list-style: none;
+      > li {
+        list-style: none;
+      }
+    }
+  }
+}
+
+.buttonContainer {
+  padding-top: 2rem;
+}
+
+.primary {
+  border-radius: 0.3rem;
+  border: none;
+  font-weight: 500;
+  min-width: 15rem;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+  &:active {
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+  }
+  padding-top: 4px;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
+  &:before {
+    content: '\f02d';
+    font-family: 'FontAwesome';
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-right: 13px;
+  }
+  cursor: pointer;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
+  &:focus {
+    outline: 0;
+  }
+  > i {
+    margin-right: 1.3rem;
+    font-weight: 600;
+    padding-top: 1px;
+  }
+  &:hover {
+    color: white;
+    // &::after {
+    //   position: absolute;
+    //   width: 100%;
+    //   height: 100%;
+    //   top: 0;
+    //   left: 0;
+    //   border-radius: 0.3rem;
+    //   content: '';
+    //   opacity: 0.1;
+    //   background: #FFFFFF;
+    // }
+  }
+}

@@ -33,6 +33,8 @@ import {
   DATABASE_ACTION_ERROR,
   EMPTY_DB_MODIFIED_DATA,
   SET_ERRORS,
+  SET_LOADER,
+  UNSET_LOADER,
 } from './constants';
 
 export function defaultAction() {
@@ -298,5 +300,17 @@ export function setErrors(errors) {
   return {
     type: SET_ERRORS,
     errors,
+  };
+}
+
+export function setLoader() {
+  return {
+    type: SET_LOADER,
+  };
+}
+
+export function unsetLoader() {
+  return {
+    type: UNSET_LOADER,
   };
 }
