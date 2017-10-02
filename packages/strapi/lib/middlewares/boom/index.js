@@ -44,7 +44,7 @@ module.exports = strapi => {
             ? ctx.body || error && error.message
             : Boom.wrap(error, ctx.status, ctx.body || error.message);
         }
-        
+
         // Empty body is considered as `notFound` response.
         if (!ctx.body) {
           ctx.notFound();

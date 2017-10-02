@@ -72,12 +72,17 @@ module.exports = function() {
 
       setFilesToWatch(process.cwd());
 
+
+
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {
             case 'reload':
               strapi.log.info('The server is restarting\n');
 
+              _.forEach(cluster.workers, worker => worker.send('isKilled'));
+              break;
+            case 'kill':
               _.forEach(cluster.workers, worker => worker.kill());
 
               cluster.fork();
@@ -95,8 +100,23 @@ module.exports = function() {
         cluster.fork();
       }
 
-      if (cluster.isWorker) return strapi.start(afterwards);
-      else return;
+      if (cluster.isWorker) {
+        process.on('message', (message) => {
+          switch (message) {
+            case 'isKilled':
+              strapi.server.destroy(() => {
+                process.send('kill');
+              });
+              break;
+            default:
+             // Do nothing.
+          }
+        });
+
+        return strapi.start(afterwards);
+      } else {
+        return;
+      }
     }
 
     // Otherwise, if no workable local `strapi` module exists,

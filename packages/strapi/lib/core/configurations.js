@@ -111,6 +111,7 @@ module.exports.app = async function() {
 
     // These middlewares cannot be disabled.
     merge(flattenMiddlewaresConfig, {
+      // Necessary middlewares for the core.
       responses: {
         enabled: true
       },
@@ -121,6 +122,16 @@ module.exports.app = async function() {
         enabled: true
       },
       boom: {
+        enabled: true
+      },
+      // Necessary middlewares for the administration panel.
+      cors: {
+        enabled: true
+      },
+      xframe: {
+        enabled: true
+      },
+      xss: {
         enabled: true
       }
     });

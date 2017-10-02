@@ -60,7 +60,7 @@ export function* submitChanges() {
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
     const response = yield call(request, requestUrl, opts, true);
-
+    
     if (response.ok) {
       if (method === 'POST') {
         storeData.clearAppStorage();
