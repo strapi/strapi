@@ -135,7 +135,7 @@ class Strapi extends EventEmitter {
     };
   }
 
-  stop(cb) {
+  stop() {
     // Destroy server and available connections.
     this.server.destroy();
 
