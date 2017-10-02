@@ -46,13 +46,27 @@ function formatQueryParams(params) {
 /**
 * Server restart watcher
 * @param response
-* @returns {object} the response data 
+* @returns {object} the response data
 */
 function serverRestartWatcher(response) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(response);
-    }, 3000);
+  return new Promise((resolve, reject) => {
+    fetch(`${Strapi.apiUrl}/_health`, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Keep-Alive': false
+      }
+    })
+      .then(() => {
+        resolve(response);
+      })
+      .catch(err => {
+        setTimeout(() => {
+          return serverRestartWatcher(response)
+            .then(resolve);
+        }, 100);
+      });
   });
 }
 
@@ -66,9 +80,9 @@ function serverRestartWatcher(response) {
  */
  export default function request(url, options = {}, shouldWatchServerRestart = false) {
    // Set headers
-   options.headers = {
+   options.headers = Object.assign({
      'Content-Type': 'application/json',
-   };
+   }, options.headers);
 
    // Add parameters to url
    url = _.startsWith(url, '/')

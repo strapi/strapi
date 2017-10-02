@@ -1,7 +1,9 @@
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": false,
+  "autoReload": {
+    "enabled": false
+  },
   "cron": {
     "enabled": false
   }

@@ -6,6 +6,16 @@ const { parallel } = require('async');
 const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union } = require('lodash');
 
 module.exports = function() {
+  const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat(['^\/admin/']);
+
+  // Set if is admin destination for middleware application.
+  // TODO: Use dynamic config for admin url.
+  this.app.use(async (ctx, next) => {
+    ctx.request.admin = accepted.some(rx => new RegExp(rx).test(ctx.request.url));
+
+    await next();
+  });
+
   // Method to initialize middlewares and emit an event.
   const initialize = (module, middleware) => (resolve, reject) => {
     let timeout = true;

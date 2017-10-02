@@ -1,4 +1,0 @@
-
-// Sets a specific type for the column creation named `<%= attribute %>`, if you'd
-// like to add a column type that isn't supported.
-table.specificType('<%= attribute %>', '<%= details.type %>')

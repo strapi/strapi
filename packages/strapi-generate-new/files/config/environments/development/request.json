@@ -1,13 +1,15 @@
 {
   "session": {
     "enabled": false,
-    "client": "redis",
-    "settings": {
-      "host": "localhost",
-      "port": 6379,
-      "database": 10,
-      "password": ""
-    }
+    "client": "cookie",
+    "key": "strapi.sid",
+    "prefix": "strapi:sess:",
+    "secretKeys": ["mySecretKey1", "mySecretKey2"],
+    "httpOnly": true,
+    "maxAge": 86400000,
+    "overwrite": true,
+    "signed": false,
+    "rolling": false
   },
   "logger": {
     "level": "debug",

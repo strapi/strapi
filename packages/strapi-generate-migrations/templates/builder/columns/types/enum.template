@@ -1,4 +1,0 @@
-
-// "enum" column named `<%= attribute %>`.
-// Aliased to "enu", as "enum" is a reserved word in JavaScript.
-table.enu('<%= attribute %>', <%= details.values || [] %>)

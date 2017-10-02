@@ -1,4 +1,0 @@
-
-// Sets the field as the primary key for the table. Pass an array of column
-// names to create a compound primary key.
-table.primary(<%= JSON.stringify(value).replace(/"/g, "'") %>)

@@ -1,4 +1,0 @@
-
-// Make a <% if (nature === 'oneWay') { %>"one-way"<% } else if (nature === 'oneToOne') { %>"one-to-one" <% } else { %>"one-to-many"<% } %> relationship between `<%= attribute %>` and the `<%= details.column %>`
-// column from the `<%= details.model %>` table.
-table.integer('<%= attribute %>').references('<%= details.model %>.<%= details.column %>')
