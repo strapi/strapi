@@ -286,15 +286,26 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig) {
 
   // Couldn't find configurations for this hook.
   if (isEmpty(get(flattenHooksConfig, name, true))) {
-
     // Check if database connector is used
-    const modelUsed = Object.keys(this.api || {})
+    const modelsUsed = Object.keys(this.api || {})
       .filter(x => isObject(this.api[x].models)) // Filter API with models
       .map(x => this.api[x].models) // Keep models
-      .filter(model => get(this.connection, model.connection, {}).connector === name) || 0; // Filter model with the right connector
+      .filter(models => {
+        const apiModelsUsed = Object.keys(models).filter(model => {
+          const connector = get(this.config.connections, models[model].connection, {}).connector;
+
+          if (connector) {
+            return connector.replace('strapi-', '') === name;
+          }
+
+          return false;
+        });
+
+        return apiModelsUsed.length !== 0
+      }) || 0; // Filter model with the right connector
 
     flattenHooksConfig[name] = {
-      enabled: modelUsed.length > 0 // Will return false if there is no model, else true.
+      enabled: modelsUsed.length > 0 // Will return false if there is no model, else true.
     };
 
     // Enabled dependencies.
