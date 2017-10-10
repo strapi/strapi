@@ -92,13 +92,13 @@ module.exports = {
     const apiPath = path.join(strapi.config.appPath, 'api');
 
     try {
-      const apis = fs.readdirSync(apiPath);
+      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
 
       _.forEach(apis, api => {
         const modelsPath = path.join(apiPath, api, 'models');
 
         try {
-          const models = fs.readdirSync(modelsPath);
+          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
 
           const modelIndex = _.indexOf(_.map(models, model => _.toLower(model)), searchFileName);
 
@@ -177,13 +177,13 @@ module.exports = {
     const apiPath = path.join(strapi.config.appPath, 'api');
 
     try {
-      const apis = fs.readdirSync(apiPath);
+      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
 
       _.forEach(apis, api => {
         const modelsPath = path.join(apiPath, api, 'models');
 
         try {
-          const models = fs.readdirSync(modelsPath);
+          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
 
           _.forEach(models, modelPath => {
             if (_.endsWith(modelPath, '.settings.json')) {
@@ -250,13 +250,13 @@ module.exports = {
     const apiPath = path.join(strapi.config.appPath, 'api');
 
     try {
-      const apis = fs.readdirSync(apiPath);
+      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
 
       _.forEach(apis, api => {
         const modelsPath = path.join(apiPath, api, 'models');
 
         try {
-          const models = fs.readdirSync(modelsPath);
+          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
 
           _.forEach(models, modelPath => {
             if (_.endsWith(modelPath, '.settings.json')) {
@@ -393,7 +393,7 @@ module.exports = {
 
     const recurciveDeleteFiles = folderPath => {
       try {
-        const items = fs.readdirSync(folderPath);
+        const items = fs.readdirSync(folderPath).filter(x => x[0] !== '.');
 
         _.forEach(items, item => {
           const itemPath = path.join(folderPath, item);
@@ -405,7 +405,7 @@ module.exports = {
           }
         });
 
-        if (_.isEmpty(fs.readdirSync(folderPath))) {
+        if (_.isEmpty(fs.readdirSync(folderPath).filter(x => x[0] !== '.'))) {
           try {
             fs.rmdirSync(folderPath);
           } catch (e) {
