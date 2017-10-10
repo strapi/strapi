@@ -264,7 +264,7 @@ module.exports = {
 
   convertParams: (entity, params) => {
     if (!entity) {
-      return strapi.log.error(`You can't call the convert params method without passing the model's name as a first argument.`);
+      return strapi.log.error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
     }
 
     const model = entity.toLowerCase();

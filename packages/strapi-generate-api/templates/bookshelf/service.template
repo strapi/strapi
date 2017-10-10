@@ -30,7 +30,9 @@ module.exports = {
 
       qb.orderBy(params.sort);
 
-      qb.offset(params.start).limit(params.limit);
+      qb.offset(params.start);
+
+      qb.limit(params.limit);
     }).fetchAll({
       withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
     });
