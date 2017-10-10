@@ -1,12 +1,18 @@
 {
   "csrf": {
-    "enabled": true
+    "enabled": true,
+    "key": "_csrf",
+    "secret": "_csrfSecret"
   },
   "csp": {
-    "enabled": true
+    "enabled": true,
+    "policy": {
+      "default-src": "'self'"
+    }
   },
   "p3p": {
-    "enabled": true
+    "enabled": true,
+    "value": ""
   },
   "hsts": {
     "enabled": true,
@@ -18,7 +24,8 @@
     "value": "SAMEORIGIN"
   },
   "xss": {
-    "enabled": true
+    "enabled": true,
+    "mode": "block"
   },
   "cors": {
     "enabled": true,

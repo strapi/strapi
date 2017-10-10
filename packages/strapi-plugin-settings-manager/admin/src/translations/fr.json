@@ -147,8 +147,10 @@
   "strapi.notification.success.languageAdd": "Le nouveau langage a été ajouté",
   "strapi.notification.success.databaseAdd": "La nouvelle base de données a été ajoutée",
   "strapi.notification.success.databaseEdit": "La base de données a bien été éditée",
+  "strapi.notification.success.databaseDeleted": "La base de données a bien été supprimée",
   "strapi.notification.success.settingsEdit": "Les modifications ont été effectuées",
   "strapi.notification.error": "Une erreur est apparue",
+  "strapi.notification.info.serverRestart": "Le serveur va redémarrer",
 
   "language.af": "Afrikaans",
   "language.af_NA": "Afrikaans (Namibië)",

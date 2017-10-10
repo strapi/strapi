@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createSelector } from 'reselect';
+import BlockerComponent from 'components/BlockerComponent';
 import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -25,9 +26,14 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
       if (plugin.id === pluginId) {
         pluginName = plugin.name;
 
-        const Elem = plugin.preventComponentRendering ? plugin.blockerComponent : plugin.mainComponent;
+        const blockerComponentProps = plugin.preventComponentRendering ? plugin.blockerComponentProps : {};
+        let Elem = plugin.preventComponentRendering ? BlockerComponent : plugin.mainComponent;
 
-        return <Elem key={plugin.id} {...this.props} />;
+        if (plugin.preventComponentRendering && plugin.blockerComponent) {
+          Elem = plugin.blockerComponent;
+        }
+
+        return <Elem key={plugin.id} {...this.props} {...blockerComponentProps} />;
       }
     });
 

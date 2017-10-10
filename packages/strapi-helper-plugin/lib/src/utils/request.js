@@ -44,6 +44,33 @@ function formatQueryParams(params) {
 }
 
 /**
+* Server restart watcher
+* @param response
+* @returns {object} the response data
+*/
+function serverRestartWatcher(response) {
+  return new Promise((resolve, reject) => {
+    fetch(`${Strapi.apiUrl}/_health`, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Keep-Alive': false
+      }
+    })
+      .then(() => {
+        resolve(response);
+      })
+      .catch(err => {
+        setTimeout(() => {
+          return serverRestartWatcher(response)
+            .then(resolve);
+        }, 100);
+      });
+  });
+}
+
+/**
  * Requests a URL, returning a promise
  *
  * @param  {string} url       The URL we want to request
@@ -51,11 +78,11 @@ function formatQueryParams(params) {
  *
  * @return {object}           The response data
  */
- export default function request(url, options = {}) {
+ export default function request(url, options = {}, shouldWatchServerRestart = false) {
    // Set headers
-   options.headers = {
+   options.headers = Object.assign({
      'Content-Type': 'application/json',
-   };
+   }, options.headers);
 
    // Add parameters to url
    url = _.startsWith(url, '/')
@@ -72,5 +99,14 @@ function formatQueryParams(params) {
      options.body = JSON.stringify(options.body);
    }
 
-   return fetch(url, options).then(checkStatus).then(parseJSON);
+   return fetch(url, options)
+    .then(checkStatus)
+    .then(parseJSON)
+    .then((response) => {
+      if (shouldWatchServerRestart) {
+        return serverRestartWatcher(response);
+      }
+
+      return response;
+    });
  }

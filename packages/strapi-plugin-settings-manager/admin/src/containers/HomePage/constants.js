@@ -30,3 +30,5 @@ export const DATABASE_EDIT = 'SettingsManager/HomePage/DATABASE_EDIT';
 export const DATABASE_ACTION_ERROR = 'SettingsManager/HomePage/DATABASE_ACTION_ERROR';
 export const EMPTY_DB_MODIFIED_DATA = 'SettingsManager/HomePage/EMPTY_DB_MODIFIED_DATA';
 export const SET_ERRORS = 'SettingsManager/HomePage/SET_ERRORS';
+export const SET_LOADER = 'SettingsManager/HomePage/SET_LOADER';
+export const UNSET_LOADER = 'SettingsManager/HomePage/UNSET_LOADER';

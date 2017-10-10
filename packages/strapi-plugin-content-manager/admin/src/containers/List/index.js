@@ -212,10 +212,7 @@ export class List extends React.Component {
         labelValues: {
           entity: pluginHeaderTitle,
         },
-        handlei18n: true,
-        addShape: true,
-        buttonBackground: 'primary',
-        buttonSize: 'buttonLg',
+        kind: 'primaryAddShape',
         onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];

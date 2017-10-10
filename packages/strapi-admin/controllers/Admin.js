@@ -18,8 +18,13 @@ module.exports = {
     }
   },
 
-  pluginFile: async ctx => {
+  pluginFile: async (ctx, next) => {
     try {
+      // Will be served through the public middleware
+      if (ctx.params.plugin === 'plugins') {
+        return await next();
+      }
+
       const file = fs.readFileSync(path.resolve(process.cwd(), 'plugins', ctx.params.plugin, 'admin', 'build', `${ctx.params.file}`));
       ctx.body = file;
     } catch (err) {

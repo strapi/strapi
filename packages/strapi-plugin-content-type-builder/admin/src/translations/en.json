@@ -1,4 +1,14 @@
 {
+  "attribute.string": "String",
+  "attribute.text": "Text",
+  "attribute.boolean": "Boolean",
+  "attribute.float": "Float",
+  "attribute.integer": "integer",
+  "attribute.decimal": "Decimal",
+  "attribute.date": "Date",
+  "attribute.json": "JSON",
+  "attribute.media": "Media",
+  "attribute.relation": "Relation",
 
   "contentType.temporaryDisplay": "(Not saved)",
   "home.contentTypeBuilder.name": "Content Types",
@@ -83,6 +93,7 @@
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
   "notification.success.message.contentType.edit": "Your content type has been updated",
   "notification.success.message.contentType.create": "Your content type has been created",
+  "notification.success.contentTypeDeleted": "The content type has been deleted",
 
   "popUpForm.attributes.string.description": "Titles, names, paragraphs, list of names",
   "popUpForm.attributes.text.description": "Descriptions, text paragraphs, articles ",

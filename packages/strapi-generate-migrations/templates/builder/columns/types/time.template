@@ -1,3 +1,0 @@
-
-// "time" column named `<%= attribute %>`.
-table.time('<%= attribute %>')

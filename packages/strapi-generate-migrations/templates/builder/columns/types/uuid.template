@@ -1,4 +1,0 @@
-
-// Adds a "uuid" column named `<%= attribute %>`. This uses the built-in "uuid"
-// type in PostgreSQL, and falling back to a "char(36)" in other databases.
-table.uuid('<%= attribute %>')

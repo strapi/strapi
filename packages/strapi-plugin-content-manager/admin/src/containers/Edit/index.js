@@ -79,16 +79,12 @@ export class Edit extends React.Component {
     this.pluginHeaderActions = [
       {
         label: 'content-manager.containers.Edit.cancel',
-        handlei18n: true,
-        buttonBackground: 'secondary',
-        buttonSize: 'buttonMd',
+        kind: 'secondary',
         onClick: this.props.cancelChanges,
         type: 'button',
       },
       {
-        handlei18n: true,
-        buttonBackground: 'primary',
-        buttonSize: 'buttonLg',
+        kind: 'primary',
         label: this.props.editing ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
         onClick: this.handleSubmit,
         disabled: this.props.editing,
@@ -99,8 +95,7 @@ export class Edit extends React.Component {
     this.pluginHeaderSubActions = [
       {
         label: 'content-manager.containers.Edit.returnList',
-        handlei18n: true,
-        buttonBackground: 'back',
+        kind: 'back',
         onClick: () => router.goBack(),
         type: 'button',
       },

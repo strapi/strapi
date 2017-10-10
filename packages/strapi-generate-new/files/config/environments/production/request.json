@@ -1,20 +1,20 @@
 {
   "session": {
-    "enabled": false,
-    "client": "redis",
-    "settings": {
-      "host": "localhost",
-      "port": 6379,
-      "database": 10,
-      "password": ""
-    }
+    "enabled": true,
+    "client": "cookie",
+    "key": "strapi.sid",
+    "prefix": "strapi:sess:",
+    "secretKeys": ["mySecretKey1", "mySecretKey2"],
+    "httpOnly": true,
+    "maxAge": 86400000,
+    "overwrite": true,
+    "signed": false,
+    "rolling": false
   },
   "logger": {
-    "logger": {
-      "level": "info",
-      "exposeInContext": true,
-      "requests": false
-    }
+    "level": "info",
+    "exposeInContext": true,
+    "requests": false
   },
   "parser": {
     "enabled": true,

@@ -1,11 +1,15 @@
-import AutoReloadBlocker from 'components/AutoReloadBlocker';
 import request from 'utils/request';
 
 const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
   request('/content-type-builder/autoReload')
     .then(response => {
       plugin.preventComponentRendering = !response.autoReload;
-      plugin.blockerComponent = AutoReloadBlocker;
+      plugin.blockerComponentProps = {
+        blockerComponentTitle: 'components.AutoReloadBlocker.header',
+        blockerComponentDescription: 'components.AutoReloadBlocker.description',
+        blockerComponentIcon: 'fa-refresh',
+        blockerComponentContent: 'renderIde',
+      };
 
       return resolve(plugin);
     })

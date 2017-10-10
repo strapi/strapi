@@ -17,9 +17,7 @@ class PluginHeaderActions extends React.Component { // eslint-disable-line react
       <Button
         {...action}
         key={action.label}
-      >
-        <FormattedMessage id={action.label} defaultMessage={action.label} />
-      </Button>
+      />
     ));
 
     return (
