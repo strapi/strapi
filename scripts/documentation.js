@@ -4,7 +4,7 @@ const path = require('path');
 const shell = require('shelljs');
 
 try {
-  const versions = fs.readdirSync(path.resolve(process.cwd(), 'docs'), 'utf8');
+  const versions = fs.readdirSync(path.resolve(process.cwd(), 'docs'), 'utf8').filter(x => x[0] !== '.');
 
   _.forEach(versions, (version) => {
     console.log(`Strapi install plugins version ${version}`);
