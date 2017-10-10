@@ -92,7 +92,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <ContentHeader
           name={'content-type-builder.home.contentTypeBuilder.name'}
           description={'content-type-builder.home.contentTypeBuilder.description'}
-          styles={{ margin: '0 0 3.2rem 0'}}
+          styles={{ margin: '-1px 0 3rem 0'}}
         />
         {component}
         <Form

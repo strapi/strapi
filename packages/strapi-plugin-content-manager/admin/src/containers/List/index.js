@@ -232,7 +232,7 @@ export class List extends React.Component {
             }}
             actions={pluginHeaderActions}
           />
-          <div className='row'>
+          <div className={`row ${styles.row}`}>
             <div className='col-lg-12'>
               {content}
               <PopUpWarning
