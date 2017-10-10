@@ -110,7 +110,7 @@ module.exports = {
    * @return {Object}
    */
 
-  editRelation: (params, values) => {
+  editRelation: async (params, values) => {
       const relation = _.find(strapi.models.<%= id %>.associations, {alias: params.relation});
 
       if (!_.isEmpty(relation) && _.isArray(values)) {
