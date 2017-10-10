@@ -1,0 +1,1814 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>GraphQL · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="graphql.html" />
+    
+    
+    <link rel="prev" href="queries.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Documentation
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="introduction.html">
+            
+                <a href="introduction.html">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="introduction.html">
+            
+                <a href="introduction.html#getting-started">
+            
+                    
+                    Getting Started
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="introduction.html">
+            
+                <a href="introduction.html#alternatives">
+            
+                    
+                    Alternatives
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="introduction.html">
+            
+                <a href="introduction.html#key-features">
+            
+                    
+                    Key-features
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="cli.html">
+            
+                <a href="cli.html">
+            
+                    
+                    Command-Line Interface
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="cli.html">
+            
+                <a href="cli.html#login">
+            
+                    
+                    Login
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="cli.html">
+            
+                <a href="cli.html#create-a-new-project">
+            
+                    
+                    Create a new project
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="cli.html">
+            
+                <a href="cli.html#start-the-server">
+            
+                    
+                    Start the server
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.4" data-path="cli.html">
+            
+                <a href="cli.html#access-the-console">
+            
+                    
+                    Access the console
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.5" data-path="cli.html">
+            
+                <a href="cli.html#generate-an-api">
+            
+                    
+                    Generate an API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.6" data-path="cli.html">
+            
+                <a href="cli.html#print-the-strapi-version">
+            
+                    
+                    Print the Strapi version
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.7" data-path="cli.html">
+            
+                <a href="cli.html#link-your-application">
+            
+                    
+                    Link your application
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.8" data-path="cli.html">
+            
+                <a href="cli.html#logout">
+            
+                    
+                    Logout
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="configuration.html">
+            
+                <a href="configuration.html">
+            
+                    
+                    Configuration
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="configuration.html">
+            
+                <a href="configuration.html#application-package">
+            
+                    
+                    Application package
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="configuration.html">
+            
+                <a href="configuration.html#global-settings">
+            
+                    
+                    Global settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="configuration.html">
+            
+                <a href="configuration.html#general-environment-settings">
+            
+                    
+                    General environment settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="configuration.html">
+            
+                <a href="configuration.html#request">
+            
+                    
+                    Request
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="configuration.html">
+            
+                <a href="configuration.html#response">
+            
+                    
+                    Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.6" data-path="configuration.html">
+            
+                <a href="configuration.html#databases">
+            
+                    
+                    Databases
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.7" data-path="configuration.html">
+            
+                <a href="configuration.html#security">
+            
+                    
+                    Security
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="router.html">
+            
+                <a href="router.html">
+            
+                    
+                    Router
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="router.html">
+            
+                <a href="router.html#route-format">
+            
+                    
+                    Route format
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="router.html">
+            
+                <a href="router.html#route-parameters">
+            
+                    
+                    Route parameters
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="router.html">
+            
+                <a href="router.html#router-prefix">
+            
+                    
+                    Router prefix
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="router.html">
+            
+                <a href="router.html#policies-and-route-process">
+            
+                    
+                    Policies and route process
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="blueprints.html">
+            
+                <a href="blueprints.html">
+            
+                    
+                    Blueprints
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="blueprints.html">
+            
+                <a href="blueprints.html#find-records">
+            
+                    
+                    find records
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="blueprints.html">
+            
+                <a href="blueprints.html#findone-record">
+            
+                    
+                    findOne record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.3" data-path="blueprints.html">
+            
+                <a href="blueprints.html#create-a-record">
+            
+                    
+                    create a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.4" data-path="blueprints.html">
+            
+                <a href="blueprints.html#update-a-record">
+            
+                    
+                    update a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.5" data-path="blueprints.html">
+            
+                <a href="blueprints.html#destroy-a-record">
+            
+                    
+                    destroy a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.6" data-path="blueprints.html">
+            
+                <a href="blueprints.html#add-to-a-record">
+            
+                    
+                    add to a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.7" data-path="blueprints.html">
+            
+                <a href="blueprints.html#remove-from-a-record">
+            
+                    
+                    remove from a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="models.html">
+            
+                <a href="models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="models.html">
+            
+                <a href="models.html#model-settings">
+            
+                    
+                    Model settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="models.html">
+            
+                <a href="models.html#associations">
+            
+                    
+                    Associations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="models.html">
+            
+                <a href="models.html#lifecycle-callbacks">
+            
+                    
+                    Lifecycle Callbacks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="9.1" data-path="queries.html">
+            
+                <a href="queries.html">
+            
+                    
+                    Query Language
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="9.1.1" data-path="queries.html">
+            
+                <a href="queries.html#query-methods">
+            
+                    
+                    Query Methods
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="9.1.2" data-path="queries.html">
+            
+                <a href="queries.html#query-language">
+            
+                    
+                    Query Language
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter active" data-level="10.1" data-path="graphql.html">
+            
+                <a href="graphql.html">
+            
+                    
+                    GraphQL
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="10.1.1" data-path="graphql.html">
+            
+                <a href="graphql.html#configuration">
+            
+                    
+                    Configuration
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="10.1.2" data-path="graphql.html">
+            
+                <a href="graphql.html#execute-simple-query">
+            
+                    
+                    Execute simple query
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="10.1.3" data-path="graphql.html">
+            
+                <a href="graphql.html#execute-complex-queries">
+            
+                    
+                    Execute complex queries
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="11.1" data-path="internationalization.html">
+            
+                <a href="internationalization.html">
+            
+                    
+                    Internationalization
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="11.1.1" data-path="internationalization.html">
+            
+                <a href="internationalization.html#i18n-settings">
+            
+                    
+                    i18n settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="11.1.2" data-path="internationalization.html">
+            
+                <a href="internationalization.html#locales">
+            
+                    
+                    Locales
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="11.1.3" data-path="internationalization.html">
+            
+                <a href="internationalization.html#translate-responses">
+            
+                    
+                    Translate responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="12.1" data-path="sessions.html">
+            
+                <a href="sessions.html">
+            
+                    
+                    Sessions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="13.1" data-path="services.html">
+            
+                <a href="services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="14.1" data-path="views.html">
+            
+                <a href="views.html">
+            
+                    
+                    Views
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="14.1.1" data-path="views.html">
+            
+                <a href="views.html#render-a-view">
+            
+                    
+                    Render a view
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="14.1.2" data-path="views.html">
+            
+                <a href="views.html#supported-template-engines">
+            
+                    
+                    Supported template engines
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="15.1" data-path="logging.html">
+            
+                <a href="logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="15.1.1" data-path="logging.html">
+            
+                <a href="logging.html#logging-with-metadata">
+            
+                    
+                    Logging with Metadata
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="15.1.2" data-path="logging.html">
+            
+                <a href="logging.html#string-interpolation">
+            
+                    
+                    String interpolation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="15.1.3" data-path="logging.html">
+            
+                <a href="logging.html#logging-levels">
+            
+                    
+                    Logging levels
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="16.1" data-path="context.html">
+            
+                <a href="context.html">
+            
+                    
+                    Context
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="16.1.1" data-path="context.html">
+            
+                <a href="context.html#api">
+            
+                    
+                    API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="16.1.2" data-path="context.html">
+            
+                <a href="context.html#request-aliases">
+            
+                    
+                    Request aliases
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="16.1.3" data-path="context.html">
+            
+                <a href="context.html#response-aliases">
+            
+                    
+                    Response aliases
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="17.1" data-path="request.html">
+            
+                <a href="request.html">
+            
+                    
+                    Request
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="18.1" data-path="response.html">
+            
+                <a href="response.html">
+            
+                    
+                    Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="19.1" data-path="admin.html">
+            
+                <a href="admin.html">
+            
+                    
+                    Admin
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="19.1.1" data-path="admin.html">
+            
+                <a href="admin.html#dashboard">
+            
+                    
+                    Dashboard
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.2" data-path="admin.html">
+            
+                <a href="admin.html#data-explorer">
+            
+                    
+                    Data Explorer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.3" data-path="admin.html">
+            
+                <a href="admin.html#users">
+            
+                    
+                    Users
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.4" data-path="admin.html">
+            
+                <a href="admin.html#customization">
+            
+                    
+                    Customization
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="20.1" data-path="users.html">
+            
+                <a href="users.html">
+            
+                    
+                    Users
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="20.1.1" data-path="users.html">
+            
+                <a href="users.html#local-registration">
+            
+                    
+                    Local Registration
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.2" data-path="users.html">
+            
+                <a href="users.html#local-login">
+            
+                    
+                    Local Login
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.3" data-path="users.html">
+            
+                <a href="users.html#authentication">
+            
+                    
+                    Authentication
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.4" data-path="users.html">
+            
+                <a href="users.html#providers">
+            
+                    
+                    Providers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.5" data-path="users.html">
+            
+                <a href="users.html#custom-providers">
+            
+                    
+                    Custom providers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.6" data-path="users.html">
+            
+                <a href="users.html#forgot-password">
+            
+                    
+                    Forgot password
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.7" data-path="users.html">
+            
+                <a href="users.html#change-password">
+            
+                    
+                    Change password
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.8" data-path="users.html">
+            
+                <a href="users.html#accessing-user-from-requests">
+            
+                    
+                    Accessing user from requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="21.1" data-path="email.html">
+            
+                <a href="email.html">
+            
+                    
+                    Email
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="21.1.1" data-path="email.html">
+            
+                <a href="email.html#email-config">
+            
+                    
+                    Email config
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.2" data-path="email.html">
+            
+                <a href="email.html#email-service">
+            
+                    
+                    Email service
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.3" data-path="email.html">
+            
+                <a href="email.html#email-api">
+            
+                    
+                    Email API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.4" data-path="email.html">
+            
+                <a href="email.html#email-model">
+            
+                    
+                    Email model
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="22.1" data-path="upload.html">
+            
+                <a href="upload.html">
+            
+                    
+                    Upload
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="22.1.1" data-path="upload.html">
+            
+                <a href="upload.html#upload-config">
+            
+                    
+                    Upload config
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.2" data-path="upload.html">
+            
+                <a href="upload.html#upload-service">
+            
+                    
+                    Upload service
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.3" data-path="upload.html">
+            
+                <a href="upload.html#upload-api">
+            
+                    
+                    Upload API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.4" data-path="upload.html">
+            
+                <a href="upload.html#upload-model">
+            
+                    
+                    Upload model
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="23.1" data-path="customization.html">
+            
+                <a href="customization.html">
+            
+                    
+                    Customization
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="24.1" data-path="testing.html">
+            
+                <a href="testing.html">
+            
+                    
+                    Testing
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="24.1.1" data-path="testing.html">
+            
+                <a href="testing.html#setup">
+            
+                    
+                    Setup
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.2" data-path="testing.html">
+            
+                <a href="testing.html#boostrap">
+            
+                    
+                    Bootstrap
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.3" data-path="testing.html">
+            
+                <a href="testing.html#writing-tests">
+            
+                    
+                    Writing tests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.4" data-path="testing.html">
+            
+                <a href="testing.html#running-tests">
+            
+                    
+                    Running tests
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >GraphQL</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="graphql">GraphQL</h1>
+<p>GraphQL is a data querying language that allows you to execute complex nested
+requests between your clients and server applications.</p>
+<h2 id="configuration">Configuration</h2>
+<p>By default, GraphQL is enabled and the HTTP endpoint is <code>/graphql</code>.
+You can override this settings in the <code>./config/general.json</code> file.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;graphql&quot;</span>: {
+    <span class="hljs-string">&quot;enabled&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-string">&quot;route&quot;</span>: <span class="hljs-string">&quot;/graphql&quot;</span>
+  }
+}
+</code></pre>
+<p>Options:</p>
+<ul>
+<li><code>enabled</code> (boolean): Enabled or disabled GraphQL.</li>
+<li><code>route</code> (string): Change GraphQL endpoint.</li>
+</ul>
+<p>Note: If GraphQL is disabled, the GraphQL global variable is not exposed.</p>
+<h2 id="execute-simple-query">Execute simple query</h2>
+<h3 id="programmatically">Programmatically</h3>
+<p>Strapi takes over GraphQL natively. We added a function called <code>query</code> to execute
+your query without given as a parameters the GraphQL schemas each time.</p>
+<p>An example of how to use <code>query</code> function:</p>
+<pre><code class="lang-js"><span class="hljs-comment">// Build your query</span>
+<span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ users{firstName lastName posts{title}} }&apos;</span>;
+
+<span class="hljs-comment">// Execute the query</span>
+graphql.query(query)
+  .then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">result</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(result);
+  })
+  .catch(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(error);
+  });
+</code></pre>
+<p>And the JSON result:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;users&quot;</span>: [{
+    <span class="hljs-string">&quot;firstname&quot;</span>: <span class="hljs-string">&quot;John&quot;</span>,
+    <span class="hljs-string">&quot;lastname&quot;</span>: <span class="hljs-string">&quot;Doe&quot;</span>,
+    <span class="hljs-string">&quot;posts&quot;</span>:[{
+      <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;First title...&quot;</span>
+    }, {
+      <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Second title...&quot;</span>
+    }, {
+      <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Third title...&quot;</span>
+    }]    
+  }, {
+    <span class="hljs-string">&quot;firstname&quot;</span>: <span class="hljs-string">&quot;Karl&quot;</span>,
+    <span class="hljs-string">&quot;lastname&quot;</span>: <span class="hljs-string">&quot;Doe&quot;</span>,
+    <span class="hljs-string">&quot;posts&quot;</span>:[{
+      <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Fourth title...&quot;</span>
+    }]    
+  }]
+}
+</code></pre>
+<h3 id="with-a-http-request">With a HTTP request</h3>
+<p>Strapi also provides a HTTP GraphQL server to execute request from your front-end application.</p>
+<p>An example of how to execute the same request as above with a HTTP request with jQuery.</p>
+<pre><code class="lang-js">$.get(<span class="hljs-string">&apos;http://yourserver.com/graphql?query={ users{firstName lastName posts{title}} }&apos;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(data);
+});
+</code></pre>
+<h2 id="execute-complex-queries">Execute complex queries</h2>
+<h3 id="query-parameters">Query parameters</h3>
+<p>If you&apos;re using Waterline ORM installed by default with Strapi, you have access to
+some Waterline query parameters in your GraphQL query such as <code>sort</code>, <code>limit</code> or <code>skip</code>.
+Strapi also provides the <code>start</code> and <code>end</code> parameters to select records between two dates.</p>
+<p>This example will return 10 users&apos; records sorted alphabetically by <code>firstName</code>:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ users(limit: 10, sort: &quot;firstName ASC&quot;){firstName lastName post{title}} }&apos;</span>;
+</code></pre>
+<p>You can access to the 10 next users by adding the <code>skip</code> parameter:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ users(limit: 10, sort: &quot;firstName ASC&quot;, skip: 10){firstName lastName posts{title}} }&apos;</span>;
+</code></pre>
+<p>And you also can select those records in a period between two dates with the <code>start</code> and <code>end</code> parameters:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ users(limit: 10, sort: &quot;firstName ASC&quot;, skip: 10, start: &quot;09/21/2015&quot;, end:&quot; 09/22/2015&quot;){firstName lastName posts{title}} }&apos;</span>;
+</code></pre>
+<h3 id="useful-functions">Useful functions</h3>
+<p>Strapi comes with a powerful set of useful functions such as <code>getLatest&lt;Model&gt;</code>, <code>getFirst&lt;Model&gt;</code> and <code>count&lt;Model&gt;</code>.</p>
+<p>Returns the 5 latest users from the September 27th 2015 at 8:59:59 PM:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ getLatestUsers(count: 5, start: &quot;9/27/2015 20:59:59&quot;){firstName lastName posts{title}} }&apos;</span>;
+</code></pre>
+<p>Returns the 5 first users:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ getFirstUsers(count: 5){firstName lastName posts{title}} }&apos;</span>;
+</code></pre>
+<p>Returns the number of subscribers the September 28th 2015:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> query = <span class="hljs-string">&apos;{ countUsers(start: &quot;9/28/2015&quot;, end: &quot;9/28/2015&quot;) }&apos;</span>;
+</code></pre>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="queries.html#query-language" class="navigation navigation-prev " aria-label="Previous page: Query Language">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="graphql.html#configuration" class="navigation navigation-next " aria-label="Next page: Configuration">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"GraphQL","level":"10.1","depth":1,"next":{"title":"Configuration","level":"10.1.1","depth":2,"anchor":"#configuration","path":"graphql.md","ref":"graphql.md#configuration","articles":[]},"previous":{"title":"Query Language","level":"9.1.2","depth":2,"anchor":"#query-language","path":"queries.md","ref":"queries.md#query-language","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":true},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":false}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/1.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"graphql.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:35.883Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

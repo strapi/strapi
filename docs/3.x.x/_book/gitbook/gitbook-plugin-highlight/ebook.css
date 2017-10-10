@@ -1,0 +1,135 @@
+pre,
+code {
+  /* http://jmblog.github.io/color-themes-for-highlightjs */
+  /* Tomorrow Comment */
+  /* Tomorrow Red */
+  /* Tomorrow Orange */
+  /* Tomorrow Yellow */
+  /* Tomorrow Green */
+  /* Tomorrow Aqua */
+  /* Tomorrow Blue */
+  /* Tomorrow Purple */
+}
+pre .hljs-comment,
+code .hljs-comment,
+pre .hljs-title,
+code .hljs-title {
+  color: #8e908c;
+}
+pre .hljs-variable,
+code .hljs-variable,
+pre .hljs-attribute,
+code .hljs-attribute,
+pre .hljs-tag,
+code .hljs-tag,
+pre .hljs-regexp,
+code .hljs-regexp,
+pre .hljs-deletion,
+code .hljs-deletion,
+pre .ruby .hljs-constant,
+code .ruby .hljs-constant,
+pre .xml .hljs-tag .hljs-title,
+code .xml .hljs-tag .hljs-title,
+pre .xml .hljs-pi,
+code .xml .hljs-pi,
+pre .xml .hljs-doctype,
+code .xml .hljs-doctype,
+pre .html .hljs-doctype,
+code .html .hljs-doctype,
+pre .css .hljs-id,
+code .css .hljs-id,
+pre .css .hljs-class,
+code .css .hljs-class,
+pre .css .hljs-pseudo,
+code .css .hljs-pseudo {
+  color: #c82829;
+}
+pre .hljs-number,
+code .hljs-number,
+pre .hljs-preprocessor,
+code .hljs-preprocessor,
+pre .hljs-pragma,
+code .hljs-pragma,
+pre .hljs-built_in,
+code .hljs-built_in,
+pre .hljs-literal,
+code .hljs-literal,
+pre .hljs-params,
+code .hljs-params,
+pre .hljs-constant,
+code .hljs-constant {
+  color: #f5871f;
+}
+pre .ruby .hljs-class .hljs-title,
+code .ruby .hljs-class .hljs-title,
+pre .css .hljs-rules .hljs-attribute,
+code .css .hljs-rules .hljs-attribute {
+  color: #eab700;
+}
+pre .hljs-string,
+code .hljs-string,
+pre .hljs-value,
+code .hljs-value,
+pre .hljs-inheritance,
+code .hljs-inheritance,
+pre .hljs-header,
+code .hljs-header,
+pre .hljs-addition,
+code .hljs-addition,
+pre .ruby .hljs-symbol,
+code .ruby .hljs-symbol,
+pre .xml .hljs-cdata,
+code .xml .hljs-cdata {
+  color: #718c00;
+}
+pre .css .hljs-hexcolor,
+code .css .hljs-hexcolor {
+  color: #3e999f;
+}
+pre .hljs-function,
+code .hljs-function,
+pre .python .hljs-decorator,
+code .python .hljs-decorator,
+pre .python .hljs-title,
+code .python .hljs-title,
+pre .ruby .hljs-function .hljs-title,
+code .ruby .hljs-function .hljs-title,
+pre .ruby .hljs-title .hljs-keyword,
+code .ruby .hljs-title .hljs-keyword,
+pre .perl .hljs-sub,
+code .perl .hljs-sub,
+pre .javascript .hljs-title,
+code .javascript .hljs-title,
+pre .coffeescript .hljs-title,
+code .coffeescript .hljs-title {
+  color: #4271ae;
+}
+pre .hljs-keyword,
+code .hljs-keyword,
+pre .javascript .hljs-function,
+code .javascript .hljs-function {
+  color: #8959a8;
+}
+pre .hljs,
+code .hljs {
+  display: block;
+  background: white;
+  color: #4d4d4c;
+  padding: 0.5em;
+}
+pre .coffeescript .javascript,
+code .coffeescript .javascript,
+pre .javascript .xml,
+code .javascript .xml,
+pre .tex .hljs-formula,
+code .tex .hljs-formula,
+pre .xml .javascript,
+code .xml .javascript,
+pre .xml .vbscript,
+code .xml .vbscript,
+pre .xml .css,
+code .xml .css,
+pre .xml .hljs-cdata,
+code .xml .hljs-cdata {
+  opacity: 0.5;
+}

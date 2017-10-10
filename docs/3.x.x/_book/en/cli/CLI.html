@@ -1,0 +1,859 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Command line interface · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="../concepts/concepts.html" />
+    
+    
+    <link rel="prev" href="../getting-started/quick-start.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter active" data-level="3.1" data-path="CLI.html">
+            
+                <a href="CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../configurations/configurations.html">
+            
+                <a href="../configurations/configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../plugins/quick-start.html">
+            
+                <a href="../plugins/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.2" data-path="../plugins/development.html">
+            
+                <a href="../plugins/development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.3" data-path="../plugins/ui-components.html">
+            
+                <a href="../plugins/ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="../plugins/utils.html">
+            
+                <a href="../plugins/utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../guides-advanced/customize-admin.html">
+            
+                <a href="../guides-advanced/customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                <a href="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="../guides-advanced/routeless-container-store-injection.html">
+            
+                <a href="../guides-advanced/routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="../guides-advanced/prevent-plugin-rendering.html">
+            
+                <a href="../guides-advanced/prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                <a href="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="../migration/migration-guide.html">
+            
+                <a href="../migration/migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Command line interface</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="command-line-interface-cli">Command Line Interface (CLI)</h1>
+<p>Strapi comes with a full featured Command Line Interface (CLI) which lets you scaffold and manage your project in seconds.</p>
+<hr>
+<h2 id="strapi-new">strapi new</h2>
+<p>Create a new project</p>
+<pre><code class="lang-bash">strapi new &lt;name&gt;
+
+options: [--dev]
+</code></pre>
+<ul>
+<li><p><strong>strapi new &lt;name&gt;</strong><br>
+Generates a new project called <strong>&lt;name&gt;</strong> and installs the plugins through the npm registry.</p>
+</li>
+<li><p><strong>strapi new &lt;name&gt; --dev</strong><br>
+Generates a new project called <strong>&lt;name&gt;</strong> and creates symlinks for the <code>./admin</code> folder and each plugin inside the <code>./plugin</code> folder. It means that the Strapi&apos;s development workflow has been set up on the machine earlier. Checkout the <a href="https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md" target="_blank">CONTRIBUTING guide</a> for more details.</p>
+</li>
+</ul>
+<hr>
+<h2 id="strapi-generateapi">strapi generate:api</h2>
+<p>Scaffold a complete API with its configuration, controller, model and service.</p>
+<pre><code class="lang-bash">strapi generate:api &lt;name&gt; [&lt;attribute:<span class="hljs-built_in">type</span>&gt;]
+
+options: [--tpl &lt;name&gt;|--plugin &lt;name&gt;]
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:api &lt;name&gt;</strong><br>
+Generates an API called <strong>&lt;name&gt;</strong> in the <code>./api</code> folder at the root of your project.</p>
+</li>
+<li><p><strong>strapi generate:api &lt;name&gt; &lt;attribute:type&gt;</strong><br>
+Generates an API called <strong>&lt;name&gt;</strong> in the <code>./api</code> folder at the root of your project. The model will already contain an attribute called <strong>&lt;attribute&gt;</strong> with the type property set to <strong>&lt;type&gt;</strong>.</p>
+<p>Example: <code>strapi generate:api product name:string description:text price:integer</code></p>
+</li>
+<li><p><strong>strapi generate:api &lt;name&gt; --plugin &lt;plugin&gt;</strong><br>
+Generates an API called <strong>&lt;name&gt;</strong> in the <code>./plugins/&lt;plugin&gt;</code> folder.</p>
+</li>
+<li><p><strong>strapi generate:api &lt;name&gt; --tpl &lt;template&gt;</strong><br>
+Generates an API called <strong>&lt;name&gt;</strong> in the <code>./api</code> folder which works with Bookshelf. By default, the generated APIs are based on Mongoose.</p>
+</li>
+</ul>
+<blockquote>
+<p>Note: The first letter of the filename will be uppercased.</p>
+</blockquote>
+<h2 id="strapi-generatecontroller">strapi generate:controller</h2>
+<p>Create a new controller</p>
+<pre><code class="lang-bash">strapi generate:controller &lt;name&gt;
+
+options: [--api &lt;name&gt;|--plugin &lt;name&gt;]
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:controller &lt;name&gt;</strong><br>
+Generates an empty controller called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;name&gt;/controllers</code> folder.</p>
+<p>Example: <code>strapi generate:controller category</code> will create the controller at <code>./api/category/controllers/Category.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:controller &lt;name&gt; --api &lt;api&gt;</strong><br>
+Generates an empty controller called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;api&gt;/controllers</code> folder.</p>
+<p>Example: <code>strapi generate:controller category --api product</code> will create the controller at <code>./api/product/controllers/Category.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:controller &lt;name&gt; --plugin &lt;plugin&gt;</strong><br>
+Generates an empty controller called <strong>&lt;name&gt;</strong> in the <code>./plugins/&lt;plugin&gt;/controllers</code> folder.</p>
+</li>
+</ul>
+<blockquote>
+<p>Note: The first letter of the filename will be uppercased.</p>
+</blockquote>
+<h2 id="strapi-generatemodel">strapi generate:model</h2>
+<p>Create a new model</p>
+<pre><code class="lang-bash">strapi generate:model &lt;name&gt; [&lt;attribute:<span class="hljs-built_in">type</span>&gt;]
+
+options: [--api &lt;name&gt;|--plugin &lt;name&gt;]
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:model &lt;name&gt;</strong><br>
+Generates an empty model called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;name&gt;/models</code> folder. It will create two files.
+The first one will be <strong>&lt;name&gt;.js</strong> which contains your lifecycle callbacks and another <strong>&lt;name&gt;.settings.json</strong> that will list your attributes and options.</p>
+<p>Example: <code>strapi generate:model category</code> will create these two files <code>./api/category/models/Category.js</code> and <code>./api/category/models/Category.settings.json</code>.</p>
+</li>
+<li><p><strong>strapi generate:model &lt;name&gt; &lt;attribute:type&gt;</strong><br>
+Generates an empty model called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;name&gt;/models</code> folder. The file <strong>&lt;name&gt;.settings.json</strong> will already contain a list of attribute with their associated <strong>&lt;type&gt;</strong>.</p>
+<p>Example: <code>strapi generate:model category name:string description:text</code> will create these two files <code>./api/category/models/Category.js</code> and <code>./api/category/models/Category.settings.json</code>. This last file will contain two attributes <code>name</code> with the type <code>string</code> and <code>description</code> with type <code>text</code>.</p>
+</li>
+<li><p><strong>strapi generate:model &lt;name&gt; --api &lt;api&gt;</strong><br>
+Generates an empty model called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;api&gt;/models</code> folder.</p>
+<p>Example: <code>strapi generate:model category --api product</code> will create these two files:</p>
+<ul>
+<li><code>./api/product/models/Category.js</code></li>
+<li><code>./api/product/models/Category.settings.json</code>.</li>
+</ul>
+</li>
+<li><p><strong>strapi generate:model &lt;name&gt; --plugin &lt;plugin&gt;</strong><br>
+Generates an empty model called <strong>&lt;name&gt;</strong> in the <code>./plugins/&lt;plugin&gt;/models</code> folder.</p>
+</li>
+</ul>
+<blockquote>
+<p>Note: The first letter of the filename will be uppercased.</p>
+</blockquote>
+<h2 id="strapi-generateservice">strapi generate:service</h2>
+<p>Create a new service</p>
+<pre><code class="lang-bash">strapi generate:service &lt;name&gt;
+
+options: [--api &lt;name&gt;|--plugin &lt;name&gt;]
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:service &lt;name&gt;</strong><br>
+Generates an empty service called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;name&gt;/services</code> folder.</p>
+<p>Example: <code>strapi generate:service category</code> will create the service at <code>./api/category/services/Category.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:service &lt;name&gt; --api &lt;api&gt;</strong><br>
+Generates an empty service called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;api&gt;/services</code> folder.</p>
+<p>Example: <code>strapi generate:service category --api product</code> will create the service at <code>./api/product/services/Category.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:service &lt;name&gt; --plugin &lt;plugin&gt;</strong><br>
+Generates an empty service called <strong>&lt;name&gt;</strong> in the <code>./plugins/&lt;plugin&gt;/services</code> folder.</p>
+</li>
+</ul>
+<blockquote>
+<p>Note: The first letter of the filename will be uppercased.</p>
+</blockquote>
+<h2 id="strapi-generatepolicy">strapi generate:policy</h2>
+<p>Create a new policy</p>
+<pre><code class="lang-bash">strapi generate:policy &lt;name&gt;
+
+options: [--api &lt;name&gt;|--plugin &lt;name&gt;]
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:policy &lt;name&gt;</strong><br>
+Generates an empty policy called <strong>&lt;name&gt;</strong> in the <code>./config/policies</code> folder.</p>
+<p>Example: <code>strapi generate:policy isAuthenticated</code> will create the policy at <code>./config/policies/isAuthenticated.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:policy &lt;name&gt; --api &lt;api&gt;</strong><br>
+Generates an empty policy called <strong>&lt;name&gt;</strong> in the <code>./api/&lt;api&gt;/config/policies</code> folder. This policy will be scoped and only accessible by the <strong>&lt;api&gt;</strong> routes.</p>
+<p>Example: <code>strapi generate:policy isAuthenticated --api product</code> will create the policy at <code>./api/product/config/policies/isAuthenticated.js</code>.</p>
+</li>
+<li><p><strong>strapi generate:policy &lt;name&gt; --plugin &lt;plugin&gt;</strong><br>
+Generates an empty policy called <strong>&lt;name&gt;</strong> in the <code>./plugins/&lt;plugin&gt;/config/policies</code> folder. This policy will be scoped and accessible only by the <strong>&lt;plugin&gt;</strong> routes.</p>
+</li>
+</ul>
+<h2 id="strapi-generateplugin">strapi generate:plugin</h2>
+<p>Create a new plugin skeleton.</p>
+<pre><code class="lang-bash">strapi generate:plugin &lt;name&gt;
+</code></pre>
+<ul>
+<li><p><strong>strapi generate:plugin &lt;name&gt;</strong><br>
+Generates an empty plugin called <strong>&lt;name&gt;</strong> in the <code>./plugins</code> folder.</p>
+<p>Example: <code>strapi generate:plugin user</code> will create the plugin at <code>./plugins/user</code>.</p>
+</li>
+</ul>
+<p>Please refer to the <a href=".../plugins/development.md">plugins documentation</a> to know more.</p>
+<hr>
+<h2 id="strapi-install">strapi install</h2>
+<p>Install a plugin in the project.</p>
+<pre><code class="lang-bash">strapi install &lt;name&gt;
+
+options: [--dev]
+</code></pre>
+<ul>
+<li><p><strong>strapi install &lt;name&gt;</strong><br>
+Installs a plugin called <strong>&lt;name&gt;</strong> in the <code>./plugins</code> folder.</p>
+<p>Example: <code>strapi install content-type-builder</code> will install the plugin at <code>./plugins/content-type-builder</code>.</p>
+</li>
+<li><p><strong>strapi install &lt;name&gt; --dev</strong><br>
+It will create a symlink from the local Strapi repository plugin folder called <strong>&lt;name&gt;</strong> in the <code>./plugins</code> folder.</p>
+<p>Example: <code>strapi install content-type-builder --dev</code> will create a symlink from <code>/path/to/the/repository/packages/strapi-plugin-content-type-builder</code> to <code>./plugins/content-type-builder</code>.</p>
+</li>
+</ul>
+<blockquote>
+<p>Checkout the <a href="https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md" target="_blank">CONTRIBUTING guide</a> for more details about the local Strapi development workflow.</p>
+<p>Note: You have to restart the server to load the plugin into your project.</p>
+</blockquote>
+<p>Please refer to the <a href=".../plugins/development.md">plugins documentation</a> to know more.</p>
+<hr>
+<h2 id="strapi-uninstall">strapi uninstall</h2>
+<p>Uninstall a plugin from the project.</p>
+<pre><code class="lang-bash">strapi uninstall &lt;name&gt;
+</code></pre>
+<ul>
+<li><p><strong>strapi uninstall &lt;name&gt;</strong><br>
+Uninstalls a plugin called <strong>&lt;name&gt;</strong> in the <code>./plugins</code> folder.</p>
+<p>Example: <code>strapi uninstall content-type-builder</code> will remove the folder at <code>./plugins/content-type-builder</code>.</p>
+</li>
+</ul>
+<p>Please refer to the <a href=".../plugins/development.md">plugins documentation</a> to know more.</p>
+<hr>
+<h2 id="strapi-version">strapi version</h2>
+<p>Print the current globally installed Strapi version.</p>
+<pre><code class="lang-bash">strapi version
+</code></pre>
+<hr>
+<h2 id="strapi-help">strapi help</h2>
+<p>List CLI commands.</p>
+<pre><code>strapi help
+</code></pre>
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../getting-started/quick-start.html" class="navigation navigation-prev " aria-label="Previous page: Quick start">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="../concepts/concepts.html" class="navigation navigation-next " aria-label="Next page: Table of contents">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Command line interface","level":"3.1","depth":1,"next":{"title":"Table of contents","level":"4.1","depth":1,"path":"concepts/concepts.md","ref":"concepts/concepts.md","articles":[]},"previous":{"title":"Quick start","level":"2.2","depth":1,"path":"getting-started/quick-start.md","ref":"getting-started/quick-start.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"cli/CLI.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

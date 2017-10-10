@@ -1,0 +1,2307 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Models · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="models.html" />
+    
+    
+    <link rel="prev" href="blueprints.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Documentation
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="introduction.html">
+            
+                <a href="introduction.html">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="introduction.html">
+            
+                <a href="introduction.html#getting-started">
+            
+                    
+                    Getting Started
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="introduction.html">
+            
+                <a href="introduction.html#alternatives">
+            
+                    
+                    Alternatives
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="introduction.html">
+            
+                <a href="introduction.html#key-features">
+            
+                    
+                    Key-features
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="cli.html">
+            
+                <a href="cli.html">
+            
+                    
+                    Command-Line Interface
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="cli.html">
+            
+                <a href="cli.html#login">
+            
+                    
+                    Login
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="cli.html">
+            
+                <a href="cli.html#create-a-new-project">
+            
+                    
+                    Create a new project
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.3" data-path="cli.html">
+            
+                <a href="cli.html#start-the-server">
+            
+                    
+                    Start the server
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.4" data-path="cli.html">
+            
+                <a href="cli.html#access-the-console">
+            
+                    
+                    Access the console
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.5" data-path="cli.html">
+            
+                <a href="cli.html#generate-an-api">
+            
+                    
+                    Generate an API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.6" data-path="cli.html">
+            
+                <a href="cli.html#print-the-strapi-version">
+            
+                    
+                    Print the Strapi version
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.7" data-path="cli.html">
+            
+                <a href="cli.html#link-your-application">
+            
+                    
+                    Link your application
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.8" data-path="cli.html">
+            
+                <a href="cli.html#logout">
+            
+                    
+                    Logout
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="configuration.html">
+            
+                <a href="configuration.html">
+            
+                    
+                    Configuration
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="configuration.html">
+            
+                <a href="configuration.html#application-package">
+            
+                    
+                    Application package
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.2" data-path="configuration.html">
+            
+                <a href="configuration.html#global-settings">
+            
+                    
+                    Global settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.3" data-path="configuration.html">
+            
+                <a href="configuration.html#general-environment-settings">
+            
+                    
+                    General environment settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.4" data-path="configuration.html">
+            
+                <a href="configuration.html#request">
+            
+                    
+                    Request
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.5" data-path="configuration.html">
+            
+                <a href="configuration.html#response">
+            
+                    
+                    Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.6" data-path="configuration.html">
+            
+                <a href="configuration.html#databases">
+            
+                    
+                    Databases
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.1.7" data-path="configuration.html">
+            
+                <a href="configuration.html#security">
+            
+                    
+                    Security
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="router.html">
+            
+                <a href="router.html">
+            
+                    
+                    Router
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="6.1.1" data-path="router.html">
+            
+                <a href="router.html#route-format">
+            
+                    
+                    Route format
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.2" data-path="router.html">
+            
+                <a href="router.html#route-parameters">
+            
+                    
+                    Route parameters
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.3" data-path="router.html">
+            
+                <a href="router.html#router-prefix">
+            
+                    
+                    Router prefix
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.1.4" data-path="router.html">
+            
+                <a href="router.html#policies-and-route-process">
+            
+                    
+                    Policies and route process
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="blueprints.html">
+            
+                <a href="blueprints.html">
+            
+                    
+                    Blueprints
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="7.1.1" data-path="blueprints.html">
+            
+                <a href="blueprints.html#find-records">
+            
+                    
+                    find records
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.2" data-path="blueprints.html">
+            
+                <a href="blueprints.html#findone-record">
+            
+                    
+                    findOne record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.3" data-path="blueprints.html">
+            
+                <a href="blueprints.html#create-a-record">
+            
+                    
+                    create a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.4" data-path="blueprints.html">
+            
+                <a href="blueprints.html#update-a-record">
+            
+                    
+                    update a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.5" data-path="blueprints.html">
+            
+                <a href="blueprints.html#destroy-a-record">
+            
+                    
+                    destroy a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.6" data-path="blueprints.html">
+            
+                <a href="blueprints.html#add-to-a-record">
+            
+                    
+                    add to a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.1.7" data-path="blueprints.html">
+            
+                <a href="blueprints.html#remove-from-a-record">
+            
+                    
+                    remove from a record
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter active" data-level="8.1" data-path="models.html">
+            
+                <a href="models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="8.1.1" data-path="models.html">
+            
+                <a href="models.html#model-settings">
+            
+                    
+                    Model settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.2" data-path="models.html">
+            
+                <a href="models.html#associations">
+            
+                    
+                    Associations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="8.1.3" data-path="models.html">
+            
+                <a href="models.html#lifecycle-callbacks">
+            
+                    
+                    Lifecycle Callbacks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="9.1" data-path="queries.html">
+            
+                <a href="queries.html">
+            
+                    
+                    Query Language
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="9.1.1" data-path="queries.html">
+            
+                <a href="queries.html#query-methods">
+            
+                    
+                    Query Methods
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="9.1.2" data-path="queries.html">
+            
+                <a href="queries.html#query-language">
+            
+                    
+                    Query Language
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="graphql.html">
+            
+                <a href="graphql.html">
+            
+                    
+                    GraphQL
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="10.1.1" data-path="graphql.html">
+            
+                <a href="graphql.html#configuration">
+            
+                    
+                    Configuration
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="10.1.2" data-path="graphql.html">
+            
+                <a href="graphql.html#execute-simple-query">
+            
+                    
+                    Execute simple query
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="10.1.3" data-path="graphql.html">
+            
+                <a href="graphql.html#execute-complex-queries">
+            
+                    
+                    Execute complex queries
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="11.1" data-path="internationalization.html">
+            
+                <a href="internationalization.html">
+            
+                    
+                    Internationalization
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="11.1.1" data-path="internationalization.html">
+            
+                <a href="internationalization.html#i18n-settings">
+            
+                    
+                    i18n settings
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="11.1.2" data-path="internationalization.html">
+            
+                <a href="internationalization.html#locales">
+            
+                    
+                    Locales
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="11.1.3" data-path="internationalization.html">
+            
+                <a href="internationalization.html#translate-responses">
+            
+                    
+                    Translate responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="12.1" data-path="sessions.html">
+            
+                <a href="sessions.html">
+            
+                    
+                    Sessions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="13.1" data-path="services.html">
+            
+                <a href="services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="14.1" data-path="views.html">
+            
+                <a href="views.html">
+            
+                    
+                    Views
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="14.1.1" data-path="views.html">
+            
+                <a href="views.html#render-a-view">
+            
+                    
+                    Render a view
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="14.1.2" data-path="views.html">
+            
+                <a href="views.html#supported-template-engines">
+            
+                    
+                    Supported template engines
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="15.1" data-path="logging.html">
+            
+                <a href="logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="15.1.1" data-path="logging.html">
+            
+                <a href="logging.html#logging-with-metadata">
+            
+                    
+                    Logging with Metadata
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="15.1.2" data-path="logging.html">
+            
+                <a href="logging.html#string-interpolation">
+            
+                    
+                    String interpolation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="15.1.3" data-path="logging.html">
+            
+                <a href="logging.html#logging-levels">
+            
+                    
+                    Logging levels
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="16.1" data-path="context.html">
+            
+                <a href="context.html">
+            
+                    
+                    Context
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="16.1.1" data-path="context.html">
+            
+                <a href="context.html#api">
+            
+                    
+                    API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="16.1.2" data-path="context.html">
+            
+                <a href="context.html#request-aliases">
+            
+                    
+                    Request aliases
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="16.1.3" data-path="context.html">
+            
+                <a href="context.html#response-aliases">
+            
+                    
+                    Response aliases
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="17.1" data-path="request.html">
+            
+                <a href="request.html">
+            
+                    
+                    Request
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="18.1" data-path="response.html">
+            
+                <a href="response.html">
+            
+                    
+                    Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="19.1" data-path="admin.html">
+            
+                <a href="admin.html">
+            
+                    
+                    Admin
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="19.1.1" data-path="admin.html">
+            
+                <a href="admin.html#dashboard">
+            
+                    
+                    Dashboard
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.2" data-path="admin.html">
+            
+                <a href="admin.html#data-explorer">
+            
+                    
+                    Data Explorer
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.3" data-path="admin.html">
+            
+                <a href="admin.html#users">
+            
+                    
+                    Users
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="19.1.4" data-path="admin.html">
+            
+                <a href="admin.html#customization">
+            
+                    
+                    Customization
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="20.1" data-path="users.html">
+            
+                <a href="users.html">
+            
+                    
+                    Users
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="20.1.1" data-path="users.html">
+            
+                <a href="users.html#local-registration">
+            
+                    
+                    Local Registration
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.2" data-path="users.html">
+            
+                <a href="users.html#local-login">
+            
+                    
+                    Local Login
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.3" data-path="users.html">
+            
+                <a href="users.html#authentication">
+            
+                    
+                    Authentication
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.4" data-path="users.html">
+            
+                <a href="users.html#providers">
+            
+                    
+                    Providers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.5" data-path="users.html">
+            
+                <a href="users.html#custom-providers">
+            
+                    
+                    Custom providers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.6" data-path="users.html">
+            
+                <a href="users.html#forgot-password">
+            
+                    
+                    Forgot password
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.7" data-path="users.html">
+            
+                <a href="users.html#change-password">
+            
+                    
+                    Change password
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="20.1.8" data-path="users.html">
+            
+                <a href="users.html#accessing-user-from-requests">
+            
+                    
+                    Accessing user from requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="21.1" data-path="email.html">
+            
+                <a href="email.html">
+            
+                    
+                    Email
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="21.1.1" data-path="email.html">
+            
+                <a href="email.html#email-config">
+            
+                    
+                    Email config
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.2" data-path="email.html">
+            
+                <a href="email.html#email-service">
+            
+                    
+                    Email service
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.3" data-path="email.html">
+            
+                <a href="email.html#email-api">
+            
+                    
+                    Email API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="21.1.4" data-path="email.html">
+            
+                <a href="email.html#email-model">
+            
+                    
+                    Email model
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="22.1" data-path="upload.html">
+            
+                <a href="upload.html">
+            
+                    
+                    Upload
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="22.1.1" data-path="upload.html">
+            
+                <a href="upload.html#upload-config">
+            
+                    
+                    Upload config
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.2" data-path="upload.html">
+            
+                <a href="upload.html#upload-service">
+            
+                    
+                    Upload service
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.3" data-path="upload.html">
+            
+                <a href="upload.html#upload-api">
+            
+                    
+                    Upload API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="22.1.4" data-path="upload.html">
+            
+                <a href="upload.html#upload-model">
+            
+                    
+                    Upload model
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="23.1" data-path="customization.html">
+            
+                <a href="customization.html">
+            
+                    
+                    Customization
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="24.1" data-path="testing.html">
+            
+                <a href="testing.html">
+            
+                    
+                    Testing
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="24.1.1" data-path="testing.html">
+            
+                <a href="testing.html#setup">
+            
+                    
+                    Setup
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.2" data-path="testing.html">
+            
+                <a href="testing.html#boostrap">
+            
+                    
+                    Bootstrap
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.3" data-path="testing.html">
+            
+                <a href="testing.html#writing-tests">
+            
+                    
+                    Writing tests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="24.1.4" data-path="testing.html">
+            
+                <a href="testing.html#running-tests">
+            
+                    
+                    Running tests
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Models</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="models">Models</h1>
+<p>Strapi comes installed with a powerful Object-Relational-Mapper (ORM) called Waterline,
+a datastore-agnostic tool that dramatically simplifies interaction with one or more databases.</p>
+<p>Models represent a structure of data which requires persistent storage. The data may live in any data-store
+but is interfaced in the same way. This allows your users to live in PostgreSQL and your user preferences
+to live in MongoDB and you will interact with the data models in the exact same way.</p>
+<p>If you&apos;re using MySQL, a model might correspond to a table. If you&apos;re using MongoDB, it might correspond
+to a collection. In either case, the goal is to provide a simple, modular way of managing data without
+relying on any one type of database.</p>
+<p>Models are defined in the <code>./api/&lt;apiName&gt;/models</code> directory.</p>
+<h2 id="model-settings">Model settings</h2>
+<p>The following properties can be specified at the top level of your model definition to override
+the defaults for that particular model.</p>
+<p>For example, this a basic model <code>Pet</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;identity&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>,
+  <span class="hljs-string">&quot;connection&quot;</span>: <span class="hljs-string">&quot;mongoDBServer&quot;</span>,
+  <span class="hljs-string">&quot;schema&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;gender&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;male&quot;</span>, <span class="hljs-string">&quot;female&quot;</span>]
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;int&quot;</span>,
+      <span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">100</span>
+    },
+    <span class="hljs-string">&quot;birthDate&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>
+    },
+    <span class="hljs-string">&quot;breed&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>
+    }
+  },
+  <span class="hljs-string">&quot;autoPK&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;autoCreatedAt&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;autoUpdatedAt&quot;</span>: <span class="hljs-literal">true</span>
+}
+</code></pre>
+<h3 id="schema">schema</h3>
+<p>A flag to toggle schemaless or schema mode in databases that support schemaless data structures.
+If turned off, this will allow you to store arbitrary data in a record. If turned on, only attributes
+defined in the model&apos;s attributes object will be stored.</p>
+<p>For adapters that don&apos;t require a schema, such as MongoDB or Redis, the <code>schema</code> key is set to <code>false</code>.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;schema&quot;</span>: <span class="hljs-literal">true</span>|<span class="hljs-literal">false</span>
+}
+</code></pre>
+<h3 id="connection">connection</h3>
+<p>The configured database connection where this model will fetch and save its data.
+Defaults to <code>defaultSQLite</code>, the default connection that uses the <code>waterline-sqlite3</code> adapter.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;connection&quot;</span>: <span class="hljs-string">&quot;mongoDBServer&quot;</span>
+}
+</code></pre>
+<h3 id="identity">identity</h3>
+<p>The lowercase unique key for the model. By default, a model&apos;s identity is inferred automatically
+by lowercasing its filename. You should never change this property on your models.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;identity&quot;</span>: <span class="hljs-string">&quot;petModel&quot;</span>
+}
+</code></pre>
+<h3 id="globalid">globalId</h3>
+<p>This flag changes the global name by which you can access your model (if the globalization of models
+is enabled). You should never change this property on your models.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;globaId&quot;</span>: <span class="hljs-string">&quot;pets&quot;</span>
+}
+</code></pre>
+<p>For example to access to your model function:</p>
+<pre><code class="lang-js">Pets.find().exec(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, pets</span>) </span>{
+  <span class="hljs-keyword">if</span> (error) {
+    <span class="hljs-built_in">console</span>.log(error);
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  }
+
+  <span class="hljs-built_in">console</span>.log(pets);
+});
+</code></pre>
+<h3 id="autopk">autoPK</h3>
+<p>A flag to toggle the automatic definition of a primary key in your model.
+The details of this default primary key vary between adapters. In any case, the primary keys generated
+by <code>autoPK</code> will be unique. If turned off no primary key will be created by default, and you will need
+to define one manually using <code>primaryKey: true</code> for one of the model attributes.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;autoPK&quot;</span>: <span class="hljs-literal">true</span>|<span class="hljs-literal">false</span>
+}
+</code></pre>
+<h3 id="autocreatedat">autoCreatedAt</h3>
+<p>A flag to toggle the automatic definition of a <code>createdAt</code> attribute in your model.
+By default, <code>createdAt</code> is an attribute which will be automatically set when a record is created with
+the current timestamp.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;autoCreatedAt&quot;</span>: <span class="hljs-literal">true</span>|<span class="hljs-literal">false</span>
+}
+</code></pre>
+<h3 id="autoupdatedat">autoUpdatedAt</h3>
+<p>A flag to toggle the automatic definition of a <code>updatedAt</code> attribute in your model.
+By default, <code>updatedAt</code> is an attribute which will be automatically set with the current timestamp
+every time a record is updated.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;autoUpdatedAt&quot;</span>: <span class="hljs-literal">true</span>|<span class="hljs-literal">false</span>
+}
+</code></pre>
+<h3 id="tablename">tableName</h3>
+<p>You can define a custom name for the physical collection in your adapter by adding a <code>tableName</code>
+attribute. This isn&apos;t just for tables. In MySQL, PostgreSQL, Oracle, etc. this setting refers
+to the name of the table, but in MongoDB or Redis, it refers to the collection, and so forth.
+If no <code>tableName</code> is specified, Waterline will use the model&apos;s <code>identity</code> as its <code>tableName</code>.</p>
+<p>This is particularly useful for working with pre-existing/legacy databases.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;tableName&quot;</span>: <span class="hljs-string">&quot;pets_table&quot;</span>
+}
+</code></pre>
+<h3 id="attributes">attributes</h3>
+<p>Model attributes are basic pieces of information about a model.
+A model called <code>Pet</code> might have attributes called <code>name</code>, <code>gender</code>, <code>age</code>,
+<code>birthday</code> and <code>breed</code>.</p>
+<p>Options can be used to enforce various constraints and add special enhancements to model attributes.</p>
+<h4 id="type">type</h4>
+<p>Specifies the type of data that will be stored in this attribute. One of:</p>
+<ul>
+<li><code>string</code></li>
+<li><code>text</code></li>
+<li><code>integer</code></li>
+<li><code>float</code></li>
+<li><code>date</code></li>
+<li><code>datetime</code></li>
+<li><code>boolean</code></li>
+<li><code>binary</code></li>
+<li><code>array</code></li>
+<li><code>json</code></li>
+</ul>
+<p>Defaults to <code>string</code> if not specified.</p>
+<h3 id="validations">Validations</h3>
+<p>Strapi bundles support for automatic validations of your models&apos; attributes.
+Any time a record is updated, or a new record is created, the data for each attribute will
+be checked against all of your predefined validation rules. This provides a convenient failsafe
+to ensure that invalid entries don&apos;t make their way into your application&apos;s database(s).</p>
+<p>Validations are defined directly in your collection attributes.</p>
+<ul>
+<li><code>after</code> (date): Checks if string date in this record is after the specified <code>Date</code>.
+Must be valid JavaScript <code>Date</code>.</li>
+<li><code>alpha</code> (boolean): Checks if string in this record contains only letters (a-zA-Z).</li>
+<li><code>alphadashed</code> (boolean): Checks if string in this record contains only numbers and/or dashes.</li>
+<li><code>alphanumeric</code> (boolean): Checks if string in this record contains only letters and numbers.</li>
+<li><code>alphanumericdashed</code> (boolean): Checks if string in this record contains only numbers and/or
+letters and/or dashes.</li>
+<li><code>array</code> (boolean): Checks if this record is a valid JavaScript array object.
+Strings formatted as arrays will fail.</li>
+<li><code>before</code> (date): Checks if string in this record is a date that&apos;s before the specified date.</li>
+<li><code>binary</code> (boolean): Checks if this record is a valid binary data. Strings will pass.</li>
+<li><code>boolean</code> (boolean): Checks if this record is a valid boolean. Strings will fail.</li>
+<li><code>contains</code> (string): Checks if string in this record contains the seed.</li>
+<li><code>creditcard</code> (boolean): Checks if string in this record is a credit card.</li>
+<li><code>date</code> (boolean): Checks if string in this record is a date takes both strings and JavaScript.</li>
+<li><code>datetime</code> (boolean): Checks if string in this record looks like a JavaScript <code>datetime</code>.</li>
+<li><code>decimal</code> (boolean): Checks if it contains a decimal or is less than 1.</li>
+<li><code>email</code> (boolean): Checks if string in this record looks like an email address.</li>
+<li><code>empty</code> (boolean): Checks if the entry is empty. Arrays, strings, or arguments objects with
+a length of 0 and objects with no
+own enumerable properties are considered empty.</li>
+<li><code>equals</code> (integer): Checks if string in this record is equal to the specified value.
+They must match in both value and type.</li>
+<li><code>falsey</code> (boolean): Would a Javascript engine register a value of <code>false</code> on this?.</li>
+<li><code>finite</code> (boolean): Checks if given value is, or can be coerced to, a finite number.
+This is not the same as native <code>isFinite</code>
+which will return <code>true</code> for booleans and empty strings.</li>
+<li><code>float</code> (boolean): Checks if string in this record is of the number type float.</li>
+<li><code>hexadecimal</code> (boolean): Checks if string in this record is a hexadecimal number.</li>
+<li><code>hexColor</code> (boolean): Checks if string in this record is a hexadecimal color.</li>
+<li><code>in</code> (array): Checks if string in this record is in the specified array of allowed
+string values.</li>
+<li><code>int</code> (boolean): Check if string in this record is an integer.</li>
+<li><code>integer</code> (boolean): Check if string in this record is an integer. Alias for <code>int</code>.</li>
+<li><code>ip</code> (boolean): Checks if string in this record is a valid IP (v4 or v6).</li>
+<li><code>ipv4</code> (boolean): Checks if string in this record is a valid IP v4.</li>
+<li><code>ipv6</code> (boolean): Checks if string in this record is aa valid IP v6.</li>
+<li><code>json</code> (boolean): Checks if the record is a JSON.</li>
+<li><code>lowercase</code> (boolean): Check if string in this record is in all lowercase.</li>
+<li><code>max</code> (integer): max value for an integer.</li>
+<li><code>maxLength</code> (integer):</li>
+<li><code>min</code> (integer): min value for an integer.</li>
+<li><code>minLength</code> (integer):</li>
+<li><code>notContains</code> (string): Checks if string in this record doesn&apos;t contain the seed.</li>
+<li><code>notIn</code> (array): does the value of this model attribute exist inside of the defined
+validator value (of the same type).
+Takes strings and arrays.</li>
+<li><code>notNull</code> (boolean): does this not have a value of <code>null</code> ?.</li>
+<li><code>null</code> (boolean): Checks if string in this record is null.</li>
+<li><code>number</code> (boolean): Checks if this record is a number. <code>NaN</code> is considered a number.</li>
+<li><code>numeric</code> (boolean): Checks if string in this record contains only numbers.</li>
+<li><code>object</code> (boolean): Checks if this attribute is the language type of Object.
+Passes for arrays, functions, objects,
+regexes, new Number(0), and new String(&apos;&apos;) !</li>
+<li><code>regex</code> (regex): Checks if the record matches the specific regex.</li>
+<li><code>required</code> (boolean): Must this model attribute contain valid data before a new
+record can be created?.</li>
+<li><code>string</code> (boolean): Checks if the record is a string.</li>
+<li><code>text</code> (boolean): Checks if the record is a text.</li>
+<li><code>truthy</code> (boolean): Would a Javascript engine register a value of <code>false</code> on this?</li>
+<li><code>undefined</code> (boolean): Would a JavaScript engine register this thing as have the
+value <code>undefined</code>?</li>
+<li><code>uppercase</code> (boolean): Checks if string in this record is uppercase.</li>
+<li><code>url</code> (boolean): Checks if string in this record is a URL.</li>
+<li><code>urlish</code> (boolean): Checks if string in this record contains something that looks like
+a route, ending with a file extension.</li>
+<li><code>uuid</code> (boolean): Checks if string in this record is a UUID (v3, v4, or v5).</li>
+<li><code>uuidv3</code> (boolean): Checks if string in this record is a UUID (v3).</li>
+<li><code>uuidv4</code> (boolean): Checks if string in this record is a UUID (v4).</li>
+</ul>
+<h4 id="defaultsto">defaultsTo</h4>
+<p>When a record is created, if no value was supplied, the record will be created with the specified
+<code>defaultsTo</code> value.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;usersGroup&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;defaultsTo&quot;</span>: <span class="hljs-string">&quot;guess&quot;</span>
+  }
+}
+</code></pre>
+<h4 id="autoincrement">autoIncrement</h4>
+<p>Sets up the attribute as an auto-increment key. When a new record is added to the model,
+if a value for this attribute is not specified, it will be generated by incrementing the most recent
+record&apos;s value by one.</p>
+<p>Attributes which specify <code>autoIncrement</code> should always be of <code>type: integer</code>.
+Also, bear in mind that the level of support varies across different datastores.
+For instance, MySQL will not allow more than one auto-incrementing column per table.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;placeInLine&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span>,
+    <span class="hljs-string">&quot;autoIncrement&quot;</span>: <span class="hljs-literal">true</span>
+  }
+}
+</code></pre>
+<h4 id="unique">unique</h4>
+<p>Ensures no two records will be allowed with the same value for the target attribute.
+This is an adapter-level constraint, so in most cases this will result in a unique index on the
+attribute being created in the underlying datastore.</p>
+<p>Defaults to <code>false</code> if not specified.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;username&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+  }
+}
+</code></pre>
+<h4 id="primarykey">primaryKey</h4>
+<p>Use this attribute as the the primary key for the record. Only one attribute per model can be the
+<code>primaryKey</code>. Defaults to <code>false</code> if not specified.</p>
+<p>This should never be used unless <code>autoPK</code> is set to <code>false</code>.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;uuid&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;primaryKey&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+  }
+}
+</code></pre>
+<h4 id="enum">enum</h4>
+<p>A special validation property which only saves data which matches a whitelisted set of values.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;gender&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;male&quot;</span>, <span class="hljs-string">&quot;female&quot;</span>]
+  }
+}
+</code></pre>
+<h4 id="size">size</h4>
+<p>If supported in the adapter, can be used to define the size of the attribute.
+For example in MySQL, <code>size</code> can be specified as a number (<code>n</code>) to create a column with the SQL
+data type: <code>varchar(n)</code>.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;name&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;size&quot;</span>: <span class="hljs-number">24</span>
+  }
+}
+</code></pre>
+<h4 id="columnname">columnName</h4>
+<p>Inside an attribute definition, you can specify a <code>columnName</code> to force Waterline to store data
+for that attribute in a specific column in the configured connection.
+Be aware that this is not necessarily SQL-specific. It will also work for MongoDB fields, etc.</p>
+<p>While the <code>columnName</code> property is primarily designed for working with existing/legacy databases,
+it can also be useful in situations where your database is being shared by other applications,
+or you don&apos;t have access permissions to change the schema.</p>
+<pre><code class="lang-js"><span class="hljs-string">&quot;attributes&quot;</span>: {
+  <span class="hljs-string">&quot;name&quot;</span>: {
+    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+    <span class="hljs-string">&quot;columnName&quot;</span>: <span class="hljs-string">&quot;pet_name&quot;</span>
+  }
+}
+</code></pre>
+<h2 id="associations">Associations</h2>
+<p>With Waterline you can associate models with other models across all data stores.
+This means that your users can live in PostgreSQL and their photos can live in MongoDB
+and you can interact with the data as if they lived together on the same database.
+You can also have associations that live on separate connections or in different databases
+within the same adapter.</p>
+<h3 id="one-way-associations">One-Way associations</h3>
+<p>A one-way association is where a model is associated with another model.
+You could query that model and populate to get the associated model.
+You can&apos;t however query the associated model and populate to get the associating model.</p>
+<p>In this example, we are associating a <code>User</code> with a <code>Pet</code> but not a <code>Pet</code> with a <code>User</code>.
+Because we have only formed an association on one of the models, a <code>Pet</code> has no restrictions
+on the number of <code>User</code> models it can belong to. If we wanted to, we could change this and
+associate the <code>Pet</code> with exactly one <code>User</code> and the <code>User</code> with exactly one <code>Pet</code>.</p>
+<p><code>./api/pet/models/Pet.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;color&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    }
+  }
+}
+</code></pre>
+<p><code>./api/user/models/User.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;color&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;pony&quot;</span>: {
+      <span class="hljs-string">&quot;model&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h3 id="one-to-one-associations">One-to-One associations</h3>
+<p>A one-to-one association states that a model may only be associated with one other model.
+In order for the model to know which other model it is associated with a foreign key must
+be included in the record.</p>
+<p>In this example, we are associating a <code>Pet</code> with a <code>User</code>. The <code>User</code> may only have one
+<code>Pet</code> and viceversa, a <code>Pet</code> can only have one <code>User</code>. However, in order to query this association
+from both sides, you will have to create/update both models.</p>
+<p><code>./api/pet/models/Pet.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;color&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;owner&quot;</span>: {
+      <span class="hljs-string">&quot;model&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>
+    }
+  }
+}
+</code></pre>
+<p><code>./api/user/models/User.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;pony&quot;</span>: {
+      <span class="hljs-string">&quot;model&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h3 id="one-to-many-associations">One-to-Many associations</h3>
+<p>A one-to-many association states that a model can be associated with many other models.
+To build this association a virtual attribute is added to a model using the <code>collection</code> property.
+In a one-to-many association one side must have a <code>collection</code> attribute and the other side must contain a
+<code>model</code> attribute. This allows the many side to know which records it needs to get when a <code>populate</code> is used.</p>
+<p>Because you may want a model to have multiple one-to-many associations on another model a <code>via</code> key is
+needed on the <code>collection</code> attribute. This states which <code>model</code> attribute on the one side of the association
+is used to populate the records.</p>
+<p>In this example, a <code>User</code> can have several <code>Pet</code>, but a <code>Pet</code> has only one <code>owner</code> (from the <code>User</code> model).</p>
+<p><code>./api/pet/models/Pet.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;color&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;owner&quot;</span>: {
+      <span class="hljs-string">&quot;model&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>
+    }
+  }
+}
+</code></pre>
+<p><code>./api/user/models/User.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;pets&quot;</span>: {
+      <span class="hljs-string">&quot;collection&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>,
+      <span class="hljs-string">&quot;via&quot;</span>: <span class="hljs-string">&quot;owner&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h3 id="many-to-many-associations">Many-to-Many associations</h3>
+<p>A many-to-many association states that a model can be associated with many other models
+and vice-versa. Because both models can have many related models a new join table will
+need to be created to keep track of these relations.</p>
+<p>Waterline will look at your models and if it finds that two models both have <code>collection</code>
+attributes that point to each other, it will automatically build up a join table for you.</p>
+<p>Because you may want a model to have multiple many-to-many associations on another model
+a <code>via</code> key is needed on the <code>collection</code> attribute. This states which <code>model</code> attribute on the
+one side of the association is used to populate the records.</p>
+<p>Using the <code>User</code> and <code>Pet</code> example lets look at how to build a schema where a <code>User</code> may
+have many <code>Pet</code> records and a <code>Pet</code> may have multiple owners.</p>
+<p>In this example, we will start with an array of users and an array of pets.
+We will create records for each element in each array then associate all of the <code>Pets</code> with all
+of the <code>Users</code>. If everything worked properly, we should be able to query any <code>User</code> and see that
+they <em>own</em> all of the <code>Pets</code>. Furthermore, we should be able to query any <code>Pet</code> and see that
+it is <em>owned</em> by every <code>User</code>.</p>
+<p><code>./api/pet/models/Pet.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;color&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;owners&quot;</span>: {
+      <span class="hljs-string">&quot;collection&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+      <span class="hljs-string">&quot;via&quot;</span>: <span class="hljs-string">&quot;pets&quot;</span>
+    }
+  }
+}
+</code></pre>
+<p><code>./api/user/models/User.settings.json</code>:</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&quot;unique&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;pets&quot;</span>: {
+      <span class="hljs-string">&quot;collection&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>,
+      <span class="hljs-string">&quot;via&quot;</span>: <span class="hljs-string">&quot;owners&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h2 id="lifecycle-callbacks">Lifecycle Callbacks</h2>
+<p>Lifecycle callbacks are functions you can define to run at certain times in a query.
+They are hooks that you can tap into in order to change data.</p>
+<p>Strapi exposes a handful of lifecycle callbacks by default.</p>
+<h3 id="callbacks-on-create">Callbacks on create</h3>
+<ul>
+<li><code>beforeValidate</code>: <code>fn(values, cb)</code></li>
+<li><code>afterValidate</code>: <code>fn(values, cb)</code></li>
+<li><code>beforeCreate</code>: <code>fn(values, cb)</code></li>
+<li><code>afterCreate</code>: <code>fn(newlyInsertedRecord, cb)</code></li>
+</ul>
+<h3 id="callbacks-on-update">Callbacks on update</h3>
+<ul>
+<li><code>beforeValidate: fn(valuesToUpdate, cb)</code></li>
+<li><code>afterValidate: fn(valuesToUpdate, cb)</code></li>
+<li><code>beforeUpdate: fn(valuesToUpdate, cb)</code></li>
+<li><code>afterUpdate: fn(updatedRecord, cb)</code></li>
+</ul>
+<h3 id="callbacks-on-destroy">Callbacks on destroy</h3>
+<ul>
+<li><code>beforeDestroy</code>: <code>fn(criteria, cb)</code></li>
+<li><code>afterDestroy</code>: <code>fn(deletedRecord, cb)</code></li>
+</ul>
+<p>For example, this could be your <code>./api/pet/models/Pet.js</code> file:</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-comment">/**
+   * Basic settings
+   */</span>
+
+  <span class="hljs-comment">// The identity to use.</span>
+  identity: settings.identity,
+
+  <span class="hljs-comment">// The connection to use.</span>
+  connection: settings.connection,
+
+  <span class="hljs-comment">// Do you want to respect schema?</span>
+  schema: settings.schema,
+
+  <span class="hljs-comment">// Merge simple attributes from settings with those ones.</span>
+  attributes: _.merge(settings.attributes, {
+
+  }),
+
+  <span class="hljs-comment">// Do you automatically want to have time data?</span>
+  autoCreatedAt: settings.autoCreatedAt,
+  autoUpdatedAt: settings.autoUpdatedAt,
+
+  <span class="hljs-comment">/**
+   * Lifecycle callbacks on create
+   */</span>
+
+  <span class="hljs-comment">// Before creating a value.</span>
+  beforeCreate: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">values, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  },
+
+  <span class="hljs-comment">// After creating a value.</span>
+  afterCreate: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">newlyInsertedRecord, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  },
+
+  <span class="hljs-comment">/**
+   * Lifecycle callbacks on update
+   */</span>
+
+  <span class="hljs-comment">// Before updating a value.</span>
+  beforeUpdate: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">valuesToUpdate, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  },
+
+  <span class="hljs-comment">// After updating a value.</span>
+  afterUpdate: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">updatedRecord, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  },
+
+  <span class="hljs-comment">/**
+   * Lifecycle callbacks on destroy
+   */</span>
+
+  <span class="hljs-comment">// Before destroying a value.</span>
+  beforeDestroy: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">criteria, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  },
+
+  <span class="hljs-comment">// After destroying a value.</span>
+  afterDestroy: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">destroyedRecords, next</span>) </span>{
+    <span class="hljs-comment">// Do some stuff</span>
+    next();
+  }
+</code></pre>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="blueprints.html#remove-from-a-record" class="navigation navigation-prev " aria-label="Previous page: remove from a record">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="models.html#model-settings" class="navigation navigation-next " aria-label="Next page: Model settings">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Models","level":"8.1","depth":1,"next":{"title":"Model settings","level":"8.1.1","depth":2,"anchor":"#model-settings","path":"models.md","ref":"models.md#model-settings","articles":[]},"previous":{"title":"remove from a record","level":"7.1.7","depth":2,"anchor":"#remove-from-a-record","path":"blueprints.md","ref":"blueprints.md#remove-from-a-record","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":true},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":false}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/1.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"models.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:35.883Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

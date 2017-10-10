@@ -1,0 +1,1097 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>UI Components · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="utils.html" />
+    
+    
+    <link rel="prev" href="development.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../cli/CLI.html">
+            
+                <a href="../cli/CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../configurations/configurations.html">
+            
+                <a href="../configurations/configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="quick-start.html">
+            
+                <a href="quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.2" data-path="development.html">
+            
+                <a href="development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="6.3" data-path="ui-components.html">
+            
+                <a href="ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="utils.html">
+            
+                <a href="utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../guides-advanced/customize-admin.html">
+            
+                <a href="../guides-advanced/customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                <a href="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="../guides-advanced/routeless-container-store-injection.html">
+            
+                <a href="../guides-advanced/routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="../guides-advanced/prevent-plugin-rendering.html">
+            
+                <a href="../guides-advanced/prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                <a href="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="../migration/migration-guide.html">
+            
+                <a href="../migration/migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >UI Components</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="ui-components">UI components</h1>
+<p>Strapi provides built-in UI Components to make development faster.</p>
+<h2 id="button">Button</h2>
+<p>Button library based on bootstrap classes</p>
+<p><img src="../assets/buttons.png" alt="Buttons img"></p>
+<h3 id="usage">Usage</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>children</code></td>
+<td>node</td>
+<td>no</td>
+<td>Ex: <code>&lt;Button primary&gt;Click me&lt;/Button&gt;</code></td>
+</tr>
+<tr>
+<td><code>className</code></td>
+<td>any</td>
+<td>no</td>
+<td>Sets a custom className. Ex: <code>&lt;Button className={styles.myCustomClass} label=&quot;Click me&quot; /&gt;</code></td>
+</tr>
+<tr>
+<td><code>kind</code></td>
+<td>string</td>
+<td>no</td>
+<td>Sets the built-in className to the button. Ex: <code>&lt;Button kind=&quot;primaryAddShape&quot;  label=&quot;Click me&quot; /&gt;</code></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td>no</td>
+<td>Sets the button label with i18n Ex: <code>&lt;Button label=&quot;myPlugin.button.label&quot; primary /&gt;</code></td>
+</tr>
+<tr>
+<td><code>labelValue</code></td>
+<td>string</td>
+<td>no</td>
+<td>Sets the button label with i18n and a dynamic value Ex:  <code>&lt;Button label=&quot;myPlugin.button.label&quot; labelValue={{ foo: &apos;bar&apos; }} primary /&gt;</code></td>
+</tr>
+<tr>
+<td><code>loader</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Displays a button loader. Ex: <code>&lt;Button loader /&gt;</code></td>
+</tr>
+<tr>
+<td><code>primary</code></td>
+<td>bool</td>
+<td>no</td>
+<td><a href="https://v4-alpha.getbootstrap.com/components/buttons/" target="_blank">Bootstrap className</a></td>
+</tr>
+<tr>
+<td><code>primaryAddShape</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Inserts fontAwesone plus icon inside the button. Ex: <code>&lt;Button primaryAddShape&gt;Click me&lt;/Button&gt;</code></td>
+</tr>
+<tr>
+<td><code>secondary</code></td>
+<td>bool</td>
+<td>no</td>
+<td><a href="https://v4-alpha.getbootstrap.com/components/buttons/" target="_blank">Bootstrap className</a></td>
+</tr>
+<tr>
+<td><code>secondaryHotline</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Sets className</td>
+</tr>
+<tr>
+<td><code>secondaryHotlineAdd</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Inserts fontAwesone plus icon inside the button. Ex: <code>&lt;Button secondaryHotlineAdd&gt;Click me&lt;/Button&gt;</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td>no</td>
+<td>Sets the button type</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<p> <strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/translations/en.json</code>.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;myPlugin.button.label&quot;</span>: <span class="hljs-string">&quot;Add a new&quot;</span>
+}
+</code></pre>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/components/Foo/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-comment">// Make sure you don&apos;t have any other component called Button otherwise it will</span>
+<span class="hljs-comment">// import the one from your ./components folder instead.</span>
+<span class="hljs-keyword">import</span> Button <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;components/Button&apos;</span>;
+
+<span class="hljs-keyword">const</span> Foo = () =&gt; {
+  <span class="hljs-comment">// Define your buttons</span>
+  <span class="hljs-keyword">const</span> buttons = [
+    {
+      kind: <span class="hljs-string">&apos;primaryAddShape&apos;</span>,
+      label: <span class="hljs-string">&apos;myPlugin.button.label&apos;</span>,
+      labelValues: {
+        foo: <span class="hljs-string">&apos;Bar&apos;</span>,
+      },
+      onClick: () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&apos;Click&apos;</span>),
+    },
+  ];
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.foo}</span>&gt;</span>
+      {buttons.map((buttonProps) =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">Button</span> {<span class="hljs-attr">...buttonProps</span>} <span class="hljs-attr">key</span>=<span class="hljs-string">{buttonProps.label})}</span> /&gt;</span>}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  );
+}
+
+// Will display a primaryAddShape button with label: &apos;Add a new Bar&apos;
+
+export default Button;
+</span></code></pre>
+<hr>
+<h2 id="input">Input</h2>
+<p>Strapi provides a built-in input library which includes :</p>
+<ul>
+<li>All kind of inputs</li>
+<li>Front-End validations</li>
+<li>Error highlight</li>
+<li>i18n</li>
+</ul>
+<h3 id="usage">Usage</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addon</code></td>
+<td>string</td>
+<td>no</td>
+<td>Allows to add a string addon in your input, based on <a href="https://v4-alpha.getbootstrap.com/components/input-group/#basic-example" target="_blank">Bootstrap</a>. Ex: <code>&lt;Input {...this.props} addon=&quot;@&quot; /&gt;</code></td>
+</tr>
+<tr>
+<td><code>addRequiredInputDesign</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Allows to add an asterix on the input. Ex: <code>&lt;Input {...this.props} addRequiredInputDesign /&gt;</code></td>
+</tr>
+<tr>
+<td><code>customBootstrapClass</code></td>
+<td>string</td>
+<td>no</td>
+<td>Allows to override the input bootstrap col system. Ex: <code>&lt;Input {...this.props} customBootstrapClass=&quot;col-md-6 offset-md-6 pull-md-6&quot; /&gt;</code></td>
+</tr>
+<tr>
+<td><code>deactivateErrorHighlight</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Prevents from displaying error highlight in the input: Ex: <code>&lt;Input {...this.props} deactivateErrorHighlight /&gt;</code></td>
+</tr>
+<tr>
+<td><code>didCheckErrors</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Use this props to display errors after submitting a form. Ex: <code>&lt;Input {...this.props} didCheckErrors={this.state.error} /&gt;</code></td>
+</tr>
+<tr>
+<td><code>disabled</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Disable the input. Ex: <code>&lt;Input {...this.props} disabled /&gt;</code></td>
+</tr>
+<tr>
+<td><code>errors</code></td>
+<td>array</td>
+<td>no</td>
+<td>Allows to display custom error messages. Ex: <code>&lt;Input {...this.props} errors={[{ id: &apos;The value is not correct&apos; }]} /&gt;</code></td>
+</tr>
+<tr>
+<td><code>handleBlur</code></td>
+<td>func or bool</td>
+<td>no</td>
+<td>Overrides the default onBlur behavior. If bool passed to the component it will disabled the input validations checking.</td>
+</tr>
+<tr>
+<td><code>handleChange</code></td>
+<td>func</td>
+<td>yes</td>
+<td>Sets your reducer state.</td>
+</tr>
+<tr>
+<td><code>handFocus</code></td>
+<td>func</td>
+<td>no</td>
+<td>Adds an onFocus event to the input.</td>
+</tr>
+<tr>
+<td><code>inputDescription</code></td>
+<td>string</td>
+<td>no</td>
+<td>Allows to add an input description that is displayed like <a href="https://v4-alpha.getbootstrap.com/components/forms/#defining-states" target="_blank">bootstrap</a>.</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Displays the input&apos;s label with i18n.</td>
+</tr>
+<tr>
+<td><code>linkContent</code></td>
+<td>object</td>
+<td>no</td>
+<td>Allows to display a link within the input&apos;s description. Ex:  <code>&lt;Input {...this.props} linkContent={{ description: &apos;check out our&apos;, link: &apos;tutorial video&apos; }} /&gt;</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The key to update your reducer.</td>
+</tr>
+<tr>
+<td><code>noErrorsDescription</code></td>
+<td>bool</td>
+<td>no</td>
+<td>Prevents from displaying built-in errors.</td>
+</tr>
+<tr>
+<td><code>placeholder</code></td>
+<td>string</td>
+<td>no</td>
+<td>Allows to set a placeholder.</td>
+</tr>
+<tr>
+<td><code>pluginId</code></td>
+<td>string</td>
+<td>no</td>
+<td>Use to display name, placeholder... with i18n.</td>
+</tr>
+<tr>
+<td><code>selectOptions</code></td>
+<td>array</td>
+<td>no</td>
+<td>Options for the select.</td>
+</tr>
+<tr>
+<td><code>tabIndex</code></td>
+<td>string</td>
+<td>no</td>
+<td>Sets the order in which the inputs are focused on tab key press.</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>no</td>
+<td>This props can only be used for checkboxes, it allows to add a title on top of the input, the label will be on the right side of the checkbox.</td>
+</tr>
+<tr>
+<td><code>validations</code></td>
+<td>object</td>
+<td>yes</td>
+<td>Allows to have the built-in input&apos;s validations. If set to {} the validations will be ignored. Ex:  <code>&lt;Input {...this.props} validations={{ required: true }} /&gt;</code></td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>string or bool or number</td>
+<td>yes</td>
+<td>The input&apos;s value.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;react&apos;</span>;
+<span class="hljs-comment">// Make sure you don&apos;t have a component called Input inside your ./components folder</span>
+<span class="hljs-comment">// It will import the one in your components folder instead.</span>
+<span class="hljs-keyword">import</span> Input <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;components/Input&apos;</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooPage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">constructor</span>(props) {
+    <span class="hljs-keyword">super</span>(props);
+
+    <span class="hljs-keyword">this</span>.state {
+      data: {
+        foo: <span class="hljs-string">&apos;bar&apos;</span>,
+      },
+      error: <span class="hljs-literal">false</span>,
+      errors: [],
+    };
+  }
+
+  handleChange = ({ target }) =&gt; {
+    <span class="hljs-keyword">const</span> value = target.type === <span class="hljs-string">&apos;number&apos;</span> ? <span class="hljs-built_in">Number</span>(target.value) : target.value;
+
+    <span class="hljs-keyword">const</span> error = target.value.length === <span class="hljs-number">0</span>;
+
+    <span class="hljs-keyword">if</span> (error) {
+      <span class="hljs-keyword">this</span>.setState({ error: <span class="hljs-literal">true</span>, errors: [{ id: <span class="hljs-string">&apos;This input is required &apos;</span> }] });
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">this</span>.setState({ data[target.name]: value, error: <span class="hljs-literal">false</span>, errors: [] });
+    }
+
+  }
+
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.foo}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Input</span>
+          <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;string&quot;</span>
+          <span class="hljs-attr">value</span>=<span class="hljs-string">{this.state.data.foo}</span>
+          <span class="hljs-attr">label</span>=<span class="hljs-string">&quot;This is a string input&quot;</span>
+          <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;foo&quot;</span>
+          <span class="hljs-attr">handleChange</span>=<span class="hljs-string">{this.handleChange}</span>
+          <span class="hljs-attr">validations</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">required:</span> <span class="hljs-attr">true</span> }}
+          <span class="hljs-attr">didCheckErrors</span>=<span class="hljs-string">{this.state.error}</span>
+        /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    );
+  }
+}
+
+export default FooPage;
+</span></code></pre>
+<hr>
+<h2 id="popup-warning">PopUp Warning</h2>
+<p>PopUp warning library based on <a href="https://reactstrap.github.io/components/modals/" target="_blank">reactstrap</a>.</p>
+<p><img src="../assets/popup-warning.png" alt="PopUp warning img"></p>
+<h3 id="usage">Usage</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bodyMessage</td>
+<td>string</td>
+<td>no</td>
+<td>Body message of the pop up (works with i18n).</td>
+</tr>
+<tr>
+<td>handleConfirm</td>
+<td>func</td>
+<td>yes</td>
+<td>Function executed when the user clicks on the <code>Confirm button</code>.</td>
+</tr>
+<tr>
+<td>isOpen</td>
+<td>bool</td>
+<td>yes</td>
+<td>Show or hide the popup.</td>
+</tr>
+<tr>
+<td>popUpWarningType</td>
+<td>string</td>
+<td>yes</td>
+<td>Sets the popup body icon. Available types: <code>danger</code>, <code>info</code>, <code>notFound</code>, <code>success</code>, <code>warning</code></td>
+</tr>
+<tr>
+<td>toggleModal</td>
+<td>func</td>
+<td>yes</td>
+<td>Function to toggle the modal.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/translations/en.json</code>.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;button.label&quot;</span>: <span class="hljs-string">&quot;Click me&quot;</span>,
+  <span class="hljs-string">&quot;popup.danger.message&quot;</span>: <span class="hljs-string">&quot;Are you sure you want to delete this item?&quot;</span>
+}
+</code></pre>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/translations/fr.json</code>.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;button.label&quot;</span>: <span class="hljs-string">&quot;Cliquez&quot;</span>,
+  <span class="hljs-string">&quot;popup.danger.message&quot;</span>: <span class="hljs-string">&quot;&#xCA;tes-vous certain de vouloir supprimer ce message?&quot;</span>
+}
+</code></pre>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/containers/FooPage/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">import</span> Button <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;components/Button&apos;</span>;
+<span class="hljs-keyword">import</span> PopUpWarning <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;components/PopUpWarning&apos;</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooPage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">constructor</span>(props) {
+    <span class="hljs-keyword">super</span>(props);
+    <span class="hljs-keyword">this</span>.state = {
+      isOpen: <span class="hljs-literal">false</span>,
+    };
+  }
+
+  handlePopUpConfirm = () =&gt; {
+    <span class="hljs-comment">// Some logic Here</span>
+    <span class="hljs-keyword">this</span>.setState({ isOpen: <span class="hljs-literal">false</span> });
+  }
+
+  render() {
+    <span class="hljs-keyword">return</span>(
+      &lt;div&gt;
+        &lt;Button primary handleClick={() =&gt; this.setState({ isOpen: !this.state.isOpen })} label=&quot;my-plugin.button.label&quot; /&gt;
+        &lt;PopUpWarning
+          bodyMessage=&quot;my-plugin.popup.danger.message&quot;
+          handleConfirm={this.handlePopUpConfirm}
+          toggleModal={() =&gt; this.setState({ isOpen: !this.state.isOpen })}
+          popUpWarningType=&quot;danger&quot;
+        /&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+
+export default FooPage;
+</code></pre>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="development.html" class="navigation navigation-prev " aria-label="Previous page: Development">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="utils.html" class="navigation navigation-next " aria-label="Next page: Helpers">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"UI Components","level":"6.3","depth":1,"next":{"title":"Helpers","level":"6.4","depth":1,"path":"plugins/utils.md","ref":"plugins/utils.md","articles":[]},"previous":{"title":"Development","level":"6.2","depth":1,"path":"plugins/development.md","ref":"plugins/development.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"plugins/ui-components.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

@@ -1,0 +1,730 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Admin panel · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="handle-plugin-user-navigation.html" />
+    
+    
+    <link rel="prev" href="../plugins/utils.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../cli/CLI.html">
+            
+                <a href="../cli/CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../configurations/configurations.html">
+            
+                <a href="../configurations/configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../plugins/quick-start.html">
+            
+                <a href="../plugins/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.2" data-path="../plugins/development.html">
+            
+                <a href="../plugins/development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.3" data-path="../plugins/ui-components.html">
+            
+                <a href="../plugins/ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="../plugins/utils.html">
+            
+                <a href="../plugins/utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter active" data-level="7.1" data-path="customize-admin.html">
+            
+                <a href="customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="handle-plugin-user-navigation.html">
+            
+                <a href="handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="routeless-container-store-injection.html">
+            
+                <a href="routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="prevent-plugin-rendering.html">
+            
+                <a href="prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="using-actions-reducer-sagas.html">
+            
+                <a href="using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="../migration/migration-guide.html">
+            
+                <a href="../migration/migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Admin panel</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="admin-panel">Admin panel</h1>
+<p>One of Strapi&apos;s main feature is its fully extendable and customizable admin panel. This section explains how the admin panel section is structured and how to customize it.</p>
+<p>See the <a href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md" target="_blank">Contributing Guide</a> for informations on how to develop the Strapi&apos;s admin interface.</p>
+<h2 id="files-structure">Files structure</h2>
+<p>The entire logic of the admin panel is located in a single folder named <code>./admin/</code>. This directory contains the following structure:</p>
+<ul>
+<li><code>admin/</code>:<ul>
+<li><code>build/</code>: build of the front-end part generated by Webpack.</li>
+<li><code>src/</code>: source code of the front-end part.<ul>
+<li><code>app.js</code>: entry point of the React application.</li>
+<li><code>assets/</code>: contains necessary assets (images&#x2026;).</li>
+<li><code>components/</code>: contains components used by the admin panel.</li>
+<li><code>containers/</code>: contains high level components.</li>
+<li><code>favicon.ico</code>: favicon displayed in the web browser.</li>
+<li><code>i18n.js</code>: logic for internationalization.</li>
+<li><code>index.html</code>: basic html file in which are injected necessary styles and scripts.</li>
+<li><code>reducers.js</code>: reducers logic.</li>
+<li><code>store.js</code> store logic.</li>
+<li><code>styles/</code>: contains the global styles. Specific styles are defined at the component level.</li>
+<li><code>translations/</code>: text messages for each supported languages.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>config/</code>:<ul>
+<li><code>routes.json</code>: admin panel API routes.</li>
+<li><code>admin.json</code>: contains admin panel specific settings.</li>
+</ul>
+</li>
+<li><code>controllers/</code>: admin panel API controllers.</li>
+<li><code>package.json</code>: contains admin panel dependencies list.</li>
+<li><code>services/</code>: admin panel API services.</li>
+</ul>
+<h2 id="customization">Customization</h2>
+<p>Strapi&apos;s admin panel can be customized according to your needs, so you can make it reflects your identity: colors, fonts, logo, etc.</p>
+<h3 id="install-admin-dependencies">Install admin dependencies</h3>
+<p>To customize the admin panel, install its own dependencies. To do so, run <code>npm install</code> from the <code>./admin/</code> folder.</p>
+<p>The most interesting dependency is <code>strapi-helper-plugin</code> which is a kind of framework, on top of React, used by both plugins and admin panel.</p>
+<h3 id="development-mode">Development mode</h3>
+<p>You can start the admin panel in development by running <code>npm start</code> from the <code>./admin/</code> folder. This command starts Webpack and a web server.</p>
+<p>At this point, you should be able to see the admin at <a href="http://localhost:4000/admin/" target="_blank">http://localhost:4000/admin/</a>.</p>
+<h4 id="colors">Colors</h4>
+<p>Admin&apos;s styles use <a href="https://github.com/postcss/postcss" target="_blank">PostCSS</a>, and more precisely <a href="https://github.com/postcss/postcss-scss" target="_blank">PostCSS-SCSS</a>.</p>
+<p>In this way, colors are stored in variables. The values of these variables can be easily changed in files located in <code>./admin/admin/src/styles/variables/</code>.</p>
+<p>The changes should be automatically visible.</p>
+<h4 id="fonts">Fonts</h4>
+<p>Fonts can also be overridden:</p>
+<ul>
+<li>Add the fonts files you need in <code>./admin/admin/src/styles/fonts</code>.</li>
+<li>Import them from <code>./admin/admin/src/styles/base/fonts.scss</code>.</li>
+<li>Use them by replacing the variables&apos; values in <code>./admin/admin/src/styles/variables/variables.bootstrap.scss</code>.</li>
+</ul>
+<h4 id="logo">Logo</h4>
+<p>To change the top-right displayed admin panel&apos;s logo, replace the image located at <code>./admin/admin/src/assets/images/logo-strapi.png</code>.</p>
+<p>Note: make sure the size of your image is the same as the existing one (434px x 120px).</p>
+<h4 id="rebuild-the-admin-panel">Rebuild the admin panel</h4>
+<p>When you are done with your modifications, you need to rebuild the dashboard.
+To do that, run the following command from the <code>./admin</code> folder:</p>
+<pre><code>npm run build
+</code></pre><p>This will replace the folder&apos;s content located at <code>./admin/admin/build</code>.</p>
+<p>Visit <a href="http://localhost:1337/admin/" target="_blank">http://localhost:1337/admin/</a> to make sure your updates have been taken in account.</p>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../plugins/utils.html" class="navigation navigation-prev " aria-label="Previous page: Helpers">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="handle-plugin-user-navigation.html" class="navigation navigation-next " aria-label="Next page: Handle plugin user navigation">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Admin panel","level":"7.1","depth":1,"next":{"title":"Handle plugin user navigation","level":"7.2","depth":1,"path":"guides-advanced/handle-plugin-user-navigation.md","ref":"guides-advanced/handle-plugin-user-navigation.md","articles":[]},"previous":{"title":"Helpers","level":"6.4","depth":1,"path":"plugins/utils.md","ref":"plugins/utils.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"guides-advanced/customize-admin.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

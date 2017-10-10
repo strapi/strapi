@@ -1,0 +1,903 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Configurations · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="../guides/controllers.html" />
+    
+    
+    <link rel="prev" href="../concepts/concepts.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../cli/CLI.html">
+            
+                <a href="../cli/CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter active" data-level="5.1" data-path="configurations.html">
+            
+                <a href="configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../plugins/quick-start.html">
+            
+                <a href="../plugins/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.2" data-path="../plugins/development.html">
+            
+                <a href="../plugins/development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.3" data-path="../plugins/ui-components.html">
+            
+                <a href="../plugins/ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="../plugins/utils.html">
+            
+                <a href="../plugins/utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../guides-advanced/customize-admin.html">
+            
+                <a href="../guides-advanced/customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                <a href="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="../guides-advanced/routeless-container-store-injection.html">
+            
+                <a href="../guides-advanced/routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="../guides-advanced/prevent-plugin-rendering.html">
+            
+                <a href="../guides-advanced/prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                <a href="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="../migration/migration-guide.html">
+            
+                <a href="../migration/migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Configurations</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="configurations">Configurations</h1>
+<p>The main configurations of the project are located in the <code>./config</code> directory. Additional configs can be added in the <code>./config</code> folder of each APIs and plugins by creating JavaScript or JSON files.</p>
+<h2 id="application">Application</h2>
+<p><strong>Path &#x2014;</strong> <code>./config/application.json</code>.</p>
+<p>Contains the main configurations relative to your project.</p>
+<ul>
+<li><code>name</code> (string): Application&apos;s name.</li>
+<li><code>description</code> (string): Application&apos;s description.</li>
+<li><code>favicon</code><ul>
+<li><code>path</code> (string): Path to the favicon file. Default value: <code>favicon.ico</code>.</li>
+<li><code>maxAge</code> (integer): Cache-control max-age directive in ms. Default value: <code>86400000</code>.</li>
+</ul>
+</li>
+<li><code>public</code><ul>
+<li><code>path</code> (string): Path to the public folder. Default value: <code>./public</code>.</li>
+<li><code>maxAge</code> (integer): Cache-control max-age directive in ms. Default value: <code>60000</code>.</li>
+</ul>
+</li>
+</ul>
+<h2 id="custom">Custom</h2>
+<p>Add custom configurations to the project. The content of this file is available through the <code>strapi.config</code> object.</p>
+<h4 id="example">Example</h4>
+<p><strong>Path &#x2014;</strong> <code>./config/custom.json</code>.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;backendURL&quot;</span>: <span class="hljs-string">&quot;http://www.strapi.io&quot;</span>,
+  <span class="hljs-string">&quot;mainColor&quot;</span>: <span class="hljs-string">&quot;blue&quot;</span>
+}
+</code></pre>
+<p>These configurations are accessible through <code>strapi.config.backendURL</code> and <code>strapi.config.mainColor</code>.</p>
+<h2 id="hook">Hook</h2>
+<blockquote>
+<p>Refer to the <a href="../advanced/hooks.html">advanced hooks settings for more informations</a>.</p>
+</blockquote>
+<h2 id="language">Language</h2>
+<p>As described in the <a href="../plugins/development.html#i18n">i18n documentation</a>, Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).</p>
+<ul>
+<li><code>enabled</code> (boolean): Enable or disable i18n. Default value: <code>true</code>.</li>
+<li><code>defaultLocale</code> (string): Default locale used by the application. Default value: <code>en_us</code>.</li>
+<li><code>modes</code> (array): Methods used to detect client language. Default value: <code>[&quot;query&quot;, &quot;subdomain&quot;, &quot;cookie&quot;, &quot;header&quot;, &quot;url&quot;, &quot;tld&quot;]</code>.</li>
+<li><code>cookieName</code> (string): Name of the cookie used to store the locale name. Default value: <code>locale</code>.</li>
+</ul>
+<h2 id="middleware">Middleware</h2>
+<blockquote>
+<p>Refer to the <a href="../advanced/middlewares.html">advanced middlewares settings for more informations</a>.</p>
+</blockquote>
+<h2 id="functions">Functions</h2>
+<p>The <code>./config/functions/</code> folder contains a set of JavaScript files in order to add dynamic and logic based configurations.</p>
+<h3 id="bootstrap">Bootstrap</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/functions/bootstrap.js</code>.</p>
+<p>The <code>bootstrap</code> function is called at every server start. You can use it to add a specific logic at this moment of your server&apos;s lifecycle.</p>
+<p>Here are some use cases:</p>
+<ul>
+<li>Create an admin user if there isn&apos;t.</li>
+<li>Fill the database with some necessary data.</li>
+<li>Check that the database is up-and-running.</li>
+</ul>
+<h3 id="cron-tasks">CRON tasks</h3>
+<p>CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).</p>
+<blockquote>
+<p>Note: Please make sure the <code>enabled</code> cron config is set to <code>true</code> in your environment&apos;s variables.</p>
+</blockquote>
+<p>The cron format consists of:</p>
+<pre><code>*    *    *    *    *    *
+&#x252C;    &#x252C;    &#x252C;    &#x252C;    &#x252C;    &#x252C;
+&#x2502;    &#x2502;    &#x2502;    &#x2502;    &#x2502;    |
+&#x2502;    &#x2502;    &#x2502;    &#x2502;    &#x2502;    &#x2514; day of week (0 - 7) (0 or 7 is Sun)
+&#x2502;    &#x2502;    &#x2502;    &#x2502;    &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500; month (1 - 12)
+&#x2502;    &#x2502;    &#x2502;    &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500; day of month (1 - 31)
+&#x2502;    &#x2502;    &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500; hour (0 - 23)
+&#x2502;    &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500; minute (0 - 59)
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500; second (0 - 59, OPTIONAL)
+</code></pre><p>To define a CRON job, add your logic like bellow:</p>
+<p><strong>Path &#x2014;</strong> <code>./config/functions/cron.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+
+  <span class="hljs-comment">/**
+   * Simple example.
+   * Every monday at 1am.
+   */</span>
+
+  <span class="hljs-string">&apos;0 0 1 * * 1&apos;</span>: () =&gt; {
+    <span class="hljs-comment">// Add your own logic here (eg. send a queue of email, create a database backup, etc.).</span>
+  }
+};
+</code></pre>
+<h2 id="locales">Locales</h2>
+<p>The <code>locales</code> directory contains the translations of your API.</p>
+<p>Each JSON file located in the folder must have the name of its corresponding translation (eg. <code>en_US.json</code>, <code>fr_FR.json</code>, etc.). Each line defines a translation key and its corresponding value.</p>
+<h4 id="example">Example</h4>
+<p><strong>Path &#x2014;</strong> <code>./config/locales/en_US.json</code>.</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">&quot;welcome&quot;</span>: <span class="hljs-string">&quot;Welcome&quot;</span>
+}
+</code></pre>
+<h2 id="environments">Environments</h2>
+<p>Most of the application&apos;s configurations are defined by environment. It means that you can specify settings for each environment (<code>development</code>, <code>production</code>, <code>test</code>, etc.).</p>
+<blockquote>
+<p>Note: You can access to the config of the current environment through <code>strapi.config.currentEnvironment</code>.</p>
+</blockquote>
+<h3 id="custom">Custom</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/custom.json</code>.</p>
+<ul>
+<li><code>customConfiguration</code> (string): Example of a configuration specific to your app.</li>
+</ul>
+<h3 id="database">Database</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/database.json</code>.</p>
+<ul>
+<li><code>defaultConnection</code> (string): Connection by default for models which are not related to a specific <code>connection</code>. Default value: <code>default</code>.</li>
+<li><code>connections</code> List of all available connections.<ul>
+<li><code>default</code><ul>
+<li><code>connector</code> (string): Connector used by the current connection. Default value: <code>strapi-mongoose</code>.</li>
+<li><code>client</code> (string): Client used to store session. Default value: <code>cookie</code>.</li>
+<li><code>key</code> (string): Cookie key name. Default value: <code>strapi.sid</code></li>
+<li><code>maxAge</code> (integer): Time in milliseconds before the session expire. Default value: <code>86400000</code>.</li>
+<li><code>rolling</code> (boolean): Force a session identifier cookie to be set on every response. Default value: <code>false</code>.</li>
+<li><code>signed</code> (boolean): httpOnly or not. Default value: <code>true</code>.</li>
+<li><code>overwrite</code> (boolean): Can overwrite or not. Default value: <code>true</code>.</li>
+<li><code>settings</code> Useful for external session stores such as Redis.<ul>
+<li><code>host</code> (string): Database host name. Default value: <code>localhost</code>.</li>
+<li><code>port</code> (integer): Database port. Default value: <code>27017</code>.</li>
+<li><code>database</code> (string): Database name. Default value: <code>development</code>.</li>
+<li><code>username</code> (string): Username used to establish the connection.</li>
+<li><code>password</code> (string): Password used to establish the connection.</li>
+<li><code>options</code> (object): List of additional options used by the connector.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="request">Request</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/request.json</code>.</p>
+<ul>
+<li><code>session</code><ul>
+<li><code>enabled</code> (boolean): Enable or disable sessions. Default value: <code>false</code>.</li>
+<li><code>client</code> (string): Client used to persist sessions. Default value: <code>redis</code>.</li>
+<li><code>settings</code><ul>
+<li><code>host</code> (string): Client host name. Default value: <code>localhost</code>.</li>
+<li><code>port</code> (integer): Client port. Default value: <code>6379</code>.</li>
+<li><code>database</code>(integer)|String - Client database name. Default value: <code>10</code>.</li>
+<li><code>password</code> (string): Client password. Default value: <code> </code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>logger</code><ul>
+<li><code>level</code> (string): Default log level. Default value: <code>debug</code>.</li>
+<li><code>exposeInContext</code> (boolean): Expose logger in context so it can be used through <code>strapi.log.info(&#x2018;my log&#x2019;)</code>. Default value: <code>true</code>.</li>
+<li><code>requests</code> (boolean): Enable or disable requests logs. Default value: <code>false</code>.</li>
+</ul>
+</li>
+<li><code>parser</code><ul>
+<li><code>enabled</code>(boolean): Enable or disable parser. Default value: <code>true</code>.</li>
+<li><code>multipart</code> (boolean): Enable or disable multipart bodies parsing. Default value: <code>true</code>.</li>
+</ul>
+</li>
+<li><code>router</code><ul>
+<li><code>prefix</code> (string): API url prefix (eg. <code>/v1</code>).</li>
+</ul>
+</li>
+</ul>
+<h3 id="response">Response</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/response.json</code>.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Gzip" target="_blank"><code>gzip</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or not GZIP response compression.</li>
+</ul>
+</li>
+<li><code>responseTime</code><ul>
+<li><code>enabled</code> (boolean): Enable or not <code>X-Response-Time header</code> to response. Default value: <code>false</code>.</li>
+</ul>
+</li>
+</ul>
+<h3 id="security">Security</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/security.json</code>.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank"><code>csrf</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable CSRF. Default value: depends on the environment.</li>
+<li><code>key</code> (string): The name of the CSRF token added to the model. Default value: <code>_csrf</code>.</li>
+<li><code>secret</code> (string): The key to place on the session object which maps to the server side token. Default value: <code>_csrfSecret</code>.</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Content_Security_Policy" target="_blank"><code>csp</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/P3P" target="_blank"><code>p3p</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable p3p.</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank"><code>hsts</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable HSTS.</li>
+<li><code>maxAge</code> (integer): Number of seconds HSTS is in effect. Default value: <code>31536000</code>.</li>
+<li><code>includeSubDomains</code> (boolean): Applies HSTS to all subdomains of the host. Default value: <code>true</code>.</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank"><code>xframe</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable <code>X-FRAME-OPTIONS</code> headers in response.</li>
+<li><code>value</code> (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: <code>SAMEORIGIN</code>.</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Cross-site_scripting" target="_blank"><code>xss</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing" target="_blank"><code>cors</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable CORS to prevent your server to be requested from another domain.</li>
+<li><code>origin</code> (string): Allowed URLs (<code>http://example1.com, http://example2.com</code> or allows everyone <code>*</code>). Default value: <code>http://localhost</code>.</li>
+<li><code>expose</code> (array): Configures the <code>Access-Control-Expose-Headers</code> CORS header. If not specified, no custom headers are exposed. Default value: <code>[&quot;WWW-Authenticate&quot;, &quot;Server-Authorization&quot;]</code>.</li>
+<li><code>maxAge</code> (integer): Configures the <code>Access-Control-Max-Age</code> CORS header. Default value: <code>31536000</code>.</li>
+<li><code>credentials</code> (boolean): Configures the <code>Access-Control-Allow-Credentials</code> CORS header. Default value: <code>true</code>.</li>
+<li><code>methods</code> (array)|String - Configures the <code>Access-Control-Allow-Methods</code> CORS header. Default value: <code>[&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;HEAD&quot;]</code>.</li>
+<li><code>headers</code> (array): Configures the <code>Access-Control-Allow-Headers</code> CORS header. If not specified, defaults to reflecting the headers specified in the request&apos;s Access-Control-Request-Headers header. Default value: <code>[&quot;Content-Type&quot;, &quot;Authorization&quot;, &quot;X-Frame-Options&quot;]</code>.</li>
+</ul>
+</li>
+<li><code>ip</code><ul>
+<li><code>enabled</code> (boolean): Enable or disable IP blocker. Default value: <code>false</code>.</li>
+<li><code>whiteList</code> (array): Whitelisted IPs. Default value: <code>[]</code>.</li>
+<li><code>blackList</code> (array): Blacklisted IPs. Default value: <code>[]</code>.</li>
+</ul>
+</li>
+</ul>
+<h3 id="server">Server</h3>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/server.json</code>.</p>
+<ul>
+<li><code>host</code> (string): Host name. Default value: <code>localhost</code>.</li>
+<li><code>port</code> (integer): Port on which the server should be running. Default value: <code>1337</code>.</li>
+<li><code>autoReload</code> (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.</li>
+<li><a href="https://en.wikipedia.org/wiki/Cron" target="_blank"><code>cron</code></a><ul>
+<li><code>enabled</code> (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: <code>false</code>.</li>
+</ul>
+</li>
+</ul>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../concepts/concepts.html" class="navigation navigation-prev " aria-label="Previous page: Table of contents">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="../guides/controllers.html" class="navigation navigation-next " aria-label="Next page: Controllers">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Configurations","level":"5.1","depth":1,"next":{"title":"Controllers","level":"5.2","depth":1,"path":"guides/controllers.md","ref":"guides/controllers.md","articles":[]},"previous":{"title":"Table of contents","level":"4.1","depth":1,"path":"concepts/concepts.md","ref":"concepts/concepts.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"configurations/configurations.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

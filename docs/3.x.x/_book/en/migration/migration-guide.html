@@ -1,0 +1,1003 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Migrating from v1 to v3 · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="../api-reference/reference.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../cli/CLI.html">
+            
+                <a href="../cli/CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../configurations/configurations.html">
+            
+                <a href="../configurations/configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="../plugins/quick-start.html">
+            
+                <a href="../plugins/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.2" data-path="../plugins/development.html">
+            
+                <a href="../plugins/development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.3" data-path="../plugins/ui-components.html">
+            
+                <a href="../plugins/ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="../plugins/utils.html">
+            
+                <a href="../plugins/utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../guides-advanced/customize-admin.html">
+            
+                <a href="../guides-advanced/customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                <a href="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="../guides-advanced/routeless-container-store-injection.html">
+            
+                <a href="../guides-advanced/routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="../guides-advanced/prevent-plugin-rendering.html">
+            
+                <a href="../guides-advanced/prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                <a href="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter active" data-level="10.1" data-path="migration-guide.html">
+            
+                <a href="migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Migrating from v1 to v3</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="migrating-from-v1-to-v3">Migrating from v1 to v3</h1>
+<p>To be honest with all of you, the migration process won&apos;t be easy. The new version introduces a lot of breaking changes especially on the query part. Some features are still not available for the moment such as the authentication, users &amp; permissions, email, media upload and GraphQL. <strong>If you&apos;re using one of theses features, you shouldn&apos;t be able to migrate unless you rewrite these features from scratch.</strong></p>
+<p><strong>Here are the major changes:</strong></p>
+<ul>
+<li>Moved from Waterline to specialized ORMs such as Mongoose (MongoDB) and Bookshelf (Postgres, MySQL, Maria, SQLite).</li>
+<li>New configurations structure.</li>
+<li>Moved from Koa@1 (generators) to Koa@2 (async functions).</li>
+<li>Removed middlewares from core (koa-graphql, koa-proxy, koa-ssl, koa-views).</li>
+<li>Better error handling with Boom.</li>
+</ul>
+<blockquote>
+<p>Feel free to <a href="http://slack.strapi.io" target="_blank">join us on Slack</a> and ask questions about the migration process.</p>
+</blockquote>
+<h2 id="getting-started">Getting started</h2>
+<p>The best way to migrate your project is to generate a new empty project using the v3. Then, copy and paste your <code>v1-app/api</code> folder to the new app <code>v3-app/api</code>. The next step is to follow the categories one by one in order and you will be able to migrate your project without issues.</p>
+<p>See the <a href="../getting-started/quick-start.html">Quick start</a> section to install the latest version of Strapi.</p>
+<h2 id="configurations">Configurations</h2>
+<p>The structure of the configurations has been harmonised and simplified. Files has been renamed or deleted, and some others has been added.</p>
+<ul>
+<li><code>./config/general.json</code> renamed <code>./config/application.json</code></li>
+<li><code>./config/i18n.json</code> renamed <code>./config/language.json</code></li>
+<li><code>./config/globals.json</code> removed</li>
+<li><code>./config/studio.json</code> removed</li>
+<li><code>./config/middleware.json</code> added</li>
+<li><code>./config/hook.json</code> added</li>
+<li><code>./config/custom.json</code> added</li>
+<li><code>./config/environments/**/databases.json</code> renamed <code>./config/environments/**/database.json</code></li>
+<li><code>./config/environments/**/response.json</code> added</li>
+<li><code>./config/environments/**/custom.json</code> added</li>
+</ul>
+<p>Please refer to the <a href="../configurations/configurations.html">new documentation</a> to set the correct values in each file.</p>
+<blockquote>
+<p>Note: Don&apos;t forget that middlewares has been removed. Please refers to the right section of this document for more details.</p>
+</blockquote>
+<h2 id="routes">Routes</h2>
+<p>The format of the routes has changed to easily integrate multiple strategies to hit the controllers&apos; actions. It means that the routes are not REST-limited.</p>
+<h4 id="v1x">v1.x</h4>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;routes&quot;</span>: {
+    <span class="hljs-string">&quot;GET /post&quot;</span>: {
+      <span class="hljs-string">&quot;controller&quot;</span>: <span class="hljs-string">&quot;Post&quot;</span>,
+      <span class="hljs-string">&quot;action&quot;</span>: <span class="hljs-string">&quot;find&quot;</span>
+    },
+    <span class="hljs-string">&quot;GET /post/:id&quot;</span>: {
+      <span class="hljs-string">&quot;controller&quot;</span>: <span class="hljs-string">&quot;Post&quot;</span>,
+      <span class="hljs-string">&quot;action&quot;</span>: <span class="hljs-string">&quot;findOne&quot;</span>
+    },
+    <span class="hljs-string">&quot;POST /post&quot;</span>: {
+      <span class="hljs-string">&quot;controller&quot;</span>: <span class="hljs-string">&quot;Post&quot;</span>,
+      <span class="hljs-string">&quot;action&quot;</span>: <span class="hljs-string">&quot;create&quot;</span>
+    },
+    <span class="hljs-string">&quot;PUT /post/:id&quot;</span>: {
+      <span class="hljs-string">&quot;controller&quot;</span>: <span class="hljs-string">&quot;Post&quot;</span>,
+      <span class="hljs-string">&quot;action&quot;</span>: <span class="hljs-string">&quot;update&quot;</span>
+    },
+    <span class="hljs-string">&quot;DELETE /post/:id&quot;</span>: {
+      <span class="hljs-string">&quot;controller&quot;</span>: <span class="hljs-string">&quot;Post&quot;</span>,
+      <span class="hljs-string">&quot;action&quot;</span>: <span class="hljs-string">&quot;delete&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h4 id="v3x">v3.x</h4>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;routes&quot;</span>: [
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;GET&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/post&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;Post.find&quot;</span>,
+    },
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;GET&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/post/:id&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;Post.findOne&quot;</span>,
+    },
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;POST&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/post&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;Post.create&quot;</span>,
+    },
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;PUT&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/post/:id&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;Post.update&quot;</span>,
+    },
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;DELETE&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/post/:id&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;Post.delete&quot;</span>,
+    }
+  ]
+}
+</code></pre>
+<h2 id="controllers">Controllers</h2>
+<p>Koa@1.x.x was based on generators whereas Koa@2.x.x is based on async functions. It means that the <code>yield</code> word has been replaced by the <code>await</code> word. Then the <code>context</code> was passed via the function context itself. Now, the <code>context</code> is passed  through the function&apos;s parameters. Also, you don&apos;t need to apply the <code>try/catch</code> pattern in each controller&apos;s actions.</p>
+<h4 id="v1x">v1.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  find: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.find(<span class="hljs-keyword">this</span>.params);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  }
+}
+</code></pre>
+<h4 id="v3x">v3.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  find: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    ctx.body = <span class="hljs-keyword">await</span> Post.find(<span class="hljs-keyword">this</span>.params);
+  }
+}
+</code></pre>
+<h2 id="services">Services</h2>
+<p>The services files should stay as they are. Your generator functions can be converted into async functions but it shouldn&apos;t be necessary.</p>
+<h2 id="models">Models</h2>
+<p>The models didn&apos;t change a lot. The <code>autoCreatedAt</code>, <code>autoUpdatedAt</code> and <code>autoPK</code> attributes have been removed and replaced by the <code>hasTimestamps</code> attribute.</p>
+<blockquote>
+<p>Note: The <code>hasTimestamps</code> options will only work with Bookshelf. Also you need to create the <code>created_at</code> and <code>updated_at</code> columns manually.</p>
+<p>Note: The <code>enum</code> type is not available for now. Also, the validations are not working properly. It means that most of the validations have to be done manually.</p>
+</blockquote>
+<h4 id="v1x">v1.x</h4>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;identity&quot;</span>: <span class="hljs-string">&quot;pet&quot;</span>,
+  <span class="hljs-string">&quot;connection&quot;</span>: <span class="hljs-string">&quot;mongoDBServer&quot;</span>,
+  <span class="hljs-string">&quot;schema&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;gender&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;male&quot;</span>, <span class="hljs-string">&quot;female&quot;</span>]
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;int&quot;</span>,
+      <span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">100</span>
+    },
+    <span class="hljs-string">&quot;birthDate&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>
+    },
+    <span class="hljs-string">&quot;breed&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>
+    }
+  },
+  <span class="hljs-string">&quot;autoPK&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;autoCreatedAt&quot;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&quot;autoUpdatedAt&quot;</span>: <span class="hljs-literal">true</span>
+}
+</code></pre>
+<h4 id="v3x">v3.x</h4>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;connection&quot;</span>: <span class="hljs-string">&quot;mongoDBServer&quot;</span>,
+  <span class="hljs-string">&quot;options&quot;</span>: {
+    <span class="hljs-string">&quot;hasTimestamps&quot;</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-string">&quot;attributes&quot;</span>: {
+    <span class="hljs-string">&quot;name&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+      <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-string">&quot;gender&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>
+    },
+    <span class="hljs-string">&quot;age&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;int&quot;</span>,
+      <span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">100</span>
+    },
+    <span class="hljs-string">&quot;birthDate&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>
+    },
+    <span class="hljs-string">&quot;breed&quot;</span>: {
+      <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h2 id="query">Query</h2>
+<p>We were based on the popular Waterline ORM. As we said in our blog posts, Waterline suffers from a lack of maintenance and we decided to move to more specific ORMs depending on the database. It increases the performances and unblock particular features for the users. Currently, we are supporting these databases:</p>
+<ul>
+<li>MongoDB (through Mongoose).</li>
+<li>Postgres, MySQL, SQLite3 and more (through Bookshelf).</li>
+<li>Redis (through ioredis).</li>
+</ul>
+<p><strong>This major change means that you will have to rewrite every single query of your app. So, please to be sure that you need to switch to the new version of Strapi before starting the migration.</strong></p>
+<h4 id="v1x">v1.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  find: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.find(<span class="hljs-keyword">this</span>.params);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  },
+
+  findOne: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.findOne(<span class="hljs-keyword">this</span>.params);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  },
+
+  <span class="hljs-comment">// POST request</span>
+  create: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.create(<span class="hljs-keyword">this</span>.request.body);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  },
+
+  <span class="hljs-comment">// PUT request</span>
+  update: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.update(<span class="hljs-keyword">this</span>.params.id, <span class="hljs-keyword">this</span>.request.body);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  },
+
+  <span class="hljs-comment">// DELETE request</span>
+  <span class="hljs-keyword">delete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">this</span>.body = <span class="hljs-keyword">yield</span> Post.destroy(<span class="hljs-keyword">this</span>.params);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  }
+};
+</code></pre>
+<h4 id="v3x">v3.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  find: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-comment">// Bookshelf</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.forge(<span class="hljs-keyword">this</span>.params).fetchAll();
+    <span class="hljs-comment">// Mongoose</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.find(<span class="hljs-keyword">this</span>.params);
+  },
+
+  findOne: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-comment">// Bookshelf</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.forge(<span class="hljs-keyword">this</span>.params).fetch();
+    <span class="hljs-comment">// Mongoose</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.findOne(<span class="hljs-keyword">this</span>.params);
+  },
+
+  create: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-comment">// Bookshelf</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.forge(<span class="hljs-keyword">this</span>.request.body).save();
+    <span class="hljs-comment">// Mongoose</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.create(<span class="hljs-keyword">this</span>.request.body);
+  },
+
+  update: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-comment">// Bookshelf</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.forge({ id: <span class="hljs-number">1234</span> }).save(<span class="hljs-keyword">this</span>.request.body, {
+      patch: <span class="hljs-literal">true</span>
+    });
+    <span class="hljs-comment">// Mongoose</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.update({ id: <span class="hljs-number">1234</span> }, <span class="hljs-keyword">this</span>.request.body);
+  },
+
+  <span class="hljs-keyword">delete</span>: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-comment">// Bookshelf</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.forge({ id: <span class="hljs-number">1234</span> }).destroy();
+    <span class="hljs-comment">// Mongoose</span>
+    ctx.body = <span class="hljs-keyword">await</span> Post.findOneAndRemove({ id: <span class="hljs-number">1234</span> });
+  }
+}
+</code></pre>
+<blockquote>
+<p>Note: You will have more changes if your project is based on a SQL database. Waterline and Mongoose are almost sharing the same API.</p>
+</blockquote>
+<h2 id="middlewares">Middlewares</h2>
+<p>We decided to reduce the core to the minimum. So, we removed middlewares with features that shouldn&apos;t be handled by a Node.js server such as:</p>
+<ul>
+<li>GraphQL: <strong>We love GraphQL at Strapi</strong> and we will provide a <code>strapi-plugin-graphql</code> <strong>very soon</strong>.</li>
+<li>Proxy: There are many great server solutions to handle a proxy feature such as nginx or Caddy.</li>
+<li>SSL: Same as proxy.</li>
+<li>Views: We are building APIs, not website. However, we know that sometimes you need to render views from your API server. That&apos;s why we created a <code>strapi-views</code> hook.</li>
+</ul>
+<h3 id="graphql">GraphQL</h3>
+<p>We are not able to give you a solution at the moment. As we said above, <strong>we will develop in the next weeks</strong> a dedicated plugin to integrate GraphQL into a project.</p>
+<h3 id="proxy--ssl">Proxy &amp; SSL</h3>
+<p>You should take a look at these articles to configure SSL and proxy with nginx:</p>
+<ul>
+<li><a href="https://www.sitepoint.com/configuring-nginx-ssl-node-js/" target="_blank">Configuring Nginx and SSL with Node.js</a></li>
+<li><a href="http://www.nikola-breznjak.com/blog/javascript/nodejs/using-nginx-as-a-reverse-proxy-in-front-of-your-node-js-application/" target="_blank">Using Nginx as a reverse proxy with a Node.js app</a></li>
+</ul>
+<h3 id="views">Views</h3>
+<p>It works exactly as before. You need to add <code>strapi-views</code> into your app&apos;s dependencies and configure the views as below:</p>
+<p><strong>Path &#x2014;</strong> <code>./config/environments/**/custom.json</code></p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;views&quot;</span>: {
+    <span class="hljs-string">&quot;viewExt&quot;</span>: <span class="hljs-string">&quot;ejs&quot;</span>,
+    <span class="hljs-string">&quot;debug&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-string">&quot;cache&quot;</span>: <span class="hljs-literal">true</span>
+  }
+}
+</code></pre>
+<blockquote>
+<p>Note: You might have to install the template engine by your own (ex: <code>npm install ejs --save</code>).</p>
+</blockquote>
+<h2 id="error-handling">Error handling</h2>
+<p>Boom is deeply integrated into the core which allows you to enjoy the entire <a href="https://github.com/hapijs/boom" target="_blank">Boom API</a> through the context of your request. Every error throw in your project will be intercepted and decorated with Boom.</p>
+<h4 id="v1x">v1.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-comment">// GET request</span>
+  find: <span class="hljs-function"><span class="hljs-keyword">function</span> *(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">yield</span> Post.find(<span class="hljs-keyword">this</span>.params);
+
+      <span class="hljs-keyword">if</span> (posts.length === <span class="hljs-number">0</span>) {
+        ctx.status = <span class="hljs-number">404</span>;
+        ctx.body = <span class="hljs-string">&apos;There are no posts!&apos;</span>;
+      } <span class="hljs-keyword">else</span> {
+        ctx.body = posts;
+      }
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">this</span>.body = error;
+    }
+  }
+};
+</code></pre>
+<h4 id="v3x">v3.x</h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-comment">// GET request</span>
+  find: <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> Post.find(<span class="hljs-keyword">this</span>.params);
+
+    <span class="hljs-keyword">if</span> (post.length === <span class="hljs-number">0</span>) {
+      ctx.notFound(<span class="hljs-string">&apos;There are no posts!&apos;</span>); <span class="hljs-comment">// Set status to 404 and decorates error into a Boom object.</span>
+    } <span class="hljs-keyword">else</span> {
+      ctx.send(posts); <span class="hljs-comment">// Set status to 200.</span>
+    }
+  }
+};
+</code></pre>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../api-reference/reference.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Table of contents">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Migrating from v1 to v3","level":"10.1","depth":1,"previous":{"title":"Table of contents","level":"8.1","depth":1,"path":"api-reference/reference.md","ref":"api-reference/reference.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"migration/migration-guide.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+

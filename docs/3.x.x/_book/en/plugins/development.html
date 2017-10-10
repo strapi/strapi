@@ -1,0 +1,1067 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Development · Strapi documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        <meta name="author" content="Strapi">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="ui-components.html" />
+    
+    
+    <link rel="prev" href="quick-start.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Useful links</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <a target="_blank" href="http://strapi.io">
+            
+                    
+                    Strapi Website
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi">
+            
+                    
+                    GitHub Repository
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <a target="_blank" href="https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md">
+            
+                    
+                    Contributing Guide
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../getting-started/installation.html">
+            
+                <a href="../getting-started/installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../getting-started/quick-start.html">
+            
+                <a href="../getting-started/quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">CLI</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../cli/CLI.html">
+            
+                <a href="../cli/CLI.html">
+            
+                    
+                    Command line interface
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Concepts</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../concepts/concepts.html">
+            
+                <a href="../concepts/concepts.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../configurations/configurations.html">
+            
+                <a href="../configurations/configurations.html">
+            
+                    
+                    Configurations
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../guides/controllers.html">
+            
+                <a href="../guides/controllers.html">
+            
+                    
+                    Controllers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../guides/models.html">
+            
+                <a href="../guides/models.html">
+            
+                    
+                    Models
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="../guides/policies.html">
+            
+                <a href="../guides/policies.html">
+            
+                    
+                    Policies
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.5" data-path="../guides/public-assets.html">
+            
+                <a href="../guides/public-assets.html">
+            
+                    
+                    Public Assets
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.6" data-path="../guides/requests.html">
+            
+                <a href="../guides/requests.html">
+            
+                    
+                    Requests
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.7" data-path="../guides/responses.html">
+            
+                <a href="../guides/responses.html">
+            
+                    
+                    Responses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.8" data-path="../guides/routing.html">
+            
+                <a href="../guides/routing.html">
+            
+                    
+                    Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.9" data-path="../guides/services.html">
+            
+                <a href="../guides/services.html">
+            
+                    
+                    Services
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Plugins</li>
+        
+        
+    
+        <li class="chapter " data-level="6.1" data-path="quick-start.html">
+            
+                <a href="quick-start.html">
+            
+                    
+                    Quick start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="6.2" data-path="development.html">
+            
+                <a href="development.html">
+            
+                    
+                    Development
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.3" data-path="ui-components.html">
+            
+                <a href="ui-components.html">
+            
+                    
+                    UI Components
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="6.4" data-path="utils.html">
+            
+                <a href="utils.html">
+            
+                    
+                    Helpers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides - Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="7.1" data-path="../guides-advanced/customize-admin.html">
+            
+                <a href="../guides-advanced/customize-admin.html">
+            
+                    
+                    Admin panel
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.2" data-path="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                <a href="../guides-advanced/handle-plugin-user-navigation.html">
+            
+                    
+                    Handle plugin user navigation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.3" data-path="../advanced/hooks.html">
+            
+                <a href="../advanced/hooks.html">
+            
+                    
+                    Hooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.4" data-path="../advanced/logging.html">
+            
+                <a href="../advanced/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.5" data-path="../advanced/middlewares.html">
+            
+                <a href="../advanced/middlewares.html">
+            
+                    
+                    Middlewares
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.6" data-path="../guides-advanced/routeless-container-store-injection.html">
+            
+                <a href="../guides-advanced/routeless-container-store-injection.html">
+            
+                    
+                    Routeless container store injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.7" data-path="../guides-advanced/prevent-plugin-rendering.html">
+            
+                <a href="../guides-advanced/prevent-plugin-rendering.html">
+            
+                    
+                    Prevent plugin rendering
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="7.8" data-path="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                <a href="../guides-advanced/using-actions-reducer-sagas.html">
+            
+                    
+                    Using React/Redux and sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">API Reference</li>
+        
+        
+    
+        <li class="chapter " data-level="8.1" data-path="../api-reference/reference.html">
+            
+                <a href="../api-reference/reference.html">
+            
+                    
+                    Table of contents
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Tutorials</li>
+        
+        
+    
+
+    
+        
+        <li class="header">Migration</li>
+        
+        
+    
+        <li class="chapter " data-level="10.1" data-path="../migration/migration-guide.html">
+            
+                <a href="../migration/migration-guide.html">
+            
+                    
+                    Migrating from v1 to v3
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Development</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="plugin-development">Plugin development</h1>
+<p>Any Strapi plugin can contain two parts: an <a href="#plugin-api-development">API</a> and a <a href="#plugin-admin-interface-development">plugin admin interface</a>. This section explains how to change each of these two parts after plugin creation, or modify an existing plugin.</p>
+<!-- See the [strapi-generate](../cli/CLI.md#strapi-generateplugin) part to check the dedicated Strapi's command line. -->
+<hr>
+<h2 id="plugin-api-development">Plugin API development</h2>
+<p>This section explains how the &apos;backend part&apos; of your plugin works.</p>
+<p>See the <a href="../concepts/concepts.html#plugin-api-development">plugin api concept</a> for details.</p>
+<p>Table of contents:</p>
+<ul>
+<li><a href="#folders-and-file-structure">Folders and files structure</a></li>
+<li><a href="#routes">Routes</a></li>
+<li><a href="#cli">CLI</a></li>
+<li><a href="#controllers">Controllers</a></li>
+<li><a href="#models">Models</a></li>
+<li><a href="#policies">Policies</a></li>
+<li><a href="#orm-queries">ORM queries</a></li>
+</ul>
+<h3 id="folders-and-files-structure">Folders and files structure</h3>
+<p>The API logic of a plugin is located in <code>./plugins/content-manager</code>.</p>
+<p>The folders and files structure is the following:</p>
+<ul>
+<li><code>admin</code>: contains the files related to the display in the admin panel</li>
+<li><code>config</code>: contains the config of the plugin<ul>
+<li><code>routes.json</code>: contains the list of routes of the plugin API</li>
+</ul>
+</li>
+<li><code>controllers</code>: contains the controllers of the plugin API</li>
+<li><code>models</code>: contains the models of the plugin API</li>
+<li><code>services</code>: contains the services of the plugin API</li>
+</ul>
+<h3 id="routes">Routes</h3>
+<p>The plugin API routes are defined in the <code>./plugins/**/config/routes.json</code> file.</p>
+<p>Please refer to <a href="../guides/routing.html">router documentation</a> for informations.</p>
+<p><em>Routes prefix:</em></p>
+<p>Each route of a plugin is prefixed by the name of the plugin (eg: <code>/my-plugin/my-plugin-route</code>).</p>
+<p>To disable the prefix, add the <code>prefix</code> attribute to each concerned route, like below:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;GET&quot;</span>,
+  <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/my-plugin-route&quot;</span>,
+  <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;MyPlugin.action&quot;</span>,
+  <span class="hljs-string">&quot;prefix&quot;</span>: <span class="hljs-literal">false</span>
+}
+</code></pre>
+<h3 id="cli">CLI</h3>
+<p>The CLI can be used to generate files in the plugins folders.</p>
+<p>Please refer to the <a href="http://strapi.io" target="_blank">CLI documentation</a> for more informations.</p>
+<h3 id="controllers">Controllers</h3>
+<p>Controllers contain functions executed according to the requested route.</p>
+<p>Please refer to the <a href="../guides/controllers.html">Controllers documentation</a> for more informations.</p>
+<h3 id="models">Models</h3>
+<p>A plugin can have its own models.</p>
+<p>Please refer to the <a href="../guides/models.html">Models documentation</a> for more informations.</p>
+<h3 id="policies">Policies</h3>
+<h4 id="global-policies">Global policies</h4>
+<p>A plugin can also use a globally exposed policy in the current Strapi project.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;routes&quot;</span>: [
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;GET&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;MyPlugin.index&quot;</span>,
+      <span class="hljs-string">&quot;config&quot;</span>: {
+        <span class="hljs-string">&quot;policies&quot;</span>: [
+          <span class="hljs-string">&quot;global.isAuthenticated&quot;</span>
+        ]
+      }
+    }
+  ]
+}
+</code></pre>
+<h4 id="plugin-policies">Plugin policies</h4>
+<p>A plugin can have its own policies, such as adding security rules. For instance, if the plugin includes a policy named <code>isAuthenticated</code>, the syntax to use this policy would be:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;routes&quot;</span>: [
+    {
+      <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;GET&quot;</span>,
+      <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;/&quot;</span>,
+      <span class="hljs-string">&quot;handler&quot;</span>: <span class="hljs-string">&quot;MyPlugin.index&quot;</span>,
+      <span class="hljs-string">&quot;config&quot;</span>: {
+        <span class="hljs-string">&quot;policies&quot;</span>: [
+          <span class="hljs-string">&quot;plugins.myPlugin.isAuthenticated&quot;</span>
+        ]
+      }
+    }
+  ]
+}
+</code></pre>
+<h3 id="orm-queries">ORM queries</h3>
+<p>Each plugin contains a folder named <code>queries</code> in <code>./plugins/**/api/queries</code>. See the <a href="../concepts/concepts.html#plugin-orm-queries">plugin ORM queries concept</a> for details. A folder must be created for each ORM (eg. <code>mongoose</code>) with a file named <code>index.js</code> which exports the Mongoose ORM related queries.</p>
+<p>The queries are accessible through the <code>strapi.query()</code> method, which automatically contains the queries according to the ORM used by the model.</p>
+<h4 id="example">Example</h4>
+<p>Mongoose ORM queries definition:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/config/queries/mongoose/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getUsers: <span class="hljs-keyword">async</span> (params) =&gt; {
+    <span class="hljs-keyword">return</span> User.find(params);
+  }
+}
+</code></pre>
+<p>Bookshelf ORM queries definition:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/config/queries/bookshelf/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getUsers: <span class="hljs-keyword">async</span> (params) =&gt; {
+    <span class="hljs-keyword">return</span> User.fetchAll(params);
+  }
+}
+</code></pre>
+<p>Usage from the plugin:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/controllers/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getUsers: <span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-comment">// Get parameters from the request</span>
+    <span class="hljs-keyword">const</span> { limit, sort } = ctx.request.query;
+
+    <span class="hljs-comment">// Get the list of users using the plugins queries</span>
+    <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> strapi.query(<span class="hljs-string">&apos;User&apos;</span>).getUsers({ limit, sort });
+
+    <span class="hljs-comment">// Send the list of users as response</span>
+    ctx.body = users;
+  }
+}
+</code></pre>
+<h4 id="advanced-usage">Advanced usage</h4>
+<p>Each function in the query file is bound with the ORM&apos;s model. It means that you can create generic query very easily. This feature is useful for CRUD such as we did in the <a href="https://github.com/strapi/strapi/tree/alpha.6/packages/strapi-plugin-content-manager/config/queries" target="_blank">Content Manager plugin</a>.</p>
+<p>Mongoose ORM generic queries:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/config/queries/mongoose/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getAll: <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">params</span>) </span>{
+    <span class="hljs-comment">// this refers to the Mongoose model called in the query</span>
+    <span class="hljs-comment">// ex: strapi.query(&apos;User&apos;).getAll(), this will be equal to the User Mongoose model.</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.find(params);
+  }
+}
+</code></pre>
+<p>Bookshelf ORM generic queries:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/config/queries/bookshelf/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getAll: <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">params</span>) </span>{
+    <span class="hljs-comment">// this refers to the Bookshelf model called in the query</span>
+    <span class="hljs-comment">// ex: strapi.query(&apos;User&apos;).getAll(), this will be equal to the User Bookshelf model.</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.fetchAll(params);
+  }
+}
+</code></pre>
+<p>Usage from the plugin:</p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/api/controllers/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  getUsers: <span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-comment">// Get parameters from the request</span>
+    <span class="hljs-keyword">const</span> { limit, sort } = ctx.request.query;
+
+    <span class="hljs-comment">// Get the list of users using the plugin&apos;s queries</span>
+    <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> strapi.query(<span class="hljs-string">&apos;User&apos;</span>).getAll({ limit, sort });
+
+    <span class="hljs-comment">// Send the list of users as response</span>
+    ctx.body = users;
+  }
+}
+</code></pre>
+<hr>
+<h2 id="plugin-admin-interface-development">Plugin admin interface development</h2>
+<p>This section explains how to create your plugin interface.</p>
+<p>Table of contents:</p>
+<ul>
+<li><a href="#start-the-project-in-development-mode">Development mode</a></li>
+<li><a href="#folders-and-file-structure">Folders and files structure</a></li>
+<li><a href="#routing">Routing</a></li>
+<li><a href="#using-redux-sagas">Using Redux/sagas</a></li>
+<li><a href="#i18n">i18n</a></li>
+<li><a href="#styles">Styling</a></li>
+<li><a href="#data-flow">Data flow</a></li>
+<li><a href="#api-reference">API Reference</a></li>
+<li><a href="#tutorial">Tutorial</a></li>
+</ul>
+<h3 id="introduction">Introduction</h3>
+<p>Strapi&apos;s admin panel and plugins system aim to be an easy and powerful way to create new features.</p>
+<p>The admin panel is a <a href="https://facebook.github.io/react/" target="_blank">React</a> application which can embed other React applications. These other React applications are the <code>admin</code> parts of each Strapi&apos;s plugins.</p>
+<h3 id="start-the-project-in-development-mode">Start the project in development mode</h3>
+<p>To start the project in development mode:</p>
+<ul>
+<li>Open a new tab in you terminal</li>
+<li>Move to the <code>./plugins/my-plugin</code> folder</li>
+<li>Currently, you&apos;ll have to run <code>npm link strapi-helper-plugin</code></li>
+<li>Install the dependencies: <code>npm install</code></li>
+<li>Start the plugin: <code>npm start</code></li>
+<li>Open the admin panel in your web browser: <a href="http://localhost:1337" target="_blank">http://localhost:1337</a></li>
+<li>You should now be able to see the plugin in development mode</li>
+</ul>
+<p><em>Explanations: by doing the steps above, you start a Webpack (to build the assets) and an Express server (exposing the assets, running on port <code>3000</code>). The admin panel automatically detects if a process is running on port <code>3000</code>. If it does, it loads the <code>main.js</code> file which is, by default, the name of the build. This system enables hot reload to improve developers&apos; experience.</em></p>
+<h3 id="folders-and-files-structure">Folders and files structure</h3>
+<p>The admin panel related parts of each plugin is contained in the <code>./plugins/my-plugin/admin</code> folder it has the following structure:</p>
+<ul>
+<li><code>app/</code>: source code directory<ul>
+<li><code>components/</code>: contains the list of React components used by the plugin</li>
+<li><code>containers/</code><ul>
+<li><code>App/</code>: container used by every other containers</li>
+<li><code>HomePage/</code><ul>
+<li><code>actions.js</code>: list of <a href="http://redux.js.org/docs/basics/Actions.html" target="_blank">Redux actions</a> used by the current container</li>
+<li><code>constants.js</code>: list of actions constants</li>
+<li><code>index.js</code>: React component of the current container</li>
+<li><code>messages.js</code>: list of messages for translations (optional)</li>
+<li><code>reducer.js</code>: list of <a href="http://redux.js.org/docs/basics/Reducers.html" target="_blank">Redux reducers</a> used by the current container</li>
+<li><code>sagas.js</code>: list of <a href="https://github.com/redux-saga/redux-saga" target="_blank">redux-sagas functions</a> used by the current container (optional)</li>
+<li><code>selectors.js</code>: list of <a href="https://github.com/reactjs/reselect" target="_blank">selectors</a> used by the current container</li>
+<li><code>styles.scss</code>: style of the current container (optional)</li>
+</ul>
+</li>
+<li><code>TeamPage/</code>: secondary page</li>
+</ul>
+</li>
+<li><code>translations/</code>: contains the translations to make the plugin internationalized<ul>
+<li><code>de.json</code></li>
+<li><code>en.json</code></li>
+<li><code>fr.json</code></li>
+</ul>
+</li>
+<li><code>routes.json</code>: file containing the list of routes of the plugin</li>
+</ul>
+</li>
+<li><code>build/</code>: Webpack build of the plugin</li>
+<li><code>package.json</code>: list of the necessary npm dependencies</li>
+</ul>
+<h3 id="routing">Routing</h3>
+<p>The routing is based on the <a href="https://reacttraining.com/react-router/web/guides/philosophy" target="_blank">React Router V4</a>, due to it&apos;s implementation each route is declared in the <code>containers/App/index.js</code> file.</p>
+<p>Also, we chose to use the <a href="https://reacttraining.com/react-router/web/api/Switch" target="_blank">Switch Router</a> because it renders a route exclusively.</p>
+<p><strong><em>Route declaration :</em></strong></p>
+<p>Let&apos;s say that you want to create a route <code>/user</code> with params <code>/:id</code> associated with the container UserPage.</p>
+<p>The declaration would be as followed :</p>
+<p><strong>Path &#x2014;</strong> <code>plugins/my-plugin/admin/src/containers/App/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;react&apos;</span>;
+<span class="hljs-keyword">import</span> UserPage <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;containers/UserPage&apos;</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  <span class="hljs-comment">// ...</span>
+
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.myPlugin}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">exact</span> <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/plugins/my-plugin/user/:id&quot;</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{UserPage}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    );
+  }
+}
+
+// ...
+</span></code></pre>
+<p>See the <a href="../guides-advanced/handle-plugin-user-navigation.html">advanced user navigation guide</a> for more informations.</p>
+<h3 id="using-redux-sagas">Using Redux sagas</h3>
+<p>Due to React Router V4 your container&apos;s store is not directly injected.
+To inject your container&apos;s store if it&apos;s associated with a route you have to do it manually.</p>
+<p>As an example, you created a FooPage container associated with the route <code>/plugins/my-plugin/bar</code>, and you want to use redux/action/reducer/sagas.</p>
+<p>Your <code>plugins/my-plugin/admin/src/containers/App/index.js</code> file will look as follows :</p>
+<pre><code class="lang-js">render() {
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.myPlugin}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">exact</span> <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/plugins/my-plugin/bar&quot;</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{FooPage}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  );
+
+}
+</span></code></pre>
+<p>And the <code>plugins/my-plugin/admin/src/containers/FooPage/index.js</code> file will be :</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;react&apos;</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;react-redux&apos;</span>;
+<span class="hljs-keyword">import</span> { createStructuredSelector } <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;reselect&apos;</span>;
+<span class="hljs-keyword">import</span> { bindActionCreators, compose } <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;redux&apos;</span>;
+<span class="hljs-keyword">import</span> PropTypes <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;prop-types&apos;</span>;
+
+<span class="hljs-comment">// Utils to create your container store</span>
+<span class="hljs-keyword">import</span> injectReducer <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;utils/injectReducer&apos;</span>;
+<span class="hljs-keyword">import</span> injectSaga <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;utils/injectSaga&apos;</span>;
+
+<span class="hljs-keyword">import</span> {
+  foo,
+  bar,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./actions&apos;</span>;
+
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./reducer&apos;</span>;
+
+<span class="hljs-keyword">import</span> saga <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./sagas&apos;</span>;
+<span class="hljs-keyword">import</span> { makeSelectFooPage } <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./selectors&apos;</span>;
+
+<span class="hljs-comment">// Styles</span>
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./styles.scss&apos;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooPage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.fooPage}</span>&gt;</span>
+        Awesome container
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+}
+
+FooPage.propTypes = {
+  fooPage: PropTypes.any,
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapDispatchToProps</span>(<span class="hljs-params">dispatch</span>) </span>{
+  <span class="hljs-keyword">return</span> bindActionCreators(
+    {
+      foo,
+      bar,
+    },
+    dispatch
+  );
+}
+
+<span class="hljs-keyword">const</span> mapStateToProps = createStructuredSelector({
+  fooPage: makeSelectFooPage(),
+});
+
+<span class="hljs-keyword">const</span> withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+<span class="hljs-comment">// This is where you create your container&apos;s store</span>
+<span class="hljs-comment">// the key must correspond to your container name in camelCase</span>
+<span class="hljs-keyword">const</span> withSagas = injectSaga({ key: <span class="hljs-string">&apos;fooPage&apos;</span>, saga });
+<span class="hljs-keyword">const</span> withReducer = injectReducer({ key: <span class="hljs-string">&apos;fooPage&apos;</span>, reducer });
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> compose(
+  withReducer,
+  withSagas,
+  withConnect,
+)(FooPage);
+</code></pre>
+<p>Important: see the <a href="../guides-advanced/routeless-container-store-injection.html">advanced plugin store injection</a> for more informations about how to create your container&apos;s store.</p>
+<h3 id="i18n">i18n</h3>
+<p><a href="https://github.com/yahoo/react-intl" target="_blank">React Intl</a> provides React components and an API to format dates, numbers, and strings, including pluralization and handling translations.</p>
+<p><strong>Usage</strong></p>
+<p>We recommend to set all your components text inside the translations folder.</p>
+<p>The example below shows how to use i18n inside your plugin.</p>
+<p><strong>Define all your ids with the associated message:</strong></p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/translations/en.json</code>.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;notification.error.message&quot;</span>: <span class="hljs-string">&quot;An error occurred&quot;</span>
+}
+</code></pre>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/translations/fr.json</code></p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;notification.error.message&quot;</span>: <span class="hljs-string">&quot;Une erreur est survenue&quot;</span>
+}
+</code></pre>
+<p><strong>Usage inside a component</strong></p>
+<p><strong>Path &#x2014;</strong> <code>./plugins/my-plugin/admin/src/components/Foo/index.js</code>.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { FormattedMessage } <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;react-intl&apos;</span>;
+<span class="hljs-keyword">import</span> SomeOtherComponent <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;components/SomeOtherComponent&apos;</span>;
+
+<span class="hljs-keyword">const</span> Foo = (props) =&gt; (
+  &lt;div className={styles.foo}&gt;
+    &lt;FormattedMessage id=&quot;my-plugin.notification.error.message&quot; /&gt;
+    &lt;SomeOtherComponent {...props} /&gt;
+  &lt;/div&gt;
+)
+
+export default Foo;
+</code></pre>
+<p><a href="https://github.com/yahoo/react-intl/wiki/Components#formattedmessage" target="_blank">Check out the documentation</a> for more extensive usage.</p>
+<h3 id="styles">Styles</h3>
+<p>The styles are inherited by the plugins. However, each component has its own styles, so it possible to completely customize it.</p>
+<p><strong>See the <a href="../concepts/concepts.html#plugin-styles">plugin styles</a> for informations on its concept.</strong></p>
+<p>To style a plugin component:</p>
+<ul>
+<li>Add a <code>styles.scss</code> file in the component directory</li>
+<li>Require it from the <code>index.js</code> file (<code>import styles from &apos;./styles.scss&apos;;</code>)</li>
+<li>Add some styles in the <code>styles.scss</code> file<pre><code>.wrapper {
+display: block;
+background: red;
+height: 100px;
+width: 100px;
+}
+</code></pre>Use this style from the component: <code>&lt;div className={styles.wrapper}&gt;&lt;/div&gt;</code></li>
+</ul>
+<p>Note: if you want to use several classes:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> cn <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;classnames&apos;</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">return</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{cn(styles.wrapper,</span> <span class="hljs-attr">styles.otherClass</span>)}&gt;</span>{this.props.children}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<h3 id="data-flow">Data flow</h3>
+<p>Refer to the <a href="../concepts/concepts.html#plugin-data-flow">plugin data flow</a> for details.</p>
+<h3 id="api-reference">API Reference</h3>
+<blockquote>
+<p>Refer to the <a href="../api-reference/reference.html#plugin-registration">plugin registration</a> for details.</p>
+</blockquote>
+<h3 id="tutorial">Tutorial</h3>
+<p>For more information, try the <a href="http://strapi.io" target="_blank">Create your first Strapi plugin</a> tutorial.</p>
+
+                                
+                                </section>
+                            
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="quick-start.html" class="navigation navigation-prev " aria-label="Previous page: Quick start">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="ui-components.html" class="navigation navigation-next " aria-label="Next page: UI Components">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Development","level":"6.2","depth":1,"next":{"title":"UI Components","level":"6.3","depth":1,"path":"plugins/ui-components.md","ref":"plugins/ui-components.md","articles":[]},"previous":{"title":"Quick start","level":"6.1","depth":1,"path":"plugins/quick-start.md","ref":"plugins/quick-start.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","anchorjs","-search","-fontsettings","-sharing","versions","ga","github","feathers-collapsible-menu"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/strapi/strapi"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"ga":{"configuration":"auto","token":"UA-54313258-1"},"versions":{"type":"branches","options":[{"value":"/documentation/1.x.x/","text":"Versions 1.x.x","selected":false},{"value":"/documentation/3.x.x/","text":"Versions 3.x.x","selected":true}]},"edit-link":{"label":"Edit This Page","base":"https://github.com/strapi/strapi/edit/structure/doc/docs/3.x.x"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"feathers-collapsible-menu":{}},"theme":"default","author":"Strapi","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Strapi documentation","language":"en","gitbook":"*"},"file":{"path":"plugins/development.md","mtime":"2017-10-10T09:12:07.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-10-10T09:13:45.204Z"},"basePath":"..","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.1.1/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-feathers-collapsible-menu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+
+    </body>
+</html>
+
