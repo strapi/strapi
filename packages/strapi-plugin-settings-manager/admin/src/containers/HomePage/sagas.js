@@ -129,7 +129,6 @@ export function* fetchDatabases(action) {
     const opts = {
       method: 'GET',
     };
-
     const requestUrlListDatabases = `/settings-manager/configurations/databases/${action.environment}`;
     const requestUrlAppDatabases = '/settings-manager/configurations/database/model';
 
@@ -186,7 +185,6 @@ export function* postLanguage() {
       body,
       method: 'POST',
     };
-
     const requestUrl = '/settings-manager/configurations/languages';
 
     const resp = yield call(request, requestUrl, opts, true);
@@ -216,7 +214,6 @@ export function* postDatabase(action) {
       method: 'POST',
       body,
     };
-
     const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
 
     const resp = yield call(request, requestUrl, opts, true);
@@ -245,15 +242,11 @@ export function* settingsEdit(action) {
     // Show button loader
     yield put(setLoader());
 
-    window.Strapi.notification.info('settings-manager.strapi.notification.info.serverRestart');
-
     const opts = {
       body: action.newSettings,
       method: 'PUT',
     };
-
     const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
-
     const resp = yield  call(request, requestUrl, opts, true);
 
     if (resp.ok) {

@@ -10,7 +10,7 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { get, has, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { router } from 'app';
 
@@ -101,18 +101,18 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           <FormattedMessage id="content-type-builder.menu.section.documentation.guide" />&nbsp;
           <FormattedMessage id="content-type-builder.menu.section.documentation.guideLink">
             {(message) => (
-              <a href="http://strapi.io/documentation" target="_blank">{message}</a>
+              <a href="http://strapi.io/documentation/3.x.x/guides/models.html" target="_blank">{message}</a>
             )}
           </FormattedMessage>
         </li>
-        <li>
+        {/*<li>
           <FormattedMessage id="content-type-builder.menu.section.documentation.tutorial" />&nbsp;
           <FormattedMessage id="content-type-builder.menu.section.documentation.tutorialLink">
             {(mess) => (
               <Link to="#" target="_blank">{mess}</Link>
             )}
           </FormattedMessage>
-        </li>
+        </li>*/}
       </ul>
     </div>
   )
