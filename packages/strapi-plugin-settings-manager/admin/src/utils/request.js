@@ -45,11 +45,30 @@ function formatQueryParams(params) {
     .join('&');
 }
 
+/**
+* Server restart watcher
+* @param response
+* @returns {object} the response data
+*/
 function serverRestartWatcher(response) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(response);
-    }, 3000);
+  return new Promise((resolve) => {
+    fetch(`${Strapi.apiUrl}/_health`, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Keep-Alive': false,
+      },
+    })
+      .then(() => {
+        resolve(response);
+      })
+      .catch(() => {
+        setTimeout(() => {
+          return serverRestartWatcher(response)
+            .then(resolve);
+        }, 100);
+      });
   });
 }
 
