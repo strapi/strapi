@@ -264,7 +264,7 @@ module.exports = {
 
   convertParams: (entity, params) => {
     if (!entity) {
-      return strapi.log.error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
+      throw new Error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
     }
 
     const model = entity.toLowerCase();
@@ -276,7 +276,7 @@ module.exports = {
     const connector = strapi.models[model].orm;
 
     if (!connector) {
-      return strapi.log.error(`Impossible to determine the use ORM for the model ${model}.`);
+      throw new Error(`Impossible to determine the use ORM for the model ${model}.`);
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;
