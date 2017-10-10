@@ -20,4 +20,5 @@ install:
   - npm run setup
 
 script:
+  - npm run doc
   - npm run test
