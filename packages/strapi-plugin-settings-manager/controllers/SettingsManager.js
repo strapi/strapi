@@ -330,14 +330,6 @@ module.exports = {
     strapi.reload();
   },
 
-  assets: async ctx => {
-    try {
-      await send(ctx, `plugins/settings-manager/admin/build/${ctx.params.file}`);
-    } catch (err) {
-      ctx.body = ctx.notFound();
-    }
-  },
-
   autoReload: async ctx => {
     ctx.send({
       autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
