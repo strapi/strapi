@@ -66,17 +66,15 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
         <div className={this.props.liStyles.language} />
         <div className={`${this.props.liStyles.borderBottom} ${this.props.liStyles.flexLiLanguage}`}>
           <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>
-            <div><span className={`flag-icon flag-icon-${flag}`} /></div>
+            <div><span className={`${this.props.liStyles.flag} flag-icon flag-icon-${flag}`} /></div>
             <div className={`${this.props.liStyles.label} ${this.props.liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
           <div className="text-center" style={{ width: '33%'}}>{this.props.name}</div>
           <div style={{display:'flex', width: '33%'}}>
-
             <div className={this.props.liStyles.centered}>{languageLabel}</div>
             <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
           </div>
         </div>
-
         <div>
           <PopUpWarning
             isOpen={this.state.showWarning}

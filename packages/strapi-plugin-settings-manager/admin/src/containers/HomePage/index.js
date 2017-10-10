@@ -462,7 +462,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   valueComponent = (props) => {
     const flagName = formatLanguageLocale(props.value.value);
     const flag = getFlag(flagName);
-    // <FormattedMessage id={props.value.label} className={styles.marginLeft} />
     return (
       <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
         <FormattedMessage id="settings-manager.selectValue" defaultMessage='{language}' values={{ language: props.value.label}} className={styles.marginLeft} />
