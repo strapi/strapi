@@ -7,7 +7,7 @@
 /* eslint-disable new-cap */
 
 import { List, Map } from 'immutable';
-import { concat, get, size, map, findIndex } from 'lodash';
+import { concat, get, size, map, findIndex, isEmpty } from 'lodash';
 
 import { storeData } from '../../utils/storeData';
 
@@ -23,7 +23,7 @@ import {
 export function deleteContentType(itemToDelete, context) {
   const oldMenu = storeData.getMenu();
   const leftMenuContentTypes = get(context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
-  const leftMenuContentTypesIndex = findIndex(leftMenuContentTypes[0].links, ['destination', itemToDelete]);
+  const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(leftMenuContentTypes[0].links, ['destination', itemToDelete]) : -1;
 
   let updateLeftMenu = false;
   let sendRequest = true;

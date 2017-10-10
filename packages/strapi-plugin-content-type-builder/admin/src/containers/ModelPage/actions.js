@@ -140,10 +140,11 @@ export function setButtonLoader() {
   };
 }
 
-export function submit() {
+export function submit(context) {
   return {
     type: SUBMIT,
-  }
+    context,
+  };
 }
 
 export function submitActionSucceeded() {

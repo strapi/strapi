@@ -62,7 +62,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     this.contentHeaderButtons = [
       { label: 'content-type-builder.form.button.cancel', handleClick: this.props.cancelChanges, kind: 'secondary', type: 'button' },
-      { label: 'content-type-builder.form.button.save', handleClick: this.props.submit, kind: 'primary', type: 'submit' },
+      { label: 'content-type-builder.form.button.save', handleClick: this.handleSubmit, kind: 'primary', type: 'submit' },
     ];
   }
 
@@ -170,6 +170,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
   }
 
+  handleSubmit = () => {
+    this.props.submit(this.context);
+  }
 
   toggleModal = () => {
     const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
@@ -206,7 +209,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
             <span className={spanStyle}>{startCase(props.link.name)}</span>
             <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>{temporary}</span>
           </div>
-
         </NavLink>
       </li>
     );
@@ -303,6 +305,26 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 }
 
+ModelPage.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+}
+
+ModelPage.propTypes = {
+  cancelChanges: PropTypes.func,
+  deleteAttribute: PropTypes.func,
+  location: PropTypes.object,
+  match: PropTypes.object,
+  menu: PropTypes.array,
+  modelFetch: PropTypes.func,
+  modelFetchSucceeded: PropTypes.func,
+  modelPage: PropTypes.object,
+  params: PropTypes.object,
+  resetShowButtonsProps: PropTypes.func,
+  submit: PropTypes.func,
+  updatedContentType: PropTypes.bool,
+};
+
 const mapStateToProps = createStructuredSelector({
   menu: makeSelectMenu(),
   modelPage: selectModelPage(),
@@ -322,21 +344,6 @@ function mapDispatchToProps(dispatch) {
     dispatch,
   );
 }
-
-ModelPage.propTypes = {
-  cancelChanges: PropTypes.func,
-  deleteAttribute: PropTypes.func,
-  location: PropTypes.object,
-  match: PropTypes.object,
-  menu: PropTypes.array,
-  modelFetch: PropTypes.func,
-  modelFetchSucceeded: PropTypes.func,
-  modelPage: PropTypes.object,
-  params: PropTypes.object,
-  resetShowButtonsProps: PropTypes.func,
-  submit: PropTypes.func,
-  updatedContentType: PropTypes.bool,
-};
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withSaga = injectSaga({ key: 'modelPage', saga });

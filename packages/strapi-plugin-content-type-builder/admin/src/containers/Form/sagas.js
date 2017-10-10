@@ -36,7 +36,6 @@ export function* editContentType(action) {
 
     const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
     const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(get(leftMenuContentTypes[0], 'links'), ['destination', initialContentType.name.toLowerCase()]) : -1;
-
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
@@ -50,6 +49,7 @@ export function* editContentType(action) {
           destination: name,
           label: capitalize(pluralize(name)),
         };
+
         leftMenuContentTypes[0].links.splice(leftMenuContentTypesIndex, 1, updatedSectionLink);
         leftMenuContentTypes[0].links = sortBy(leftMenuContentTypes[0].links, 'label');
         action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
