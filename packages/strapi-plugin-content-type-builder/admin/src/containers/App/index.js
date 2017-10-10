@@ -61,7 +61,9 @@ class App extends React.Component {
 }
 
 App.contextTypes = {
+  plugins: PropTypes.object,
   router: PropTypes.object.isRequired,
+  updatePlugin: PropTypes.func,
 };
 
 App.propTypes = {

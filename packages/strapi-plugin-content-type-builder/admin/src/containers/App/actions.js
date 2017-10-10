@@ -7,7 +7,7 @@
 /* eslint-disable new-cap */
 
 import { List, Map } from 'immutable';
-import { concat, size, map, findIndex } from 'lodash';
+import { concat, get, size, map, findIndex } from 'lodash';
 
 import { storeData } from '../../utils/storeData';
 
@@ -20,8 +20,12 @@ import {
   TEMPORARY_CONTENT_TYPE_POSTED,
 } from './constants';
 
-export function deleteContentType(itemToDelete) {
+export function deleteContentType(itemToDelete, context) {
   const oldMenu = storeData.getMenu();
+  const leftMenuContentTypes = get(context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+  const leftMenuContentTypesIndex = findIndex(leftMenuContentTypes[0].links, ['destination', itemToDelete]);
+
+  let updateLeftMenu = false;
   let sendRequest = true;
 
   if (oldMenu) {
@@ -36,10 +40,19 @@ export function deleteContentType(itemToDelete) {
     }
   }
 
+  // Update Admin left menu content types
+  if (leftMenuContentTypesIndex !== -1) {
+    updateLeftMenu = true;
+    leftMenuContentTypes[0].links.splice(leftMenuContentTypesIndex, 1);
+  }
+
   return {
     type: DELETE_CONTENT_TYPE,
     itemToDelete,
     sendRequest,
+    leftMenuContentTypes,
+    updateLeftMenu,
+    updatePlugin: context.updatePlugin,
   }
 }
 

@@ -51,7 +51,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   handleDelete = (contentTypeName) => {
-    this.props.deleteContentType(contentTypeName);
+    this.props.deleteContentType(contentTypeName, this.context);
   }
 
   toggleModal = () => {
@@ -108,6 +108,22 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 }
 
+HomePage.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+}
+
+HomePage.propTypes =  {
+  deleteContentType: PropTypes.func,
+  location: PropTypes.object,
+  match: PropTypes.object,
+  menu: PropTypes.array,
+  models: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
+};
+
 const mapStateToProps = createStructuredSelector({
   homePage: selectHomePage(),
   modelsLoading: makeSelectLoading(),
@@ -123,17 +139,6 @@ function mapDispatchToProps(dispatch) {
     dispatch,
   );
 }
-
-HomePage.propTypes =  {
-  deleteContentType: PropTypes.func,
-  location: PropTypes.object,
-  match: PropTypes.object,
-  menu: PropTypes.array,
-  models: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.array,
-  ]),
-};
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'homePage', reducer });
