@@ -279,7 +279,7 @@ module.exports.app = async function() {
     this.config.url = `http://${this.config.host}:${this.config.port}`;
 };
 
-const enableHookNestedDependencies = function (name, flattenHooksConfig) {
+const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
   if (!this.hook[name]) {
     this.log.warn(`(hook:${name}) \`strapi-${name}\` is missing in your dependencies. Please run \`npm install strapi-${name}\``);
   }
@@ -305,13 +305,13 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig) {
       }) || 0; // Filter model with the right connector
 
     flattenHooksConfig[name] = {
-      enabled: modelsUsed.length > 0 // Will return false if there is no model, else true.
+      enabled: force || modelsUsed.length > 0 // Will return false if there is no model, else true.
     };
 
     // Enabled dependencies.
     if (get(this.hook, `${name}.dependencies`, []).length > 0) {
       this.hook[name].dependencies.forEach(dependency => {
-        enableHookNestedDependencies.call(this, dependency.replace('strapi-', ''), flattenHooksConfig);
+        enableHookNestedDependencies.call(this, dependency.replace('strapi-', ''), flattenHooksConfig, true);
       });
     }
   }
