@@ -411,9 +411,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         sections = this.props.home.configsDisplay.sections;
     }
 
-    // custom selectOptions for languages
+    // Custom selectOptions for languages
     const selectOptions = this.props.match.params.slug === 'languages' ? this.props.home.listLanguages : [];
-
     return (
       <Component
         sections={sections}
