@@ -244,6 +244,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     const contentType = storeData.getContentType();
 
+    // Update relation key of the temporary contentType
     if (contentType) {
       map(contentType.attributes, (attr, key) => {
         if (get(attr.params, 'target') === replace(split(this.props.hash, '::')[0], '#edit', '')) {
@@ -253,7 +254,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       this.props.contentTypeCreate(contentType);
     }
 
-    return this.props.contentTypeEdit();
+    return this.props.contentTypeEdit(this.context);
   }
 
   editContentTypeAttribute = () => {
@@ -587,6 +588,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
 Form.contextTypes = {
   plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 }
 
 const mapStateToProps = selectForm();
