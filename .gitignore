@@ -103,13 +103,12 @@ package-lock.json
 testApp
 coverage
 
+
 ############################
 # Documentation
 ############################
 
 _book
-
-
 
 ############################
 # Builds
