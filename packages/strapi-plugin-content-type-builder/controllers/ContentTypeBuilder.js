@@ -3,7 +3,6 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const send = require('koa-send');
 
 const Service = require('../services/ContentTypeBuilder');
 
