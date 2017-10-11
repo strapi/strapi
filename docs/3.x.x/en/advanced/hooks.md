@@ -2,9 +2,8 @@
 
 The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, your will have to add the hook `strapi-bookshelf` to be able to connect your app with your database.
 
-
+**Path —** `./hooks/documentation/lib/index.js`.
 ```js
-
 const fs = require('fs');
 const path = require('path');
 
@@ -38,7 +37,16 @@ module.exports = strapi => {
       // it's just an example to tell you that you
       // run your business logic and when it's done
       // you just need to call the callback `cb`
-      generateDocumentation(path.resolve(process.cwd(), this.defaults.documentation.path), cb);
+      generateDocumentation(path.resolve(process.cwd(), this.defaults.documentation.path), function(err) {
+        if (err) {
+          // Error: it will display the error to the user
+          // and the hook won't be loaded.
+          return cb(err);
+        }
+
+        // Success.
+        cb();
+      });
     }
   };
 
@@ -46,7 +54,24 @@ module.exports = strapi => {
 };
 ```
 
+- `defaults` (object): Contains the defaults configurations. This object is merged to `strapi.config.hook.settings.**`.
+- `initialize` (function): Called during the server boot. The callback `cb` needs to be called. Otherwise, the hook won't be loaded.
+
 Every folder that follows this name pattern `strapi-*` in your `./node_modules` folder will be loaded as a hook. The hooks are accessible through the `strapi.hook` variable.
+
+## Structure
+
+A hook needs to follow the structure below:
+
+```
+/lib
+- index.js
+- LICENSE.md
+- package.json
+- README.md
+```
+
+The `index.js` is the entry point to your hook. It should look like the example above.
 
 ## Dependencies
 

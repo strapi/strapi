@@ -2,8 +2,8 @@
 
 The middlewares are functions which are composed and executed in a stack-like manner upon request. If you are not familiar with the middleware stack in Koa, we highly recommend you to read the [Koa's documentation introduction](http://koajs.com/#introduction).
 
+**Path —** [`strapi/lib/middlewares/responseTime/index.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).
 ```js
-// X-Response-Time middleware
 module.exports = strapi => {
   return {
     defaults: {
@@ -30,6 +30,9 @@ module.exports = strapi => {
 };
 ```
 
+- `defaults` (object): Contains the defaults configurations. This object is merged to `strapi.config.middleware.settings.**`.
+- `initialize` (function): Called during the server boot. The callback `cb` needs to be called. Otherwise, the middleware won't be loaded into the stack.
+
 The core of Strapi embraces a small list of middlewares for performances, security and great error handling.
 
 - boom
@@ -54,6 +57,17 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 - xss
 
 > Note: The following middlewares cannot be disabled: responses, router, logger and boom.
+
+## Structure
+
+A middleware needs to follow the structure below:
+
+```
+/lib
+- index.js
+```
+
+The `index.js` is the entry point to your middleware. It should look like the example above.
 
 ## Custom middlewares
 
