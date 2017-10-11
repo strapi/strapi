@@ -319,6 +319,8 @@ const shouldRenderCompo = (plugin) => new Promise((resolve, request) => {
 export default shouldRenderCompo;
 ```
 
+***
+
 ## Using React/Redux and sagas
 
 If your application is going to interact with some back-end application for data, we recommend using redux saga for side effect management.

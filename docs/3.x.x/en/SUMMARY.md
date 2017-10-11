@@ -34,7 +34,7 @@
 * [Advanced usage](plugins/advanced.md)
 
 ### Guides - Advanced
-* [Admin panel](guides-advanced/customize-admin.md)
+* [Admin panel](advanced/customize-admin.md)
 * [Hooks](advanced/hooks.md)
 * [Logging](advanced/logging.md)
 * [Middlewares](advanced/middlewares.md)
