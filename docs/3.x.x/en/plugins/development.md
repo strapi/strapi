@@ -28,7 +28,7 @@ The API logic of a plugin is located in `./plugins/content-manager`.
 The folders and files structure is the following:
 ```
 /project
-└─── admin // Contains the needed files to display to display the admin panel
+└─── admin // Contains the plugin's front-end
 └─── config // Contains the configurations of the plugin
 |    └─── routes.json // Contains the plugin's API routes
 └─── controllers // Contains the plugin's API controllers
