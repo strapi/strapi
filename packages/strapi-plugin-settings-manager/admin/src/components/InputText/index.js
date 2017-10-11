@@ -49,7 +49,6 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   componentWillReceiveProps(nextProps) {
-    // if (this.props.errors !== nextProps.errors) {
     if (!this.isSame(nextProps)) {
       const errors = isEmpty(nextProps.errors) ? [] : uniqBy(union(this.state.errors, nextProps.errors), 'id');
 
