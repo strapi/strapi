@@ -18,7 +18,7 @@ options: [--dev]
   Generates a new project called **&#60;name&#62;** and installs the plugins through the npm registry.
 
 - **strapi new &#60;name&#62; --dev**<br/>
-  Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier. Checkout the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
+  Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier. See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
 
 ***
 

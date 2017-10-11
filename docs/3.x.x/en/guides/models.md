@@ -1,6 +1,6 @@
 # Models
 
-Check out the [models' concepts](../concepts/concepts.md#models) for details.
+See the [models' concepts](../concepts/concepts.md#models) for details.
 
 ## How to create a model?
 
@@ -63,11 +63,11 @@ The following types are currently available:
 
 ## Relations
 
-See the [relations concept](../concepts/concepts.md#relations) for more informations about relations type.
+Refer to the [relations concept](../concepts/concepts.md#relations) for more informations about relations type.
 
 ### Many-to-many
 
-See the [many-to-many concept](../concepts/concepts.md#many-to-many).
+Refer to the [many-to-many concept](../concepts/concepts.md#many-to-many).
 
 #### Example
 
@@ -136,7 +136,7 @@ module.exports = {
 
 ### One-to-many
 
-See the [one-to-many concept](../concepts/concepts.md#one-to-many) for more informations.
+Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more informations.
 
 #### Example
 
@@ -201,7 +201,7 @@ module.exports = {
 
 ### One-to-one
 
-See the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
+Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
 
 #### Example
 
@@ -264,7 +264,7 @@ module.exports = {
 ```
 ### One-way
 
-See the [one-way concept](../concepts/concepts.md#one-way) for informations.
+Refer to the [one-way concept](../concepts/concepts.md#one-way) for informations.
 
 #### Example
 
@@ -300,7 +300,7 @@ module.exports = {
 
 ## Lifecycle callbacks
 
-See the [lifecycle callbacks concepts](../concepts/concepts.md#lifecycle-callbacks) for informations.
+Refer to the [lifecycle callbacks concepts](../concepts/concepts.md#lifecycle-callbacks) for informations.
 
 The following events are available by default:
 

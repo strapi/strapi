@@ -1,6 +1,6 @@
 # Installation
 
-Let's start with the installation.
+Installation is very easy and only takes a few seconds.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ npm install strapi@alpha -g
 
 Note: if you encounter npm permissions issues, [change the permissions to npms default directory](https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-1-change-the-permission-to-npms-default-directory).
 
-It takes about 20 seconds with a good Internet connection. You can take a coffee ☕️ if you have a slow one.
+It takes about 20 seconds with a good Internet connection. You can take a coffee ☕️  if you have a slow one.
 
 Having troubles during the installation? Check if someone already had the same issue https://github.com/strapi/strapi/issues. If not, you can [post one](https://github.com/strapi/strapi/issues/new), or ask for help https://strapi.io/support.
 

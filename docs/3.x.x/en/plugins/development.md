@@ -26,12 +26,15 @@ Table of contents:
 The API logic of a plugin is located in `./plugins/content-manager`.
 
 The folders and files structure is the following:
- - `admin`: contains the files related to the display in the admin panel
- - `config`: contains the config of the plugin
-  - `routes.json`: contains the list of routes of the plugin API
- - `controllers`: contains the controllers of the plugin API
- - `models`: contains the models of the plugin API
- - `services`: contains the services of the plugin API
+```
+/project
+└─── admin // Contains the plugin's front-end
+└─── config // Contains the configurations of the plugin
+|    └─── routes.json // Contains the plugin's API routes
+└─── controllers // Contains the plugin's API controllers
+└─── models // Contains the plugin's API models
+└─── services // Contains the plugin's API services
+```
 
 ### Routes
 
@@ -242,27 +245,30 @@ To start the project in development mode, read the [Contributing Guide](https://
 ### Folders and files structure
 
 The admin panel related parts of each plugin is contained in the `./plugins/my-plugin/admin` folder it has the following structure:
- - `app/`: source code directory
-   - `components/`: contains the list of React components used by the plugin
-   - `containers/`
-    - `App/`: container used by every other containers
-    - `HomePage/`
-      - `actions.js`: list of [Redux actions](http://redux.js.org/docs/basics/Actions.html) used by the current container
-      - `constants.js`: list of actions constants
-      - `index.js`: React component of the current container
-      - `messages.js`: list of messages for translations (optional)
-      - `reducer.js`: list of [Redux reducers](http://redux.js.org/docs/basics/Reducers.html) used by the current container
-      - `sagas.js`: list of [redux-sagas functions](https://github.com/redux-saga/redux-saga) used by the current container (optional)
-      - `selectors.js`: list of [selectors](https://github.com/reactjs/reselect) used by the current container
-      - `styles.scss`: style of the current container (optional)
-    - `TeamPage/`: secondary page
-   - `translations/`: contains the translations to make the plugin internationalized
-    - `de.json`
-    - `en.json`
-    - `fr.json`
-   - `routes.json`: file containing the list of routes of the plugin
- - `build/`: Webpack build of the plugin
- - `package.json`: list of the necessary npm dependencies
+
+```
+/admin
+└─── build // Webpack build of the plugin
+└─── src // Source code directory
+|    └─── bootstrap.js // (Optional) Contains the logic to execute before rendering the plugin
+|    └─── components // Contains the list of React components used by the plugin
+|    └─── containers
+|    |    └─── App // Container used by every others containers
+|    |    └─── HomePage
+|    |         └─── action.js // List of Redux actions used by the current container
+|    |         └─── constants.js // List of actions constants
+|    |         └─── index.js // React component of the current container
+|    |         └─── reducer.js // Redux reducer used by the current container
+|    |         └─── sagas.js // List of sagas functions
+|    |         └─── selectors.js // List of selectors
+|    |         └─── styles.scss // Style of the current container
+|    |
+|    └─── requirements.js // (Optional) Contains the logic to prevent a plugin from being rendered
+|    └─── translations // Contains the translations to make the plugin internationalized
+|         └─── en.json
+|         └─── fr.json
+└─── package.json // List of the necessary npm dependencies
+```
 
 ### Routing
 
@@ -299,7 +305,7 @@ class App extends React.Component {
 
 // ...
 ```
-See the [advanced user navigation guide](../guides-advanced/handle-plugin-user-navigation.md) for more informations.
+See the [advanced user navigation guide](./advanced.md#handle-user-navigation) for more informations.
 
 ### Using Redux sagas
 
@@ -387,7 +393,7 @@ export default compose(
 ```
 
 
-Important: see the [advanced plugin store injection](../guides-advanced/routeless-container-store-injection.md) for more informations about how to create your container's store.
+Important: see the [advanced container store injection](./advanced.md#routeless-container-store-injection.md) for more informations about how to create your container's store.
 
 ### i18n
 
@@ -432,7 +438,7 @@ const Foo = (props) => (
 export default Foo;
 ```
 
-[Check out the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
+See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
 
 ### Styles
 

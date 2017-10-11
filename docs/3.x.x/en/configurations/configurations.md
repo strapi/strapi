@@ -35,7 +35,7 @@ These configurations are accessible through `strapi.config.backendURL` and `stra
 
 ## Hook
 
-> Refer to the [advanced hooks settings for more informations](../advanced/hooks.md).
+> Please refer to the [advanced hooks settings for more informations](../advanced/hooks.md).
 
 ## Language
 
@@ -48,7 +48,7 @@ As described in the [i18n documentation](../plugins/development.md#i18n), Strapi
 
 ## Middleware
 
-> Refer to the [advanced middlewares settings for more informations](../advanced/middlewares.md).
+> Please refer to the [advanced middlewares settings for more informations](../advanced/middlewares.md).
 
 ## Functions
 
@@ -70,7 +70,7 @@ Here are some use cases:
 
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
 
-> Note: Please make sure the `enabled` cron config is set to `true` in your environment's variables.
+> Note: Make sure the `enabled` cron config is set to `true` in your environment's variables.
 
 The cron format consists of:
 
