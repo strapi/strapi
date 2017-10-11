@@ -174,6 +174,8 @@ Most of the application's configurations are defined by environment. It means th
  - `router`
   - `prefix` (string): API url prefix (eg. `/v1`).
 
+> Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
+
 ### Response
 
 **Path —** `./config/environments/**/response.json`.
