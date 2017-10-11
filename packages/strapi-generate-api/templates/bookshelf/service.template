@@ -21,18 +21,18 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    params = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+    const convertedParams = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
 
     return <%= globalID %>.query(function(qb) {
-      _.forEach(params.where, (where, key) => {
+      _.forEach(convertedParams.where, (where, key) => {
         qb.where(key, where.symbol, where.value);
       });
 
-      qb.orderBy(params.sort);
+      qb.orderBy(convertedParams.sort);
 
-      qb.offset(params.start);
+      qb.offset(convertedParams.start);
 
-      qb.limit(params.limit);
+      qb.limit(convertedParams.limit);
     }).fetchAll({
       withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
     });
