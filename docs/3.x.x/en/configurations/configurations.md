@@ -152,6 +152,67 @@ Most of the application's configurations are defined by environment. It means th
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
 
+#### Example
+
+**Path —** `./config/environments/**/database.json`.
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-mongoose",
+      "settings": {
+        "client": "mongo",
+        "host": "localhost",
+        "port": 27017,
+        "database": "development",
+        "username": "fooUsername",
+        "password": "fooPwd"
+      },
+      "options": {}
+    },
+    "postgres": {
+      "connector": "strapi-bookshelf",
+      "settings": {
+        "client": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "aureliengeorget",
+        "password": "${process.env.USERNAME}",
+        "database": "${process.env.PWD}",
+        "schema": "public"
+      },
+      "options": {}
+    },
+    "mysql": {
+      "connector": "strapi-bookshelf",
+      "settings": {
+        "client": "mysql",
+        "host": "localhost",
+        "port": 5432,
+        "username": "aureliengeorget",
+        "password": "root",
+        "database": ""
+      },
+      "options": {}
+    },
+    "redis": {
+      "connector": "strapi-redis",
+      "settings": {
+        "port": 6379,
+        "host": "localhost",
+        "password": ""
+      },
+      "options": {
+        "debug": false
+      }
+    }
+  }
+}
+```
+
+> Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+
 ### Request
 
 **Path —** `./config/environments/**/request.json`.
@@ -228,3 +289,33 @@ Most of the application's configurations are defined by environment. It means th
  - `autoReload` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+
+## Dynamic configurations
+
+For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
+
+### Syntax
+
+The syntax is inspired by the [ES6 template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
+
+### Usage
+
+In any JSON configurations files in your project, you can inject dynamic values like this:
+
+**Path —** `./config/application.json`.
+```json
+{
+  "name": "${process.env.APP_NAME}",
+  "description": "${process.env.APP_DESCRIPTION}",
+  "favicon": {
+    "path": "favicon.ico",
+    "maxAge": 86400000
+  },
+  "public": {
+    "path": "./public",
+    "maxAge": 60000
+  }
+}
+```
+
+> Note: You can't execute functions inside the curly braces. Only strings are allowed.
