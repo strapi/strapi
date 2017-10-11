@@ -15,7 +15,7 @@ module.exports = {
    * Every monday at 1am.
    */
 
-  // '0 1 * * 1': function () {
+  // '0 1 * * 1': () => {
   //
   // }
 };
