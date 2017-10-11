@@ -2,13 +2,13 @@
 
 See the [responses concepts](../concepts/concepts.md#responses) for details.
 
-## Context Response
-
-The context object (`ctx`) contains a list of values and functions useful to manage server responses. They are accessible through `ctx.response`, from [controllers](controllers.md) and [policies](policies.md).
-
 ### API Reference
 
 For more information, please refer to the [Koa response documentation](http://koajs.com/#response).
+
+## Context Response
+
+The context object (`ctx`) contains a list of values and functions useful to manage server responses. They are accessible through `ctx.response`, from [controllers](controllers.md) and [policies](policies.md).
 
 #### response.header
 
@@ -634,6 +634,8 @@ Flush any set headers, and begin the body.
 Strapi integrates [Boom](https://github.com/hapijs/boom): a set of utilities for returning HTTP errors. Every Boom’s functions are accessible through the `ctx.response`.
 
 You can also override responses based on them status. Please read the [configuration responses](../configurations/configurations.md#responses) for that.
+
+> Note: Every Boom's functions is delegated to the context. It means that `ctx.notFound` is a shortcut to `ctx.response.notFound`.
 
 ### API Reference
 
