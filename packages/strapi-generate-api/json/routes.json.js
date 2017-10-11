@@ -16,7 +16,7 @@ const _ = require('lodash');
 
 module.exports = scope => {
   function generateRoutes() {
-    return {
+    const routes = {
       routes: [{
         method: 'GET',
         path: '/' + scope.humanizeId,
@@ -54,7 +54,35 @@ module.exports = scope => {
         }
       }]
     };
+
+    if (scope.args.tpl && scope.args.tpl !== 'mongoose') {
+      routes.routes.push({
+        method: 'POST',
+        path: '/' + scope.humanizeId + '/:id/relationships/:relation',
+        handler: scope.globalID + '.createRelation',
+        config: {
+          policies: []
+        }
+      }, {
+        method: 'PUT',
+        path: '/' + scope.humanizeId + '/:id/relationships/:relation',
+        handler: scope.globalID + '.updateRelation',
+        config: {
+          policies: []
+        }
+      }, {
+        method: 'DELETE',
+        path: '/' + scope.humanizeId + '/:id/relationships/:relation',
+        handler: scope.globalID + '.destroyRelation',
+        config: {
+          policies: []
+        }
+      });
+    }
+
+    return routes;
   }
+
 
   // We have to delete current file
   if (!_.isEmpty(scope.parentId)) {
