@@ -6,7 +6,7 @@
 
 // Node.js core.
 const path = require('path');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 
 // Public node modules.
 const _ = require('lodash');
@@ -78,28 +78,35 @@ module.exports = (scope, cb) => {
     pluginsInstallation();
   }
 
+  // Install default plugins and link dependencies.
   function pluginsInstallation() {
-    exec(`strapi install settings-manager ${scope.developerMode ? '--dev': ''}`, (err, stdout) => {
-      logger.info('Installing plugin `Settings Manager`...');
+    // Define the list of default plugins.
+    const defaultPlugins = ['settings-manager', 'content-type-builder', 'content-manager'];
 
-      if (err) {
-        logger.error('An error occured during Settings Manager plugin installation.');
-        logger.error(stdout);
+    // Install each plugin.
+    defaultPlugins.forEach(defaultPlugin => {
+      try {
+        execSync(`strapi install ${defaultPlugin} ${scope.developerMode ? '--dev' : ''}`);
+        logger.info(`The plugin ${defaultPlugin} has been successfully installed.`);
+      } catch (error) {
+        logger.error(`An error occurred during ${defaultPlugin} plugin installation.`);
+        logger.error(error);
       }
-
-      availableDependencies.forEach(dependency => {
-        logger.info(`Linking \`${dependency.key}\` dependency to the project...`);
-
-        if (dependency.global) {
-          fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
-        } else {
-          fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
-        }
-      });
-
-      logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
-
-      cb();
     });
+
+    // Link dependencies.
+    availableDependencies.forEach(dependency => {
+      logger.info(`Linking \`${dependency.key}\` dependency to the project...`);
+
+      if (dependency.global) {
+        fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+      } else {
+        fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+      }
+    });
+
+    logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+
+    cb();
   }
 };
