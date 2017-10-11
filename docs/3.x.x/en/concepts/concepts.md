@@ -1,8 +1,9 @@
 # Concepts
 
   - Table of contents
-    - [Controllers](#controllers)
     - [Files structure](#files-structure)
+    - [Controllers](#controllers)
+    - [Filters](#filters)
     - [Models](#models)
       - [Attributes](#attributes)
       - [Relations](#relations)
@@ -27,6 +28,12 @@
 
 ***
 
+## Files structure
+
+TODO
+
+***
+
 ## Controllers
 
 Controllers are JavaScript files which contain a set of methods called **actions** reached by the client according to the requested route. It means that every time a client requests the route, the action performs the business logic coded and sends back the response. They represent the *C* in the *MVC* pattern. In most cases, the controllers will contain the bulk of a project's business logic.
@@ -46,13 +53,15 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 
 The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
-> Please refer to the [controller's guide](../guides/controllers.md) for more informations.
+> Please refer to the [controllers' guide](../guides/controllers.md) for more informations.
 
 ***
 
-## Files structure
+## Filters
 
-TODO
+Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /user?_limit=30&name=John`).
+
+> Please refer to the [filters' guide](../guides/filters.md) for more informations.
 
 ***
 
@@ -110,7 +119,7 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 
 A model must contain a list of attributes, and each of these attributes must have a type.
 
-> Please refer to the [model's guide for more informations about attributes](../guides/models.md#define-the-attributes).
+> Please refer to the [models' guide for more informations about attributes](../guides/models.md#define-the-attributes).
 
 ### Relations
 
@@ -213,7 +222,7 @@ Plugin policies are usable from any app API.
 
 ## Public Assets
 
-Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`. 
+Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`.
 
 > Please refer to the [public configuration](../configurations/configurations.md#Application) for more informations.
 
