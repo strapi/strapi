@@ -164,39 +164,39 @@ export default defaultSaga;
   2. Memoization
   3. Composability
 
-  Creating a selector
+Creating a selector:
 
-  **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/selectors.js`
-  ```js
-  import { createSelector } from 'reselect';
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/selectors.js`
+```js
+import { createSelector } from 'reselect';
 
-  /**
-  * Direct selector to the fooPage state domain
-  */
-  const selectFooPageDomain = () => state => state.get('fooPage');
+/**
+* Direct selector to the fooPage state domain
+*/
+const selectFooPageDomain = () => state => state.get('fooPage');
 
-  /**
-   * Other specific selectors
-   */
+/**
+ * Other specific selectors
+ */
 
-   const makeSelectLoading = () => createSelector(
-     selectFooPageDomain(),
-     (substate) => substate.get('loading'),
-   );
+ const makeSelectLoading = () => createSelector(
+   selectFooPageDomain(),
+   (substate) => substate.get('loading'),
+ );
 
-  /**
-   * Default selector used by FooPage
-   */
+/**
+ * Default selector used by FooPage
+ */
 
-  const selectFooPage = () => createSelector(
-    selectFooDomain(),
-    (substate) => substate.toJS()
-  );
+const selectFooPage = () => createSelector(
+  selectFooDomain(),
+  (substate) => substate.toJS()
+);
 
-  export default selectFooPage;
-  export { makeSelectLoading };
+export default selectFooPage;
+export { makeSelectLoading };
 
-  ```
+```
 
 
 #### Example

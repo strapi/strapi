@@ -73,7 +73,7 @@ To create your API using the Content Type Builder:
  - Then, click on "Add fields", add the following fields:
    - A `string` field named `name`.
    - A `text` field named `description`.
-   - A `float` field named `price`.
+   - A `number` field named `price` (with `float` as number format).
  - Save.
  - Refresh your browser to make it appear in the main menu.
 
@@ -122,11 +122,11 @@ Your API is now ready and [contains data](#manage-your-data). At this point, you
 
 When you create your API using the command line or the Content Type Builder plugin, it automatically creates the needed files to build your Content Types REST API.
 
-### List entries
+### List entries (GET)
 
 To retrieve the list of products, use the `GET /your-content-type` route.
 
-Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_order=price:asc`. For more informations, read the [filters documentation]
+Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_order=price:asc`. For more informations, read the [filters documentation](TODO)
 
 Here is an example using jQuery.
 
@@ -143,7 +143,7 @@ $.ajax({
 });
 ```
 
-### Get a specific entry
+### Get a specific entry (GET)
 
 If you want to get a specific entry, add the `id` of the wanted product at the end of the url.
 

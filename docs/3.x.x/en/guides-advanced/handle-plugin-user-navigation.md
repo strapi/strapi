@@ -27,7 +27,9 @@ User navigation within your plugin can be managed by two different ways :
 <NavLink
   to="/faq"
   activeClassName="selected"
->FAQs</NavLink>
+>
+  FAQs
+</NavLink>
 ```
 
 ## Using the App Router

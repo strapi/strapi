@@ -213,7 +213,7 @@ Plugin policies are usable from any app API.
 
 ## Public Assets
 
-Because an API may need to serve static assets, every new Strapi project includes by default, a folder named `/public`. Any file located in this directory is accessible if the request's path doesn't match any other defined route and if it matches a public file name.
+Because an API may need to serve static assets, every new Strapi project includes by default, a folder named `public`. Any file located in this directory is accessible if the request's path doesn't match any other defined route and if it matches a public file name.
 
 #### Example
 

@@ -107,7 +107,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 **Path —** `./api/product/controllers/Product.js`.
 ```js
 module.exports = {
-  findProducts: async(ctx) => {
+  findProductsWithCategories: async(ctx) => {
     // Retrieve the list of products.
     const products = Product
       .find()
@@ -122,7 +122,7 @@ module.exports = {
 **Path —** `./api/category/controllers/Category.js`.
 ```js
 module.exports = {
-  findCategories: async(ctx) => {
+  findCategoriesWithProducts: async(ctx) => {
     // Retrieve the list of categories.
     const categories = Category
       .find()
@@ -142,7 +142,7 @@ See the [one-to-many concept](../concepts/concepts.md#one-to-many) for more info
 
 A `user` can have many `articles`, and an `article` can be related to one `user` (author).
 
-**Path —** `./api/user/models/USer.settings.json`.
+**Path —** `./api/user/models/User.settings.json`.
 ```js
 {
   ...
@@ -187,7 +187,7 @@ module.exports = {
 **Path —** `./api/article/controllers/Article.js`.
 ```js
 module.exports = {
-  findArticlesWithUsers: async(ctx) => {
+  findArticlesWithAuthors: async(ctx) => {
     // Retrieve the list of articles with their authors.
     const articles = Article
       .find()
@@ -236,7 +236,7 @@ A `user` can have one `address`. And this address is only related to this `user`
 **Path —** `./api/user/controllers/User.js`.
 ```js
 module.exports = {
-  findUsersWithAddress: async(ctx) => {
+  findUsersWithAddresses: async(ctx) => {
     // Retrieve the list of users with their addresses.
     const users = User
       .find()
@@ -336,7 +336,7 @@ module.exports = {
    */
   beforeCreate: (next) => {
     // Hash password.
-    const passwordHashed = strapi.api.user.services.user.hashPassword(this.password)
+    strapi.api.user.services.user.hashPassword(this.password)
       .then((passwordHashed) => {
         // Set the password.
         this.password = passwordHashed;

@@ -10,10 +10,10 @@ Any Strapi plugin can contain two parts: an [API](#plugin-api-development) and a
 
 This section explains how the 'backend part' of your plugin works.
 
-See the [plugin api concept](../concepts/concepts.md#plugin-api-development) for details.
+See the [plugin API concept](../concepts/concepts.md#plugin-api-development) for details.
 
 Table of contents:
-  - [Folders and files structure](#folders-and-file-structure)
+  - [Folders and files structure](#folders-and-files-structure)
   - [Routes](#routes)
   - [CLI](#cli)
   - [Controllers](#controllers)
@@ -57,7 +57,7 @@ To disable the prefix, add the `prefix` attribute to each concerned route, like 
 
 The CLI can be used to generate files in the plugins folders.
 
-Please refer to the [CLI documentation](http://strapi.io) for more informations.
+Please refer to the [CLI documentation](../cli/CLI.md) for more informations.
 
 ### Controllers
 
@@ -115,9 +115,11 @@ A plugin can have its own policies, such as adding security rules. For instance,
 }
 ```
 
+Please refer to the [Policies documentation](../guides/policies.md) for more informations.
+
 ### ORM queries
 
-Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. See the [plugin ORM queries concept](../concepts/concepts.md#plugin-orm-queries) for details. A folder must be created for each ORM (eg. `mongoose`) with a file named `index.js` which exports the Mongoose ORM related queries.
+Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. See the [plugin ORM queries concept](../concepts/concepts.md#plugin-orm-queries) for details. A folder must be created for each ORM (eg. `mongoose`) with a file named `mongoose.js` which exports the Mongoose ORM related queries.
 
 The queries are accessible through the `strapi.query()` method, which automatically contains the queries according to the ORM used by the model.
 
@@ -235,17 +237,7 @@ The admin panel is a [React](https://facebook.github.io/react/) application whic
 
 ### Start the project in development mode
 
-To start the project in development mode:
- - Open a new tab in you terminal
- - Move to the `./plugins/my-plugin` folder
- - Currently, you'll have to run `npm link strapi-helper-plugin`
- - Install the dependencies: `npm install`
- - Start the plugin: `npm start`
- - Open the admin panel in your web browser: [http://localhost:1337](http://localhost:1337)
- - You should now be able to see the plugin in development mode
-
-*Explanations: by doing the steps above, you start a Webpack (to build the assets) and an Express server (exposing the assets, running on port `3000`). The admin panel automatically detects if a process is running on port `3000`. If it does, it loads the `main.js` file which is, by default, the name of the build. This system enables hot reload to improve developers' experience.*
-
+To start the project in development mode, read the [Contributing Guide](https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md).
 
 ### Folders and files structure
 
@@ -319,16 +311,13 @@ As an example, you created a FooPage container associated with the route `/plugi
 Your `plugins/my-plugin/admin/src/containers/App/index.js` file will look as follows :
 
 ```js
-render() {
-  return (
-    <div className={styles.myPlugin}>
-      <Switch>
-        <Route exact path="/plugins/my-plugin/bar" component={FooPage} />
-      </Switch>
-    </div>
-  );
-
-}
+render() => (
+  <div className={styles.myPlugin}>
+    <Switch>
+      <Route exact path="/plugins/my-plugin/bar" component={FooPage} />
+    </Switch>
+  </div>
+);
 ```
 
 And the `plugins/my-plugin/admin/src/containers/FooPage/index.js` file will be :
@@ -348,9 +337,7 @@ import {
   foo,
   bar,
 } from './actions';
-
 import reducer from './reducer';
-
 import saga from './sagas';
 import { makeSelectFooPage } from './selectors';
 
@@ -449,7 +436,7 @@ export default Foo;
 
 ### Styles
 
-The styles are inherited by the plugins. However, each component has its own styles, so it possible to completely customize it.
+The [Bootstrap styles](http://getbootstrap.com/) are inherited by the plugins. However, each component has its own styles, so it possible to completely customize it.
 
 **See the [plugin styles](../concepts/concepts.md#plugin-styles) for informations on its concept.**
 
@@ -457,15 +444,17 @@ To style a plugin component:
  - Add a `styles.scss` file in the component directory
  - Require it from the `index.js` file (`import styles from './styles.scss';`)
  - Add some styles in the `styles.scss` file
+
 ```
 .wrapper {
-  display: block;
-  background: red;
-  height: 100px;
-  width: 100px;
+    display: block;
+    background: red;
+    height: 100px;
+    width: 100px;
 }
 ```
-Use this style from the component: `<div className={styles.wrapper}></div>`
+
+Use this style from the component: `<div className={styles.wrapper}></div>`.
 
 Note: if you want to use several classes:
 

@@ -5,7 +5,7 @@ See the [services concept](../concepts/concepts.md#services) for more informatio
 ## How to create a service?
 
 There is two ways to create a service.
- - Using the CLI `strapi generate:service user`. Read the [CLI documentation] for more information.
+ - Using the CLI `strapi generate:service user`. Read the [CLI documentation](./cli/CLI.md) for more information.
  - Manually create a JavaScript file named `User.js` in `./api/**/services/`.
 
 #### Example
@@ -18,11 +18,11 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter object using SMTP transport.
 const transporter = nodemailer.createTransport({
-service: 'Gmail',
-auth: {
-  user: 'user@gmail.com',
-  pass: 'password'
-}
+  service: 'Gmail',
+  auth: {
+    user: 'user@gmail.com',
+    pass: 'password'
+  }
 });
 
 module.exports = {

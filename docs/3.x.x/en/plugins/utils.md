@@ -243,11 +243,9 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
 import { dataFetch } from './actions';
-import { selectContentTypePage } from './selectors'
-
+import { selectContentTypePage } from './selectors';
 import saga from './sagas';
 import reducer from './reducer';
-
 import styles from './styles.scss';
 
 export class ContentTypePage extends React.Component { // eslint-disable-line react/prefer-stateless-function

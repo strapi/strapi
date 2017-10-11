@@ -72,7 +72,7 @@ Returns an object of models available in the project. Every JavaScript or JSON f
 
 ## strapi.plugins
 
-Returns an object of plugins available in the project. Every plugin object contains the associated controllers, models, services and configurations contained in the `./plugins/**/` folder.
+Returns an object of plugins available in the project. Each plugin object contains the associated controllers, models, services and configurations contained in the `./plugins/**/` folder.
 
 ## strapi.query
 

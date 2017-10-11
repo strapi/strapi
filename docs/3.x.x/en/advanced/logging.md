@@ -22,11 +22,11 @@ module.exports = {
       strapi.log.info(folders); // ctx.log.info(folders);
 
       ctx.send(folders);
-    } catch (e) {
+    } catch (error) {
       strapi.log.fatal(error); // ctx.log.fatal(error);
-    }  
+      ctx.badImplementation(error.message);
+    }
   }
-
 }
 ```
 

@@ -4,7 +4,7 @@ Strapi provides built-in UI Components to make development faster.
 
 ## Button
 
-Button library based on bootstrap classes
+Button library based on bootstrap classes.
 
 ![Buttons img](../assets/buttons.png)
 
@@ -61,7 +61,6 @@ const Foo = () => {
 }
 
 // Will display a primaryAddShape button with label: 'Add a new Bar'
-
 export default Button;
 ```
 
@@ -95,7 +94,7 @@ Strapi provides a built-in input library which includes :
 | `name` | string | yes | The key to update your reducer. |
 | `noErrorsDescription` | bool | no | Prevents from displaying built-in errors. |
 | `placeholder` | string | no | Allows to set a placeholder. |
-| `pluginId` | string | no | Use to display name, placeholder... with i18n. |
+| `pluginId` | string | no | Use to display name, placeholder, etc. with i18n. |
 | `selectOptions` | array | no | Options for the select. |
 |  `tabIndex` | string | no | Sets the order in which the inputs are focused on tab key press. |
 | `title` | string | no | This props can only be used for checkboxes, it allows to add a title on top of the input, the label will be on the right side of the checkbox. |
@@ -133,7 +132,6 @@ class FooPage extends React.Component {
     } else {
       this.setState({ data[target.name]: value, error: false, errors: [] });
     }
-
   }
 
   render() {

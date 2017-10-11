@@ -36,7 +36,7 @@ That should print `3.0.0-alpha.x`.
 
 ![Strapi version verification](../assets/strapi-verification.png)
 
-Now, Strapi is installed globally in your computer. Type `strapi` in your terminal you will have access to every available command lines.
+Strapi is installed globally on your computer. Type `strapi` in your terminal you will have access to every available command lines.
 
 ***
 
