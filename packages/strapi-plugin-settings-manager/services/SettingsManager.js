@@ -328,7 +328,7 @@ module.exports = {
                 name: 'form.security.item.xframe.value',
                 target: 'security.xframe.value',
                 type: 'enum',
-                value: _.get(strapi.config, `environments.${env}.security.xframe`, null),
+                value: _.get(strapi.config, `environments.${env}.security.xframe.value`, null),
                 items: [
                   {
                     name: 'form.security.item.xframe.deny',
