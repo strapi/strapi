@@ -41,12 +41,13 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
 
 // utils
+import unknowFlag from 'assets/images/unknow_flag.png';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+import supportedFlags from 'utils/supportedFlags.json';
 import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
-
 import selectHomePage from './selectors';
 import {
   cancelChanges,
@@ -462,8 +463,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   valueComponent = (props) => {
     const flagName = formatLanguageLocale(props.value.value);
     const flag = getFlag(flagName);
+    const spanStyle = includes(supportedFlags.flags, flag) ? {} : { backgroundImage: `url(${unknowFlag})` };
+
     return (
-      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`}>
+      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`} style={spanStyle}>
         <FormattedMessage id="settings-manager.selectValue" defaultMessage='{language}' values={{ language: props.value.label}} className={styles.marginLeft} />
       </span>
     );
