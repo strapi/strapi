@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, includes, mapKeys, reject, map, isObject } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -28,7 +28,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.errors !== nextProps.errors) {
+    if (!this.isSame(nextProps)) {
       this.setState({ errors: nextProps.errors });
     }
   }
@@ -43,6 +43,9 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
     }
   }
 
+  isSame = (nextProps) => {
+    return size(this.props.errors) === size(nextProps.errors) && this.props.errors.every((error, index) => error.id === nextProps.errors[index].id);
+  }
   // Basic string validations
   validate = (value) => {
     let errors = [];

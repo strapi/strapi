@@ -29,7 +29,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, remove } from 'lodash';
+import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
@@ -49,12 +49,16 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.errors !== nextProps.errors) {
-      const errors = uniqBy(union(this.state.errors, nextProps.errors), 'id');
+    if (!this.isSame(nextProps)) {
+      const errors = isEmpty(nextProps.errors) ? [] : uniqBy(union(this.state.errors, nextProps.errors), 'id');
 
-      if (isEmpty(nextProps.errors)) remove(errors, (error) => error.id === 'settings-manager.request.error.database.exist');
+      // if (isEmpty(nextProps.errors)) remove(errors, (error) => error.id === 'settings-manager.request.error.database.exist');
       this.setState({ errors });
     }
+  }
+
+  isSame = (nextProps) => {
+    return size(this.props.errors) === size(nextProps.errors) && this.props.errors.every((error, index) => error.id === nextProps.errors[index].id);
   }
 
   handleBlur = ({ target }) => {

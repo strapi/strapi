@@ -48,7 +48,6 @@ export function* editDatabase(action) {
       method: 'PUT',
       body,
     };
-
     const requestUrl = `/settings-manager/configurations/databases/${action.apiUrl}`;
 
     const resp = yield call(request, requestUrl, opts, true);
@@ -57,12 +56,10 @@ export function* editDatabase(action) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
       yield put(databaseActionSucceeded());
     }
-
   } catch(error) {
     const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
 
     yield put(databaseActionError(formErrors));
-
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
@@ -70,16 +67,13 @@ export function* editDatabase(action) {
 export function* deleteDatabase(action) {
   try {
     const opts = { method: 'DELETE' };
-
-    const requestUrl = `settings-manager/configurations/databases/${action.databaseToDelete}/${action.endPoint}`;
+    const requestUrl = `/settings-manager/configurations/databases/${action.databaseToDelete}/${action.endPoint}`;
 
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
     }
-
-
   } catch(error) {
     yield put(databaseActionError([]));
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
@@ -91,7 +85,6 @@ export function* deleteLanguage(action) {
     const opts = {
       method: 'DELETE',
     };
-
     const requestUrl = `/settings-manager/configurations/languages/${action.languageToDelete}`;
 
     const resp = yield call(request, requestUrl, opts, true);
@@ -99,9 +92,7 @@ export function* deleteLanguage(action) {
     if (resp.ok) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.languageDelete');
     }
-
   } catch(error) {
-
     yield put(languageActionError());
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -112,12 +103,10 @@ export function* fetchConfig(action) {
     const opts = {
       method: 'GET',
     };
-
     const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
+
     const data = yield call(request, requestUrl, opts);
-
     yield put(configFetchSucceded(data));
-
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -129,7 +118,6 @@ export function* fetchDatabases(action) {
     const opts = {
       method: 'GET',
     };
-
     const requestUrlListDatabases = `/settings-manager/configurations/databases/${action.environment}`;
     const requestUrlAppDatabases = '/settings-manager/configurations/database/model';
 
@@ -137,9 +125,7 @@ export function* fetchDatabases(action) {
       call(request, requestUrlListDatabases, opts),
       call(request, requestUrlAppDatabases, opts),
     ];
-
     yield put(databasesFetchSucceeded(listDatabasesData, appDatabaseData));
-
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -150,7 +136,6 @@ export function* fetchLanguages() {
     const opts = {
       method: 'GET',
     };
-
     const requestUrlAppLanguages = '/settings-manager/configurations/languages';
     const requestUrlListLanguages = '/settings-manager/configurations/i18n';
 
@@ -158,9 +143,7 @@ export function* fetchLanguages() {
       call(request, requestUrlAppLanguages, opts),
       call(request, requestUrlListLanguages, opts),
     ];
-
     yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
-
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -186,17 +169,14 @@ export function* postLanguage() {
       body,
       method: 'POST',
     };
-
     const requestUrl = '/settings-manager/configurations/languages';
 
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
       window.Strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
-
       yield put(languageActionSucceeded());
     }
-
   } catch(error) {
     yield put(languageActionError());
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
@@ -205,7 +185,6 @@ export function* postLanguage() {
 
 export function* postDatabase(action) {
   try {
-
     const body = {};
 
     forEach(action.data, (value, key) => {
@@ -216,7 +195,6 @@ export function* postDatabase(action) {
       method: 'POST',
       body,
     };
-
     const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
 
     const resp = yield call(request, requestUrl, opts, true);
@@ -225,7 +203,6 @@ export function* postDatabase(action) {
       yield put(databaseActionSucceeded());
       window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
     }
-
   } catch(error) {
     const formErrors = map(error.response.payload.message, (err) => {
       const target = err.target ? replace(err.target, err.target.split('.')[2], '${name}') : 'database.connections.${name}.name';
@@ -245,15 +222,11 @@ export function* settingsEdit(action) {
     // Show button loader
     yield put(setLoader());
 
-    window.Strapi.notification.info('settings-manager.strapi.notification.info.serverRestart');
-
     const opts = {
       body: action.newSettings,
       method: 'PUT',
     };
-
     const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
-
     const resp = yield  call(request, requestUrl, opts, true);
 
     if (resp.ok) {
@@ -261,8 +234,6 @@ export function* settingsEdit(action) {
       yield put(editSettingsSucceeded());
       yield put(unsetLoader());
     }
-
-
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
     yield put(unsetLoader());
@@ -274,13 +245,11 @@ export function* fetchSpecificDatabase(action) {
     const opts = {
       method: 'GET',
     };
-
     const requestUrl = `/settings-manager/configurations/databases/${action.databaseName}/${action.endPoint}`;
 
     const data = yield call(request, requestUrl, opts);
 
     yield put(specificDatabaseFetchSucceeded(data));
-
   } catch(error) {
     window.Strapi.notification.error('settings-manager.strapi.notification.error');
   }
