@@ -16,7 +16,7 @@ This documentation is only related to Strapi v3@alpha.6 ([v1 documentation is st
 **[Migration guide](migration/migration-guide.md)**<br />
 Migrate from v1 to v3@aplha.6.
 
-**[Get Started](getting-started/quick-start.md)**<br />
+**[Get Started](getting-started/installation.md)**<br />
 Learn how to install Strapi and start developing your API.
 
 **[Concepts](concepts/concepts.md)**<br />
