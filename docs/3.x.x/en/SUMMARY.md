@@ -33,7 +33,7 @@
 * [UI Components](plugins/ui-components.md)
 * [Advanced usage](plugins/advanced.md)
 
-### Guides - Advanced
+### Advanced Usage
 * [Admin panel](advanced/customize-admin.md)
 * [Hooks](advanced/hooks.md)
 * [Logging](advanced/logging.md)

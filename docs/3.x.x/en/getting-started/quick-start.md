@@ -47,6 +47,7 @@ Creating your first project with Strapi is easy:
   cd my-project
   strapi start
   ```
+  
   ![Start Strapi](../assets/strapi-start.png)
 
 Now that your app is running let's see how to [create your first api](#create-your-first-api).
