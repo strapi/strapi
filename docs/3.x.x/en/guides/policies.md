@@ -1,6 +1,6 @@
 # Policies
 
-Check out the [policies' concepts](../concepts/concepts.md#policies) for concepts informations.
+ See the [policies' concepts](../concepts/concepts.md#policies) for details.
 
 ## How to create a policy?
 
@@ -29,7 +29,8 @@ In this example, we are verifying that a session is open. If it is the case, we 
 To apply policies to a route, you need to associate an array of policies to it. As explained in the [policies' concepts](../concepts/concepts.md#policies), there are two kinds of policies: global or scoped.
 
 ### Global policies
-See the [concept](../concepts/concepts.md#policies) for details.
+
+Refer to the [concept](../concepts/concepts.md#policies) for details.
 
 The global policies can be associated to any routes in your project.
 
@@ -57,7 +58,7 @@ Before executing the `find` action in the `Car.js` controller, the global policy
 
 ### Plugins policies
 
-Plugins can add and expose policies into your app. For example, the plugin `Auth` comes with several useful policies to ensure that the user is well authenticated or has the rights to perform an action.
+Plugins can add and expose policies into your app. For example, the plugin `Auth` (COMING SOON) comes with several useful policies to ensure that the user is well authenticated or has the rights to perform an action.
 
 **Path —** `./api/car/config/routes.json`.
 ```js

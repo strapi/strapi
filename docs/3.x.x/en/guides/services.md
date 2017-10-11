@@ -1,6 +1,6 @@
 # Services
 
-See the [services concept](../concepts/concepts.md#services) for more informations.
+See the [services concept](../concepts/concepts.md#services) for details.
 
 ## How to create a service?
 

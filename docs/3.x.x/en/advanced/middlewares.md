@@ -74,7 +74,7 @@ The framework allows the application to override the default middlewares and add
 - server.js
 ```
 
-Every middleware will be injected into the Koa stack. To manage the load order, please refers to the [Middleware order section](#load-order).
+Every middleware will be injected into the Koa stack. To manage the load order, please refer to the [Middleware order section](#load-order).
 
 ## Load order
 
@@ -127,7 +127,7 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
   }
 ```
 
-The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the other middlewares will be loaded asynchronously.
+The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the others middlewares will be loaded asynchronously.
 
 
 **Load a middleware after another one**
@@ -169,7 +169,7 @@ The `gzip` middleware will be loaded after the `p3p` middleware. All the others 
   }
 ```
 
-The `router` middleware will be loaded at the very end. The `parser` middleware will be loaded after all the middlewares and just before the `router` middleware.
+The `router` middleware will be loaded at the very end. The `parser` middleware will be loaded after all the others and just before the `router` middleware.
 
 
 **Complete example**

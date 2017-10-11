@@ -1,6 +1,6 @@
 # Routing
 
-See the [routing's concept](../concepts/concepts.md#routing) for more informations.
+See the [routing's concept](../concepts/concepts.md#routing) for details.
 
 ## How to create a route?
 
@@ -41,7 +41,7 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 
 ## Dynamic parameters
 
-The router used by Strapi allows you to create dynamic routes where you can use parameters and simple regular expressions. These parameters will be exposed in the `ctx.params` object. For more details, please refers to the [PathToRegex](https://github.com/pillarjs/path-to-regexp) documentation.
+The router used by Strapi allows you to create dynamic routes where you can use parameters and simple regular expressions. These parameters will be exposed in the `ctx.params` object. For more details, please refer to the [PathToRegex](https://github.com/pillarjs/path-to-regexp) documentation.
 
 ```json
 {

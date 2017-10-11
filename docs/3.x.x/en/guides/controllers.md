@@ -1,6 +1,6 @@
 # Controllers
 
-Check out the [controllers' concepts](../concepts/concepts.md#controllers) for details.
+See the [controllers' concepts](../concepts/concepts.md#controllers) for details.
 
 ## How to create a controller?
 

@@ -29,24 +29,21 @@
 ### Plugins
 * [Quick start](plugins/quick-start.md)
 * [Development](plugins/development.md)
-* [UI Components](plugins/ui-components.md)
 * [Helpers](plugins/utils.md)
+* [UI Components](plugins/ui-components.md)
+* [Advanced usage](plugins/advanced.md)
 
 ### Guides - Advanced
 * [Admin panel](guides-advanced/customize-admin.md)
-* [Handle plugin user navigation](guides-advanced/handle-plugin-user-navigation.md)
 * [Hooks](advanced/hooks.md)
 * [Logging](advanced/logging.md)
 * [Middlewares](advanced/middlewares.md)
-* [Routeless container store injection](guides-advanced/routeless-container-store-injection.md)
-* [Prevent plugin rendering](guides-advanced/prevent-plugin-rendering.md)
-* [Using React/Redux and sagas](guides-advanced/using-actions-reducer-sagas.md)
 
 ### API Reference
 * [Table of contents](api-reference/reference.md)
 
 ### Tutorials
-<!-- * [Coming soon] (SOON.md) -->
+* Coming soon
 
 ### Migration
 * [Migrating from v1 to v3](migration/migration-guide.md)

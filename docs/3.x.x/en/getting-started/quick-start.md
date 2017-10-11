@@ -79,7 +79,7 @@ To create your API using the Content Type Builder:
 
 That's it: your API is created!
 
-*Note: See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for informations about how to do it the hacker way*
+*Note: See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for informations about how to do it the hacker way.*
 
 ### Files structure
 
@@ -126,7 +126,7 @@ When you create your API using the command line or the Content Type Builder plug
 
 To retrieve the list of products, use the `GET /your-content-type` route.
 
-Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_order=price:asc`. For more informations, read the [filters documentation](TODO)
+Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_order=price:asc`. For more informations, read the [filters documentation] (Coming soon)
 
 Here is an example using jQuery.
 
