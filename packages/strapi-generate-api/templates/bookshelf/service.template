@@ -21,7 +21,19 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    return <%= globalID %>.forge(params).query(params).fetchAll({
+    const convertedParams = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
+    return <%= globalID %>.query(function(qb) {
+      _.forEach(convertedParams.where, (where, key) => {
+        qb.where(key, where.symbol, where.value);
+      });
+
+      qb.orderBy(convertedParams.sort);
+
+      qb.offset(convertedParams.start);
+
+      qb.limit(convertedParams.limit);
+    }).fetchAll({
       withRelated: _.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias'))
     });
   },
