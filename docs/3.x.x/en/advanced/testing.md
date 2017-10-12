@@ -1,3 +1,0 @@
-# Testing
-
-Documentation coming soon.
