@@ -12,9 +12,8 @@
         - [One-to-one](#one-to-one)
         - [One-way](#one-way)
       - [Lifecycle callbacks](#lifecycle-callbacks)
-    - [Plugin API development](#plugin-api-development)
-    - [Plugin data flow](#plugin-data-flow)
-    - [Plugin ORM queries](#plugin-orm-queries)
+    - [Internationalization](#internationalization-and-localization)
+    - [Plugin](#plugin)
     - [Plugin styles](#plugin-styles)
     - [Policies](#policies)
       - [Global policies](#global-policies)
@@ -152,6 +151,14 @@ One-way relationships are useful to link an entry to another. However, only one 
 Lifecycle callbacks are functions triggered at specific moments of the queries.
 
 > Please refer to the [lifecycle callbacks guide](../guides/models.md#lifecycle-callbacks).
+
+***
+
+## Internationalization and localization
+
+Internationalization and localization (i18n) allows to adapt the project to different languages and serve the right content to the users. This feature is deeply integrated into the Strapi's core. It will detect the user language preference (locale) and translate the requested content using the translation files.
+
+> Please refer to the [internationalization's guide](../guides/i18n.md).
 
 ***
 
