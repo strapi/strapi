@@ -5,7 +5,7 @@
   "plugins": [
     "edit-link",
     "anchorjs",
-    "-search",
+    "search",
     "-fontsettings",
     "-sharing",
     "versions",
