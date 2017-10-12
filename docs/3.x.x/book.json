@@ -11,7 +11,8 @@
     "versions",
     "ga",
     "github",
-    "feathers-collapsible-menu"
+    "feathers-collapsible-menu",
+    "block-align"
   ],
   "pluginsConfig": {
     "edit-link": {

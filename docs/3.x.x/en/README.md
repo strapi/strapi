@@ -1,5 +1,11 @@
-
+{% center %}
 ![Logo](https://cldup.com/7umchwdUBh.png)
+
+### API creation made simple, secure and fast.
+
+The most advanced open-source Content Management Framework to build powerful API with no effort.
+
+<br />
 
 [![npm version](https://img.shields.io/npm/v/strapi.svg)](https://www.npmjs.org/package/strapi)
 [![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
@@ -7,6 +13,8 @@
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 [Strapi](http://strapi.io) is an open source solution to create, deploy and manage your own API. It provides a powerful dashboard and features to make your life easier.
+
+{% endcenter %}
 
 ## v3@alpha.6 is available!
 We've been working on a major update for Strapi during the past months, rewriting the core framework and the dashboard.
