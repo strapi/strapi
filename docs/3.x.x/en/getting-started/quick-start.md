@@ -25,30 +25,30 @@ This section explains how to handle Strapi for the first time.
 
 Creating your first project with Strapi is easy:
 
-1. **Open your terminal**
+**#1 — Open your terminal**
 
-  Open your terminal in the directory you want to create your application in.
+Open your terminal in the directory you want to create your application in.
 
-2. **Run the following command line in your terminal:**
+**#2 — Run the following command line in your terminal:**
 
-  ```bash
-  strapi new my-project
-  ```
+```bash
+strapi new my-project
+```
 
-  ![Generate a Strapi project](../assets/new-project.png)
+![Generate a Strapi project](../assets/terminal_new.png)
 
-  This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
+This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
 
-3. **Go to your project and launch the server:**
+**#3 — Go to your project and launch the server:**
 
-  In your terminal run the following commands:
+In your terminal run the following commands:
 
-  ```bash
-  cd my-project
-  strapi start
-  ```
+```bash
+cd my-project
+strapi start
+```
 
-  ![Start Strapi](../assets/strapi-start.png)
+![Start Strapi](../assets/terminal_start.png)
 
 Now that your app is running let's see how to [create your first api](#create-your-first-api).
 
