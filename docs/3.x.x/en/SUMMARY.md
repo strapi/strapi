@@ -18,6 +18,7 @@
 ### Guides
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
+* [Filters](guides/filters.md)
 * [Models](guides/models.md)
 * [Policies](guides/policies.md)
 * [Public Assets](guides/public-assets.md)
