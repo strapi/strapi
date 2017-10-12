@@ -149,7 +149,7 @@ One-way relationships are useful to link an entry to another. However, only one 
 
 ### Lifecycle callbacks
 
-Lifecycle Callbacks are functions triggered at specific moments of the queries.
+Lifecycle callbacks are functions triggered at specific moments of the queries.
 
 > Please refer to the [lifecycle callbacks guide](../guides/models.md#lifecycle-callbacks).
 
@@ -157,7 +157,7 @@ Lifecycle Callbacks are functions triggered at specific moments of the queries.
 
 ## Plugin API development
 
-A Plugin can have an API which can be used the same way as an API generated in a Strapi project.
+A plugin can have an API which can be used the same way as an API generated in a Strapi project.
 
 > Please refer to the [plugin development](../plugins/development.md#plugin-api-development) for more informations how it works.
 
@@ -167,7 +167,7 @@ A Plugin can have an API which can be used the same way as an API generated in a
 
 Each plugin has its own data store, so it stays completely independent from the others.
 
-Data flow is controlled thanks to [Redux](http://redux.js.org/) and [redux-sagas](https://github.com/redux-saga/redux-saga).
+Data flow is controlled thanks to [Redux](http://redux.js.org/) and [redux-saga](https://github.com/redux-saga/redux-saga).
 
 ***
 
@@ -183,14 +183,14 @@ Strapi supports multiple ORMs in order to let the users choose the database mana
 
 The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. Also, it uses [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
-> Please refer to the [plugin development][../plugins/development.md#styles] for detailed informations.
+> Please refer to the [plugin development](../plugins/development.md#styles) for detailed informations.
 
 ***
 
 ## Policies
 
-Policies are functions which have the ability to block a request before it reaches the controller's action.
-Each route of the project can be associated to an array of policies, so securing business logic is easy. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
+Policies are functions which have the ability to execute a logic on each request before it reaches the controller's action. They are mostly used for securing business logic easily.
+Each route of the project can be associated to an array of policies. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
 
 Policies can be:
  - `global`: so they can be used within the entire project.
@@ -246,7 +246,7 @@ The context object (`ctx`) contains a list of values and functions useful to man
 
 ## Routing
 
-`routes.json` files define all available routes for the clients.
+`./api/**/config/routes.json` files define all available routes for the clients.
 
 > Please refer to the [routing guide](../guides/routing.md) for more informations.
 
