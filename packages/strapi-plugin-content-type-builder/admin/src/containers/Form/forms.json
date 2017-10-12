@@ -6,7 +6,7 @@
           "label": "content-type-builder.form.contentType.item.connections",
           "name": "connection",
           "type": "select",
-          "value": "",
+          "value": "default",
           "items": [{}],
           "validations": {
             "required": true

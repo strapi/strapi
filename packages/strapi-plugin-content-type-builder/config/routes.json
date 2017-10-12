@@ -50,14 +50,6 @@
     },
     {
       "method": "GET",
-      "path": "/assets/:file",
-      "handler": "ContentTypeBuilder.assets",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/autoReload",
       "handler": "ContentTypeBuilder.autoReload",
       "config": {

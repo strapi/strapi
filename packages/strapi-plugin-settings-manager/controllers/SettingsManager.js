@@ -3,7 +3,6 @@
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
-const send = require('koa-send');
 
 module.exports = {
   menu: async ctx => {
@@ -328,14 +327,6 @@ module.exports = {
     !_.isEmpty(updateErrors) ? ctx.badRequest(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
 
     strapi.reload();
-  },
-
-  assets: async ctx => {
-    try {
-      await send(ctx, `plugins/settings-manager/admin/build/${ctx.params.file}`);
-    } catch (err) {
-      ctx.body = ctx.notFound();
-    }
   },
 
   autoReload: async ctx => {

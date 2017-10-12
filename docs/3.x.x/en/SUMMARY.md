@@ -3,7 +3,7 @@
 ## Useful links
 * [Strapi Website](http://strapi.io)
 * [GitHub Repository](https://github.com/strapi/strapi)
-* [Contributing Guide](https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md)
+* [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md)
 
 ### Getting started
 * [Installation](getting-started/installation.md)
@@ -19,6 +19,7 @@
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
 * [Filters](guides/filters.md)
+* [Internationalization](guides/i18n.md)
 * [Models](guides/models.md)
 * [Policies](guides/policies.md)
 * [Public Assets](guides/public-assets.md)

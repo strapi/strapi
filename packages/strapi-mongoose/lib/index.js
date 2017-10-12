@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const mongoose = require('mongoose');
+const Mongoose = require('mongoose').Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
 // Local helpers.
@@ -46,23 +46,22 @@ module.exports = function (strapi) {
       }
 
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
+        const instance = new Mongoose();
         const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
-          mongoose.connect(`mongodb://${host}:${port}/${database}`, {
+          instance.connect(`mongodb://${host}:${port}/${database}`, {
             useMongoClient: true
           });
         } else {
-          mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
+          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
             useMongoClient: true
           });
         }
 
-        const db = mongoose.connection;
-
         // Handle error
-        db.on('error', error => {
+        instance.connection.on('error', error => {
           if (error.message.indexOf(`:${port}`)) {
             return cb('Make sure your MongoDB database is running...');
           }
@@ -71,9 +70,9 @@ module.exports = function (strapi) {
         });
 
         // Handle success
-        db.on('open', () => {
+        instance.connection.on('open', () => {
           // Select models concerned by this connection
-          const models = _.pickBy(strapi.models, {connection: connectionName});
+          const models = _.pickBy(strapi.models, { connection: connectionName });
 
           // Return callback if there is no model
           if (_.isEmpty(models)) {
@@ -139,10 +138,10 @@ module.exports = function (strapi) {
                   virtuals: true
                 });
 
-                global[definition.globalName] = mongoose.model(definition.globalName, collection.schema);
+                global[definition.globalName] = instance.model(definition.globalName, collection.schema);
 
                 // Expose ORM functions through the `strapi.models` object.
-                strapi.models[model] = _.assign(mongoose.model(definition.globalName), strapi.models[model]);
+                strapi.models[model] = _.assign(instance.model(definition.globalName), strapi.models[model]);
 
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];
@@ -188,7 +187,7 @@ module.exports = function (strapi) {
 
             if (_.isEmpty(definition.attributes)) {
               // Generate empty schema
-              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema({}));
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema({}));
 
               return loadedAttributes();
             }
@@ -197,7 +196,7 @@ module.exports = function (strapi) {
             // all attributes for relationships-- see below.
             const done = _.after(_.size(definition.attributes), () => {
               // Generate schema without virtual populate
-              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema(_.omitBy(definition.loadedModel, model => {
                 return model.type === 'virtual';
               })));
 
@@ -213,7 +212,7 @@ module.exports = function (strapi) {
               utilsModels.defineAssociations(model, definition, details, name);
 
               if (_.isEmpty(verbose)) {
-                definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
+                definition.loadedModel[name].type = utils(instance).convertType(details.type);
               }
 
               let FK;
@@ -221,7 +220,7 @@ module.exports = function (strapi) {
               switch (verbose) {
                 case 'hasOne':
                   definition.loadedModel[name] = {
-                    type: mongoose.Schema.Types.ObjectId,
+                    type: instance.Schema.Types.ObjectId,
                     ref: _.capitalize(details.model)
                   };
                   break;
@@ -240,7 +239,7 @@ module.exports = function (strapi) {
                     details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.collection)
                     }];
                   }
@@ -260,7 +259,7 @@ module.exports = function (strapi) {
                     details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = {
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.model)
                     };
                   }
@@ -281,7 +280,7 @@ module.exports = function (strapi) {
                     details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.collection)
                     }];
                   }
@@ -295,6 +294,54 @@ module.exports = function (strapi) {
           });
         });
       });
+    },
+
+    getQueryParams: (value, type, key) => {
+      const result = {};
+
+      switch (type) {
+        case '=':
+          result.key = `where.${key}`;
+          result.value = value;
+          break;
+        case '_ne':
+          result.key = `where.${key}.$ne`;
+          result.value = value;
+          break;
+        case '_lt':
+          result.key = `where.${key}.$lt`;
+          result.value = value;
+          break;
+        case '_gt':
+          result.key = `where.${key}.$gt`;
+          result.value = value;
+          break;
+        case '_lte':
+          result.key = `where.${key}.$lte`;
+          result.value = value;
+          break;
+        case '_gte':
+          result.key = `where.${key}.$gte`;
+          result.value = value;
+          break;
+        case '_sort':
+          result.key = `sort`;
+          result.value = (value === 'desc') ? '-' : '';
+          result.value += key;
+          break;
+        case '_start':
+          result.key = `start`;
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = `limit`;
+          result.value = parseFloat(value);
+          break;
+        default:
+          result = undefined;
+      }
+
+      return result;
     }
   };
 

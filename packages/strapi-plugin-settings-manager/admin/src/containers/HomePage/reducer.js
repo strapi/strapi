@@ -32,16 +32,16 @@ import {
 const initialState = fromJS({
   loading: true,
   cancelAction: false,
-  configsDisplay: OrderedMap(),
-  initialData: Map(),
-  modifiedData: Map(),
-  listLanguages: Map(),
-  addDatabaseSection: Map(),
+  configsDisplay: OrderedMap({}),
+  initialData: Map({}),
+  modifiedData: Map({}),
+  listLanguages: Map({}),
+  addDatabaseSection: Map({}),
   didCreatedNewLanguage: false,
   didCreatedNewDb: false,
-  specificDatabase: OrderedMap(),
+  specificDatabase: OrderedMap({}),
   dbNameTarget: '',
-  selectOptions: Map(),
+  selectOptions: Map({}),
   formValidations: [],
   formErrors: [],
   error: false,
@@ -90,7 +90,7 @@ function homePageReducer(state = initialState, action) {
         .set('loading', false)
         .set('didCreatedNewLanguage', false)
         .set('configsDisplay', OrderedMap(action.configs))
-        .set('initialData', Map())
+        .set('initialData', Map(action.selectedLanguage))
         .set('modifiedData', Map(action.selectedLanguage))
         .set('selectOptions', Map(action.selectOptions))
         .set('formErrors', [])
@@ -105,9 +105,9 @@ function homePageReducer(state = initialState, action) {
         .set('configsDisplay', OrderedMap(action.configsDisplay))
         .updateIn(['modifiedData', 'language.defaultLocale'], () => action.newLanguage);
     case LANGUAGE_ACTION_SUCCEEDED:
-      return state.set('error', !state.get('error'));
+      return state.set('error', !state.get('error')).set('modifiedData', state.get('initialData'));
     case LANGUAGE_ACTION_ERROR:
-      return state.set('didCreatedNewLanguage', true);
+      return state.set('didCreatedNewLanguage', true).set('error', !state.get('error'));
     case DATABASE_ACTION_SUCCEEDED:
       const newDefaultDbConnection = state.getIn(['modifiedData', 'database.defaultConnection']);
       return state

@@ -47,7 +47,7 @@ Creating your first project with Strapi is easy:
   cd my-project
   strapi start
   ```
-  
+
   ![Start Strapi](../assets/strapi-start.png)
 
 Now that your app is running let's see how to [create your first api](#create-your-first-api).
@@ -69,8 +69,9 @@ Let's take the example of an e-commerce API, which manages products.
 ![Strapi Content Type Builder](../assets/content-type-builder.png)
 
 To create your API using the Content Type Builder:
- - Start your project and visit the admin panel at the following address: http://localhost:1337/admin/plugins/content-type-builder.
- - Click on "Create Content Type" (it should open a form modal), fill the name field with `product` and submit the form.
+ - Start your project and visit the admin panel at the following address:
+ http://localhost:1337/admin/plugins/content-type-builder.
+ - Click on "Create Content Type" (it should open a modal), fill the name field with `product` and submit the form.
  - Then, click on "Add fields", add the following fields:
    - A `string` field named `name`.
    - A `text` field named `description`.
@@ -84,7 +85,7 @@ That's it: your API is created!
 
 ### Files structure
 
-A new directory has been created in the `/api` folder of your application which contains all the needed stuff for your `Product` Content Type: API, routes, controller, service and model. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
+A new directory has been created in the `/api` folder of your application which contains all the needed stuff for your `Product` Content Type: API, routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
 
 
 Well done, you created your first Strapi API!

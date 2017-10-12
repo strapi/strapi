@@ -30,7 +30,6 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
   render() {
     // assign the target id the language name to prepare for delete
     const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75)'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
-
     // format the locale to
     const defaultLanguageArray = formatLanguageLocale(this.props.name);
     const flag = getFlag(defaultLanguageArray);
@@ -67,17 +66,15 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
         <div className={this.props.liStyles.language} />
         <div className={`${this.props.liStyles.borderBottom} ${this.props.liStyles.flexLiLanguage}`}>
           <div className={`${this.props.liStyles.flexed} ${this.props.liStyles.flagContainer}`}>
-            <div><span className={`flag-icon flag-icon-${flag}`} /></div>
+            <div><span className={`${this.props.liStyles.flag} flag-icon flag-icon-${flag}`} /></div>
             <div className={`${this.props.liStyles.label} ${this.props.liStyles.capitalized}`}>{languageDisplay}</div>
           </div>
           <div className="text-center" style={{ width: '33%'}}>{this.props.name}</div>
           <div style={{display:'flex', width: '33%'}}>
-
             <div className={this.props.liStyles.centered}>{languageLabel}</div>
             <div className={this.props.liStyles.trashContainer}>{deleteIcon}</div>
           </div>
         </div>
-
         <div>
           <PopUpWarning
             isOpen={this.state.showWarning}

@@ -41,7 +41,7 @@
 }
 
 .modalPosition {
-  // top: 16.8rem;
+  left: 18.2rem;
   > div {
     border:none;
     border-radius: 2px;
@@ -80,7 +80,6 @@
     position: relative;
     border-radius: 0.3rem;
     text-transform: capitalize;
-    // margin-right: 1.8rem;
     cursor: pointer;
     font-family: Lato;
     &:focus {
@@ -110,6 +109,7 @@
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white !important;
+  border: none;
   &:active {
    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
  }

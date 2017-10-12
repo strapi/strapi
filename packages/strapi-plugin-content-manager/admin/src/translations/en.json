@@ -8,7 +8,7 @@
   "containers.Edit.cancel": "Cancel",
   "containers.Edit.returnList": "Return to list",
   "containers.List.addAnEntry": "Add New {entity}",
-  "containers.List.pluginHeaderDescription": "Manage your {label}",
+  "containers.List.pluginHeaderDescription": "Manage your {label}.",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 

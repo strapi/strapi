@@ -40,7 +40,10 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     if (nextProps.error !== this.props.error && isEmpty(nextProps.formErrors)) {
       this.setState({ modal: false, loader: false });
     }
-    if (!isEmpty(nextProps.formErrors)) this.setState({ loader: false });
+
+    if (!isEmpty(nextProps.formErrors)) {
+      this.setState({ loader: false });
+    }
   }
 
   toggle = () => {

@@ -244,6 +244,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     const contentType = storeData.getContentType();
 
+    // Update relation key of the temporary contentType
     if (contentType) {
       map(contentType.attributes, (attr, key) => {
         if (get(attr.params, 'target') === replace(split(this.props.hash, '::')[0], '#edit', '')) {
@@ -253,7 +254,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       this.props.contentTypeCreate(contentType);
     }
 
-    return this.props.contentTypeEdit();
+    return this.props.contentTypeEdit(this.context);
   }
 
   editContentTypeAttribute = () => {
@@ -527,7 +528,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
     const edit = includes(this.props.hash, '#edit');
     const selectOptions = includes(this.props.hash, 'attributenumber') ? get(this.props.form, ['items', '1', 'items']) : this.props.selectOptions;
-    
+
     if (includes(popUpFormType, 'relation')) {
       return (
         <PopUpRelations
@@ -583,6 +584,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       </div>
     );
   }
+}
+
+Form.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 }
 
 const mapStateToProps = selectForm();

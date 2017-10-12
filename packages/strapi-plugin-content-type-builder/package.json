@@ -26,7 +26,6 @@
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
     "classnames": "^2.2.5",
-    "koa-send": "^4.1.0",
     "pluralize": "^7.0.0",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",

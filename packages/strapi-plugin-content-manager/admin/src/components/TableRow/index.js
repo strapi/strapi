@@ -6,7 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import moment from 'moment';
+import { isEmpty, isObject } from 'lodash';
 
 import styles from './styles.scss';
 
@@ -36,6 +37,13 @@ class TableRow extends React.Component {
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
+      case 'date':
+      case 'time':
+      case 'datetime':
+      case 'timestamp':
+        return value && isObject(value) && value._isAMomentObject === true ?
+          this.props.value.format('YYYY-MM-DD HH:mm:ss') :
+          moment(this.props.value).format('YYYY-MM-DD HH:mm:ss');
       default:
         return '-';
     }
@@ -83,6 +91,9 @@ TableRow.propTypes = {
   headers: PropTypes.array.isRequired,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
+  value: PropTypes.shape({
+    format: PropTypes.func,
+  }),
 };
 
 TableRow.defaultProps = {
