@@ -20,17 +20,17 @@ This documentation is only related to Strapi v3@alpha.6 ([v1 documentation is st
 **[Get Started](getting-started/installation.md)**<br />
 Learn how to install Strapi and start developing your API.
 
+**[Command Line Interface](cli/CLI.md)**<br />
+Get to know our CLI to make features the hacker way!
+
 **[Concepts](concepts/concepts.md)**<br />
 Get to know more about Strapi and how it works.
 
 **[Guides](configurations/configurations.md)**<br />
 Get familiar with Strapi. Discover concrete examples on how to develop the features you need.
 
-**[Command Line Interface](cli/CLI.md)**<br />
-Get to know our CLI to make features the hacker way!
-
-**[Developing a plugin](plugins/development.md)**<br />
-Understand how to develop your own plugin.
+**[Plugins](plugins/development.md)**<br />
+Understand how to install plugins and develop your owns.
 
 **[API Reference](api-reference/reference.md)**<br />
 Learn about Strapi's API, the `strapi` object that is available in your backend.
