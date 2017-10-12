@@ -10,7 +10,7 @@ li.chapter a{
 }
 
 li.chapter:hover a{
-  background-color: #eee !important;
+  background: #eee !important;
   text-decoration: none !important;
 }
 
