@@ -3,3 +3,18 @@ li.header{
   font-weight: 500;
   letter-spacing: 0.05rem;
 }
+
+li.chapter a{
+  transition: background-color 0.15s ease;
+  -webkit-transition: background-color 0.15s ease;
+}
+
+li.chapter:hover a{
+  background-color: #eee !important;
+  text-decoration: none !important;
+}
+
+.versions-select select{
+  height: 36px;
+  border: 1px solid #ccc;
+}
