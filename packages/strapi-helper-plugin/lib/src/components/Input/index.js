@@ -153,12 +153,17 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputSelect = (requiredClass, inputDescription) => {
-    const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+  renderInputSelect = (requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
     return (
-      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-4'}`}>
+      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-6'} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
           className="form-control"
@@ -167,20 +172,25 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           onChange={this.props.onChange}
           value={this.props.value}
           disabled={this.props.disabled}
+          onBlur={handleBlur}
+          tabIndex={this.props.tabIndex}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`${option.name}`} defaultMessage={option.name} key={key}>
-              {(message) => (
-                <option value={option.value}>
-                  {message}
-                </option>
-              )}
-            </FormattedMessage>
+            option.name ?
+              <FormattedMessage id={option.name} defaultMessage={option.name} values={{ option: option.name }} key={key}>
+                {(message) => (
+                  <option value={option.value}>
+                    {message}
+                  </option>
+                )}
+              </FormattedMessage> :
+              <option value={option.value} key={key}>{option.name}</option>
           ))}
         </select>
         <div className={styles.inputDescriptionContainer}>
           <small>{inputDescription}</small>
         </div>
+        {this.renderErrors()}
         {spacer}
       </div>
     );
@@ -315,7 +325,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         disabled={this.props.disabled}
       />;
 
-    const inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+    const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
+
+    let inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+
+    if (!isEmpty(this.props.linkContent) && !isEmpty(this.props.inputDescription)) {
+      inputDescription = <FormattedMessage id='input.description' defaultMessage={`{description}, {link}`} values={{link, description: <FormattedMessage id={this.props.inputDescription} /> }} />;
+    }
 
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
@@ -325,7 +341,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     switch (this.props.type) {
       case 'select':
-        return this.renderInputSelect(requiredClass, inputDescription);
+        return this.renderInputSelect(requiredClass, inputDescription, bootStrapClassDanger, handleBlur);
       case 'textarea':
         return this.renderInputTextArea(requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':

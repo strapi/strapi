@@ -93,7 +93,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         validations={get(this.props.input, 'validations')}
         errors={this.props.errors}
         didCheckErrors={this.props.didCheckErrors}
-        pluginId="content-type-builder"
+        pluginID="content-type-builder"
       />;
 
     const dropDown = this.props.dropDownItems ? this.renderDropdownMenu() : '';

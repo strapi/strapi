@@ -54,7 +54,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         title={item.title}
         errors={errors}
         didCheckErrors={this.props.didCheckErrors}
-        pluginId={this.props.pluginId}
+        pluginID={this.props.pluginID}
         linkContent={item.linkContent}
       />
     );
@@ -145,7 +145,7 @@ PopUpForm.propTypes = {
   overrideHandleBlurCondition: PropTypes.func,
   overrideRenderInput: PropTypes.func,
   overrideRenderInputCondition: PropTypes.func,
-  pluginId: PropTypes.string,
+  pluginID: PropTypes.string,
   popUpHeaderNavLinks: PropTypes.array,
   popUpTitle: PropTypes.string,
   renderCustomPopUpHeader: PropTypes.oneOfType([
