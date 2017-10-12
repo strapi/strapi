@@ -191,6 +191,39 @@ export default compose(
 
 ***
 
+## Execute a logic before mounting
+
+You can execute a business logic before your plugin is being mounted.
+
+### Usage
+
+To do this, you need to create `bootstrap.js` file at the root of your `src` plugin's folder.
+This file must contains a default functions that returns a `Promise`.
+
+#### Example
+
+In this example, we want to populate the left menu with links that will refer to our Content Types.
+
+**Path —** `./app/plugins/content-manager/admin/src/bootstrap.js`.
+```js
+import { generateMenu } from 'containers/App/sagas';
+
+// This method is executed before the load of the plugin
+const bootstrap = (plugin) => new Promise((resolve, reject) => {
+  generateMenu()
+    .then(menu => {
+      plugin.leftMenuSections = menu;
+
+      resolve(plugin);
+    })
+    .catch(e => reject(e));
+});
+
+export default bootstrap;
+```
+
+***
+
 ## Prevent rendering
 
 You can prevent your plugin from being rendered if some conditions aren't met.
@@ -198,9 +231,9 @@ You can prevent your plugin from being rendered if some conditions aren't met.
 ### Usage
 
 To disable your plugin's rendering, you can simply create `requirements.js` file at the root of your `src` plugin's folder.
-This file must contain a default function that returns a `Promise`;
+This file must contain a default function that returns a `Promise`.
 
-Example:
+#### Example
 
 Let's say that you want to disable your plugin if the server autoReload config is disabled in development mode.
 
