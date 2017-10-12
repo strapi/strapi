@@ -83,15 +83,16 @@ module.exports = (scope, cb) => {
       }
 
       return {
-        name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
+        name: _.trim(_.deburr(_.lowerCase(parts[0]).toLowerCase())),
         params: {
-          type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
+          type: _.trim(_.deburr(_.lowerCase(parts[1]).toLowerCase()))
         }
       };
     } else {
       return _.has(attribute, 'params.type') ? attribute : undefined;
     }
   });
+  
   scope.attributes = _.compact(scope.attributes);
 
   // Handle invalid action arguments.

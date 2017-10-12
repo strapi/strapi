@@ -260,5 +260,59 @@ module.exports = {
 
   getVia: (attribute, association) => {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
+  },
+
+  convertParams: (entity, params) => {
+    if (!entity) {
+      throw new Error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
+    }
+
+    const model = entity.toLowerCase();
+
+    if (!strapi.models.hasOwnProperty(model)) {
+      return this.log.error(`The model ${model} can't be found.`);
+    }
+
+    const connector = strapi.models[model].orm;
+
+    if (!connector) {
+      throw new Error(`Impossible to determine the use ORM for the model ${model}.`);
+    }
+
+    const convertor = strapi.hook[connector].load().getQueryParams;
+    const convertParams = {
+      where: {},
+      sort: '',
+      start: 0,
+      limit: 100
+    };
+
+    _.forEach(params, (value, key)  => {
+      let result;
+
+      if (_.includes(['_start', '_limit'], key)) {
+        result = convertor(value, key);
+      } else if (key === '_sort') {
+        const [attr, order] = value.split(':');
+        result = convertor(order, key, attr);
+      } else {
+        const suffix = key.split('_');
+
+        let type;
+
+        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte'], _.last(suffix))) {
+          type = `_${_.last(suffix)}`;
+          key = _.dropRight(suffix).join('_');
+        } else {
+          type = '=';
+        }
+
+        result = convertor(value, type, key);
+      }
+
+      _.set(convertParams, result.key, result.value);
+    });
+
+    return convertParams;
   }
 };

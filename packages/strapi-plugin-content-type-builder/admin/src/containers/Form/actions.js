@@ -88,6 +88,13 @@ export function contentTypeCreate(newModel) {
   };
 }
 
+export function contentTypeEdit(context) {
+  return {
+    type: CONTENT_TYPE_EDIT,
+    context,
+  };
+}
+
 export function contentTypeFetch(contentTypeName) {
   return {
     type: CONTENT_TYPE_FETCH,
@@ -108,12 +115,6 @@ export function contentTypeFetchSucceeded(contentType) {
   return {
     type: CONTENT_TYPE_FETCH_SUCCEEDED,
     data,
-  };
-}
-
-export function contentTypeEdit() {
-  return {
-    type: CONTENT_TYPE_EDIT,
   };
 }
 

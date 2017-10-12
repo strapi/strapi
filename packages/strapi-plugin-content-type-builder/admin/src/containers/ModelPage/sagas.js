@@ -1,5 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { forEach, get, includes, map, replace, set, size, unset } from 'lodash';
+import { capitalize, forEach, get, includes, map, replace, set, size, unset, sortBy } from 'lodash';
+import pluralize from 'pluralize';
 import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
@@ -27,7 +28,7 @@ export function* fetchModel(action) {
   }
 }
 
-export function* submitChanges() {
+export function* submitChanges(action) {
   try {
     // Show button loader
     yield put(setButtonLoader());
@@ -60,12 +61,21 @@ export function* submitChanges() {
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
     const response = yield call(request, requestUrl, opts, true);
-    
+
     if (response.ok) {
       if (method === 'POST') {
         storeData.clearAppStorage();
         yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
         yield put(postContentTypeSucceeded());
+
+        const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+        const newContentType = body.name.toLowerCase();
+
+        if (leftMenuContentTypes) {
+          leftMenuContentTypes[0].links.push({ destination: newContentType, label: capitalize(pluralize(newContentType)) });
+          leftMenuContentTypes[0].links = sortBy(leftMenuContentTypes[0].links, 'label');
+          action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
+        }
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
       } else {
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');

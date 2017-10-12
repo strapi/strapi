@@ -1,3 +1,5 @@
+import pluralize from 'pluralize';
+import { capitalize, findIndex, get, isEmpty, sortBy } from 'lodash';
 import { takeLatest, call, put, fork, select } from 'redux-saga/effects';
 import request from 'utils/request';
 
@@ -20,7 +22,7 @@ import {
   makeSelectModifiedDataEdit,
 } from './selectors';
 
-export function* editContentType() {
+export function* editContentType(action) {
   try {
     const initialContentType = yield select(makeSelectInitialDataEdit());
     const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
@@ -32,11 +34,26 @@ export function* editContentType() {
 
     yield put(setButtonLoading());
 
+    const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+    const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(get(leftMenuContentTypes[0], 'links'), ['destination', initialContentType.name.toLowerCase()]) : -1;
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
       yield put(contentTypeActionSucceeded());
       yield put(unsetButtonLoading());
+
+      // Update admin left menu content types section
+      if (leftMenuContentTypesIndex !== -1) {
+        const name = body.name.toLowerCase();
+        const updatedSectionLink = {
+          destination: name,
+          label: capitalize(pluralize(name)),
+        };
+
+        leftMenuContentTypes[0].links.splice(leftMenuContentTypesIndex, 1, updatedSectionLink);
+        leftMenuContentTypes[0].links = sortBy(leftMenuContentTypes[0].links, 'label');
+        action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
+      }
       window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
     }
   } catch(error) {

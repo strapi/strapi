@@ -22,6 +22,7 @@ import LeftMenu from 'containers/LeftMenu';
 import Content from 'containers/Content';
 import NotFoundPage from 'containers/NotFoundPage';
 
+import { updatePlugin } from 'containers/App/actions';
 import { selectPlugins } from 'containers/App/selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
@@ -30,6 +31,13 @@ import Header from 'components/Header/index';
 import styles from './styles.scss';
 
 export class AdminPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => (
+    {
+      plugins: this.props.plugins,
+      updatePlugin: this.props.updatePlugin,
+    }
+  )
+
   render() {
     return (
       <div className={styles.adminPage}>
@@ -53,12 +61,18 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   }
 }
 
+AdminPage.childContextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+};
+
 AdminPage.contextTypes = {
   router: PropTypes.object.isRequired,
 };
 
 AdminPage.propTypes = {
   plugins: PropTypes.object.isRequired,
+  updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -68,6 +82,7 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return {
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
+    updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
     dispatch,
   };
 }

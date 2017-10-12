@@ -5,7 +5,7 @@
   "menu.item.advanced": "Advanced",
 
   "menu.section.environments": "Environments",
-  "menu.item.database": "Databases",
+  "menu.item.database": "Database",
   "menu.item.request": "Request",
   "menu.item.response": "Response",
   "menu.item.security": "Security",
@@ -15,8 +15,8 @@
   "form.button.save": "Save",
   "form.button.confirm": "Confim",
 
-  "form.databases.name": "Databases",
-  "form.databases.description": "Configure your databases settings by environnement.",
+  "form.databases.name": "Database",
+  "form.databases.description": "Configure your database settings by environnement.",
 
   "form.database.item.name": "Connection Name",
   "form.database.item.client": "Client",
@@ -104,7 +104,7 @@
 
   "form.language.name": "Languages",
   "form.language.description": "Configure your languages.",
-  "form.language.choose": "Choose a language",
+  "form.language.choose": "Choose a language:",
 
   "request.error.database.exist": "This connection already exists",
   "request.error.type.string": "A text is required.",
@@ -113,7 +113,7 @@
   "request.error.type.select": "The value must be in predefined list.",
 
   "request.error.validation.required": "This value input is required.",
-  "request.error.validation.regex": "The value not match the regex.",
+  "request.error.validation.regex": "The value does not match the regex.",
   "request.error.validation.max": "The value is too high.",
   "request.error.validation.min": "The value is too low.",
   "request.error.validation.maxLength": "The value is too long.",

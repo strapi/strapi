@@ -10,18 +10,14 @@ $linkcolour: #F5F5F5;
   margin: 0 1.8rem;
   border-radius: 2px;
   > a {
-    // z-index: 100;
-    // box-shadow: 1px 0 0px rgba(0,0,0,0.05);
     box-shadow: 1px 0 0px rgba(0,0,0,0.05), inset 0px -1px 0px -2px rgba(0,0,0,0.05);
     background-color: $linkcolour;
     &:first-child {
       border-radius: 2px 0 0 0;
     }
-
     &:last-child {
       border-radius: 0 2px 0 0;
     }
-
   }
 }
 
@@ -44,7 +40,6 @@ $linkcolour: #F5F5F5;
   background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
-  z-index: 100;
   box-shadow: 1px 0 0 rgba(0,0,0,0.05);
   > div {
     &:first-child {
@@ -61,7 +56,6 @@ $linkcolour: #F5F5F5;
   background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
-  z-index: 100;
   box-shadow: -1px 0 0 rgba(0,0,0,0.05);
   > div {
     &:first-child {
@@ -78,7 +72,6 @@ $linkcolour: #F5F5F5;
   background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
-  z-index: 100;
   box-shadow: 1px 0 0 rgba(0,0,0,0.05), -1px 0 0 rgba(0,0,0,0.05)!important ;
   > div {
     &:first-child {
@@ -89,7 +82,6 @@ $linkcolour: #F5F5F5;
       background-color: #1C5DE7;
     }
   }
-
 }
 
 .linkText {

@@ -3,7 +3,6 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const send = require('koa-send');
 
 const Service = require('../services/ContentTypeBuilder');
 
@@ -183,14 +182,6 @@ module.exports = {
     ctx.send({ ok: true });
 
     strapi.reload();
-  },
-
-  assets: async ctx => {
-    try {
-      await send(ctx, `plugins/content-type-builder/admin/build/${ctx.params.file}`);
-    } catch (err) {
-      ctx.body = ctx.notFound();
-    }
   },
 
   autoReload: async ctx => {

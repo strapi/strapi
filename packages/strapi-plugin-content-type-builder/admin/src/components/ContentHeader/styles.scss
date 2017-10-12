@@ -1,6 +1,6 @@
 .contentHeader { /* stylelint-disable */
   position: relative;
-  margin: 2.4rem 0rem 3.3rem 0rem;
+  margin: 2.3rem 0rem 3.3rem 0rem;
   font-family: Lato;
   display: flex;
   justify-content: space-between;
@@ -12,6 +12,8 @@
   font-size: 2.4rem;
   line-height: 2.9rem;
   font-weight: 600;
+  margin-bottom: 2px;
+  
   > i {
     margin-top: 1.1rem;
     margin-left: 1rem;

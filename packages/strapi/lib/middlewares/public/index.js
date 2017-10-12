@@ -89,6 +89,22 @@ module.exports = strapi => {
             })
           ]
         });
+
+        strapi.router.route({
+          method: 'GET',
+          path: `/${plugin}/assets/*.*`,
+          handler: [
+            async (ctx, next) => {
+              ctx.url = path.basename(ctx.url);
+
+              await next();
+            },
+            strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true
+            })
+          ]
+        });
       });
 
       cb();
