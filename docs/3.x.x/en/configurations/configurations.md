@@ -1,12 +1,26 @@
 # Configurations
 
-The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./config` folder of each APIs and plugins by creating JavaScript or JSON files.
+The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each APIs and plugins by creating JavaScript or JSON files.
 
 ## Application
 
-**Path —** `./config/application.json`.
-
 Contains the main configurations relative to your project.
+
+**Path —** `./config/application.json`.
+```json
+{
+  "name": "Default Application",
+  "description": "This API is going to be awesome!",
+  "favicon": {
+    "path": "favicon.ico",
+    "maxAge": 86400000
+  },
+  "public": {
+    "path": "./public",
+    "maxAge": 60000
+  }
+}
+```
 
  - `name` (string): Application's name.
  - `description` (string): Application's description.
@@ -16,6 +30,8 @@ Contains the main configurations relative to your project.
  - `public`
    - `path` (string): Path to the public folder. Default value: `./public`.
    - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+
+***
 
 ## Custom
 
@@ -33,22 +49,47 @@ Add custom configurations to the project. The content of this file is available 
 
 These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
 
+***
+
 ## Hook
 
 > Please refer to the [advanced hooks settings for more informations](../advanced/hooks.md).
 
+***
+
+## Middleware
+
+> Please refer to the [advanced middlewares settings for more informations](../advanced/middlewares.md).
+
+***
+
 ## Language
 
 As described in the [i18n documentation](../plugins/development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
+
+**Path —** `./config/language.json`.
+```json
+{
+  "enabled": true,
+  "defaultLocale": "en_us",
+  "modes": [
+    "query",
+    "subdomain",
+    "cookie",
+    "header",
+    "url",
+    "tld"
+  ],
+  "cookieName": "locale"
+}
+```
 
  - `enabled` (boolean): Enable or disable i18n. Default value: `true`.
  - `defaultLocale` (string): Default locale used by the application. Default value: `en_us`.
  - `modes` (array): Methods used to detect client language. Default value: `["query", "subdomain", "cookie", "header", "url", "tld"]`.
  - `cookieName` (string): Name of the cookie used to store the locale name. Default value: `locale`.
 
-## Middleware
-
-> Please refer to the [advanced middlewares settings for more informations](../advanced/middlewares.md).
+***
 
 ## Functions
 
@@ -103,6 +144,8 @@ module.exports = {
 };
 ```
 
+***
+
 ## Locales
 
 The `locales` directory contains the translations of your API.
@@ -118,6 +161,10 @@ Each JSON file located in the folder must have the name of its corresponding tra
 }
 ```
 
+> Take a look at the [internationalization's guide](../guides/i18n.md) for more details.
+
+***
+
 ## Environments
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
@@ -127,8 +174,12 @@ Most of the application's configurations are defined by environment. It means th
 ### Custom
 
 **Path —** `./config/environments/**/custom.json`.
-
- - `customConfiguration` (string): Example of a configuration specific to your app.
+```json
+{
+  "backendURL": "http://www.strapi.io",
+  "mainColor": "blue"
+}
+```
 
 ### Database
 
@@ -290,13 +341,15 @@ Most of the application's configurations are defined by environment. It means th
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
 
+***
+
 ## Dynamic configurations
 
 For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
 
 ### Syntax
 
-The syntax is inspired by the [ES6 template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
+The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
 
 ### Usage
 

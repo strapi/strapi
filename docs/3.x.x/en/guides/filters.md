@@ -69,7 +69,7 @@ Requests system can be implemented in custom code sections.
 
 ### Extracting requests filters
 
-To extract the filters from an JavaScript object or a request, you need to call the [`strapi.utils.models.convertParams` helper](../api-reference/reference.md#utils).
+To extract the filters from an JavaScript object or a request, you need to call the [`strapi.utils.models.convertParams` helper](../api-reference/reference.md#strapiutils).
 
 > Note: The returned objects is formatted according to the ORM used by the model.
 
