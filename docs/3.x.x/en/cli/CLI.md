@@ -15,15 +15,17 @@ options: [--dev]
 ```
 
 - **strapi new &#60;name&#62;**<br/>
-  Generates a new project called **&#60;name&#62;** and installs the plugins through the npm registry.
+  Generates a new project called **&#60;name&#62;** and installs the default plugins through the npm registry.
 
 - **strapi new &#60;name&#62; --dev**<br/>
-  Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier. See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
+  Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier.
+
+  See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
 
 ***
 
 ## strapi generate:api
-Scaffold a complete API with its configuration, controller, model and service.
+Scaffold a complete API with its configurations, controller, model and service.
 
 ```bash
 strapi generate:api <name> [<attribute:type>]
@@ -42,8 +44,12 @@ options: [--tpl <name>|--plugin <name>]
 - **strapi generate:api &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an API called **&#60;name&#62;** in the `./plugins/<plugin>` folder.
 
+  Example: `strapi generate:api product --plugin content-manager`
+
 - **strapi generate:api &#60;name&#62; --tpl &#60;template&#62;**<br/>
-  Generates an API called **&#60;name&#62;** in the `./api` folder which works with Bookshelf. By default, the generated APIs are based on Mongoose.
+  Generates an API called **&#60;name&#62;** in the `./api` folder which works with the given **&#60;template&#62;**. By default, the generated APIs are based on Mongoose.
+
+  Example: `strapi generate:api product --tpl bookshelf`
 
 > Note: The first letter of the filename will be uppercased.
 
@@ -97,6 +103,7 @@ options: [--api <name>|--plugin <name>]
   Example: `strapi generate:model category --api product` will create these two files:
   - `./api/product/models/Category.js`
   - `./api/product/models/Category.settings.json`.
+
 
 - **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
@@ -188,7 +195,8 @@ options: [--dev]
 
 > Checkout the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details about the local Strapi development workflow.
 
-> Note: You have to restart the server to load the plugin into your project.
+
+> **Note: You have to restart the server to load the plugin into your project.**
 
 Please refer to the [plugins documentation](.../plugins/development.md) to know more.
 
