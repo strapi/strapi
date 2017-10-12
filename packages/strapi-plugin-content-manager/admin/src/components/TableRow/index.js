@@ -58,10 +58,14 @@ class TableRow extends React.Component {
     // Generate cells
     const cells = this.props.headers.map((header, i) => (
       <td key={i}>
-        {this.getDisplayedValue(
-          header.type,
-          this.props.record[header.name]
-        )}
+        <div className={styles.truncate}>
+          <div className={styles.truncated}>
+            {this.getDisplayedValue(
+              header.type,
+              this.props.record[header.name]
+            )}
+          </div>
+        </div>
       </td>
     ));
 

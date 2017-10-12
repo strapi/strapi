@@ -18,6 +18,18 @@
   }
 }
 
+.truncate {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.truncated {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .actions {
   text-align: right;
 
