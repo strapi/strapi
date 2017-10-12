@@ -6,7 +6,7 @@
 
 There is several ways to create a policy.
  - Using the CLI `strapi generate:policy isAuthenticated`. Read the [CLI documentation](../cli/CLI.md) for more information.
- - Manually create a JavaScript file named `isAuthenticated.js` in `./config/policies/` or `./api/**/config/policies/`.
+ - Manually create a JavaScript file named `isAuthenticated.js` in `./config/policies/`.
 
 **Path —** `./config/policies/isAuthenticated.js`.
 ```js
@@ -117,3 +117,21 @@ module.exports = async (ctx, next) => {
 The policy `isAdmin` located in `./api/car/config/policies/isAdmin.js` will be executed before the `find` action in the `Car.js` controller.
 
 > Note: The policy `isAdmin` can only be applied to the routes defined in the `/api/car` folder.
+
+## Advanced usage
+
+As it's explained above, the policies are executed before the controller's action. It looks like an action that you can make `before` the controller's action. You can also execute a logic `after`.
+
+**Path —** `./config/policies/custom404.js`.
+```js
+module.exports = async (ctx, next) => {
+  // Indicate to the server to go to
+  // the next policy or to the controller's action.
+  await next();
+
+  // The code below will be executed after the controller's action.
+  if (ctx.status === 404) {
+    ctx.body = 'We cannot find the ressource.';
+  }
+};
+```

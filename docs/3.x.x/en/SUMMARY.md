@@ -37,8 +37,8 @@
 
 ### Advanced Usage
 * [Admin panel](advanced/customize-admin.md)
-* [Hooks](advanced/hooks.md)
 * [Logging](advanced/logging.md)
+* [Hooks](advanced/hooks.md)
 * [Middlewares](advanced/middlewares.md)
 
 ### API Reference
