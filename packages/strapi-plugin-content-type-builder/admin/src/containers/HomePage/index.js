@@ -68,9 +68,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         availableNumber={availableNumber}
         title={title}
         buttonLabel={'content-type-builder.button.contentType.add'}
-        handleButtonClick={this.handleButtonClick}
+        onButtonClick={this.handleButtonClick}
         rowItems={this.props.models}
-        handleDelete={this.handleDelete}
+        onHandleDelete={this.handleDelete}
       />
     );
   }

@@ -23,7 +23,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
           {title}
           <div className={styles.buttonContainer}>
             <Button
-              onClick={this.props.handleButtonClick}
+              onClick={this.props.onButtonClick}
               secondaryHotlineAdd
               label={'content-type-builder.button.attributes.add'}
             />
@@ -48,9 +48,9 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  handleButtonClick: PropTypes.func,
   listContent: PropTypes.object,
   listContentMappingKey: PropTypes.string.isRequired,
+  onButtonClick: PropTypes.func,
   renderCustomLi: PropTypes.func,
   renderCustomListTitle: PropTypes.func,
 }

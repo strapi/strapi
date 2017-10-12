@@ -152,7 +152,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
-  changeDefaultLanguage = ({ target }) => {
+  getDatabase = (databaseName) => {
+    // allow state here just for modal purpose
+    this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
+    // this.setState({ modal: !this.state.modal });
+  }
+
+  handleDefaultLanguageChange = ({ target }) => {
     // create new object configsDisplay based on store property configsDisplay
     const configsDisplay = {
       name: this.props.home.configsDisplay.name,
@@ -182,13 +188,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     // Edit the new config
     this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
   }
-
-  getDatabase = (databaseName) => {
-    // allow state here just for modal purpose
-    this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
-    // this.setState({ modal: !this.state.modal });
-  }
-
+  
   handleFetch(props) {
     const apiUrl = props.match.params.env ? `${props.match.params.slug}/${props.match.params.env}` : props.match.params.slug;
 
@@ -230,6 +230,15 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleChangeLanguage = (value) => this.props.changeInput('language.defaultLocale', value.value);
 
   handleCancel = () => this.props.cancelChanges();
+
+  handleSetDefaultConnectionDb = () => {
+    const value = this.state.toggleDefaultConnection
+      ? this.props.home.addDatabaseSection.sections[1].items[0].value
+      : this.props.home.modifiedData[this.props.home.dbNameTarget];
+    const target = { name: 'database.defaultConnection', value };
+    this.handleChange({target});
+    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
+  }
 
   handleSubmit = (e) => { // eslint-disable-line consistent-return
     e.preventDefault();
@@ -281,9 +290,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       key={key}
       {...props}
       liStyles={liStyles}
-      handleLanguageDelete={this.handleLanguageDelete}
+      onDeleteLanguage={this.handleLanguageDelete}
       listLanguages={this.props.home.listLanguages}
-      changeDefaultLanguage={this.changeDefaultLanguage}
+      onDefaultLanguageChange={this.handleDefaultLanguageChange}
     />
   )
 
@@ -308,7 +317,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
             key={key}
             className={popUpStyles.defaultConnection}
             id={item.target}
-            onClick={this.setDefaultConnectionDb}
+            onClick={this.handleSetDefaultConnectionDb}
           >
             <FormattedMessage id={`settings-manager.${item.name}`} />{isActive}
           </div>
@@ -349,12 +358,12 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       key={key}
       data={props}
       getDatabase={this.getDatabase}
-      handleDatabaseDelete={this.handleDatabaseDelete}
+      onDeleteDatabase={this.handleDatabaseDelete}
       sections={this.props.home.specificDatabase.sections}
       values={this.props.home.modifiedData}
-      handleChange={this.handleChange}
+      onChange={this.handleChange}
       renderPopUpForm={this.renderPopUpFormDatabase}
-      handleSubmit={this.handleSubmitEditDatabase}
+      onSubmit={this.handleSubmitEditDatabase}
       formErrors={this.props.home.formErrors}
       error={this.props.home.error}
       resetToggleDefaultConnection={this.resetToggleDefaultConnection}
@@ -419,9 +428,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         sections={sections}
         listItems={this.props.home.configsDisplay.sections}
         values={this.props.home.modifiedData}
-        handleChange={this.handleChange}
-        handleCancel={this.handleCancel}
-        handleSubmit={this.handleSubmit}
+        onChange={this.handleChange}
+        onCancel={this.handleCancel}
+        onSubmit={this.handleSubmit}
         links={this.props.environments}
         path={this.props.location.pathname}
         slug={this.props.match.params.slug}
@@ -442,15 +451,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         showLoader={this.props.home.showLoader}
       />
     );
-  }
-
-  setDefaultConnectionDb = () => {
-    const value = this.state.toggleDefaultConnection
-      ? this.props.home.addDatabaseSection.sections[1].items[0].value
-      : this.props.home.modifiedData[this.props.home.dbNameTarget];
-    const target = { name: 'database.defaultConnection', value };
-    this.handleChange({target});
-    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
   }
 
   // Set the toggleDefaultConnection to false

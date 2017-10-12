@@ -34,7 +34,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         value: get(this.props.dropDownItems[0], 'name'),
       };
 
-      this.props.handleChange({ target });
+      this.props.onChange({ target });
     }
   }
 
@@ -46,7 +46,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         value: get(nextProps.dropDownItems[0], 'name'),
       };
 
-      this.props.handleChange({ target });
+      this.props.onChange({ target });
     }
   }
 
@@ -68,7 +68,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
     <ModalBody className={`${styles.modalBodyAdvanced}`}>
       <div className="container-fluid">
         <div className="row">
-          {map(take(this.props.form.items, 2), (input, key) => (
+          {map(take(this.props.form.items, 1), (input, key) => (
             <Input
               key={key}
               type={input.type}
@@ -120,14 +120,14 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         header={this.props.contentType}
         input={get(this.props.form, ['items', '0'])}
         value={get(this.props.values, 'name')}
-        handleSubmit={this.props.handleSubmit}
-        handleChange={this.props.handleChange}
+        onSubmit={this.props.onSubmit}
+        onChange={this.props.onChange}
         didCheckErrors={this.props.didCheckErrors}
         errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
       />
       <RelationNaturePicker
         selectedIco={get(this.props.values, ['params', 'nature'])}
-        handleChange={this.props.handleChange}
+        onChange={this.props.onChange}
         contentTypeName={get(this.props.contentType, 'name')}
         contentTypeTarget={get(this.props.values, ['params', 'target'])}
       />
@@ -135,11 +135,11 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         tabIndex="2"
         contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
         relationType={get(this.props.values, ['params', 'nature'])}
-        handleSubmit={this.props.handleSubmit}
+        onSubmit={this.props.onSubmit}
         header={get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])])}
         input={get(this.props.form, ['items', '1'])}
         value={get(this.props.values, ['params', 'key'])}
-        handleChange={this.props.handleChange}
+        onChange={this.props.onChange}
         didCheckErrors={this.props.didCheckErrors}
         errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : []}
         dropDownItems={this.props.dropDownItems}
@@ -149,11 +149,12 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 
   render() {
     const loader = this.props.showLoader ?
-      <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-      : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
+      <Button onClick={this.props.onSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      : <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
 
     const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
-  
+    const handleToggle = this.props.toggle;
+
     return (
       <div className={styles.popUpRelations}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
@@ -173,7 +174,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           {modalBody}
 
           <ModalFooter className={styles.modalFooter}>
-            <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
+            <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
             {loader}{' '}
           </ModalFooter>
         </Modal>
@@ -194,10 +195,10 @@ PopUpRelations.propTypes = {
     PropTypes.array,
     PropTypes.object,
   ]),
-  handleChange: PropTypes.func,
-  handleSubmit: PropTypes.func,
   isEditting: PropTypes.bool,
   isOpen: PropTypes.bool,
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
   popUpTitle: PropTypes.string.isRequired,
   routePath: PropTypes.string.isRequired,
   showLoader: PropTypes.bool,

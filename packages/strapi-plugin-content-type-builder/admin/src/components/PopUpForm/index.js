@@ -32,20 +32,17 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     }
 
     const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
-
     const value = !isEmpty(this.props.values) && includes(item.name, '.') ? get(this.props.values, [split(item.name, '.')[0], split(item.name, '.')[1]]) : this.props.values[item.name];
-
-    const handleBlur = shouldOverrideHandleBlur ? this.props.handleBlur : false;
+    const handleBlur = shouldOverrideHandleBlur ? this.props.onBlur : false;
     const errorIndex = findIndex(this.props.formErrors, ['name', item.name]);
     const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
-
 
     return (
       <Input
         key={key}
         type={item.type}
-        handleChange={this.props.handleChange}
-        handleBlur={handleBlur}
+        onChange={this.props.onChange}
+        onBlur={handleBlur}
         label={item.label}
         name={item.name}
         validations={item.validations}
@@ -69,7 +66,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         <PopUpHeaderNavLink
           key={key}
           message={link.message}
-          handleClick={this.changeForm}
           name={link.name}
           nameToReplace={link.nameToReplace}
           routePath={this.props.routePath}
@@ -91,14 +87,16 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
 
     const loader = this.props.showLoader ?
-      <Button onClick={this.props.handleSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-      : <Button type="submit" onClick={this.props.handleSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${this.props.buttonSubmitMessage}`} /></Button>;
+      <Button onClick={this.props.onSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
+      : <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${this.props.buttonSubmitMessage}`} /></Button>;
 
+    const handleToggle = this.props.toggle;
     const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
       : <ModalFooter className={styles.modalFooter}>
-        <Button onClick={this.props.toggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
+        <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
         {loader}{' '}
       </ModalFooter>;
+
     return (
       <div className={styles.popUpForm}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
@@ -110,7 +108,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             {navContainer}
           </div>
           <ModalBody className={styles.modalBody}>
-            <form onSubmit={this.props.handleSubmit}>
+            <form onSubmit={this.props.onSubmit}>
               <div className="container-fluid">
                 <div className="row">
                   {modalBody}
@@ -137,12 +135,12 @@ PopUpForm.propTypes = {
     PropTypes.array,
     PropTypes.object,
   ]),
-  handleBlur: PropTypes.func,
-  handleChange: PropTypes.func,
-  handleSubmit: PropTypes.func,
   isOpen: PropTypes.bool,
   noButtons: PropTypes.bool,
   noNav: PropTypes.bool,
+  onBlur: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func,
   overrideCustomBootstrapClass: PropTypes.bool,
   overrideHandleBlurCondition: PropTypes.func,
   overrideRenderInput: PropTypes.func,

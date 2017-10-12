@@ -43,21 +43,22 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     };
   }
 
-  edit = (e) => {
+  handleEdit = (e) => {
     e.preventDefault();
-    this.props.handleEdit(this.props.row.name);
+    this.props.onEditAttribute(this.props.row.name);
   }
 
   delete = () => {
-    this.props.handleDelete(this.props.row.name);
+    this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
   }
 
-  showModalWarning = (e) => {
+  handleShowModalWarning = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.setState({ showWarning: !this.state.showWarning });
   }
+
   toggleModalWarning = () => {
     // e.preventDefault();
     // e.stopPropagation()
@@ -77,7 +78,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
     return (
-      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.edit}>
+      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.handleEdit}>
         <div className={styles.flex}>
           <div className={styles.nameContainer}>
             {this.renderAttributesBox()}
@@ -87,10 +88,10 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
           <div className={styles.mainField}></div>
           <div className={styles.icoContainer}>
             <div className="ico">
-              <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
+              <i className="fa fa-pencil ico" onClick={this.handleEdit} role="button" />
             </div>
             <div className="ico">
-              <i className="fa fa-trash ico" onClick={this.showModalWarning} role="button" />
+              <i className="fa fa-trash ico" onClick={this.handleShowModalWarning} role="button" />
             </div>
           </div>
         </div>
@@ -107,8 +108,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 AttributeRow.propTypes = {
-  handleDelete: PropTypes.func,
-  handleEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onEditAttribute: PropTypes.func,
   row: PropTypes.object,
 }
 

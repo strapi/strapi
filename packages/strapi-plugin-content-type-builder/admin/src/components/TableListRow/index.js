@@ -20,7 +20,8 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
       showWarning: false,
     };
   }
-  edit = (e) => {
+
+  handleEdit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     router.push(`/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
@@ -29,11 +30,11 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   delete = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.handleDelete(this.props.rowItem.name)
+    this.props.onDelete(this.props.rowItem.name)
     this.setState({ showWarning: false });
   }
 
-  goTo = () => {
+  handleGoTo = () => {
     router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}`);
   }
 
@@ -41,7 +42,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     this.setState({ showWarning: !this.state.showWarning });
   }
 
-  showModalWarning = (e) => {
+  handleShowModalWarning = (e) => {
     e.stopPropagation();
     this.setState({ showWarning: !this.state.showWarning });
   }
@@ -52,7 +53,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
     return (
       <li>
-        <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
+        <div className={`${styles.liInnerContainer} row`} onClick={this.handleGoTo} role="button">
           <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
           <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)}</span> {temporary}</div>
           <div className="col-md-5 text-center">{description}</div>
@@ -60,10 +61,10 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
           <div className="col-md-1">
             <div className={styles.icContainer}>
               <div>
-                <i className="fa fa-pencil" onClick={this.edit} role="button" />
+                <i className="fa fa-pencil" onClick={this.handleEdit} role="button" />
               </div>
               <div>
-                <i className="fa fa-trash" onClick={this.showModalWarning} role="button" />
+                <i className="fa fa-trash" onClick={this.handleShowModalWarning} role="button" />
               </div>
             </div>
           </div>
@@ -81,7 +82,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 TableListRow.propTypes = {
-  handleDelete: PropTypes.func,
+  onDelete: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,
 };
 

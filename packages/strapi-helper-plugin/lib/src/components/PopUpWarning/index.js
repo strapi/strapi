@@ -55,7 +55,7 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
               </FormattedMessage>
               <FormattedMessage id={this.props.content.confirm || `popUpWarning.button.confirm`}>
                 {(message) => (
-                  <Button onClick={this.props.handleConfirm} className={styles.primary}>{message}</Button>
+                  <Button onClick={this.props.onConfirm} className={styles.primary}>{message}</Button>
                 )}
               </FormattedMessage>
             </div>
@@ -69,8 +69,8 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 
 PopUpWarning.propTypes = {
   bodyMessage: PropTypes.string,
-  handleConfirm: PropTypes.func,
   isOpen: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func,
   popUpWarningType: PropTypes.string,
   toggleModal: PropTypes.func.isRequired,
 }

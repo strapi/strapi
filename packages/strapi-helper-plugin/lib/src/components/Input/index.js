@@ -24,12 +24,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
 
   componentDidMount() {
-    // Init the select value if type === "select"
-    if (this.props.type === 'select' && !isEmpty(this.props.selectOptions) && this.props.selectOptions[0].value !== '') {
-      const target = { name: this.props.name, value: this.props.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     if (this.props.value && !isEmpty(this.props.value)) {
       this.setState({ hasInitialValue: true });
     }
@@ -40,11 +34,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
-      const target = { name: nextProps.name, value: nextProps.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     // Check if errors have been updated during validations
     if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
 
@@ -120,7 +109,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       name: e.target.name,
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   renderErrors = (errorStyles) => { // eslint-disable-line consistent-return
@@ -175,7 +164,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           className="form-control"
           id={this.props.label}
           name={this.props.name}
-          onChange={this.props.handleChange}
+          onChange={this.props.onChange}
           value={this.props.value}
           disabled={this.props.disabled}
         >
@@ -214,12 +203,12 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           {(placeholder) => (
             <textarea
               className="form-control"
-              onChange={this.props.handleChange}
+              onChange={this.props.onChange}
               value={this.props.value}
               name={this.props.name}
               id={this.props.label}
               onBlur={handleBlur}
-              onFocus={this.props.handleFocus}
+              onFocus={this.props.onFocus}
               placeholder={placeholder}
               disabled={this.props.disabled}
             />
@@ -261,7 +250,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
             name: this.props.name,
             id: this.props.label,
           }}
-          onChange={(moment) => this.props.handleChange({ target: {
+          onChange={(moment) => this.props.onChange({ target: {
             name: this.props.name,
             value: moment
           }})}
@@ -282,8 +271,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           name={this.props.name}
           id={this.props.label}
           onBlur={handleBlur}
-          onFocus={this.props.handleFocus}
-          onChange={this.props.handleChange}
+          onFocus={this.props.onFocus}
+          onChange={this.props.onChange}
           value={inputValue}
           type={this.props.type}
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -298,7 +287,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
-    const handleBlur = this.props.handleBlur || this.handleBlur;
+    const handleBlur = this.props.onBlur || this.handleBlur;
     // override bootStrapClass
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
@@ -317,8 +306,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         name={this.props.name}
         id={this.props.label}
         onBlur={handleBlur}
-        onFocus={this.props.handleFocus}
-        onChange={this.props.handleChange}
+        onFocus={this.props.onFocus}
+        onChange={this.props.onChange}
         value={inputValue}
         type={this.props.type}
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -377,16 +366,16 @@ Input.propTypes = {
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
   errors: PropTypes.array,
-  handleBlur: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
-  handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func,
   inputDescription: PropTypes.string,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
+  ]),
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   pluginID: PropTypes.string,
   selectOptions: PropTypes.array,

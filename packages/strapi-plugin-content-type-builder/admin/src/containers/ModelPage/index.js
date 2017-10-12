@@ -190,7 +190,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </li>
   )
 
-  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} handleEdit={this.handleEditAttribute} handleDelete={this.handleDelete} />
+  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} onEditAttribute={this.handleEditAttribute} onDelete={this.handleDelete} />
 
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
@@ -250,13 +250,13 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
-      <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
+      <EmptyAttributesView onClickAddAttribute={this.handleClickAddAttribute} /> :
       <List
         listContent={this.props.modelPage.model}
         renderCustomListTitle={this.renderListTitle}
         listContentMappingKey={'attributes'}
         renderCustomLi={this.renderCustomLi}
-        handleButtonClick={this.handleClickAddAttribute}
+        onButtonClick={this.handleClickAddAttribute}
       />;
 
     return (

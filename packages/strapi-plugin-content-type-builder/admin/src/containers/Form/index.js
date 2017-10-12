@@ -490,7 +490,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       key={key}
       data={item}
       value={this.props.modifiedDataAttribute.params}
-      handleChange={this.handleChange}
+      onChange={this.handleChange}
       errors={this.props.formErrors}
       didCheckErrors={this.props.didCheckErrors}
     />
@@ -540,10 +540,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           contentType={get(dropDownItems, [findIndex(dropDownItems, ['name', this.props.modelName])])}
           form={this.props.form}
           showRelation={includes(this.props.hash, 'defineRelation')}
-          handleChange={this.handleChange}
+          onChange={this.handleChange}
           values={this.props.modifiedDataAttribute}
           dropDownItems={dropDownItems}
-          handleSubmit={this.handleSubmit}
+          onSubmit={this.handleSubmit}
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           isEditting={edit}
@@ -563,9 +563,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           form={this.props.form}
           values={values}
           selectOptions={selectOptions}
-          handleChange={this.handleChange}
-          handleBlur={this.handleBlur}
-          handleSubmit={this.handleSubmit}
+          onChange={this.handleChange}
+          onBlur={this.handleBlur}
+          onSubmit={this.handleSubmit}
           noNav={noNav}
           renderModalBody={renderModalBody}
           noButtons={noButtons}

@@ -23,7 +23,7 @@ class Pagination extends React.Component {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
-      this.props.changePage(this.props.currentPage - 1);
+      this.props.onChangePage(this.props.currentPage - 1);
     }
   }
 
@@ -31,20 +31,20 @@ class Pagination extends React.Component {
     e.preventDefault();
 
     if (!this.isLastPage()) {
-      this.props.changePage(this.props.currentPage + 1);
+      this.props.onChangePage(this.props.currentPage + 1);
     }
   }
 
   handleFirstPageClick = (e) => {
     e.preventDefault();
 
-    this.props.changePage(1);
+    this.props.onChangePage(1);
   }
 
   handleLastPageClick = (e) => {
     e.preventDefault();
 
-    this.props.changePage(this.getLastPageNumber());
+    this.props.onChangePage(this.getLastPageNumber());
   }
 
   isFirstPage = () => {
@@ -71,7 +71,7 @@ class Pagination extends React.Component {
     linksOptions.push({
       value: this.props.currentPage,
       isActive: true,
-      onClick: e => {
+      handleClick: e => {
         e.preventDefault();
       },
     });
@@ -81,7 +81,7 @@ class Pagination extends React.Component {
       linksOptions.unshift({
         value: this.props.currentPage - 1,
         isActive: false,
-        onClick: this.handlePreviousPageClick,
+        handleClick: this.handlePreviousPageClick,
       });
     }
 
@@ -90,7 +90,7 @@ class Pagination extends React.Component {
       linksOptions.push({
         value: this.props.currentPage + 1,
         isActive: false,
-        onClick: this.handleNextPageClick,
+        handleClick: this.handleNextPageClick,
       });
     }
 
@@ -99,12 +99,12 @@ class Pagination extends React.Component {
       linksOptions.unshift({
         value: '...',
         isActive: false,
-        onClick: this.handleDotsClick,
+        handleClick: this.handleDotsClick,
       });
       linksOptions.unshift({
         value: 1,
         isActive: false,
-        onClick: this.handleFirstPageClick,
+        handleClick: this.handleFirstPageClick,
       });
     }
 
@@ -113,12 +113,12 @@ class Pagination extends React.Component {
       linksOptions.push({
         value: '...',
         isActive: false,
-        onClick: this.handleDotsClick,
+        handleClick: this.handleDotsClick,
       });
       linksOptions.push({
         value: this.getLastPageNumber(),
         isActive: false,
-        onClick: this.handleLastPageClick,
+        handleClick: this.handleLastPageClick,
       });
     }
 
@@ -129,7 +129,7 @@ class Pagination extends React.Component {
           className={`${linksOption.isActive && styles.navLiActive}`}
           key={key}
         >
-          <a href disabled={linksOption.isActive} onClick={linksOption.onClick}>
+          <a href disabled={linksOption.isActive} onClick={linksOption.handleClick}>
             {linksOption.value}
           </a>
         </li>
@@ -175,13 +175,13 @@ class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
-  changePage: PropTypes.func.isRequired,
   count: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.bool,
   ]).isRequired,
   currentPage: PropTypes.number.isRequired,
   limit: PropTypes.number.isRequired,
+  onChangePage: PropTypes.func.isRequired,
 };
 
 export default Pagination;

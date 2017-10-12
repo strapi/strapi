@@ -12,6 +12,7 @@ import { FormattedMessage } from 'react-intl';
 import Danger from '../../assets/icons/icon_danger.svg';
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-handler-names */
 class PopUpWarning extends React.Component { // eslint-disable-line react/prefer-stateless-function
   renderModalBodyDanger = () => (
     <ModalBody>

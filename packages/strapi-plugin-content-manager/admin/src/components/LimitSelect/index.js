@@ -31,7 +31,7 @@ class LimitSelect extends React.Component {
 
         <div className={styles.selectWrapper}>
           <select
-            onChange={this.props.handleChange}
+            onChange={this.props.onChangeLimit}
             className={`form-control ${styles.select}`}
             id={this.state.id}
             value={this.props.limit}
@@ -48,8 +48,8 @@ class LimitSelect extends React.Component {
 }
 
 LimitSelect.propTypes = {
-  handleChange: PropTypes.func.isRequired,
   limit: PropTypes.number.isRequired,
+  onChangeLimit: PropTypes.func.isRequired,
 };
 
 export default LimitSelect;

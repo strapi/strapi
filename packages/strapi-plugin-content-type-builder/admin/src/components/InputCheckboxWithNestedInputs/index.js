@@ -19,7 +19,18 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
       name: this.props.data.name,
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
+
+    if (!target.value) {
+      const valueToRemove = {
+        target: {
+          name: `${this.props.data.name}Value`,
+          type: 'number',
+          value: '',
+        },
+      };
+      this.props.onChange(valueToRemove);
+    }
   }
 
 
@@ -35,7 +46,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
               <Input
                 key={key}
                 type={item.type}
-                handleChange={this.props.handleChange}
+                onChange={this.props.onChange}
                 name={item.name}
                 value={this.props.value[item.name.split('.')[1]]}
                 validations={item.validations}
@@ -84,7 +95,7 @@ InputCheckboxWithNestedInputs.propTypes = {
   data: PropTypes.object.isRequired,
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
-  handleChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
   value: PropTypes.object,
 };
 

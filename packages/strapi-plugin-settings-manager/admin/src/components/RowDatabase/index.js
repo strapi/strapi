@@ -15,7 +15,6 @@ import PopUpWarning from 'components/PopUpWarning';
 import styles from 'components/List/styles.scss';
 
 class RowDatabase extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  /* eslint-disable jsx-a11y/no-static-element-interactions */
   constructor(props) {
     super(props);
     this.state = {
@@ -30,37 +29,38 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
       if (isEmpty(nextProps.formErrors)) this.setState({ modal: false, loader: false });
     }
 
-    // if (nextProps.formErrors !== this.props.formErrors && nextProps.formErrors) this.setState({ loader: false });
     if (!isEmpty(nextProps.formErrors)) this.setState({ loader: false });
   }
 
-  componentWillUnmount() {
-    // this.setState({})
+  deleteDatabase = () => {
+    this.setState({ warning: !this.state.warning });
+    this.props.onDeleteDatabase(this.props.data.name);
   }
 
-  showDatabaseModal = (e) => {
+  handleShowDatabaseModal = (e) => {
     if (e.target.id !== 'trash') {
       this.setState({ modal: !this.state.modal });
       this.props.getDatabase(this.props.data.name);
     }
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.setState({ loader: true });
+    this.props.onSubmit(this.props.data.name);
+  }
+
+  handleToggle = () => {
+    this.setState({ modal: !this.state.modal });
+  }
+
+  handleToggleWarning = () => this.setState({ warning: !this.state.warning });
+
   toggle = () => {
     this.setState({ modal: !this.state.modal });
   }
 
   toggleWarning = () => this.setState({ warning: !this.state.warning });
-
-  handleSubmit = (e) => {
-    e.preventDefault();
-    this.setState({ loader: true });
-    this.props.handleSubmit(this.props.data.name);
-  }
-
-  deleteDatabase = () => {
-    this.setState({ warning: !this.state.warning });
-    this.props.handleDatabaseDelete(this.props.data.name);
-  }
 
   render() {
     const loader = this.state.loader
@@ -72,8 +72,9 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           )}
         </FormattedMessage>
       );
+      
     return (
-      <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.showDatabaseModal}>
+      <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.handleShowDatabaseModal}>
         <div className={styles.flexLi}>
           <div className={styles.flexed}>
             <div className={styles.squared} style={{ backgroundColor: this.props.data.color }}>
@@ -86,9 +87,8 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           </div>
           <div className={styles.centered} style={{ width: '15rem'}}>{this.props.data.database}</div>
           <div className={styles.flexed} style={{ minWidth: '3rem', justifyContent: 'space-between'}}>
-
             <div className={styles.ico}><i className="fa fa-pencil" id={this.props.data.name} /></div>
-            <div className={`${styles.leftSpaced} ${styles.ico}`}><i id="trash" className="fa fa-trash" onClick={this.toggleWarning} /></div>
+            <div className={`${styles.leftSpaced} ${styles.ico}`}><i id="trash" className="fa fa-trash" onClick={this.handleToggleWarning} /></div>
           </div>
         </div>
         <div>
@@ -97,9 +97,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
               Databases
             </ModalHeader>
             <div className={styles.bordered} />
-
             <form autoComplete="off">
-
               <ModalBody className={styles.modalBody}>
                 <div className={styles.spacerSmall} />
                 <PopUpForm {...this.props} />
@@ -107,7 +105,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
                 <FormattedMessage id="settings-manager.form.button.cancel">
                   {(message) => (
-                    <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
+                    <Button onClick={this.handleToggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
                 {loader}
@@ -136,8 +134,8 @@ RowDatabase.propTypes = {
   error: PropTypes.bool,
   formErrors: PropTypes.array,
   getDatabase: PropTypes.func,
-  handleDatabaseDelete: PropTypes.func,
-  handleSubmit: PropTypes.func,
+  onDeleteDatabase: PropTypes.func,
+  onSubmit: PropTypes.func,
 };
 
 export default RowDatabase;

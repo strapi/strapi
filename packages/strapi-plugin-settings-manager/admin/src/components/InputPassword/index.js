@@ -84,7 +84,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
     return errors;
   }
 
-  showPassword = () => this.setState({ type: !this.state.type })
+  handleShowPassword = () => this.setState({ type: !this.state.type })
 
   renderErrors = () => { // eslint-disable-line consistent-return
     if (!this.props.noErrorsDescription) {
@@ -139,7 +139,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
           <small>{this.props.inputDescription}</small>
           {this.renderErrors()}
         </div>
-        <div className={this.props.styles.insideInput} onClick={this.showPassword} style={color}>
+        <div className={this.props.styles.insideInput} onClick={this.handleShowPassword} style={color}>
           <i className="fa fa-eye" />
         </div>
       </div>

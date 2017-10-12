@@ -14,7 +14,7 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  goTo = () => {
+  handleGoTo = () => {
     router.push(replace(this.props.routePath, this.props.nameToReplace, this.props.name));
   }
 
@@ -22,7 +22,7 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
     const activeClass = includes(this.props.routePath, this.props.name) ? styles.popUpHeaderNavLink : '';
 
     return (
-      <div className={activeClass} onClick={this.goTo} style={{ cursor: 'pointer' }}>
+      <div className={activeClass} onClick={this.handleGoTo} style={{ cursor: 'pointer' }}>
         <FormattedMessage id={this.props.message} />
       </div>
     );

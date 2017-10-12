@@ -30,7 +30,7 @@ class Table extends React.Component {
           record={record}
           history={this.props.history}
           primaryKey={this.props.primaryKey}
-          handleDelete={this.props.handleDelete}
+          onDelete={this.props.handleDelete}
           redirectUrl={this.props.redirectUrl}
         />
       ));
@@ -39,7 +39,7 @@ class Table extends React.Component {
       <table className={`table ${styles.table}`}>
         <TableHeader
           headers={this.props.headers}
-          changeSort={this.props.changeSort}
+          onChangeSort={this.props.onChangeSort}
           sort={this.props.sort}
           primaryKey={this.props.primaryKey}
         />
@@ -56,10 +56,10 @@ Table.contextTypes = {
 };
 
 Table.propTypes = {
-  changeSort: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
+  onChangeSort: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   records: PropTypes.array.isRequired,
   redirectUrl: PropTypes.string.isRequired,

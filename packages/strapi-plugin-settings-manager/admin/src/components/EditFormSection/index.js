@@ -40,7 +40,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                     <EditFormSectionNested
                       section={item.items}
                       values={this.props.values}
-                      handleChange={this.props.handleChange}
+                      onChange={this.props.onChange}
                       sectionNested
                       formErrors={this.props.formErrors}
                     />
@@ -58,7 +58,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 
 EditFormSection.propTypes = {
   formErrors: PropTypes.array,
-  handleChange: PropTypes.func,
+  onChange: PropTypes.func,
   renderInput: PropTypes.func,
   section: PropTypes.object,
   showNestedForm: PropTypes.bool,

@@ -69,7 +69,7 @@ class TableRow extends React.Component {
     cells.push(
       <td key='action' className={styles.actions}>
         <i className="fa fa-pencil" aria-hidden="true"></i>
-        <i onClick={this.props.handleDelete} id={this.props.record.id} className="fa fa-trash" aria-hidden="true"></i>
+        <i onClick={this.props.onDelete} id={this.props.record.id} className="fa fa-trash" aria-hidden="true"></i>
       </td>
     );
 
@@ -87,8 +87,8 @@ TableRow.contextTypes = {
 
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
-  handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
+  onDelete: PropTypes.func,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
   value: PropTypes.shape({
@@ -97,7 +97,7 @@ TableRow.propTypes = {
 };
 
 TableRow.defaultProps = {
-  handleDelete: () => {},
+  onDelete: () => {},
 };
 
 export default TableRow;

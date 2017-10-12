@@ -17,7 +17,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
     const buttonStyle = this.props.showLoader ? { display: 'none' } : {};
     return (
       <div className={styles.editForm}>
-        <form onSubmit={this.props.handleSubmit} autoComplete="nope">
+        <form onSubmit={this.props.onSubmit} autoComplete="nope">
           <div className={styles.formContainer}>
             {map(this.props.sections, (section, key) => {
               let line;
@@ -30,7 +30,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
                   <EditFormSection
                     section={section}
                     values={this.props.values}
-                    handleChange={this.props.handleChange}
+                    onChange={this.props.onChange}
                     cancelAction={this.props.cancelAction}
                     formErrors={this.props.formErrors}
                   />
@@ -42,12 +42,12 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <div className={styles.buttonContainer}>
             <FormattedMessage id="settings-manager.form.button.cancel">
               {(message) => (
-                <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.handleCancel} style={buttonStyle} />
+                <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.onCancel} style={buttonStyle} />
               )}
             </FormattedMessage>
             <FormattedMessage id="settings-manager.form.button.save">
               {(message) => (
-                <Button type="submit" loader={this.props.showLoader} label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.handleSubmit} />
+                <Button type="submit" loader={this.props.showLoader} label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.onSubmit} />
               )}
             </FormattedMessage>
           </div>
@@ -60,9 +60,9 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 EditForm.propTypes = {
   cancelAction: PropTypes.bool,
   formErrors: PropTypes.array,
-  handleCancel: PropTypes.func,
-  handleChange: PropTypes.func,
-  handleSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
   sections: PropTypes.array,
   showLoader: PropTypes.bool,
   values: PropTypes.object,

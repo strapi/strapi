@@ -23,7 +23,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     addRequiredInputDesign: PropTypes.bool,
     cancelAction: PropTypes.bool,
     formErrors: PropTypes.array,
-    handleChange: PropTypes.func,
+    onChange: PropTypes.func,
     section: PropTypes.oneOfType([
       PropTypes.object,
       PropTypes.array,
@@ -83,7 +83,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       this.setState({ showNestedForm: target.value });
     }
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   renderInput = (props, key) => {
@@ -103,7 +103,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       config[props.target] || config[dynamicTarget] || '';
 
     // custom handleChange props for nested input form
-    const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
+    const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.onChange;
     let hiddenLabel = includes(props.name, 'enabled');
 
     if (includes(config.showInputLabel, props.name)) hiddenLabel = false;

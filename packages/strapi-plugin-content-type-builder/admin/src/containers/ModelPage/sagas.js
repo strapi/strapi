@@ -36,7 +36,7 @@ export function* submitChanges(action) {
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
-
+  
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
       if (attribute.connection) {
@@ -51,7 +51,8 @@ export function* submitChanges(action) {
         }
 
         if (!value) {
-          unset(body.attributes[index].params, key);
+          const paramsKey = includes(key, 'Value') ? replace(key,'Value', '') : key;
+          unset(body.attributes[index].params, paramsKey);
         }
       });
     });

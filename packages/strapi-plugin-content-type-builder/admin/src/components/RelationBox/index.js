@@ -31,7 +31,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       name: 'params.target',
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   toggle = () => this.setState({ showMenu: !this.state.showMenu });
@@ -84,7 +84,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       <Input
         tabIndex={this.props.tabIndex}
         type={get(this.props.input, 'type')}
-        handleChange={this.props.handleChange}
+        onChange={this.props.onChange}
         label={get(this.props.input, 'label')}
         name={get(this.props.input, 'name')}
         value={this.props.value}
@@ -106,7 +106,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
           {dropDown}
         </div>
         <div className={styles.inputContainer}>
-          <form onSubmit={this.props.handleSubmit}>
+          <form onSubmit={this.props.onSubmit}>
             <div className="container-fluid">
               <div className={`row ${styles.input}`}>
                 {content}
@@ -124,11 +124,11 @@ RelationBox.propTypes = {
   didCheckErrors: PropTypes.bool,
   dropDownItems: PropTypes.array,
   errors: PropTypes.array,
-  handleChange: PropTypes.func,
-  handleSubmit: PropTypes.func,
   header: PropTypes.object,
   input: PropTypes.object,
   isFirstContentType: PropTypes.bool,
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
   relationType: PropTypes.string,
   tabIndex: PropTypes.string,
   value: PropTypes.string,
