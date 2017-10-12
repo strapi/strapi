@@ -4,12 +4,12 @@ li.header{
   letter-spacing: 0.05rem;
 }
 
-li.chapter a{
+li.chapter > a{
   transition: background-color 0.15s ease;
   -webkit-transition: background-color 0.15s ease;
 }
 
-li.chapter:hover a{
+li.chapter:hover > a{
   background: #eee !important;
   text-decoration: none !important;
 }
