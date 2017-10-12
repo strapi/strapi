@@ -17,9 +17,6 @@ We've been working on a major update for Strapi during the past months, rewritin
 
 This documentation is only related to Strapi v3@alpha.6 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
 
-**[Migration guide](migration/migration-guide.md)**<br />
-Migrate from v1 to v3@aplha.6.
-
 **[Get Started](getting-started/installation.md)**<br />
 Learn how to install Strapi and start developing your API.
 
@@ -37,3 +34,6 @@ Understand how to develop your own plugin.
 
 **[API Reference](api-reference/reference.md)**<br />
 Learn about Strapi's API, the `strapi` object that is available in your backend.
+
+**[Migration guide](migration/migration-guide.md)**<br />
+Migrate from v1 to v3@alpha.6.
