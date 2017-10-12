@@ -1,4 +1,5 @@
 # Don't check auto-generated stuff into git
+dist
 coverage
 build
 node_modules

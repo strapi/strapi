@@ -67,12 +67,36 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Use Pino as logger~~.
 
 `strapi@alpha.6` *(expected release date: 21/09/2017)*:
-- [Plugin] Content Manager.
-- [Plugin] Content Type Builder.
-- Finalize the plugins queries process to be able to use different ORMs.
-- Update `strapi-helper-plugin` and `strapi-admin` dependencies to the latest version.
-- Use [lerna](http://lernajs.io) to run tests.
+- ~~[Admin] Reduce number of steps to be able to contribute~~.
+- ~~[Admin] Reduce bundle size by sharing commons dependencies~~.
+- ~~[Admin] Update `strapi-helper-plugin` and `strapi-admin` dependencies to the latest version~~.
+- ~~[Plugin] Content Manager~~.
+- ~~[Plugin] Content Type Builder~~.
+- ~~[Plugin] Finalize the query process to be able to use different ORMs~~.
+- ~~[Plugin] Execute `bootstrap` function before mounting~~.
+- ~~[Plugin] Execute `requirement` function to allow or not rendering~~.
+- ~~[Framework] Support filters parameters~~.
+- ~~Write new documentation~~.
 
-`strapi@alpha.7` *(expected release date: 31/10/2017)*:
+`strapi@alpha.7` *(expected release date: 24/11/2017)*:
+- [Admin] Define push area into the plugins.
+- [Admin] Harmonise sharing components between plugins.
+- [Admin] `List plugins` page.
+- [Admin] Use latest available version of Bootstrap.
 - [Plugin] Users & groups (with full authentication process).
-- Give the ability to create a log file.
+- Improve generated APIs (especially the relation part).
+
+`strapi@alpha.8` *(expected release date: 22/12/2017)*:
+- [Plugin] Upload.
+- [Plugin] Email.
+- [Plugin] GraphQL.
+- [Plugin] Content Manager v2
+  - Search (filters).
+  - WYSWYG.
+  - Required relation.
+- Re-design & improve the DX of the validations layer.
+
+`strapi@alpha.9` *(expected release date: 19/01/2018)*:
+- [Plugin] Be able to reinstall a plugin without loosing the user's configurations.
+- [Plugin] Settings Manager v2 (add/update configurations in each every environment).
+- HTTP/2.
