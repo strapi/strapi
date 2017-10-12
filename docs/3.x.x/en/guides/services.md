@@ -10,7 +10,7 @@ There is two ways to create a service.
 
 #### Example
 
-The goal of a service is to store reusable functions. If you continue with our `email` service, we can imagine that we would like a function to send emails:
+The goal of a service is to store reusable functions. An `email` service could be useful, if we plan to send emails from different functions in our codebase:
 
 **Path —** `./api/email/services/Email.js`.
 ```js

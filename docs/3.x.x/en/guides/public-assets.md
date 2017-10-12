@@ -10,7 +10,8 @@ An image named `company-logo.png` in `./public/` is accessible through `/company
 
 > Note: `index.html` files are served if the request corresponds to a folder name (`/pictures` url will try to serve `public/pictures/index.html` file).
 
-> Note bis: The dotfiles are not exposed. It means that every files with the names start by `.` such as `.htaccess` or `.gitignore` are not served.
+
+> Warning bis: The dotfiles are not exposed. It means that every files with the names start by `.` such as `.htaccess` or `.gitignore` are not served.
 
 
 Refer to the [public assets configurations](../configurations/configurations.md#Application) for more informations.

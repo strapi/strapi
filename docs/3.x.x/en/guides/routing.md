@@ -4,9 +4,9 @@ See the [routing's concept](../concepts/concepts.md#routing) for details.
 
 ## How to create a route?
 
-You have to edit the `routes.json` file in one of your APIs folders (`./api/**/config/routes.json`) and manually add a new route object into the `routes` key.
+You have to edit the `routes.json` file in one of your APIs folders (`./api/**/config/routes.json`) and manually add a new route object into the `routes` array.
 
-**Path —** `./api/youApi/config/routes.json`.
+**Path —** `./api/**/config/routes.json`.
 ```json
 {
   "routes": [

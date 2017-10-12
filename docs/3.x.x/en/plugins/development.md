@@ -1,4 +1,4 @@
-# Plugin development
+# Development
 
 Any Strapi plugin can contain two parts: an [API](#plugin-api-development) and a [plugin admin interface](#plugin-admin-interface-development). This section explains how to change each of these two parts after plugin creation, or modify an existing plugin.
 
@@ -6,11 +6,9 @@ Any Strapi plugin can contain two parts: an [API](#plugin-api-development) and a
 
 ***
 
-## Plugin API development
+## Back-end
 
 This section explains how the 'backend part' of your plugin works.
-
-See the [plugin API concept](../concepts/concepts.md#plugin-api-development) for details.
 
 Table of contents:
   - [Folders and files structure](#folders-and-files-structure)
@@ -23,11 +21,9 @@ Table of contents:
 
 ### Folders and files structure
 
-The API logic of a plugin is located in `./plugins/content-manager`.
-
-The folders and files structure is the following:
+The logic of a plugin is located at his root directory `./plugins/**`. The folders and files structure is the following:
 ```
-/project
+/plugin
 └─── admin // Contains the plugin's front-end
 └─── config // Contains the configurations of the plugin
 |    └─── routes.json // Contains the plugin's API routes
@@ -40,9 +36,9 @@ The folders and files structure is the following:
 
 The plugin API routes are defined in the `./plugins/**/config/routes.json` file.
 
-Please refer to [router documentation](../guides/routing.md) for informations.
+> Please refer to [router documentation](../guides/routing.md) for informations.
 
-*Routes prefix:*
+**Route prefix**
 
 Each route of a plugin is prefixed by the name of the plugin (eg: `/my-plugin/my-plugin-route`).
 
@@ -122,7 +118,7 @@ Please refer to the [Policies documentation](../guides/policies.md) for more inf
 
 ### ORM queries
 
-Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. See the [plugin ORM queries concept](../concepts/concepts.md#plugin-orm-queries) for details. A folder must be created for each ORM (eg. `mongoose`) with a file named `mongoose.js` which exports the Mongoose ORM related queries.
+Strapi supports multiple ORMs in order to let the users choose the database management system that suits their needs. Hence, each plugin must be compatible with at least one ORM. Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. A folder must be created for each ORM (eg. `mongoose`) with a file named `mongoose.js` which exports the Mongoose ORM related queries.
 
 The queries are accessible through the `strapi.query()` method, which automatically contains the queries according to the ORM used by the model.
 
@@ -217,9 +213,9 @@ module.exports = {
 ```
 ***
 
-## Plugin admin interface development
+## Front-end
 
-This section explains how to create your plugin interface.
+This section explains how to create your plugin interface in the admin panel.
 
 Table of contents:
 - [Development mode](#start-the-project-in-development-mode)
@@ -276,7 +272,7 @@ The routing is based on the [React Router V4](https://reacttraining.com/react-ro
 
 Also, we chose to use the [Switch Router](https://reacttraining.com/react-router/web/api/Switch) because it renders a route exclusively.
 
-***Route declaration :***
+**Route declaration :**
 
 Let's say that you want to create a route `/user` with params `/:id` associated with the container UserPage.
 
@@ -479,7 +475,9 @@ return (
 
 ### Data flow
 
-Refer to the [plugin data flow](../concepts/concepts.md#plugin-data-flow) for details.
+Each plugin has its own data store, so it stays completely independent from the others.
+
+Data flow is controlled thanks to Redux and redux-sagas.
 
 ### API Reference
 

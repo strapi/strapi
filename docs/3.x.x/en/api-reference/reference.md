@@ -25,7 +25,7 @@
 
 ## strapi.admin
 
-This object contains the controllers, models, services and configurations contained in the `/admin` folder.
+This object contains the controllers, models, services and configurations contained in the `./admin` folder.
 
 ## strapi.app
 
@@ -33,13 +33,13 @@ Returns the Koa instance.
 
 ## strapi.bootstrap
 
-Returns a `Promise`. When resolved, it means that the `/config/functions/bootstrap.js` has been executed. Otherwise, it throws an error.
+Returns a `Promise`. When resolved, it means that the `./config/functions/bootstrap.js` has been executed. Otherwise, it throws an error.
 
 > Note: You can also access to the bootstrap function through `strapi.config.functions.boostrap`.
 
 ## strapi.config
 
-Returns an object that represents the configurations of the project. Every JavaScript or JSON file located in the `/config` folder will be parsed into the `strapi.config` object.
+Returns an object that represents the configurations of the project. Every JavaScript or JSON file located in the `./config` folder will be parsed into the `strapi.config` object.
 
 ## strapi.controllers
 

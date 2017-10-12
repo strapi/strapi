@@ -155,27 +155,11 @@ Lifecycle callbacks are functions triggered at specific moments of the queries.
 
 ***
 
-## Plugin API development
+## Plugin
 
-A plugin can have an API which can be used the same way as an API generated in a Strapi project.
+A plugin is like a sub-app fully independent. It has its own business logic with its dedicated models, controllers, services, middlewares or hooks. It can also contains an UI integrated into the admin panel to use it easily. It allows to develops or plugs features in a project in a short time span.
 
-> Please refer to the [plugin development](../plugins/development.md#plugin-api-development) for more informations how it works.
-
-***
-
-## Plugin data flow
-
-Each plugin has its own data store, so it stays completely independent from the others.
-
-Data flow is controlled thanks to [Redux](http://redux.js.org/) and [redux-saga](https://github.com/redux-saga/redux-saga).
-
-***
-
-## Plugin ORM queries
-
-Strapi supports multiple ORMs in order to let the users choose the database management system that suits their needs. Hence, each plugin must be compatible with at least one ORM.
-
-> Please refer to the [plugin ORM queries](../plugins/development.md#orm-queries) for more informations.
+> Please refer to the [plugins documentation](../plugins/quick-start.md) for more informations.
 
 ***
 
