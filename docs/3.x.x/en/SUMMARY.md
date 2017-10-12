@@ -3,7 +3,7 @@
 ## Useful links
 * [Strapi Website](http://strapi.io)
 * [GitHub Repository](https://github.com/strapi/strapi)
-* [Contributing Guide](https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md)
+* [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md)
 
 ### Getting started
 * [Installation](getting-started/installation.md)
