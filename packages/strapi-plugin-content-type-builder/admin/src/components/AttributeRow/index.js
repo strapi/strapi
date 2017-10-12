@@ -48,7 +48,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     this.props.onEditAttribute(this.props.row.name);
   }
 
-  delete = () => {
+  handleDelete = () => {
     this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
   }
@@ -98,9 +98,9 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
+          content={{ messagee: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete' }}
           popUpWarningType={'danger'}
-          handleConfirm={this.delete}
+          onConfirm={this.handleDelete}
         />
       </li>
     );

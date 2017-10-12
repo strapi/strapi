@@ -27,7 +27,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     router.push(`/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
 
-  delete = (e) => {
+  handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.props.onDelete(this.props.rowItem.name)
@@ -72,9 +72,9 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
+          content={{ message: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete' }}
           popUpWarningType={'danger'}
-          handleConfirm={this.delete}
+          onConfirm={this.handleDelete}
         />
       </li>
     );

@@ -14,6 +14,9 @@
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
   "components.ProductionBlocker.header": "This plugin is only available in development.",
-  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments."
-
+  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments.",
+  "components.popUpWarning.button.cancel": "Cancel",
+  "components.popUpWarning.button.confirm": "Confirm",
+  "components.popUpWarning.title": "Please confirm",
+  "components.popUpWarning.message": "Are you sure you want to delete this?"
 }
