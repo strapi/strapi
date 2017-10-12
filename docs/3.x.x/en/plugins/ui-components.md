@@ -6,7 +6,7 @@ Strapi provides built-in UI Components to make development faster.
 
 Button library based on bootstrap classes.
 
-![Buttons img](../assets/buttons.png)
+{% center %} ![Buttons img](../assets/buttons.png) {% endcenter %}
 
 ### Usage
 
@@ -160,7 +160,7 @@ export default FooPage;
 
 PopUp warning library based on [reactstrap](https://reactstrap.github.io/components/modals/).
 
-![PopUp warning img](../assets/popup-warning.png)
+{% center %} ![PopUp warning img](../assets/popup-warning.png) {% endcenter %}
 
 ### Usage
 
