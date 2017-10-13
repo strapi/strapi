@@ -29,7 +29,41 @@
 
 ## Files structure
 
-TODO
+By default, your project's structure will look like this:
+
+- [`/admin`](../advanced/customize-admin.md): contains the vast majority of the admin's front-end and back-end logic.
+- `/api`: contains the business logic of your project will be in this folder split in sub-folder per API.
+   - `**`
+      - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
+      - [`/controllers`](#controllers): contains the API's controllers.
+      - [`/models`](#models): contains the API's models.
+      - [`/services`](#services):  contains the API's services.
+- `/node_modules`: contains the npm's packages used by the project.
+- [`/config`](../configurations/configurations.md)
+  - [`/environments`](../configurations/configurations.md#environments): contains the project's configurations per environment.
+    - `/**`
+      - `/development`
+        - [`custom.json`](../configurations/configurations.md#custom): contains the custom configurations for this environment.
+        - [`database.json`](../configurations/configurations.md#database): contains the database connections for this environment.
+        - [`request.json`](../configurations/configurations.md#request): contains the request settings for this environment.
+        - [`response.json`](../configurations/configurations.md#response): contains the response settings for this environment.
+        - [`server.json`](../configurations/configurations.md#server): contains the server settings for this environment.
+      - `/production`
+      - `/test`
+  - [`/functions`](../configurations/configurations.html#functions): contains lifecycle or generic functions of the project.
+  - [`/locales`](../configurations/configurations.html#locales): contains the translation files used by the built-in i18n feature.
+  - [`application.json`](../configurations/configurations.html#application): contains the general configurations of the project.
+  - [`custom.json`](../configurations/configurations.html#custom): contains the custom configurations of the project.
+  - [`hook.json`](../configurations/configurations.html#hook): contains the hook settings of the project.
+  - [`language.json`](../configurations/configurations.html#language): contains the language settings of the project.
+  - [`middleware.json`](../configurations/configurations.html#middleware): contains the middleware settings of the project.
+- [`/hooks`](../advanced/hooks.html): contains the custom hooks of the project.
+- [`/middlewares`](../advanced/middlewares.html): contains the custom middlewares of the project.
+- [`/plugins`](../configurations/configurations.md#plugins): contains the installed plugins in the project.
+- [`/public`](../concepts/concepts.html#public-assets): contains the file accessible to the outside world.
+
+
+> Tips: Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
 
 ***
 
