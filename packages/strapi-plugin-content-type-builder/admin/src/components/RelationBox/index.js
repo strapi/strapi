@@ -52,9 +52,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
                     {value.name}
                   </div>
                 </DropdownItem>
-
               </div>
-
             )
           })}
         </DropdownMenu>
@@ -121,17 +119,28 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
 
 RelationBox.propTypes = {
   contentTypeTargetPlaceholder: PropTypes.string,
-  didCheckErrors: PropTypes.bool,
+  didCheckErrors: PropTypes.bool.isRequired,
   dropDownItems: PropTypes.array,
   errors: PropTypes.array,
   header: PropTypes.object,
   input: PropTypes.object,
   isFirstContentType: PropTypes.bool,
-  onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   relationType: PropTypes.string,
-  tabIndex: PropTypes.string,
+  tabIndex: PropTypes.string.isRequired,
   value: PropTypes.string,
 }
+
+RelationBox.defaultProps = {
+  contentTypeTargetPlaceholder: '',
+  dropDownItems: [],
+  errors: [],
+  header: {},
+  input: {},
+  isFirstContentType: false,
+  relationType: 'oneToOne',
+  value: '',
+};
 
 export default RelationBox;

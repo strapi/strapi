@@ -114,14 +114,14 @@ HomePage.contextTypes = {
 }
 
 HomePage.propTypes =  {
-  deleteContentType: PropTypes.func,
-  location: PropTypes.object,
-  match: PropTypes.object,
-  menu: PropTypes.array,
+  deleteContentType: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  menu: PropTypes.array.isRequired,
   models: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.array,
-  ]),
+  ]).isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

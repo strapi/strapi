@@ -18,5 +18,16 @@
   "components.popUpWarning.button.cancel": "Cancel",
   "components.popUpWarning.button.confirm": "Confirm",
   "components.popUpWarning.title": "Please confirm",
-  "components.popUpWarning.message": "Are you sure you want to delete this?"
+  "components.popUpWarning.message": "Are you sure you want to delete this?",
+  "components.Input.error.validation.required": "This value input is required.",
+  "components.Input.error.validation.regex": "The value not match the regex.",
+  "components.Input.error.validation.max": "The value is too high.",
+  "components.Input.error.validation.min": "The value is too low.",
+  "components.Input.error.validation.maxLength": "The value is too long.",
+  "components.Input.error.validation.minLength": "The value is too short.",
+  "components.Input.error.contentTypeName.taken": "This name already exists",
+  "components.Input.error.attribute.taken": "This field name already exists",
+  "components.Input.error.attribute.key.taken": "This value already exists",
+  "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
+  "components.Input.error.validation.minSupMax": "Can't be superior"
 }

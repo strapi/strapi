@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-wrap-multilines */
-
+/* eslint-disable react/require-default-props */
 class Input extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

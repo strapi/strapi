@@ -30,10 +30,10 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
 }
 
 PopUpHeaderNavLink.propTypes = {
-  message: PropTypes.string,
-  name: PropTypes.string,
-  nameToReplace: PropTypes.string,
-  routePath: PropTypes.string,
+  message: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  nameToReplace: PropTypes.string.isRequired,
+  routePath: PropTypes.string.isRequired,
 }
 
 export default PopUpHeaderNavLink;

@@ -95,8 +95,14 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
 RelationNaturePicker.propTypes = {
   contentTypeName: PropTypes.string,
   contentTypeTarget: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
   selectedIco: PropTypes.string,
 }
+
+RelationNaturePicker.defaultProps = {
+  contentTypeName: '',
+  contentTypeTarget: '',
+  selectedIco: 'oneToOne',
+};
 
 export default RelationNaturePicker;

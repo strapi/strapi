@@ -28,9 +28,9 @@ class RelationIco extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationIco.propTypes = {
-  ico: PropTypes.any,
-  name: PropTypes.string,
-  onChange: PropTypes.func,
+  ico: PropTypes.any.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
 
 export default RelationIco;

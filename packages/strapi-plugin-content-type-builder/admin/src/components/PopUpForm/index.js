@@ -128,26 +128,38 @@ PopUpForm.propTypes = {
   customBootstrapClass: PropTypes.string,
   didCheckErrors: PropTypes.bool,
   form: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
-  ]),
+    PropTypes.array,
+    PropTypes.object,
+  ]).isRequired,
   formErrors: PropTypes.oneOfType([
     PropTypes.array,
     PropTypes.object,
   ]),
-  isOpen: PropTypes.bool,
+  isOpen: PropTypes.bool.isRequired,
   noButtons: PropTypes.bool,
   noNav: PropTypes.bool,
-  onBlur: PropTypes.func,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   onChange: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
   overrideCustomBootstrapClass: PropTypes.bool,
-  overrideHandleBlurCondition: PropTypes.func,
-  overrideRenderInput: PropTypes.func,
-  overrideRenderInputCondition: PropTypes.func,
+  overrideHandleBlurCondition: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+  overrideRenderInput: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+  overrideRenderInputCondition: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   pluginID: PropTypes.string,
   popUpHeaderNavLinks: PropTypes.array,
-  popUpTitle: PropTypes.string,
+  popUpTitle: PropTypes.string.isRequired,
   renderCustomPopUpHeader: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.object,
@@ -156,12 +168,32 @@ PopUpForm.propTypes = {
   renderModalBody: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
-  ]),
+  ]).isRequired,
   routePath: PropTypes.string,
   selectOptions: PropTypes.array,
   showLoader: PropTypes.bool,
-  toggle: PropTypes.func,
+  toggle: PropTypes.func.isRequired,
   values: PropTypes.object,
 };
+
+PopUpForm.defaultProps = {
+  customBootstrapClass: 'col-md-6',
+  didCheckErrors: false,
+  formErrors: [],
+  noButtons: false,
+  noNav: false,
+  onBlur: false,
+  overrideCustomBootstrapClass: false,
+  overrideHandleBlurCondition: false,
+  overrideRenderInput: false,
+  overrideRenderInputCondition: false,
+  pluginID: 'content-type-builder',
+  popUpHeaderNavLinks: [],
+  renderCustomPopUpHeader: false,
+  routePath: '',
+  selectOptions: [],
+  showLoader: false,
+  values: {},
+}
 
 export default PopUpForm;

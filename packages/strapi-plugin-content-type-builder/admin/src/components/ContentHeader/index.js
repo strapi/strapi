@@ -85,4 +85,16 @@ ContentHeader.propTypes = {
   styles: PropTypes.object,
 };
 
+ContentHeader.defaultProps = {
+  addButtons: false,
+  buttonsContent: [],
+  description: '',
+  editIcon: false,
+  editPath: '',
+  icoType: 'pencil',
+  isLoading: false,
+  name: '',
+  styles: {},
+};
+
 export default ContentHeader;

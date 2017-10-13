@@ -57,37 +57,37 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   validate = (value) => {
     let errors = [];
     // handle i18n
-    const requiredError = { id: `${this.props.pluginID}.error.validation.required` };
+    const requiredError = { id: 'components.Input.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'max':
           if (parseInt(value, 10) > validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.max` });
+            errors.push({ id: 'components.Input.error.validation.max' });
           }
           break;
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.maxLength` });
+            errors.push({ id: 'components.Input.error.validation.maxLength' });
           }
           break;
         case 'min':
           if (parseInt(value, 10) < validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.min` });
+            errors.push({ id: 'components.Input.error.validation.min' });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.minLength` });
+            errors.push({ id: 'components.Input.error.validation.minLength' });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.required` });
+            errors.push({ id: 'components.Input.error.validation.required' });
           }
           break;
         case 'regex':
           if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.regex` });
+            errors.push({ id: 'components.Input.error.validation.regex' });
           }
           break;
         default:
@@ -391,9 +391,11 @@ Input.propTypes = {
     PropTypes.bool,
   ]),
   onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.func,
+  onFocus: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   placeholder: PropTypes.string,
-  pluginID: PropTypes.string,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
   title: PropTypes.string,
@@ -405,5 +407,22 @@ Input.propTypes = {
     PropTypes.number,
   ]),
 };
+
+Input.defaultProps = {
+  addon: false,
+  addRequiredInputDesign: false,
+  deactivateErrorHighlight: false,
+  didCheckErrors: false,
+  disabled: false,
+  errors: [],
+  inputDescription: '',
+  noErrorsDescription: false,
+  onBlur: false,
+  onFocus: false,
+  placeholder: '',
+  selectOptions: [],
+  selectOptionsFetchSucceeded: false,
+  value: ''
+}
 
 export default Input;

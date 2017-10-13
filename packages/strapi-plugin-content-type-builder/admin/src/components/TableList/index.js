@@ -59,8 +59,8 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
 TableList.propTypes = {
   availableNumber: PropTypes.number.isRequired,
   buttonLabel: PropTypes.string.isRequired,
-  onButtonClick: PropTypes.func,
-  onHandleDelete: PropTypes.func,
+  onButtonClick: PropTypes.func.isRequired,
+  onHandleDelete: PropTypes.func.isRequired,
   rowItems: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,
 };

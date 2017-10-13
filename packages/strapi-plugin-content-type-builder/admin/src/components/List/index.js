@@ -51,8 +51,20 @@ List.propTypes = {
   listContent: PropTypes.object,
   listContentMappingKey: PropTypes.string.isRequired,
   onButtonClick: PropTypes.func,
-  renderCustomLi: PropTypes.func,
-  renderCustomListTitle: PropTypes.func,
+  renderCustomLi: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+  renderCustomListTitle: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
 }
 
+List.defaultProps = {
+  listContent: {},
+  onButtonClick: () => {},
+  renderCustomLi: false,
+  renderCustomListTitle: false,
+}
 export default List;

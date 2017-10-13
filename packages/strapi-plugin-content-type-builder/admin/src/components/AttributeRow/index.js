@@ -98,7 +98,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          content={{ messagee: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete' }}
+          content={{ message: 'content-type-builder.popUpWarning.bodyMessage.attribute.delete' }}
           popUpWarningType={'danger'}
           onConfirm={this.handleDelete}
         />
@@ -108,9 +108,9 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 AttributeRow.propTypes = {
-  onDelete: PropTypes.func,
-  onEditAttribute: PropTypes.func,
-  row: PropTypes.object,
+  onDelete: PropTypes.func.isRequired,
+  onEditAttribute: PropTypes.func.isRequired,
+  row: PropTypes.object.isRequired,
 }
 
 export default AttributeRow;

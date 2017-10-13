@@ -33,9 +33,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
     }
   }
 
-
   renderNestedInput = () => {
-
     if (this.props.value[this.props.data.name.split('.')[1]]) {
       return (
         <div className={styles.nestedInputContainer} style={{ marginBottom: '-19px' }}>
@@ -97,6 +95,12 @@ InputCheckboxWithNestedInputs.propTypes = {
   errors: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.object,
+};
+
+InputCheckboxWithNestedInputs.defaultProps = {
+  didCheckErrors: false,
+  errors: [],
+  value: {},
 };
 
 export default InputCheckboxWithNestedInputs;

@@ -185,26 +185,34 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 
 PopUpRelations.propTypes = {
   contentType: PropTypes.object,
-  didCheckErrors: PropTypes.bool,
+  didCheckErrors: PropTypes.bool.isRequired,
   dropDownItems: PropTypes.array,
   form: PropTypes.oneOfType([
     PropTypes.array.isRequired,
     PropTypes.object.isRequired,
-  ]),
+  ]).isRequired,
   formErrors: PropTypes.oneOfType([
     PropTypes.array,
     PropTypes.object,
-  ]),
+  ]).isRequired,
   isEditting: PropTypes.bool,
-  isOpen: PropTypes.bool,
-  onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
+  isOpen: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   popUpTitle: PropTypes.string.isRequired,
   routePath: PropTypes.string.isRequired,
   showLoader: PropTypes.bool,
-  showRelation: PropTypes.bool,
-  toggle: PropTypes.func,
+  showRelation: PropTypes.bool.isRequired,
+  toggle: PropTypes.func.isRequired,
   values: PropTypes.object,
 }
+
+PopUpRelations.defaultProps = {
+  contentType: {},
+  dropDownItems: [],
+  isEditting: false,
+  showLoader: false,
+  values: {},
+};
 
 export default PopUpRelations;
