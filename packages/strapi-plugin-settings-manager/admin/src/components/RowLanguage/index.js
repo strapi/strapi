@@ -12,6 +12,7 @@ import PopUpWarning from 'components/PopUpWarning';
 // utils
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 
+/* eslint-disable react/require-default-props  */
 class RowLanguage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

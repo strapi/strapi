@@ -33,6 +33,7 @@ import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, un
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

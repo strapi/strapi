@@ -25,6 +25,7 @@ import ButtonPrimaryHotline from 'components/Button';
 import PopUpForm from 'components/PopUpForm';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

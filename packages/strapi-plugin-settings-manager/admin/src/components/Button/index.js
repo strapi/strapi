@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class Button extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {

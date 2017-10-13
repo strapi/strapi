@@ -72,8 +72,8 @@ import saga from './sagas';
 import styles from './styles.scss';
 import config from './config.json';
 
+/* eslint-disable react/require-default-props  */
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
   constructor(props) {
     super(props);
     this.customComponents = config.customComponents;
@@ -188,7 +188,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     // Edit the new config
     this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
   }
-  
+
   handleFetch(props) {
     const apiUrl = props.match.params.env ? `${props.match.params.slug}/${props.match.params.env}` : props.match.params.slug;
 

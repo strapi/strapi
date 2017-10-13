@@ -26,6 +26,7 @@ import styles from './styles.scss';
 
 import saga from './sagas';
 
+/* eslint-disable react/require-default-props  */
 class App extends React.Component {
   componentDidMount() {
     this.props.menuFetch();

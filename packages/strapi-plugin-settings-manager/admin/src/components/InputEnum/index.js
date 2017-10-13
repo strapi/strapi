@@ -10,6 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { map } from 'lodash';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class InputEnum extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';

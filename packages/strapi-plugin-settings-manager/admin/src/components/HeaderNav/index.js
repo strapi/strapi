@@ -13,6 +13,7 @@ import List from 'components/List';
 import { darken } from '../../utils/colors';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class HeaderNav extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const baseUrl = join(take(this.props.path.split('/'), 4), '/');

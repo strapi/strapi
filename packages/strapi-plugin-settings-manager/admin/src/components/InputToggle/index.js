@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class InputToggle extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

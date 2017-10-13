@@ -10,6 +10,7 @@ import { isEmpty, includes, mapKeys, reject, map, isObject, size } from 'lodash'
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputPassword extends React.Component { // eslint-disable-line react/prefer-stateless-function
   /* eslint-disable jsx-a11y/no-static-element-interactions */
   constructor(props) {

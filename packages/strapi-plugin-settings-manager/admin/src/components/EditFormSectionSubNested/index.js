@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import WithFormSection from 'components/WithFormSection';
 
+/* eslint-disable react/require-default-props  */
 class EditFormSectionSubNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (

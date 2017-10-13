@@ -10,6 +10,7 @@ import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class InputSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     // init the select value

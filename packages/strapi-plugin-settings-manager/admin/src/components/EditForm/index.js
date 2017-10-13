@@ -12,6 +12,7 @@ import Button from 'components/Button';
 import EditFormSection from 'components/EditFormSection';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const buttonStyle = this.props.showLoader ? { display: 'none' } : {};

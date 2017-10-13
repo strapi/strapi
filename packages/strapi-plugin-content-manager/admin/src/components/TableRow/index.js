@@ -98,6 +98,9 @@ TableRow.propTypes = {
 
 TableRow.defaultProps = {
   onDelete: () => {},
+  value: {
+    format: () => {},
+  },
 };
 
 export default TableRow;

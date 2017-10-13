@@ -12,6 +12,7 @@ import { has, map, forEach } from 'lodash';
 import EditFormSectionSubNested from 'components/EditFormSectionSubNested';
 import WithFormSection from 'components/WithFormSection';
 
+/* eslint-disable react/require-default-props  */
 class EditFormSectionNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);

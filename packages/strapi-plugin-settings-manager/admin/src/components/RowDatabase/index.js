@@ -14,6 +14,7 @@ import PopUpForm from 'components/PopUpForm';
 import PopUpWarning from 'components/PopUpWarning';
 import styles from 'components/List/styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class RowDatabase extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -72,7 +73,7 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           )}
         </FormattedMessage>
       );
-      
+
     return (
       <li className={`${styles.databaseFont}`} style={{ cursor: 'pointer'}} onClick={this.handleShowDatabaseModal}>
         <div className={styles.flexLi}>

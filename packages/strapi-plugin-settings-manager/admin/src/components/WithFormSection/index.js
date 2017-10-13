@@ -17,7 +17,7 @@ import InputEnum from 'components/InputEnum';
 import config from './config.json';
 import styles from './styles.scss';
 
-
+/* eslint-disable react/require-default-props  */
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
     addRequiredInputDesign: PropTypes.bool,

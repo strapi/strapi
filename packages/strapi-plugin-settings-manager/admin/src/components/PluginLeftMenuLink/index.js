@@ -61,4 +61,8 @@ PluginLeftMenuLink.propTypes = {
   link: PropTypes.object.isRequired,
 };
 
+PluginLeftMenuLink.defaultProps = {
+  envParams: '',
+};
+
 export default PluginLeftMenuLink;
