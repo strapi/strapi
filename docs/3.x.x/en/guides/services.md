@@ -5,7 +5,7 @@ See the [services concept](../concepts/concepts.md#services) for details.
 ## How to create a service?
 
 There is two ways to create a service.
- - Using the CLI `strapi generate:service user`. Read the [CLI documentation](./cli/CLI.md) for more information.
+ - Using the CLI `strapi generate:service user`. Read the [CLI documentation](../cli/CLI.md) for more information.
  - Manually create a JavaScript file named `User.js` in `./api/**/services/`.
 
 #### Example
