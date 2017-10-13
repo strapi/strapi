@@ -20,6 +20,7 @@ import {
   join,
   map,
   replace,
+  size,
   toNumber,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -97,7 +98,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.match.params.slug) {
       this.handleFetch(this.props);
     } else {
-      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
+      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug']) || 'application'}`);
     }
   }
 
@@ -150,6 +151,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     } else {
       this.props.setErrors(formErrors);
     }
+  }
+
+  emptyDbModifiedData = () => {
+    this.setState({ toggleDefaultConnection: false });
+    this.props.emptyDbModifiedData();
   }
 
   getDatabase = (databaseName) => {
@@ -297,7 +303,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   )
 
   renderListTitle = () => {
-    const availableContentNumber = this.props.home.configsDisplay.sections.length;
+    const availableContentNumber = size(this.props.home.configsDisplay.sections);
     const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
 
@@ -370,10 +376,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     />
   )
 
-  emptyDbModifiedData = () => {
-    this.setState({ toggleDefaultConnection: false });
-    this.props.emptyDbModifiedData();
-  }
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.match.params.slug));
@@ -473,10 +475,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   render() {
-    if (this.props.home.loading) {
-      return <div />;
-    }
-
     return (
       <div className="container-fluid">
         <div className="row">

@@ -25,6 +25,10 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
   }
 
   componentWillReceiveProps(nextProps) {
+    if (this.state.environmentIndex === -1 && nextProps.envParams) {
+      this.setState({ environmentIndex: findIndex(nextProps.environments, ['name', nextProps.envParams]) });
+    }
+
     if (nextProps.envParams && nextProps.envParams !== this.props.envParams) {
       const environmentIndex = findIndex(nextProps.environments, ['name', nextProps.envParams]);
       this.setState({ environmentIndex });
@@ -39,7 +43,6 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
         `${this.props.link.slug}/${get(this.props.environments, [this.state.environmentIndex, 'name'])}`
         : `${this.props.link.slug}`;
     }
-
 
     return (
       <li className={styles.pluginLeftMenuLink}>
