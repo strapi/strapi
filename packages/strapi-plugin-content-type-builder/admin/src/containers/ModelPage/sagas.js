@@ -51,7 +51,8 @@ export function* submitChanges(action) {
         }
 
         if (!value) {
-          unset(body.attributes[index].params, key);
+          const paramsKey = includes(key, 'Value') ? replace(key,'Value', '') : key;
+          unset(body.attributes[index].params, paramsKey);
         }
       });
     });

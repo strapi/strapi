@@ -20,6 +20,17 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
     };
 
     this.props.handleChange({ target });
+
+    if (!target.value) {
+      const paramsToRemove = {
+        target: {
+          type: 'number',
+          value: '',
+          name: `${this.props.data.name}Value`,
+        },
+      };
+      this.props.handleChange(paramsToRemove);
+    }
   }
 
 
