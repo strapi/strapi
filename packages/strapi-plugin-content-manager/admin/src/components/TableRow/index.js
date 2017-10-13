@@ -40,10 +40,13 @@ class TableRow extends React.Component {
       case 'date':
       case 'time':
       case 'datetime':
-      case 'timestamp':
-        return value && isObject(value) && value._isAMomentObject === true ?
-          this.props.value.format('YYYY-MM-DD HH:mm:ss') :
-          moment(this.props.value).format('YYYY-MM-DD HH:mm:ss');
+      case 'timestamp': {
+        const date = value && isObject(value) && value._isAMomentObject === true ?
+          value :
+          moment(value);
+
+        return date.utc().format('YYYY-MM-DD HH:mm:ss')
+      }
       default:
         return '-';
     }
@@ -95,9 +98,6 @@ TableRow.propTypes = {
   headers: PropTypes.array.isRequired,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
-  value: PropTypes.shape({
-    format: PropTypes.func,
-  }),
 };
 
 TableRow.defaultProps = {
