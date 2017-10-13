@@ -51,18 +51,6 @@ These configurations are accessible through `strapi.config.backendURL` and `stra
 
 ***
 
-## Hook
-
-> Please refer to the [advanced hooks settings for more informations](../advanced/hooks.md).
-
-***
-
-## Middleware
-
-> Please refer to the [advanced middlewares settings for more informations](../advanced/middlewares.md).
-
-***
-
 ## Language
 
 As described in the [i18n documentation](../plugins/development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
@@ -171,6 +159,7 @@ Most of the application's configurations are defined by environment. It means th
 
 > Note: You can access to the config of the current environment through `strapi.config.currentEnvironment`.
 
+***
 
 ## Database
 
@@ -255,6 +244,8 @@ Most of the application's configurations are defined by environment. It means th
 
 > Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 
+***
+
 ## Request
 
 **Path —** `./config/environments/**/request.json`.
@@ -279,6 +270,8 @@ Most of the application's configurations are defined by environment. It means th
 
 > Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 
+***
+
 ## Response
 
 **Path —** `./config/environments/**/response.json`.
@@ -287,6 +280,8 @@ Most of the application's configurations are defined by environment. It means th
   - `enabled` (boolean): Enable or not GZIP response compression.
  - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+
+***
 
 ## Security
 
@@ -321,6 +316,8 @@ Most of the application's configurations are defined by environment. It means th
    - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
    - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
    - `blackList` (array): Blacklisted IPs. Default value: `[]`.
+
+***
 
 ## Server
 
