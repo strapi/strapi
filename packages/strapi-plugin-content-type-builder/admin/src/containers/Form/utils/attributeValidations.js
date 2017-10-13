@@ -64,7 +64,5 @@ const hasNestedValue = (attributeData) => {
     formErrors.push({ name: 'params.minLengthValue', errors: [{ id: 'content-type-builder.error.validation.minSupMax' } ] });
   }
 
-
-
   return formErrors;
-}
+};

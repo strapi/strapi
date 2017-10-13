@@ -205,7 +205,7 @@ PopUpRelations.propTypes = {
   showRelation: PropTypes.bool.isRequired,
   toggle: PropTypes.func.isRequired,
   values: PropTypes.object,
-}
+};
 
 PopUpRelations.defaultProps = {
   contentType: {},

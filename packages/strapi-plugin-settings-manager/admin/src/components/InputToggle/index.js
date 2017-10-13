@@ -80,6 +80,6 @@ InputToggle.propTypes = {
   isChecked: PropTypes.bool,
   name: PropTypes.string,
   target: PropTypes.string,
-}
+};
 
 export default InputToggle;

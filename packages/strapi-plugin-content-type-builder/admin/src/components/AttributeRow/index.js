@@ -111,6 +111,6 @@ AttributeRow.propTypes = {
   onDelete: PropTypes.func.isRequired,
   onEditAttribute: PropTypes.func.isRequired,
   row: PropTypes.object.isRequired,
-}
+};
 
 export default AttributeRow;

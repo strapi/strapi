@@ -78,6 +78,6 @@ PopUpWarning.propTypes = {
   showDanger: PropTypes.bool,
   toggleModal: PropTypes.func,
   warningMessage: PropTypes.string,
-}
+};
 
 export default PopUpWarning;

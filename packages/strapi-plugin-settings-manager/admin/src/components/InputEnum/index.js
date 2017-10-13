@@ -37,7 +37,7 @@ class InputEnum extends React.Component { // eslint-disable-line react/prefer-st
                   onChange={this.props.handleChange}
                 />
               </label>
-            )
+            );
           })}
         </div>
       </div>
@@ -52,6 +52,6 @@ InputEnum.propTypes = {
   selectOptions: PropTypes.array,
   target: PropTypes.string,
   value: PropTypes.any,
-}
+};
 
 export default InputEnum;

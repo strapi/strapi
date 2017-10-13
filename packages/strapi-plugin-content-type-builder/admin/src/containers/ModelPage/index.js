@@ -53,7 +53,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     this.state = {
       contentTypeTemporary: false,
-    }
+    };
 
     this.popUpHeaderNavLinks = [
       { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
@@ -119,7 +119,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   fetchModel = (props) => {
     if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === props.match.params.modelName) {
-      this.setState({ contentTypeTemporary: true })
+      this.setState({ contentTypeTemporary: true });
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
     } else {
       this.setState({ contentTypeTemporary: false });
@@ -308,7 +308,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 ModelPage.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 ModelPage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,

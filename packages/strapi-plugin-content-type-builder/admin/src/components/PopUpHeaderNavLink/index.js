@@ -34,6 +34,6 @@ PopUpHeaderNavLink.propTypes = {
   name: PropTypes.string.isRequired,
   nameToReplace: PropTypes.string.isRequired,
   routePath: PropTypes.string.isRequired,
-}
+};
 
 export default PopUpHeaderNavLink;

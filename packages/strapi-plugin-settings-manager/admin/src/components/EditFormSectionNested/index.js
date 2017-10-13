@@ -60,7 +60,6 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
         <div className="row">
           {map(this.props.section, (item, key) => {
             if (this.state.showNestedForm) {
-
               return (
                 <div key={key} style={{width: '100%'}}>
                   {this.props.renderInput(item, key)}
@@ -71,10 +70,10 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
                     formErrors={this.props.formErrors}
                   />
                 </div>
-              )
+              );
             }
 
-            return this.props.renderInput(item, key)
+            return this.props.renderInput(item, key);
           })}
         </div>
       </div>

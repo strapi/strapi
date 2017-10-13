@@ -99,7 +99,8 @@
         "eventHandlerPrefix": "handle",
         "eventHandlerPropPrefix": "on"
       }
-    ]
+    ],
+    "semi": 2
   },
   "settings": {
     "import/resolver": {

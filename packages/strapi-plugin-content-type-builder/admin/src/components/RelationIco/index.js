@@ -31,6 +31,6 @@ RelationIco.propTypes = {
   ico: PropTypes.any.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-}
+};
 
 export default RelationIco;

@@ -54,6 +54,6 @@ PluginLeftMenuSection.defaultProps = {
   basePath: '',
   customIcon: '',
   renderCustomLink: false,
-}
+};
 
 export default PluginLeftMenuSection;

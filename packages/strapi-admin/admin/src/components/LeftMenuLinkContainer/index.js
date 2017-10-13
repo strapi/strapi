@@ -20,7 +20,7 @@ function LeftMenuLinkContainer({ plugins }) {
     plugin.leftMenuSections.map((leftMenuSection, j) => {
 
       if (size(get(leftMenuSection, 'links')) === 0) {
-        return <div />
+        return <div />;
       }
 
       return (

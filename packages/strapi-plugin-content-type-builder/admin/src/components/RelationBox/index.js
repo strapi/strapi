@@ -53,7 +53,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
                   </div>
                 </DropdownItem>
               </div>
-            )
+            );
           })}
         </DropdownMenu>
       </ButtonDropdown>
@@ -130,7 +130,7 @@ RelationBox.propTypes = {
   relationType: PropTypes.string,
   tabIndex: PropTypes.string.isRequired,
   value: PropTypes.string,
-}
+};
 
 RelationBox.defaultProps = {
   contentTypeTargetPlaceholder: '',

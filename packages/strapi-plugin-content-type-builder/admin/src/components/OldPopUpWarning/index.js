@@ -75,6 +75,6 @@ PopUpWarning.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   popUpWarningType: PropTypes.string,
   toggleModal: PropTypes.func.isRequired,
-}
+};
 
 export default PopUpWarning;

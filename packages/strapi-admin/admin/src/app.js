@@ -98,7 +98,7 @@ const registerPlugin = (plugin) => {
     case isFunction(plugin.pluginRequirements):
       plugin.pluginRequirements(plugin).then(plugin => {
         store.dispatch(pluginLoaded(plugin));
-      })
+      });
       break;
     // Execute bootstrap function
     case isFunction(plugin.bootstrap):

@@ -33,7 +33,7 @@ class Button extends React.Component {
             <p></p><p></p><p></p>
           </div>
         </button>
-      )
+      );
     }
     return (
       <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...buttonProps}>

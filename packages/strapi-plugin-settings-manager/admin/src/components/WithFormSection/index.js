@@ -68,7 +68,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   checkForNestedForm(props) {
     forEach(props.section.items, (input) => {
       if(has(input, 'items')) {
-        this.setState({ hasNestedInput: true, inputWithNestedForm: input.target })
+        this.setState({ hasNestedInput: true, inputWithNestedForm: input.target });
 
         if (props.values[input.target]) {
           this.setState({ showNestedForm: true });
@@ -140,6 +140,6 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       />
     );
   }
-}
+};
 
 export default WithFormSection;

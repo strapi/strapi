@@ -75,7 +75,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     );
   }
 
-
   render() {
     const component = size(this.props.models) === 0 ?
       <EmptyContentTypeView handleButtonClick={this.toggleModal} />
@@ -111,7 +110,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 HomePage.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 HomePage.propTypes =  {
   deleteContentType: PropTypes.func.isRequired,

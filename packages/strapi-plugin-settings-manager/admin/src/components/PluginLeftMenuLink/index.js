@@ -16,7 +16,7 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
     super(props);
     this.state = {
       environmentIndex: 0,
-    }
+    };
   }
 
   componentDidMount() {

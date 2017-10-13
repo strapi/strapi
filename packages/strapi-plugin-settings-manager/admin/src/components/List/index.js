@@ -164,6 +164,6 @@ List.propTypes = {
     PropTypes.bool,
     PropTypes.func,
   ]),
-}
+};
 
 export default List;

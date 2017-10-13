@@ -18,6 +18,6 @@ const WithInput = (InnerInput) => class extends React.Component { // eslint-disa
       />
     );
   }
-}
+};
 
 export default WithInput;

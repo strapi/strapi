@@ -184,6 +184,6 @@ InputNumber.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
-}
+};
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

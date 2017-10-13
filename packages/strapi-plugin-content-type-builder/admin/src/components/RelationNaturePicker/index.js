@@ -47,7 +47,7 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
         ico: ManyToMany,
         icoSelected: ManyToManySelected,
       },
-    ]
+    ];
   }
   render() {
     let contentTypeName = startCase(this.props.contentTypeName);
@@ -97,7 +97,7 @@ RelationNaturePicker.propTypes = {
   contentTypeTarget: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   selectedIco: PropTypes.string,
-}
+};
 
 RelationNaturePicker.defaultProps = {
   contentTypeName: '',

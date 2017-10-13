@@ -20,7 +20,6 @@ class EditFormSectionSubNested extends React.Component { // eslint-disable-line 
           ))}
         </div>
       </div>
-
     );
   }
 }

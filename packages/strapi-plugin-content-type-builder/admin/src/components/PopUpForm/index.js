@@ -194,6 +194,6 @@ PopUpForm.defaultProps = {
   selectOptions: [],
   showLoader: false,
   values: {},
-}
+};
 
 export default PopUpForm;

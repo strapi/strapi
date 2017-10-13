@@ -46,7 +46,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                       formErrors={this.props.formErrors}
                     />
                   </div>
-                )
+                );
               }
               return this.props.renderInput(item, key);
             })}

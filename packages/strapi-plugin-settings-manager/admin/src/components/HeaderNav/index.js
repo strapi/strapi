@@ -54,5 +54,6 @@ HeaderNav.propTypes = {
   links: PropTypes.array,
   path: PropTypes.string,
   renderListComponent: PropTypes.bool,
-}
+};
+
 export default HeaderNav;

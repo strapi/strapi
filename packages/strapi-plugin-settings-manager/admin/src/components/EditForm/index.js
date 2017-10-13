@@ -37,7 +37,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
                   />
                   {line}
                 </div>
-              )
+              );
             })}
           </div>
           <div className={styles.buttonContainer}>

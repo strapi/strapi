@@ -510,7 +510,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         &nbsp;
         <FormattedMessage id="content-type-builder.popUpForm.field" />
       </div>
-    )
+    );
   }
 
   render() {
@@ -589,7 +589,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 Form.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 const mapStateToProps = selectForm();
 

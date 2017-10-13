@@ -59,12 +59,13 @@ List.propTypes = {
     PropTypes.bool,
     PropTypes.func,
   ]),
-}
+};
 
 List.defaultProps = {
   listContent: {},
   onButtonClick: () => {},
   renderCustomLi: false,
   renderCustomListTitle: false,
-}
+};
+
 export default List;

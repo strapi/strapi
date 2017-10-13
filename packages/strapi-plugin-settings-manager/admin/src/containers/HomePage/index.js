@@ -307,7 +307,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
 
-    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
+    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>;
   }
 
   renderListButtonLabel = () => `list.${this.props.match.params.slug}.button.label`;
@@ -355,7 +355,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           />
           <div className={styles.popUpSpacer} />
         </div>
-      )
+      );
     })
   )
 

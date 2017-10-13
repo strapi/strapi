@@ -109,8 +109,7 @@ export function setForm(data) {
   return {
     type: SET_FORM,
     form,
-  }
-
+  };
 }
 
 export function setFormErrors(formErrors) {
@@ -122,7 +121,7 @@ export function setFormErrors(formErrors) {
 
 export function setFormValidations(data) {
   const form = Object.keys(data).map(attr => {
-    return { name: attr,  validations: get(data, attr) || {} }
+    return { name: attr,  validations: get(data, attr) || {} };
   });
 
   const formValidations = getValidationsFromForm(form, []);
@@ -130,7 +129,7 @@ export function setFormValidations(data) {
   return {
     type: SET_FORM_VALIDATIONS,
     formValidations,
-  }
+  };
 }
 
 export function setInitialState() {

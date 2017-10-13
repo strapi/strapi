@@ -26,7 +26,7 @@ export const generateMenu = function () {
       window.Strapi.notification.error('content-manager.error.model.fetch');
       throw Error(error);
     });
-}
+};
 
 export function* getModels() {
   try {

@@ -30,7 +30,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onDelete(this.props.rowItem.name)
+    this.props.onDelete(this.props.rowItem.name);
     this.setState({ showWarning: false });
   }
 

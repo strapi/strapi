@@ -51,6 +51,6 @@ function AttributeCard({ attribute, handleClick }) {
 AttributeCard.propTypes = {
   attribute: PropTypes.object.isRequired,
   handleClick: PropTypes.func.isRequired,
-}
+};
 
 export default AttributeCard;

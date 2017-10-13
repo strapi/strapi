@@ -81,7 +81,7 @@ export function mapDispatchToProps(dispatch) {
       modelsFetch,
     },
     dispatch
-  )
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

@@ -149,7 +149,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         </div>
         {spacer}
       </div>
-    )
+    );
   }
 
   renderInputSelect = (bootStrapClass, requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
@@ -230,7 +230,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         {this.renderErrors(styles.errorContainerTextArea)}
         {spacer}
       </div>
-    )
+    );
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (

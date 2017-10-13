@@ -53,7 +53,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
                 didCheckErrors={this.props.didCheckErrors}
                 pluginId="content-type-builder"
               />
-            )
+            );
           })}
         </div>
       );

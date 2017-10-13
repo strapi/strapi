@@ -119,8 +119,7 @@ function homePageReducer(state = initialState, action) {
     case DATABASE_ACTION_ERROR:
       return state
         .set('error', !state.get('error'))
-        .set('formErrors', action.formErrors)
-        // .set('didCreatedNewDb', true);
+        .set('formErrors', action.formErrors);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state
         .set('specificDatabase', OrderedMap(action.database))
@@ -142,7 +141,7 @@ function homePageReducer(state = initialState, action) {
       return state.setIn(['configsDisplay', 'sections'], newSections);
     case SET_ERRORS:
       return state
-        .set('formErrors', action.errors)
+        .set('formErrors', action.errors);
     case SET_LOADER:
       return state.set('showLoader', true);
     case UNSET_LOADER:

@@ -34,7 +34,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
           <Button key={key} type={button.type} label={button.label} kind={button.kind} onClick={button.handleClick} />
         ))}
       </div>
-    )
+    );
   }
 
   renderContentHeader = () => {
