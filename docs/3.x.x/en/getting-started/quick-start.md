@@ -123,7 +123,7 @@ Here is an example using jQuery.
 ```js
 $.ajax({
   type: 'GET',
-  url: 'http://localhost:1337/product_order=price:asc', // Order by price.
+  url: 'http://localhost:1337/product?_order=price:asc', // Order by price.
   done: function(products) {
     console.log('Well done, here is the list of products: ', products);
   },
