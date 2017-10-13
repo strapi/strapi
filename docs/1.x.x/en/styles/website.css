@@ -1,7 +1,8 @@
 li.header{
   color: #101622 !important;
-  font-weight: 500;
-  letter-spacing: 0.05rem;
+  font-weight: 600;
+  letter-spacing: 0.07rem;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 li.chapter > a{
@@ -17,4 +18,8 @@ li.chapter:hover > a{
 .versions-select select{
   height: 36px;
   border: 1px solid #ccc;
+}
+
+.book-summary{
+  background-color: #f7f7f7 !important;
 }
