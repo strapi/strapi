@@ -171,17 +171,8 @@ Most of the application's configurations are defined by environment. It means th
 
 > Note: You can access to the config of the current environment through `strapi.config.currentEnvironment`.
 
-### Custom
 
-**Path —** `./config/environments/**/custom.json`.
-```json
-{
-  "backendURL": "http://www.strapi.io",
-  "mainColor": "blue"
-}
-```
-
-### Database
+## Database
 
 **Path —** `./config/environments/**/database.json`.
 
@@ -264,7 +255,7 @@ Most of the application's configurations are defined by environment. It means th
 
 > Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 
-### Request
+## Request
 
 **Path —** `./config/environments/**/request.json`.
 
@@ -288,7 +279,7 @@ Most of the application's configurations are defined by environment. It means th
 
 > Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 
-### Response
+## Response
 
 **Path —** `./config/environments/**/response.json`.
 
@@ -297,7 +288,7 @@ Most of the application's configurations are defined by environment. It means th
  - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
 
-### Security
+## Security
 
 **Path —** `./config/environments/**/security.json`.
 
@@ -331,7 +322,7 @@ Most of the application's configurations are defined by environment. It means th
    - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
    - `blackList` (array): Blacklisted IPs. Default value: `[]`.
 
-### Server
+## Server
 
 **Path —** `./config/environments/**/server.json`.
 
@@ -351,7 +342,7 @@ For security reasons, sometimes it's better to set variables through the server 
 
 The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
 
-### Usage
+#### Usage
 
 In any JSON configurations files in your project, you can inject dynamic values like this:
 
