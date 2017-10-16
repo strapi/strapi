@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
-    "eslint": "^4.8.0",
+    "eslint": "^4.9.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-config-prettier": "^2.6.0",

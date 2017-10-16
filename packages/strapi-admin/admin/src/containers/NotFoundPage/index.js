@@ -32,8 +32,7 @@ export default class NotFound extends React.Component { // eslint-disable-line r
         </h2>
         <Button
           label="app.components.NotFoundPage.back"
-          handlei18n
-          buttonBackground="back"
+          kind="back"
           onClick={(e) => {
             e.stopPropagation();
 
