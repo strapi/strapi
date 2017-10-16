@@ -20,15 +20,15 @@ function LeftMenuLinkContainer({ plugins }) {
     plugin.leftMenuSections.map((leftMenuSection, j) => {
 
       if (size(get(leftMenuSection, 'links')) === 0) {
-        return <div />;
+        return <div key="emptyDiv" />;
       }
 
       return (
         <div key={j}>
           <p className={styles.title}>{leftMenuSection.name}</p>
           <ul className={styles.list}>
-            {leftMenuSection.links.map((link, k) =>
-              <LeftMenuLink key={k} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${plugin.id}/${link.destination}`} />
+            {leftMenuSection.links.map((link) => 
+              <LeftMenuLink key={link.label} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${plugin.id}/${link.destination}`} />
             )}
           </ul>
         </div>

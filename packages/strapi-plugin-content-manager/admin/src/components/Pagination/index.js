@@ -129,7 +129,7 @@ class Pagination extends React.Component {
           className={`${linksOption.isActive && styles.navLiActive}`}
           key={key}
         >
-          <a href disabled={linksOption.isActive} onClick={linksOption.handleClick}>
+          <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
             {linksOption.value}
           </a>
         </li>
@@ -142,7 +142,7 @@ class Pagination extends React.Component {
       <div className={styles.pagination}>
         <div>
           <a
-            href
+            href=""
             className={`
                ${styles.paginationNavigator}
                ${this.isFirstPage() && styles.paginationNavigatorDisabled}
@@ -158,7 +158,7 @@ class Pagination extends React.Component {
             </ul>
           </nav>
           <a
-            href
+            href=""
             className={`
                ${styles.paginationNavigator}
                ${this.isLastPage() && styles.paginationNavigatorDisabled}

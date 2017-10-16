@@ -56,6 +56,9 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
       // if (isEmpty(nextProps.errors)) remove(errors, (error) => error.id === 'settings-manager.request.error.database.exist');
       this.setState({ errors });
     }
+    if (isEmpty(nextProps.errors)) {
+      this.setState({ errors: [] });
+    }
   }
 
   isSame = (nextProps) => {
@@ -122,7 +125,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
             ? <FormattedMessage {...error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
+            <div key={key} className="form-control-feedback invalid-feedback" style={{marginBottom: '1.8rem', fontSize: '1.3rem' }}>{displayError}</div>
           );
         })
       );
@@ -140,7 +143,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           onChange={this.props.handleChange}
           value={inputValue}
           type="text"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={message}
           autoComplete="off"
           style={{marginBottom}}
@@ -173,7 +176,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           onChange={this.props.handleChange}
           value={inputValue}
           type="text"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={placeholder}
           style={{marginBottom: marginBottomInput }}
         />

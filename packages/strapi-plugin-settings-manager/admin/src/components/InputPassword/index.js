@@ -95,7 +95,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
             ? <FormattedMessage id={error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback">{displayError}</div>
+            <div key={key} className="form-control-feedback invalid-feedback" style={{ fontSize: '1.3rem' }}>{displayError}</div>
           );
         })
       );
@@ -131,7 +131,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
                 onChange={this.props.handleChange}
                 value={inputValue}
                 type={type}
-                className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+                className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
                 placeholder={message}
                 autoComplete="off"
               />

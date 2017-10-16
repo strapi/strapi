@@ -15,7 +15,7 @@ code {
   @include border-radius($border-radius);
 
   // Streamline the style when inside anchors to avoid broken underline and more
-  a {
+  a > {
     padding: 0;
     color: inherit;
     background-color: inherit;
