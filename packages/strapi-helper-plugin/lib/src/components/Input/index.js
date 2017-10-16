@@ -386,9 +386,15 @@ Input.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.func,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.func,
+  onFocus: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   placeholder: PropTypes.string,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
