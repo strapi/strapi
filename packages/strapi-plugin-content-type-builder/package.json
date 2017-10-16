@@ -31,7 +31,6 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-transition-group": "^1.2.0",
-    "reactstrap": "^4.8.0",
     "strapi-generate": "3.0.0-alpha.5.5",
     "strapi-generate-api": "3.0.0-alpha.5.5"
   },

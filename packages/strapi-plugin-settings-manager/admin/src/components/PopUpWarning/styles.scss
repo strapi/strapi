@@ -72,6 +72,7 @@
   width: 15rem;
   border: none;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
   &:active {
     background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
     background-color: none!important;
@@ -86,6 +87,11 @@
   width: 15rem;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
+  &:focus, &:hover {
+    background-color: transparent;
+    color: #F64D0A;
+    border: 0.1rem solid #F64D0A;
+  }
 }
 
 .buttonContainer {
@@ -94,6 +100,35 @@
   display: flex;
   margin-top: 3rem;
   justify-content: space-between;
+  > button {
+    height: 3rem;
+    width: 15rem;
+    position: relative;
+    border-radius: 0.3rem;
+    text-transform: capitalize;
+    background-color: transparent;
+    cursor: pointer;
+    font-family: Lato;
+    &:focus {
+      outline: 0;
+    }
+    > i {
+      margin-right: 1.3rem;
+    }
+    &:hover {
+     &::after {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       top: 0;
+       left: 0;
+       border-radius: 0.3rem;
+       content: '';
+       opacity: 0.1;
+       background: #FFFFFF;
+     }
+   }
+  }
 }
 
 .modalBody {

@@ -53,6 +53,7 @@
     position: relative;
     border-radius: 0.3rem;
     text-transform: capitalize;
+    background-color: transparent;
     cursor: pointer;
     font-family: Lato;
     &:focus {
@@ -82,8 +83,11 @@
   -webkit-font-smoothing: antialiased;
   color: white !important;
   border: none;
-  &:active {
-   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+  &:active, &:focus, &:hover {
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    background-color: transparent;
+    border: none;
  }
 }
 .secondary {
@@ -95,6 +99,11 @@
   overflow: hidden;
   &:active {
    border: 0.15rem solid #F64D0A;
+ }
+ &:focus, &:hover {
+   background-color: transparent;
+   color: #F64D0A;
+   border: 0.1rem solid #F64D0A;
  }
 }
 .bordered {

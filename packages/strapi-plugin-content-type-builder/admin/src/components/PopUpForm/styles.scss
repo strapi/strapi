@@ -88,7 +88,7 @@
   position: relative;
   > button {
     z-index: 999;
-    
+
     margin-right: -1.5rem;
     color: #C3C5C8;
     opacity: 1;
@@ -97,7 +97,7 @@
     &:hover, &:focus {
       color: #C3C5C8;
       opacity: 1;
-      outline: 0;
+      outline: 0!important;
     }
     > span {
       display: none;
@@ -130,6 +130,11 @@
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white!important;
+  &:hover, &:active {
+    border: none!important;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    color: white;
+  }
 }
 
 .secondary {
@@ -138,7 +143,8 @@
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   cursor: pointer;
-  &:hover {
+  background-color: transparent;
+  &:hover, &:active {
     color: #F64D0A;
     background-color: white;
     border: 0.1rem solid #F64D0A;

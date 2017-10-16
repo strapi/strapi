@@ -29,8 +29,7 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-select": "^1.0.0-rc.5",
-    "react-transition-group": "^1.2.0",
-    "reactstrap": "^4.8.0"
+    "react-transition-group": "^1.2.0"
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
