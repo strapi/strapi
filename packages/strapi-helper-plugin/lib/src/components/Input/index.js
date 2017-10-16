@@ -153,7 +153,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputSelect = (requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
+  renderInputSelect = (requiredClass, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -161,12 +161,12 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     }
 
     return (
-      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-6'} ${bootStrapClassDanger}`}>
+      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-6'}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
-          className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+          className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
           id={this.props.label}
           name={this.props.name}
           onChange={this.props.onChange}
@@ -197,7 +197,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   }
 
-  renderInputTextArea = (requiredClass, bootStrapClassDanger, inputDescription, handleBlur) => {
+  renderInputTextArea = (requiredClass, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
     if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
@@ -205,14 +205,14 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     }
 
     return (
-      <div className={`${styles.inputTextArea} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass} ${bootStrapClassDanger}`}>
+      <div className={`${styles.inputTextArea} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
         <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
           {(placeholder) => (
             <textarea
-              className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+              className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
               onChange={this.props.onChange}
               value={this.props.value}
               name={this.props.name}
@@ -285,7 +285,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           onChange={this.props.onChange}
           value={inputValue}
           type={this.props.type}
-          className={`form-control ${!isEmpty(this.state.errors)? 'form-control-danger is-invalid' : ''}`}
+          className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors)? 'form-control-danger is-invalid' : ''}`}
           placeholder={message}
           autoComplete="off"
           disabled={this.props.disabled}
@@ -298,18 +298,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const inputValue = this.props.value || '';
     // override default onBlur
     const handleBlur = this.props.onBlur || this.handleBlur;
-    // override bootStrapClass
-    // set error class with override possibility
-    const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
     const placeholder = this.props.placeholder || this.props.label;
-
     const label = this.props.label ?
       <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} /></label>
         : <label htmlFor={this.props.label} />;
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
       styles.requiredClass : '';
-
 
     const input = placeholder ? this.renderFormattedInput(handleBlur, inputValue, placeholder)
       : <input
@@ -320,7 +315,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         onChange={this.props.onChange}
         value={inputValue}
         type={this.props.type}
-        className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+        className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
         placeholder={placeholder}
         disabled={this.props.disabled}
       />;
@@ -341,9 +336,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     switch (this.props.type) {
       case 'select':
-        return this.renderInputSelect(requiredClass, inputDescription, bootStrapClassDanger, handleBlur);
+        return this.renderInputSelect(requiredClass, inputDescription, handleBlur);
       case 'textarea':
-        return this.renderInputTextArea(requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
+        return this.renderInputTextArea(requiredClass, inputDescription, handleBlur);
       case 'checkbox':
         return this.renderInputCheckbox(requiredClass, inputDescription);
       case 'date':
@@ -357,7 +352,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         {input}
       </div> : input;
     return (
-      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass} ${bootStrapClassDanger}`}>
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
         {label}
 
         {addonInput}
