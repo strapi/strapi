@@ -18,7 +18,7 @@ class TableFooter extends React.Component {
       <div className={`row ${styles.tableFooter}`}>
         <div className="col-lg-6">
           <LimitSelect
-            handleChange={this.props.handleChangeLimit}
+            onChangeLimit={this.props.onChangeLimit}
             limit={this.props.limit}
           />
         </div>
@@ -27,7 +27,7 @@ class TableFooter extends React.Component {
           <Pagination
             limit={this.props.limit}
             currentPage={this.props.currentPage}
-            changePage={this.props.changePage}
+            onChangePage={this.props.onChangePage}
             count={this.props.count}
           />
         </div>
@@ -37,14 +37,14 @@ class TableFooter extends React.Component {
 }
 
 TableFooter.propTypes = {
-  changePage: PropTypes.func.isRequired,
   count: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.bool,
   ]).isRequired,
   currentPage: PropTypes.number.isRequired,
-  handleChangeLimit: PropTypes.func.isRequired,
   limit: PropTypes.number.isRequired,
+  onChangeLimit: PropTypes.func.isRequired,
+  onChangePage: PropTypes.func.isRequired,
 };
 
 export default TableFooter;

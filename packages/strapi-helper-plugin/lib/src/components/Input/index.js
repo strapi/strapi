@@ -24,12 +24,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
 
   componentDidMount() {
-    // Init the select value if type === "select"
-    if (this.props.type === 'select' && !isEmpty(this.props.selectOptions) && this.props.selectOptions[0].value !== '') {
-      const target = { name: this.props.name, value: this.props.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     if (this.props.value && !isEmpty(this.props.value)) {
       this.setState({ hasInitialValue: true });
     }
@@ -40,11 +34,6 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.type === 'select' && this.props.selectOptionsFetchSucceeded !== nextProps.selectOptionsFetchSucceeded && nextProps.selectOptions[0].value !== '') {
-      const target = { name: nextProps.name, value: nextProps.selectOptions[0].value  };
-      this.props.handleChange({ target });
-    }
-
     // Check if errors have been updated during validations
     if (this.props.didCheckErrors !== nextProps.didCheckErrors) {
 
@@ -68,37 +57,37 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   validate = (value) => {
     let errors = [];
     // handle i18n
-    const requiredError = { id: `${this.props.pluginID}.error.validation.required` };
+    const requiredError = { id: 'components.Input.error.validation.required' };
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
         case 'max':
           if (parseInt(value, 10) > validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.max` });
+            errors.push({ id: 'components.Input.error.validation.max' });
           }
           break;
         case 'maxLength':
           if (value.length > validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.maxLength` });
+            errors.push({ id: 'components.Input.error.validation.maxLength' });
           }
           break;
         case 'min':
           if (parseInt(value, 10) < validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.min` });
+            errors.push({ id: 'components.Input.error.validation.min' });
           }
           break;
         case 'minLength':
           if (value.length < validationValue) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.minLength` });
+            errors.push({ id: 'components.Input.error.validation.minLength' });
           }
           break;
         case 'required':
           if (value.length === 0) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.required` });
+            errors.push({ id: 'components.Input.error.validation.required' });
           }
           break;
         case 'regex':
           if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: `${this.props.pluginID}.error.validation.regex` });
+            errors.push({ id: 'components.Input.error.validation.regex' });
           }
           break;
         default:
@@ -120,7 +109,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       name: e.target.name,
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   renderErrors = (errorStyles) => { // eslint-disable-line consistent-return
@@ -164,34 +153,44 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputSelect = (requiredClass, inputDescription) => {
-    const spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+  renderInputSelect = (requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
     return (
-      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-4'}`}>
+      <div className={`${styles.input} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-6'} ${bootStrapClassDanger}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
           className="form-control"
           id={this.props.label}
           name={this.props.name}
-          onChange={this.props.handleChange}
+          onChange={this.props.onChange}
           value={this.props.value}
           disabled={this.props.disabled}
+          onBlur={handleBlur}
+          tabIndex={this.props.tabIndex}
         >
           {map(this.props.selectOptions, (option, key) => (
-            <FormattedMessage id={`${option.name}`} defaultMessage={option.name} key={key}>
-              {(message) => (
-                <option value={option.value}>
-                  {message}
-                </option>
-              )}
-            </FormattedMessage>
+            option.name ?
+              <FormattedMessage id={option.name} defaultMessage={option.name} values={{ option: option.name }} key={key}>
+                {(message) => (
+                  <option value={option.value}>
+                    {message}
+                  </option>
+                )}
+              </FormattedMessage> :
+              <option value={option.value} key={key}>{option.name}</option>
           ))}
         </select>
         <div className={styles.inputDescriptionContainer}>
           <small>{inputDescription}</small>
         </div>
+        {this.renderErrors()}
         {spacer}
       </div>
     );
@@ -214,12 +213,12 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           {(placeholder) => (
             <textarea
               className="form-control"
-              onChange={this.props.handleChange}
+              onChange={this.props.onChange}
               value={this.props.value}
               name={this.props.name}
               id={this.props.label}
               onBlur={handleBlur}
-              onFocus={this.props.handleFocus}
+              onFocus={this.props.onFocus}
               placeholder={placeholder}
               disabled={this.props.disabled}
             />
@@ -261,7 +260,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
             name: this.props.name,
             id: this.props.label,
           }}
-          onChange={(moment) => this.props.handleChange({ target: {
+          onChange={(moment) => this.props.onChange({ target: {
             name: this.props.name,
             value: moment
           }})}
@@ -282,8 +281,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           name={this.props.name}
           id={this.props.label}
           onBlur={handleBlur}
-          onFocus={this.props.handleFocus}
-          onChange={this.props.handleChange}
+          onFocus={this.props.onFocus}
+          onChange={this.props.onChange}
           value={inputValue}
           type={this.props.type}
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -298,7 +297,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
-    const handleBlur = this.props.handleBlur || this.handleBlur;
+    const handleBlur = this.props.onBlur || this.handleBlur;
     // override bootStrapClass
     // set error class with override possibility
     const bootStrapClassDanger = !this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'has-danger' : '';
@@ -317,8 +316,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         name={this.props.name}
         id={this.props.label}
         onBlur={handleBlur}
-        onFocus={this.props.handleFocus}
-        onChange={this.props.handleChange}
+        onFocus={this.props.onFocus}
+        onChange={this.props.onChange}
         value={inputValue}
         type={this.props.type}
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -326,7 +325,13 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         disabled={this.props.disabled}
       />;
 
-    const inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+    const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
+
+    let inputDescription = !isEmpty(this.props.inputDescription) ? <FormattedMessage id={this.props.inputDescription} /> : '';
+
+    if (!isEmpty(this.props.linkContent) && !isEmpty(this.props.inputDescription)) {
+      inputDescription = <FormattedMessage id='input.description' defaultMessage={`{description}, {link}`} values={{link, description: <FormattedMessage id={this.props.inputDescription} /> }} />;
+    }
 
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
 
@@ -336,7 +341,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
     switch (this.props.type) {
       case 'select':
-        return this.renderInputSelect(requiredClass, inputDescription);
+        return this.renderInputSelect(requiredClass, inputDescription, bootStrapClassDanger, handleBlur);
       case 'textarea':
         return this.renderInputTextArea(requiredClass, bootStrapClassDanger, inputDescription, handleBlur);
       case 'checkbox':
@@ -377,18 +382,20 @@ Input.propTypes = {
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
   errors: PropTypes.array,
-  handleBlur: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
-  handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func,
   inputDescription: PropTypes.string,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
+  ]),
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   placeholder: PropTypes.string,
-  pluginID: PropTypes.string,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
   title: PropTypes.string,
@@ -400,5 +407,22 @@ Input.propTypes = {
     PropTypes.number,
   ]),
 };
+
+Input.defaultProps = {
+  addon: false,
+  addRequiredInputDesign: false,
+  deactivateErrorHighlight: false,
+  didCheckErrors: false,
+  disabled: false,
+  errors: [],
+  inputDescription: '',
+  noErrorsDescription: false,
+  onBlur: false,
+  onFocus: false,
+  placeholder: '',
+  selectOptions: [],
+  selectOptionsFetchSucceeded: false,
+  value: ''
+}
 
 export default Input;

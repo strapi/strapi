@@ -23,7 +23,7 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
           </FormattedMessage>
           <div className={styles.buttonContainer}>
             <Button
-              onClick={this.props.handleClick}
+              onClick={this.props.onClickAddAttribute}
               primaryAddShape
               label={'content-type-builder.button.attributes.add'}
             />
@@ -35,7 +35,7 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
 }
 
 EmptyAttributesView.propTypes = {
-  handleClick: PropTypes.func,
+  onClickAddAttribute: PropTypes.func.isRequired,
 };
 
 export default EmptyAttributesView;

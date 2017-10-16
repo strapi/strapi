@@ -33,6 +33,7 @@ import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -183,6 +184,6 @@ InputNumber.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
-}
+};
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

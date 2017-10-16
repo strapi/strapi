@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-wrap-multilines */
-
+/* eslint-disable react/require-default-props */
 class Input extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -108,7 +108,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       name: this.props.name,
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   renderErrors = (errorStyles) => { // eslint-disable-line consistent-return
@@ -149,7 +149,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         </div>
         {spacer}
       </div>
-    )
+    );
   }
 
   renderInputSelect = (bootStrapClass, requiredClass, inputDescription, bootStrapClassDanger, handleBlur) => {
@@ -168,7 +168,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           className="form-control"
           id={this.props.label}
           name={this.props.name}
-          onChange={this.props.handleChange}
+          onChange={this.props.onChange}
           value={this.props.value}
           disabled={this.props.disabled}
           onBlur={handleBlur}
@@ -212,12 +212,12 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           {(placeholder) => (
             <textarea
               className="form-control"
-              onChange={this.props.handleChange}
+              onChange={this.props.onChange}
               value={this.props.value}
               name={this.props.name}
               id={this.props.label}
               onBlur={handleBlur}
-              onFocus={this.props.handleFocus}
+              onFocus={this.props.onFocus}
               placeholder={placeholder}
               disabled={this.props.disabled}
               tabIndex={this.props.tabIndex}
@@ -230,7 +230,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         {this.renderErrors(styles.errorContainerTextArea)}
         {spacer}
       </div>
-    )
+    );
   }
 
   renderFormattedInput = (handleBlur, inputValue, placeholder) => (
@@ -240,8 +240,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           name={this.props.name}
           id={this.props.label}
           onBlur={handleBlur}
-          onFocus={this.props.handleFocus}
-          onChange={this.props.handleChange}
+          onFocus={this.props.onFocus}
+          onChange={this.props.onChange}
           value={inputValue}
           type={this.props.type}
           className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -257,7 +257,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
-    const handleBlur = this.props.handleBlur || this.handleBlur;
+    const handleBlur = this.props.onBlur || this.handleBlur;
     // override bootStrapClass
     const bootStrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-6';
     // set error class with override possibility
@@ -277,8 +277,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         name={this.props.name}
         id={this.props.label}
         onBlur={handleBlur}
-        onFocus={this.props.handleFocus}
-        onChange={this.props.handleChange}
+        onFocus={this.props.onFocus}
+        onChange={this.props.onChange}
         value={inputValue}
         type={this.props.type}
         className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
@@ -342,12 +342,6 @@ Input.propTypes = {
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
   errors: PropTypes.array,
-  handleBlur: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
-  handleChange: PropTypes.func.isRequired,
-  handleFocus: PropTypes.func,
   inputDescription: PropTypes.string,
   label: PropTypes.string.isRequired,
   linkContent: PropTypes.shape({
@@ -356,6 +350,12 @@ Input.propTypes = {
   }),
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
+  ]),
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   pluginId: PropTypes.string,
   selectOptions: PropTypes.array,

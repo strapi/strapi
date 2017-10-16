@@ -201,8 +201,8 @@ export class Edit extends React.Component {
                   currentModelName={this.props.currentModelName}
                   schema={this.props.schema}
                   setRecordAttribute={this.props.setRecordAttribute}
-                  handleChange={this.handleChange}
-                  handleSubmit={this.handleSubmit}
+                  onChange={this.handleChange}
+                  onSubmit={this.handleSubmit}
                   editing={this.props.editing}
                   formErrors={this.props.formErrors.toJS()}
                   didCheckErrors={this.props.didCheckErrors}

@@ -67,8 +67,12 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  modelsFetch: PropTypes.func,
+  modelsFetch: PropTypes.func.isRequired,
   shouldRefetchContentType: PropTypes.bool,
+};
+
+App.defaultProps = {
+  shouldRefetchContentType: false,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -77,7 +81,7 @@ export function mapDispatchToProps(dispatch) {
       modelsFetch,
     },
     dispatch
-  )
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

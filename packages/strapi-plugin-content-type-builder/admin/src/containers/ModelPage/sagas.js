@@ -36,7 +36,7 @@ export function* submitChanges(action) {
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
-
+  
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
       if (attribute.connection) {

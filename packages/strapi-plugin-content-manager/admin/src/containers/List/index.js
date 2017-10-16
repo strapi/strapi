@@ -192,7 +192,7 @@ export class List extends React.Component {
           route={this.props.match}
           routeParams={this.props.match.params}
           headers={tableHeaders}
-          changeSort={this.handleChangeSort}
+          onChangeSort={this.handleChangeSort}
           sort={this.props.sort}
           history={this.props.history}
           primaryKey={currentModel.primaryKey || 'id'}
@@ -245,15 +245,15 @@ export class List extends React.Component {
                   confirm: 'content-manager.popUpWarning.button.confirm',
                 }}
                 popUpWarningType={'danger'}
-                handleConfirm={this.handleDelete}
+                onConfirm={this.handleDelete}
               />
               <TableFooter
                 limit={this.props.limit}
                 currentPage={this.props.currentPage}
-                changePage={this.handleChangePage}
+                onChangePage={this.handleChangePage}
                 count={this.props.count}
                 className="push-lg-right"
-                handleChangeLimit={this.handleChangeLimit}
+                onChangeLimit={this.handleChangeLimit}
               />
             </div>
           </div>

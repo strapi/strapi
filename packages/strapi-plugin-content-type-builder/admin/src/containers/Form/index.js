@@ -490,7 +490,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       key={key}
       data={item}
       value={this.props.modifiedDataAttribute.params}
-      handleChange={this.handleChange}
+      onChange={this.handleChange}
       errors={this.props.formErrors}
       didCheckErrors={this.props.didCheckErrors}
     />
@@ -510,7 +510,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         &nbsp;
         <FormattedMessage id="content-type-builder.popUpForm.field" />
       </div>
-    )
+    );
   }
 
   render() {
@@ -540,10 +540,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           contentType={get(dropDownItems, [findIndex(dropDownItems, ['name', this.props.modelName])])}
           form={this.props.form}
           showRelation={includes(this.props.hash, 'defineRelation')}
-          handleChange={this.handleChange}
+          onChange={this.handleChange}
           values={this.props.modifiedDataAttribute}
           dropDownItems={dropDownItems}
-          handleSubmit={this.handleSubmit}
+          onSubmit={this.handleSubmit}
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           isEditting={edit}
@@ -563,9 +563,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           form={this.props.form}
           values={values}
           selectOptions={selectOptions}
-          handleChange={this.handleChange}
-          handleBlur={this.handleBlur}
-          handleSubmit={this.handleSubmit}
+          onChange={this.handleChange}
+          onBlur={this.handleBlur}
+          onSubmit={this.handleSubmit}
           noNav={noNav}
           renderModalBody={renderModalBody}
           noButtons={noButtons}
@@ -577,7 +577,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           overrideHandleBlurCondition={this.checkInputContentType}
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
-          pluginId="content-type-builder"
+          pluginID="content-type-builder"
           overrideCustomBootstrapClass={includes(this.props.hash, 'attributenumber')}
           customBootstrapClass='col-md-6'
         />
@@ -589,7 +589,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 Form.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 const mapStateToProps = selectForm();
 
@@ -623,50 +623,55 @@ function mapDispatchToProps(dispatch) {
 }
 
 Form.propTypes = {
-  addAttributeRelationToContentType: PropTypes.func,
-  addAttributeToContentType: PropTypes.func,
+  addAttributeRelationToContentType: PropTypes.func.isRequired,
+  addAttributeToContentType: PropTypes.func.isRequired,
   changeInput: PropTypes.func.isRequired,
-  changeInputAttribute: PropTypes.func,
+  changeInputAttribute: PropTypes.func.isRequired,
   connectionsFetch: PropTypes.func.isRequired,
-  contentTypeCreate: PropTypes.func,
-  contentTypeEdit: PropTypes.func,
-  contentTypeFetch: PropTypes.func,
-  contentTypeFetchSucceeded: PropTypes.func,
-  didCheckErrors: PropTypes.bool,
-  editContentTypeAttribute: PropTypes.func,
-  editContentTypeAttributeRelation: PropTypes.func,
+  contentTypeCreate: PropTypes.func.isRequired,
+  contentTypeEdit: PropTypes.func.isRequired,
+  contentTypeFetch: PropTypes.func.isRequired,
+  contentTypeFetchSucceeded: PropTypes.func.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
+  editContentTypeAttribute: PropTypes.func.isRequired,
+  editContentTypeAttributeRelation: PropTypes.func.isRequired,
   form: PropTypes.oneOfType([
     PropTypes.array.isRequired,
     PropTypes.object.isRequired,
-  ]),
-  formErrors: PropTypes.array,
-  formValidations: PropTypes.array,
+  ]).isRequired,
+  formErrors: PropTypes.array.isRequired,
+  formValidations: PropTypes.array.isRequired,
   hash: PropTypes.string.isRequired,
-  isFormSet: PropTypes.bool,
+  isFormSet: PropTypes.bool.isRequired,
   isModelPage: PropTypes.bool,
   menuData: PropTypes.array.isRequired,
-  modelLoading: PropTypes.bool,
+  modelLoading: PropTypes.bool, // eslint-disable-line react/require-default-props
   modelName: PropTypes.string,
-  modifiedData: PropTypes.object,
-  modifiedDataAttribute: PropTypes.object,
-  modifiedDataEdit: PropTypes.object,
-  popUpHeaderNavLinks: PropTypes.array,
+  modifiedData: PropTypes.object.isRequired,
+  modifiedDataAttribute: PropTypes.object.isRequired,
+  modifiedDataEdit: PropTypes.object.isRequired,
+  popUpHeaderNavLinks: PropTypes.array.isRequired,
   redirectRoute: PropTypes.string.isRequired,
-  removeContentTypeRequiredError: PropTypes.func,
-  resetFormErrors: PropTypes.func,
-  resetIsFormSet: PropTypes.func,
-  routePath: PropTypes.string,
-  selectOptions: PropTypes.array,
-  setAttributeForm: PropTypes.func,
-  setAttributeFormEdit: PropTypes.func,
+  removeContentTypeRequiredError: PropTypes.func.isRequired,
+  resetFormErrors: PropTypes.func.isRequired,
+  resetIsFormSet: PropTypes.func.isRequired,
+  routePath: PropTypes.string.isRequired,
+  selectOptions: PropTypes.array.isRequired,
+  setAttributeForm: PropTypes.func.isRequired,
+  setAttributeFormEdit: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
-  setFormErrors: PropTypes.func,
-  shouldRefetchContentType: PropTypes.bool,
-  showButtonLoading: PropTypes.bool,
-  storeTemporaryMenu: PropTypes.func,
-  temporaryContentTypeFieldsUpdated: PropTypes.func,
+  setFormErrors: PropTypes.func.isRequired,
+  shouldRefetchContentType: PropTypes.bool.isRequired,
+  showButtonLoading: PropTypes.bool.isRequired,
+  storeTemporaryMenu: PropTypes.func.isRequired,
+  temporaryContentTypeFieldsUpdated: PropTypes.func.isRequired,
   toggle: PropTypes.func.isRequired,
-  updateContentType: PropTypes.func,
+  updateContentType: PropTypes.func.isRequired,
+};
+
+Form.defaultProps = {
+  isModelPage: false,
+  modelName: '',
 };
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

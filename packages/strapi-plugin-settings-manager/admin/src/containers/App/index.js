@@ -26,6 +26,7 @@ import styles from './styles.scss';
 
 import saga from './sagas';
 
+/* eslint-disable react/require-default-props  */
 class App extends React.Component {
   componentDidMount() {
     this.props.menuFetch();
@@ -33,10 +34,6 @@ class App extends React.Component {
   }
 
   render() {
-    if (this.props.loading) {
-      return <div />;
-    }
-
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>
@@ -55,7 +52,7 @@ App.contextTypes = {
 
 App.propTypes = {
   environmentsFetch: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
+  // loading: PropTypes.bool.isRequired,
   menuFetch: PropTypes.func.isRequired,
 };
 

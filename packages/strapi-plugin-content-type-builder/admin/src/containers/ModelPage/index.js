@@ -53,7 +53,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     this.state = {
       contentTypeTemporary: false,
-    }
+    };
 
     this.popUpHeaderNavLinks = [
       { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
@@ -119,7 +119,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   fetchModel = (props) => {
     if (storeData.getIsModelTemporary() && get(storeData.getContentType(), 'name') === props.match.params.modelName) {
-      this.setState({ contentTypeTemporary: true })
+      this.setState({ contentTypeTemporary: true });
       this.props.modelFetchSucceeded({ model: storeData.getContentType() });
     } else {
       this.setState({ contentTypeTemporary: false });
@@ -190,7 +190,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     </li>
   )
 
-  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} handleEdit={this.handleEditAttribute} handleDelete={this.handleDelete} />
+  renderCustomLi = (row, key) => <AttributeRow key={key} row={row} onEditAttribute={this.handleEditAttribute} onDelete={this.handleDelete} />
 
   renderCustomLink = (props, linkStyles) => {
     if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
@@ -250,13 +250,13 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
-      <EmptyAttributesView handleClick={this.handleClickAddAttribute} /> :
+      <EmptyAttributesView onClickAddAttribute={this.handleClickAddAttribute} /> :
       <List
         listContent={this.props.modelPage.model}
         renderCustomListTitle={this.renderListTitle}
         listContentMappingKey={'attributes'}
         renderCustomLi={this.renderCustomLi}
-        handleButtonClick={this.handleClickAddAttribute}
+        onButtonClick={this.handleClickAddAttribute}
       />;
 
     return (
@@ -308,21 +308,20 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 ModelPage.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 ModelPage.propTypes = {
-  cancelChanges: PropTypes.func,
-  deleteAttribute: PropTypes.func,
-  location: PropTypes.object,
-  match: PropTypes.object,
-  menu: PropTypes.array,
-  modelFetch: PropTypes.func,
-  modelFetchSucceeded: PropTypes.func,
-  modelPage: PropTypes.object,
-  params: PropTypes.object,
-  resetShowButtonsProps: PropTypes.func,
-  submit: PropTypes.func,
-  updatedContentType: PropTypes.bool,
+  cancelChanges: PropTypes.func.isRequired,
+  deleteAttribute: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  menu: PropTypes.array.isRequired,
+  modelFetch: PropTypes.func.isRequired,
+  modelFetchSucceeded: PropTypes.func.isRequired,
+  modelPage: PropTypes.object.isRequired,
+  resetShowButtonsProps: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
+  updatedContentType: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

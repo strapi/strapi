@@ -35,27 +35,27 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
       <div className={styles.popUpWarning}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggleModal} className={styles.modalPosition}>
           <ModalHeader toggle={this.props.toggleModal} className={styles.header}>
-            <FormattedMessage id={this.props.content.title || `popUpWarning.title`} />
+            <FormattedMessage id={this.props.content.title || 'components.popUpWarning.title'} />
           </ModalHeader>
           <div className={styles.bordered} />
           <ModalBody>
             <div className={styles.modalDangerBodyContainer}>
               <img src={this.icons[this.props.popUpWarningType]} alt="icon" />
-              <FormattedMessage id={this.props.content.message}>
+              <FormattedMessage id={this.props.content.message || 'components.popUpWarning.message'}>
                 {(message) => (
                   <p>{message}</p>
                 )}
               </FormattedMessage>
             </div>
             <div className={styles.buttonContainer}>
-              <FormattedMessage id={this.props.content.cancel || `popUpWarning.button.cancel`}>
+              <FormattedMessage id={this.props.content.cancel || 'components.popUpWarning.button.cancel'}>
                 {(message) => (
                   <Button onClick={this.props.toggleModal} className={styles.secondary}>{message}</Button>
                 )}
               </FormattedMessage>
-              <FormattedMessage id={this.props.content.confirm || `popUpWarning.button.confirm`}>
+              <FormattedMessage id={this.props.content.confirm || 'components.popUpWarning.button.confirm'}>
                 {(message) => (
-                  <Button onClick={this.props.handleConfirm} className={styles.primary}>{message}</Button>
+                  <Button onClick={this.props.onConfirm} className={styles.primary}>{message}</Button>
                 )}
               </FormattedMessage>
             </div>
@@ -68,11 +68,26 @@ class PopUpWarning extends React.Component { // eslint-disable-line react/prefer
 }
 
 PopUpWarning.propTypes = {
-  bodyMessage: PropTypes.string,
-  handleConfirm: PropTypes.func,
+  content: PropTypes.shape({
+    cancel: PropTypes.string,
+    confirm: PropTypes.string,
+    message: PropTypes.string,
+    title: PropTypes.string,
+  }),
   isOpen: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func.isRequired,
   popUpWarningType: PropTypes.string,
   toggleModal: PropTypes.func.isRequired,
-}
+};
+
+PopUpWarning.defaultProps = {
+  content: {
+    cancel: 'components.popUpWarning.button.cancel',
+    confirm: 'components.popUpWarning.button.confirm',
+    message: 'components.popUpWarning.message',
+    title: 'components.popUpWarning.title',
+  },
+  popUpWarningType: 'danger',
+};
 
 export default PopUpWarning;

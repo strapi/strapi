@@ -18,6 +18,8 @@ import IcoSuccess from '../../assets/icons/icon_success.svg';
 import IcoWarning from '../../assets/icons/icon_warning.svg';
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-handler-names */
+/* eslint-disable react/require-default-props */
 class PopUpWarning extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -73,6 +75,6 @@ PopUpWarning.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   popUpWarningType: PropTypes.string,
   toggleModal: PropTypes.func.isRequired,
-}
+};
 
 export default PopUpWarning;

@@ -68,13 +68,12 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         availableNumber={availableNumber}
         title={title}
         buttonLabel={'content-type-builder.button.contentType.add'}
-        handleButtonClick={this.handleButtonClick}
+        onButtonClick={this.handleButtonClick}
         rowItems={this.props.models}
-        handleDelete={this.handleDelete}
+        onHandleDelete={this.handleDelete}
       />
     );
   }
-
 
   render() {
     const component = size(this.props.models) === 0 ?
@@ -111,17 +110,17 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 HomePage.contextTypes = {
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 HomePage.propTypes =  {
-  deleteContentType: PropTypes.func,
-  location: PropTypes.object,
-  match: PropTypes.object,
-  menu: PropTypes.array,
+  deleteContentType: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  menu: PropTypes.array.isRequired,
   models: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.array,
-  ]),
+  ]).isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

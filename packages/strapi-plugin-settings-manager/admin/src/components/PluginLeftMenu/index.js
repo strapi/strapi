@@ -28,4 +28,8 @@ PluginLeftMenu.propTypes = {
   sections: PropTypes.array.isRequired,
 };
 
+PluginLeftMenu.defaultProps = {
+  envParams: '',
+};
+
 export default PluginLeftMenu;

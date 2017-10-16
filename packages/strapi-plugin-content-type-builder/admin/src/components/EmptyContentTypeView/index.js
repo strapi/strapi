@@ -38,7 +38,7 @@ class EmptyContentTypeView extends React.Component { // eslint-disable-line reac
 }
 
 EmptyContentTypeView.propTypes = {
-  handleButtonClick: PropTypes.func,
+  handleButtonClick: PropTypes.func.isRequired,
 };
 
 export default EmptyContentTypeView;

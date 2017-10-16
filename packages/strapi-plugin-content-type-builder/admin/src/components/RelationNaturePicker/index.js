@@ -47,11 +47,12 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
         ico: ManyToMany,
         icoSelected: ManyToManySelected,
       },
-    ]
+    ];
   }
   render() {
     let contentTypeName = startCase(this.props.contentTypeName);
     let contentTypeTarget = startCase(this.props.contentTypeTarget);
+
     switch (this.props.selectedIco) {
       case 'oneToMany':
         contentTypeTarget = pluralize(contentTypeTarget);
@@ -68,21 +69,21 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
 
     }
 
+    const relationText = this.props.selectedIco ? <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`}  /> : '';
+
     return (
       <div className={styles.relationNaturePicker}>
         {map(this.icos, (value, key) => (
-          <RelationIco key={key} ico={this.props.selectedIco === value.name ? value.icoSelected : value.ico} name={value.name} handleChange={this.props.handleChange} />
+          <RelationIco key={key} ico={this.props.selectedIco === value.name ? value.icoSelected : value.ico} name={value.name} onChange={this.props.onChange} />
         ))}
         <div className={styles.infoContainer}>
           <span>
-
             {contentTypeName}
           </span>
           &nbsp;
-          <FormattedMessage id={`content-type-builder.relation.${this.props.selectedIco}`}  />
+          {relationText}
           &nbsp;
           <span>
-
             {contentTypeTarget}
           </span>
         </div>
@@ -94,9 +95,14 @@ class RelationNaturePicker extends React.Component { // eslint-disable-line reac
 RelationNaturePicker.propTypes = {
   contentTypeName: PropTypes.string,
   contentTypeTarget: PropTypes.string,
-  handleChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
   selectedIco: PropTypes.string,
+};
 
-}
+RelationNaturePicker.defaultProps = {
+  contentTypeName: '',
+  contentTypeTarget: '',
+  selectedIco: 'oneToOne',
+};
 
 export default RelationNaturePicker;

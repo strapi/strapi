@@ -10,6 +10,7 @@ import { map } from 'lodash';
 import WithFormSection from 'components/WithFormSection';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentWillUnmount() {
     if (this.props.resetToggleDefaultConnection) this.props.resetToggleDefaultConnection();

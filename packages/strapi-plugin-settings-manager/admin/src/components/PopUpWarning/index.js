@@ -12,6 +12,8 @@ import { FormattedMessage } from 'react-intl';
 import Danger from '../../assets/icons/icon_danger.svg';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
+/* eslint-disable react/jsx-handler-names */
 class PopUpWarning extends React.Component { // eslint-disable-line react/prefer-stateless-function
   renderModalBodyDanger = () => (
     <ModalBody>
@@ -76,6 +78,6 @@ PopUpWarning.propTypes = {
   showDanger: PropTypes.bool,
   toggleModal: PropTypes.func,
   warningMessage: PropTypes.string,
-}
+};
 
 export default PopUpWarning;
