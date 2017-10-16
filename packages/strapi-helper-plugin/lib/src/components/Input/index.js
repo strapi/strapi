@@ -386,15 +386,9 @@ Input.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
@@ -417,12 +411,12 @@ Input.defaultProps = {
   errors: [],
   inputDescription: '',
   noErrorsDescription: false,
-  onBlur: false,
-  onFocus: false,
+  onBlur: () => {},
+  onFocus: () => {},
   placeholder: '',
   selectOptions: [],
   selectOptionsFetchSucceeded: false,
   value: ''
-}
+};
 
 export default Input;
