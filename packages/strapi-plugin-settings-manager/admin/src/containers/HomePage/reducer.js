@@ -11,6 +11,7 @@ import {
   CHANGE_DEFAULT_LANGUAGE,
   CHANGE_INPUT,
   CANCEL_CHANGES,
+  CLOSE_MODAL,
   LANGUAGES_FETCH_SUCCEEDED,
   EDIT_SETTINGS_SUCCEEDED,
   LANGUAGE_ACTION_SUCCEEDED,
@@ -62,6 +63,8 @@ function homePageReducer(state = initialState, action) {
     case CHANGE_INPUT:
       return state
         .updateIn(['modifiedData', action.key], () => action.value);
+    case CLOSE_MODAL:
+      return state.set('error', !state.get('error'));
     case CANCEL_CHANGES:
       return state
         .set('modifiedData', state.get('initialData'))

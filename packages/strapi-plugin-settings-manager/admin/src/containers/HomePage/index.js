@@ -54,6 +54,7 @@ import {
   cancelChanges,
   changeDefaultLanguage,
   changeInput,
+  closeModal,
   configFetch,
   databaseEdit,
   databasesFetch,
@@ -269,7 +270,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
 
-    if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+    if (isEmpty(body)) {
+      this.props.closeModal();
+      return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+    }
 
 
     if (isEmpty(formErrors)) {
@@ -512,6 +516,7 @@ function mapDispatchToProps(dispatch) {
       changeDefaultLanguage,
       changeInput,
       configFetch,
+      closeModal,
       databaseDelete,
       databaseEdit,
       databasesFetch,
@@ -532,6 +537,7 @@ HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   changeDefaultLanguage: PropTypes.func.isRequired,
   changeInput: PropTypes.func.isRequired,
+  closeModal: PropTypes.func.isRequired,
   configFetch: PropTypes.func.isRequired,
   databaseDelete: PropTypes.func.isRequired,
   databaseEdit: PropTypes.func.isRequired,

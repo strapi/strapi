@@ -14,6 +14,7 @@ import {
   LANGUAGES_FETCH_SUCCEEDED,
   CHANGE_INPUT,
   CANCEL_CHANGES,
+  CLOSE_MODAL,
   DEFAULT_ACTION,
   EDIT_SETTINGS,
   EDIT_SETTINGS_SUCCEEDED,
@@ -75,6 +76,11 @@ export function cancelChanges() {
   };
 }
 
+export function closeModal() {
+  return {
+    type: CLOSE_MODAL,
+  };
+}
 
 export function languagesFetch() {
   return {
