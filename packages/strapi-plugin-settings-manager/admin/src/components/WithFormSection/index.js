@@ -98,7 +98,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     // check if the input has a nested form so it is displayed on the entire line
     const customBootstrapClass = this.state.hasNestedInput ?
       // bootstrap class to make the input displayed on the entire line
-      'col-md-6 offset-md-6 pull-md-6' :
+      'col-md-6 offset-md-6 mr-md-5' :
       // if the input hasn't a nested form but the config requires him to be displayed differently
       config[props.target] || config[dynamicTarget] || '';
 

@@ -121,7 +121,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
             ? <FormattedMessage {...error} />
             : error;
           return (
-            <div key={key} className={`form-control-feedback ${divStyle}`}>{displayError}</div>
+            <div key={key} className={`form-control-feedback invalid-feedback ${divStyle}`}>{displayError}</div>
           );
         })
       );
@@ -166,7 +166,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={`${this.props.label}`} />
         </label>
         <select
-          className="form-control"
+          className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
           id={this.props.label}
           name={this.props.name}
           onChange={this.props.onChange}
@@ -212,7 +212,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
           {(placeholder) => (
             <textarea
-              className="form-control"
+              className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
               onChange={this.props.onChange}
               value={this.props.value}
               name={this.props.name}
@@ -285,7 +285,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           onChange={this.props.onChange}
           value={inputValue}
           type={this.props.type}
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors)? 'form-control-danger is-invalid' : ''}`}
           placeholder={message}
           autoComplete="off"
           disabled={this.props.disabled}
@@ -320,7 +320,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         onChange={this.props.onChange}
         value={inputValue}
         type={this.props.type}
-        className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+        className={`form-control ${!isEmpty(this.state.errors) ? 'is-invalid': ''}`}
         placeholder={placeholder}
         disabled={this.props.disabled}
       />;

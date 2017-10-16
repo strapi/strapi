@@ -19,7 +19,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   renderInput = (item, key) => {
     // const customBootstrapClass = 'col-md-6'
     let customBootstrapClass = item.type === 'textarea' ?
-      'col-md-8 offset-md-4 pull-md-4' : 'col-md-6 offset-md-6 pull-md-6';
+      'col-md-8 offset-md-4 mr-md-5' : 'col-md-6 offset-md-6 mr-md-5';
 
     const shouldOverrideRendering = this.props.overrideRenderInputCondition ? this.props.overrideRenderInputCondition(item) : false;
 
@@ -110,7 +110,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <ModalBody className={styles.modalBody}>
             <form onSubmit={this.props.onSubmit}>
               <div className="container-fluid">
-                <div className="row">
+                <div className={`row ${this.props.renderModalBody ? 'justify-content-center' : ''}`}>
                   {modalBody}
                 </div>
               </div>

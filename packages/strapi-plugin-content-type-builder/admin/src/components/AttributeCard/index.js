@@ -32,9 +32,8 @@ const asset = {
 };
 
 function AttributeCard({ attribute, handleClick }) {
-  const bootstrapClass = attribute.type === 'relation' ? 'col-md-6 offset-md-3' : 'col-md-6';
   return (
-    <div className={bootstrapClass}>
+    <div className="col-md-6">
       <div className={styles.attributeCardContainer} onClick={() => handleClick(attribute.type)}>
         <div className={styles.attributeCard}>
           <img src={asset[attribute.type]} alt="ico" />

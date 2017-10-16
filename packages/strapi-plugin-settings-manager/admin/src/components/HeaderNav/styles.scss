@@ -41,15 +41,7 @@ $linkcolour: #F5F5F5;
   font-weight: bold;
   text-decoration: none !important;
   box-shadow: 1px 0 0 rgba(0,0,0,0.05);
-  > div {
-    &:first-child {
-      position: absolute;
-      height: 0.2rem;
-      top: 0rem;
-      width: 100%;
-      background-color: #1C5DE7;
-    }
-  }
+  border-top: 0.2rem solid #1C5DE7;
 }
 
 .linkActive:last-child {
@@ -57,31 +49,15 @@ $linkcolour: #F5F5F5;
   font-weight: bold;
   text-decoration: none !important;
   box-shadow: -1px 0 0 rgba(0,0,0,0.05);
-  > div {
-    &:first-child {
-      position: absolute;
-      height: 0.2rem;
-      top: 0rem;
-      width: 100%;
-      background-color: #1C5DE7;
-    }
-  }
+  border-top: 0.2rem solid #1C5DE7;
 }
 
 .linkActive:not(:first-child, :last-child) {
   background-color: #FFFFFF!important;
   font-weight: bold;
   text-decoration: none !important;
-  box-shadow: 1px 0 0 rgba(0,0,0,0.05), -1px 0 0 rgba(0,0,0,0.05)!important ;
-  > div {
-    &:first-child {
-      position: absolute;
-      height: 0.2rem;
-      top: 0rem;
-      width: 100%;
-      background-color: #1C5DE7;
-    }
-  }
+  box-shadow: 1px 0 0 rgba(0,0,0,0.05), -1px 0 0 rgba(0,0,0,0.05) !important;
+  border-top: 0.2rem solid #1C5DE7;
 }
 
 .linkText {
