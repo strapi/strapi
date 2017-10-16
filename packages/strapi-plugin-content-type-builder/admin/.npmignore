@@ -65,10 +65,8 @@ $RECYCLE.BIN/
 # Logs and databases
 ############################
 
-.tmp
 *.log
 *.sql
-*.sqlite
 
 
 ############################
@@ -76,6 +74,7 @@ $RECYCLE.BIN/
 ############################
 
 *#
+ssl
 .idea
 nbproject
 
@@ -89,30 +88,14 @@ lcov.info
 pids
 logs
 results
-build
 node_modules
 .node_history
-package-lock.json
-**/package-lock.json
 
 
 ############################
 # Tests
 ############################
 
+test
 testApp
 coverage
-
-
-############################
-# Documentation
-############################
-
-_book
-
-############################
-# Builds
-############################
-
-packages/strapi-generate-new/files/public/
-packages/*/yarn.lock
