@@ -30,7 +30,8 @@
     "react-dom": "^15.6.1",
     "react-select": "^1.0.0-rc.5",
     "react-transition-group": "^1.2.0",
-    "reactstrap": "^4.8.0"
+    "reactstrap": "^4.8.0",
+    "strapi-helper-plugin": "3.0.0-alpha.6"
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
@@ -47,7 +48,6 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "3.0.0-alpha.6",
     "webpack": "^3.7.1"
   },
   "author": {

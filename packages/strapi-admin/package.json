@@ -26,6 +26,7 @@
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^0.30.0",
     "sanitize.css": "^4.1.0",
+    "strapi-helper-plugin": "3.0.0-alpha.6",
     "strapi-utils": "3.0.0-alpha.6"
   },
   "devDependencies": {
@@ -46,7 +47,6 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "3.0.0-alpha.6",
     "webpack": "^3.7.1"
   },
   "author": {
