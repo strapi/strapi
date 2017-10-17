@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { map } from 'lodash';
 
 // modal
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
@@ -17,54 +18,66 @@ import IcoSuccess from '../../assets/icons/icon_success.svg';
 import IcoWarning from '../../assets/icons/icon_warning.svg';
 import styles from './styles.scss';
 
-class PopUpWarning extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
+const icons = {
+  'danger': IcoDanger,
+  'info': IcoInfo,
+  'notFound': IcoNotFound,
+  'success': IcoSuccess,
+  'warning': IcoWarning,
+};
 
-    this.icons = {
-      'danger': IcoDanger,
-      'info': IcoInfo,
-      'notFound': IcoNotFound,
-      'success': IcoSuccess,
-      'warning': IcoWarning,
-    };
-  }
+function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarningType, toggleModal }) {
+  const buttons = [
+    {
+      className: styles.secondary,
+      id: content.cancel || 'components.popUpWarning.button.cancel',
+      handleClick: toggleModal,
+      style: {},
+    },
+    {
+      className: styles.primary,
+      id: content.confirm || 'components.popUpWarning.button.confirm',
+      handleClick: onConfirm,
+      style: {},
+    },
+  ];
+  const singleButton = [
+    {
+      className: styles.primary,
+      id: content.confirm || 'components.popUpWarning.button.confirm',
+      handleClick: onConfirm,
+      style: { width: '100%' },
+    },
+  ];
+  const footerButtons = onlyConfirmButton ? singleButton : buttons;
 
-  render() {
-    return (
-      <div className={styles.popUpWarning}>
-        <Modal isOpen={this.props.isOpen} toggle={this.props.toggleModal} className={styles.modalPosition}>
-          <ModalHeader toggle={this.props.toggleModal} className={styles.header}>
-            <FormattedMessage id={this.props.content.title || 'components.popUpWarning.title'} />
-          </ModalHeader>
-          <div className={styles.bordered} />
-          <ModalBody>
-            <div className={styles.modalDangerBodyContainer}>
-              <img src={this.icons[this.props.popUpWarningType]} alt="icon" />
-              <FormattedMessage id={this.props.content.message || 'components.popUpWarning.message'}>
-                {(message) => (
-                  <p>{message}</p>
-                )}
+  return (
+    <div className={styles.popUpWarning}>
+      <Modal isOpen={isOpen} toggle={toggleModal} className={styles.modalPosition}>
+        <ModalHeader toggle={toggleModal} className={styles.header}>
+          <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
+        </ModalHeader>
+        <div className={styles.bordered} />
+        <ModalBody>
+          <div className={styles.modalDangerBodyContainer}>
+            <img src={icons[popUpWarningType]} alt="icon" />
+            <FormattedMessage id={content.message || 'components.popUpWarning.message'}>
+              {(message) => (
+                <p>{message}</p>
+              )}
+            </FormattedMessage>
+          </div>
+          <div className={styles.buttonContainer}>
+            {map(footerButtons, (button) => (
+              <FormattedMessage id={button.id} key={button.id}>
+                {(message) => <Button onClick={button.handleClick} className={button.className} style={button.style}>{message}</Button>}
               </FormattedMessage>
-            </div>
-            <div className={styles.buttonContainer}>
-              <FormattedMessage id={this.props.content.cancel || 'components.popUpWarning.button.cancel'}>
-                {(message) => (
-                  <Button onClick={this.props.toggleModal} className={styles.secondary}>{message}</Button>
-                )}
-              </FormattedMessage>
-              <FormattedMessage id={this.props.content.confirm || 'components.popUpWarning.button.confirm'}>
-                {(message) => (
-                  <Button onClick={this.props.onConfirm} className={styles.primary}>{message}</Button>
-                )}
-              </FormattedMessage>
-            </div>
-          </ModalBody>
-
-        </Modal>
-      </div>
-    );
-  }
+            ))}
+          </div>
+        </ModalBody>
+      </Modal>
+    </div>
+  );
 }
 
 PopUpWarning.propTypes = {
