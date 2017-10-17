@@ -104,8 +104,12 @@ class FooPage extends React.Component {
   render () {
     return (
       <div className={styles.fooPage}>
-      <Ico icoType="trash" onClick={this.handleClick} />
-      <PopUpWarning isOpen={this.state.showModal} onConfirm={() => this.setState({ showModal: false })} toggleModal={() => this.setState({ showModal: false })} />
+        <Ico icoType="trash" onClick={this.handleClick} />
+        <PopUpWarning
+          isOpen={this.state.showModal}
+          onConfirm={() => this.setState({ showModal: false })}
+          toggleModal={() => this.setState({ showModal: false })}
+        />
       </div>
     );
   }
@@ -146,11 +150,15 @@ class FooPage extends React.Component {
       { icoType: 'pencil', onClick: () => console.log('click on pencil icon') },
       { icoType: 'trash',  onClick: this.handleClick },
     ];
-    
+
     return (
       <div className={styles.fooPage}>
-      <IcoContainer icons={icons} />
-      <PopUpWarning isOpen={this.state.showModal} onConfirm={() => this.setState({ showModal: false })} toggleModal={() => this.setState({ showModal: false })} />
+        <IcoContainer icons={icons} />
+        <PopUpWarning
+          isOpen={this.state.showModal}
+          onConfirm={() => this.setState({ showModal: false })}
+          toggleModal={() => this.setState({ showModal: false })}
+        />
       </div>
     );
   }
