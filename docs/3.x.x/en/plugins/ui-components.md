@@ -74,6 +74,93 @@ export default Button;
 
 ***
 
+## Ico
+
+Ico components that works with fontAwesone.
+
+### Usage
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| `icoType` | string | no (default: `trash`) | fontAwesone ico name. Ex: <Ico icoType="pencil" /> |
+| `onClick` | func | no | Function executed onClick. |
+
+### Example
+
+```js
+import React from 'react';
+import Ico from 'components/Ico';
+import PopUpWarning from 'components/PopUpWarning';
+import styles from 'styles';
+
+class FooPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { showModal: false };
+  }
+
+  handleClick = () => this.setState({ showModal: true });
+
+  render () {
+    return (
+      <div className={styles.fooPage}>
+      <Ico icoType="trash" onClick={this.handleClick} />
+      <PopUpWarning isOpen={this.state.showModal} onConfirm={() => this.setState({ showModal: false })} toggleModal={() => this.setState({ showModal: false })} />
+      </div>
+    );
+  }
+}
+
+export default FooPage;
+```
+
+***
+
+## IcoContainer
+
+Container containing two icons, generally used for editing or deleting data.
+
+### Usage
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| icons | array | no | Array containing icons' props. |
+
+### Example
+
+```js
+import React from 'react';
+import IcoContainer from 'components/IcoContainer';
+import PopUpWarning from 'components/PopUpWarning';
+import styles from 'styles';
+
+class FooPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { showModal: false };
+  }
+
+  handleClick = () => this.setState({ showModal: true });
+
+  render() {
+    const icons = [
+      { icoType: 'pencil', onClick: () => console.log('click on pencil icon') },
+      { icoType: 'trash',  onClick: this.handleClick },
+    ];
+    
+    return (
+      <div className={styles.fooPage}>
+      <IcoContainer icons={icons} />
+      <PopUpWarning isOpen={this.state.showModal} onConfirm={() => this.setState({ showModal: false })} toggleModal={() => this.setState({ showModal: false })} />
+      </div>
+    );
+  }
+}
+
+export default FooPage;
+```
+
+***
+
 ## Input
 
 Strapi provides a built-in input library which includes :
