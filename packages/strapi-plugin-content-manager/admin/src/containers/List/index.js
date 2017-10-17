@@ -45,7 +45,6 @@ import {
 // Selectors.
 import {
   makeSelectRecords,
-  makeSelectLoadingRecords,
   makeSelectCurrentModelName,
   makeSelectCurrentModelNamePluralized,
   makeSelectCount,
@@ -165,42 +164,32 @@ export class List extends React.Component {
     if (!this.props.currentModelName || !this.props.schema) {
       return <div />;
     }
+    // Detect current model structure from models list
+    const currentModel = this.props.models[this.props.currentModelName];
 
-    let content;
-    if (this.props.loadingRecords) {
-      content = (
-        <div>
-          <p>Loading...</p>
-        </div>
-      );
-    } else {
-      // Detect current model structure from models list
-      const currentModel = this.props.models[this.props.currentModelName];
+    // Define table headers
+    const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
+      name: value,
+      label: this.props.schema[this.props.currentModelName].fields[value].label,
+      type: this.props.schema[this.props.currentModelName].fields[value].type,
+    }));
 
-      // Define table headers
-      const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
-        name: value,
-        label: this.props.schema[this.props.currentModelName].fields[value].label,
-        type: this.props.schema[this.props.currentModelName].fields[value].type,
-      }));
+    tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'Id', type: 'string' });
 
-      tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'Id', type: 'string' });
-
-      content = (
-        <Table
-          records={this.props.records}
-          route={this.props.match}
-          routeParams={this.props.match.params}
-          headers={tableHeaders}
-          onChangeSort={this.handleChangeSort}
-          sort={this.props.sort}
-          history={this.props.history}
-          primaryKey={currentModel.primaryKey || 'id'}
-          handleDelete={this.toggleModalWarning}
-          redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
-        />
-      );
-    }
+    const content = (
+      <Table
+        records={this.props.records}
+        route={this.props.match}
+        routeParams={this.props.match.params}
+        headers={tableHeaders}
+        onChangeSort={this.handleChangeSort}
+        sort={this.props.sort}
+        history={this.props.history}
+        primaryKey={currentModel.primaryKey || 'id'}
+        handleDelete={this.toggleModalWarning}
+        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
+      />
+    );
 
     // Plugin header config
     const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
@@ -284,7 +273,6 @@ List.propTypes = {
   history: PropTypes.object.isRequired,
   limit: PropTypes.number.isRequired,
   loadCount: PropTypes.func.isRequired,
-  loadingRecords: PropTypes.bool.isRequired,
   loadRecords: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
@@ -294,7 +282,7 @@ List.propTypes = {
   ]).isRequired,
   records: PropTypes.oneOfType([
     PropTypes.array,
-    PropTypes.bool,
+    PropTypes.object,
   ]).isRequired,
   // route: PropTypes.object.isRequired,
   schema: PropTypes.oneOfType([
@@ -322,7 +310,6 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   records: makeSelectRecords(),
-  loadingRecords: makeSelectLoadingRecords(),
   count: makeSelectCount(),
   loadingCount: makeSelectLoadingCount(),
   models: makeSelectModels(),

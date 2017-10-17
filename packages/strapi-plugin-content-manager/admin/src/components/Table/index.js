@@ -61,7 +61,10 @@ Table.propTypes = {
   history: PropTypes.object.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
-  records: PropTypes.array.isRequired,
+  records: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+  ]).isRequired,
   redirectUrl: PropTypes.string.isRequired,
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
