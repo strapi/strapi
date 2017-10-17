@@ -34,6 +34,7 @@ class TableRow extends React.Component {
       case 'float':
       case 'integer':
       case 'biginteger':
+      case 'decimal':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
