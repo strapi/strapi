@@ -228,6 +228,7 @@ PopUp warning library based on [reactstrap](https://reactstrap.github.io/compone
 | content | object | no | Used to set the confirm button, cancel button, title, body messages. |
 | onConfirm | func | yes | Function executed when the user clicks on the `Confirm button`. |
 | isOpen | bool | yes | Show or hide the popup. |
+| onlyConfirmButton | bool | yes | Display only the confirm button (`primary`) with `width: 100%`. |
 | popUpWarningType | string | yes | Sets the popup body icon. Available types: `danger`, `info`, `notFound`, `success`, `warning` |
 | toggleModal | func | yes | Function to toggle the modal. |
 

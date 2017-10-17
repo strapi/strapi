@@ -89,6 +89,7 @@ PopUpWarning.propTypes = {
   }),
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
+  onlyConfirmButton: PropTypes.bool,
   popUpWarningType: PropTypes.string,
   toggleModal: PropTypes.func.isRequired,
 };
@@ -100,6 +101,7 @@ PopUpWarning.defaultProps = {
     message: 'components.popUpWarning.message',
     title: 'components.popUpWarning.title',
   },
+  onlyConfirmButton: false,
   popUpWarningType: 'danger',
 };
 
