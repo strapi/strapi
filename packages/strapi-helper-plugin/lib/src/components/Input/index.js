@@ -379,6 +379,10 @@ Input.propTypes = {
   errors: PropTypes.array,
   inputDescription: PropTypes.string,
   label: PropTypes.string.isRequired,
+  linkContent: PropTypes.shape({
+    link: PropTypes.string,
+    description: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
@@ -411,6 +415,7 @@ Input.defaultProps = {
   disabled: false,
   errors: [],
   inputDescription: '',
+  linkContent: {},
   noErrorsDescription: false,
   onBlur: () => {},
   onFocus: () => {},
