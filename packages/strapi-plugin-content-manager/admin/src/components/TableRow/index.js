@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { isEmpty, isObject } from 'lodash';
 
+import IcoContainer from 'components/IcoContainer';
+
 import styles from './styles.scss';
 
 class TableRow extends React.Component {
@@ -73,11 +75,9 @@ class TableRow extends React.Component {
       </td>
     ));
 
-    // Add actions cell.
     cells.push(
       <td key='action' className={styles.actions}>
-        <i className="fa fa-pencil" aria-hidden="true"></i>
-        <i onClick={this.props.onDelete} id={this.props.record.id} className="fa fa-trash" aria-hidden="true"></i>
+        <IcoContainer icons={[{ icoType: 'pencil' }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
       </td>
     );
 

@@ -4,9 +4,13 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 function Ico(props) {
+  const iProps = Object.assign({}, props);
+  const propsToDelete = ['onClick', 'icoType'];
+  propsToDelete.map((value) => delete iProps[value]);
+
   return (
-    <div className={styles.ico} onClick={(e) => handleClick(e, props.onClick)}>
-      <i className={`fa fa-${props.icoType}`} id={props.id} role="button" aria-hidden="true"/>
+    <div className={styles.ico} onClick={(e) => handleClick(e, props.onClick)} id={props.id}>
+      <i className={`fa fa-${props.icoType}`} id={props.id} role="button" aria-hidden="true"  {...iProps} />
     </div>
   )
 }
@@ -14,7 +18,7 @@ function Ico(props) {
 const handleClick = (e, onClick) => {
   e.preventDefault();
   e.stopPropagation();
-  onClick();
+  onClick(e);
 }
 
 Ico.proptypes = {

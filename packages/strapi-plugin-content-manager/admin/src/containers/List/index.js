@@ -69,7 +69,6 @@ export class List extends React.Component {
   componentDidMount() {
     // Init the view
     this.init(this.props);
-    // this.init(this.props.match.params.slug);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -77,7 +76,6 @@ export class List extends React.Component {
 
     if (locationChanged) {
       this.init(nextProps);
-      // this.init(nextProps.match.params.slug);
     }
 
     if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
@@ -148,10 +146,8 @@ export class List extends React.Component {
 
   toggleModalWarning = (e) => {
     if (!isUndefined(e)) {
-
       e.preventDefault();
       e.stopPropagation();
-
       this.setState({
         target: e.target.id,
       });
@@ -164,6 +160,7 @@ export class List extends React.Component {
     if (!this.props.currentModelName || !this.props.schema) {
       return <div />;
     }
+
     // Detect current model structure from models list
     const currentModel = this.props.models[this.props.currentModelName];
 
