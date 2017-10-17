@@ -29,5 +29,6 @@
   "components.error.attribute.taken": "Ce champ existe déjà",
   "components.error.attribute.key.taken": "Cette valeur existe déjà",
   "components.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
-  "components.error.validation.minSupMax": "Ne peut pas être plus grand"
+  "components.error.validation.minSupMax": "Ne peut pas être plus grand",
+  "components.ErrorBoundary.title": "Une erreur est survenue"
 }

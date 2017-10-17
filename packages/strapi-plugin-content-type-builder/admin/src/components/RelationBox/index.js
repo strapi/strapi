@@ -94,7 +94,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         pluginID="content-type-builder"
       />;
 
-    const dropDown = this.props.dropDownItems ? this.renderDropdownMenu() : '';
+    const dropDown = !isEmpty(this.props.dropDownItems) ? this.renderDropdownMenu() : '';
 
     return (
       <div className={styles.relationBox}>
