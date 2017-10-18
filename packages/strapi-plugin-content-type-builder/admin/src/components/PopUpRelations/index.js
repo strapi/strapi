@@ -71,6 +71,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           {map(take(this.props.form.items, 1), (input, key) => (
             <Input
               key={key}
+              customBootstrapClass="col-md-6 offset-md-6 mr-md-5"
               type={input.type}
               value={get(this.props.values, ['params', input.name.split('.')[1]])}
               name={input.name}

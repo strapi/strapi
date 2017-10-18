@@ -64,6 +64,10 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
   toggleWarning = () => this.setState({ warning: !this.state.warning });
 
   render() {
+    const content = {
+      message: this.props.data.isUsed ? 'settings-manager.popUpWarning.databases.danger.message' : 'settings-manager.popUpWarning.databases.delete.message',
+      confirm: this.props.data.isUsed ? 'settings-manager.popUpWarning.danger.ok.message' : '',
+    };
     const loader = this.state.loader
       ? <Button onClick={this.handleSubmit} className={styles.primary} disabled={this.state.loader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
       : (
@@ -118,11 +122,10 @@ class RowDatabase extends React.Component { // eslint-disable-line react/prefer-
           <PopUpWarning
             isOpen={this.state.warning}
             toggleModal={this.toggleWarning}
-            handleConfirm={this.deleteDatabase}
-            handleConfirmDanger={this.toggleWarning}
-            warningMessage={'popUpWarning.databases.delete.message'}
-            dangerMessage={'popUpWarning.databases.danger.message'}
-            showDanger={this.props.data.isUsed}
+            onConfirm={this.props.data.isUsed ? this.toggleWarning : this.deleteDatabase}
+            content={content}
+            popUpWarningType={this.props.data.isUsed ? 'danger' : 'warning'}
+            onlyConfirmButton={this.props.data.isUsed}
           />
         </div>
       </li>

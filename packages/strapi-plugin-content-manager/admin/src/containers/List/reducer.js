@@ -29,7 +29,7 @@ const initialState = fromJS({
   currentModelName: false,
   currentModelNamePluralized: false,
   loadingRecords: true,
-  records: false,
+  records: [],
   loadingCount: true,
   count: false,
   currentPage: 1,
