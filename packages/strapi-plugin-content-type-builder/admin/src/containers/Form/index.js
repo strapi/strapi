@@ -578,7 +578,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           pluginID="content-type-builder"
-          overrideCustomBootstrapClass={includes(this.props.hash, 'attributenumber')}
+          overrideCustomBootstrapClass={includes(this.props.hash, 'attributenumber') && includes(this.props.hash, 'baseSettings')}
           customBootstrapClass='col-md-6'
         />
       </div>

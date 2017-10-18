@@ -21,7 +21,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     };
   }
 
-  deleteLanguage = () => {
+  handleDeleteLanguage = () => {
     this.setState({ showWarning: !this.state.showWarning });
     this.props.onDeleteLanguage(this.props.name);
   }
@@ -82,8 +82,9 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
           <PopUpWarning
             isOpen={this.state.showWarning}
             toggleModal={this.toggleWarning}
-            handleConfirm={this.deleteLanguage}
-            warningMessage={'popUpWarning.languages.delete.message'}
+            onConfirm={this.handleDeleteLanguage}
+            content={{ message: 'settings-manager.popUpWarning.languages.delete.message' }}
+            popUpWarningType="danger"
           />
         </div>
       </li>

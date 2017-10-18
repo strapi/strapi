@@ -6,7 +6,7 @@
 
 import { fromJS, List } from 'immutable';
 
-import { LOAD_MODELS, LOADED_MODELS, UPDATE_SCHEMA } from './constants';
+import { EMPTY_STORE, LOAD_MODELS, LOADED_MODELS, UPDATE_SCHEMA } from './constants';
 
 const initialState = fromJS({
   loading: true,
@@ -17,6 +17,8 @@ const initialState = fromJS({
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
+    case EMPTY_STORE:
+      return initialState;
     case LOAD_MODELS:
       return state;
     case LOADED_MODELS:

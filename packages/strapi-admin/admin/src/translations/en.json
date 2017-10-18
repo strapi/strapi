@@ -29,5 +29,6 @@
   "components.Input.error.attribute.taken": "This field name already exists",
   "components.Input.error.attribute.key.taken": "This value already exists",
   "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
-  "components.Input.error.validation.minSupMax": "Can't be superior"
+  "components.Input.error.validation.minSupMax": "Can't be superior",
+  "components.ErrorBoundary.title": "Something wen't wrong"
 }

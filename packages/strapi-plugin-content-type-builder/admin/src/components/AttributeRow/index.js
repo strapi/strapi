@@ -10,6 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
+import IcoContainer from 'components/IcoContainer';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
@@ -43,27 +44,16 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     };
   }
 
-  handleEdit = (e) => {
-    e.preventDefault();
-    this.props.onEditAttribute(this.props.row.name);
-  }
+  handleEdit = () => this.props.onEditAttribute(this.props.row.name);
 
   handleDelete = () => {
     this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
   }
 
-  handleShowModalWarning = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ showWarning: !this.state.showWarning });
-  }
+  handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
-  toggleModalWarning = () => {
-    // e.preventDefault();
-    // e.stopPropagation()
-    this.setState({ showWarning: !this.state.showWarning });
-  }
+  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   renderAttributesBox = () => {
     const attributeType = this.props.row.params.type || 'relation';
@@ -77,6 +67,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       : <div><FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.target)}</span></div>;
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
+    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
+
     return (
       <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.handleEdit}>
         <div className={styles.flex}>
@@ -86,14 +78,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
           </div>
           <div className={styles.relationContainer}>{relationType}</div>
           <div className={styles.mainField}></div>
-          <div className={styles.icoContainer}>
-            <div className="ico">
-              <i className="fa fa-pencil ico" onClick={this.handleEdit} role="button" />
-            </div>
-            <div className="ico">
-              <i className="fa fa-trash ico" onClick={this.handleShowModalWarning} role="button" />
-            </div>
-          </div>
+          <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
           isOpen={this.state.showWarning}

@@ -19,7 +19,7 @@ import Home from 'containers/Home';
 import Edit from 'containers/Edit';
 import List from 'containers/List';
 
-import { loadModels, updateSchema } from './actions';
+import { emptyStore, loadModels, updateSchema } from './actions';
 import { makeSelectLoading } from './selectors';
 
 import saga from './sagas';
@@ -41,6 +41,10 @@ class App extends React.Component {
     } else {
       this.props.loadModels();
     }
+  }
+
+  componentWillUnmount() {
+    this.props.emptyStore();
   }
 
   render() {
@@ -65,6 +69,7 @@ App.contextTypes = {
 };
 
 App.propTypes = {
+  emptyStore: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   loadModels: PropTypes.func.isRequired,
   updateSchema: PropTypes.func.isRequired,
@@ -73,6 +78,7 @@ App.propTypes = {
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      emptyStore,
       loadModels,
       updateSchema,
     },

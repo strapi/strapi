@@ -34,6 +34,7 @@ class EditForm extends React.Component {
       case 'float':
       case 'integer':
       case 'bigint':
+      case 'decimal':
         return 'number';
       default:
         return 'text';

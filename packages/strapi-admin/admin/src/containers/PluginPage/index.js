@@ -9,7 +9,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createSelector } from 'reselect';
+
 import BlockerComponent from 'components/BlockerComponent';
+import ErrorBoundary from 'components/ErrorBoundary';
+
 import { selectPlugins } from 'containers/App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -33,7 +36,11 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
           Elem = plugin.blockerComponent;
         }
 
-        return <Elem key={plugin.id} {...this.props} {...blockerComponentProps} />;
+        return (
+          <ErrorBoundary key={plugin.id}>            
+            <Elem {...this.props} {...blockerComponentProps} />
+          </ErrorBoundary>
+        );
       }
     });
 

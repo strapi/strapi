@@ -58,10 +58,113 @@ const Foo = () => {
       {buttons.map((buttonProps) => <Button {...buttonProps} key={buttonProps.label})} />}
     </div>
   );
+
+  // Same as
+  // return (
+  //  <div className={styles.foo}>
+  //    <Button label="myPlugin.button.label" labelValues={{ foo: 'Bar' }} primaryAddShape onClick={() => console.log('Click')} />
+  //  </div>
+  // );
+
 }
 
 // Will display a primaryAddShape button with label: 'Add a new Bar'
 export default Button;
+```
+
+***
+
+## Ico
+
+Ico components that works with fontAwesome.
+
+### Usage
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| `icoType` | string | no (default: `trash`) | fontAwesome ico name. Ex: <Ico icoType="pencil" /> |
+| `onClick` | func | no | Function executed onClick. |
+
+### Example
+
+```js
+import React from 'react';
+import Ico from 'components/Ico';
+import PopUpWarning from 'components/PopUpWarning';
+import styles from 'styles';
+
+class FooPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { showModal: false };
+  }
+
+  handleClick = () => this.setState({ showModal: true });
+
+  render () {
+    return (
+      <div className={styles.fooPage}>
+        <Ico icoType="trash" onClick={this.handleClick} />
+        <PopUpWarning
+          isOpen={this.state.showModal}
+          onConfirm={() => this.setState({ showModal: false })}
+          toggleModal={() => this.setState({ showModal: false })}
+        />
+      </div>
+    );
+  }
+}
+
+export default FooPage;
+```
+
+***
+
+## IcoContainer
+
+Container containing icons, generally used for editing or deleting data.
+
+### Usage
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| icons | array | no | Array containing icons' props. |
+
+### Example
+
+```js
+import React from 'react';
+import IcoContainer from 'components/IcoContainer';
+import PopUpWarning from 'components/PopUpWarning';
+import styles from 'styles';
+
+class FooPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { showModal: false };
+  }
+
+  handleClick = () => this.setState({ showModal: true });
+
+  render() {
+    const icons = [
+      { icoType: 'pencil', onClick: () => console.log('click on pencil icon') },
+      { icoType: 'trash',  onClick: this.handleClick },
+    ];
+
+    return (
+      <div className={styles.fooPage}>
+        <IcoContainer icons={icons} />
+        <PopUpWarning
+          isOpen={this.state.showModal}
+          onConfirm={() => this.setState({ showModal: false })}
+          toggleModal={() => this.setState({ showModal: false })}
+        />
+      </div>
+    );
+  }
+}
+
+export default FooPage;
 ```
 
 ***
@@ -85,16 +188,15 @@ Strapi provides a built-in input library which includes :
 | `didCheckErrors` | bool | no | Use this props to display errors after submitting a form. Ex: `<Input {...this.props} didCheckErrors={this.state.error} />` |
 | `disabled` | bool | no | Disable the input. Ex: `<Input {...this.props} disabled />` |
 | `errors` | array | no | Allows to display custom error messages. Ex: `<Input {...this.props} errors={[{ id: 'The value is not correct' }]} />` |
-| `handleBlur` | func or bool  | no | Overrides the default onBlur behavior. If bool passed to the component it will disabled the input validations checking. |
-| `handleChange` | func | yes | Sets your reducer state. |
-| `handFocus` | func | no | Adds an onFocus event to the input. |
 | `inputDescription` | string | no | Allows to add an input description that is displayed like [bootstrap](https://v4-alpha.getbootstrap.com/components/forms/#defining-states). |
 | `label` | string | yes | Displays the input's label with i18n. |
 | `linkContent` | object | no | Allows to display a link within the input's description. Ex: {% raw %} ``` <Input {...this.props} linkContent={{ description: 'check out our', link: 'tutorial video' }} />``` {% endraw %} |
 | `name` | string | yes | The key to update your reducer. |
 | `noErrorsDescription` | bool | no | Prevents from displaying built-in errors. |
+| `onBlur` | func or bool  | no | Overrides the default onBlur behavior. If bool passed to the component it will disabled the input validations checking. |
+| `onChange` | func | yes | Sets your reducer state. |
+| `onFocus` | func | no | Adds an onFocus event to the input. |
 | `placeholder` | string | no | Allows to set a placeholder. |
-| `pluginId` | string | no | Use to display name, placeholder, etc. with i18n. |
 | `selectOptions` | array | no | Options for the select. |
 |  `tabIndex` | string | no | Sets the order in which the inputs are focused on tab key press. |
 | `title` | string | no | This props can only be used for checkboxes, it allows to add a title on top of the input, the label will be on the right side of the checkbox. |
@@ -103,6 +205,7 @@ Strapi provides a built-in input library which includes :
 
 ### Example
 
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
 ```js
 import React from 'react';
 // Make sure you don't have a component called Input inside your ./components folder
@@ -112,7 +215,6 @@ import Input from 'components/Input';
 class FooPage extends React.Component {
   constructor(props) {
     super(props);
-
     this.state {
       data: {
         foo: 'bar',
@@ -124,7 +226,6 @@ class FooPage extends React.Component {
 
   handleChange = ({ target }) => {
     const value = target.type === 'number' ? Number(target.value) : target.value;
-
     const error = target.value.length === 0;
 
     if (error) {
@@ -136,13 +237,13 @@ class FooPage extends React.Component {
 
   render() {
     return (
-      <div className={styles.foo}>
+      <div className={styles.fooPage}>
         <Input
           type="string"
           value={this.state.data.foo}
           label="This is a string input"
           name="foo"
-          handleChange={this.handleChange}
+          onChange={this.handleChange}
           validations={{ required: true }}
           didCheckErrors={this.state.error}
         />
@@ -150,6 +251,59 @@ class FooPage extends React.Component {
     );
   }
 }
+
+// ...
+
+export default FooPage;
+```
+
+#### Example with propety linkContent and i18n
+
+**Path —** `./plugins/my-plugin/admin/src/translations/en.json`.
+```json
+{
+  "form.input.inputDescription": "Content type name should be singular",
+  "form.input.label": "Name",
+  "form.input.linkContent.description": "check out our documentation"
+}
+```
+
+**Path —** `./plugins/my-plugin/admin/src/translations/fr.json`.
+```json
+{
+  "form.input.inputDescription": "Le nom des modèles doit être au singulier",
+  "form.input.label": "Nom",
+  "form.input.linkContent.description": "regardez la documentation."
+}
+```
+
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
+```js
+import React from 'react';
+
+// ...
+
+class FooPage extends React.Component {
+  // ...
+  render () {
+    return (
+      <div className={styles.fooPage}>
+        <Input
+          didCheckErrors={this.state.error}
+          inputDescription="my-plugin.form.input.inputDescription"
+          label="my-plugin.form.input.label"
+          linkContent={{ link: 'https://strapi.io/documentation/', description: 'my-plugin.form.input.linkContent.description' }}
+          onChange={this.handleChange}
+          type="string"
+          validations={{ required: true }}
+          value={this.state.data.foo}
+        />
+      </div>
+    );
+  }
+}
+
+// ...
 
 export default FooPage;
 ```
@@ -166,9 +320,10 @@ PopUp warning library based on [reactstrap](https://reactstrap.github.io/compone
 
 | Property | Type | Required | Description |
 | -------- | ---- | -------- | ----------- |
-| bodyMessage | string | no | Body message of the pop up (works with i18n). |
-| handleConfirm | func | yes | Function executed when the user clicks on the `Confirm button`. |
+| content | object | no | Used to set the confirm button, cancel button, title, body messages. |
+| onConfirm | func | yes | Function executed when the user clicks on the `Confirm button`. |
 | isOpen | bool | yes | Show or hide the popup. |
+| onlyConfirmButton | bool | yes | Display only the confirm button (`primary`) with `width: 100%`. |
 | popUpWarningType | string | yes | Sets the popup body icon. Available types: `danger`, `info`, `notFound`, `success`, `warning` |
 | toggleModal | func | yes | Function to toggle the modal. |
 
@@ -178,16 +333,20 @@ PopUp warning library based on [reactstrap](https://reactstrap.github.io/compone
 **Path —** `./plugins/my-plugin/admin/src/translations/en.json`.
 ```json
 {
-  "button.label": "Click me",
-  "popup.danger.message": "Are you sure you want to delete this item?"
+  "popup.danger.button.cancel": "Cancel...",
+  "popup.danger.button.confirm": "Confirm../",
+  "popup.danger.message": "Are you sure you want to delete this item?!",
+  "popup.danger.title": "Please confirm...."
 }
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/translations/fr.json`.
 ```json
 {
-  "button.label": "Cliquez",
-  "popup.danger.message": "Êtes-vous certain de vouloir supprimer ce message?"
+  "popup.danger.button.cancel": "Annuler...",
+  "popup.danger.button.label": "Je confirme...",
+  "popup.danger.message": "Êtes-vous certain de vouloir supprimer ce message?!",
+  "popup.danger.title": "Merci de confirmer..."
 }
 ```
 
@@ -214,17 +373,37 @@ class FooPage extends React.Component {
   }
 
   render() {
-    return(
+    const popupContent = {
+      cancel: 'my-plugin.popup.danger.button.cancel',
+      confirm: 'my-plugin.popup.danger.button.confirm',
+      message: 'my-plugin.popup.danger.message',
+      title: 'my-plugin.popup.danger.title',
+    };
+
+    return (
       <div>
-        <Button primary handleClick={() => this.setState({ isOpen: !this.state.isOpen })} label="my-plugin.button.label" />
+        <Button primary onClick={() => this.setState({ isOpen: !this.state.isOpen })} label="my-plugin.button.label" />
         <PopUpWarning
-          bodyMessage="my-plugin.popup.danger.message"
-          handleConfirm={this.handlePopUpConfirm}
+          content={popupContent}
+          onConfirm={this.handlePopUpConfirm}
           toggleModal={() => this.setState({ isOpen: !this.state.isOpen })}
           popUpWarningType="danger"
         />
       </div>
     );
+
+    // Equivalent without custom messages
+
+    // return (
+    //   <div>
+    //     <Button primary onClick={() => this.setState({ isOpen: !this.state.isOpen })} label="my-plugin.button.label" />
+    //     <PopUpWarning
+    //       onConfirm={this.handlePopUpConfirm}
+    //       toggleModal={() => this.setState({ isOpen: !this.state.isOpen })}
+    //       popUpWarningType="danger"
+    //     />
+    //   </div>
+    // );
   }
 }
 
