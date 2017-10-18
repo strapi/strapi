@@ -18,11 +18,7 @@ const initialState = fromJS({
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case EMPTY_STORE:
-      return state
-        .set('loading', true)
-        .set('models', false)
-        .set('schema', false)
-        .set('formValidations', List());
+      return initialState;
     case LOAD_MODELS:
       return state;
     case LOADED_MODELS:

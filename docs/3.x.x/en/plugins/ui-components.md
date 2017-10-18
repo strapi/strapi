@@ -76,13 +76,13 @@ export default Button;
 
 ## Ico
 
-Ico components that works with fontAwesone.
+Ico components that works with fontAwesome.
 
 ### Usage
 
 | Property | Type | Required | Description |
 | -------- | ---- | -------- | ----------- |
-| `icoType` | string | no (default: `trash`) | fontAwesone ico name. Ex: <Ico icoType="pencil" /> |
+| `icoType` | string | no (default: `trash`) | fontAwesome ico name. Ex: <Ico icoType="pencil" /> |
 | `onClick` | func | no | Function executed onClick. |
 
 ### Example
@@ -122,7 +122,7 @@ export default FooPage;
 
 ## IcoContainer
 
-Container containing two icons, generally used for editing or deleting data.
+Container containing icons, generally used for editing or deleting data.
 
 ### Usage
 | Property | Type | Required | Description |
@@ -374,10 +374,10 @@ class FooPage extends React.Component {
 
   render() {
     const popupContent = {
-      cancel: "my-plugin.popup.danger.button.cancel",
-      confirm: "my-plugin.popup.danger.button.confirm",
-      message: "my-plugin.popup.danger.message",
-      title: "my-plugin.popup.danger.title",
+      cancel: 'my-plugin.popup.danger.button.cancel',
+      confirm: 'my-plugin.popup.danger.button.confirm',
+      message: 'my-plugin.popup.danger.message',
+      title: 'my-plugin.popup.danger.title',
     };
 
     return (
