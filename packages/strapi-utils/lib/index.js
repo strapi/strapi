@@ -7,12 +7,11 @@
 module.exports = {
   cli: require('./cli'),
   commander: require('./commander'),
-  dictionary: require('./dictionary'),
   finder: require('./finder'),
   joijson: require('./joi-json'),
   json: require('./json'),
   knex: require('./knex'),
-  logger: require('./winston'),
+  logger: require('./logger'),
   models: require('./models'),
   regex: require('./regex')
 };

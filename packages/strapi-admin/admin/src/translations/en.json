@@ -1,0 +1,19 @@
+{
+  "app.components.ComingSoonPage.comingSoon": "Coming soon",
+  "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
+  "app.components.HomePage.welcome": "Welcome to the home page",
+  "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
+  "app.components.LeftMenuLinkContainer.configuration": "Configuration",
+  "app.components.LeftMenuLinkContainer.general": "General",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Install new plugin",
+  "app.components.LeftMenuLinkContainer.listPlugins": "List plugins",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
+  "app.components.LeftMenuLinkContainer.plugins": "Plugins",
+  "app.components.NotFoundPage.description": "Not Found",
+  "app.components.NotFoundPage.back": "Back to homepage",
+  "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
+  "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
+  "components.ProductionBlocker.header": "This plugin is only available in development.",
+  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments."
+
+}

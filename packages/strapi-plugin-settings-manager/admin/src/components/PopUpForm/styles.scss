@@ -1,0 +1,32 @@
+.popUpForm { /* stylelint-disable */
+
+}
+
+.padded {
+  padding: 0 15px 0 15px;
+}
+
+.defaultConnection {
+  position: absolute;
+  bottom: -5.5rem;
+  left: 3rem;
+  display: flex;
+  color: #27B710;
+  cursor: pointer;
+}
+
+.rounded {
+  margin-top: .5rem;
+  margin-left: 1rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  padding-left: .1rem;
+  padding-bottom: .1rem;
+  border: 1px solid #27B710;
+  font-size: .4rem;
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  align-content: center;
+}

@@ -43,6 +43,7 @@ program
 // `$ strapi new`
 program
   .command('new')
+  .option('-d, --dev', 'Development mode')
   .description('create a new application ')
   .action(require('./strapi-new'));
 
@@ -51,12 +52,6 @@ program
   .command('start')
   .description('start your Strapi application')
   .action(require('./strapi-start'));
-
-// `$ strapi console`
-// program
-//   .command('console')
-//   .description('open the Strapi framework console')
-//   .action(require('./strapi-console'));
 
 // `$ strapi generate:api`
 program
@@ -115,18 +110,6 @@ program
   .description('generate a basic plugin')
     .action(require('./strapi-generate'));
 
-// `$ strapi generate:hook`
-program
-  .command('generate:hook <id>')
-  .description('generate an installable hook')
-  .action(require('./strapi-generate'));
-
-// `$ strapi generate:generator`
-program
-  .command('generate:generator <id>')
-  .description('generate a custom generator')
-  .action(require('./strapi-generate'));
-
 // `$ strapi install`
 program
   .command('install <plugin>')
@@ -139,36 +122,6 @@ program
   .command('uninstall <plugin>')
   .description('uninstall a Strapi plugin')
   .action(require('./strapi-uninstall'));
-
-// `$ strapi migrate:make`
-program
-  .command('migrate:make')
-  .description('make migrations for a connection')
-  .action(require('./strapi-migrate-make'));
-
-// `$ strapi migrate:run`
-program
-  .command('migrate:run')
-  .description('run migrations for a connection')
-  .action(require('./strapi-migrate-run'));
-
-// `$ strapi migrate:rollback`
-program
-  .command('migrate:rollback')
-  .description('rollback the latest batch of migrations for a connection')
-  .action(require('./strapi-migrate-rollback'));
-
-// `$ strapi config`
-program
-  .command('config')
-  .description('extend the Strapi framework with custom generators')
-  .action(require('./strapi-config'));
-
-// `$ strapi update`
-program
-  .command('update')
-  .description('pull the latest updates of your custom generators')
-  .action(require('./strapi-update'));
 
 /**
  * Normalize help argument

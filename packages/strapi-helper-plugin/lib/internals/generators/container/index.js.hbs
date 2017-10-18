@@ -5,36 +5,31 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 {{#if wantHeaders}}
-import Helmet from 'react-helmet';
-{{/if}}
-{{#if wantActionsAndReducer}}
-import select{{properCase name}} from './selectors';
+import { Helmet } from 'react-helmet';
 {{/if}}
 {{#if wantMessages}}
 import { FormattedMessage } from 'react-intl';
+{{/if}}
+{{#if wantActionsAndReducer}}
+import { createStructuredSelector } from 'reselect';
+import makeSelect{{properCase name}} from './selectors';
+{{/if}}
+{{#if wantMessages}}
 import messages from './messages';
 {{/if}}
-{{#if wantCSS}}
-import styles from './styles.scss';
-{{/if}}
 
-export class {{ properCase name }} extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class {{ properCase name }} extends React.{{{ component }}} { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      {{#if wantCSS}}
-      <div className={{curly true}}styles.{{ camelCase name }}{{curly}}>
-      {{else}}
       <div>
-      {{/if}}
       {{#if wantHeaders}}
-      <Helmet
-        title="{{properCase name}}"
-        meta={{curly true}}[
-          {{curly true}} name: 'description', content: 'Description of {{properCase name}}' {{curly}},
-        ]{{curly}}
-      />
+        <Helmet>
+          <title>{{properCase name}}</title>
+          <meta name="description" content="Description of {{properCase name}}" />
+        </Helmet>
       {{/if}}
       {{#if wantMessages}}
         <FormattedMessage {...messages.header} />
@@ -44,8 +39,14 @@ export class {{ properCase name }} extends React.Component { // eslint-disable-l
   }
 }
 
+{{ properCase name }}.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+};
+
 {{#if wantActionsAndReducer}}
-const mapStateToProps = select{{properCase name}}();
+const mapStateToProps = createStructuredSelector({
+  {{name}}: makeSelect{{properCase name}}(),
+});
 {{/if}}
 
 function mapDispatchToProps(dispatch) {
@@ -57,5 +58,5 @@ function mapDispatchToProps(dispatch) {
 {{#if wantActionsAndReducer}}
 export default connect(mapStateToProps, mapDispatchToProps)({{ properCase name }});
 {{else}}
-export default connect(mapDispatchToProps)({{ properCase name }});
+export default connect(null, mapDispatchToProps)({{ properCase name }});
 {{/if}}

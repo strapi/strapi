@@ -92,6 +92,8 @@ results
 build
 node_modules
 .node_history
+package-lock.json
+**/package-lock.json
 
 
 ############################
@@ -101,6 +103,12 @@ node_modules
 testApp
 coverage
 
+
+############################
+# Documentation
+############################
+
+_book
 
 ############################
 # Builds

@@ -1,6 +1,6 @@
 {
   "name": "strapi-ejs",
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.6.3",
   "description": "EJS hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,7 +14,7 @@
   "main": "./lib",
   "dependencies": {
     "co": "^4.6.0",
-    "koa-ejs": "^3.0.0"
+    "koa-ejs": "^4.1.0"
   },
   "strapi": {
     "isHook": true

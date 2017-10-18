@@ -1,23 +1,10 @@
 {
   "host": "localhost",
   "port": 1337,
-  "frontendUrl": "",
-  "reload": {
-    "timeout": 1000,
-    "workers": 0
+  "autoReload": {
+    "enabled": true
   },
-  "logger": true,
-  "parser": {
-    "encode": "utf-8",
-    "formLimit": "56kb",
-    "jsonLimit": "1mb",
-    "strict": true,
-    "extendTypes": {
-      "json": [
-        "application/x-javascript"
-      ]
-    }
-  },
-  "gzip": true,
-  "responseTime": true
+  "cron": {
+    "enabled": false
+  }
 }

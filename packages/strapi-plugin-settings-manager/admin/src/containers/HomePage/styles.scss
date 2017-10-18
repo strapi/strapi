@@ -1,0 +1,25 @@
+.home { /* stylelint-disable */
+  background: rgba(14,22,34,0.02);
+  min-height: calc(100vh - 6rem); // TODO shoukd be variable
+  padding: 0;
+}
+
+.left {
+  opacity: 0.3;
+}
+
+.flagContainer {
+  margin-left: 1rem;
+  background-position: 0;
+  > span {
+    margin-left: 3rem;
+  }
+}
+
+.modalLanguageLabel {
+  padding-bottom: 10px;
+}
+
+.popUpSpacer {
+  height: 1rem;
+}

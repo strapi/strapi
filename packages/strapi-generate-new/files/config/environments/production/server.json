@@ -1,18 +1,10 @@
 {
-  "frontendUrl": "",
-  "reload": false,
-  "logger": true,
-  "parser": {
-    "encode": "utf-8",
-    "formLimit": "56kb",
-    "jsonLimit": "1mb",
-    "strict": true,
-    "extendTypes": {
-      "json": [
-        "application/x-javascript"
-      ]
-    }
+  "host": "localhost",
+  "port": 1337,
+  "autoReload": {
+    "enabled": false
   },
-  "gzip": true,
-  "responseTime": true
+  "cron": {
+    "enabled": false
+  }
 }

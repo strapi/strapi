@@ -16,7 +16,9 @@ const _ = require('lodash');
 
 module.exports = scope => {
   function generateRoutes() {
-    return {
+    const tokenID = scope.args.tpl && scope.args.tpl !== 'mongoose' ? 'id' : '_id';
+
+    const routes = {
       routes: [{
         method: 'GET',
         path: '/' + scope.humanizeId,
@@ -26,7 +28,7 @@ module.exports = scope => {
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:' + tokenID,
         handler: scope.globalID + '.findOne',
         config: {
           policies: []
@@ -40,21 +42,49 @@ module.exports = scope => {
         }
       }, {
         method: 'PUT',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:' + tokenID,
         handler: scope.globalID + '.update',
         config: {
           policies: []
         }
       }, {
         method: 'DELETE',
-        path: '/' + scope.humanizeId + '/:id',
+        path: '/' + scope.humanizeId + '/:' + tokenID,
         handler: scope.globalID + '.destroy',
         config: {
           policies: []
         }
       }]
     };
+
+    if (scope.args.tpl && scope.args.tpl !== 'mongoose') {
+      routes.routes.push({
+        method: 'POST',
+        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        handler: scope.globalID + '.createRelation',
+        config: {
+          policies: []
+        }
+      }, {
+        method: 'PUT',
+        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        handler: scope.globalID + '.updateRelation',
+        config: {
+          policies: []
+        }
+      }, {
+        method: 'DELETE',
+        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        handler: scope.globalID + '.destroyRelation',
+        config: {
+          policies: []
+        }
+      });
+    }
+
+    return routes;
   }
+
 
   // We have to delete current file
   if (!_.isEmpty(scope.parentId)) {

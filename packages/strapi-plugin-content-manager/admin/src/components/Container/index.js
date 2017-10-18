@@ -5,26 +5,23 @@
  */
 
 import React from 'react';
-
-import styles from './styles.scss';
+import PropTypes from 'prop-types';
 
 class Container extends React.Component {
   render() {
     return (
-      <div className={styles.container}>
-        <div className={`row row-eq-height ${styles.containerContent}`}>
-          {this.props.children}
-        </div>
+      <div className={`container`}>
+        {this.props.children}
       </div>
     );
   }
 }
 
 Container.propTypes = {
-  children: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.array,
-  ]),
+  children: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]).isRequired,
 };
 
 export default Container;

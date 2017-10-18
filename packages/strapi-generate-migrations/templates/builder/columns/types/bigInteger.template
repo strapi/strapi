@@ -1,6 +1,0 @@
-
-// In MySQL or PostgreSQL, adds a "bigint" column named `<%= attribute %>`,
-// otherwise adds a normal "integer" named `<%= attribute %>`.
-// Note that "bigint" data is returned as a string in queries because JavaScript
-// may be unable to parse them without loss of precision.
-table.bigInteger('<%= attribute %>')

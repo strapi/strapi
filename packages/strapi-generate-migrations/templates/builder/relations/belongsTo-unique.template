@@ -1,4 +1,0 @@
-
-// Make a "one-to-one" relationship between `<%= attribute %>` and the `<%= details.column %>`
-// column from the `<%= details.model %>` table.
-table.integer('<%= attribute %>').unsigned().unique().references('<%= details.model %>.<%= details.column %>')

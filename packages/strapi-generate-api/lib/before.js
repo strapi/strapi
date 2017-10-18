@@ -69,23 +69,31 @@ module.exports = (scope, cb) => {
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
-  // Map attributes and split them.
+  // Map attributes and split them for CLI.
   scope.attributes = scope.args.attributes.map((attribute) => {
-    const parts = attribute.split(':');
+    if (_.isString(attribute)) {
+      const parts = attribute.split(':');
 
-    parts[1] = parts[1] || 'string';
+      parts[1] = parts[1] || 'string';
 
-    // Handle invalid attributes.
-    if (!parts[1] || !parts[0]) {
-      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
-      return;
+      // Handle invalid attributes.
+      if (!parts[1] || !parts[0]) {
+        invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+        return;
+      }
+
+      return {
+        name: _.trim(_.deburr(_.lowerCase(parts[0]).toLowerCase())),
+        params: {
+          type: _.trim(_.deburr(_.lowerCase(parts[1]).toLowerCase()))
+        }
+      };
+    } else {
+      return _.has(attribute, 'params.type') ? attribute : undefined;
     }
-
-    return {
-      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
-      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
-    };
   });
+  
+  scope.attributes = _.compact(scope.attributes);
 
   // Handle invalid action arguments.
   // Send back invalidActions.
@@ -104,13 +112,19 @@ module.exports = (scope, cb) => {
     const compiled = _.template(attributeTemplate);
     return _.trimEnd(_.unescape(compiled({
       name: attribute.name,
-      type: attribute.type
+      params: attribute.params
     })));
   }).join(',\n');
 
+  // Set collectionName
+  scope.collectionName = _.has(scope.args, 'collectionName') ? scope.args.collectionName : undefined;
+
+  // Set description
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
+
   // Get default connection
   try {
-    scope.connection = JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'databases.json'))).defaultConnection || '';
+    scope.connection = _.get(scope.args, 'connection') || JSON.parse(fs.readFileSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json'))).defaultConnection || '';
   } catch (err) {
     return cb.invalid(err);
   }

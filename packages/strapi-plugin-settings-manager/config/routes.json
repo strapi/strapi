@@ -1,0 +1,116 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/menu",
+      "handler": "SettingsManager.menu",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/environments",
+      "handler": "SettingsManager.environments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/languages",
+      "handler": "SettingsManager.languages",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/configurations/languages",
+      "handler": "SettingsManager.createLanguage",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/configurations/languages/:name",
+      "handler": "SettingsManager.deleteLanguage",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/database/model",
+      "handler": "SettingsManager.databaseModel",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/databases/:env",
+      "handler": "SettingsManager.databases",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/databases/:name?/:env?",
+      "handler": "SettingsManager.database",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/configurations/databases/:name/:env",
+      "handler": "SettingsManager.updateDatabase",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/configurations/databases/:env",
+      "handler": "SettingsManager.createDatabase",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/configurations/databases/:name/:env",
+      "handler": "SettingsManager.deleteDatabase",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/configurations/:slug/:env?",
+      "handler": "SettingsManager.get",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/configurations/:slug/:env?",
+      "handler": "SettingsManager.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/autoReload",
+      "handler": "SettingsManager.autoReload",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

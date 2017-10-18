@@ -7,12 +7,24 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { syncHistoryWithStore } from 'react-router-redux';
+
 import App from 'containers/App'; // eslint-disable-line
-import { selectLocationState } from 'containers/App/selectors'; // eslint-disable-line
-import configureStore from 'store';
-import createRoutes from 'routes';
+
+import configureStore from './store';
 import { translationMessages } from './i18n';
+
+const tryRequire = (bootstrap = false) => {
+  try {
+    const config = bootstrap ? require('bootstrap').default : require('requirements').default;
+    return config;
+  } catch(err) {
+    return null;
+  }
+};
+
+const bootstrap = tryRequire(true);
+const pluginRequirements = tryRequire();
+
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -25,18 +37,8 @@ const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
 const router = window.Strapi.router;
 
-// Create redux store with history
-// this uses the singleton browserHistory provided by react-router
-// Optionally, this could be changed to leverage a created history
-// e.g. `const browserHistory = useRouterHistory(createBrowserHistory)();`
+// Create redux store with Strapi admin history
 const store = configureStore({}, window.Strapi.router);
-
-// Sync history and store, as the react-router-redux reducer
-// is under the non-default key ("routing"), selectLocationState
-// must be provided for resolving how to retrieve the "route" in the state
-syncHistoryWithStore(window.Strapi.router, store, {
-  selectLocationState: selectLocationState(),
-});
 
 // Define the plugin root component
 function Comp(props) {
@@ -46,11 +48,6 @@ function Comp(props) {
     </Provider>
   );
 }
-
-// Add contextTypes to get access to the admin router
-Comp.contextTypes = {
-  router: React.PropTypes.object.isRequired,
-};
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -68,17 +65,20 @@ if (module.hot) {
   });
 }
 
-// Register the plugin
+// Register the plugin.
 window.Strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
   leftMenuLinks: [],
   mainComponent: Comp,
-  routes: createRoutes(store),
   translationMessages,
+  bootstrap,
+  pluginRequirements,
+  preventComponentRendering: false,
+  blockerComponent: null,
+  blockerComponentProps: {},
 });
-
 
 // Export store
 export { store, apiUrl, pluginId, pluginName, pluginDescription, router };

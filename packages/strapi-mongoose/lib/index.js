@@ -6,14 +6,14 @@
 
 // Public node modules.
 const _ = require('lodash');
-const mongoose = require('mongoose');
+const Mongoose = require('mongoose').Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
 // Local helpers.
 const utils = require('./utils/');
 
 // Strapi helpers for models.
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, logger }  = require('strapi-utils');
 
 /**
  * Bookshelf hook
@@ -46,29 +46,33 @@ module.exports = function (strapi) {
       }
 
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
-        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.hooks.mongoose.defaults);
+        const instance = new Mongoose();
+        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
-          mongoose.connect(`mongodb://${host}:${port}/${database}`);
+          instance.connect(`mongodb://${host}:${port}/${database}`, {
+            useMongoClient: true
+          });
         } else {
-          mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`);
+          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
+            useMongoClient: true
+          });
         }
 
-        const db = mongoose.connection;
-
         // Handle error
-        db.on('error', error => {
+        instance.connection.on('error', error => {
+          if (error.message.indexOf(`:${port}`)) {
+            return cb('Make sure your MongoDB database is running...');
+          }
+
           cb(error);
         });
 
         // Handle success
-        db.on('open', () => {
-          // Initialize collections
-          _.set(strapi, 'mongoose.collections', {});
-
+        instance.connection.on('open', () => {
           // Select models concerned by this connection
-          const models = _.pickBy(strapi.models, {connection: connectionName});
+          const models = _.pickBy(strapi.models, { connection: connectionName });
 
           // Return callback if there is no model
           if (_.isEmpty(models)) {
@@ -78,7 +82,7 @@ module.exports = function (strapi) {
           const loadedAttributes = _.after(_.size(models), () => {
             _.forEach(models, (definition, model) => {
               try {
-                let collection = strapi.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
+                let collection = strapi.config.hook.settings.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
 
                 // Set the default values to model settings.
                 _.defaults(definition, {
@@ -134,16 +138,16 @@ module.exports = function (strapi) {
                   virtuals: true
                 });
 
-                global[definition.globalName] = mongoose.model(definition.globalName, collection.schema);
+                global[definition.globalName] = instance.model(definition.globalName, collection.schema);
 
                 // Expose ORM functions through the `strapi.models` object.
-                strapi.models[model] = _.assign(mongoose.model(definition.globalName), strapi.models[model]);
+                strapi.models[model] = _.assign(instance.model(definition.globalName), strapi.models[model]);
 
                 // Push model to strapi global variables.
                 collection = global[definition.globalName];
 
                 // Push attributes to be aware of model schema.
-                collection._attributes = definition.attributes;
+                strapi.models[model]._attributes = definition.attributes;
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -183,7 +187,7 @@ module.exports = function (strapi) {
 
             if (_.isEmpty(definition.attributes)) {
               // Generate empty schema
-              _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema({}));
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema({}));
 
               return loadedAttributes();
             }
@@ -192,7 +196,7 @@ module.exports = function (strapi) {
             // all attributes for relationships-- see below.
             const done = _.after(_.size(definition.attributes), () => {
               // Generate schema without virtual populate
-              _.set(strapi.mongoose.collections, mongooseUtils.toCollectionName(definition.globalName) + '.schema', new mongoose.Schema(_.omitBy(definition.loadedModel, model => {
+              _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema(_.omitBy(definition.loadedModel, model => {
                 return model.type === 'virtual';
               })));
 
@@ -202,13 +206,13 @@ module.exports = function (strapi) {
             // Add every relationships to the loaded model for Bookshelf.
             // Basic attributes don't need this-- only relations.
             _.forEach(definition.attributes, (details, name) => {
-              const verbose = _.get(utilsModels.getNature(details, name), 'verbose') || '';
+              const verbose = _.get(utilsModels.getNature(details, name, undefined, model.toLowerCase()), 'verbose') || '';
 
               // Build associations key
-              if (!_.isEmpty(verbose)) {
-                utilsModels.defineAssociations(globalName, definition, details, name);
-              } else {
-                definition.loadedModel[name].type = utils(mongoose).convertType(details.type);
+              utilsModels.defineAssociations(model, definition, details, name);
+
+              if (_.isEmpty(verbose)) {
+                definition.loadedModel[name].type = utils(instance).convertType(details.type);
               }
 
               let FK;
@@ -216,7 +220,7 @@ module.exports = function (strapi) {
               switch (verbose) {
                 case 'hasOne':
                   definition.loadedModel[name] = {
-                    type: mongoose.Schema.Types.ObjectId,
+                    type: instance.Schema.Types.ObjectId,
                     ref: _.capitalize(details.model)
                   };
                   break;
@@ -227,11 +231,15 @@ module.exports = function (strapi) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.collection),
-                      via: FK.via
+                      via: FK.via,
+                      justOne: false
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.collection)
                     }];
                   }
@@ -239,32 +247,40 @@ module.exports = function (strapi) {
                 case 'belongsTo':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && FK.nature === 'oneToOne') {
+                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'oneToMany') {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.model),
                       via: FK.via,
                       justOne: true
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = {
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.model)
                     };
                   }
+
                   break;
                 case 'belongsToMany':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && _.isUndefined(details.via)) {
+                  // One-side of the relationship has to be a virtual field to be bidirectional.
+                  if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(FK.collection),
-                      via: utilsModels.getVia(name, details)
+                      via: FK.via
                     };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                   } else {
                     definition.loadedModel[name] = [{
-                      type: mongoose.Schema.Types.ObjectId,
+                      type: instance.Schema.Types.ObjectId,
                       ref: _.capitalize(details.collection)
                     }];
                   }
@@ -278,6 +294,54 @@ module.exports = function (strapi) {
           });
         });
       });
+    },
+
+    getQueryParams: (value, type, key) => {
+      const result = {};
+
+      switch (type) {
+        case '=':
+          result.key = `where.${key}`;
+          result.value = value;
+          break;
+        case '_ne':
+          result.key = `where.${key}.$ne`;
+          result.value = value;
+          break;
+        case '_lt':
+          result.key = `where.${key}.$lt`;
+          result.value = value;
+          break;
+        case '_gt':
+          result.key = `where.${key}.$gt`;
+          result.value = value;
+          break;
+        case '_lte':
+          result.key = `where.${key}.$lte`;
+          result.value = value;
+          break;
+        case '_gte':
+          result.key = `where.${key}.$gte`;
+          result.value = value;
+          break;
+        case '_sort':
+          result.key = `sort`;
+          result.value = (value === 'desc') ? '-' : '';
+          result.value += key;
+          break;
+        case '_start':
+          result.key = `start`;
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = `limit`;
+          result.value = parseFloat(value);
+          break;
+        default:
+          result = undefined;
+      }
+
+      return result;
     }
   };
 

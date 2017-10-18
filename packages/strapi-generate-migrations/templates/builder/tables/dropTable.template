@@ -1,6 +1,0 @@
-
-/**
- * Delete the `<%= tableName %>` table.
- */
-
-connection.schema.dropTable('<%= tableName %>'),

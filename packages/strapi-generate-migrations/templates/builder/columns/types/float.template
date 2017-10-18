@@ -1,3 +1,0 @@
-
-// "float" column named `<%= attribute %>` with optional precision (defaults to 8) and scale (defaults to 2).
-table.float('<%= attribute %>', <%= details.precision || 8 %>, <%= details.scale || 2 %>)

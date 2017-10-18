@@ -2,7 +2,8 @@
   "parser": "babel-eslint",
   "extends": [
     "airbnb",
-    "prettier"
+    "prettier",
+    "eslint:recommended"
   ],
   "env": {
     "browser": true,
@@ -16,9 +17,10 @@
     "jsx-a11y"
   ],
   "parserOptions": {
-    "ecmaVersion": 6,
+    "ecmaVersion": 7,
     "sourceType": "module",
     "ecmaFeatures": {
+      "impliedStrict": true,
       "jsx": true
     }
   },
@@ -56,17 +58,21 @@
     ],
     "jsx-a11y/aria-props": 2,
     "jsx-a11y/heading-has-content": 0,
-    "jsx-a11y/href-no-hash": 2,
+    "jsx-a11y/interactive-supports-focus": 0,
     "jsx-a11y/label-has-for": 2,
     "jsx-a11y/mouse-events-have-key-events": 2,
     "jsx-a11y/role-has-required-aria-props": 2,
     "jsx-a11y/role-supports-aria-props": 2,
+    "jsx-a11y/href-no-hash": "off",
+    "jsx-a11y/anchor-is-valid": ["warn", { "aspects": ["invalidHref"] }],
+    "jsx-a11y/no-noninteractive-element-interactions": 0,
     "max-len": 0,
     "newline-per-chained-call": 0,
     "no-console": 1,
     "no-use-before-define": 0,
     "prefer-template": 2,
     "class-methods-use-this": 0,
+    "react/react-in-jsx-scope": 0,
     "react/forbid-prop-types": 0,
     "react/jsx-first-prop-new-line": [
       2,
@@ -74,6 +80,7 @@
     ],
     "react/jsx-filename-extension": 0,
     "react/jsx-no-target-blank": 0,
+    "react/no-did-mount-set-state": 0,
     "react/require-extension": 0,
     "react/self-closing-comp": 0,
     "redux-saga/no-yield-in-race": 2,
@@ -81,12 +88,15 @@
     "require-yield": 0,
     "react/no-unescaped-entities": 0,
     "react/prefer-stateless-function": 0,
-    "react/sort-prop-types": 2
+    "react/sort-prop-types": 2,
+    "react/require-default-props": 0,
+    "no-undef": 0,
+    "react/no-array-index-key": 0
   },
   "settings": {
     "import/resolver": {
       "webpack": {
-        "config": "./node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.test.babel.js"
+        "config": "node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.test.babel.js"
       }
     }
   }

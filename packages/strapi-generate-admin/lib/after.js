@@ -4,6 +4,9 @@
  * Module dependencies
  */
 
+const { exec } = require('child_process');
+const path = require('path');
+
 /**
  * Runs after this generator has finished
  *
@@ -11,7 +14,19 @@
  * @param {Function} cb
  */
 
-module.exports = function afterGenerate(scope, cb) {
+module.exports =  (scope, cb) => {
+  if (scope.developerMode) {
+    return cb();
+  }
+  
+  // Install back-end admin `node_modules`.
+  exec('npm install --production --ignore-scripts', {
+    cwd: path.resolve(scope.rootPath, 'admin')
+  }, (err) => {
+    if (err) {
+      return cb(err);
+    }
 
-  return cb();
+    cb();
+  });
 };

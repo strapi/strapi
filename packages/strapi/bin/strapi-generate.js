@@ -13,7 +13,7 @@ const path = require('path');
 const generate = require('strapi-generate');
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi generate`

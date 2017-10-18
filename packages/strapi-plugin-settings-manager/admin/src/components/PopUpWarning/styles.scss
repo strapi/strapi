@@ -1,0 +1,153 @@
+.popUpWarning { /* stylelint-disable */
+  width: 37.5rem!important;
+}
+
+.header {
+  border: none!important;
+  > h4 {
+    width: 100%;
+    text-align: center;
+    font-family: Lato;
+    font-weight: bold!important;
+    font-size: 1.8rem!important;
+
+  }
+  > button {
+    margin-top: -2rem;
+    margin-right: 0!important;
+    z-index: 999;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0;
+    }
+    > span {
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+  }
+}
+
+.centered {
+  justify-content: center;
+}
+
+.bordered {
+  margin-top: -.4rem;
+  margin-left: 3rem;
+  margin-right: 3rem;
+  border: 1px solid #F6F6F6;
+}
+
+.noBorder {
+  border: none!important;
+}
+
+.modal-content {
+  padding: 0!important;
+}
+.modalFooter {
+
+  margin-top: 4.5rem;
+  margin-bottom: 1.1rem;;
+  > input {
+    margin-top: 1.3rem!important;
+  }
+}
+
+.primary {
+  font-family: Lato;
+  color: white;
+  width: 15rem;
+  border: none;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  &:active {
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    background-color: none!important;
+    color: white!important;
+
+  }
+
+}
+
+.secondary {
+  font-family: Lato;
+  width: 15rem;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+}
+
+.buttonContainer {
+  width: 100%;
+  padding: 0 .5rem;
+  display: flex;
+  margin-top: 3rem;
+  justify-content: space-between;
+}
+
+.modalBody {
+  text-align: center;
+  font-size: 1.4rem;
+  padding-top: 1.8rem;
+}
+
+
+.modalPosition {
+  > div {
+    border:none;
+    border-radius: 2px;
+    width: 37.5rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.modalDangerBodyContainer {
+  padding-top: .1rem;
+  > img {
+    width: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  > p {
+    line-height: 1.8rem;
+  }
+
+  color: #F64D0A;
+  text-align: center;
+  font-family: Lato;
+  font-size: 1.3rem;
+}
+
+.buttonDangerContainer {
+  width: 100%;
+  padding: 0 .5rem;
+  display: flex;
+  margin-top: 3.1rem;
+  justify-content: space-around;
+  > button {
+    width: 31.5rem;
+    height: 3rem;
+    font-size: 1.3rem;
+      -webkit-font-smoothing: antialiased;
+    &:hover {
+      color: white;
+    }
+
+  }
+}
+
+// .modalPosition {
+//   top: 20.3rem;
+//   width: 37.5rem;
+// }

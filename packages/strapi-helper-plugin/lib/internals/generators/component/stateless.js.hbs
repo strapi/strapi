@@ -15,7 +15,7 @@ import messages from './messages';
 import styles from './styles.scss';
 {{/if}}
 
-function {{ properCase name }}() {
+function {{ properCase name}}() {
   return (
     {{#if wantCSS}}
     <div className={{curly true}}styles.{{ camelCase name }}{{curly}}>
@@ -28,5 +28,9 @@ function {{ properCase name }}() {
     </div>
   );
 }
+
+{{ properCase name }}.proptypes = {
+
+};
 
 export default {{ properCase name }};

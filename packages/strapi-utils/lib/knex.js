@@ -11,9 +11,6 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 
-// Logger.
-const logger = require('./winston');
-
 /**
  * Check if connection is valid
  */
@@ -25,8 +22,8 @@ module.exports = scope => {
   try {
     require.resolve(path.resolve(scope.rootPath, 'node_modules', 'strapi-knex'));
   } catch (err) {
-    logger.error('Impossible to call the Knex migration tool.');
-    logger.error('You can install it with `$ npm install strapi-knex --save`.');
+    console.error('Impossible to call the Knex migration tool.');
+    console.error('You can install it with `$ npm install strapi-knex --save`.');
     process.exit(1);
   }
 
@@ -35,8 +32,8 @@ module.exports = scope => {
   try {
     fs.accessSync(path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'databases.json'), fs.F_OK | fs.R_OK);
   } catch (err) {
-    logger.error('No `databases.json` file detected at `' + path.resolve(scope.rootPath, 'config', 'environments', scope.environment) + '`.');
-    logger.error(err);
+    console.error('No `databases.json` file detected at `' + path.resolve(scope.rootPath, 'config', 'environments', scope.environment) + '`.');
+    console.error(err);
     process.exit(1);
   }
 
@@ -53,7 +50,7 @@ module.exports = scope => {
 
   // Make sure the specified connection exists in config.
   if (!_.has(scope.connections, scope.connection)) {
-    logger.error('No connection found for `' + scope.connection + '`.');
+    console.error('No connection found for `' + scope.connection + '`.');
     process.exit(1);
   }
 
@@ -62,8 +59,8 @@ module.exports = scope => {
     try {
       scope.db = require(path.resolve(scope.rootPath, 'node_modules', 'knex'))(scope.dbConfig);
     } catch (err) {
-      logger.error('The client `' + config.client + '` is not installed.');
-      logger.error(err);
+      console.error('The client `' + config.client + '` is not installed.');
+      console.error(err);
       process.exit(1);
     }
   });

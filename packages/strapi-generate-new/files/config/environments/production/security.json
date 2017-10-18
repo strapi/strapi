@@ -1,22 +1,35 @@
 {
-  "session": {
-    "key": "myApp",
-    "secretKeys": [
-      "mySecretKey1"
-    ],
-    "maxAge": 86400000
+  "csrf": {
+    "enabled": true,
+    "key": "_csrf",
+    "secret": "_csrfSecret"
   },
-  "csrf": false,
-  "csp": false,
-  "p3p": false,
+  "csp": {
+    "enabled": true,
+    "policy": {
+      "default-src": "'self'"
+    }
+  },
+  "p3p": {
+    "enabled": true,
+    "value": ""
+  },
   "hsts": {
+    "enabled": true,
     "maxAge": 31536000,
     "includeSubDomains": true
   },
-  "xframe": "SAMEORIGIN",
-  "xssProtection": false,
+  "xframe": {
+    "enabled": true,
+    "value": "SAMEORIGIN"
+  },
+  "xss": {
+    "enabled": true,
+    "mode": "block"
+  },
   "cors": {
-    "origin": true,
+    "enabled": true,
+    "origin": "http://localhost",
     "expose": [
       "WWW-Authenticate",
       "Server-Authorization"
@@ -34,13 +47,13 @@
     ],
     "headers": [
       "Content-Type",
-      "Authorization"
+      "Authorization",
+      "X-Frame-Options"
     ]
   },
-  "ssl": false,
   "ip": {
+    "enabled": false,
     "whiteList": [],
     "blackList": []
-  },
-  "proxy": false
+  }
 }

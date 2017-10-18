@@ -1,22 +1,35 @@
 {
-  "session": {
-    "key": "myApp",
-    "secretKeys": [
-      "mySecretKey1"
-    ],
-    "maxAge": 86400000
+  "csrf": {
+    "enabled": false,
+    "key": "_csrf",
+    "secret": "_csrfSecret"
   },
-  "csrf": false,
-  "csp": false,
-  "p3p": false,
+  "csp": {
+    "enabled": false,
+    "policy": {
+      "default-src": "'self'"
+    }
+  },
+  "p3p": {
+    "enabled": false,
+    "value": ""
+  },
   "hsts": {
+    "enabled": false,
     "maxAge": 31536000,
     "includeSubDomains": true
   },
-  "xframe": "SAMEORIGIN",
-  "xssProtection": false,
+  "xframe": {
+    "enabled": false,
+    "value": "SAMEORIGIN"
+  },
+  "xss": {
+    "enabled": false,
+    "mode": "block"
+  },
   "cors": {
-    "origin": "http://studio.strapi.io",
+    "enabled": false,
+    "origin": "http://localhost",
     "expose": [
       "WWW-Authenticate",
       "Server-Authorization"
@@ -35,13 +48,12 @@
     "headers": [
       "Content-Type",
       "Authorization",
-      "StudioToken"
+      "X-Frame-Options"
     ]
   },
-  "ssl": false,
   "ip": {
+    "enabled": false,
     "whiteList": [],
     "blackList": []
-  },
-  "proxy": false
+  }
 }

@@ -9,9 +9,10 @@
 // Node.js core.
 const { exec } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
 // Logger.
-const { logger, cli } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi install`
@@ -40,32 +41,21 @@ module.exports = function (plugin, cliArguments) {
   logger.debug('Installation in progress...');
 
   if (cliArguments.dev) {
-    // Run `npm link` to create a symlink between the node module
-    // installed globally and the current Strapi application.
-    exec(`npm link ${pluginId}`, (err) => {
-      if (err) {
-        logger.error('It looks like this plugin is not installed globally.');
-        process.exit(1);
-      }
+    try {
+      fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginId), path.resolve(process.cwd(), pluginPath), 'dir');
 
-      try {
-        // Create a symlink between the Strapi application and the node module installed.
-        fs.symlinkSync(`../node_modules/${pluginId}`, pluginPath, 'dir');
-
-        // Success.
-        logger.info('The plugin has been successfully installed.');
-        process.exit(0);
-      } catch (err) {
-        logger.error('An error occurred during plugin installation.');
-        process.exit(1);
-      }
-    });
+      logger.info('The plugin has been successfully installed.');
+      process.exit(0);
+    } catch (e) {
+      logger.error('An error occurred during plugin installation.');
+      process.exit(1);
+    }
   } else {
     // Debug message.
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    exec(`npm install ${pluginId}`, (err) => {
+    exec(`npm install ${pluginId}@alpha --ignore-scripts --no-save`, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginId}`);
         process.exit(1);

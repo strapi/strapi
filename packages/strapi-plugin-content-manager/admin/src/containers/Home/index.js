@@ -7,43 +7,34 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 
-import { define } from 'i18n';
+import PluginHeader from 'components/PluginHeader';
 
-import Container from 'components/Container';
-
-import messages from './messages.json';
 import styles from './styles.scss';
-
-define(messages);
 
 export class Home extends React.Component {
   render() {
-    const PluginHeader = this.props.exposedComponents.PluginHeader;
-
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
-              id: 'plugin-content-manager-title',
-              defaultMessage: 'Content Manager',
+              id: 'content-manager.containers.Home.pluginHeaderTitle',
             }}
-            description={messages.pluginHeaderDescription}
+            description={{
+              id: 'content-manager.containers.Home.pluginHeaderDescription',
+            }}
+            actions={[]}
           />
-          <Container>
-            <p>
-              <FormattedMessage {...messages.introduction} />
-            </p>
-          </Container>
+          <p>
+            <FormattedMessage id="content-manager.containers.Home.introduction" />
+          </p>
         </div>
       </div>
     );
   }
 }
 
-Home.propTypes = {
-  exposedComponents: React.PropTypes.object.isRequired,
-};
+Home.propTypes = {};
 
 export function mapDispatchToProps() {
   return {};

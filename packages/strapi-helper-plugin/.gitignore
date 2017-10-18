@@ -1,8 +1,10 @@
 # Don't check auto-generated stuff into git
+dist
 coverage
 build
 node_modules
 stats.json
+package-lock.json
 
 # Cruft
 .DS_Store

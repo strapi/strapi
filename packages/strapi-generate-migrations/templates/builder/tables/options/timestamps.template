@@ -1,4 +1,0 @@
-
-// Adds a "created_at" and "updated_at" columns on the database,
-// setting these each to "dateTime" types.
-table.timestamps()

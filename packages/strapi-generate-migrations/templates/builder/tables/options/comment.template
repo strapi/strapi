@@ -1,3 +1,0 @@
-
-// Set the comment for the `<%= tableName %>` table.
-table.comment('<%= value %>')

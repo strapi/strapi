@@ -25,8 +25,9 @@ module.exports = function(strapi) {
     defaults: {
       port: 6379,
       host: 'localhost',
-      family: 4,
-      db: 0,
+      options: {
+        db: 0
+      },
       showFriendlyErrorStack: process.env.NODE_ENV !== 'production'
     },
 
@@ -35,9 +36,19 @@ module.exports = function(strapi) {
      */
 
     initialize: cb => {
+      if (_.isEmpty(strapi.models) || !_.pickBy(strapi.config.connections, {
+        connector: 'strapi-redis'
+      })) {
+        return cb();
+      }
+
       const connections = _.pickBy(strapi.config.connections, {
         connector: 'strapi-redis'
       });
+
+      if(_.size(connections) === 0) {
+        cb();
+      }
 
       const done = _.after(_.size(connections), () => {
         cb();
@@ -46,10 +57,16 @@ module.exports = function(strapi) {
       // For each connection in the config register a new Knex connection.
       _.forEach(connections, (connection, name) => {
         // Apply defaults
-        _.defaults(connection.settings, strapi.hooks.redis.defaults);
+        _.defaults(connection.settings, strapi.config.hook.settings.redis);
 
         try {
-          const redis = new Redis(connection.settings);
+          const redis = new Redis(_.defaultsDeep({
+            port: _.get(connection.settings, 'port'),
+            host: _.get(connection.settings, 'host'),
+            options: {
+              db: _.get(connection.options, 'database') || 0
+            }
+          }, strapi.config.hook.settings.redis));
 
           redis.on('error', err => {
             strapi.log.error(err);

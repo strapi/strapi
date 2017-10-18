@@ -71,44 +71,5 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send(data);
-  },
-
-  /**
-   * Add relation to a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  createRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= id %>.addRelation(ctx.params, ctx.request.body);
-
-    // Send 200 `ok`
-    ctx.send(data);
-  },
-
-  /**
-   * Update relation to a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  updateRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= id %>.editRelation(ctx.params, ctx.request.body);
-
-    // Send 200 `ok`
-    ctx.send(data);
-  },
-
-  /**
-   * Destroy relation to a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  destroyRelation: async (ctx, next) => {
-    const data = await strapi.services.<%= id %>.removeRelation(ctx.params, ctx.request.body);
-
-    // Send 200 `ok`
-    ctx.send(data);
   }
 };

@@ -1,0 +1,178 @@
+  .back {
+  background: #F3F3F3;
+  color: #323740;
+  font-weight: 500;
+  padding: 0 15px;
+  transition: all .2s ease;
+
+  &:before{
+    content: '\f053';
+    font-family: 'FontAwesome';
+    font-size: 1.2rem;
+    color: #323740;
+    margin-right: 10px;
+  }
+
+  &:hover{
+    background: darken(#F6F6F6, 5%);
+  }
+
+  &:active{
+    box-shadow: inset 1px 1px 5px rgba(0,0,0,.1);
+  }
+}
+
+.button {
+  height: 3rem;
+  position: relative;
+  border-radius: 0.3rem;
+  text-transform: capitalize;
+  margin-right: 1.8rem;
+  cursor: pointer;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
+  &:focus {
+    outline: 0;
+  }
+  > i {
+    margin-right: 1.3rem;
+    font-weight: 600;
+    padding-top: 1px;
+  }
+  &:hover {
+   &::after {
+     position: absolute;
+     width: 100%;
+     height: 100%;
+     top: 0;
+     left: 0;
+     border-radius: 0.3rem;
+     content: '';
+     opacity: 0.1;
+     background: #FFFFFF;
+   }
+ }
+}
+
+.primary {
+  font-weight: 500;
+  min-width: 15rem;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+  &:active {
+   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+ }
+}
+
+.primaryAddShape {
+  font-weight: 500;
+  min-width: 15rem;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+  &:active {
+   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+ }
+ padding-top: 4px;
+ padding-left: 1.6rem;
+ padding-right: 1.6rem;
+ &:before {
+   content: '\F067';
+   font-family: 'FontAwesome';
+   font-weight: 600;
+   font-size: 1.3rem;
+   margin-right: 13px;
+ }
+}
+
+.secondary {
+  // height: 32px !important;
+  min-width: 10rem;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+  &:active {
+   border: 0.15rem solid #F64D0A;
+ }
+}
+
+.secondaryHotline {
+  height: 2.6rem;
+  min-width: 15rem;
+  color: #1C5DE7;
+  line-height: 1.6rem;
+  border: 0.1rem solid #1C5DE7;
+  font-weight: 500;
+  font-size: 1.3rem;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
+}
+
+.secondaryHotlineAdd {
+  height: 2.6rem;
+  min-width: auto;
+  padding: 0 15px 0px;
+  color: #1C5DE7;
+  line-height: 1.6rem;
+  border: 0.1rem solid #1C5DE7;
+  font-weight: 500;
+  font-size: 1.3rem;
+  &:before {
+    content: '\F067';
+    font-family: 'FontAwesome';
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-right: 13px;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-top: -2.35rem;
+  padding-left: 4px;
+  line-height: 3.8rem;
+  font-size: 4rem;
+}
+
+.loader {
+  height: 3rem;
+  padding: 0;
+  border-radius: 0.3rem;
+  letter-spacing: .5rem;
+  font-family: Lato;
+  cursor: not-allowed;
+  opacity: .65;
+  &:focus {
+    outline: 0;
+  }
+}
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  // font-size: 5rem;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: .4s;
+}

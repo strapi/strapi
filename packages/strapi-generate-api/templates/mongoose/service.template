@@ -18,7 +18,15 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    return <%= globalID %>.find(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+    const convertedParams = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
+    return <%= globalID %>
+      .find()
+      .where(convertedParams.where)
+      .sort(convertedParams.sort)
+      .skip(convertedParams.start)
+      .limit(convertedParams.limit)
+      .populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**
@@ -28,7 +36,9 @@ module.exports = {
    */
 
   fetch: (params) => {
-    return <%= globalID %>.findOne(params).populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+    return <%= globalID %>
+      .findOne(params)
+      .populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
   },
 
   /**

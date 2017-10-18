@@ -31,13 +31,16 @@ module.exports = scope => {
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi-mongoose')
+      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-generate': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-generate-api': getDependencyVersion(cliPkg, 'strapi')
     },
     'main': './server.js',
     'scripts': {
       'start': 'node server.js',
       'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
-      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js'
+      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js',
+      'postinstall': 'node node_modules/strapi-utils/script/plugin-install.js'
     },
     'author': {
       'name': scope.author || 'A Strapi developer',

@@ -1,0 +1,18 @@
+{
+  "app.components.ComingSoonPage.comingSoon": "Bientôt disponible",
+  "app.components.ComingSoonPage.featuresNotAvailable": "Cette fonctionnalité est toujours en cours de développement.",
+  "app.components.HomePage.welcome": "Bienvenue sur la page d'accueil",
+  "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
+  "app.components.LeftMenuLinkContainer.configuration": "Configuration",
+  "app.components.LeftMenuLinkContainer.general": "Général",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Installer un nouveau plugin",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Liste des plugins",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
+  "app.components.LeftMenuLinkContainer.plugins": "Plugins",
+  "app.components.NotFoundPage.description": "Page introuvable",
+  "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
+  "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
+  "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
+  "components.ProductionBlocker.header": "Ce plugin est disponible uniquement en développement.",
+  "components.ProductionBlocker.description": "Pour des raisons de sécurité il est désactivé dans les autres environnements."
+}

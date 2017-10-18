@@ -1,0 +1,12 @@
+{
+  "name": "Default Application",
+  "description": "This API is going to be awesome!",
+  "favicon": {
+    "path": "favicon.ico",
+    "maxAge": 86400000
+  },
+  "public": {
+    "path": "./public",
+    "maxAge": 60000
+  }
+}

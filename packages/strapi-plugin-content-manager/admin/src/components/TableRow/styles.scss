@@ -1,44 +1,45 @@
 .tableRow { /* stylelint-disable */
+  height: 54px;
   background: #ffffff;
-  border-bottom: 1px solid #D4DDE3;
-
-  td:first-child {
-    border-left: 3px solid transparent;
-  }
 
   &:hover {
-    background: #F8FAFB;
     cursor: pointer;
+    background: #F7F8F8;
+  }
 
-    td:first-child {
-      border-left: 3px solid #1C5DE7;
-    }
+  td{
+    height: 53px;
+    line-height: 53px;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #333740;
+    border-collapse: collapse;
+    border-top: 1px solid #F1F1F2 !important;
   }
 }
 
-.tableRowCell {
-  border: none;
-  font-weight: 400;
-  color: #465373;
-  padding-top: 1.6rem !important;
-  padding-bottom: 1.6rem !important;
+.truncate {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.truncated {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .actions {
+  text-align: right;
+
   i {
-    font-size: 1.2rem;
-    color: #8B96B3;
-    color: #CDD3E4;
-    margin-left: 1rem;
+    margin-left: 15px;
+    font-size: 1.1rem;
+    color: #0E1622;
 
-    &:hover {
-      color: #1C5DE7;
+    &:first-of-type{
+      margin-left: 0px;
     }
-  }
-}
-
-.idLink {
-  &:hover {
-    text-decoration: none;
   }
 }

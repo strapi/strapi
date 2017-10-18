@@ -5,24 +5,15 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
-import { define } from 'i18n';
-
-import messages from './messages.json';
+import { map } from 'lodash';
 import styles from './styles.scss';
-
-define(messages);
 
 class LimitSelect extends React.Component {
   componentWillMount() {
     const id = _.uniqueId();
     this.setState({ id });
-  }
-
-  shouldComponentUpdate() {
-    return false;
   }
 
   /**
@@ -35,36 +26,30 @@ class LimitSelect extends React.Component {
   }
 
   render() {
-    // Generate options
-    const options = this.getOptionsValues().map(optionValue => (
-      <option value={optionValue} key={optionValue}>{optionValue}</option>
-    ));
-
-    // Get id in order to link the `label` and the `select` elements
-    const id = this.state.id;
-
     return (
       <form className="form-inline">
-        <div className="form-group">
-          <label className={styles.label} htmlFor={id}>
-            <FormattedMessage {...messages.itemsPerPage} />:</label>
-          <div className={styles.selectWrapper}>
-            <select
-              onChange={this.props.onLimitChange}
-              className={`form-control ${styles.select}`}
-              id={id}
-            >
-              {options}
-            </select>
-          </div>
+
+        <div className={styles.selectWrapper}>
+          <select
+            onChange={this.props.handleChange}
+            className={`form-control ${styles.select}`}
+            id={this.state.id}
+            value={this.props.limit}
+          >
+            {map(this.getOptionsValues(), (optionValue, key) => <option value={optionValue} key={key}>{optionValue}</option>)}
+          </select>
         </div>
+        <label className={styles.label} htmlFor={this.state.id}>
+          <FormattedMessage id="content-manager.components.LimitSelect.itemsPerPage" />
+        </label>
       </form>
     );
   }
 }
 
 LimitSelect.propTypes = {
-  onLimitChange: React.PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  limit: PropTypes.number.isRequired,
 };
 
 export default LimitSelect;

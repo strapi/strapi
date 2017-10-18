@@ -2,9 +2,41 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
+const fs = require('fs');
 const path = require('path');
 
 const webpack = require('webpack');
+
+const pkg = require(path.resolve(process.cwd(), 'package.json'));
+const pluginId = pkg.name.replace(/^strapi-/i, '');
+
+let noPlugin = false;
+let plugins = [];
+let pluginFolders = {};
+
+if (process.env.npm_lifecycle_event === 'start') {
+  try {
+    fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
+  } catch (e) {
+    try {
+      fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
+
+      // Allow app without plugins.
+      noPlugin = true;
+    } catch (e) {
+      throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
+    }
+  }
+
+  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
+    .filter(x => x[0] !== '.') : [];
+
+  pluginFolders = plugins.reduce((acc, current) => {
+    acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+
+    return acc;
+  }, {});
+}
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -14,41 +46,61 @@ module.exports = (options) => ({
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
-      test: /\.js$/, // Transform all .js files required somewhere with Babel
+      test: /\.js$/, // Transform all .js files required somewhere with Babel,
       use: {
-        loader: 'babel',
+        loader: 'babel-loader',
         options: {
-          "presets": options.babelPresets,
-          "env": {
-            "production": {
-              "only": [
-                "src",
+          presets: options.babelPresets,
+          env: {
+            production: {
+              only: [
+                'src',
               ],
-              "plugins": [
+              plugins: [
                 require.resolve('babel-plugin-transform-react-remove-prop-types'),
                 require.resolve('babel-plugin-transform-react-constant-elements'),
                 require.resolve('babel-plugin-transform-react-inline-elements'),
               ],
             },
-            "test": {
-              "plugins": [
-                "istanbul",
+            test: {
+              plugins: [
+                'istanbul',
               ],
             },
           },
-        }
+        },
       },
-      include: [
-        path.join(process.cwd(), 'admin', 'src'),
-        // Add the `strapi-helper-plugin` folders watched by babel
-        path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src'),
-      ],
+      include: [path.join(process.cwd(), 'admin', 'src')]
+        .concat(plugins.reduce((acc, current) => {
+          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), pluginFolders[current]);
+
+          return acc;
+        }, []))
+        .concat([path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
-      exclude: /node_modules/,
-      // loader: 'null-loader'
-      use: options.cssLoaders,
+      use: [{
+        loader: 'style-loader',
+      }, {
+        loader: 'css-loader',
+        options: {
+          localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
+          modules: true,
+          importLoaders: 1,
+          sourceMap: true,
+          minimize: process.env.NODE_ENV === 'production'
+        },
+      }, {
+        loader: 'postcss-loader',
+        options: {
+          config: {
+            path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+          },
+        },
+      }, {
+        loader: 'sass-loader',
+      }],
     }, {
       // Do not transform vendor's CSS with CSS-modules
       // The point is that they remain in global scope.
@@ -57,7 +109,13 @@ module.exports = (options) => ({
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader'],
+      loaders: ['style-loader', {
+        loader: 'css-loader',
+        options: {
+          minimize: process.env.NODE_ENV === 'production',
+          sourceMap: true,
+        }
+      }],
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader',
@@ -65,8 +123,28 @@ module.exports = (options) => ({
       test: /\.(jpg|png|gif)$/,
       loaders: [
         'file-loader',
-        'image-webpack?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
+        {
+          loader: 'image-webpack-loader',
+          query: {
+            mozjpeg: {
+              progressive: true,
+            },
+            gifsicle: {
+              interlaced: false,
+            },
+            optipng: {
+              optimizationLevel: 4,
+            },
+            pngquant: {
+              quality: '65-90',
+              speed: 4,
+            },
+          },
+        },
       ],
+    }, {
+      test: /\.html$/,
+      loader: 'html-loader',
     }, {
       test: /\.json$/,
       loader: 'json-loader',
@@ -75,10 +153,10 @@ module.exports = (options) => ({
       loader: 'url-loader?limit=10000',
     }],
   },
-  plugins: options.plugins.concat([
+  plugins: [
     new webpack.ProvidePlugin({
       // make fetch available
-      fetch: 'exports?self.fetch!whatwg-fetch',
+      fetch: 'exports-loader?self.fetch!whatwg-fetch',
     }),
 
     // Always expose NODE_ENV to webpack, in order to use `process.env.NODE_ENV`
@@ -89,8 +167,8 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
-    new webpack.NamedModulesPlugin(),
-  ]),
+    new webpack.NamedModulesPlugin()
+  ].concat(options.plugins),
   resolve: {
     modules: [
       'admin/src',
@@ -98,6 +176,7 @@ module.exports = (options) => ({
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],
+    alias: options.alias,
     symlinks: false,
     extensions: [
       '.js',
@@ -110,7 +189,7 @@ module.exports = (options) => ({
       'main',
     ],
   },
-
+  externals: options.externals,
   resolveLoader: {
     modules: [
       path.join(__dirname, '..', '..', '..', 'node_modules'),
@@ -118,5 +197,5 @@ module.exports = (options) => ({
     ],
   },
   devtool: options.devtool,
-  target: 'web', // Make web variables accessible to webpack, e.g. window
+  target: 'web', // Make web variables accessible to webpack, e.g. window,
 });

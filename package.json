@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.4.8",
+  "version": "3.0.0-alpha.6.3",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -12,6 +12,7 @@
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.8.0",
     "eslint-plugin-redux-saga": "^0.3.0",
+    "gitbook-cli": "^2.3.2",
     "istanbul": "~0.4.2",
     "lerna": "^2.0.0",
     "mocha": "~2.4.5",
@@ -23,6 +24,7 @@
   "scripts": {
     "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
     "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
+    "doc": "node ./scripts/documentation.js",
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
