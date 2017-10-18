@@ -77,7 +77,13 @@ export function* submitChanges(action) {
           leftMenuContentTypes[0].links = sortBy(leftMenuContentTypes[0].links, 'label');
           action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
         }
+
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
+
+        // Temporary patch to fix menu links.
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
       }
