@@ -22,7 +22,8 @@ module.exports = function() {
           './node_modules/strapi-utils',
           './node_modules/strapi-generate*',
           './node_modules/strapi-plugin-*',
-          './node_modules/strapi-helper-*'
+          './node_modules/strapi-helper-*',
+          './node_modules/strapi-middleware-*'
         ]
       }, (err, files) => {
         if (err) {
