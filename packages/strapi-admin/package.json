@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.5.5",
+  "version": "3.0.0-alpha.6.3",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -9,24 +9,25 @@
   "scripts": {
     "analyze:clean": "rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
-    "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "build": "npm run build:dll && cross-env NODE_ENV=production IS_ADMIN=true webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:dll": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.dll.babel.js --color -p --progress",
+    "analyze": "node ../strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "build": "npm run build:dll && cross-env NODE_ENV=production IS_ADMIN=true webpack --config ../strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:dll": "cross-env NODE_ENV=production webpack --config ../strapi-helper-plugin/lib/internals/webpack/webpack.dll.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",
-    "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node node_modules/strapi-helper-plugin/lib/server",
-    "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node ../strapi-helper-plugin/lib/server",
+    "generate": "plop --plopfile ../strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "eslint --ignore-path .gitignore --config ../strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "pretest": "npm run lint",
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo Tests are not implemented.",
     "prepublish": "npm run build",
-    "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
+    "postinstall": "node ../strapi-helper-plugin/lib/internals/scripts/postinstall.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^0.30.0",
     "sanitize.css": "^4.1.0",
-    "strapi-utils": "3.0.0-alpha.5.5"
+    "strapi-helper-plugin": "3.0.0-alpha.6.3",
+    "strapi-utils": "3.0.0-alpha.6.3"
   },
   "devDependencies": {
     "cross-env": "^5.1.0",
@@ -46,7 +47,6 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^3.8.1"
   },
   "author": {

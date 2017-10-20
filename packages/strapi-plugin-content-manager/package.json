@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.5.5",
+  "version": "3.0.0-alpha.6.3",
   "description": "A powerful UI to easily manage your data.",
   "engines": {
     "node": ">= 8.0.0",
@@ -45,7 +45,8 @@
   },
   "dependencies": {
     "prop-types": "^15.5.10",
-    "react-select": "^1.0.0-rc.5"
+    "react-select": "^1.0.0-rc.5",
+    "strapi-helper-plugin": "3.0.0-alpha.6.3"
   },
   "devDependencies": {
     "cross-env": "^5.1.0",
@@ -62,7 +63,6 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "3.0.0-alpha.5.5",
     "webpack": "^3.8.1"
   }
 }
