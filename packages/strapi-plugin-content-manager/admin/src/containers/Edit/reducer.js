@@ -31,6 +31,7 @@ const initialState = fromJS({
   currentModelName: '',
   loading: false,
   record: false,
+  initialRecord: {},
   editing: false,
   deleting: false,
   isCreating: false,
@@ -61,7 +62,8 @@ function editReducer(state = initialState, action) {
     case LOAD_RECORD_SUCCESS:
       return state
         .set('loading', false)
-        .set('record', fromJS(action.record));
+        .set('record', fromJS(action.record))
+        .set('initialRecord', fromJS(action.record));
     case SET_RECORD_ATTRIBUTE:
       return state
         .setIn(['record', action.key], fromJS(action.value));
@@ -82,7 +84,7 @@ function editReducer(state = initialState, action) {
     case TOGGLE_NULL:
       return state.set('isRelationComponentNull', !state.get('isRelationComponentNull'));
     case CANCEL_CHANGES:
-      return state.set('record', Map({}));
+      return state.set('record', state.get('initialRecord'));
     case SET_FORM_VALIDATIONS:
       return state
         .set('formValidations', List(action.formValidations));
