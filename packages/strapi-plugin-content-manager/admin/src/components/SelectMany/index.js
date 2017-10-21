@@ -74,7 +74,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
       : '';
 
     const value = this.props.record.get(this.props.relation.alias);
-  
+
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectMany}`}>
@@ -87,7 +87,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           multi
           value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => ({
             value: get(item, 'value') || item,
-            label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
+            label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item ).mainField || item.value.id,
           }))}
         />
       </div>
