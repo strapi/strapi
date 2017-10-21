@@ -84,10 +84,6 @@ export function* submitChanges(action) {
 
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
 
-        // Temporary patch to fix menu links.
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
       } else {
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
       }
