@@ -169,8 +169,8 @@ module.exports = {
       };
     } else if ((types.current === 'model' || types.current === 'modelD') && types.other === 'collection') {
       return {
-        nature: 'oneToMany',
-        verbose: 'belongsTo'
+        nature: 'manyToOne',
+        verbose: 'hasMany'
       };
     } else if (types.current === 'modelD' && types.other === 'collection') {
       return {
@@ -179,8 +179,8 @@ module.exports = {
       };
     } else if (types.current === 'collection' && types.other === 'model') {
       return {
-        nature: 'manyToOne',
-        verbose: 'hasMany'
+        nature: 'oneToMany',
+        verbose: 'belongsTo'
       };
     } else if (types.current === 'collection' && types.other === 'collection') {
       return {
