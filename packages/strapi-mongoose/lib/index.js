@@ -94,7 +94,8 @@ module.exports = function (strapi) {
                   validate: 'beforeCreate',
                   remove: 'beforeDestroy',
                   update: 'beforeUpdate',
-                  find: 'beforeFetch',
+                  find: 'beforeFetchAll',
+                  findOne: 'beforeFetch',
                   save: 'beforeSave'
                 };
 
@@ -108,7 +109,8 @@ module.exports = function (strapi) {
                   validate: 'afterCreate',
                   remove: 'afterDestroy',
                   update: 'afterUpdate',
-                  find: 'afterFetch',
+                  find: 'afterFetchAll',
+                  findOne: 'afterFetch',
                   save: 'afterSave'
                 };
 

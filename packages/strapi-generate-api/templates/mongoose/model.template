@@ -19,7 +19,19 @@ module.exports = {
   //   next();
   // },
 
-  // Before fetching a value.
+  // Before fetching all values.
+  // Fired before a `fetchAll` operation.
+  // beforeFetchAll: function (next) {
+  //   // Use `this` to get your current object
+  //   next();
+  // },
+
+  // After fetching all values.
+  // Fired after a `fetchAll` operation.
+  // afterFetchAll: function (doc, next) {
+  //   next();
+  // },
+
   // Fired before a `fetch` operation.
   // beforeFetch: function (next) {
   //   // Use `this` to get your current object
