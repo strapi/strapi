@@ -249,7 +249,7 @@ module.exports = function (strapi) {
                 case 'belongsTo':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'oneToMany') {
+                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.model),

@@ -18,7 +18,7 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
 
       switch (relation.nature) {
         case 'oneToOne':
-        case 'oneToMany':
+        case 'manyToOne':
           if (relation.dominant) {
             return (
               <SelectOne
@@ -32,21 +32,18 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
             );
           }
           break;
-        case 'manyToOne':
+        case 'oneToMany':
         case 'manyToMany':
-          if (relation.dominant === true || relation.nature === 'manyToMany') {
-            return (
-              <SelectMany
-                currentModelName={this.props.currentModelName}
-                key={i}
-                record={this.props.record}
-                relation={relation}
-                schema={this.props.schema}
-                setRecordAttribute={this.props.setRecordAttribute}
-              />
-            );
-          }
-          break;
+          return (
+            <SelectMany
+              currentModelName={this.props.currentModelName}
+              key={i}
+              record={this.props.record}
+              relation={relation}
+              schema={this.props.schema}
+              setRecordAttribute={this.props.setRecordAttribute}
+            />
+          );
         default:
           break;
       }
