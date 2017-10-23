@@ -68,10 +68,9 @@ HomePage.propTypes = {
   data: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.object,
-  ]),
-  exposedComponents: PropTypes.object,
-  loadData: PropTypes.func,
-  loading: PropTypes.bool,
+  ]).isRequired,
+  loadData: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
