@@ -123,7 +123,7 @@ module.exports = {
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
                   value[details.via] = (value[details.via] || []).concat([params.values[this.primaryKey]]);
                 } else {
-                  value[details.via] = params[this.primaryKey];
+                  value[details.via] = params[this.primaryKey] || params.id;
                 }
 
                 virtualFields.push(strapi.query(details.model || details.collection).addRelation({
