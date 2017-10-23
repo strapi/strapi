@@ -44,6 +44,10 @@ export function* submitChanges(action) {
       }
 
       forEach(attribute.params, (value, key) => {
+        if (key === 'dominant' && get(attribute.params, 'nature') !== 'manyToMany') {
+          delete body.attributes[index].params.dominant;
+        }
+
         if (includes(key, 'Value')) {
           // Remove and set needed keys for params
           set(body.attributes[index].params, replace(key, 'Value', ''), value);
