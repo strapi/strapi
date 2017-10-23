@@ -42,7 +42,7 @@ module.exports = strapi => {
       if (!_.isEmpty(_.get(strapi.admin, 'config.routes', false))) {
         // Create router for admin.
         // Prefix router with the admin's name.
-        const router = strapi.koaMiddlewares.joiRouter();
+        const router = strapi.koaMiddlewares.routerJoi();
 
         _.forEach(strapi.admin.config.routes, value => {
           composeEndpoint(value, null, router)(cb);
@@ -61,7 +61,7 @@ module.exports = strapi => {
       if (strapi.plugins) {
         // Parse each plugin's routes.
         _.forEach(strapi.plugins, (plugin, name) => {
-          const router = strapi.koaMiddlewares.joiRouter();
+          const router = strapi.koaMiddlewares.routerJoi();
 
           // Exclude routes with prefix.
           const excludedRoutes = _.omitBy(plugin.config.routes, o => !o.hasOwnProperty('prefix'));
