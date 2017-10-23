@@ -1,7 +1,7 @@
 {
   "app.components.ComingSoonPage.comingSoon": "Bientôt disponible",
   "app.components.ComingSoonPage.featuresNotAvailable": "Cette fonctionnalité est toujours en cours de développement.",
-  "app.components.HomePage.welcome": "Bienvenue à board!",
+  "app.components.HomePage.welcome": "Bienvenue à bord!",
   "app.components.HomePage.description.part1": "Nous somme heureux de vous compter parmi nos utilisateurs",
   "app.components.HomePage.description.part2": "Vous faites désormais parti de notre communauté qui peut vous aider à développer votre application.",
   "app.components.HomePage.button": "Créez votre application",
