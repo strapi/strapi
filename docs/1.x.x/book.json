@@ -16,7 +16,7 @@
   "pluginsConfig": {
     "edit-link": {
       "label": "Edit This Page",
-      "base": "https://github.com/strapi/strapi/edit/structure/doc/docs/1.x.x"
+      "base": "https://github.com/strapi/strapi/tree/master/docs/1.x.x"
     },
     "ga": {
       "token": "UA-54313258-1"
