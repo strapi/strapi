@@ -271,7 +271,7 @@ class Strapi extends EventEmitter {
 
     if (file.indexOf('strapi-plugin-') !== -1) {
       pluginPath = file.split(path.sep).filter(x => x.indexOf('strapi-plugin-') !== -1)[0];
-    } else if (file.indexOf('/plugins/') !== -1) {
+    } else if (file.indexOf(path.sep + 'plugins' + path.sep) !== -1) {
       const pathTerms = file.split(path.sep);
       const index = pathTerms.indexOf('plugins');
 
