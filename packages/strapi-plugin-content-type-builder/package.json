@@ -37,7 +37,7 @@
     "strapi-helper-plugin": "3.0.0-alpha.6.3"
   },
   "devDependencies": {
-    "cross-env": "^5.0.5",
+    "cross-env": "^5.1.0",
     "eslint": "^4.9.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
@@ -51,7 +51,8 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "webpack": "^3.7.1"
+    "strapi-helper-plugin": "3.0.0-alpha.6.3",
+    "webpack": "^3.8.1"
   },
   "author": {
     "name": "Strapi team",

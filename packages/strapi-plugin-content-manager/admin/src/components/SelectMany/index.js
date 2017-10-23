@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
-import { isArray, isNull, isUndefined, get } from 'lodash';
+import { isArray, isNull, isUndefined, get, findIndex } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -63,7 +63,9 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   handleChange = (value) => {
-    this.props.setRecordAttribute(this.props.relation.alias, value);
+    const filteredValue = value.filter((data, index  ) => findIndex(value, (o) => o.value.id === data.value.id) === index);
+
+    this.props.setRecordAttribute(this.props.relation.alias, filteredValue);
   }
 
   render() {
@@ -81,10 +83,11 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
         <Select.Async
           onChange={this.handleChange}
           loadOptions={this.getOptions}
+          id={this.props.relation.alias}
           multi
           value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => ({
             value: get(item, 'value') || item,
-            label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
+            label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item ).mainField || item.value.id,
           }))}
         />
       </div>

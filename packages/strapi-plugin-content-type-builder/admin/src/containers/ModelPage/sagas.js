@@ -36,7 +36,7 @@ export function* submitChanges(action) {
     const modelName = get(storeData.getContentType(), 'name');
 
     const body = yield select(makeSelectModel());
-  
+
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
       if (attribute.connection) {
@@ -44,6 +44,10 @@ export function* submitChanges(action) {
       }
 
       forEach(attribute.params, (value, key) => {
+        if (key === 'dominant' && get(attribute.params, 'nature') !== 'manyToMany') {
+          delete body.attributes[index].params.dominant;
+        }
+
         if (includes(key, 'Value')) {
           // Remove and set needed keys for params
           set(body.attributes[index].params, replace(key, 'Value', ''), value);
@@ -80,10 +84,6 @@ export function* submitChanges(action) {
 
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
 
-        // Temporary patch to fix menu links.
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
       } else {
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
       }

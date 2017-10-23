@@ -1,7 +1,11 @@
 {
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
   "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
-  "app.components.HomePage.welcome": "Welcome to the home page",
+  "app.components.HomePage.welcome": "Welcome on board!",
+  "app.components.HomePage.description.part1": "We are happy to have you as one of our users!",
+  "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dreamed app.",
+  "app.components.HomePage.button": "Create your first app",
+  "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",
   "app.components.LeftMenuLinkContainer.general": "General",
@@ -30,5 +34,6 @@
   "components.Input.error.attribute.key.taken": "This value already exists",
   "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
   "components.Input.error.validation.minSupMax": "Can't be superior",
-  "components.ErrorBoundary.title": "Something wen't wrong"
+  "components.ErrorBoundary.title": "Something wen't wrong...",
+  "components.ListRow.empty": "There is no data to be shown."
 }

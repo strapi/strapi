@@ -177,7 +177,7 @@ export class Edit extends React.Component {
     const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || primaryKey;
     const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
     const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get(primaryKey)}`;
-
+    
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
