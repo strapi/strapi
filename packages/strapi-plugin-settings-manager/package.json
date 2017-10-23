@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.6.3",
+  "version": "3.0.0-alpha.6.4",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -31,7 +31,7 @@
     "react-select": "^1.0.0-rc.5",
     "react-transition-group": "^1.2.0",
     "reactstrap": "^4.8.0",
-    "strapi-helper-plugin": "3.0.0-alpha.6.3"
+    "strapi-helper-plugin": "3.0.0-alpha.6.4"
   },
   "devDependencies": {
     "cross-env": "^5.1.0",
