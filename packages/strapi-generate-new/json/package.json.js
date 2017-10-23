@@ -31,9 +31,7 @@ module.exports = scope => {
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-generate': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-generate-api': getDependencyVersion(cliPkg, 'strapi')
+      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi')
     },
     'main': './server.js',
     'scripts': {
