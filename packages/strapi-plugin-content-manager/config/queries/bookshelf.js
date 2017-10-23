@@ -127,7 +127,7 @@ module.exports = {
 
               // Push the work into the flow process.
               toAdd.forEach(value => {
-                value[details.via] = params.values[this.primaryKey];
+                value[details.via] = params.values[this.primaryKey] || params[this.primaryKey];
 
                 virtualFields.push(strapi.query(details.model || details.collection).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,

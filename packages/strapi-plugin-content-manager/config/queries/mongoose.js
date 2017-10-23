@@ -120,8 +120,10 @@ module.exports = {
 
               // Push the work into the flow process.
               toAdd.forEach(value => {
-                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
-                  value[details.via] = (value[details.via] || []).concat([params.values[this.primaryKey]]);
+                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey] || params[this.primaryKey])) {
+                  value[details.via] = (value[details.via] || []).concat([(params.values[this.primaryKey] || params[this.primaryKey])]).filter(x => {
+                    return x !== null && x !== undefined;
+                  });
                 } else {
                   value[details.via] = params[this.primaryKey] || params.id;
                 }
