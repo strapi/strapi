@@ -74,6 +74,14 @@ export default Button;
 
 ***
 
+## ExtendComponent
+
+ExtendComponent allows a plugin to injectDesign into another one.
+
+> Refer to the advanced plugin [documentation](./advanced.md#inject-design) to see how to use it.
+
+***
+
 ## Ico
 
 Ico components that works with fontAwesome.

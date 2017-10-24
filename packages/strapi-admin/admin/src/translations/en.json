@@ -4,7 +4,7 @@
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.description.part1": "We are happy to have you as one of our users!",
   "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dreamed app.",
-  "app.components.HomePage.button": "Create your first app",
+  "app.components.HomePage.button": "Create your first content type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",
