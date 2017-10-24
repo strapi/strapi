@@ -81,26 +81,34 @@
   display: flex;
   justify-content: space-around;
   padding-top: 3rem;
-  // width: 669px;
   > a {
     height: 58px;
     width: 204px;
     border: 1px solid #E3E9F3;
+    &:hover {
+      border: 1px solid #CAD0DA;
+    }
     &:after {
       height: 34px;
-      width: 102px;
-      display: inline-table;
+      width: 120px;
+      margin-bottom: 10px;
+      display: inline-flex;
+      margin-top: 13px;
       background-image: url('../../assets/images/logo_github.png');
       background-size: contain;
       content: '';
     }
     &:first-child {
       &:after {
+        height: 32px;
+        width: 156px;
         background-image: url('../../assets/images/logo_stack_overflow.png');
       }
     }
     &:last-child {
       &:after {
+        height: 32px;
+        width: 156x;
         background-image: url('../../assets/images/logo_slack.png');
       }
     }
