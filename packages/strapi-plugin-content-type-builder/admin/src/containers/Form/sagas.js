@@ -1,5 +1,5 @@
 import pluralize from 'pluralize';
-import { capitalize, findIndex, get, isEmpty, sortBy } from 'lodash';
+import { capitalize, findIndex, get, isEmpty, sortBy, set, replace } from 'lodash';
 import { takeLatest, call, put, fork, select } from 'redux-saga/effects';
 import request from 'utils/request';
 
@@ -27,6 +27,9 @@ export function* editContentType(action) {
     const initialContentType = yield select(makeSelectInitialDataEdit());
     const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
     const body = yield select(makeSelectModifiedDataEdit());
+
+    set(body, 'description', replace(body.description, /\"/, '\"')); // eslint-disable-line no-useless-escape
+
     const opts = {
       method: 'PUT',
       body,
