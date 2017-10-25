@@ -1,3 +1,4 @@
+
 'use strict';
 
 /**
@@ -26,7 +27,7 @@ module.exports = {
       .sort(convertedParams.sort)
       .skip(convertedParams.start)
       .limit(convertedParams.limit)
-      .populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+      .populate(_.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias')).join(' '));
   },
 
   /**
@@ -38,7 +39,7 @@ module.exports = {
   fetch: (params) => {
     return <%= globalID %>
       .findOne(params)
-      .populate(_.keys(_.pickBy(strapi.models.<%= humanizeId %>.attributes, { autoPopulate: true })).join(' '));
+      .populate(_.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias')).join(' '));
   },
 
   /**
@@ -57,10 +58,11 @@ module.exports = {
    * @return {Promise}
    */
 
-  edit: (params, values) => {
+  edit: async (params, values) => {
     // Note: The current method will return the full response of Mongo.
     // To get the updated object, you have to execute the `findOne()` method
     // or use the `findOneOrUpdate()` method with `{ new:true }` option.
+    await strapi.hook.mongoose.load().manageRelations(strapi.models, <%= globalID %>, _.merge(params, { values }));
     return <%= globalID %>.update(params, values, { multi: true });
   },
 
