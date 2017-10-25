@@ -59,7 +59,7 @@ module.exports = {
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
     description = _.replace(description, /\"/g, '\\"');
-    console.log(description);
+    
     return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
