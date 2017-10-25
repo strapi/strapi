@@ -3,9 +3,9 @@
  * ModelPage actions
  *
  */
-import { cloneDeep, findIndex, forEach, get, includes, map, set } from 'lodash';
+import { cloneDeep, findIndex, forEach, get, includes, map, set, replace } from 'lodash';
 import { storeData } from '../../utils/storeData';
-
+/* eslint-disable no-useless-escape */
 import {
   ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
@@ -115,6 +115,8 @@ export function modelFetchSucceeded(data) {
       }
     });
   });
+
+  set(model.model, 'description', replace(model.model.description, /\\\"/, '\"'));
 
   return {
     type: MODEL_FETCH_SUCCEEDED,

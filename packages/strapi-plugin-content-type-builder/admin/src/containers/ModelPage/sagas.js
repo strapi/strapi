@@ -28,6 +28,7 @@ export function* fetchModel(action) {
   }
 }
 
+/* eslint-disable no-useless-escape */
 export function* submitChanges(action) {
   try {
     // Show button loader
@@ -64,6 +65,8 @@ export function* submitChanges(action) {
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
+    set(body, 'description', replace(body.description, /\"/, '\"'));
+
     const opts = { method, body };
     const response = yield call(request, requestUrl, opts, true);
 
