@@ -1,6 +1,5 @@
-import { takeLatest } from 'redux-saga';
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { put, fork, take, cancel } from 'redux-saga/effects';
+import { takeLatest, put, fork, take, cancel } from 'redux-saga/effects';
 
 import { loadedData } from './actions';
 import { LOAD_DATA } from './constants';

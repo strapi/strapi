@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 
 import HomePage from 'containers/HomePage';
 
@@ -28,14 +28,19 @@ class App extends React.Component {
   }
 }
 
-App.propTypes = {
-  match: PropTypes.object,
+App.contextTypes = {
+  plugins: PropTypes.object,
+  router: PropTypes.object.isRequired,
+  updatePlugin: PropTypes.func,
 };
 
+App.propTypes = {};
+
 export function mapDispatchToProps(dispatch) {
-  return {
+  return bindActionCreators(
+    {},
     dispatch,
-  };
+  );
 }
 
 const mapStateToProps = createStructuredSelector({});

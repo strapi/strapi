@@ -127,6 +127,198 @@ export default compose(
 
 ***
 
+## Inject design
+
+The `ExtendComponent` allows you to inject design from one plugin into another.
+
+### Example
+
+Let's say that you want to enable another plugin to inject a component into the top area of your plugin's container called `FooPage`;
+
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/actions.js`.
+```js
+import {
+  ON_TOGGLE_SHOW_LOREM,
+} from './constants';
+
+export function onToggleShowLorem() {
+  return {
+    type: ON_TOGGLE_SHOW_LOREM,
+  };
+}
+```
+
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
+```js
+import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators, compose } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
+
+// Import the ExtendComponent
+import ExtendComponent from 'components/ExtendComponent';
+
+// Utils
+import injectReducer from 'utils/injectReducer';
+
+// Actions
+import { onToggleShowLorem } from './action'
+
+import reducer from './reducer';
+
+// Selectors
+import { makeSelectShowLorem } from './selectors';
+
+class FooPage extends React.Component {
+  render() {
+    const lorem = this.props.showLorem ? <p>Lorem ipsum dolor sit amet, consectetur adipiscing</p> : '';
+    return (
+      <div>
+        <h1>This is FooPage container</h1>
+        <ExtendComponent
+          area="top"
+          container="FooPage"
+          plugin="my-plugin"
+          {...props}
+        />
+        {lorem}
+      </div>
+    );
+  }
+}
+
+FooPage.propTypes = {
+  onToggleShowLorem: PropTypes.func.isRequired,
+  showLorem: PropTypes.bool.isRequired,
+};
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      onToggleShowLorem,
+    },
+    dispatch,
+  );
+}
+
+const mapStateToProps = createStructuredSelector({
+  showLorem: makeSelectShowLorem(),
+});
+
+const withConnect = connect(mapDispatchToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'fooPage', reducer });
+
+export default compose(
+  withReducer,
+  withConnect,
+)(FooPage);
+```
+
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/reducer.js`.
+```js
+import { fromJS } from 'immutable';
+import { ON_TOGGLE_SHOW_LOREM } from './constants';
+
+const initialState = fromJS({
+  showLorem: false,
+});
+
+function fooPageReducer(state= initialState, action) {
+  switch (action.type) {
+    case ON_TOGGLE_SHOW_LOREM:
+      return state.set('showLorem', !state.get('showLorem'));
+    default:
+      return state;
+  }
+}
+
+export default fooPageReducer;
+```
+
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/selectors.js`.
+```js
+import  { createSelector } from 'reselect';
+
+/**
+* Direct selector to the fooPage state domain
+*/
+
+const selectFooPageDomain = () => state => state.get('fooPage');
+
+/**
+* Other specific selectors
+*/
+
+const makeSelectShowLorem = () => createSelector(
+  selectFooPageDomain(),
+  (substate) => substate.get('showLorem'),
+);
+
+export { makeSelectShowLorem };
+```
+
+That's all now your plugin's container is injectable!
+
+Let's see how to inject some design from another plugin.
+
+
+### Create your injectedComponent
+**Path -** `./plugins/another-plugin/admin/src/extendables/BarContainer/index.js`;
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
+
+// Import our Button component
+import Button from 'components/Button';
+
+// Other imports such as actions, selectors, sagas, reducer...
+
+class BarContainer extends React.Component {
+  render() {
+    return (
+      <div>
+        <Button primary onClick={this.props.onToggleShowLorem}>
+          Click me to show lorem paragraph
+        </Button>
+      </div>
+    );
+  }
+}
+
+BarContainer.propTypes = {
+  onToggleShowLorem: PropTypes.func,
+};
+
+BarContainer.defaultProps = {
+  onToggleShowLorem: () => {},
+};
+
+export default BarContainer;
+```
+
+### Tell the admin that you want to inject some design into another plugin
+
+You have to create a file called `injectedComponents.js` at the root of your `another-plugin` src folder.
+
+**Path —** `./plugins/another-plugin/admin/src/injectedComponents.js`.
+```js
+import BarContainer from 'extendables/BarContainer';
+
+// export an array containing all the injected components
+export default [
+  {
+    area: 'top',
+    container: 'FooPage',
+    injectedComponent: BarContainer,
+    plugin: 'my-plugin',
+  },
+];
+```
+Just by doing so, the `another-plugin` will add a `Button` which toggles the `lorem` paragraph in the `FooPage` view.
+
+***
+
 ## Routeless container store injection
 
 See the basic container's store injection [documentation](./development.md#using-redux-sagas).
