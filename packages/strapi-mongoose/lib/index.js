@@ -345,7 +345,6 @@ module.exports = function (strapi) {
     },
 
     manageRelations: async function (models, Model, params) {
-      console.log(params);
       const virtualFields = [];
       const response = await Model
         .findOne({
@@ -420,19 +419,17 @@ module.exports = function (strapi) {
               } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
                 // Records to add in the relation.
                 const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
-                  a === b[Model.primaryKey].toString()
+                  ((typeof a === 'string') ? a : a[Model.primaryKey].toString()) === b[Model.primaryKey].toString()
                 );
                 // Records to remove in the relation.
                 const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
-                  a[Model.primaryKey].toString() === b
+                  a[Model.primaryKey].toString() === ((typeof b === 'string') ? b : b[Model.primaryKey].toString())
                 )
                   .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 
                 // Push the work into the flow process.
                 toAdd.forEach(value => {
-                  value = {
-                    _id: value
-                  };
+                  value = (typeof value === 'string') ? { _id: value } : value;
 
                   if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
                     value[details.via] = (value[details.via] || []).concat([response[Model.primaryKey]]);
@@ -448,6 +445,8 @@ module.exports = function (strapi) {
                 });
 
                 toRemove.forEach(value => {
+                  value = (typeof value === 'string') ? { _id: value } : value;
+
                   if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
                     value[details.via] = value[details.via].filter(x => x.toString() !== response[Model.primaryKey].toString());
                   } else {
