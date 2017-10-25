@@ -10,25 +10,19 @@ import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 
 class ExtendComponent extends React.Component {
-  getInjectedComponent = () => {
-    const injectedComponent = this.context.plugins.reduce((acc, plugin) => {
-
+  getInjectedComponent = () => (
+    this.context.plugins.reduce((acc, plugin) => {
       if (!isEmpty(plugin.toJS().injectedComponents)) {
-        const injectedComponents = plugin.toJS().injectedComponents.filter((compo) => {
-
-          if (compo.plugin === this.props.plugin && compo.container === this.props.container && compo.area === this.props.area) {
-            return compo;
-          }
-        });
+        const injectedComponents = plugin.toJS().injectedComponents.filter((compo) => (
+          compo.plugin === this.props.plugin && compo.container === this.props.container && compo.area === this.props.area
+        ));
 
         return injectedComponents[0];
       }
 
       return acc;
-    }, {});
-
-    return injectedComponent;
-  }
+    }, {})
+  )
 
   render() {
     const Component = get(this.getInjectedComponent(), 'injectedComponent');
