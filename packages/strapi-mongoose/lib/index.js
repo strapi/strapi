@@ -369,7 +369,7 @@ module.exports = function (strapi) {
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
-                    strapi.query(details.collection || details.model).update({
+                    this.manageRelations(models, Model, {
                       id: response[current][Model.primaryKey],
                       values: {
                         [details.via]: null
@@ -381,10 +381,12 @@ module.exports = function (strapi) {
 
                 // Remove previous relationship asynchronously if it exists.
                 virtualFields.push(
-                  strapi.query(details.model || details.collection).findOne({ id : recordId })
+                  models[details.model || details.collection]
+                    .findOne({ id : recordId })
+                    .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
                     .then(record => {
                       if (record && _.isObject(record[details.via])) {
-                        return module.exports.update.call(this, {
+                        return this.manageRelations(models, models[details.model || details.collection], {
                           id: record[details.via][Model.primaryKey] || record[details.via].id,
                           values: {
                             [current]: null
@@ -399,10 +401,10 @@ module.exports = function (strapi) {
 
                 // Update the record on the other side.
                 // When params.values[current] is null this means that we are removing the relation.
-                virtualFields.push(strapi.query(details.model || details.collection).update({
+                virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
                   id: recordId,
                   values: {
-                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || value.id || value._id
+                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
                   },
                   parseRelationships: false
                 }));
