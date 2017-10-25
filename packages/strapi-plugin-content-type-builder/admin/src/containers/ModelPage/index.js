@@ -72,7 +72,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   componentWillReceiveProps(nextProps) {
     if (this.props.updatedContentType !== nextProps.updatedContentType) {
-      if (this.state.contentTypeTemporary) {
+      if (this.state.contentTypeTemporary && storeData.getContentType()) {
         this.props.modelFetchSucceeded({ model: storeData.getContentType() });
       } else {
         this.fetchModel(nextProps);
