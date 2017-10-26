@@ -190,7 +190,7 @@ module.exports = {
     });
   },
 
-  checkTableExist: async ctx => {
+  checkTableExists: async ctx => {
     // Get connec
     const { connection } = ctx.params;
     const model = _.toLower(ctx.params.model);
@@ -198,14 +198,14 @@ module.exports = {
 
     if (connector === 'strapi-bookshelf') {
       try {
-        const tableExist = await strapi.connections[connection].schema.hasTable(model)
+        const tableExists = await strapi.connections[connection].schema.hasTable(model)
 
-        return ctx.send({ tableExist });
+        return ctx.send({ tableExists });
       } catch(error) {
         return ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
       }
     }
 
-    ctx.send({ tableExist: true })
+    ctx.send({ tableExists: true })
   }
 };

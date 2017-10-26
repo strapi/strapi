@@ -32,6 +32,7 @@ import { storeData } from '../../utils/storeData';
 
 import {
   cancelChanges,
+  checkIfTableExists,
   deleteAttribute,
   modelFetch,
   modelFetchSucceeded,
@@ -77,6 +78,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       } else {
         this.fetchModel(nextProps);
       }
+    }
+
+    if (this.props.modelPage.didFetchModel !== nextProps.modelPage.didFetchModel) {
+      this.props.checkIfTableExists();
     }
   }
 
@@ -312,6 +317,7 @@ ModelPage.contextTypes = {
 
 ModelPage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
+  checkIfTableExists: PropTypes.func.isRequired,
   deleteAttribute: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
@@ -334,6 +340,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       cancelChanges,
+      checkIfTableExists,
       deleteAttribute,
       modelFetch,
       modelFetchSucceeded,

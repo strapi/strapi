@@ -58,8 +58,8 @@
     },
     {
       "method": "GET",
-      "path": "/checkTableExist/:connection/:model",
-      "handler": "ContentTypeBuilder.checkTableExist",
+      "path": "/checkTableExists/:connection/:model",
+      "handler": "ContentTypeBuilder.checkTableExists",
       "config": {
         "policies": []
       }

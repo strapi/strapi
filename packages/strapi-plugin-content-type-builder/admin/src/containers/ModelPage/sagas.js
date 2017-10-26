@@ -9,9 +9,30 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
-import { MODEL_FETCH, SUBMIT } from './constants';
-import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps, setButtonLoader, unsetButtonLoader, submitActionSucceeded } from './actions';
+import { CHECK_IF_TABLE_EXISTS, MODEL_FETCH, SUBMIT } from './constants';
+import {
+  checkIfTableExistsSucceeded,
+  modelFetchSucceeded,
+  postContentTypeSucceeded,
+  resetShowButtonsProps,
+  setButtonLoader,
+  unsetButtonLoader,
+  submitActionSucceeded,
+} from './actions';
 import { makeSelectModel } from './selectors';
+
+export function* getTableExistance() {
+  try {
+    const model = yield select(makeSelectModel());
+    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${model.name}`;
+    const tableExists = yield call(request, requestUrl, { method: 'GET' });
+
+    yield put(checkIfTableExistsSucceeded(tableExists));
+
+  } catch(error) {
+    window.strapi.notification.error('An error occured');
+  }
+}
 
 export function* fetchModel(action) {
   try {
@@ -101,14 +122,14 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
+  const loadExistanceTableWatcher = yield fork(takeLatest, CHECK_IF_TABLE_EXISTS, getTableExistance);
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  // const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
   yield take(LOCATION_CHANGE);
 
+  yield cancel(loadExistanceTableWatcher);
   yield cancel(loadModelWatcher);
-  // yield cancel(deleteAttributeWatcher);
   yield cancel(loadSubmitChanges);
 }
 
