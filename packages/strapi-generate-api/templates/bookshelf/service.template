@@ -28,7 +28,9 @@ module.exports = {
         qb.where(key, where.symbol, where.value);
       });
 
-      qb.orderBy(convertedParams.sort);
+      if (convertedParams.sort) {
+        qb.orderBy(convertedParams.sort);
+      }
 
       qb.offset(convertedParams.start);
 
@@ -66,7 +68,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  edit: (params, values) => {
+  edit: async (params, values) => {
+    await strapi.hook.bookshelf.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(params), { values }));
     return <%= globalID %>.forge(params).save(values, {path: true});
   },
 

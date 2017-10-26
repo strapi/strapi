@@ -5,7 +5,7 @@ module.exports = {
     return await this
       .forge()
       .fetchAll({
-        withRelated: this.associations.map(x => x.alias).join(' ')
+        withRelated: this.associations.map(x => x.alias)
       });
   },
 
@@ -21,7 +21,7 @@ module.exports = {
         [this.primaryKey]: params[this.primaryKey]
       })
       .fetch({
-        withRelated: this.associations.map(x => x.alias).join(' ')
+        withRelated: this.associations.map(x => x.alias)
       });
 
     return record ? record.toJSON() : record;
