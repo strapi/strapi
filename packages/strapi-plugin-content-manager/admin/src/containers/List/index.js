@@ -202,7 +202,7 @@ export class List extends React.Component {
         onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];
-    
+
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
