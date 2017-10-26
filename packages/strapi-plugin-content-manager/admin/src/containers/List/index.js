@@ -202,7 +202,7 @@ export class List extends React.Component {
         onClick: () => this.context.router.history.push(this.addRoute),
       },
     ];
-
+    
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
@@ -213,7 +213,7 @@ export class List extends React.Component {
             description={{
               id: 'content-manager.containers.List.pluginHeaderDescription',
               values: {
-                label: this.props.schema[this.props.currentModelName].labelPlural.toLowerCase(),
+                label: this.props.count,
               },
             }}
             actions={pluginHeaderActions}
