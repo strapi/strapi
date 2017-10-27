@@ -1,0 +1,36 @@
+.noTableWarning {
+  display: flex;
+  margin-top: 3.6rem;
+  padding: 0 2.8rem;
+  justify-content: space-between;
+  background-color: #FFFFFF;
+  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
+  min-height: 5.3rem;
+  line-height: 5.3rem;
+  font-size: 1.3rem;
+}
+
+.buttonContainer {
+  > a {
+    > button {
+      cursor: pointer;
+      background: #F6F6F6;
+      height: 3rem;
+      border-radius: 0.3rem;
+      text-transform: capitalize;
+      color: #323740;
+      line-height: 1.6rem;
+      border: 0.1rem solid #DFE0E1;
+      font-weight: 500;
+      font-size: 1.3rem;
+      padding-left: 1.6rem;
+      padding-right: 1.6rem;
+    }
+  }
+}
+
+.contentContainer {
+  > img {
+    margin-right: 2.5rem;
+  }
+}
