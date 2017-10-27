@@ -89,7 +89,7 @@
 
   "modelPage.attribute.relationWith": "Relation avec",
 
-  "noTableWarning.description": "N'oubliez pas de créer `{modelName}` dans votre database",
+  "noTableWarning.description": "N'oubliez pas de créer la table `{modelName}` dans votre database",
   "noTableWarning.infos": "Plus d'infos",
 
   "notification.error.message": "Une erreur est survenue",

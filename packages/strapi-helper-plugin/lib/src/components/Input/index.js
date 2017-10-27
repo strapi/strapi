@@ -333,7 +333,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         </div>
         {this.renderErrors()}
         {spacer}
-        <div className={styles.insideInput} onClick={this.handleShowPassword} style={color} onClick={this.handleShowPassword}>
+        <div className={styles.insideInput} onClick={this.handleShowPassword} style={color}>
           <i className="fa fa-eye" />
         </div>
       </div>
