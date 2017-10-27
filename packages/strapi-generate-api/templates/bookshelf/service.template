@@ -70,7 +70,7 @@ module.exports = {
 
   edit: async (params, values) => {
     await strapi.hook.bookshelf.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(params), { values }));
-    return <%= globalID %>.forge(params).save(values, {path: true});
+    return <%= globalID %>.forge(params).save(_.omit(values,  _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias'))), {path: true});
   },
 
   /**

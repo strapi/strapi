@@ -573,7 +573,7 @@ module.exports = function(strapi) {
 
                 // Push the work into the flow process.
                 toAdd.forEach(value => {
-                  value = (typeof value === 'number') ? { id: value } : params.values[Model.primaryKey];
+                  value = (typeof value === 'number') ? { id: value } : value;
 
                   value[details.via] = parseFloat(params[Model.primaryKey]);
                   params.values[Model.primaryKey] = parseFloat(params[Model.primaryKey]);
