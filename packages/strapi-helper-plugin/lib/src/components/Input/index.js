@@ -19,6 +19,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     this.state = {
       errors: [],
       hasInitialValue: false,
+      showPassword: false,
     };
   }
 
@@ -294,6 +295,51 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     </FormattedMessage>
   )
 
+  handleShowPassword = () => this.setState({ showPassword: !this.state.showPassword });
+
+  renderInputPassword = (requiredClass, inputDescription, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
+    const color = this.state.showPassword ? { color: 'black' } : { color: '#9EA7B8' };
+    const type = this.state.showPassword ? 'text' : 'password';
+    
+    return (
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+        </label>
+        <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
+          {(placeholder) => (
+            <input
+              className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+              onChange={this.props.onChange}
+              value={this.props.value}
+              name={this.props.name}
+              id={this.props.label}
+              onBlur={handleBlur}
+              onFocus={this.props.onFocus}
+              placeholder={placeholder}
+              disabled={this.props.disabled}
+              type={type}
+            />
+          )}
+        </FormattedMessage>
+        <div className={styles.inputTextAreaDescriptionContainer}>
+          <small>{inputDescription}</small>
+        </div>
+        {this.renderErrors(styles.errorContainerTextArea)}
+        {spacer}
+        <div className={styles.insideInput} onClick={this.handleShowPassword} style={color} onClick={this.handleShowPassword}>
+          <i className="fa fa-eye" />
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
@@ -343,6 +389,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         return this.renderInputCheckbox(requiredClass, inputDescription);
       case 'date':
         return this.renderInputDate(requiredClass, inputDescription);
+      case 'password':
+        return this.renderInputPassword(requiredClass, inputDescription, handleBlur);
       default:
     }
 

@@ -31,6 +31,16 @@
   -webkit-appearance: none;
 }
 
+.insideInput {
+  position: absolute;
+  top: 3.5rem;
+  right: 2.7rem;
+  color: #9EA7B8;
+  &:hover {
+    color: black!important;
+  }
+}
+
 .input {
   min-width: 200px;
   margin-bottom: 1.5rem;
