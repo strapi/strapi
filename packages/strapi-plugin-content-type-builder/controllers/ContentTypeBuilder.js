@@ -198,8 +198,8 @@ module.exports = {
 
     if (connector === 'strapi-bookshelf') {
       try {
-        const tableExists = await strapi.connections[connection].schema.hasTable(model)
-
+        const tableExists = await strapi.connections[connection].schema.hasTable(model);
+        
         return ctx.send({ tableExists });
       } catch(error) {
         return ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
