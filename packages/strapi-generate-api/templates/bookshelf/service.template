@@ -59,7 +59,9 @@ module.exports = {
    */
 
   add: (values) => {
-    return <%= globalID %>.forge(values).save();
+    const data = await <%= globalID %>.forge(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias')))).save();
+    await strapi.hook.bookshelf.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(data.toJSON()), { values }));
+    return data;
   },
 
   /**
