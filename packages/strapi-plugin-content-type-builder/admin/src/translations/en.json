@@ -89,6 +89,8 @@
   "modelPage.attribute.relationWith": "Relation with",
 
   "noTableWarning.description": "Don't forget to create `{modelName}` in your database",
+  "noTableWarning.infos": "More infos",
+
   "notification.error.message": "An error occured",
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
   "notification.success.message.contentType.edit": "Your content type has been updated",

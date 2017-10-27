@@ -21,8 +21,7 @@ function NoTableWarning({ modelName }) {
       <div className={styles.buttonContainer}>
         <a href="https://strapi.io/documentation/guides/models.html#bookshelf" target="_blank">
           <button>
-
-            More info
+            <FormattedMessage id="content-type-builder.noTableWarning.infos" />
           </button>
         </a>
       </div>
