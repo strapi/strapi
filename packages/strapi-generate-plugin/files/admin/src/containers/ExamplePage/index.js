@@ -24,17 +24,16 @@ import saga from './saga';
 
 export class ExamplePage extends React.Component {
   generateDataBlock() {
-    let dataBlock;
     if (this.props.data) {
       const items = this.props.data.map((item, i) => <li key={i}>{item}</li>);
-      dataBlock = (
+      return (
         <div>
           <p>Data:</p>
           <ul>{items}</ul>
         </div>
       );
     }
-    return dataBlock;
+    return;
   }
 
   render() {
@@ -75,10 +74,12 @@ ExamplePage.propTypes = {
 };
 
 function mapDispatchToProps(dispatch) {
-  return {
-    loadData: () => dispatch(loadData()),
-    dispatch,
-  };
+  return bindActionCreators(
+    {
+      loadData,
+    },
+    dipatch,
+  );
 }
 
 const mapStateToProps = createStructuredSelector({
