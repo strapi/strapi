@@ -513,7 +513,7 @@ module.exports = function(strapi) {
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
-                    strapi.query(details.collection || details.model).update({
+                    this.manageRelations(models, models[details.collection || details.model], {
                       id: response[current][Model.primaryKey],
                       values: {
                         [details.via]: null
@@ -525,11 +525,17 @@ module.exports = function(strapi) {
 
                 // Remove previous relationship asynchronously if it exists.
                 virtualFields.push(
-                  strapi.query(details.model || details.collection).findOne({ id : recordId })
-                    .then(record => {
+                  models[details.model || details.collection]
+                    .forge({ id : recordId })
+                    .fetch({
+                      withRelated: models[details.model || details.collection].associations.map(x => x.alias)
+                    })
+                    .then(response => {
+                      const record = response ? response.toJSON() : response;
+
                       if (record && _.isObject(record[details.via])) {
-                        return module.exports.update.call(this, {
-                          id: record[details.via][Model.primaryKey] || record[details.via].id,
+                        return this.manageRelations(models, Model, {
+                          id: record[details.via][models[details.model || details.collection].primaryKey] || record[details.via].id,
                           values: {
                             [current]: null
                           },
@@ -543,7 +549,7 @@ module.exports = function(strapi) {
 
                 // Update the record on the other side.
                 // When params.values[current] is null this means that we are removing the relation.
-                virtualFields.push(strapi.query(details.model || details.collection).update({
+                virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
                   id: recordId,
                   values: {
                     [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || value.id || value._id
