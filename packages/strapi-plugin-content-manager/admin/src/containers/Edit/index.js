@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace, toNumber } from 'lodash';
+import { map, get, isObject, isEmpty, replace, toNumber, toString } from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -177,13 +177,13 @@ export class Edit extends React.Component {
     const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || primaryKey;
     const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
     const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get(primaryKey)}`;
-
+    
     return (
       <div>
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
-              id: pluginHeaderTitle,
+              id: toString(pluginHeaderTitle),
             }}
             description={{
               id: 'plugin-content-manager-description',
