@@ -30,7 +30,7 @@ export function* getTableExistance() {
     yield put(checkIfTableExistsSucceeded(tableExists));
 
   } catch(error) {
-    window.strapi.notification.error('An error occured');
+    window.Strapi.notification.error('An error occured');
   }
 }
 
