@@ -46,7 +46,7 @@
   "dependencies": {
     "prop-types": "^15.5.10",
     "react-select": "^1.0.0-rc.5",
-    "strapi-helper-plugin": "file:../strapi-helper-plugin"
+    "strapi-helper-plugin": "3.0.0-alpha.6.3"
   },
   "devDependencies": {
     "cross-env": "^5.1.1",

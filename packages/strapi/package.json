@@ -52,13 +52,13 @@
     "node-schedule": "^1.2.0",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",
-    "strapi-generate": "file:../strapi-generate",
-    "strapi-generate-admin": "file:../strapi-generate-admin",
-    "strapi-generate-api": "file:../strapi-generate-api",
-    "strapi-generate-new": "file:../strapi-generate-new",
-    "strapi-generate-policy": "file:../strapi-generate-policy",
-    "strapi-generate-service": "file:../strapi-generate-service",
-    "strapi-utils": "file:../strapi-utils"
+    "strapi-generate": "3.0.0-alpha.6.3",
+    "strapi-generate-admin": "3.0.0-alpha.6.3",
+    "strapi-generate-api": "3.0.0-alpha.6.3",
+    "strapi-generate-new": "3.0.0-alpha.6.3",
+    "strapi-generate-policy": "3.0.0-alpha.6.3",
+    "strapi-generate-service": "3.0.0-alpha.6.3",
+    "strapi-utils": "3.0.0-alpha.6.3"
   },
   "author": {
     "email": "hi@strapi.io",

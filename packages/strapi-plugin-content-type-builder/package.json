@@ -50,7 +50,7 @@
     "plop": "^1.9.0",
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "file:../strapi-helper-plugin",
+    "strapi-helper-plugin": "3.0.0-alpha.6.3",
     "webpack": "^3.8.1"
   },
   "author": {
