@@ -23,6 +23,7 @@ import ContentHeader from 'components/ContentHeader';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 import Form from 'containers/Form';
 import List from 'components/List';
+import NoTableWarning from 'components/NoTableWarning';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
 import injectSaga from 'utils/injectSaga';
@@ -32,6 +33,7 @@ import { storeData } from '../../utils/storeData';
 
 import {
   cancelChanges,
+  checkIfTableExists,
   deleteAttribute,
   modelFetch,
   modelFetchSucceeded,
@@ -77,6 +79,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       } else {
         this.fetchModel(nextProps);
       }
+    }
+
+    if (this.props.modelPage.didFetchModel !== nextProps.modelPage.didFetchModel) {
+      this.props.checkIfTableExists();
     }
   }
 
@@ -247,7 +253,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     // Url to redirects the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.match.path, '/:modelName', '');
     const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
-
+    const showNoTableWarning = this.props.modelPage.tableExists ? '' : <NoTableWarning modelName={this.props.modelPage.model.name} />;
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesView onClickAddAttribute={this.handleClickAddAttribute} /> :
@@ -284,6 +290,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
                 />
                 {content}
+                {showNoTableWarning}
               </div>
             </div>
           </div>
@@ -312,6 +319,7 @@ ModelPage.contextTypes = {
 
 ModelPage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
+  checkIfTableExists: PropTypes.func.isRequired,
   deleteAttribute: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
@@ -334,6 +342,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       cancelChanges,
+      checkIfTableExists,
       deleteAttribute,
       modelFetch,
       modelFetchSucceeded,
