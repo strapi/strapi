@@ -78,7 +78,7 @@ function mapDispatchToProps(dispatch) {
     {
       loadData,
     },
-    dipatch,
+    dispatch,
   );
 }
 
