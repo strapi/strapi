@@ -85,10 +85,14 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           loadOptions={this.getOptions}
           id={this.props.relation.alias}
           multi
-          value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => ({
-            value: get(item, 'value') || item,
-            label: item.label || templateObject({ mainField: this.props.relation.displayedAttribute }, item ).mainField || item.value.id,
-          }))}
+          value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => {
+            if (item) {
+              return {
+                value: get(item, 'value') || item,
+                label: get(item, 'label') || templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField || item.value.id,
+              };
+            }
+          })}
         />
       </div>
     );
