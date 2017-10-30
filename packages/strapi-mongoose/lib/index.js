@@ -369,8 +369,8 @@ module.exports = function (strapi) {
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
-                    this.manageRelations(models, Model, {
-                      id: response[current][Model.primaryKey],
+                    this.manageRelations(models, models[details.model || details.collection], {
+                      _id: response[current][Model.primaryKey],
                       values: {
                         [details.via]: null
                       },

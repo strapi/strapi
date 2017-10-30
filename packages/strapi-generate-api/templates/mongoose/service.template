@@ -48,8 +48,10 @@ module.exports = {
    * @return {Promise}
    */
 
-  add: (values) => {
-    return <%= globalID %>.create(values);
+  add: async (values) => {
+    const data = await <%= globalID %>.create(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias'))));
+    await strapi.hook.mongoose.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(data), { values }));
+    return data;
   },
 
   /**
