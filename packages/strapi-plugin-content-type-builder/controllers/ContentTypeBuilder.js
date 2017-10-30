@@ -191,15 +191,18 @@ module.exports = {
   },
 
   checkTableExists: async ctx => {
-    // Get connec
+    // Get connection
     const { connection } = ctx.params;
 
-
-    const model = _.toLower(ctx.params.model);
     const connector = _.get(strapi.config.currentEnvironment.database.connections, [connection, 'connector']);
+    const model = _.toLower(ctx.params.model);
+
+    if (!model) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Model is required' }] }]);
+    }
 
     if (!connector) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Connection doesn\'t exist'}]}]);
+      return ctx.badRequest(null, [{ messages: [{ id: 'Connection doesn\'t exist' }] }]);
     }
 
     if (connector === 'strapi-bookshelf') {
