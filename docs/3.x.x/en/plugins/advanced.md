@@ -624,7 +624,6 @@ function fooPageReducer(state = initialState, action) {
         .set('error', false)
         .set('errorMessage', '')
         .set('loading', false);
-      break;
     default:
       return state;
   }
@@ -637,9 +636,8 @@ export default fooPageReducer;
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/sagas.js`
 ```js
-import { takeLatest } from 'redux-saga';
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { put, fork, call, take, cancel } from 'redux-saga/effects';
+import { takeLatest, put, fork, call, take, cancel } from 'redux-saga/effects';
 
 // Use our request helper
 import { request } from 'utils/request';
