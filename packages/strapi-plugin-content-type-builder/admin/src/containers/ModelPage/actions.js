@@ -9,9 +9,11 @@ import { storeData } from '../../utils/storeData';
 import {
   ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
+  CANCEL_CHANGES,
+  CHECK_IF_TABLE_EXISTS,
+  CHECK_IF_TABLE_EXISTS_SUCCEEDED,
   EDIT_CONTENT_TYPE_ATTRIBUTE,
   EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
-  CANCEL_CHANGES,
   DEFAULT_ACTION,
   DELETE_ATTRIBUTE,
   MODEL_FETCH,
@@ -40,6 +42,25 @@ export function addAttributeToContentType(newAttribute) {
   };
 }
 
+export function cancelChanges() {
+  return {
+    type: CANCEL_CHANGES,
+  };
+}
+
+export function checkIfTableExists() {
+  return {
+    type: CHECK_IF_TABLE_EXISTS,
+  };
+}
+
+export function checkIfTableExistsSucceeded({ tableExists }) {
+  return {
+    type: CHECK_IF_TABLE_EXISTS_SUCCEEDED,
+    tableExists,
+  };
+}
+
 export function editContentTypeAttribute(modifiedAttribute, attributePosition, shouldAddParralAttribute) {
   return {
     type: EDIT_CONTENT_TYPE_ATTRIBUTE,
@@ -58,12 +79,6 @@ export function editContentTypeAttributeRelation(modifiedAttribute, attributePos
     parallelAttribute: setParallelAttribute(modifiedAttribute),
     parallelAttributePosition,
     shouldRemoveParallelAttribute,
-  };
-}
-
-export function cancelChanges() {
-  return {
-    type: CANCEL_CHANGES,
   };
 }
 

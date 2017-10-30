@@ -94,13 +94,7 @@ class Pagination extends React.Component {
       });
     }
 
-    // Add previous link dots and first page link
     if (this.needPreviousLinksDots()) {
-      linksOptions.unshift({
-        value: '...',
-        isActive: false,
-        handleClick: this.handleDotsClick,
-      });
       linksOptions.unshift({
         value: 1,
         isActive: false,
@@ -108,13 +102,7 @@ class Pagination extends React.Component {
       });
     }
 
-    // Add next link dots and last page link
     if (this.needAfterLinksDots()) {
-      linksOptions.push({
-        value: '...',
-        isActive: false,
-        handleClick: this.handleDotsClick,
-      });
       linksOptions.push({
         value: this.getLastPageNumber(),
         isActive: false,

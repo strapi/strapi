@@ -12,6 +12,9 @@ const path = require('path');
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
+// Local Strapi dependencies.
+const packageJSON = require('../package.json');
+
 // Logger.
 const { cli, logger } = require('strapi-utils');
 
@@ -28,6 +31,7 @@ module.exports = function (id, cliArguments) {
     strapiRoot: path.resolve(__dirname, '..'),
     id: id,
     args: cliArguments,
+    strapiPackageJSON: packageJSON
   };
 
   // Register the generator type.

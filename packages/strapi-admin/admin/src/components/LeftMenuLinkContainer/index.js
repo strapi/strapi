@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, map, size } from 'lodash';
+import { get, isEmpty, map, size, sortBy } from 'lodash';
 
 import LeftMenuLink from 'components/LeftMenuLink';
 
@@ -27,7 +27,7 @@ function LeftMenuLinkContainer({ plugins }) {
         <div key={j}>
           <p className={styles.title}>{leftMenuSection.name}</p>
           <ul className={styles.list}>
-            {leftMenuSection.links.map((link) => 
+            {leftMenuSection.links.map((link) =>
               <LeftMenuLink key={link.label} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${plugin.id}/${link.destination}`} />
             )}
           </ul>
@@ -36,14 +36,14 @@ function LeftMenuLinkContainer({ plugins }) {
     })
   ));
 
-  // Check if the plugins list is empty or not
-  const pluginsLinks = plugins.size
-    ? plugins.valueSeq().map((plugin) => (
+  // Check if the plugins list is empty or not and display plugins by name
+  const pluginsLinks = !isEmpty(plugins.toJS()) ?
+    map(sortBy(plugins.toJS(), 'name'), plugin => (
       <LeftMenuLink
-        key={plugin.get('id')}
-        icon={plugin.get('icon') || 'plug'}
-        label={plugin.get('name')}
-        destination={`/plugins/${plugin.get('id')}`}
+        key={get(plugin, 'id')}
+        icon={get(plugin, 'icon') || 'plug'}
+        label={get(plugin, 'name')}
+        destination={`/plugins/${get(plugin, 'id')}`}
       />
     ))
     : (

@@ -38,9 +38,12 @@ Button library based on bootstrap classes.
 ```js
 // Make sure you don't have any other component called Button otherwise it will
 // import the one from your ./components folder instead.
-import Button from 'components/Button';
+import React from 'react';
 
-const Foo = () => {
+import Button from 'components/Button';
+import styles from './styles.scss';
+
+function Foo() {
   // Define your buttons
   const buttons = [
     {
@@ -55,22 +58,34 @@ const Foo = () => {
 
   return (
     <div className={styles.foo}>
-      {buttons.map((buttonProps) => <Button {...buttonProps} key={buttonProps.label})} />}
+      {buttons.map(buttonProps => <Button key={buttonProps.label} {...buttonProps} />)}
     </div>
   );
 
   // Same as
   // return (
-  //  <div className={styles.foo}>
-  //    <Button label="myPlugin.button.label" labelValues={{ foo: 'Bar' }} primaryAddShape onClick={() => console.log('Click')} />
-  //  </div>
+  //    <div className={styles.foo}>
+  //       <Button
+  //         label="myPlugin.button.label"
+  //         labelValues={{ foo: 'Bar' }}
+  //         onClick={() => console.log('Click')}
+  //         primaryAddShape
+  //       />
+  //    </div>
   // );
-
 }
 
 // Will display a primaryAddShape button with label: 'Add a new Bar'
-export default Button;
+export default Foo;
 ```
+
+***
+
+## ExtendComponent
+
+ExtendComponent allows a plugin to injectDesign into another one.
+
+> Refer to the advanced plugin [documentation](./advanced.md#inject-design) to see how to use it.
 
 ***
 
@@ -227,11 +242,13 @@ class FooPage extends React.Component {
   handleChange = ({ target }) => {
     const value = target.type === 'number' ? Number(target.value) : target.value;
     const error = target.value.length === 0;
-
+    const data = {
+      [target.name]: value,
+    }
     if (error) {
       this.setState({ error: true, errors: [{ id: 'This input is required ' }] });
     } else {
-      this.setState({ data[target.name]: value, error: false, errors: [] });
+      this.setState({ data, error: false, errors: [] });
     }
   }
 
@@ -257,7 +274,7 @@ class FooPage extends React.Component {
 export default FooPage;
 ```
 
-#### Example with propety linkContent and i18n
+#### Example with property linkContent and i18n
 
 **Path —** `./plugins/my-plugin/admin/src/translations/en.json`.
 ```json
