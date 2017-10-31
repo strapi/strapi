@@ -552,7 +552,7 @@ module.exports = function(strapi) {
                 virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
                   id: recordId,
                   values: {
-                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || value.id || value._id
+                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
                   },
                   parseRelationships: false
                 }));
