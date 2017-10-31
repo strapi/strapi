@@ -509,7 +509,7 @@ module.exports = function(strapi) {
               if (response[current] !== params.values[current]) {
                 const value = _.isNull(params.values[current]) ? response[current] : params.values;
 
-                const recordId = _.isNull(params.values[current]) ? value[Model.primaryKey] || value.id || value._id : value[current];
+                const recordId = _.isNull(params.values[current]) ? value[Model.primaryKey] || value.id || value._id : typeof value[current] === 'object' ? value[current].id : value[current];
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
@@ -557,7 +557,7 @@ module.exports = function(strapi) {
                   parseRelationships: false
                 }));
 
-                acc[current] = _.isNull(params.values[current]) ? null : value[current];
+                acc[current] = _.isNull(params.values[current]) ? null : typeof value[current] === 'object' ? value[current][Model.primaryKey] : value[current];
               }
 
               break;
