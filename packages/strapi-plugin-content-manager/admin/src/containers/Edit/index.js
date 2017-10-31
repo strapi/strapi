@@ -15,6 +15,7 @@ import { map, get, isObject, isEmpty, replace, toNumber, toString } from 'lodash
 import { router } from 'app';
 
 // Components.
+import BackHeader from 'components/BackHeader';
 import EditForm from 'components/EditForm';
 import EditFormRelations from 'components/EditFormRelations';
 import PluginHeader from 'components/PluginHeader';
@@ -92,14 +93,14 @@ export class Edit extends React.Component {
       },
     ];
 
-    this.pluginHeaderSubActions = [
-      {
-        label: 'content-manager.containers.Edit.returnList',
-        kind: 'back',
-        onClick: () => router.goBack(),
-        type: 'button',
-      },
-    ];
+    // this.pluginHeaderSubActions = [
+    //   {
+    //     label: 'content-manager.containers.Edit.returnList',
+    //     kind: 'back',
+    //     onClick: () => router.goBack(),
+    //     type: 'button',
+    //   },
+    // ];
 
     this.layout = bindLayout.call(this, layout);
   }
@@ -177,9 +178,10 @@ export class Edit extends React.Component {
     const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || primaryKey;
     const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
     const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get(primaryKey)}`;
-    
+
     return (
       <div>
+        <BackHeader onClick={() => router.goBack()} />
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
@@ -190,7 +192,6 @@ export class Edit extends React.Component {
               defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={this.pluginHeaderActions}
-            subActions={this.pluginHeaderSubActions}
             fullWidth={this.props.isRelationComponentNull}
           />
           <div className='row'>
