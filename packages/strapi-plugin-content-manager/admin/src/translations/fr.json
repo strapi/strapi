@@ -13,6 +13,10 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
+  "emptyAttributes.title": "Il n'y a pas encore de champs",
+  "emptyAttributes.description": "Ajoutez votre premier champ a votre modèle",
+  "emptyAttributes.button": "Ouvrir le Content Type Builder",
+
   "error.schema.generation": "Une erreur est survenue lors de la génération du schéma.",
   "error.records.count": "Une erreur est survenue lors de la réception du nombre d'entrées.",
   "error.records.fetch": "Une erreur est survenue lors de la réception des entrées.",
