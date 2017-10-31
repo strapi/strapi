@@ -105,9 +105,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   handleChangeCheckbox = (e) => {
     const target = {
-      type: e.target.type,
+      type: 'checkbox',
       value: !this.props.value,
-      name: e.target.name,
+      name: this.props.name,
     };
 
     this.props.onChange({ target });
@@ -139,8 +139,15 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           {title}
           <FormattedMessage id={this.props.label} defaultMessage={this.props.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name} style={{ cursor: 'pointer' }}>
+                <input
+                  className="form-check-input"
+                  defaultChecked={this.props.value}
+                  id={this.props.name}
+                  name={this.props.name}
+                  onChange={this.handleChangeCheckbox}
+                  type="checkbox" id={this.props.name}
+                />
                 {message}
               </label>
             )}
