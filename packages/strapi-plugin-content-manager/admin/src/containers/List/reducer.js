@@ -60,7 +60,13 @@ function listReducer(state = initialState, action) {
     case CHANGE_LIMIT:
       return state.set('limit', action.limit);
     case DELETE_RECORD_SUCCESS:
-      return state.set('records', state.get('records').filter(o => o._id !== action.id));
+      return state.set('records', state.get('records').filter(o => {
+        if (o._id) {
+          return o._id !== action.id;
+        }
+
+        return o.id !== action.id;
+      }));
     default:
       return state;
   }
