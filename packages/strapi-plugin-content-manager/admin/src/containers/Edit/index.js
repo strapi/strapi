@@ -93,15 +93,6 @@ export class Edit extends React.Component {
       },
     ];
 
-    // this.pluginHeaderSubActions = [
-    //   {
-    //     label: 'content-manager.containers.Edit.returnList',
-    //     kind: 'back',
-    //     onClick: () => router.goBack(),
-    //     type: 'button',
-    //   },
-    // ];
-
     this.layout = bindLayout.call(this, layout);
   }
 
@@ -164,7 +155,7 @@ export class Edit extends React.Component {
 
   handleSubmitOnEnterPress = (e) => {
     if (e.keyCode === 13) {
-      this.handleSubmit();
+      this.handleSubmit(e);
     }
   }
 

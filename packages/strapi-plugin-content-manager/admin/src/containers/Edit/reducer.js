@@ -93,7 +93,7 @@ function editReducer(state = initialState, action) {
     case SET_FORM_ERRORS:
       return state
         .set('formErrors', List(action.formErrors))
-        .set('didCheckErrors', !state.didCheckErrors);
+        .set('didCheckErrors', !state.get('didCheckErrors'));
     case RESET_EDIT_SUCCESS:
       return state.set('editSuccess', false);
     default:

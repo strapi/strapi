@@ -60,7 +60,7 @@ class EditForm extends React.Component {
 
         return acc;
       }, {});
-
+    
       return (
         <Input
           key={attr}
