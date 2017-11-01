@@ -2,7 +2,7 @@
 
 const glob = require('glob');
 const path = require('path');
-const { after, includes, indexOf, dropRight, uniq, isUndefined, get, defaultsDeep, set } = require('lodash');
+const { after, includes, indexOf, dropRight, uniq, isUndefined, get, defaultsDeep, set, merge} = require('lodash');
 
 module.exports = function() {
   // Method to initialize hooks and emit an event.
@@ -16,7 +16,9 @@ module.exports = function() {
         }
       }, this.config.hook.timeout || 1000);
 
-      module(this).initialize.call(module, err => {
+      const loadedModule = module(this);
+
+      loadedModule.initialize.call(module, err => {
         timeout = false;
 
         if (err) {
@@ -26,6 +28,9 @@ module.exports = function() {
         }
 
         this.hook[hook].loaded = true;
+
+        this.hook[hook] = merge(this.hook[hook], loadedModule);
+
         this.emit('hook:' + hook + ':loaded');
         // Remove listeners.
         this.removeAllListeners('hook:' + hook + ':loaded');

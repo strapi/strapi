@@ -60,7 +60,7 @@ module.exports = {
 
   add: async (values) => {
     const data = await <%= globalID %>.forge(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias')))).save();
-    await strapi.hook.bookshelf.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(data.toJSON()), { values }));
+    await strapi.hook.bookshelf.manageRelations('<%= id %>', _.merge(_.clone(data.toJSON()), { values }));
     return data;
   },
 
@@ -71,7 +71,7 @@ module.exports = {
    */
 
   edit: async (params, values) => {
-    await strapi.hook.bookshelf.load().manageRelations(strapi.models, <%= globalID %>, _.merge(_.clone(params), { values }));
+    await strapi.hook.bookshelf.manageRelations('<%= id %>', _.merge(_.clone(params), { values }));
     return <%= globalID %>.forge(params).save(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias'))), {path: true});
   },
 

@@ -344,7 +344,10 @@ module.exports = function (strapi) {
       return result;
     },
 
-    manageRelations: async function (models, Model, params) {
+    manageRelations: async function (model, params) {
+      const models = strapi.models;
+      const Model = strapi.models[model];
+
       const virtualFields = [];
       const response = await Model
         .findOne({
@@ -369,7 +372,7 @@ module.exports = function (strapi) {
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
-                    this.manageRelations(models, models[details.model || details.collection], {
+                    this.manageRelations(details.model || details.collection, {
                       _id: response[current][Model.primaryKey],
                       values: {
                         [details.via]: null
@@ -386,7 +389,7 @@ module.exports = function (strapi) {
                     .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
                     .then(record => {
                       if (record && _.isObject(record[details.via])) {
-                        return this.manageRelations(models, models[details.model || details.collection], {
+                        return this.manageRelations(details.model || details.collection, {
                           id: record[details.via][Model.primaryKey] || record[details.via].id,
                           values: {
                             [current]: null
@@ -401,7 +404,7 @@ module.exports = function (strapi) {
 
                 // Update the record on the other side.
                 // When params.values[current] is null this means that we are removing the relation.
-                virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
+                virtualFields.push(this.manageRelations(details.model || details.collection, {
                   id: recordId,
                   values: {
                     [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
@@ -439,7 +442,7 @@ module.exports = function (strapi) {
                     value[details.via] = params[Model.primaryKey];
                   }
 
-                  virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
+                  virtualFields.push(this.manageRelations(details.model || details.collection, {
                     id: value[Model.primaryKey] || value.id || value._id,
                     values: value,
                     foreignKey: current
@@ -455,7 +458,7 @@ module.exports = function (strapi) {
                     value[details.via] = null;
                   }
 
-                  virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
+                  virtualFields.push(this.manageRelations(details.model || details.collection, {
                     id: value[Model.primaryKey] || value.id || value._id,
                     values: value,
                     foreignKey: current

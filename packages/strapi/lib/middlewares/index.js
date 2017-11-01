@@ -3,7 +3,7 @@
 const glob = require('glob');
 const path = require('path');
 const { parallel } = require('async');
-const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union } = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
 
 module.exports = function() {
   const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat(['^\/admin/']);
@@ -25,6 +25,8 @@ module.exports = function() {
         reject(`(middleware: ${middleware}) takes too long to load`);
       }
     }, this.config.middleware.timeout || 1000);
+
+    this.middleware[middleware] = merge(this.middleware[middleware], module);
 
     module.initialize.call(module, err => {
       timeout = false;

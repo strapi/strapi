@@ -484,7 +484,10 @@ module.exports = function(strapi) {
       return result;
     },
 
-    manageRelations: async function (models, Model, params) {
+    manageRelations: async function (model, params) {
+      const models = strapi.models;
+      const Model = strapi.models[model];
+
       const virtualFields = [];
       const record = await Model
         .forge({
@@ -513,7 +516,7 @@ module.exports = function(strapi) {
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
                   virtualFields.push(
-                    this.manageRelations(models, models[details.collection || details.model], {
+                    this.manageRelations(details.collection || details.model, {
                       id: response[current][Model.primaryKey],
                       values: {
                         [details.via]: null
@@ -534,7 +537,7 @@ module.exports = function(strapi) {
                       const record = response ? response.toJSON() : response;
 
                       if (record && _.isObject(record[details.via])) {
-                        return this.manageRelations(models, Model, {
+                        return this.manageRelations(model, {
                           id: record[details.via][models[details.model || details.collection].primaryKey] || record[details.via].id,
                           values: {
                             [current]: null
@@ -549,7 +552,7 @@ module.exports = function(strapi) {
 
                 // Update the record on the other side.
                 // When params.values[current] is null this means that we are removing the relation.
-                virtualFields.push(this.manageRelations(models, models[details.model || details.collection], {
+                virtualFields.push(this.manageRelations(details.model || details.collection, {
                   id: recordId,
                   values: {
                     [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
@@ -584,7 +587,7 @@ module.exports = function(strapi) {
                   value[details.via] = parseFloat(params[Model.primaryKey]);
                   params.values[Model.primaryKey] = parseFloat(params[Model.primaryKey]);
 
-                  virtualFields.push(this.addRelation(models, models[details.model || details.collection], {
+                  virtualFields.push(this.addRelation(details.model || details.collection, {
                     id: value[Model.primaryKey] || value.id || value._id,
                     values: association.nature === 'manyToMany' ? params.values : value,
                     foreignKey: current
@@ -594,7 +597,7 @@ module.exports = function(strapi) {
                 toRemove.forEach(value => {
                   value[details.via] = null;
 
-                  virtualFields.push(this.removeRelation(models, models[details.model || details.collection], {
+                  virtualFields.push(this.removeRelation(details.model || details.collection, {
                     id: value[Model.primaryKey] || value.id || value._id,
                     values: association.nature === 'manyToMany' ? params.values : value,
                     foreignKey: current
@@ -628,7 +631,8 @@ module.exports = function(strapi) {
       const process = await Promise.all(virtualFields);
     },
 
-    addRelation: async function (models, Model, params) {
+    addRelation: async function (model, params) {
+      const Model = strapi.models[model];
       const association = Model.associations.filter(x => x.via === params.foreignKey)[0];
 
       if (!association) {
@@ -639,7 +643,7 @@ module.exports = function(strapi) {
       switch (association.nature) {
         case 'oneToOne':
         case 'oneToMany':
-          return this.manageRelations(models, Model, params)
+          return this.manageRelations(model, params)
         case 'manyToMany':
           return Model.forge({
             [Model.primaryKey]: parseFloat(params[Model.primaryKey])
@@ -650,7 +654,8 @@ module.exports = function(strapi) {
       }
     },
 
-    removeRelation: async function (models, Model, params) {
+    removeRelation: async function (model, params) {
+      const Model = strapi.models[model];
       const association = Model.associations.filter(x => x.via === params.foreignKey)[0];
 
       if (!association) {
@@ -661,7 +666,7 @@ module.exports = function(strapi) {
       switch (association.nature) {
         case 'oneToOne':
         case 'oneToMany':
-          return this.manageRelations(models, Model, params)
+          return this.manageRelations(model, params)
         case 'manyToMany':
           return Model.forge({
             [Model.primaryKey]: parseFloat(params[Model.primaryKey])
