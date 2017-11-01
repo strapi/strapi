@@ -28,7 +28,7 @@
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
-    "setup": "npm run clean:all && npm install && node ./scripts/setup.js",
+    "setup": "npm run clean:all && npm install && node ./scripts/setup.js && npm run clean",
     "test": "make test"
   },
   "author": {
