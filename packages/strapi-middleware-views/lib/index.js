@@ -10,6 +10,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const consolidate = require('consolidate');
+const views = require('koa-views');
 
 /**
  * Public assets hook
@@ -69,7 +70,7 @@ module.exports = strapi => {
         });
 
         strapi.app.use(
-          strapi.koaMiddlewares.views(
+          views(
             path.resolve(strapi.config.appPath, strapi.config.paths.views),
             opts
           )
