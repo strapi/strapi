@@ -82,7 +82,7 @@ function editReducer(state = initialState, action) {
     case DELETE_RECORD_ERROR:
       return state.set('deleting', false);
     case TOGGLE_NULL:
-      return state.set('isRelationComponentNull', !state.get('isRelationComponentNull'));
+      return state.set('isRelationComponentNull', true);
     case CANCEL_CHANGES:
       return state.set('record', state.get('initialRecord'));
     case SET_FORM_VALIDATIONS:
@@ -93,7 +93,7 @@ function editReducer(state = initialState, action) {
     case SET_FORM_ERRORS:
       return state
         .set('formErrors', List(action.formErrors))
-        .set('didCheckErrors', !state.didCheckErrors);
+        .set('didCheckErrors', !state.get('didCheckErrors'));
     case RESET_EDIT_SUCCESS:
       return state.set('editSuccess', false);
     default:

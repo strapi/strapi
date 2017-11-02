@@ -1,5 +1,17 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { capitalize, forEach, get, includes, map, replace, set, size, unset, sortBy } from 'lodash';
+import {
+  capitalize,
+  forEach,
+  get,
+  includes,
+  isEmpty,
+  map,
+  replace,
+  set,
+  size,
+  sortBy,
+  unset,
+} from 'lodash';
 import pluralize from 'pluralize';
 import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
@@ -24,13 +36,14 @@ import { makeSelectModel } from './selectors';
 export function* getTableExistance() {
   try {
     const model = yield select(makeSelectModel());
-    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${model.name}`;
+    const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
+    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
     const tableExists = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(checkIfTableExistsSucceeded(tableExists));
 
   } catch(error) {
-    window.strapi.notification.error('An error occured');
+    window.Strapi.notification.error('An error occured');
   }
 }
 

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
-import { compose } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -78,7 +78,7 @@ function mapDispatchToProps(dispatch) {
     {
       loadData,
     },
-    dipatch,
+    dispatch,
   );
 }
 
