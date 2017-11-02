@@ -1,6 +1,29 @@
-// import { take, call, put, select } from 'redux-saga/effects';
+import { fork, call, put, select, takeLatest } from 'redux-saga/effects';
 
+import { pluginDeleted } from 'containers/App/actions';
+import request from 'utils/request';
+
+import { deletePluginSucceeded } from './actions';
+import { ON_DELETE_PLUGIN_CONFIRM } from './constants';
+import { makeSelectPluginToDelete } from './selectors';
+
+export function* deletePlugin() {
+  try {
+    const plugin = yield select(makeSelectPluginToDelete());
+    const requestUrl = `/admin/plugins/uninstall/${plugin}`;
+
+    const resp = yield call(request, requestUrl, { method: 'DELETE' });
+
+    if (resp.ok) {
+      yield put(deletePluginSucceeded());
+      yield put(pluginDeleted(plugin));
+    }
+
+  } catch(error) {
+    console.log(error);
+  }
+}
 // Individual exports for testing
 export default function* defaultSaga() {
-  // See example in containers/HomePage/saga.js
+  yield fork(takeLatest, ON_DELETE_PLUGIN_CONFIRM, deletePlugin);
 }

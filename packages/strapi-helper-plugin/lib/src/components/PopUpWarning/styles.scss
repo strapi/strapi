@@ -82,7 +82,7 @@
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white !important;
-  border: none;
+  border: none !important;
   &:active, &:focus, &:hover {
     box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
     background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
@@ -92,7 +92,7 @@
 }
 .secondary {
   // height: 32px !important;
-  color: #F64D0A;
+  color: #F64D0A !important;
   border: 0.1rem solid #F64D0A;
   position: relative;
   border-radius: 3px;
@@ -101,7 +101,7 @@
    border: 0.15rem solid #F64D0A;
  }
  &:focus, &:hover {
-   background-color: transparent;
+   background-color: transparent !important;
    color: #F64D0A;
    border: 0.1rem solid #F64D0A;
  }

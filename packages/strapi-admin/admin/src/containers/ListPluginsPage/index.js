@@ -14,10 +14,12 @@ import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
 import PluginHeader from 'components/PluginHeader';
+import ListPlugins from 'components/ListPlugins';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import makeSelectListPluginsPage from './selectors';
+import { makeSelectPluginDeleteAction } from './selectors';
+import { onDeletePluginClick, onDeletePluginConfirm } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
@@ -44,6 +46,13 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
             }}
             actions={[]}
           />
+          <ListPlugins
+            history={this.props.history}
+            plugins={this.context.plugins.toJS()}
+            pluginActionSucceeded={this.props.pluginActionSucceeded}
+            onDeleteClick={this.props.onDeletePluginClick}
+            onDeleteConfirm={this.props.onDeletePluginConfirm}
+          />
         </div>
       </div>
     );
@@ -55,16 +64,22 @@ ListPluginsPage.contextTypes = {
 };
 
 ListPluginsPage.propTypes = {
-  // dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  onDeletePluginClick: PropTypes.func.isRequired,
+  onDeletePluginConfirm: PropTypes.func.isRequired,
+  pluginActionSucceeded: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
-  listpluginspage: makeSelectListPluginsPage(),
+  pluginActionSucceeded: makeSelectPluginDeleteAction(),
 });
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    {},
+    {
+      onDeletePluginClick,
+      onDeletePluginConfirm,
+    },
     dispatch
   );
 }

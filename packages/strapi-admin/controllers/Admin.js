@@ -40,5 +40,15 @@ module.exports = {
       // Fallback, render admin page
       ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
     }
+  },
+
+  uninstallPlugin: async ctx => {
+    try {
+      const { plugin } = ctx.params;
+      console.log('plugin', plugin);
+      ctx.send({ ok: true });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
   }
 };
