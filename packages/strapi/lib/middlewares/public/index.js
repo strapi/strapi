@@ -51,6 +51,37 @@ module.exports = strapi => {
         ]
       });
 
+      // Server admin and plugins assets.
+      strapi.router.route({
+        method: 'GET',
+        path: '/admin/*.*',
+        handler: [
+          async (ctx, next) => {
+            ctx.url = path.basename(ctx.url);
+
+            await next();
+          },
+          strapi.koaMiddlewares.static('./admin/admin/build', {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      strapi.router.route({
+        method: 'GET',
+        path: '/admin/:plugin/*.*',
+        handler: async (ctx, next) => {
+          console.log("THERE");
+          ctx.url = path.basename(ctx.url);
+
+          return await strapi.koaMiddlewares.static(`./plugins/${ctx.params.plugin}/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })(ctx, next);
+        }
+      });
+
       // Match every route with an extension.
       // The file without extension will not be served.
       // Note: This route could be override by the user.
