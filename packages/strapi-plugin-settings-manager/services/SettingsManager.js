@@ -858,12 +858,12 @@ module.exports = {
     const installedConnector = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
     if (connector && !installedConnector) {
-      strapi.log.info(`Strapi install ${connector} dependency ...`);
+      strapi.log.info(`Installing ${connector} dependency ...`);
       exec(`npm install ${connector}@alpha`);
     }
 
     if (client && !installedClient) {
-      strapi.log.info(`Strapi install ${client} dependency ...`);
+      strapi.log.info(`Installing ${client} dependency ...`);
       exec(`npm install ${client}`);
     }
   },
