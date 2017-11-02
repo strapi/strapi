@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Modelize the data structure of you API.",
   "attribute.string": "String",
   "attribute.text": "Text",
   "attribute.boolean": "Boolean",

@@ -5,7 +5,7 @@
   "strapi": {
     "name": "Settings Manager",
     "icon": "wrench",
-    "description": "Description of settings-manager plugin."
+    "description": "settings-manager.plugin.description"
   },
   "scripts": {
     "analyze:clean": "rimraf stats.json",

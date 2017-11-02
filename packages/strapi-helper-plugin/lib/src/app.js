@@ -76,6 +76,7 @@ if (module.hot) {
 window.Strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   icon: pluginPkg.strapi.icon,
+  description: pluginDescription,
   id: pluginId,
   leftMenuLinks: [],
   mainComponent: Comp,

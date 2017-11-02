@@ -5,7 +5,7 @@
   "strapi": {
     "name": "Content Type Builder",
     "icon": "paint-brush",
-    "description": "Description of content-type-builder plugin."
+    "description": "content-type-builder.plugin.description"
   },
   "scripts": {
     "analyze:clean": "rimraf stats.json",
