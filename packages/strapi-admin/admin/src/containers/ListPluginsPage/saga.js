@@ -20,7 +20,8 @@ export function* deletePlugin() {
     }
 
   } catch(error) {
-    console.log(error);
+    yield put(deletePluginSucceeded());
+    window.Strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
   }
 }
 // Individual exports for testing

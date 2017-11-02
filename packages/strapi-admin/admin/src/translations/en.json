@@ -18,6 +18,7 @@
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",
+  "app.components.listPluginsPage.deletePlugin.error": "An error occurred during the plugin uninstallation",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.none": "No plugin is installed",
