@@ -9,10 +9,19 @@ const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
+const WriteJsonPlugin = require('write-json-webpack-plugin');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 const dllPlugin = pkg.dllPlugin;
+
+let pluginsToInitialize;
+
+try {
+  pluginsToInitialize = require(path.resolve(process.cwd(), 'admin', 'src', 'config', 'plugins.json'));
+} catch (e) {
+  pluginsToInitialize = [];
+}
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 
@@ -57,6 +66,12 @@ if (isAdmin) {
   plugins.push(new ExtractTextPlugin('[name].[contenthash].css'));
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
+  }));
+  plugins.push(new WriteJsonPlugin({
+      object: pluginsToInitialize,
+      path: 'config',
+      // default output is timestamp.json
+      filename: 'plugins.json',
   }));
 }
 

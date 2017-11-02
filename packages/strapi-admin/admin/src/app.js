@@ -68,6 +68,31 @@ window.onload = function onLoad() {
   }
 };
 
+// Don't inject plugins in development mode.
+if (window.location.port !== '4000') {
+  const uri = window.location.href.indexOf('/admin') !== -1 ?
+    `${window.location.origin}/admin` :
+    window.location.origin;
+
+  fetch(`${uri}/config/plugins.json`)
+    .then(response => {
+      return response.json();
+    })
+    .then(plugins => {
+      const body = document.getElementsByTagName('body')[0];
+
+      (plugins || []).forEach(plugin => {
+        const script = document.createElement('script');
+        script.src = plugin.source;
+
+        body.appendChild(script);
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
+
 /**
  * Public Strapi object exposed to the `window` object
  */

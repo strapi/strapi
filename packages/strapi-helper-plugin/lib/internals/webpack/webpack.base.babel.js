@@ -146,9 +146,6 @@ module.exports = (options) => ({
       test: /\.html$/,
       loader: 'html-loader',
     }, {
-      test: /\.json$/,
-      loader: 'json-loader',
-    }, {
       test: /\.(mp4|webm)$/,
       loader: 'url-loader?limit=10000',
     }],

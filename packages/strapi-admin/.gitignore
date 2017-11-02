@@ -3,6 +3,7 @@ coverage
 build
 node_modules
 stats.json
+plugins.json
 package-lock.json
 
 # Cruft

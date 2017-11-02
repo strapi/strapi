@@ -34,7 +34,7 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      // Default index pages.
+      // Serve /public index page.
       strapi.router.route({
         method: 'GET',
         path: '/',
@@ -51,7 +51,24 @@ module.exports = strapi => {
         ]
       });
 
-      // Server admin and plugins assets.
+      // Serve /admin index page.
+      strapi.router.route({
+        method: 'GET',
+        path: '/admin',
+        handler: [
+          async (ctx, next) => {
+            ctx.url = 'index.html';
+
+            await next();
+          },
+          strapi.koaMiddlewares.static('./admin/admin/build', {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      // Serve admin assets.
       strapi.router.route({
         method: 'GET',
         path: '/admin/*.*',
@@ -68,18 +85,43 @@ module.exports = strapi => {
         ]
       });
 
+      // Serve plugins assets.
       strapi.router.route({
         method: 'GET',
-        path: '/admin/:plugin/*.*',
+        path: '/admin/:resource/*.*',
         handler: async (ctx, next) => {
-          console.log("THERE");
           ctx.url = path.basename(ctx.url);
 
-          return await strapi.koaMiddlewares.static(`./plugins/${ctx.params.plugin}/admin/build`, {
+          if (Object.keys(strapi.plugins).indexOf(ctx.params.resource) !== -1) {
+            return await strapi.koaMiddlewares.static(`./plugins/${ctx.params.resource}/admin/build`, {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true
+            })(ctx, next);
+          }
+
+          // Handle subfolders.
+          return await strapi.koaMiddlewares.static('./admin/admin/build/' + ctx.params.resource, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })(ctx, next);
         }
+      });
+
+      // Allow page refresh
+      strapi.router.route({
+        method: 'GET',
+        path: '/admin/plugins/*',
+        handler: [
+          async (ctx, next) => {
+            ctx.url = 'index.html';
+
+            await next();
+          },
+          strapi.koaMiddlewares.static('./admin/admin/build', {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
       });
 
       // Match every route with an extension.
