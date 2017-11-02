@@ -628,7 +628,7 @@ module.exports = function(strapi) {
       }
 
       // Update virtuals fields.
-      const process = await Promise.all(virtualFields);
+      await Promise.all(virtualFields);
     },
 
     addRelation: async function (model, params) {
