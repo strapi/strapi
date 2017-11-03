@@ -142,31 +142,39 @@ $spacer:   1rem !default;
 $spacer-x: $spacer !default;
 $spacer-y: $spacer !default;
 $spacers: (
-  0: (
-    x: 0,
-    y: 0
-  ),
-  1: (
-    x: ($spacer-x * .25),
-    y: ($spacer-y * .25)
-  ),
-  2: (
-    x: ($spacer-x * .5),
-    y: ($spacer-y * .5)
-  ),
-  3: (
-    x: $spacer-x,
-    y: $spacer-y
-  ),
-  4: (
-    x: ($spacer-x * 1.5),
-    y: ($spacer-y * 1.5)
-  ),
-  5: (
-    x: ($spacer-x * 3),
-    y: ($spacer-y * 3)
-  )
+  0: 0,
+  1: ($spacer * .25),
+  2: ($spacer * .5),
+  3: $spacer,
+  4: ($spacer * 1.5),
+  5: ($spacer * 3)
 ) !default;
+// $spacers: (
+//   0: (
+//     x: 0,
+//     y: 0
+//   ),
+//   1: (
+//     x: ($spacer-x * .25),
+//     y: ($spacer-y * .25)
+//   ),
+//   2: (
+//     x: ($spacer-x * .5),
+//     y: ($spacer-y * .5)
+//   ),
+//   3: (
+//     x: $spacer-x,
+//     y: $spacer-y
+//   ),
+//   4: (
+//     x: ($spacer-x * 1.5),
+//     y: ($spacer-y * 1.5)
+//   ),
+//   5: (
+//     x: ($spacer-x * 3),
+//     y: ($spacer-y * 3)
+//   )
+// ) !default;
 $border-width: 1px !default;
 
 // This variable affects the `.h-*` and `.w-*` classes.

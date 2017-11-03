@@ -36,7 +36,16 @@ PluginLeftMenuLink.propTypes = {
   basePath: PropTypes.string,
   customIcon: PropTypes.string,
   link: PropTypes.object.isRequired,
-  renderCustomLink: PropTypes.func,
+  renderCustomLink: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+};
+
+PluginLeftMenuLink.defaultProps = {
+  basePath: '',
+  customIcon: '',
+  renderCustomLink: false,
 };
 
 export default PluginLeftMenuLink;

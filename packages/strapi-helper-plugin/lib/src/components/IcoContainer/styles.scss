@@ -1,0 +1,12 @@
+.icoContainer {
+  display: flex;
+  justify-content: flex-end;
+  > div {
+    width: 23px;
+    height: 100%;
+    color: #0E1622;
+  }
+  > div:last-child {
+    margin-left: 0;
+  }
+}

@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props */
 function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, blockerComponentIcon, blockerComponentContent = '' }) {
   let content;
 

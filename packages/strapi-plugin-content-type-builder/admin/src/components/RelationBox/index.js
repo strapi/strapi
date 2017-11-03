@@ -31,7 +31,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       name: 'params.target',
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   toggle = () => this.setState({ showMenu: !this.state.showMenu });
@@ -52,10 +52,8 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
                     {value.name}
                   </div>
                 </DropdownItem>
-
               </div>
-
-            )
+            );
           })}
         </DropdownMenu>
       </ButtonDropdown>
@@ -84,7 +82,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       <Input
         tabIndex={this.props.tabIndex}
         type={get(this.props.input, 'type')}
-        handleChange={this.props.handleChange}
+        onChange={this.props.onChange}
         label={get(this.props.input, 'label')}
         name={get(this.props.input, 'name')}
         value={this.props.value}
@@ -93,10 +91,10 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         validations={get(this.props.input, 'validations')}
         errors={this.props.errors}
         didCheckErrors={this.props.didCheckErrors}
-        pluginId="content-type-builder"
+        pluginID="content-type-builder"
       />;
 
-    const dropDown = this.props.dropDownItems ? this.renderDropdownMenu() : '';
+    const dropDown = !isEmpty(this.props.dropDownItems) ? this.renderDropdownMenu() : '';
 
     return (
       <div className={styles.relationBox}>
@@ -106,7 +104,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
           {dropDown}
         </div>
         <div className={styles.inputContainer}>
-          <form onSubmit={this.props.handleSubmit}>
+          <form onSubmit={this.props.onSubmit}>
             <div className="container-fluid">
               <div className={`row ${styles.input}`}>
                 {content}
@@ -121,17 +119,28 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
 
 RelationBox.propTypes = {
   contentTypeTargetPlaceholder: PropTypes.string,
-  didCheckErrors: PropTypes.bool,
+  didCheckErrors: PropTypes.bool.isRequired,
   dropDownItems: PropTypes.array,
   errors: PropTypes.array,
-  handleChange: PropTypes.func,
-  handleSubmit: PropTypes.func,
   header: PropTypes.object,
   input: PropTypes.object,
   isFirstContentType: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   relationType: PropTypes.string,
-  tabIndex: PropTypes.string,
+  tabIndex: PropTypes.string.isRequired,
   value: PropTypes.string,
-}
+};
+
+RelationBox.defaultProps = {
+  contentTypeTargetPlaceholder: '',
+  dropDownItems: [],
+  errors: [],
+  header: {},
+  input: {},
+  isFirstContentType: false,
+  relationType: 'oneToOne',
+  value: '',
+};
 
 export default RelationBox;

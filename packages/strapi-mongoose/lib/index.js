@@ -344,6 +344,151 @@ module.exports = function (strapi) {
       }
 
       return result;
+    },
+
+    manageRelations: async function (model, params) {
+      const models = strapi.models;
+      const Model = strapi.models[model];
+
+      const virtualFields = [];
+      const response = await Model
+        .findOne({
+          [Model.primaryKey]: params._id || params.id
+        })
+        .populate(_.keys(_.groupBy(_.reject(Model.associations, {autoPopulate: false}), 'alias')).join(' '));
+
+      // Only update fields which are on this document.
+      const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
+        const association = Model.associations.filter(x => x.alias === current)[0];
+        const details = Model._attributes[current];
+
+        if (_.get(Model._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
+          acc[current] = params.values[current];
+        } else {
+          switch (association.nature) {
+            case 'oneToOne':
+              if (response[current] !== params.values[current]) {
+                const value = _.isNull(params.values[current]) ? response[current] : params.values;
+
+                const recordId = _.isNull(params.values[current]) ? value[Model.primaryKey] || value.id || value._id : value[current];
+
+                if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
+                  virtualFields.push(
+                    this.manageRelations(details.model || details.collection, {
+                      _id: response[current][Model.primaryKey],
+                      values: {
+                        [details.via]: null
+                      },
+                      parseRelationships: false
+                    })
+                  );
+                }
+
+                // Remove previous relationship asynchronously if it exists.
+                virtualFields.push(
+                  models[details.model || details.collection]
+                    .findOne({ id : recordId })
+                    .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
+                    .then(record => {
+                      if (record && _.isObject(record[details.via])) {
+                        return this.manageRelations(details.model || details.collection, {
+                          id: record[details.via][Model.primaryKey] || record[details.via].id,
+                          values: {
+                            [current]: null
+                          },
+                          parseRelationships: false
+                        });
+                      }
+
+                      return Promise.resolve();
+                    })
+                );
+
+                // Update the record on the other side.
+                // When params.values[current] is null this means that we are removing the relation.
+                virtualFields.push(this.manageRelations(details.model || details.collection, {
+                  id: recordId,
+                  values: {
+                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
+                  },
+                  parseRelationships: false
+                }));
+
+                acc[current] = _.isNull(params.values[current]) ? null : value[current];
+              }
+
+              break;
+            case 'oneToMany':
+            case 'manyToOne':
+            case 'manyToMany':
+              if (details.dominant === true) {
+                acc[current] = params.values[current];
+              } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
+                // Records to add in the relation.
+                const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
+                  ((typeof a === 'string') ? a : a[Model.primaryKey].toString()) === b[Model.primaryKey].toString()
+                );
+                // Records to remove in the relation.
+                const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
+                  a[Model.primaryKey].toString() === ((typeof b === 'string') ? b : b[Model.primaryKey].toString())
+                )
+                  .filter(x => toAdd.find(y => x.id === y.id) === undefined);
+
+                // Push the work into the flow process.
+                toAdd.forEach(value => {
+                  value = (typeof value === 'string') ? { _id: value } : value;
+
+                  if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
+                    value[details.via] = (value[details.via] || []).concat([response[Model.primaryKey]]);
+                  } else {
+                    value[details.via] = params[Model.primaryKey];
+                  }
+
+                  virtualFields.push(this.manageRelations(details.model || details.collection, {
+                    id: value[Model.primaryKey] || value.id || value._id,
+                    values: value,
+                    foreignKey: current
+                  }));
+                });
+
+                toRemove.forEach(value => {
+                  value = (typeof value === 'string') ? { _id: value } : value;
+
+                  if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
+                    value[details.via] = value[details.via].filter(x => x.toString() !== response[Model.primaryKey].toString());
+                  } else {
+                    value[details.via] = null;
+                  }
+
+                  virtualFields.push(this.manageRelations(details.model || details.collection, {
+                    id: value[Model.primaryKey] || value.id || value._id,
+                    values: value,
+                    foreignKey: current
+                  }));
+                });
+              } else if (_.get(Model._attributes, `${current}.isVirtual`) !== true) {
+                acc[current] = params.values[current];
+              }
+
+              break;
+            default:
+          }
+        }
+
+        return acc;
+      }, {});
+
+      virtualFields.push(Model
+        .update({
+          [Model.primaryKey]: params[Model.primaryKey] || params.id
+        }, values, {
+          strict: false
+        }));
+
+      // Update virtuals fields.
+      const process = await Promise.all(virtualFields);
+
+      return process[process.length - 1];
     }
   };
 

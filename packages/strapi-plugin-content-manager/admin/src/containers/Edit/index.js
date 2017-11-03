@@ -11,10 +11,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace, toNumber } from 'lodash';
+import { map, get, isObject, isEmpty, replace, toNumber, toString } from 'lodash';
 import { router } from 'app';
 
 // Components.
+import BackHeader from 'components/BackHeader';
 import EditForm from 'components/EditForm';
 import EditFormRelations from 'components/EditFormRelations';
 import PluginHeader from 'components/PluginHeader';
@@ -92,15 +93,6 @@ export class Edit extends React.Component {
       },
     ];
 
-    this.pluginHeaderSubActions = [
-      {
-        label: 'content-manager.containers.Edit.returnList',
-        kind: 'back',
-        onClick: () => router.goBack(),
-        type: 'button',
-      },
-    ];
-
     this.layout = bindLayout.call(this, layout);
   }
 
@@ -163,7 +155,7 @@ export class Edit extends React.Component {
 
   handleSubmitOnEnterPress = (e) => {
     if (e.keyCode === 13) {
-      this.handleSubmit();
+      this.handleSubmit(e);
     }
   }
 
@@ -180,17 +172,17 @@ export class Edit extends React.Component {
 
     return (
       <div>
+        <BackHeader onClick={() => router.goBack()} />
         <div className={`container-fluid ${styles.containerFluid}`}>
           <PluginHeader
             title={{
-              id: pluginHeaderTitle,
+              id: toString(pluginHeaderTitle),
             }}
             description={{
               id: 'plugin-content-manager-description',
               defaultMessage: `${pluginHeaderDescription}`,
             }}
             actions={this.pluginHeaderActions}
-            subActions={this.pluginHeaderSubActions}
             fullWidth={this.props.isRelationComponentNull}
           />
           <div className='row'>
@@ -201,8 +193,8 @@ export class Edit extends React.Component {
                   currentModelName={this.props.currentModelName}
                   schema={this.props.schema}
                   setRecordAttribute={this.props.setRecordAttribute}
-                  handleChange={this.handleChange}
-                  handleSubmit={this.handleSubmit}
+                  onChange={this.handleChange}
+                  onSubmit={this.handleSubmit}
                   editing={this.props.editing}
                   formErrors={this.props.formErrors.toJS()}
                   didCheckErrors={this.props.didCheckErrors}
@@ -229,6 +221,12 @@ export class Edit extends React.Component {
     );
   }
 }
+
+Edit.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+};
+
 /* eslint-disable react/require-default-props */
 Edit.propTypes = {
   cancelChanges: PropTypes.func.isRequired,

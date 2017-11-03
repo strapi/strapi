@@ -498,22 +498,27 @@ module.exports = {
               {
                 name: 'form.database.item.provider.mongo',
                 value: 'mongo',
+                port: 27017
               },
               {
                 name: 'form.database.item.provider.postgres',
                 value: 'postgres',
+                port: 5432
               },
               {
                 name: 'form.database.item.provider.mysql',
                 value: 'mysql',
+                port: 3306
               },
               {
                 name: 'form.database.item.provider.sqlite3',
                 value: 'sqlite3',
+                port: 1433
               },
               {
                 name: 'form.database.item.provider.redis',
                 value: 'redis',
+                port: 6379
               }
             ],
             validations: {
@@ -846,10 +851,26 @@ module.exports = {
   },
 
   installDependency: (params, name) => {
-    const connector = _.get(params, `database.connections.${name}.connector`);
-    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+    const clientsDependencies = {
+      postgres: 'pg',
+      mysql: 'mysql',
+      sqlite3: 'sqlite3'
+    };
 
-    if (connector && !installed) exec(`npm install ${connector}@alpha`);
+    const client = _.get(clientsDependencies, _.get(params, `database.connections.${name}.settings.client`));
+    const installedClient = _.indexOf(_.keys(strapi.config.info.dependencies), client) !== -1;
+    const connector = _.get(params, `database.connections.${name}.connector`);
+    const installedConnector = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+
+    if (connector && !installedConnector) {
+      strapi.log.info(`Installing ${connector} dependency ...`);
+      exec(`npm install ${connector}@alpha`);
+    }
+
+    if (client && !installedClient) {
+      strapi.log.info(`Installing ${client} dependency ...`);
+      exec(`npm install ${client}`);
+    }
   },
 
   cleanDependency: (env, config) => {

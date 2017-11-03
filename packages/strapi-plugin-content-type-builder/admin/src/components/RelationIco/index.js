@@ -17,7 +17,7 @@ class RelationIco extends React.Component { // eslint-disable-line react/prefer-
       type: 'string',
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   render() {
@@ -28,9 +28,9 @@ class RelationIco extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationIco.propTypes = {
-  handleChange: PropTypes.func,
-  ico: PropTypes.any,
-  name: PropTypes.string,
-}
+  ico: PropTypes.any.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
 
 export default RelationIco;

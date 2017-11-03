@@ -33,6 +33,7 @@ import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, un
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -54,6 +55,9 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
 
       // if (isEmpty(nextProps.errors)) remove(errors, (error) => error.id === 'settings-manager.request.error.database.exist');
       this.setState({ errors });
+    }
+    if (isEmpty(nextProps.errors)) {
+      this.setState({ errors: [] });
     }
   }
 
@@ -121,7 +125,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
             ? <FormattedMessage {...error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
+            <div key={key} className="form-control-feedback invalid-feedback" style={{marginBottom: '1.8rem', fontSize: '1.3rem' }}>{displayError}</div>
           );
         })
       );
@@ -139,7 +143,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           onChange={this.props.handleChange}
           value={inputValue}
           type="text"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={message}
           autoComplete="off"
           style={{marginBottom}}
@@ -172,7 +176,7 @@ class InputText extends React.Component { // eslint-disable-line react/prefer-st
           onChange={this.props.handleChange}
           value={inputValue}
           type="text"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={placeholder}
           style={{marginBottom: marginBottomInput }}
         />
@@ -208,6 +212,6 @@ InputText.propTypes = {
   target: PropTypes.string,
   validations: PropTypes.object,
   value: PropTypes.string,
-}
+};
 
 export default WithInput(InputText); // eslint-disable-line new-cap

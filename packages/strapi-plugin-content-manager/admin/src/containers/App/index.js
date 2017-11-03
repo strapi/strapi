@@ -18,9 +18,10 @@ import injectSaga from 'utils/injectSaga';
 import Home from 'containers/Home';
 import Edit from 'containers/Edit';
 import List from 'containers/List';
+import EmptyAttributesView from 'components/EmptyAttributesView';
 
-import { loadModels, updateSchema } from './actions';
-import { makeSelectLoading } from './selectors';
+import { emptyStore, getModelEntries, loadModels, updateSchema } from './actions';
+import { makeSelectLoading, makeSelectModels, makeSelectModelEntries } from './selectors';
 
 import saga from './sagas';
 
@@ -41,11 +42,35 @@ class App extends React.Component {
     } else {
       this.props.loadModels();
     }
+
+    const modelName = this.props.location.pathname.split('/')[3];
+
+    if (modelName) {
+      this.props.getModelEntries(modelName);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const currentModelName = this.props.location.pathname.split('/')[3];
+
+    if (prevProps.location.pathname !== this.props.location.pathname && currentModelName) {
+      this.props.getModelEntries(currentModelName);
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.emptyStore();
   }
 
   render() {
     if (this.props.loading) {
       return <div />;
+    }
+
+    const currentModelName = this.props.location.pathname.split('/')[3];
+
+    if (currentModelName && isEmpty(get(this.props.models, [currentModelName, 'attributes']))) {
+      return <EmptyAttributesView currentModelName={currentModelName} history={this.props.history} modelEntries={this.props.modelEntries} />;
     }
 
     return (
@@ -65,14 +90,25 @@ App.contextTypes = {
 };
 
 App.propTypes = {
+  emptyStore: PropTypes.func.isRequired,
+  getModelEntries: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   loading: PropTypes.bool.isRequired,
   loadModels: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  modelEntries: PropTypes.number.isRequired,
+  models: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
+  ]).isRequired,
   updateSchema: PropTypes.func.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      emptyStore,
+      getModelEntries,
       loadModels,
       updateSchema,
     },
@@ -82,6 +118,8 @@ export function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   loading: makeSelectLoading(),
+  modelEntries: makeSelectModelEntries(),
+  models: makeSelectModels(),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

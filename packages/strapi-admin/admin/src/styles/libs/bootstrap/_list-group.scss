@@ -19,23 +19,19 @@
 
 .list-group-item-action {
   width: 100%; // For `<button>`s (anchors become 100% by default though)
-  color: $list-group-link-color;
+  color: $list-group-action-color;
   text-align: inherit; // For `<button>`s (anchors inherit)
-
-  .list-group-item-heading {
-    color: $list-group-link-heading-color;
-  }
 
   // Hover state
   @include hover-focus {
-    color: $list-group-link-hover-color;
+    color: $list-group-action-hover-color;
     text-decoration: none;
     background-color: $list-group-hover-bg;
   }
 
   &:active {
-    color: $list-group-link-active-color;
-    background-color: $list-group-link-active-bg;
+    color: $list-group-action-active-color;
+    background-color: $list-group-action-active-bg;
   }
 }
 
@@ -46,9 +42,7 @@
 
 .list-group-item {
   position: relative;
-  display: flex;
-  flex-flow: row wrap;
-  align-items: center;
+  display: block;
   padding: $list-group-item-padding-y $list-group-item-padding-x;
   // Place the border on the list items and negative margin up for better styling
   margin-bottom: -$list-group-border-width;
@@ -71,16 +65,7 @@
   &.disabled,
   &:disabled {
     color: $list-group-disabled-color;
-    cursor: $cursor-disabled;
     background-color: $list-group-disabled-bg;
-
-    // Force color to inherit for custom content
-    .list-group-item-heading {
-      color: inherit;
-    }
-    .list-group-item-text {
-      color: $list-group-disabled-text-color;
-    }
   }
 
   // Include both here for `<a>`s and `<button>`s
@@ -88,18 +73,7 @@
     z-index: 2; // Place active items above their siblings for proper border styling
     color: $list-group-active-color;
     background-color: $list-group-active-bg;
-    border-color: $list-group-active-border;
-
-    // Force color to inherit for custom content
-    .list-group-item-heading,
-    .list-group-item-heading > small,
-    .list-group-item-heading > .small {
-      color: inherit;
-    }
-
-    .list-group-item-text {
-      color: $list-group-active-text-color;
-    }
+    border-color: $list-group-active-border-color;
   }
 }
 
@@ -135,7 +109,6 @@
 // Add modifier classes to change text and background color on individual items.
 // Organizationally, this must come after the `:hover` states.
 
-@include list-group-item-variant(success, $state-success-bg, $state-success-text);
-@include list-group-item-variant(info, $state-info-bg, $state-info-text);
-@include list-group-item-variant(warning, $state-warning-bg, $state-warning-text);
-@include list-group-item-variant(danger, $state-danger-bg, $state-danger-text);
+@each $color, $value in $theme-colors {
+  @include list-group-item-variant($color, theme-color-level($color, -9), theme-color-level($color, 6));
+}

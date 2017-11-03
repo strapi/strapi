@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Modelize the data structure of you API.",
   "attribute.string": "String",
   "attribute.text": "Text",
   "attribute.boolean": "Boolean",
@@ -28,7 +29,7 @@
   "error.validation.max": "The value is too high.",
   "error.validation.min": "The value is too low.",
   "error.validation.maxLength": "The value is too long.",
-  "error.validation.minLength": "The value is too shot.",
+  "error.validation.minLength": "The value is too short.",
   "error.contentTypeName.taken": "This name already exists",
   "error.attribute.taken": "This field name already exists",
   "error.attribute.key.taken": "This value already exists",
@@ -88,6 +89,8 @@
   "modelPage.contentType.list.relationShipTitle.singular": "relationship",
   "modelPage.attribute.relationWith": "Relation with",
 
+  "noTableWarning.description": "Don't forget to create the table `{modelName}` in your database",
+  "noTableWarning.infos": "More infos",
 
   "notification.error.message": "An error occured",
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
@@ -129,6 +132,7 @@
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
   "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this Content Type?",
+  "popUpWarning.bodyMessage.attribute.delete": "Are you sure you want to delete this field?",
 
 
   "table.contentType.title.plural": "Content Types are available",

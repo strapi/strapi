@@ -73,4 +73,4 @@ export const storeData = {
 
     return window.Strapi.notification.info('This plugin is optimized with your localStorage');
   },
-}
+};

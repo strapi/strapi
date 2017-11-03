@@ -14,7 +14,7 @@ const webpack = require('webpack');
 module.exports = {
   context: process.cwd(),
   entry: {
-    vendor: ['react', 'react-dom', 'react-intl', 'react-transition-group', 'immutable', 'lodash'] // Shared dependencies accross the admin and plugins.
+    vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash'] // Shared dependencies accross the admin and plugins.
   },
   devtool: 'cheap-module-source-map',
   output: {
@@ -45,7 +45,8 @@ module.exports = {
       'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
       'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
       'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
-      'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group')
+      'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'),
+      'reactstrap': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap')
     },
     symlinks: false,
     extensions: [

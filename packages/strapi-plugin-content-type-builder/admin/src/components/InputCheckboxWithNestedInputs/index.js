@@ -19,23 +19,21 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
       name: this.props.data.name,
     };
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
 
     if (!target.value) {
-      const paramsToRemove = {
+      const valueToRemove = {
         target: {
+          name: `${this.props.data.name}Value`,
           type: 'number',
           value: '',
-          name: `${this.props.data.name}Value`,
         },
       };
-      this.props.handleChange(paramsToRemove);
+      this.props.onChange(valueToRemove);
     }
   }
 
-
   renderNestedInput = () => {
-
     if (this.props.value[this.props.data.name.split('.')[1]]) {
       return (
         <div className={styles.nestedInputContainer} style={{ marginBottom: '-19px' }}>
@@ -46,7 +44,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
               <Input
                 key={key}
                 type={item.type}
-                handleChange={this.props.handleChange}
+                onChange={this.props.onChange}
                 name={item.name}
                 value={this.props.value[item.name.split('.')[1]]}
                 validations={item.validations}
@@ -55,7 +53,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
                 didCheckErrors={this.props.didCheckErrors}
                 pluginId="content-type-builder"
               />
-            )
+            );
           })}
         </div>
       );
@@ -73,8 +71,15 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
           {title}
           <FormattedMessage id={this.props.data.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.label} onClick={this.handleChange} style={{ cursor: 'pointer' }}>
-                <input className="form-check-input" type="checkbox" checked={this.props.value[this.props.data.name.split('.')[1]]} onChange={this.handleChange} name={this.props.data.name} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.name} style={{ cursor: 'pointer' }}>
+                <input
+                  className="form-check-input"
+                  defaultChecked={this.props.value[this.props.data.name.split('.')[1]]}
+                  id={this.props.data.name}
+                  name={this.props.data.name}
+                  onChange={this.handleChange}
+                  type="checkbox"
+                />
                 {message}
               </label>
             )}
@@ -95,8 +100,14 @@ InputCheckboxWithNestedInputs.propTypes = {
   data: PropTypes.object.isRequired,
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
-  handleChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
   value: PropTypes.object,
+};
+
+InputCheckboxWithNestedInputs.defaultProps = {
+  didCheckErrors: false,
+  errors: [],
+  value: {},
 };
 
 export default InputCheckboxWithNestedInputs;

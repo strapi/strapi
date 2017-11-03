@@ -33,7 +33,7 @@ export default function sendUpdatedParams(isCreatingNewFields) {
       if (!includes(bodyKey, 'enabled') && includes(bodyKey, sectionName)) {
         unset(body, bodyKey);
       }
-    })
+    });
   });
 
   return body;

@@ -1,3 +1,116 @@
 .wrapper {
-  padding: 2.3rem;
+  padding: 4.4rem 20.4rem;
+  font-family: Lato;
+  color: #2C3138;
+  text-align: center;
+  > h1 {
+    margin-bottom: 18px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  > img {
+    width: 64.7rem;
+    height: 25.2rem;
+    margin-bottom: 35px;
+  }
+  > p {
+    margin: 0;
+    line-height: 1.8rem;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
+
+
+.button {
+  height: 3rem;
+  position: relative;
+  border-radius: 0.3rem;
+  text-transform: capitalize;
+  margin-right: 1.8rem;
+  cursor: pointer;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
+  &:focus {
+    outline: 0;
+  }
+  > i {
+    margin-right: 1.3rem;
+    font-weight: 600;
+    padding-top: 1px;
+  }
+  &:hover {
+   &::after {
+     position: absolute;
+     width: 100%;
+     height: 100%;
+     top: 0;
+     left: 0;
+     border-radius: 0.3rem;
+     content: '';
+     opacity: 0.1;
+     background: #FFFFFF;
+   }
+ }
+  font-weight: 500;
+  min-width: 15rem;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+  &:active {
+   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+ }
+ padding-top: 4px;
+ padding-left: 1.6rem;
+ padding-right: 1.6rem;
+ &:before {
+   content: '\F067';
+   font-family: 'FontAwesome';
+   font-weight: 600;
+   font-size: 1.3rem;
+   margin-right: 13px;
+ }
+}
+
+.buttonContainer {
+  padding-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.linkContainer {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 3rem;
+  > a {
+    height: 58px;
+    width: 204px;
+    border: 1px solid #E3E9F3;
+    &:hover {
+      border: 1px solid #CAD0DA;
+    }
+    &:after {
+      height: 34px;
+      width: 120px;
+      margin-bottom: 10px;
+      display: inline-flex;
+      margin-top: 13px;
+      background-image: url('../../assets/images/logo_github.png');
+      background-size: contain;
+      content: '';
+    }
+    &:first-child {
+      &:after {
+        height: 32px;
+        width: 156px;
+        background-image: url('../../assets/images/logo_stack_overflow.png');
+      }
+    }
+    &:last-child {
+      &:after {
+        height: 32px;
+        width: 156x;
+        background-image: url('../../assets/images/logo_slack.png');
+      }
+    }
+  }
 }

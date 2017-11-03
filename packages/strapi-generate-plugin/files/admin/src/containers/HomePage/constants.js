@@ -4,5 +4,4 @@
  *
  */
 
-export const LOAD_DATA = 'HomePage/LOAD_DATA';
-export const LOADED_DATA = 'HomePage/LOADED_DATA';
+export const DEFAULT_ACTION = 'HomePage/DEFAULT_ACTION';
