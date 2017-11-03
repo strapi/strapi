@@ -33,8 +33,8 @@
     "reactstrap": "^4.8.0"
   },
   "devDependencies": {
-    "cross-env": "^5.1.0",
-    "eslint": "^4.9.0",
+    "cross-env": "^5.1.1",
+    "eslint": "^4.10.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-config-prettier": "^2.6.0",
