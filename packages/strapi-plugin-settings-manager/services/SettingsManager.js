@@ -498,22 +498,27 @@ module.exports = {
               {
                 name: 'form.database.item.provider.mongo',
                 value: 'mongo',
+                port: 27017
               },
               {
                 name: 'form.database.item.provider.postgres',
                 value: 'postgres',
+                port: 5432
               },
               {
                 name: 'form.database.item.provider.mysql',
                 value: 'mysql',
+                port: 3306
               },
               {
                 name: 'form.database.item.provider.sqlite3',
                 value: 'sqlite3',
+                port: 1433
               },
               {
                 name: 'form.database.item.provider.redis',
                 value: 'redis',
+                port: 6379
               }
             ],
             validations: {
