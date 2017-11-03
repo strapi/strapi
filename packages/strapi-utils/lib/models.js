@@ -242,7 +242,7 @@ module.exports = {
         collection: association.collection,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true,
+        autoPopulate: _.get(association, 'autoPopulate', true),
         dominant: details.dominant !== true
       });
     } else if (association.hasOwnProperty('model')) {
@@ -252,7 +252,7 @@ module.exports = {
         model: association.model,
         via: association.via || undefined,
         nature: infos.nature,
-        autoPopulate: (_.get(association, 'autoPopulate') || _.get(strapi.config, 'jsonapi.enabled')) === true,
+        autoPopulate: _.get(association, 'autoPopulate', true),
         dominant: details.dominant !== true
       });
     }
