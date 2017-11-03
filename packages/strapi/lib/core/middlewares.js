@@ -47,6 +47,23 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
+      const cwd = process.cwd();
+
+      glob(
+        './node_modules/*(strapi-middleware-*)',
+        {
+          cwd
+        },
+        (err, files) => {
+          if (err) {
+            return reject(err);
+          }
+
+          mountMiddlewares.call(this, files, cwd)(resolve, reject);
+        }
+      );
+    }),
+    new Promise((resolve, reject) => {
       const cwd = path.resolve(__dirname, '..', 'middlewares');
 
       glob(
@@ -124,7 +141,8 @@ const mountMiddlewares = function (files, cwd) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
-        const name = p.split('/')[1];
+        const name = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
+          .split('/')[1];
 
         this.middleware[name] = {
           loaded: false

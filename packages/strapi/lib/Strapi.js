@@ -6,7 +6,7 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get } = require('lodash');
+const { includes, get, assign } = require('lodash');
 const { logger, models } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -85,6 +85,8 @@ class Strapi extends EventEmitter {
 
   async start(config = {}, cb) {
     try {
+      this.config = assign(this.config, config)
+
       // Enhance app.
       await this.enhancer();
       // Load the app.
@@ -94,7 +96,7 @@ class Strapi extends EventEmitter {
       // Freeze object.
       await this.freeze();
       // Launch server.
-      this.server.listen(config.port || this.config.port, err => {
+      this.server.listen(this.config.port, err => {
         if (err) {
           console.log(err);
         }

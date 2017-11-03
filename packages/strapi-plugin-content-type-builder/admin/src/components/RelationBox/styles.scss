@@ -64,22 +64,11 @@
       border: none;
       font-size: 14px;
       color: black;
-    }
-    > button:focus {
-      background-color: transparent!important;
-      box-shadow: none;
-    }
-    > button:active {
-      background-color: transparent!important;
-      box-shadow: none;
-    }
-    > button:hover {
-      background-color: transparent!important;
-      box-shadow: none;
-    }
-    > button:visited {
-      background-color: transparent!important;
-      box-shadow: none;
+      &:focus, &:active, &:hover, &:visited {
+        background-color: transparent!important;
+        box-shadow: none;
+        color: black;
+      }
     }
   }
 }

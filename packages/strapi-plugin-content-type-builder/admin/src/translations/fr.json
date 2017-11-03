@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Modelisez la structure de données de votre API.",
   "attribute.string": "Chaîne de caractères",
   "attribute.text": "Text",
   "attribute.boolean": "Booléen",
@@ -88,6 +89,9 @@
   "modelPage.contentType.list.relationShipTitle.singular": "relation",
 
   "modelPage.attribute.relationWith": "Relation avec",
+
+  "noTableWarning.description": "N'oubliez pas de créer la table `{modelName}` dans votre database",
+  "noTableWarning.infos": "Plus d'infos",
 
   "notification.error.message": "Une erreur est survenue",
   "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",

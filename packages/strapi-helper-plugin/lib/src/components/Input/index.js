@@ -19,6 +19,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     this.state = {
       errors: [],
       hasInitialValue: false,
+      showPassword: false,
     };
   }
 
@@ -104,9 +105,9 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
 
   handleChangeCheckbox = (e) => {
     const target = {
-      type: e.target.type,
+      type: 'checkbox',
       value: !this.props.value,
-      name: e.target.name,
+      name: this.props.name,
     };
 
     this.props.onChange({ target });
@@ -138,8 +139,15 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           {title}
           <FormattedMessage id={this.props.label} defaultMessage={this.props.label}>
             {(message) => (
-              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.label}>
-                <input className="form-check-input" type="checkbox" defaultChecked={this.props.value} onChange={this.handleChangeCheckbox} name={this.props.name} />
+              <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
+                <input
+                  className="form-check-input"
+                  defaultChecked={this.props.value}
+                  id={this.props.name}
+                  name={this.props.name}
+                  onChange={this.handleChangeCheckbox}
+                  type="checkbox" id={this.props.name}
+                />
                 {message}
               </label>
             )}
@@ -294,6 +302,93 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     </FormattedMessage>
   )
 
+  handleShowPassword = () => this.setState({ showPassword: !this.state.showPassword });
+
+  renderInputPassword = (requiredClass, inputDescription, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
+    const color = this.state.showPassword ? { color: 'black' } : { color: '#9EA7B8' };
+    const type = this.state.showPassword ? 'text' : 'password';
+
+    return (
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+        </label>
+        <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
+          {(placeholder) => (
+            <input
+              className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+              onChange={this.props.onChange}
+              value={this.props.value}
+              name={this.props.name}
+              id={this.props.label}
+              onBlur={handleBlur}
+              onFocus={this.props.onFocus}
+              placeholder={placeholder}
+              disabled={this.props.disabled}
+              type={type}
+            />
+          )}
+        </FormattedMessage>
+        <div className={styles.inputDescriptionContainer}>
+          <small>{inputDescription}</small>
+        </div>
+        {this.renderErrors()}
+        {spacer}
+        <div className={styles.insideInput} onClick={this.handleShowPassword} style={color}>
+          <i className="fa fa-eye" />
+        </div>
+      </div>
+    );
+  }
+
+  renderInputSearch = (requiredClass, inputDescription, handleBlur) => {
+    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
+    return (
+      <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
+        <label htmlFor={this.props.label}>
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+        </label>
+        <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
+          <span className={`input-group-addon ${styles.addonSearch}`} />
+          <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
+            {(placeholder) => (
+              <input
+                className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
+                onChange={this.props.onChange}
+                value={this.props.value}
+                name={this.props.name}
+                id={this.props.label}
+                onBlur={handleBlur}
+                onFocus={this.props.onFocus}
+                placeholder={placeholder}
+                disabled={this.props.disabled}
+                type="text"
+              />
+            )}
+          </FormattedMessage>
+        </div>
+        <div className={styles.inputDescriptionContainer}>
+          <small>{inputDescription}</small>
+        </div>
+        <div>
+          {this.renderErrors()}
+          {spacer}
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
@@ -334,6 +429,10 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       spacer = <div />;
     }
 
+    if (this.props.search) {
+      return this.renderInputSearch(requiredClass, inputDescription, handleBlur);
+    }
+
     switch (this.props.type) {
       case 'select':
         return this.renderInputSelect(requiredClass, inputDescription, handleBlur);
@@ -343,6 +442,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         return this.renderInputCheckbox(requiredClass, inputDescription);
       case 'date':
         return this.renderInputDate(requiredClass, inputDescription);
+      case 'password':
+        return this.renderInputPassword(requiredClass, inputDescription, handleBlur);
       default:
     }
 
@@ -395,6 +496,7 @@ Input.propTypes = {
     PropTypes.func,
   ]),
   placeholder: PropTypes.string,
+  search: PropTypes.bool,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
   title: PropTypes.string,
@@ -420,6 +522,7 @@ Input.defaultProps = {
   onBlur: () => {},
   onFocus: () => {},
   placeholder: '',
+  search: false,
   selectOptions: [],
   selectOptionsFetchSucceeded: false,
   value: ''

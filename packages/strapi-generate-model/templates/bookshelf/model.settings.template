@@ -1,6 +1,6 @@
 {
   "connection": "<%= connection %>",
-  "tableName": "<%= idPluralized %>",
+  "collectionName": "<%= idPluralized %>",
   "options": {
     "increments": true,
     "timestamps": true,

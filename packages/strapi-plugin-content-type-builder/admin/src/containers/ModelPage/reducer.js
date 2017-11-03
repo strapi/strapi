@@ -11,9 +11,10 @@ import { storeData } from '../../utils/storeData';
 import {
   ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
+  CANCEL_CHANGES,
+  CHECK_IF_TABLE_EXISTS_SUCCEEDED,
   EDIT_CONTENT_TYPE_ATTRIBUTE,
   EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
-  CANCEL_CHANGES,
   DELETE_ATTRIBUTE,
   MODEL_FETCH_SUCCEEDED,
   POST_CONTENT_TYPE_SUCCEEDED,
@@ -25,6 +26,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  didFetchModel: false,
   initialModel: Map({
     attributes: List(),
   }),
@@ -35,6 +37,7 @@ const initialState = fromJS({
   showButtons: false,
   modelLoading: true,
   showButtonLoader: false,
+  tableExists: false,
 });
 
 function modelPageReducer(state = initialState, action) {
@@ -47,6 +50,12 @@ function modelPageReducer(state = initialState, action) {
       return state
         .updateIn(['model', 'attributes'], (list) => list.push(action.newAttribute))
         .set('showButtons', true);
+    case CANCEL_CHANGES:
+      return state
+        .set('showButtons', false)
+        .set('model', state.get('initialModel'));
+    case CHECK_IF_TABLE_EXISTS_SUCCEEDED:
+      return state.set('tableExists', action.tableExists);
     case EDIT_CONTENT_TYPE_ATTRIBUTE: {
       if (action.shouldAddParralAttribute) {
         return state
@@ -71,10 +80,6 @@ function modelPageReducer(state = initialState, action) {
         .updateIn(['model', 'attributes', action.attributePosition], () => action.modifiedAttribute)
         .updateIn(['model', 'attributes', action.parallelAttributePosition], () => action.parallelAttribute);
     }
-    case CANCEL_CHANGES:
-      return state
-        .set('showButtons', false)
-        .set('model', state.get('initialModel'));
     case DELETE_ATTRIBUTE: {
       const contentTypeAttributes = state.getIn(['model', 'attributes']).toJS();
       contentTypeAttributes.splice(action.position, 1);
@@ -102,6 +107,7 @@ function modelPageReducer(state = initialState, action) {
     }
     case MODEL_FETCH_SUCCEEDED:
       return state
+        .set('didFetchModel', !state.get('didFetchModel'))
         .set('modelLoading', false)
         .set('model', Map(action.model.model))
         .set('initialModel', Map(action.model.model))

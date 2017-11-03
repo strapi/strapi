@@ -35,13 +35,6 @@
     }
     > li:not(:first-child) {
       margin-top: 0!important;
-      position: relative;
-      height: 5.4rem;
-      line-height: 5.4rem;
-      cursor: pointer;
-      &:hover {
-        background-color: #F7F8F8;
-      }
     }
     > li:nth-child(2) {
       height: 5.7rem;
@@ -96,6 +89,7 @@
 
 
 .italic {
+    font-weight: 600;
   > span:nth-child(2) {
     font-style: italic;
   }

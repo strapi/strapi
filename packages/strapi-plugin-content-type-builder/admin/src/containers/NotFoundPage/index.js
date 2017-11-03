@@ -10,20 +10,11 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 
-import messages from './messages';
+import NotFound from 'components/NotFound';
 
-export default class NotFound extends React.Component {
+export default class NotFoundPage extends React.Component {
   render() {
-    return (
-      <div>
-        <div className="container">
-          <h1>
-            <FormattedMessage {...messages.pageNotFound} />
-          </h1>
-        </div>
-      </div>
-    );
+    return <NotFound {...this.props} />;
   }
 }

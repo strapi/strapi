@@ -6,19 +6,14 @@
 
 import { fromJS } from 'immutable';
 
-import { LOAD_DATA, LOADED_DATA } from './constants';
+import { DEFAULT_ACTION } from './constants';
 
-const initialState = fromJS({
-  loading: false,
-  data: false,
-});
+const initialState = fromJS({});
 
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
-    case LOAD_DATA:
-      return state.set('loading', true);
-    case LOADED_DATA:
-      return state.set('loading', false).set('data', fromJS(action.data));
+    case DEFAULT_ACTION:
+      return state;
     default:
       return state;
   }

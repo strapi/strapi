@@ -37,7 +37,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
     // Request URL
     const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
-    const requestUrl = `/content-manager/explorer/${this.props.relation.model}/${requestUrlSuffix}`;
+    const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
     return request(requestUrl, {
@@ -72,7 +72,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       : '';
 
     const value = this.props.record.get(this.props.relation.alias);
-
+    
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectOne}`}>
@@ -84,7 +84,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {
             value: value.toJS(),
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, value.toJS()).mainField,
+            label: templateObject({ mainField: this.props.relation.displayedAttribute }, value.toJS()).mainField || value.toJS().id,
           }}
         />
       </div>

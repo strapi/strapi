@@ -25,6 +25,13 @@ const tryRequire = (bootstrap = false) => {
 const bootstrap = tryRequire(true);
 const pluginRequirements = tryRequire();
 
+let injectedComponents;
+
+try {
+  injectedComponents = require('injectedComponents').default;
+} catch(err) {
+  injectedComponents = [];
+}
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -69,6 +76,7 @@ if (module.hot) {
 window.Strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   icon: pluginPkg.strapi.icon,
+  description: pluginDescription,
   id: pluginId,
   leftMenuLinks: [],
   mainComponent: Comp,
@@ -77,6 +85,7 @@ window.Strapi.registerPlugin({
   pluginRequirements,
   preventComponentRendering: false,
   blockerComponent: null,
+  injectedComponents,
   blockerComponentProps: {},
 });
 

@@ -340,6 +340,10 @@ It works exactly as before. You need to add `strapi-views` into your app's depen
 ```json
 {
   "views": {
+    "enabled": true,
+    "map": {
+      "ejs": "ejs"
+    },
     "viewExt": "ejs",
     "debug": true,
     "cache": true

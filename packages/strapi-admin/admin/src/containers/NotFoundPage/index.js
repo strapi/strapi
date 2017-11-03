@@ -11,40 +11,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { defineMessages, FormattedMessage } from 'react-intl';
 
-import Button from 'components/Button';
+import NotFound from 'components/NotFound';
 
-import styles from './styles.scss';
-import messages from './messages.json';
-
-defineMessages(messages);
-
-export default class NotFound extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export default class NotFoundPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={styles.notFound}>
-        <h1 className={styles.notFoundTitle}>
-          404
-        </h1>
-        <h2 className={styles.notFoundDescription}>
-          <FormattedMessage {...messages.description} />
-        </h2>
-        <Button
-          label="app.components.NotFoundPage.back"
-          kind="back"
-          onClick={(e) => {
-            e.stopPropagation();
-
-            this.props.history.goBack();
-          }}
-        />
-      </div>
+      <NotFound {...this.props} />
     );
   }
 }
 
-NotFound.propTypes = {
+NotFoundPage.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,

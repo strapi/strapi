@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.6.3",
+  "version": "3.0.0-alpha.6.4",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -26,18 +26,18 @@
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^0.30.0",
     "sanitize.css": "^4.1.0",
-    "strapi-helper-plugin": "3.0.0-alpha.6.3",
-    "strapi-utils": "3.0.0-alpha.6.3"
+    "strapi-helper-plugin": "3.0.0-alpha.6.4",
+    "strapi-utils": "3.0.0-alpha.6.4"
   },
   "devDependencies": {
-    "cross-env": "^5.1.0",
-    "eslint": "^4.9.0",
+    "cross-env": "^5.1.1",
+    "eslint": "^4.10.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-config-prettier": "^2.6.0",
+    "eslint-config-prettier": "^2.7.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-babel": "^4.1.2",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.4.0",
     "eslint-plugin-redux-saga": "^0.4.0",
