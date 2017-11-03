@@ -11,6 +11,7 @@ import {
   CHANGE_DEFAULT_LANGUAGE,
   CHANGE_INPUT,
   CANCEL_CHANGES,
+  CLOSE_MODAL,
   LANGUAGES_FETCH_SUCCEEDED,
   EDIT_SETTINGS_SUCCEEDED,
   LANGUAGE_ACTION_SUCCEEDED,
@@ -62,6 +63,8 @@ function homePageReducer(state = initialState, action) {
     case CHANGE_INPUT:
       return state
         .updateIn(['modifiedData', action.key], () => action.value);
+    case CLOSE_MODAL:
+      return state.set('error', !state.get('error'));
     case CANCEL_CHANGES:
       return state
         .set('modifiedData', state.get('initialData'))
@@ -119,8 +122,7 @@ function homePageReducer(state = initialState, action) {
     case DATABASE_ACTION_ERROR:
       return state
         .set('error', !state.get('error'))
-        .set('formErrors', action.formErrors)
-        // .set('didCreatedNewDb', true);
+        .set('formErrors', action.formErrors);
     case SPECIFIC_DATABASE_FETCH_SUCCEEDED:
       return state
         .set('specificDatabase', OrderedMap(action.database))
@@ -142,7 +144,7 @@ function homePageReducer(state = initialState, action) {
       return state.setIn(['configsDisplay', 'sections'], newSections);
     case SET_ERRORS:
       return state
-        .set('formErrors', action.errors)
+        .set('formErrors', action.errors);
     case SET_LOADER:
       return state.set('showLoader', true);
     case UNSET_LOADER:

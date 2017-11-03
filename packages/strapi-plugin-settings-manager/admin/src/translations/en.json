@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Configurate your project in seconds",
   "menu.section.global-settings": "Global settings",
   "menu.item.application": "Application",
   "menu.item.languages": "Languages",

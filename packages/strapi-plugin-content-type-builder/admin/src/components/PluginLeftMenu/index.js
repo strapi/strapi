@@ -38,11 +38,24 @@ class PluginLeftMenu extends React.Component { // eslint-disable-line react/pref
 }
 
 PluginLeftMenu.propTypes = {
-  addCustomSection: PropTypes.func,
+  addCustomSection: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   basePath: PropTypes.string,
   customIcon: PropTypes.string,
-  renderCustomLink: PropTypes.func,
+  renderCustomLink: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   sections: PropTypes.array.isRequired,
+};
+
+PluginLeftMenu.defaultProps = {
+  addCustomSection: false,
+  basePath: '',
+  customIcon: '',
+  renderCustomLink: false,
 };
 
 export default PluginLeftMenu;

@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
 import styles from './styles.scss';
 
-
+/* eslint-disable react/require-default-props  */
 class PluginLeftMenuSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const environmentsRequired = this.props.section.name === 'menu.section.environments';

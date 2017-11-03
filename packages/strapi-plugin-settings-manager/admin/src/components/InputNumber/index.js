@@ -33,6 +33,7 @@ import { isEmpty, includes, map, mapKeys, isObject, reject, union, uniqBy } from
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputNumber extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -93,7 +94,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           const displayError = isObject(error) && error.id ?
             <FormattedMessage {...error} /> : error;
           return (
-            <div key={key} className="form-control-feedback" style={{marginBottom: '1.8rem'}}>{displayError}</div>
+            <div key={key} className="form-control-feedback invalid-feedback" style={{marginBottom: '1.8rem', fontSize: '1.3rem' }}>{displayError}</div>
           );
         })
       );
@@ -111,7 +112,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           onChange={this.props.handleChange}
           value={inputValue}
           type="number"
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={message}
           style={{marginBottom}}
         />
@@ -140,7 +141,7 @@ class InputNumber extends React.Component { // eslint-disable-line react/prefer-
           onBlur={handleBlur}
           onChange={this.props.handleChange}
           onFocus={this.props.handleFocus}
-          className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+          className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
           placeholder={placeholder}
           style={{marginBottom: marginBottomInput }}
         />
@@ -183,6 +184,6 @@ InputNumber.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
-}
+};
 
 export default WithInput(InputNumber); // eslint-disable-line new-cap

@@ -14,6 +14,7 @@ import {
   LANGUAGES_FETCH_SUCCEEDED,
   CHANGE_INPUT,
   CANCEL_CHANGES,
+  CLOSE_MODAL,
   DEFAULT_ACTION,
   EDIT_SETTINGS,
   EDIT_SETTINGS_SUCCEEDED,
@@ -40,7 +41,7 @@ import {
 export function defaultAction() {
   return {
     type: DEFAULT_ACTION,
-  }
+  };
 }
 
 export function configFetch(endPoint) {
@@ -75,6 +76,11 @@ export function cancelChanges() {
   };
 }
 
+export function closeModal() {
+  return {
+    type: CLOSE_MODAL,
+  };
+}
 
 export function languagesFetch() {
   return {
@@ -132,7 +138,6 @@ export function editSettingsSucceeded() {
   };
 }
 
-
 function getDataFromConfigs(configs) {
   const data = {};
 
@@ -143,7 +148,7 @@ function getDataFromConfigs(configs) {
       if (has(item, 'items')) {
         forEach(item.items, (itemValue) => {
           data[itemValue.target] = itemValue.value;
-        })
+        });
       }
     });
   });
@@ -153,11 +158,9 @@ function getDataFromConfigs(configs) {
     const allowFromValueNested = split(get(data, 'security.xframe.value'), ' ')[1];
     data['security.xframe.value'] = allowFromValue;
     data['security.xframe.value.nested'] = allowFromValueNested;
-
   }
   return data;
 }
-
 
 export function changeDefaultLanguage(configsDisplay, newLanguage) {
   return {
@@ -193,7 +196,6 @@ export function languageDelete(languageToDelete) {
   };
 }
 
-
 export function databasesFetch(environment) {
   return {
     type: DATABASES_FETCH,
@@ -204,7 +206,7 @@ export function databasesFetch(environment) {
 export function databasesFetchSucceeded(listDatabases, availableDatabases) {
   // form.database.item.connector
   const appDatabases = availableDatabases;
-  remove(appDatabases.sections[0].items, (item) => item.name === 'form.database.item.connector')
+  remove(appDatabases.sections[0].items, (item) => item.name === 'form.database.item.connector');
   const configsDisplay = {
     name: 'form.databases.name',
     description: 'form.databases.description',
@@ -280,7 +282,6 @@ export function specificDatabaseFetchSucceeded(db) {
     formValidations,
   };
 }
-
 
 export function databaseEdit(data, apiUrl) {
   return {

@@ -8,6 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import IcoContainer from 'components/IcoContainer';
+import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
 import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
@@ -20,68 +22,55 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
       showWarning: false,
     };
   }
-  edit = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+
+  handleEdit = () => {
     router.push(`/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
 
-  delete = (e) => {
+  handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.handleDelete(this.props.rowItem.name)
+    this.props.onDelete(this.props.rowItem.name);
     this.setState({ showWarning: false });
   }
 
-  goTo = () => {
+  handleGoTo = () => {
     router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}`);
   }
 
-  toggleModalWarning = () => {
-    this.setState({ showWarning: !this.state.showWarning });
-  }
+  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
-  showModalWarning = (e) => {
-    e.stopPropagation();
-    this.setState({ showWarning: !this.state.showWarning });
-  }
+  handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   render() {
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const description = isEmpty(this.props.rowItem.description) ? '-' :  this.props.rowItem.description;
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
+    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: this.handleShowModalWarning }];
+
     return (
-      <li>
-        <div className={`${styles.liInnerContainer} row`} onClick={this.goTo} role="button">
-          <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
-          <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)}</span> {temporary}</div>
-          <div className="col-md-5 text-center">{description}</div>
-          <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
-          <div className="col-md-1">
-            <div className={styles.icContainer}>
-              <div>
-                <i className="fa fa-pencil" onClick={this.edit} role="button" />
-              </div>
-              <div>
-                <i className="fa fa-trash" onClick={this.showModalWarning} role="button" />
-              </div>
-            </div>
-          </div>
+      <ListRow onClick={this.handleGoTo}>
+        <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
+        <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)}</span> {temporary}</div>
+        <div className="col-md-5 text-center">{description}</div>
+        <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
+        <div className="col-md-1">
+          <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
+          content={{ message: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete' }}
           popUpWarningType={'danger'}
-          handleConfirm={this.delete}
+          onConfirm={this.handleDelete}
         />
-      </li>
+      </ListRow>
     );
   }
 }
 
 TableListRow.propTypes = {
-  handleDelete: PropTypes.func,
+  onDelete: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,
 };
 

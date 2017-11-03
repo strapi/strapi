@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const exec = require('child_process').execSync;
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -39,6 +40,25 @@ module.exports = {
     } catch (err) {
       // Fallback, render admin page
       ctx.body = strapi.admin.services.admin.generateAdminIndexFile();
+    }
+  },
+
+  uninstallPlugin: async ctx => {
+    try {
+      const { plugin } = ctx.params;
+      const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
+
+      strapi.reload.isWatching = false;
+
+      strapi.log.info(`Uninstalling ${plugin}...`);
+      exec(`node ${strapiBin} uninstall ${plugin}`);
+
+      ctx.send({ ok: true });
+
+      strapi.reload();
+    } catch(err) {
+      strapi.reload.isWatching = true;
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   }
 };

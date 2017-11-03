@@ -13,6 +13,7 @@ import List from 'components/List';
 import { darken } from '../../utils/colors';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class HeaderNav extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const baseUrl = join(take(this.props.path.split('/'), 4), '/');
@@ -31,7 +32,6 @@ class HeaderNav extends React.Component { // eslint-disable-line react/prefer-st
 
                   return (
                     <NavLink key={key} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
-                      <div></div>
                       <div className={`${styles.linkText} text-center`}>
                         {link.name}
                         {notifActive}
@@ -53,5 +53,6 @@ HeaderNav.propTypes = {
   links: PropTypes.array,
   path: PropTypes.string,
   renderListComponent: PropTypes.bool,
-}
+};
+
 export default HeaderNav;

@@ -22,6 +22,7 @@ import {
   join,
   map,
   replace,
+  size,
   toNumber,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -55,6 +56,7 @@ import {
   cancelChanges,
   changeDefaultLanguage,
   changeInput,
+  closeModal,
   configFetch,
   databaseEdit,
   databasesFetch,
@@ -74,8 +76,8 @@ import saga from './sagas';
 import styles from './styles.scss';
 import config from './config.json';
 
+/* eslint-disable react/require-default-props  */
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
   constructor(props) {
     super(props);
     this.customComponents = config.customComponents;
@@ -99,7 +101,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.match.params.slug) {
       this.handleFetch(this.props);
     } else {
-      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
+      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug']) || 'application'}`);
     }
   }
 
@@ -154,7 +156,18 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
-  changeDefaultLanguage = ({ target }) => {
+  emptyDbModifiedData = () => {
+    this.setState({ toggleDefaultConnection: false });
+    this.props.emptyDbModifiedData();
+  }
+
+  getDatabase = (databaseName) => {
+    // allow state here just for modal purpose
+    this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
+    // this.setState({ modal: !this.state.modal });
+  }
+
+  handleDefaultLanguageChange = ({ target }) => {
     // create new object configsDisplay based on store property configsDisplay
     const configsDisplay = {
       name: this.props.home.configsDisplay.name,
@@ -183,12 +196,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     // Edit the new config
     this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
-  }
-
-  getDatabase = (databaseName) => {
-    // allow state here just for modal purpose
-    this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
-    // this.setState({ modal: !this.state.modal });
   }
 
   handleFetch(props) {
@@ -236,6 +243,15 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleCancel = () => this.props.cancelChanges();
 
+  handleSetDefaultConnectionDb = () => {
+    const value = this.state.toggleDefaultConnection
+      ? this.props.home.addDatabaseSection.sections[1].items[0].value
+      : this.props.home.modifiedData[this.props.home.dbNameTarget];
+    const target = { name: 'database.defaultConnection', value };
+    this.handleChange({target});
+    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
+  }
+
   handleSubmit = (e) => { // eslint-disable-line consistent-return
     e.preventDefault();
     const apiUrl = this.props.match.params.env ? `${this.props.match.params.slug}/${this.props.match.params.env}` : this.props.match.params.slug;
@@ -258,7 +274,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const apiUrl = `${databaseName}/${this.props.match.params.env}`;
     const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
 
-    if (isEmpty(body)) return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+    if (isEmpty(body)) {
+      this.props.closeModal();
+      return window.Strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+    }
 
 
     if (isEmpty(formErrors)) {
@@ -285,18 +304,18 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       key={key}
       {...props}
       liStyles={liStyles}
-      handleLanguageDelete={this.handleLanguageDelete}
+      onDeleteLanguage={this.handleLanguageDelete}
       listLanguages={this.props.home.listLanguages}
-      changeDefaultLanguage={this.changeDefaultLanguage}
+      onDefaultLanguageChange={this.handleDefaultLanguageChange}
     />
   )
 
   renderListTitle = () => {
-    const availableContentNumber = this.props.home.configsDisplay.sections.length;
+    const availableContentNumber = size(this.props.home.configsDisplay.sections);
     const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
     const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
 
-    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>
+    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>;
   }
 
   renderListButtonLabel = () => `list.${this.props.match.params.slug}.button.label`;
@@ -312,7 +331,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
             key={key}
             className={popUpStyles.defaultConnection}
             id={item.target}
-            onClick={this.setDefaultConnectionDb}
+            onClick={this.handleSetDefaultConnectionDb}
           >
             <FormattedMessage id={`settings-manager.${item.name}`} />{isActive}
           </div>
@@ -344,7 +363,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           />
           <div className={styles.popUpSpacer} />
         </div>
-      )
+      );
     })
   )
 
@@ -353,22 +372,18 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       key={key}
       data={props}
       getDatabase={this.getDatabase}
-      handleDatabaseDelete={this.handleDatabaseDelete}
+      onDeleteDatabase={this.handleDatabaseDelete}
       sections={this.props.home.specificDatabase.sections}
       values={this.props.home.modifiedData}
-      handleChange={this.handleChange}
+      onChange={this.handleChange}
       renderPopUpForm={this.renderPopUpFormDatabase}
-      handleSubmit={this.handleSubmitEditDatabase}
+      onSubmit={this.handleSubmitEditDatabase}
       formErrors={this.props.home.formErrors}
       error={this.props.home.error}
       resetToggleDefaultConnection={this.resetToggleDefaultConnection}
     />
   )
 
-  emptyDbModifiedData = () => {
-    this.setState({ toggleDefaultConnection: false });
-    this.props.emptyDbModifiedData();
-  }
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.match.params.slug));
@@ -423,9 +438,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         sections={sections}
         listItems={this.props.home.configsDisplay.sections}
         values={this.props.home.modifiedData}
-        handleChange={this.handleChange}
-        handleCancel={this.handleCancel}
-        handleSubmit={this.handleSubmit}
+        onChange={this.handleChange}
+        onCancel={this.handleCancel}
+        onSubmit={this.handleSubmit}
         links={this.props.environments}
         path={this.props.location.pathname}
         slug={this.props.match.params.slug}
@@ -448,15 +463,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     );
   }
 
-  setDefaultConnectionDb = () => {
-    const value = this.state.toggleDefaultConnection
-      ? this.props.home.addDatabaseSection.sections[1].items[0].value
-      : this.props.home.modifiedData[this.props.home.dbNameTarget];
-    const target = { name: 'database.defaultConnection', value };
-    this.handleChange({target});
-    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
-  }
-
   // Set the toggleDefaultConnection to false
   resetToggleDefaultConnection = () => this.setState({ toggleDefaultConnection: false });
 
@@ -477,10 +483,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   render() {
-    if (this.props.home.loading) {
-      return <div />;
-    }
-
     return (
       <div className="container-fluid">
         <div className="row">
@@ -518,6 +520,7 @@ function mapDispatchToProps(dispatch) {
       changeDefaultLanguage,
       changeInput,
       configFetch,
+      closeModal,
       databaseDelete,
       databaseEdit,
       databasesFetch,
@@ -538,6 +541,7 @@ HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   changeDefaultLanguage: PropTypes.func.isRequired,
   changeInput: PropTypes.func.isRequired,
+  closeModal: PropTypes.func.isRequired,
   configFetch: PropTypes.func.isRequired,
   databaseDelete: PropTypes.func.isRequired,
   databaseEdit: PropTypes.func.isRequired,

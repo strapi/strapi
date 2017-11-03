@@ -49,7 +49,7 @@
    > i {
      margin-right: 1.3rem;
    }
-   &:hover {
+   &:hover, &:active {
     &::after {
       position: absolute;
       width: 100%;
@@ -135,6 +135,11 @@
   &:focus {
     outline: 0;
   }
+  &:hover, &:active {
+    color: white;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    border: none;
+  }
   border: none!important;
   width: 15rem;
   line-height: 1.6rem;
@@ -184,7 +189,8 @@
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   cursor: pointer;
-  &:hover {
+  background-color: transparent;
+  &:hover, &:active {
     color: #F64D0A;
     background-color: white;
     border: 0.1rem solid #F64D0A;

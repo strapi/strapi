@@ -25,6 +25,7 @@ import ButtonPrimaryHotline from 'components/Button';
 import PopUpForm from 'components/PopUpForm';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class List extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -58,6 +59,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
   }
 
   render() {
+    const handleToggle = this.toggle;
     const button = this.props.noListButtonPopUp
       ? ''
       : (
@@ -66,7 +68,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
           label={this.props.listButtonLabel}
           handlei18n={this.props.handlei18n}
           addShape
-          onClick={this.toggle}
+          onClick={handleToggle}
         />
       );
 
@@ -131,7 +133,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
               <ModalFooter className={`${styles.noBorder} ${styles.modalFooter}`}>
                 <FormattedMessage id="settings-manager.form.button.cancel">
                   {(message) => (
-                    <Button onClick={this.toggle} className={styles.secondary}>{message}</Button>
+                    <Button onClick={handleToggle} className={styles.secondary}>{message}</Button>
                   )}
                 </FormattedMessage>
                 {loader}
@@ -162,6 +164,6 @@ List.propTypes = {
     PropTypes.bool,
     PropTypes.func,
   ]),
-}
+};
 
 export default List;

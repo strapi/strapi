@@ -31,6 +31,7 @@ const initialState = fromJS({
   currentModelName: '',
   loading: false,
   record: false,
+  initialRecord: {},
   editing: false,
   deleting: false,
   isCreating: false,
@@ -61,7 +62,8 @@ function editReducer(state = initialState, action) {
     case LOAD_RECORD_SUCCESS:
       return state
         .set('loading', false)
-        .set('record', fromJS(action.record));
+        .set('record', fromJS(action.record))
+        .set('initialRecord', fromJS(action.record));
     case SET_RECORD_ATTRIBUTE:
       return state
         .setIn(['record', action.key], fromJS(action.value));
@@ -80,9 +82,9 @@ function editReducer(state = initialState, action) {
     case DELETE_RECORD_ERROR:
       return state.set('deleting', false);
     case TOGGLE_NULL:
-      return state.set('isRelationComponentNull', !state.get('isRelationComponentNull'));
+      return state.set('isRelationComponentNull', true);
     case CANCEL_CHANGES:
-      return state.set('record', Map({}));
+      return state.set('record', state.get('initialRecord'));
     case SET_FORM_VALIDATIONS:
       return state
         .set('formValidations', List(action.formValidations));
@@ -91,7 +93,7 @@ function editReducer(state = initialState, action) {
     case SET_FORM_ERRORS:
       return state
         .set('formErrors', List(action.formErrors))
-        .set('didCheckErrors', !state.didCheckErrors);
+        .set('didCheckErrors', !state.get('didCheckErrors'));
     case RESET_EDIT_SUCCESS:
       return state.set('editSuccess', false);
     default:

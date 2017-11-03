@@ -21,7 +21,7 @@ export function checkFormValidity(formData, formValidations, formErrors) {
         if (data.nestedValidations) {
           forEach(data.nestedValidations, (nestedData) => {
             if (nestedData.target === key) valueValidations = nestedData;
-          })
+          });
         }
       });
     }
@@ -125,7 +125,7 @@ export function getInputsValidationsFromConfigs(configs) {
               }
             }
           });
-          formValidations.push(validations)
+          formValidations.push(validations);
         } else {
           formValidations.push(validations);
         }

@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Modelisez la structure de données de votre API.",
   "attribute.string": "Chaîne de caractères",
   "attribute.text": "Text",
   "attribute.boolean": "Booléen",
@@ -89,6 +90,9 @@
 
   "modelPage.attribute.relationWith": "Relation avec",
 
+  "noTableWarning.description": "N'oubliez pas de créer la table `{modelName}` dans votre database",
+  "noTableWarning.infos": "Plus d'infos",
+
   "notification.error.message": "Une erreur est survenue",
   "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
   "notification.success.message.contentType.edit": "Votre modèle a bien été modifié",
@@ -126,6 +130,8 @@
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Merci de confirmer",
   "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûre de vouloir supprimer ce modèle?",
+  "popUpWarning.bodyMessage.attribute.delete": "Êtes-vous sûre de vouloir supprimer ce champ?",
+
   "popUpRelation.title": "Relation",
 
   "table.contentType.title.plural": "Modèles sont disponibles",

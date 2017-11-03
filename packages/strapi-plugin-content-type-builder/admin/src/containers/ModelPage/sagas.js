@@ -1,5 +1,17 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { capitalize, forEach, get, includes, map, replace, set, size, unset, sortBy } from 'lodash';
+import {
+  capitalize,
+  forEach,
+  get,
+  includes,
+  isEmpty,
+  map,
+  replace,
+  set,
+  size,
+  sortBy,
+  unset,
+} from 'lodash';
 import pluralize from 'pluralize';
 import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 
@@ -9,9 +21,31 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
-import { MODEL_FETCH, SUBMIT } from './constants';
-import { modelFetchSucceeded, postContentTypeSucceeded, resetShowButtonsProps, setButtonLoader, unsetButtonLoader, submitActionSucceeded } from './actions';
+import { CHECK_IF_TABLE_EXISTS, MODEL_FETCH, SUBMIT } from './constants';
+import {
+  checkIfTableExistsSucceeded,
+  modelFetchSucceeded,
+  postContentTypeSucceeded,
+  resetShowButtonsProps,
+  setButtonLoader,
+  unsetButtonLoader,
+  submitActionSucceeded,
+} from './actions';
 import { makeSelectModel } from './selectors';
+
+export function* getTableExistance() {
+  try {
+    const model = yield select(makeSelectModel());
+    const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
+    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
+    const tableExists = yield call(request, requestUrl, { method: 'GET' });
+
+    yield put(checkIfTableExistsSucceeded(tableExists));
+
+  } catch(error) {
+    window.Strapi.notification.error('An error occured');
+  }
+}
 
 export function* fetchModel(action) {
   try {
@@ -84,10 +118,6 @@ export function* submitChanges(action) {
 
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
 
-        // Temporary patch to fix menu links.
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
       } else {
         window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
       }
@@ -105,14 +135,14 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
+  const loadExistanceTableWatcher = yield fork(takeLatest, CHECK_IF_TABLE_EXISTS, getTableExistance);
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  // const deleteAttributeWatcher = yield fork(takeLatest, DELETE_ATTRIBUTE, attributeDelete);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
   yield take(LOCATION_CHANGE);
 
+  yield cancel(loadExistanceTableWatcher);
   yield cancel(loadModelWatcher);
-  // yield cancel(deleteAttributeWatcher);
   yield cancel(loadSubmitChanges);
 }
 

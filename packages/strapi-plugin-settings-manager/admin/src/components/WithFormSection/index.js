@@ -17,13 +17,13 @@ import InputEnum from 'components/InputEnum';
 import config from './config.json';
 import styles from './styles.scss';
 
-
+/* eslint-disable react/require-default-props  */
 const WithFormSection = (InnerComponent) => class extends React.Component {
   static propTypes = {
     addRequiredInputDesign: PropTypes.bool,
     cancelAction: PropTypes.bool,
     formErrors: PropTypes.array,
-    handleChange: PropTypes.func,
+    onChange: PropTypes.func,
     section: PropTypes.oneOfType([
       PropTypes.object,
       PropTypes.array,
@@ -68,7 +68,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
   checkForNestedForm(props) {
     forEach(props.section.items, (input) => {
       if(has(input, 'items')) {
-        this.setState({ hasNestedInput: true, inputWithNestedForm: input.target })
+        this.setState({ hasNestedInput: true, inputWithNestedForm: input.target });
 
         if (props.values[input.target]) {
           this.setState({ showNestedForm: true });
@@ -83,7 +83,7 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       this.setState({ showNestedForm: target.value });
     }
 
-    this.props.handleChange({ target });
+    this.props.onChange({ target });
   }
 
   renderInput = (props, key) => {
@@ -98,12 +98,12 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
     // check if the input has a nested form so it is displayed on the entire line
     const customBootstrapClass = this.state.hasNestedInput ?
       // bootstrap class to make the input displayed on the entire line
-      'col-md-6 offset-md-6 pull-md-6' :
+      'col-md-6 offset-md-6 mr-md-5' :
       // if the input hasn't a nested form but the config requires him to be displayed differently
       config[props.target] || config[dynamicTarget] || '';
 
     // custom handleChange props for nested input form
-    const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.handleChange;
+    const handleChange = this.state.hasNestedInput ? this.handleChange :  this.props.onChange;
     let hiddenLabel = includes(props.name, 'enabled');
 
     if (includes(config.showInputLabel, props.name)) hiddenLabel = false;
@@ -140,6 +140,6 @@ const WithFormSection = (InnerComponent) => class extends React.Component {
       />
     );
   }
-}
+};
 
 export default WithFormSection;

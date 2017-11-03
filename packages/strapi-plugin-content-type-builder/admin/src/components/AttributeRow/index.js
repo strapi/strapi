@@ -10,6 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
+import IcoContainer from 'components/IcoContainer';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
@@ -43,26 +44,16 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     };
   }
 
-  edit = (e) => {
-    e.preventDefault();
-    this.props.handleEdit(this.props.row.name);
-  }
+  handleEdit = () => this.props.onEditAttribute(this.props.row.name);
 
-  delete = () => {
-    this.props.handleDelete(this.props.row.name);
+  handleDelete = () => {
+    this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
   }
 
-  showModalWarning = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ showWarning: !this.state.showWarning });
-  }
-  toggleModalWarning = () => {
-    // e.preventDefault();
-    // e.stopPropagation()
-    this.setState({ showWarning: !this.state.showWarning });
-  }
+  handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+
+  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   renderAttributesBox = () => {
     const attributeType = this.props.row.params.type || 'relation';
@@ -76,8 +67,10 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       : <div><FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.target)}</span></div>;
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
+    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
+
     return (
-      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.edit}>
+      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.handleEdit}>
         <div className={styles.flex}>
           <div className={styles.nameContainer}>
             {this.renderAttributesBox()}
@@ -85,21 +78,14 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
           </div>
           <div className={styles.relationContainer}>{relationType}</div>
           <div className={styles.mainField}></div>
-          <div className={styles.icoContainer}>
-            <div className="ico">
-              <i className="fa fa-pencil ico" onClick={this.edit} role="button" />
-            </div>
-            <div className="ico">
-              <i className="fa fa-trash ico" onClick={this.showModalWarning} role="button" />
-            </div>
-          </div>
+          <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          bodyMessage={'content-type-builder.popUpWarning.bodyMessage.contentType.delete'}
+          content={{ message: 'content-type-builder.popUpWarning.bodyMessage.attribute.delete' }}
           popUpWarningType={'danger'}
-          handleConfirm={this.delete}
+          onConfirm={this.handleDelete}
         />
       </li>
     );
@@ -107,9 +93,9 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
 }
 
 AttributeRow.propTypes = {
-  handleDelete: PropTypes.func,
-  handleEdit: PropTypes.func,
-  row: PropTypes.object,
-}
+  onDelete: PropTypes.func.isRequired,
+  onEditAttribute: PropTypes.func.isRequired,
+  row: PropTypes.object.isRequired,
+};
 
 export default AttributeRow;

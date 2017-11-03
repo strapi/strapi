@@ -65,7 +65,7 @@ export function connectionsFetch() {
 
 export function connectionsFetchSucceeded(data) {
   const connections = map(data.connections, (connection) => ({ name: connection, value: connection }));
-  connections.splice(0,0, { name: '', value: '' });
+  // connections.splice(0,0, { name: '', value: '' });
   return {
     type: CONNECTIONS_FETCH_SUCCEEDED,
     connections,
@@ -165,7 +165,7 @@ export function setAttributeForm(hash) {
     form: data.form,
     attribute,
     formValidations,
-  }
+  };
 }
 
 export function setAttributeFormEdit(hash, contentType) {
@@ -183,7 +183,7 @@ export function setAttributeFormEdit(hash, contentType) {
     form,
     attribute,
     formValidations,
-  }
+  };
 }
 
 export function setButtonLoading() {
@@ -195,7 +195,7 @@ export function setButtonLoading() {
 export function setForm(hash) {
   const form = forms[hash.split('::')[1]][hash.split('::')[2]];
   const data = getDataFromForm(forms[hash.split('::')[1]]);
-  const formValidations = getValidationsFromForm(forms[hash.split('::')[1]], [])
+  const formValidations = getValidationsFromForm(forms[hash.split('::')[1]], []);
 
   return {
     type: SET_FORM,
@@ -218,10 +218,6 @@ export function unsetButtonLoading() {
     type: UNSET_BUTTON_LOADING,
   };
 }
-
-
-
-
 
 /**
 *
@@ -263,5 +259,5 @@ function setAttributeFormData(hash) {
   return {
     form,
     attribute,
-  }
+  };
 }

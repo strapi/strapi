@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class InputToggle extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -35,7 +36,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  toggle = (e) => {
+  handleToggle = (e) => {
     e.preventDefault();
     let isChecked = this.state.isChecked;
 
@@ -64,8 +65,8 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
       <div className={`${customBootstrapClass} ${styles.container}`} style={resized}>
         {label}
         <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">
-          <button type="button" className={btnClassOff} id="off" onClick={this.toggle}>OFF</button>
-          <button type="button" className={btnClassOn} id="on" onClick={this.toggle}>ON</button>
+          <button type="button" className={btnClassOff} id="off" onClick={this.handleToggle}>OFF</button>
+          <button type="button" className={btnClassOn} id="on" onClick={this.handleToggle}>ON</button>
         </div>
       </div>
     );
@@ -79,6 +80,6 @@ InputToggle.propTypes = {
   isChecked: PropTypes.bool,
   name: PropTypes.string,
   target: PropTypes.string,
-}
+};
 
 export default InputToggle;

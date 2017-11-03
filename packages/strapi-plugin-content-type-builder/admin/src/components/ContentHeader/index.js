@@ -15,7 +15,7 @@ import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 class ContentHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  edit = () => {
+  handleEdit = () => {
     router.push(this.props.editPath);
   }
 
@@ -34,7 +34,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
           <Button key={key} type={button.type} label={button.label} kind={button.kind} onClick={button.handleClick} />
         ))}
       </div>
-    )
+    );
   }
 
   renderContentHeader = () => {
@@ -45,7 +45,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
         <div>
           <div className={`${styles.title} ${styles.flex}`}>
             <span>{startCase(this.props.name)}</span>
-            <i className={`fa fa-${this.props.icoType}`} onClick={this.edit} role="button" />
+            <i className={`fa fa-${this.props.icoType}`} onClick={this.handleEdit} role="button" />
           </div>
           <div className={styles.subTitle}>{description}</div>
         </div>
@@ -83,6 +83,18 @@ ContentHeader.propTypes = {
   isLoading: PropTypes.bool,
   name: PropTypes.string,
   styles: PropTypes.object,
+};
+
+ContentHeader.defaultProps = {
+  addButtons: false,
+  buttonsContent: [],
+  description: '',
+  editIcon: false,
+  editPath: '',
+  icoType: 'pencil',
+  isLoading: false,
+  name: '',
+  styles: {},
 };
 
 export default ContentHeader;
