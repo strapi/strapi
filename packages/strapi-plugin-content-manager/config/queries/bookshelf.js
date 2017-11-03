@@ -5,7 +5,7 @@ module.exports = {
     return await this
       .forge()
       .fetchAll({
-        withRelated: this.associations.map(x => x.alias).join(' ')
+        withRelated: this.associations.map(x => x.alias)
       });
   },
 
@@ -21,7 +21,7 @@ module.exports = {
         [this.primaryKey]: params[this.primaryKey]
       })
       .fetch({
-        withRelated: this.associations.map(x => x.alias).join(' ')
+        withRelated: this.associations.map(x => x.alias)
       });
 
     return record ? record.toJSON() : record;
@@ -127,7 +127,7 @@ module.exports = {
 
               // Push the work into the flow process.
               toAdd.forEach(value => {
-                value[details.via] = params.values[this.primaryKey];
+                value[details.via] = params.values[this.primaryKey] || params[this.primaryKey];
 
                 virtualFields.push(strapi.query(details.model || details.collection).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,

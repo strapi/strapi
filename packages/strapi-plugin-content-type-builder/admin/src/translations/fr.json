@@ -1,4 +1,5 @@
 {
+  "plugin.description": "Modelisez la structure de données de votre API.",
   "attribute.string": "Chaîne de caractères",
   "attribute.text": "Text",
   "attribute.boolean": "Booléen",

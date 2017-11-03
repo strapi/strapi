@@ -37,7 +37,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
     // Request URL
     const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
-    const requestUrl = `/content-manager/explorer/${this.props.relation.model}/${requestUrlSuffix}`;
+    const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
     return request(requestUrl, {

@@ -101,7 +101,7 @@ module.exports = strapi => {
           migrations: _.get(connection.options, 'migrations')
         }, strapi.config.hook.settings.knex);
 
-        if (options.client === 'pg' || options.client === 'mysql' && _.isString(_.get(options.connection, 'schema'))) {
+        if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
           options.pool = {
             min: _.get(connection.options, 'pool.min') || 0,
             max: _.get(connection.options, 'pool.max') || 10,
@@ -111,6 +111,8 @@ module.exports = strapi => {
               });
             }
           };
+        } else {
+          delete options.connection.schema;
         }
 
         // Finally, use the client via `knex`.

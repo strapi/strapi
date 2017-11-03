@@ -1,6 +1,7 @@
 import { fromJS } from 'immutable';
 import {
   UPDATE_PLUGIN,
+  PLUGIN_DELETED,
   PLUGIN_LOADED,
 } from './constants';
 
@@ -14,6 +15,8 @@ function appReducer(state = initialState, action) {
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:
       return state.setIn(['plugins', action.pluginId, action.updatedKey], fromJS(action.updatedValue));
+    case PLUGIN_DELETED:
+      return state.deleteIn(['plugins', action.plugin]);
     default:
       return state;
   }

@@ -30,7 +30,7 @@ function globalPolicy(endpoint, value, route) {
 }
 
 module.exports = strapi => function routerChecker(value, endpoint, plugin) {
-  const Joi = strapi.koaMiddlewares.joiRouter.Joi;
+  const Joi = strapi.koaMiddlewares.routerJoi.Joi;
   const builder = joijson.builder(Joi);
   const route = regex.detectRoute(endpoint);
 

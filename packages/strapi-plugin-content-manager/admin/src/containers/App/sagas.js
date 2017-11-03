@@ -4,9 +4,20 @@ import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 import { generateSchema } from 'utils/schema';
 
-import { loadedModels, updateSchema } from './actions';
-import { LOAD_MODELS, LOADED_MODELS } from './constants';
+import { getModelEntriesSucceeded, loadedModels, updateSchema } from './actions';
+import { GET_MODEL_ENTRIES, LOAD_MODELS, LOADED_MODELS } from './constants';
 import { makeSelectModels } from './selectors';
+
+export function* modelEntriesGet(action) {
+  try {
+    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${action.modelName}/count`;
+    const response = yield call(request, requestUrl, { method: 'GET' });
+
+    yield put(getModelEntriesSucceeded(response.count));
+  } catch(error) {
+    window.Strapi.notification.error('content-manager.error.model.fetch');
+  }
+}
 
 export const generateMenu = function () {
   return request(`${window.Strapi.apiUrl}/content-manager/models`, {
@@ -59,6 +70,7 @@ export function* modelsLoaded() {
 export function* defaultSaga() {
   yield fork(takeLatest, LOAD_MODELS, getModels);
   yield fork(takeLatest, LOADED_MODELS, modelsLoaded);
+  yield fork(takeLatest, GET_MODEL_ENTRIES, modelEntriesGet);
 }
 
 // All sagas to be loaded

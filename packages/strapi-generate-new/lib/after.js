@@ -78,6 +78,8 @@ module.exports = (scope, cb) => {
     pluginsInstallation();
   }
 
+  const strapiBin = path.join(scope.strapiRoot, scope.strapiPackageJSON.bin.strapi);
+
   // Install default plugins and link dependencies.
   function pluginsInstallation() {
     // Define the list of default plugins.
@@ -86,7 +88,7 @@ module.exports = (scope, cb) => {
     // Install each plugin.
     defaultPlugins.forEach(defaultPlugin => {
       try {
-        execSync(`strapi install ${defaultPlugin} ${scope.developerMode ? '--dev' : ''}`);
+        execSync(`node ${strapiBin} install ${defaultPlugin} ${scope.developerMode ? '--dev' : ''}`);
         logger.info(`The plugin ${defaultPlugin} has been successfully installed.`);
       } catch (error) {
         logger.error(`An error occurred during ${defaultPlugin} plugin installation.`);

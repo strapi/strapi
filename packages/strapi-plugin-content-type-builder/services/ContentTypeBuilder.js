@@ -59,7 +59,9 @@ module.exports = {
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
     description = _.replace(description, /\"/g, '\\"');
-    
+
+    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-mongoose').split('-')[1];
+
     return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
@@ -70,7 +72,8 @@ module.exports = {
           description,
           attributes,
           connection,
-          collectionName: !_.isEmpty(collectionName) ? collectionName : undefined
+          collectionName: !_.isEmpty(collectionName) ? collectionName : undefined,
+          tpl: template
         }
       };
 
