@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { isEmpty, isObject } from 'lodash';
 
+import IcoContainer from 'components/IcoContainer';
+
 import styles from './styles.scss';
 
 class TableRow extends React.Component {
@@ -34,6 +36,7 @@ class TableRow extends React.Component {
       case 'float':
       case 'integer':
       case 'biginteger':
+      case 'decimal':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
@@ -45,7 +48,7 @@ class TableRow extends React.Component {
           value :
           moment(value);
 
-        return date.utc().format('YYYY-MM-DD HH:mm:ss')
+        return date.utc().format('YYYY-MM-DD HH:mm:ss');
       }
       default:
         return '-';
@@ -72,11 +75,9 @@ class TableRow extends React.Component {
       </td>
     ));
 
-    // Add actions cell.
     cells.push(
       <td key='action' className={styles.actions}>
-        <i className="fa fa-pencil" aria-hidden="true"></i>
-        <i onClick={this.props.handleDelete} id={this.props.record.id} className="fa fa-trash" aria-hidden="true"></i>
+        <IcoContainer icons={[{ icoType: 'pencil' }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
       </td>
     );
 
@@ -94,14 +95,17 @@ TableRow.contextTypes = {
 
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
-  handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
+  onDelete: PropTypes.func,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
 };
 
 TableRow.defaultProps = {
-  handleDelete: () => {},
+  onDelete: () => {},
+  value: {
+    format: () => {},
+  },
 };
 
 export default TableRow;

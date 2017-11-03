@@ -18,7 +18,6 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
     return (
       <div className={styles.tableListContainer}>
         <div className="container-fluid">
-
           <div className="row">
             <div className={styles.headerContainer}>
               <div className={styles.titleContainer}>
@@ -28,12 +27,11 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                 <Button
                   secondaryHotlineAdd
                   label={this.props.buttonLabel}
-                  onClick={this.props.handleButtonClick}
+                  onClick={this.props.onButtonClick}
                 />
               </div>
             </div>
           </div>
-
           <div className="row">
             <div className={styles.ulContainer}>
               <ul>
@@ -47,7 +45,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                   </div>
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
-                  <TableListRow key={key} rowItem={rowItem} handleDelete={this.props.handleDelete} />
+                  <TableListRow key={key} rowItem={rowItem} onDelete={this.props.onHandleDelete} />
                 ))}
               </ul>
             </div>
@@ -61,8 +59,8 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
 TableList.propTypes = {
   availableNumber: PropTypes.number.isRequired,
   buttonLabel: PropTypes.string.isRequired,
-  handleButtonClick: PropTypes.func,
-  handleDelete: PropTypes.func,
+  onButtonClick: PropTypes.func.isRequired,
+  onHandleDelete: PropTypes.func.isRequired,
   rowItems: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,
 };

@@ -6,13 +6,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { map } from 'lodash';
+import { get, map, size } from 'lodash';
 
 import SelectOne from 'components/SelectOne';
 import SelectMany from 'components/SelectMany';
 import styles from './styles.scss';
 
 class EditFormRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    if (size(get(this.props.schema, [this.props.currentModelName, 'relations'])) === 0 && !this.props.isNull) {
+      this.props.toggleNull();
+    }
+  }
+
   render() {
     const relations = map(this.props.schema[this.props.currentModelName].relations, (relation, i) => {
 
@@ -50,10 +56,6 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
     });
 
     if (!relations.length) {
-      if (this.props.isNull === false) {
-        this.props.toggleNull();
-      }
-
       return (null);
     }
 

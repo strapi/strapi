@@ -17,7 +17,7 @@ export function* deleteContentType(action) {
     }
 
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message')
+    window.Strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 
@@ -28,7 +28,7 @@ export function* fetchModels() {
 
     yield put(modelsFetchSucceeded(data));
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message')
+    window.Strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 

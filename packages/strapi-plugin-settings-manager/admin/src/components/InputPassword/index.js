@@ -10,6 +10,7 @@ import { isEmpty, includes, mapKeys, reject, map, isObject, size } from 'lodash'
 import { FormattedMessage } from 'react-intl';
 import WithInput from 'components/WithInput';
 
+/* eslint-disable react/require-default-props  */
 class InputPassword extends React.Component { // eslint-disable-line react/prefer-stateless-function
   /* eslint-disable jsx-a11y/no-static-element-interactions */
   constructor(props) {
@@ -84,7 +85,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
     return errors;
   }
 
-  showPassword = () => this.setState({ type: !this.state.type })
+  handleShowPassword = () => this.setState({ type: !this.state.type })
 
   renderErrors = () => { // eslint-disable-line consistent-return
     if (!this.props.noErrorsDescription) {
@@ -94,7 +95,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
             ? <FormattedMessage id={error} />
             : error;
           return (
-            <div key={key} className="form-control-feedback">{displayError}</div>
+            <div key={key} className="form-control-feedback invalid-feedback" style={{ fontSize: '1.3rem' }}>{displayError}</div>
           );
         })
       );
@@ -130,7 +131,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
                 onChange={this.props.handleChange}
                 value={inputValue}
                 type={type}
-                className={`form-control ${this.state.errors? 'form-control-danger' : ''}`}
+                className={`form-control ${!isEmpty(this.state.errors) ? 'form-control-danger is-invalid' : ''}`}
                 placeholder={message}
                 autoComplete="off"
               />
@@ -139,7 +140,7 @@ class InputPassword extends React.Component { // eslint-disable-line react/prefe
           <small>{this.props.inputDescription}</small>
           {this.renderErrors()}
         </div>
-        <div className={this.props.styles.insideInput} onClick={this.showPassword} style={color}>
+        <div className={this.props.styles.insideInput} onClick={this.handleShowPassword} style={color}>
           <i className="fa fa-eye" />
         </div>
       </div>

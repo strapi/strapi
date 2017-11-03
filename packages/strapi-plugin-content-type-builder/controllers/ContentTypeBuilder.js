@@ -188,5 +188,33 @@ module.exports = {
     ctx.send({
       autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
     });
+  },
+
+  checkTableExists: async ctx => {
+    // Get connection
+    const { connection } = ctx.params;
+
+    const connector = _.get(strapi.config.currentEnvironment.database.connections, [connection, 'connector']);
+    const model = _.toLower(ctx.params.model);
+
+    if (!model) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Model is required' }] }]);
+    }
+
+    if (!connector) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Connection doesn\'t exist' }] }]);
+    }
+
+    if (connector === 'strapi-bookshelf') {
+      try {
+        const tableExists = await strapi.connections[connection].schema.hasTable(model);
+
+        return ctx.send({ tableExists });
+      } catch(error) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
+      }
+    }
+
+    ctx.send({ tableExists: true })
   }
 };

@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 class TableHeader extends React.Component {
-  changeSort(name) {
+  handleChangeSort(name) {
     if (this.props.sort === name) {
-      this.props.changeSort(`-${name}`);
+      this.props.onChangeSort(`-${name}`);
     } else if (this.props.sort === `-${name}`) {
-      this.props.changeSort(this.props.primaryKey);
+      this.props.onChangeSort(this.props.primaryKey);
     } else {
-      this.props.changeSort(name);
+      this.props.onChangeSort(name);
     }
   }
 
@@ -35,7 +35,7 @@ class TableHeader extends React.Component {
       return (
         <th // eslint-disable-line jsx-a11y/no-static-element-interactions
           key={i}
-          onClick={() => this.changeSort(header.name)}
+          onClick={() => this.handleChangeSort(header.name)}
         >
           <span>
             {header.label}
@@ -60,8 +60,8 @@ class TableHeader extends React.Component {
 }
 
 TableHeader.propTypes = {
-  changeSort: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
+  onChangeSort: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   sort: PropTypes.string.isRequired,
 };

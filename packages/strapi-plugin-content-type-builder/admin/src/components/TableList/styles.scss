@@ -29,19 +29,12 @@
     padding: 0;
     list-style: none;
     > li:first-child {
-      margin-top: 0rem;
+      margin-top: 0.1rem;
       border-radius: 2px 2px 0 0;
       background-color: #F3F3F4;
     }
     > li:not(:first-child) {
       margin-top: 0!important;
-      position: relative;
-      height: 5.4rem;
-      line-height: 5.4rem;
-      cursor: pointer;
-      &:hover {
-        background-color: #F7F8F8;
-      }
     }
     > li:nth-child(2) {
       height: 5.7rem;
@@ -95,28 +88,8 @@
 }
 
 
-.icContainer {
-  display: flex;
-  justify-content: flex-end;
-  z-index: 9999;
-  opacity: .75;
-
-  > div {
-    width: 23px;
-    height: 100%;
-    color: #0E1622;
-
-  >  i {
-      z-index: 0;
-      font-size: 1.1rem;
-    }
-  }
-  > div:last-child {
-    margin-left: 0;
-  }
-}
-
 .italic {
+    font-weight: 600;
   > span:nth-child(2) {
     font-style: italic;
   }

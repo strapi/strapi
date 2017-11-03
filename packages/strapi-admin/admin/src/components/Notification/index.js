@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class Notification extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  onCloseClicked = () => {
+  handleCloseClicked = () => {
     this.props.onHideNotification(this.props.notification.id);
   };
 
@@ -43,11 +43,11 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
 
     return (
       <li key={this.props.notification.id} className={`${styles.notification} ${styles[options.class]}`}>
-        <icon className={`fa ${options.icon} ${styles.notificationIcon}`}></icon>
+        <i className={`fa ${options.icon} ${styles.notificationIcon}`} />
         <div className={styles.notificationContent}>
           <p className={styles.notificationTitle}><FormattedMessage id={this.props.notification.message} /></p>
         </div>
-        <icon className={`fa fa-close ${styles.notificationClose}`} onClick={this.onCloseClicked}></icon>
+        <i className={`fa fa-close ${styles.notificationClose}`} onClick={this.handleCloseClicked} />
       </li>
     );
   }

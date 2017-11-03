@@ -12,6 +12,7 @@ import PopUpWarning from 'components/PopUpWarning';
 // utils
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 
+/* eslint-disable react/require-default-props  */
 class RowLanguage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -20,16 +21,18 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
     };
   }
 
-  deleteLanguage = () => {
+  handleDeleteLanguage = () => {
     this.setState({ showWarning: !this.state.showWarning });
-    this.props.handleLanguageDelete(this.props.name);
+    this.props.onDeleteLanguage(this.props.name);
   }
+
+  handleToggleWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   toggleWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   render() {
     // assign the target id the language name to prepare for delete
-    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75)'}} onClick={this.toggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
+    const deleteIcon = this.props.active ? '' : <i className="fa fa-trash" style={{ fontSize: '1.1rem', color: 'rgba(14,22,34,0.75)'}} onClick={this.handleToggleWarning} id={this.props.name} />; // eslint-disable-line jsx-a11y/no-static-element-interactions
     // format the locale to
     const defaultLanguageArray = formatLanguageLocale(this.props.name);
     const flag = getFlag(defaultLanguageArray);
@@ -53,7 +56,7 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
         // set the span's id with the language name to retrieve it
         <FormattedMessage id="settings-manager.list.languages.set.languages">
           {(message) => (
-            <button className={this.props.liStyles.normal} onClick={this.props.changeDefaultLanguage} id={this.props.name}>
+            <button className={this.props.liStyles.normal} onClick={this.props.onDefaultLanguageChange} id={this.props.name}>
               {message}
             </button>
           )}
@@ -79,8 +82,9 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
           <PopUpWarning
             isOpen={this.state.showWarning}
             toggleModal={this.toggleWarning}
-            handleConfirm={this.deleteLanguage}
-            warningMessage={'popUpWarning.languages.delete.message'}
+            onConfirm={this.handleDeleteLanguage}
+            content={{ message: 'settings-manager.popUpWarning.languages.delete.message' }}
+            popUpWarningType="danger"
           />
         </div>
       </li>
@@ -90,11 +94,11 @@ class RowLanguage extends React.Component { // eslint-disable-line react/prefer-
 
 RowLanguage.propTypes = {
   active: PropTypes.bool,
-  changeDefaultLanguage: PropTypes.func,
-  handleLanguageDelete: PropTypes.func,
   listLanguages: PropTypes.object,
   liStyles: PropTypes.object,
   name: PropTypes.string,
+  onDefaultLanguageChange: PropTypes.func,
+  onDeleteLanguage: PropTypes.func,
 };
 
 export default RowLanguage;

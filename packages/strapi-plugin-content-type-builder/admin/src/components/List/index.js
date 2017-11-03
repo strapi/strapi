@@ -23,7 +23,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
           {title}
           <div className={styles.buttonContainer}>
             <Button
-              onClick={this.props.handleButtonClick}
+              onClick={this.props.onButtonClick}
               secondaryHotlineAdd
               label={'content-type-builder.button.attributes.add'}
             />
@@ -48,11 +48,24 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
-  handleButtonClick: PropTypes.func,
   listContent: PropTypes.object,
   listContentMappingKey: PropTypes.string.isRequired,
-  renderCustomLi: PropTypes.func,
-  renderCustomListTitle: PropTypes.func,
-}
+  onButtonClick: PropTypes.func,
+  renderCustomLi: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+  renderCustomListTitle: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+};
+
+List.defaultProps = {
+  listContent: {},
+  onButtonClick: () => {},
+  renderCustomLi: false,
+  renderCustomListTitle: false,
+};
 
 export default List;

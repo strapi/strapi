@@ -176,12 +176,19 @@ button {
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white!important;
+  &:active, &:focus, &:hover {
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    background-color: transparent;
+    border: none;
+ }
 }
 
 .secondary {
   font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
+  background-color: transparent;
   cursor: pointer;
   &:hover {
     color: #F64D0A;

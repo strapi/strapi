@@ -16,6 +16,7 @@ import { pluginId } from 'app';
 
 import HomePage from 'containers/HomePage';
 import ModelPage from 'containers/ModelPage';
+import NotFoundPage from 'containers/NotFoundPage';
 import formSaga from 'containers/Form/sagas';
 import formReducer from 'containers/Form/reducer';
 
@@ -54,6 +55,7 @@ class App extends React.Component {
         <Switch>
           <Route exact path="/plugins/content-type-builder" component={HomePage} />
           <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
+          <Route path="" component={NotFoundPage} />
         </Switch>
       </div>
     );
@@ -67,8 +69,12 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  modelsFetch: PropTypes.func,
+  modelsFetch: PropTypes.func.isRequired,
   shouldRefetchContentType: PropTypes.bool,
+};
+
+App.defaultProps = {
+  shouldRefetchContentType: false,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -77,7 +83,7 @@ export function mapDispatchToProps(dispatch) {
       modelsFetch,
     },
     dispatch
-  )
+  );
 }
 
 const mapStateToProps = createStructuredSelector({

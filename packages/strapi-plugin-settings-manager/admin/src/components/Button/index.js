@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
+/* eslint-disable react/require-default-props  */
 class Button extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -32,7 +33,7 @@ class Button extends React.Component {
             <p></p><p></p><p></p>
           </div>
         </button>
-      )
+      );
     }
     return (
       <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...buttonProps}>

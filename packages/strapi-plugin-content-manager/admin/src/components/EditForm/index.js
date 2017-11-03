@@ -34,6 +34,7 @@ class EditForm extends React.Component {
       case 'float':
       case 'integer':
       case 'bigint':
+      case 'decimal':
         return 'number';
       default:
         return 'text';
@@ -59,7 +60,7 @@ class EditForm extends React.Component {
 
         return acc;
       }, {});
-
+    
       return (
         <Input
           key={attr}
@@ -69,7 +70,7 @@ class EditForm extends React.Component {
           customBootstrapClass={get(layout, 'className') || ''}
           value={this.props.record.get(attr) || ''}
           placeholder={get(layout, 'placeholder') || details.placeholder || details.label || attr || ''}
-          handleChange={this.props.handleChange}
+          onChange={this.props.onChange}
           validations={get(layout, 'validations') || validations}
           errors={errors}
           didCheckErrors={this.props.didCheckErrors}
@@ -79,7 +80,7 @@ class EditForm extends React.Component {
     });
 
     return (
-      <form className={styles.form} onSubmit={this.props.handleSubmit}>
+      <form className={styles.form} onSubmit={this.props.onSubmit}>
         <div className='row'>
           {fields}
         </div>
@@ -93,9 +94,9 @@ EditForm.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array.isRequired,
   formValidations: PropTypes.array.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
   layout: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,

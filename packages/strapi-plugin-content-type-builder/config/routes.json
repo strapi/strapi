@@ -55,6 +55,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/checkTableExists/:connection/:model",
+      "handler": "ContentTypeBuilder.checkTableExists",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

@@ -35,7 +35,7 @@ export function deleteContentType(itemToDelete, context) {
       storeData.clearAppStorage();
     }else {
       oldMenu.splice(index, 1);
-      const newMenu = oldMenu
+      const newMenu = oldMenu;
       storeData.setMenu(newMenu);
     }
   }
@@ -53,7 +53,7 @@ export function deleteContentType(itemToDelete, context) {
     leftMenuContentTypes,
     updateLeftMenu,
     updatePlugin: context.updatePlugin,
-  }
+  };
 }
 
 export function modelsFetch() {

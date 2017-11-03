@@ -12,6 +12,7 @@ import { has, map, forEach } from 'lodash';
 import EditFormSectionSubNested from 'components/EditFormSectionSubNested';
 import WithFormSection from 'components/WithFormSection';
 
+/* eslint-disable react/require-default-props  */
 class EditFormSectionNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -59,21 +60,20 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
         <div className="row">
           {map(this.props.section, (item, key) => {
             if (this.state.showNestedForm) {
-
               return (
                 <div key={key} style={{width: '100%'}}>
                   {this.props.renderInput(item, key)}
                   <EditFormSectionSubNested
                     section={this.state.section}
                     values={this.props.values}
-                    handleChange={this.props.handleChange}
+                    onChange={this.props.onChange}
                     formErrors={this.props.formErrors}
                   />
                 </div>
-              )
+              );
             }
 
-            return this.props.renderInput(item, key)
+            return this.props.renderInput(item, key);
           })}
         </div>
       </div>
@@ -83,7 +83,7 @@ class EditFormSectionNested extends React.Component { // eslint-disable-line rea
 
 EditFormSectionNested.propTypes = {
   formErrors: PropTypes.array,
-  handleChange: PropTypes.func,
+  onChange: PropTypes.func,
   renderInput: PropTypes.func,
   section: PropTypes.oneOfType([
     PropTypes.array,

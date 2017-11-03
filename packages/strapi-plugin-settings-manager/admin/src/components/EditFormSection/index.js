@@ -13,6 +13,7 @@ import WithFormSection from 'components/WithFormSection';
 // nested form
 import EditFormSectionNested from 'components/EditFormSectionNested';
 
+/* eslint-disable react/require-default-props  */
 class EditFormSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage id={`settings-manager.${this.props.section.name}`} />;
@@ -40,12 +41,12 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
                     <EditFormSectionNested
                       section={item.items}
                       values={this.props.values}
-                      handleChange={this.props.handleChange}
+                      onChange={this.props.onChange}
                       sectionNested
                       formErrors={this.props.formErrors}
                     />
                   </div>
-                )
+                );
               }
               return this.props.renderInput(item, key);
             })}
@@ -58,7 +59,7 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
 
 EditFormSection.propTypes = {
   formErrors: PropTypes.array,
-  handleChange: PropTypes.func,
+  onChange: PropTypes.func,
   renderInput: PropTypes.func,
   section: PropTypes.object,
   showNestedForm: PropTypes.bool,
