@@ -46,16 +46,18 @@ module.exports = {
   uninstallPlugin: async ctx => {
     try {
       const { plugin } = ctx.params;
+      const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
 
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      exec(`strapi uninstall ${plugin}`);
+      exec(`node ${strapiBin} uninstall ${plugin}`);
 
       ctx.send({ ok: true });
 
       strapi.reload();
     } catch(err) {
+      console.log('error', err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
