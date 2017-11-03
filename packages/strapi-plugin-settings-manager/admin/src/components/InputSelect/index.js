@@ -6,14 +6,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { map } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 class InputSelect extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     // init the select value
-    if (this.props.selectOptions[0].value !== '') {
+    if (this.props.selectOptions[0].value !== '' && isEmpty(this.props.value)) {
       const target = { name: this.props.target, value: this.props.selectOptions[0].value  };
       this.props.handleChange({ target });
     }

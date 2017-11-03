@@ -11,6 +11,8 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
+  endsWith,
+  find,
   findIndex,
   findKey,
   forEach,
@@ -219,10 +221,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
           [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
         this.props.setErrors(formErrors);
+      } else if (endsWith(name, '.settings.client')) {
+        const item = find(this.props.home.addDatabaseSection.sections[0].items[1].items, { value });
+        this.props.changeInput('database.connections.${name}.settings.port', item.port);
+        this.props.changeInput(`database.connections.${this.props.home.addDatabaseSection.sections[1].items[0].value}.settings.port`, item.port);
       } else {
         this.props.setErrors([]);
       }
-
     }
     this.props.changeInput(name, value);
   }
@@ -245,7 +250,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       this.props.editSettings(body, apiUrl);
     } else {
       this.props.setErrors(formErrors);
-      // window.Strapi.notification.info('Settings are equals');
     }
   }
 
