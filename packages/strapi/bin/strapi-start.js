@@ -62,7 +62,7 @@ module.exports = function() {
       const setFilesToWatch = (src) => {
         var files = fs.readdirSync(src);
         _.forEach(files, file => {
-          if (_.startsWith(file, '.') || file === 'node_modules') return;
+          if (_.startsWith(file, '.') || file === 'node_modules' || file === 'plugins.json') return;
 
           const filePath = `${src}/${file}`;
           if (fs.statSync(filePath).isDirectory()) setFilesToWatch(filePath);

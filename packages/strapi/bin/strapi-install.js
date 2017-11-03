@@ -44,9 +44,6 @@ module.exports = function (plugin, cliArguments) {
     try {
       fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'dir');
 
-      // Update config file.
-      updatePluginConfig(pluginID.replace('strapi-plugin-', ''));
-
       logger.info('The plugin has been successfully installed.');
       process.exit(0);
     } catch (e) {
@@ -74,9 +71,6 @@ module.exports = function (plugin, cliArguments) {
         // Move the plugin from the `node_modules` folder to the `./plugins` folder.
         fs.renameSync(`./node_modules/${pluginID}`, pluginPath);
 
-        // Update config file.
-        updatePluginConfig(pluginID.replace('strapi-plugin-', ''));
-
         // Success.
         logger.info('The plugin has been successfully installed.');
         process.exit(0);
@@ -85,54 +79,5 @@ module.exports = function (plugin, cliArguments) {
         process.exit(1);
       }
     });
-  }
-
-  function updatePluginConfig(pluginID) {
-    const pluginConfigPath = path.resolve(process.cwd(), 'admin', 'admin', 'src', 'config', 'plugins.json');
-
-    try {
-      // Try to access to path.
-      fs.accessSync(pluginConfigPath);
-
-      const rawConfig = fs.readFileSync(pluginConfigPath, 'utf8');
-      const jsonConfig = JSON.parse(rawConfig);
-
-      updatePluginFile(pluginID, jsonConfig, pluginConfigPath);
-    } catch (e) {
-      if (e.code === 'ENOENT') {
-        return updatePluginFile(pluginID, [], pluginConfigPath);
-      }
-
-      logger.error(e);
-      logger.error('Impossible to access to ' + pluginConfigPath);
-    }
-  };
-
-  function updatePluginFile(pluginID, data, pluginConfigPath) {
-    try {
-      const pluginBuildConfigPath = path.resolve(process.cwd(), 'admin', 'admin', 'build', 'config', 'plugins.json');
-      const isInstalled = data.filter((x = {}) => x.id === pluginID).length;
-
-      if (isInstalled === 0) {
-        data.push({
-          id: pluginID,
-          source: `http://localhost:1337/admin/${pluginID}/main.js`
-        });
-      }
-
-      fs.writeFileSync(pluginConfigPath, JSON.stringify(data), 'utf8');
-
-      try {
-        fs.accessSync(pluginBuildConfigPath);
-        fs.unlinkSync(pluginBuildConfigPath);
-      } catch (e) {
-        // Silent
-      } finally {
-        fs.copyFileSync(pluginConfigPath, pluginBuildConfigPath);
-      }
-    } catch (e) {
-      logger.error(e);
-      logger.error('Impossible to write to ' + pluginConfigPath);
-    }
   }
 };

@@ -10,6 +10,7 @@
     "analyze:clean": "rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
     "analyze": "node ../strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "build:dev": "npm run build:dll && cross-env NODE_ENV=development IS_ADMIN=true webpack --config ../strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build": "npm run build:dll && cross-env NODE_ENV=production IS_ADMIN=true webpack --config ../strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build:dll": "cross-env NODE_ENV=production webpack --config ../strapi-helper-plugin/lib/internals/webpack/webpack.dll.babel.js --color -p --progress",
     "build:clean": "rimraf admin/build",

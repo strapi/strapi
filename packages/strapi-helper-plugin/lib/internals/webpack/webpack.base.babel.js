@@ -2,6 +2,7 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
+const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 
@@ -37,6 +38,17 @@ if (process.env.npm_lifecycle_event === 'start') {
     return acc;
   }, {});
 }
+
+let adminURL = null;
+
+try {
+  const server = require(path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'));
+
+  adminURL = _.get(server, 'admin.url', null);
+} catch (e) {
+  // Silent
+}
+
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -162,6 +174,7 @@ module.exports = (options) => ({
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        ADMIN_URL: JSON.stringify(adminURL),
       },
     }),
     new webpack.NamedModulesPlugin()

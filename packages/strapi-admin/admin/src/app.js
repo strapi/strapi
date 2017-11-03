@@ -73,8 +73,8 @@ if (window.location.port !== '4000') {
   const uri = window.location.href.indexOf('/admin') !== -1 ?
     `${window.location.origin}/admin` :
     window.location.origin;
-
-  fetch(`${uri}/config/plugins.json`)
+    
+  fetch(`${process.env.ADMIN_URL !== null ? process.env.ADMIN_URL : uri}/config/plugins.json`)
     .then(response => {
       return response.json();
     })
@@ -83,7 +83,7 @@ if (window.location.port !== '4000') {
 
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
-        script.src = plugin.source;
+        script.src = plugin.source[process.env.NODE_ENV];
 
         body.appendChild(script);
       });

@@ -8,7 +8,7 @@ const path = require('path');
 const cluster = require('cluster');
 const { includes, get } = require('lodash');
 const { logger, models } = require('strapi-utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { EventEmitter } = require('events');
@@ -178,6 +178,9 @@ class Strapi extends EventEmitter {
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
+
+    // Harmonize plugins configuration.
+    await plugins.call(this);
   }
 
   reload() {
