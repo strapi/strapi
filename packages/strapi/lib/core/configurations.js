@@ -84,7 +84,7 @@ module.exports.app = async function() {
     this.config = templateConfigurations(this.config);
 
     // Initialize main router to use it in middlewares.
-    this.router = this.koaMiddlewares.joiRouter();
+    this.router = this.koaMiddlewares.routerJoi();
 
     // Define required middlewares categories.
     const middlewareCategories = ['request', 'response', 'security', 'server'];

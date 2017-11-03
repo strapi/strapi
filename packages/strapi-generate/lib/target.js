@@ -232,8 +232,15 @@ function parseTarget(target, scope, cb) {
     // If we couldn't find a generator using the configured module,
     // try requiring `strapi-generate-<module>` to get the core generator.
     if (!subGenerator && !module.match(/^strapi-generate-/)) {
+      let strapiRoot = scope.strapiRoot;
+
+      // Handle local installation
+      if (strapiRoot.endsWith('node_modules/strapi')) {
+        strapiRoot = process.cwd();
+      }
+
       try {
-        subGenerator = require(path.resolve(scope.strapiRoot, 'node_modules', 'strapi-generate-' + module));
+        subGenerator = require(path.resolve(strapiRoot, 'node_modules', 'strapi-generate-' + module));
       } catch (e1) {
         requireError = e1;
       }

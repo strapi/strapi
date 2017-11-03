@@ -94,7 +94,8 @@ module.exports = function (strapi) {
                   validate: 'beforeCreate',
                   remove: 'beforeDestroy',
                   update: 'beforeUpdate',
-                  find: 'beforeFetch',
+                  find: 'beforeFetchAll',
+                  findOne: 'beforeFetch',
                   save: 'beforeSave'
                 };
 
@@ -108,7 +109,8 @@ module.exports = function (strapi) {
                   validate: 'afterCreate',
                   remove: 'afterDestroy',
                   update: 'afterUpdate',
-                  find: 'afterFetch',
+                  find: 'afterFetchAll',
+                  findOne: 'afterFetch',
                   save: 'afterSave'
                 };
 
@@ -247,7 +249,7 @@ module.exports = function (strapi) {
                 case 'belongsTo':
                   FK = _.find(definition.associations, {alias: name});
 
-                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'oneToMany') {
+                  if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref: _.capitalize(details.model),
