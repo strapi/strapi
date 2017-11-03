@@ -25,7 +25,8 @@
   "license": "MIT",
   "strapi": {
     "name": "Content Manager",
-    "icon": "plug"
+    "icon": "plug",
+    "description": "content-manager.plugin.description"
   },
   "scripts": {
     "analyze:clean": "rimraf stats.json",

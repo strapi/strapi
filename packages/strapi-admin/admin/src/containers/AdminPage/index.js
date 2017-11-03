@@ -19,6 +19,7 @@ import HomePage from 'containers/HomePage';
 import PluginPage from 'containers/PluginPage';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import LeftMenu from 'containers/LeftMenu';
+import ListPluginsPage from 'containers/ListPluginsPage';
 import Content from 'containers/Content';
 import NotFoundPage from 'containers/NotFoundPage';
 
@@ -49,7 +50,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
               <Route path="/" component={HomePage} exact />
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
-              <Route path="/list-plugins" component={ComingSoonPage} exact />
+              <Route path="/list-plugins" component={ListPluginsPage} exact />
               <Route path="/install-plugin" component={ComingSoonPage} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
