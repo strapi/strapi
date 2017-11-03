@@ -57,7 +57,6 @@ module.exports = {
 
       strapi.reload();
     } catch(err) {
-      console.log('error', err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
