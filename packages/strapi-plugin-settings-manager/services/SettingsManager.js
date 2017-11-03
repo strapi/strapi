@@ -846,10 +846,26 @@ module.exports = {
   },
 
   installDependency: (params, name) => {
-    const connector = _.get(params, `database.connections.${name}.connector`);
-    const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+    const clientsDependencies = {
+      postgres: 'pg',
+      mysql: 'mysql',
+      sqlite3: 'sqlite3'
+    };
 
-    if (connector && !installed) exec(`npm install ${connector}@alpha`);
+    const client = _.get(clientsDependencies, _.get(params, `database.connections.${name}.settings.client`));
+    const installedClient = _.indexOf(_.keys(strapi.config.info.dependencies), client) !== -1;
+    const connector = _.get(params, `database.connections.${name}.connector`);
+    const installedConnector = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+
+    if (connector && !installedConnector) {
+      strapi.log.info(`Installing ${connector} dependency ...`);
+      exec(`npm install ${connector}@alpha`);
+    }
+
+    if (client && !installedClient) {
+      strapi.log.info(`Installing ${client} dependency ...`);
+      exec(`npm install ${client}`);
+    }
   },
 
   cleanDependency: (env, config) => {
