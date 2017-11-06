@@ -5,15 +5,18 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
+
 // Design
+import HeaderNav from 'components/HeaderNav';
 import PluginHeader from 'components/PluginHeader';
 
+// Utils
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
@@ -35,7 +38,8 @@ export class HomePage extends React.Component {
             title={{ id: 'users-permissions.HomePage.header.title' }}
             description={{ id: 'users-permissions.HomePage.header.description' }}
             actions={[]}
-            />
+          />
+          <HeaderNav />
         </div>
       </div>
     );
@@ -43,7 +47,7 @@ export class HomePage extends React.Component {
 }
 
 HomePage.contextTypes = {
-  router: PropTypes.object,
+  // router: PropTypes.object,
 };
 
 HomePage.propTypes = {

@@ -20,11 +20,17 @@ import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';
 
 class App extends React.Component {
+  componentDidMount() {
+    if (!this.props.location.pathname.split('/')[3]) {
+      this.props.history.push('/plugins/users-permissions/roles');
+    }
+  }
+
   render() {
     return (
       <div className={pluginId}>
         <Switch>
-          <Route path={`/plugins/${pluginId}/:settingType?`} component={HomePage} exact />
+          <Route path={`/plugins/${pluginId}/:settingType`} component={HomePage} exact />
           <Route component={NotFoundPage} />
         </Switch>
       </div>
@@ -40,6 +46,7 @@ App.contextTypes = {
 
 App.propTypes = {
   history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {

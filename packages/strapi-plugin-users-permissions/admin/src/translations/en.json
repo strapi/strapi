@@ -1,6 +1,11 @@
 {
+  "HeaderNav.link.advancedSettings": "Advanced settings",
+  "HeaderNav.link.emailTemplates": "Email templates",
+  "HeaderNav.link.providers": "Providers",
+  "HeaderNav.link.roles": "Roles",
+
   "HomePage.header.title": "Auth & Permissions",
   "HomePage.header.description": "Define the roles and permissions for every one of them",
-  
+
   "plugin.description": "Protect your API with a full-authentication process"
 }
