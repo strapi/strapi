@@ -3,22 +3,22 @@
     {
       "name": "Owner",
       "description": "Rule them all. This role can't be deleted",
-      "nb_user": 1
+      "nb_users": 1
     },
     {
       "name": "Administrator",
       "description": "Full access to everything",
-      "nb_user": 3
+      "nb_users": 3
     },
     {
       "name": "Moderator",
       "description": "Allow editing and deleting (except users)",
-      "nb_user": 12
+      "nb_users": 12
     },
     {
       "name": "Editor",
       "description": "Allow creating and editing your entries",
-      "nb_user": 429
+      "nb_users": 429
     }
   ],
   "providers": [
@@ -53,7 +53,7 @@
       "ico": "refresh"
     },
     {
-      "name": "Successful sign-in",
+      "name": "Successfull sign-in",
       "ico": "check"
     }
   ]

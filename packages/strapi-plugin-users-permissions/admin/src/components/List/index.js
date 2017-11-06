@@ -12,6 +12,7 @@ import { map, size } from 'lodash';
 
 // Design
 import Button from 'components/Button';
+import ListRow from 'components/ListRow';
 
 import styles from './styles.scss';
 
@@ -63,10 +64,10 @@ function List({ data, noButton, onButtonClick, settingType }) {
         </div>
       </div>
       <div className={styles.ulContainer}>
-        <ul>
-          {map(data, item => {
-            return <li key={item.name}>{item.name}</li>
-          })}
+        <ul className={noButton ? styles.listPadded : ''}>
+          {map(data, item => (
+            <ListRow item={item} key={item.name} settingType={settingType} />
+          ))}
         </ul>
       </div>
     </div>
