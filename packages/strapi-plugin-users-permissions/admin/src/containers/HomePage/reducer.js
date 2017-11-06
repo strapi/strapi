@@ -4,16 +4,20 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 
-import { DEFAULT_ACTION } from './constants';
+import {
+  FETCH_DATA_SUCCEEDED,
+} from './constants';
 
-const initialState = fromJS({});
+const initialState = fromJS({
+  data: List([]),
+});
 
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
-    case DEFAULT_ACTION:
-      return state;
+    case FETCH_DATA_SUCCEEDED:
+      return state.set('data', List(action.data));
     default:
       return state;
   }

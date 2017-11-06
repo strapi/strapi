@@ -43,5 +43,9 @@
   "components.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.error.validation.minSupMax": "Ne peut pas être plus grand",
   "components.ErrorBoundary.title": "Une erreur est survenue...",
-  "components.ListRow.empty": "Il n'y a pas de données à afficher."
+  "components.ListRow.empty": "Il n'y a pas de données à afficher.",
+  "Auth & Permissions": "Auth & Permissions",
+  "Content Manager": "Content Manager",
+  "Content Type Builder": "Content Type Builder",
+  "Settings Manager": "Settings Manager"
 }

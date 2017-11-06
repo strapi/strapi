@@ -1,0 +1,60 @@
+{
+  "roles": [
+    {
+      "name": "Owner",
+      "description": "Rule them all. This role can't be deleted",
+      "nb_user": 1
+    },
+    {
+      "name": "Administrator",
+      "description": "Full access to everything",
+      "nb_user": 3
+    },
+    {
+      "name": "Moderator",
+      "description": "Allow editing and deleting (except users)",
+      "nb_user": 12
+    },
+    {
+      "name": "Editor",
+      "description": "Allow creating and editing your entries",
+      "nb_user": 429
+    }
+  ],
+  "providers": [
+    {
+      "name": "email",
+      "enabled": true,
+      "ico": "envelope"
+    },
+    {
+      "name": "facebook",
+      "enabled": false,
+      "ico": "facebook"
+    },
+    {
+      "name": "twitter",
+      "enabled": true,
+      "ico": "twitter"
+    },
+    {
+      "name": "google",
+      "enabled": false,
+      "ico": "google"
+    }
+  ],
+  "email-templates": [
+    {
+      "name": "Email address validation",
+      "ico": "envelope"
+    },
+    {
+      "name": "Reset password",
+      "ico": "refresh"
+    },
+    {
+      "name": "Successful sign-in",
+      "ico": "check"
+    }
+  ]
+}

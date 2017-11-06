@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
@@ -14,6 +14,7 @@ import cn from 'classnames';
 
 // Design
 import HeaderNav from 'components/HeaderNav';
+import List from 'components/List';
 import PluginHeader from 'components/PluginHeader';
 
 // Utils
@@ -26,11 +27,34 @@ import selectHomePage from './selectors';
 // Styles
 import styles from './styles.scss';
 
+// Actions
+import {
+  fetchData,
+} from './actions';
+
 import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
+  componentDidMount() {
+    this.props.fetchData(this.props.match.params.settingType);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
+      this.props.fetchData(this.props.match.params.settingType);
+    }
+  }
+
   render() {
+    const noButtonList = this.props.match.params.settingType === 'email-templates';
+    const component = this.props.match.params.settingType === 'advanced-settings' ?
+      <div>coucou</div> :
+        <List
+          data={this.props.data}
+          settingType={this.props.match.params.settingType}
+          noButton={noButtonList}
+        />;
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
@@ -40,32 +64,31 @@ export class HomePage extends React.Component {
             actions={[]}
           />
           <HeaderNav />
+          {component}
         </div>
       </div>
     );
   }
 }
 
-HomePage.contextTypes = {
-  // router: PropTypes.object,
-};
+HomePage.defaultProps = {};
 
 HomePage.propTypes = {
-  // homePage: PropTypes.object,
+  data: PropTypes.array.isRequired,
+  fetchData: PropTypes.func.isRequired,
 };
+
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      // Your actions here
+      fetchData,
     },
     dispatch,
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  homePage: selectHomePage(),
-});
+const mapStateToProps = selectHomePage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 

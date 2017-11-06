@@ -4,10 +4,21 @@
  *
  */
 
-import { DEFAULT_ACTION } from './constants';
+import {
+  FETCH_DATA,
+  FETCH_DATA_SUCCEEDED,
+} from './constants';
 
-export function defaultAction() {
+export function fetchData(endPoint) {
   return {
-    type: DEFAULT_ACTION,
+    type: FETCH_DATA,
+    endPoint,
+  };
+}
+
+export function fetchDataSucceeded(data) {
+  return {
+    type: FETCH_DATA_SUCCEEDED,
+    data,
   };
 }

@@ -7,5 +7,19 @@
   "HomePage.header.title": "Auth & Permissions",
   "HomePage.header.description": "Define the roles and permissions for every one of them",
 
+  "List.button.roles": "Add a New Role",
+  "List.button.providers": "Add a New Provider",
+
+  "List.title.emailTemplates.singular": "{number} email template is available",
+  "List.title.emailTemplates.plural": "{number} email templates are available",
+
+  "List.title.providers.disabled.singular": "{number} is disabled",
+  "List.title.providers.disabled.plural": "{number} are disabled",
+  "List.title.providers.enabled.singular": "{number} provider is enabled and",
+  "List.title.providers.enabled.plural": "{number} providers are enabled and",
+
+  "List.title.roles.singular": "{number} role is available",
+  "List.title.roles.plural": "{number} roles are available",
+
   "plugin.description": "Protect your API with a full-authentication process"
 }
