@@ -10,9 +10,13 @@ import PropTypes from 'prop-types';
 
 // Design
 import IcoContainer from 'components/IcoContainer';
+import PopUpWarning from 'components/PopUpWarning';
+
 import styles from './styles.scss';
 
 class ListRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  state = { showModalDelete: false };
+
   generateContent = () => {
     let icons = [
       {
@@ -21,7 +25,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
       },
       {
         icoType: 'trash',
-        onClick: () => { console.log('delete') },
+        onClick: () => { this.setState({ showModalDelete: true }) },
       },
     ];
 
@@ -111,6 +115,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         <div className={styles.container}>
           {this.generateContent()}
         </div>
+        <PopUpWarning isOpen={this.state.showModalDelete} onConfirm={() => this.setState({ showModalDelete: false })} toggleModal={() => this.setState({ showModalDelete: false })}/>
       </li>
     );
   }
