@@ -24,7 +24,7 @@ class App extends React.Component {
     return (
       <div className={pluginId}>
         <Switch>
-          <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+          <Route path={`/plugins/${pluginId}/:settingType?`} component={HomePage} exact />
           <Route component={NotFoundPage} />
         </Switch>
       </div>

@@ -10,6 +10,9 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
+import cn from 'classnames';
+// Design
+import PluginHeader from 'components/PluginHeader';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -26,7 +29,14 @@ import saga from './saga';
 export class HomePage extends React.Component {
   render() {
     return (
-      <div className={styles.homePage}>
+      <div>
+        <div className={cn('container-fluid', styles.containerFluid)}>
+          <PluginHeader
+            title={{ id: 'users-permissions.HomePage.header.title' }}
+            description={{ id: 'users-permissions.HomePage.header.description' }}
+            actions={[]}
+            />
+        </div>
       </div>
     );
   }
