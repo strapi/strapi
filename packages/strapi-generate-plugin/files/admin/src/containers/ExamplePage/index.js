@@ -52,6 +52,7 @@ export class ExamplePage extends React.Component {
               label={this.props.loading ? 'Loading...' : 'Submit'}
               disabled={this.props.loading}
               onClick={this.props.loadData}
+              primary
             />
           </div>
         </div>
