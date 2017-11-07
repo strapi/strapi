@@ -27,6 +27,12 @@ class App extends React.Component {
     }
   }
 
+  componentDidUpdate() {
+    if (!this.props.location.pathname.split('/')[3]) {
+      this.props.history.push('/plugins/users-permissions/roles');
+    }
+  }
+
   render() {
     return (
       <div className={pluginId}>

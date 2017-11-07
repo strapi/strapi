@@ -5,11 +5,20 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  ON_CANCEL,
+  ON_CHANGE_INPUT,
 } from './constants';
 
-export function defaultAction() {
+export function onCancel() {
   return {
-    type: DEFAULT_ACTION,
+    type: ON_CANCEL,
+  };
+}
+
+export function onChangeInput({ target }) {
+  return {
+    type: ON_CHANGE_INPUT,
+    key: target.name,
+    value: target.value,
   };
 }

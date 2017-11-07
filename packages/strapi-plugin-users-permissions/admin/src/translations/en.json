@@ -1,4 +1,15 @@
 {
+  "EditPage.cancel": "Cancel",
+  "EditPage.submit": "Save",
+  "EditPage.form.roles": "Roles details",
+  "EditPage.form.roles.label.description": "Description",
+  "EditPage.form.roles.label.name": "Name",
+  "EditPage.form.roles.label.users": "Users associated with this role ({number})",
+  "EditPage.header.title": "{name}",
+  "EditPage.header.title.create": "Create a new role",
+  "EditPage.header.description": "{description}",
+  "EditPage.header.description.create": " ",
+
   "HeaderNav.link.advancedSettings": "Advanced settings",
   "HeaderNav.link.emailTemplates": "Email templates",
   "HeaderNav.link.providers": "Providers",
@@ -6,6 +17,8 @@
 
   "HomePage.header.title": "Auth & Permissions",
   "HomePage.header.description": "Define the roles and permissions for every one of them",
+
+  "InputSearch.placeholder": "Search for a user",
 
   "List.button.roles": "Add a New Role",
   "List.button.providers": "Add a New Provider",

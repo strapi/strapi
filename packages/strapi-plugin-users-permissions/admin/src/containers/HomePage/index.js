@@ -47,16 +47,19 @@ export class HomePage extends React.Component {
     }
   }
 
+  onButtonClick = () => this.props.history.push(`${this.props.location.pathname}/create`);
+
   render() {
     const noButtonList = this.props.match.params.settingType === 'email-templates';
     const component = this.props.match.params.settingType === 'advanced-settings' ?
       <div>coucou</div> :
         <List
           data={this.props.data}
-          settingType={this.props.match.params.settingType}
-          noButton={noButtonList}
           deleteActionSucceeded={this.props.deleteActionSucceeded}
           deleteData={this.props.deleteData}
+          noButton={noButtonList}
+          onButtonClick={this.onButtonClick}
+          settingType={this.props.match.params.settingType}
         />;
     return (
       <div>

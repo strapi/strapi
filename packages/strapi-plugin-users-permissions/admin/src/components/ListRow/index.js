@@ -7,6 +7,7 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import { router } from 'app';
 
 // Design
 import IcoContainer from 'components/IcoContainer';
@@ -23,13 +24,11 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     }
   }
 
-  handleDelete = () => this.props.deleteData(this.props.item, this.props.settingType);
-
   generateContent = () => {
     let icons = [
       {
         icoType: 'pencil',
-        onClick: () => { console.log('edit') },
+        onClick: this.handleClick,
       },
       {
         icoType: 'trash',
@@ -90,7 +89,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         icons = [
           {
             icoType: 'pencil',
-            onClick: () => { console.log('edit') },
+            onClick: this.handleClick,
           },
         ];
 
@@ -117,9 +116,23 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     }
   }
 
+  handleClick = () => {
+    switch (this.props.settingType) {
+      case 'roles':
+        return router.push(`${router.location.pathname}/${this.props.item.id}`);
+      case 'providers':
+      case 'email-templates':
+        return console.log('click');
+      default:
+        return;
+    }
+  }
+
+  handleDelete = () => this.props.deleteData(this.props.item, this.props.settingType);
+
   render() {
     return (
-      <li className={styles.li}>
+      <li className={styles.li} onClick={this.handleClick}>
         <div className={styles.container}>
           {this.generateContent()}
         </div>
