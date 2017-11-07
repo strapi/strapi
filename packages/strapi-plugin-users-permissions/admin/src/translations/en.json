@@ -21,5 +21,9 @@
   "List.title.roles.singular": "{number} role is available",
   "List.title.roles.plural": "{number} roles are available",
 
+  "notification.error.delete": "An error occured while trying to delete the item",
+  "notification.error.fetch": "An error occured while trying to fetch data",
+  "notification.success.delete": "The item has been deleted",
+
   "plugin.description": "Protect your API with a full-authentication process"
 }

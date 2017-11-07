@@ -29,6 +29,7 @@ import styles from './styles.scss';
 
 // Actions
 import {
+  deleteData,
   fetchData,
 } from './actions';
 
@@ -54,6 +55,8 @@ export class HomePage extends React.Component {
           data={this.props.data}
           settingType={this.props.match.params.settingType}
           noButton={noButtonList}
+          deleteActionSucceeded={this.props.deleteActionSucceeded}
+          deleteData={this.props.deleteData}
         />;
     return (
       <div>
@@ -75,6 +78,8 @@ HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   data: PropTypes.array.isRequired,
+  deleteActionSucceeded: PropTypes.bool.isRequired,
+  deleteData: PropTypes.func.isRequired,
   fetchData: PropTypes.func.isRequired,
 };
 
@@ -82,6 +87,7 @@ HomePage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      deleteData,
       fetchData,
     },
     dispatch,

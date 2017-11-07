@@ -14,4 +14,30 @@ const selectHomePage = () => createSelector(
   (substate) => substate.toJS(),
 );
 
+/**
+* Other specific selectors
+*/
+
+const makeSelectAllData = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('data').toJS(),
+);
+
+const makeSelectDataToDelete = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('dataToDelete').toJS(),
+);
+
+
+const makeSelectDeleteEndPoint = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('deleteEndPoint'),
+);
+
 export default selectHomePage;
+
+export {
+  makeSelectAllData,
+  makeSelectDataToDelete,
+  makeSelectDeleteEndPoint,
+};

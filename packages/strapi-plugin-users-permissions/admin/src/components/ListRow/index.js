@@ -17,6 +17,14 @@ import styles from './styles.scss';
 class ListRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { showModalDelete: false };
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.deleteActionSucceeded !== this.props.deleteActionSucceeded) {
+      this.setState({ showModalDelete: false });
+    }
+  }
+
+  handleDelete = () => this.props.deleteData(this.props.item, this.props.settingType);
+
   generateContent = () => {
     let icons = [
       {
@@ -115,7 +123,11 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         <div className={styles.container}>
           {this.generateContent()}
         </div>
-        <PopUpWarning isOpen={this.state.showModalDelete} onConfirm={() => this.setState({ showModalDelete: false })} toggleModal={() => this.setState({ showModalDelete: false })}/>
+        <PopUpWarning
+          isOpen={this.state.showModalDelete}
+          onConfirm={this.handleDelete}
+          toggleModal={() => this.setState({ showModalDelete: false })}
+        />
       </li>
     );
   }
@@ -131,6 +143,8 @@ ListRow.defaultProps = {
 }
 
 ListRow.proptypes = {
+  deleteActionSucceeded: PropTypes.bool.isRequired,
+  deleteData: PropTypes.func.isRequired,
   item: PropTypes.object,
   settingType: PropTypes.string,
 };

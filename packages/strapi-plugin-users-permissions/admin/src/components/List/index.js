@@ -46,7 +46,7 @@ const generateListTitle = (data, settingType) => {
 }
 
 
-function List({ data, noButton, onButtonClick, settingType }) {
+function List({ data, deleteActionSucceeded, deleteData, noButton, onButtonClick, settingType }) {
   return (
     <div className={styles.list}>
       <div className={styles.flex}>
@@ -66,7 +66,13 @@ function List({ data, noButton, onButtonClick, settingType }) {
       <div className={styles.ulContainer}>
         <ul className={noButton ? styles.listPadded : ''}>
           {map(data, item => (
-            <ListRow item={item} key={item.name} settingType={settingType} />
+            <ListRow
+              deleteActionSucceeded={deleteActionSucceeded}
+              deleteData={deleteData}
+              item={item}
+              key={item.name}
+              settingType={settingType}
+            />
           ))}
         </ul>
       </div>
@@ -80,6 +86,8 @@ List.defaultProps = {
 };
 
 List.proptypes = {
+  deleteActionSucceeded: PropTypes.bool.isRequired,
+  deleteData: PropTypes.func.isRequired,
   noButton: PropTypes.bool,
   onButtonClick: PropTypes.func,
 };

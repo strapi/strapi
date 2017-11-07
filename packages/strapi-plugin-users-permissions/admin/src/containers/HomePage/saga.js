@@ -1,9 +1,33 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { takeLatest, put, fork, take, cancel } from 'redux-saga/effects';
+import { takeLatest, put, fork, take, cancel, select } from 'redux-saga/effects';
+import { findIndex } from 'lodash';
 
-import { fetchDataSucceeded } from './actions';
-import { FETCH_DATA } from './constants';
+import { deleteDataSucceeded, fetchDataSucceeded } from './actions';
+import { DELETE_DATA, FETCH_DATA } from './constants';
 import data from './data.json';
+import {
+  makeSelectAllData,
+  makeSelectDataToDelete,
+  // makeSelectDeleteEndPoint,
+} from './selectors';
+
+export function* dataDelete() {
+  try {
+    const allData = yield select(makeSelectAllData());
+    const dataToDelete = yield select(makeSelectDataToDelete());
+    const indexDataToDelete = findIndex(allData, ['name', dataToDelete.name]);
+
+    if (indexDataToDelete !== -1) {
+      yield put(deleteDataSucceeded(indexDataToDelete));
+
+      window.Strapi.notification.success('users-permissions.notification.success.delete')
+    }
+
+
+  } catch(err) {
+    window.Strapi.notification.error('users-permissions.notification.error.delete');
+  }
+}
 
 export function* dataFetch(action) {
   try {
@@ -12,7 +36,7 @@ export function* dataFetch(action) {
     yield put(fetchDataSucceeded(response));
 
   } catch(err) {
-    window.Strapi.notification.error('An error occured');
+    window.Strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }
 
@@ -20,6 +44,7 @@ export function* dataFetch(action) {
 export function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, FETCH_DATA, dataFetch);
 
+  yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield take(LOCATION_CHANGE);
   yield cancel(loadDataWatcher);
 }
