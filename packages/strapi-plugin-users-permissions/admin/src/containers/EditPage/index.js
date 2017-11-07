@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, size } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -24,8 +24,10 @@ import injectReducer from 'utils/injectReducer';
 
 // Actions
 import {
+  addUser,
   onCancel,
   onChangeInput,
+  onClickDelete,
 } from './actions';
 
 // Selectors
@@ -61,6 +63,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       : 'users-permissions.EditPage.header.description';
 
     const pluginHeaderActions = this.props.editPage.showButtons ? this.pluginHeaderActions : [];
+
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />
@@ -113,13 +116,15 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       </div>
                     </div>
                     <InputSearch
+                      addUser={this.props.addUser}
+                      didDeleteUser={this.props.editPage.didDeleteUser}
                       label="users-permissions.EditPage.form.roles.label.users"
-                      labelValues={{ number: 0 }}
-                      onChange={() => console.log('change')}
+                      labelValues={{ number: size(get(this.props.editPage, ['modifiedData', 'users'])) }}
                       type="text"
                       validations={{ required: true }}
-                      value=""
+                      values={get(this.props.editPage, ['modifiedData', 'users'])}
                       name="users"
+                      onClickDelete={this.props.onClickDelete}
                     />
                   </div>
                 </form>
@@ -133,9 +138,11 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 }
 
 EditPage.propTypes = {
+  addUser: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
   onChangeInput: PropTypes.func.isRequired,
+  onClickDelete: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -145,8 +152,10 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addUser,
       onCancel,
       onChangeInput,
+      onClickDelete,
     },
     dispatch,
   );

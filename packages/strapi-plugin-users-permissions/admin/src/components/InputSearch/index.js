@@ -6,14 +6,33 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { includes, isEmpty, map, toLower } from 'lodash';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+
+import InputSearchLi from 'components/InputSearchLi';
 
 import styles from './styles.scss';
 
 class InputSearch extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { errors: [] };
+  state = { errors: [], value: '', users: this.props.values, filteredUsers: this.props.values };
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
+      this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
+    }
+  }
+
+  handleChange = ({ target }) => {
+    const filteredUsers = isEmpty(target.value) ?
+    this.state.users
+    : this.state.users.filter((user) => {
+        if (includes(toLower(user.name), toLower(target.value))) {
+          return user;
+        }
+      });
+    this.setState({ value: target.value, filteredUsers });
+  }
 
   render() {
     return (
@@ -29,13 +48,20 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
                 className={cn('form-control', !isEmpty(this.state.errors) ? 'is-invalid': '')}
                 id={this.props.name}
                 name={this.props.name}
-                onChange={this.props.onChange}
-                value={this.props.value}
+                onChange={this.handleChange}
+                value={this.state.value}
                 placeholder={message}
                 type="text"
               />
             )}
           </FormattedMessage>
+        </div>
+        <div className={styles.ulContainer}>
+          <ul>
+            {map(this.state.filteredUsers, (user) => (
+              <InputSearchLi key={user.name} item={user} onClickDelete={this.props.onClickDelete} />
+            ))}
+          </ul>
         </div>
       </div>
     );
@@ -54,6 +80,7 @@ InputSearch.proptypes = {
   labelValues: PropTypes.object,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  onClickDelete: PropTypes.func.isRequired,
   value: PropTypes.string,
 };
 
