@@ -15,51 +15,64 @@ module.exports = function() {
       path.resolve(this.config.appPath, 'packages', 'strapi-admin', 'admin', 'build', 'config', 'plugins.json');
 
     try {
-      // Try to access to path.
-      fs.access(sourcePath, err => {
+      fs.access(path.resolve(this.config.appPath, 'admin', 'admin'), err => {
         if (err && err.code !== 'ENOENT') {
-          this.log.error('Impossible to access to ' + sourcePath);
-
           return reject(err);
         }
 
-        if (!err) {
-          // Delete source file.
-          fs.unlinkSync(sourcePath);
+        // No admin.
+        if (err.code === 'ENOENT') {
+          return resolve();
         }
 
         // Try to access to path.
-        fs.access(buildPath, err => {
+        fs.access(sourcePath, err => {
           if (err && err.code !== 'ENOENT') {
-            this.log.error('Impossible to access to ' + buildPath);
+            this.log.error('Impossible to access to ' + sourcePath);
 
             return reject(err);
           }
 
           if (!err) {
-            // Delete build file.
-            fs.unlinkSync(buildPath);
+            // Delete source file.
+            fs.unlinkSync(sourcePath);
           }
 
-          // Create `plugins.json` file.
-          const data =  Object.keys(this.plugins).map(x => ({
-            id: x,
-            source: Object.keys(this.config.environments).reduce((acc, current) => {
-              acc[current] = `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${this.config.paths.admin}/${x}/main.js`;
+          // Try to access to path.
+          fs.access(buildPath, err => {
+            if (err && err.code !== 'ENOENT') {
+              this.log.error('Impossible to access to ' + buildPath);
 
-              // Override source value using plugin's configurations.
-              if (['development', 'test'].indexOf(current) === -1 && !_.isEmpty(_.get(this.plugins[x].config, `sources.${current}`, {}))) {
-                acc[current] = this.plugins[x].config.sources[current];
-              }
+              return reject(err);
+            }
 
-              return acc;
-            }, {})
-          }));
+            if (!err) {
+              // Delete build file.
+              fs.unlinkSync(buildPath);
+            }
 
-          fs.writeFileSync(sourcePath, JSON.stringify(data, null, 2), 'utf8');
-          fs.writeFileSync(buildPath, JSON.stringify(data), 'utf8');
+            // Create `plugins.json` file.
+            const data =  Object.keys(this.plugins).map(x => ({
+              id: x,
+              source: Object.keys(this.config.environments).reduce((acc, current) => {
+                acc[current] = `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${this.config.paths.admin}/${x}/main.js`;
 
-          resolve();
+                // Override source value using plugin's configurations.
+                if (['development', 'test'].indexOf(current) === -1 && !_.isEmpty(_.get(this.plugins[x].config, `sources.${current}`, {}))) {
+                  acc[current] = this.plugins[x].config.sources[current];
+                }
+
+                return acc;
+              }, {})
+            }));
+
+            console.log(strapi.admin);
+
+            fs.writeFileSync(sourcePath, JSON.stringify(data, null, 2), 'utf8');
+            fs.writeFileSync(buildPath, JSON.stringify(data), 'utf8');
+
+            resolve();
+          });
         });
       });
     } catch (e) {
