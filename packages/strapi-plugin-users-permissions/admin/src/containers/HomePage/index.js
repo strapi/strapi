@@ -62,6 +62,7 @@ export class HomePage extends React.Component {
           onButtonClick={this.onButtonClick}
           settingType={this.props.match.params.settingType}
         />;
+      
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
