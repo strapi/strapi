@@ -13,6 +13,7 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 
 // Design
+import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import PluginHeader from 'components/PluginHeader';
@@ -52,7 +53,7 @@ export class HomePage extends React.Component {
   render() {
     const noButtonList = this.props.match.params.settingType === 'email-templates';
     const component = this.props.match.params.settingType === 'advanced-settings' ?
-      <div>coucou</div> :
+      <EditForm /> :
         <List
           data={this.props.data}
           deleteActionSucceeded={this.props.deleteActionSucceeded}

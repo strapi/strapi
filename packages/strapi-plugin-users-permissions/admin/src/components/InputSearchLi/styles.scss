@@ -23,6 +23,7 @@
     display: flex;
     justify-content: space-between;
     > div:last-child {
+      cursor: pointer;
       color: #B3B5B9;
     }
   }

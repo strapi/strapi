@@ -1,4 +1,12 @@
 {
+  "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
+  "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
+  "EditForm.inputSelect.durations.label": "Duration",
+  "EditForm.inputSelect.durations.description": "Nombre d'heure pendant lesquelles un utilisateur ne peut souscrire.",
+
+  "EditForm.inputToggle.label": "Un compte par adresse email",
+  "EditForm.inputToggle.description": "Interdire l'utilisateur de créer de multiple comptes avec la même adresse email avec des providers différents",
+
   "EditPage.cancel": "Cancel",
   "EditPage.submit": "Sauvegarder",
   "EditPage.form.roles": "Rôles détails",

@@ -192,7 +192,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                   </option>
                 )}
               </FormattedMessage> :
-              <option value={option.value} key={key}>{option.name}</option>
+              <option value={option.value} key={key}>{option.value}</option>
           ))}
         </select>
         <div className={styles.inputDescriptionContainer}>
@@ -389,6 +389,40 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     );
   }
 
+  handleToggle = (e) => {
+    const target = {
+      type: 'toggle',
+      name: this.props.name,
+      value: e.target.id === 'on',
+    }
+
+    this.props.onChange({ target });
+  }
+
+  renderInputToggle = () => {
+    const btnClassOff = this.props.value ? 'btn' : `btn ${styles.gradientOff}`;
+    const btnClassOn = this.props.value ? `btn ${styles.gradientOn}` : 'btn';
+    const spacer = this.props.inputDescription ? <div className={styles.spacer} /> : <div />;
+    const inputDescription = this.props.inputDescription ?
+      <FormattedMessage id={this.props.inputDescription} /> : '';
+
+    return (
+      <div className={`${this.props.customBootstrapClass || 'col-md-6'} ${styles.inputToggle}`}>
+        <div className={styles.toggleLabel}>
+          <FormattedMessage id={this.props.label} values={this.props.labelValues} />
+        </div>
+        <div className={`btn-group ${styles.inputToggleButtons}`}>
+          <button type="button" className={btnClassOff} id="off" onClick={this.handleToggle}>OFF</button>
+          <button type="button" className={btnClassOn} id="on" onClick={this.handleToggle}>ON</button>
+        </div>
+        <div className={styles.inputDescriptionContainer}>
+          <small>{inputDescription}</small>
+        </div>
+        {spacer}
+      </div>
+    );
+  }
+
   render() {
     const inputValue = this.props.value || '';
     // override default onBlur
@@ -444,6 +478,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         return this.renderInputDate(requiredClass, inputDescription);
       case 'password':
         return this.renderInputPassword(requiredClass, inputDescription, handleBlur);
+      case 'toggle':
+        return this.renderInputToggle();
       default:
     }
 

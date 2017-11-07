@@ -1,4 +1,12 @@
 {
+  "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
+  "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
+  "EditForm.inputSelect.durations.label": "Duration",
+  "EditForm.inputSelect.durations.description": "Number of hours during the user can't subscribe.",
+
+  "EditForm.inputToggle.label": "One account per email addres",
+  "EditForm.inputToggle.description": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+
   "EditPage.cancel": "Cancel",
   "EditPage.submit": "Save",
   "EditPage.form.roles": "Roles details",
