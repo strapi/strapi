@@ -21,7 +21,7 @@ module.exports = function() {
         }
 
         // No admin.
-        if (err.code === 'ENOENT') {
+        if (err && err.code === 'ENOENT') {
           return resolve();
         }
 
