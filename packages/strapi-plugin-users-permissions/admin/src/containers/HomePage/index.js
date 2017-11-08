@@ -11,12 +11,14 @@ import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
+import { isEmpty, replace } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import PluginHeader from 'components/PluginHeader';
+import PopUpForm from 'components/PopUpForm';
 
 // Utils
 import injectReducer from 'utils/injectReducer';
@@ -48,7 +50,13 @@ export class HomePage extends React.Component {
     }
   }
 
-  onButtonClick = () => this.props.history.push(`${this.props.location.pathname}/create`);
+  onButtonClick = () => {
+    if (this.props.match.params.settingType === 'roles') {
+      this.props.history.push(`${this.props.location.pathname}/create`);
+    } else {
+      this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
+    }
+  }
 
   render() {
     const noButtonList = this.props.match.params.settingType === 'email-templates';
@@ -62,7 +70,9 @@ export class HomePage extends React.Component {
           onButtonClick={this.onButtonClick}
           settingType={this.props.match.params.settingType}
         />;
-      
+
+      const hashArray = replace(this.props.location.hash, '#', '').split('::');
+
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
@@ -74,6 +84,11 @@ export class HomePage extends React.Component {
           <HeaderNav />
           {component}
         </div>
+        <PopUpForm
+          actionType={hashArray[0]}
+          settingType={hashArray[1]}
+          isOpen={!isEmpty(this.props.location.hash)}
+        />
       </div>
     );
   }

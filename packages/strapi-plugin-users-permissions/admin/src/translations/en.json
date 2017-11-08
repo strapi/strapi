@@ -46,5 +46,19 @@
   "notification.error.fetch": "An error occured while trying to fetch data",
   "notification.success.delete": "The item has been deleted",
 
-  "plugin.description": "Protect your API with a full-authentication process"
+  "plugin.description": "Protect your API with a full-authentication process",
+
+  "popUpForm.button.cancel": "Cancel",
+  "popUpForm.button.save": "Save",
+  "popUpForm.header.add.providers": "Add New Provider",
+  "popUpForm.header.edit.email-templates": "Edit Email Templates",
+  "popUpForm.header.edit.providers": "Edit Provider",
+  "popUpForm.inputSelect.providers.label": "Choose the provider",
+  "popUpForm.inputToggle.providers.label": "Enable",
+  "popUpForm.inputToggle.providers.description": "If disabled, the users won't be able to use this provider.",
+  "popUpForm.inputText.shipperName.label": "Shipper name",
+  "popUpForm.inputEmail.shipperEmail.label": "Shipper email",
+  "popUpForm.inputEmail.responseEmail.label": "Response email",
+  "popUpForm.inputText.emailObject.label": "Object",
+  "popUpForm.inputTextArea.message.label": "Message"
 }

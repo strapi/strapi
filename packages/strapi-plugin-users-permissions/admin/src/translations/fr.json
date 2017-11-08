@@ -46,5 +46,19 @@
   "notification.error.fetch": "Une erreur est survenue en essayant de récupérer les données",
   "notification.success.delete": "L'élément a bien été supprimé",
 
-  "plugin.description": "Protegez votre API avec un système d'authentification complet"
+  "plugin.description": "Protegez votre API avec un système d'authentification complet",
+
+  "popUpForm.button.cancel": "Annuler",
+  "popUpForm.button.save": "Sauvegarder",
+  "popUpForm.header.add.providers": "Ajouter un Nouveau Provider",
+  "popUpForm.header.edit.email-templates": "Editer Email Templates",
+  "popUpForm.header.edit.providers": "Editer Le Provider",
+  "popUpForm.inputSelect.providers.label": "Sélectionnez le provider",
+  "popUpForm.inputToggle.providers.label": "Activer",
+  "popUpForm.inputToggle.providers.description": "S'il est désactivé les utilisateurs ne pourront pas utiliser ce provider.",
+  "popUpForm.inputText.shipperName.label": "Nom de l'envoyeur",
+  "popUpForm.inputEmail.shipperEmail.label": "Email de l'envoyeur",
+  "popUpForm.inputEmail.responseEmail.label": "Email de réponse",
+  "popUpForm.inputText.emailObject.label": "Objet",
+  "popUpForm.inputTextArea.message.label": "Message"
 }
