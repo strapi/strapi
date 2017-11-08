@@ -773,7 +773,7 @@ import reducer from './reducer';
 export class FooPage extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.error !== nextProps.error && nextProps.error) {
-      window.Strapi.notification.error(nextProps.errorMessage);
+      strapi.notification.error(nextProps.errorMessage);
     }
   }
 

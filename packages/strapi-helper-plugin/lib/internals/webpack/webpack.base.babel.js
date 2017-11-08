@@ -5,15 +5,34 @@
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-
 const webpack = require('webpack');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
-let noPlugin = false;
-let plugins = [];
-let pluginFolders = {};
+// Define remote and backend URLs.
+const URLs = {
+  remote: '',
+  backend: ''
+};
+
+const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+try {
+  const server = require(serverConfig);
+
+  URLs.remote = _.get(server, 'admin.remoteURL', null) ? _.get(server, 'admin.remoteURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}/admin`;
+  URLs.backend = _.get(server, 'admin.backendURL', null) ? _.get(server, 'admin.backendURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
+} catch (e) {
+  throw new Error('Impossible to open ' + serverConfig);
+}
+
+// Load plugins into the same build in development mode.
+const plugins = {
+  exist: false,
+  src: [],
+  folders: {}
+};
 
 if (process.env.npm_lifecycle_event === 'start') {
   try {
@@ -23,32 +42,22 @@ if (process.env.npm_lifecycle_event === 'start') {
       fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
 
       // Allow app without plugins.
-      noPlugin = true;
+      plugins.exist = true;
     } catch (e) {
       throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
     }
   }
 
-  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
-    .filter(x => x[0] !== '.') : [];
+  // Read `plugins` directory.
+  plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins')).filter(x => x[0] !== '.') : [];
 
-  pluginFolders = plugins.reduce((acc, current) => {
+  // Construct object of plugin' paths.
+  plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
 
     return acc;
   }, {});
 }
-
-let adminURL = null;
-
-try {
-  const server = require(path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'));
-
-  adminURL = _.get(server, 'admin.url', null);
-} catch (e) {
-  // Silent
-}
-
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -83,8 +92,8 @@ module.exports = (options) => ({
         },
       },
       include: [path.join(process.cwd(), 'admin', 'src')]
-        .concat(plugins.reduce((acc, current) => {
-          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), pluginFolders[current]);
+        .concat(plugins.src.reduce((acc, current) => {
+          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
           return acc;
         }, []))
@@ -174,7 +183,8 @@ module.exports = (options) => ({
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        ADMIN_URL: JSON.stringify(adminURL),
+        REMOTE_URL: JSON.stringify(URLs.remote),
+        BACKEND_URL: JSON.stringify(URLs.backend),
       },
     }),
     new webpack.NamedModulesPlugin()

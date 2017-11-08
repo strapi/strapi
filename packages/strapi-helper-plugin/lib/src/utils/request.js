@@ -50,7 +50,7 @@ function formatQueryParams(params) {
 */
 function serverRestartWatcher(response) {
   return new Promise((resolve, reject) => {
-    fetch(`${Strapi.apiUrl}/_health`, {
+    fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
       headers: {
@@ -86,7 +86,7 @@ function serverRestartWatcher(response) {
 
    // Add parameters to url
    url = _.startsWith(url, '/')
-     ? `${Strapi.apiUrl}${url}`
+     ? `${strapi.backendURL}${url}`
      : url;
 
    if (options && options.params) {

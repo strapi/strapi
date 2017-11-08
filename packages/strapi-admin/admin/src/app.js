@@ -25,6 +25,16 @@ import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
 
+// Retrieve remote and backend URLs.
+const remoteURL = process.env.REMOTE_URL || 'http://localhost:1337/admin';
+const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+
+window.strapi = {
+  remoteURL,
+  backendURL,
+  languages,
+};
+
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
@@ -70,11 +80,7 @@ window.onload = function onLoad() {
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
-  const uri = window.location.href.indexOf('/admin') !== -1 ?
-    `${window.location.origin}/admin` :
-    window.location.origin;
-    
-  fetch(`${process.env.ADMIN_URL !== null ? process.env.ADMIN_URL : uri}/config/plugins.json`)
+  fetch(`${remoteURL}/config/plugins.json`)
     .then(response => {
       return response.json();
     })
@@ -140,10 +146,7 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-const port = window.Strapi && window.Strapi.port ? window.Strapi.port : 1337;
-const apiUrl = window.Strapi && window.Strapi.apiUrl ? window.Strapi.apiUrl : `http://localhost:${port}`;
-
-window.Strapi = {
+window.strapi = Object.assign(window.strapi, {
   registerPlugin,
   notification: {
     success: (message) => {
@@ -159,8 +162,6 @@ window.Strapi = {
       displayNotification(message, 'info');
     },
   },
-  port,
-  apiUrl,
   refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
       render(merge({}, translationMessages, translationMessagesUpdated));
@@ -170,8 +171,7 @@ window.Strapi = {
     },
   }),
   router: history,
-  languages,
-};
+});
 
 const dispatch = store.dispatch;
 export {

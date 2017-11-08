@@ -34,7 +34,7 @@ const formatMessages = messages => reduce(messages, (result, value, key) => {
  */
 const requireTranslations = language => {
   try {
-    return require(`translations/${language}.json`); // eslint-disable-line global-require
+    return require(`/translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
     console.error(`Unable to load "${language}" translation for the plugin ${pluginId}. Please make sure "${language}.json" file exists in "pluginPath/admin/src/translations" folder.`);
     return false;
@@ -44,7 +44,10 @@ const requireTranslations = language => {
 /**
  * Dynamically generate `translationsMessages object`.
  */
-const translationMessages = reduce(window.Strapi.languages, (result, language) => {
+
+console.log(window.strapi);
+
+const translationMessages = reduce(window.strapi.languages, (result, language) => {
   const obj = result;
   const messages = requireTranslations(language);
   obj[language] = formatMessages(messages);

@@ -66,8 +66,6 @@ module.exports = function() {
               }, {})
             }));
 
-            console.log(strapi.admin);
-
             fs.writeFileSync(sourcePath, JSON.stringify(data, null, 2), 'utf8');
             fs.writeFileSync(buildPath, JSON.stringify(data), 'utf8');
 
