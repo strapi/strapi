@@ -8,7 +8,7 @@
 
 // Node.js core.
 const { exec } = require('child_process');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 // Logger.
@@ -55,7 +55,7 @@ module.exports = function (plugin, cliArguments) {
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    exec(`npm install ${pluginID}@alpha --ignore-scripts --no-save`, (err) => {
+    exec(`npm install ${pluginId}@alpha --ignore-scripts --no-save --prefix ${pluginPath}`, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
         process.exit(1);
@@ -69,7 +69,7 @@ module.exports = function (plugin, cliArguments) {
         logger.debug(`Moving the \`node_modules/${pluginID}\` folder to the \`./plugins\` folder.`);
 
         // Move the plugin from the `node_modules` folder to the `./plugins` folder.
-        fs.renameSync(`./node_modules/${pluginID}`, pluginPath);
+        fs.copySync(`${pluginPath}/node_modules/${pluginId}`, pluginPath);
 
         // Success.
         logger.info('The plugin has been successfully installed.');

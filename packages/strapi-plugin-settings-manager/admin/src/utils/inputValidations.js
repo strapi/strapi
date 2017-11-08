@@ -27,7 +27,7 @@ export function checkFormValidity(formData, formValidations, formErrors) {
     }
 
     // If section is disabled don't need further checks
-    if (includes(key, 'enabled') && !value) return false;
+    if (includes(key, 'enabled') && !value || !valueValidations) return false;
 
     forEach(valueValidations.nestedValidations, (nestedValidations) => {
       if (nestedValidations.validations.required && !has(formData, nestedValidations.target)) {

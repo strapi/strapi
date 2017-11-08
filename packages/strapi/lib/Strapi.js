@@ -114,6 +114,8 @@ class Strapi extends EventEmitter {
           cb();
         }
       });
+
+      utils.usage.call(this);
     } catch (e) {
       this.log.debug(`Server wasn't able to start properly.`);
       this.log.error(e);
