@@ -31,6 +31,7 @@
   "comonents.popUpWarning.button.confirm": "Confirmer",
   "components.popUpWarning.title": "Merci de confirmer",
   "components.popUpWarning.message": "Etes-vous sure de vouloir le supprimer?",
+  "components.Input.error.validation.email": "Le format n'est pas de type email",
   "components.error.validation.required": "Ce champ est obligatoire.",
   "components.error.validation.regex": "La valeur ne correspond pas au format attendu.",
   "components.error.validation.max": "La valeur est trop grande.",

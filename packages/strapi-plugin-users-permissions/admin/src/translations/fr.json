@@ -60,5 +60,9 @@
   "popUpForm.inputEmail.shipperEmail.label": "Email de l'envoyeur",
   "popUpForm.inputEmail.responseEmail.label": "Email de réponse",
   "popUpForm.inputText.emailObject.label": "Objet",
-  "popUpForm.inputTextArea.message.label": "Message"
+  "popUpForm.inputText.emailObject.placeholder": "Merci de confirmer votre adresse email pour %APP_NAME%",
+  "popUpForm.inputTextArea.message.label": "Message",
+  "popUpForm.inputTextArea.message.placeholder": "<p>Merci de cliquer sur ce lien pour valider votre compte</p>",
+  "popUpForm.inputEmail.placeholder": "arthurdupont@gmail.com",
+  "popUpForm.inputText.shipperName.placeholder": "Arthur Dupont"
 }

@@ -16,6 +16,7 @@ import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   toggleModal = () => router.push(router.location.pathname);
+  state = { value: '' }
 
   renderButton = () => {
     if (this.props.showLoader) {
@@ -69,25 +70,26 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           name="shipperName"
           onChange={() => console.log('change')}
           value=""
-          placeholder="John Doe"
+          placeholder="users-permissions.popUpForm.inputText.shipperName.placeholder"
           type="text"
           validations={{}}
+          autoFocus
         />
         <Input
           label="users-permissions.popUpForm.inputEmail.shipperEmail.label"
           name="shipperEmail"
-          onChange={() => console.log('change')}
-          value=""
-          placeholder="John Doe"
+          onChange={({ target }) => this.setState({ value: target.value })}
+          value={this.state.value}
+          placeholder="users-permissions.popUpForm.inputEmail.placeholder"
           type="email"
-          validations={{}}
+          validations={{ required: true }}
         />
         <Input
           label="users-permissions.popUpForm.inputEmail.responseEmail.label"
           name="responseEmail"
           onChange={() => console.log('change')}
           value=""
-          placeholder="John Doe"
+          placeholder="users-permissions.popUpForm.inputEmail.placeholder"
           type="email"
           validations={{}}
         />
@@ -98,7 +100,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             name="emailObject"
             onChange={() => console.log('change')}
             value=""
-            placeholder="Please confirm your address email for %APP_NAME%"
+            placeholder="users-permissions.popUpForm.inputText.emailObject.placeholder"
             type="text"
             validations={{}}
           />
@@ -108,7 +110,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             name="message"
             onChange={() => console.log('change')}
             value=""
-            placeholder="John Doe"
+            placeholder="users-permissions.popUpForm.inputTextArea.message.placeholder"
             type="textarea"
             validations={{}}
           />

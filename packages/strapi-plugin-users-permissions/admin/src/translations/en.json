@@ -60,5 +60,9 @@
   "popUpForm.inputEmail.shipperEmail.label": "Shipper email",
   "popUpForm.inputEmail.responseEmail.label": "Response email",
   "popUpForm.inputText.emailObject.label": "Object",
-  "popUpForm.inputTextArea.message.label": "Message"
+  "popUpForm.inputText.emailObject.placeholder": "Please confirm your email address for %APP_NAME%",
+  "popUpForm.inputTextArea.message.label": "Message",
+  "popUpForm.inputTextArea.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "popUpForm.inputEmail.placeholder": "johndoe@gmail.com",
+  "popUpForm.inputText.shipperName.placeholder": "John Doe"
 }
