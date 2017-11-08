@@ -5,20 +5,14 @@
 */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
-// Uncomment to use PropTypes
 import Input from 'components/Input';
-// import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
 class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { value: false }
-
-  handleChange = ({target}) => {
-    this.setState({ value: target.value });
-  }
-
   render() {
     return (
       <div className={styles.editForm}>
@@ -27,9 +21,9 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             label="users-permissions.EditForm.inputToggle.label"
             inputDescription="users-permissions.EditForm.inputToggle.description"
             name="uniqueAccount"
-            onChange={this.handleChange}
+            onChange={this.props.onChange}
             type="toggle"
-            value={this.state.value}
+            value={get(this.props.values, 'uniqueAccount')}
             validations={{}}
           />
         </div>
@@ -40,25 +34,24 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             label="users-permissions.EditForm.inputSelect.subscriptions.label"
             inputDescription="users-permissions.EditForm.inputSelect.subscriptions.description"
             name="subscriptions"
-            onChange={() => console.log('change')}
+            onChange={this.props.onChange}
             type="select"
-            value={'100'}
             selectOptions={[ { value: '100' }, { value: '200' }]}
             validations={{}}
+            value={get(this.props.values, 'subscriptions')}
           />
-        <div className="col-md-3" />
+          <div className="col-md-3" />
           <Input
             customBootstrapClass="col-md-3"
             label="users-permissions.EditForm.inputSelect.durations.label"
             inputDescription="users-permissions.EditForm.inputSelect.durations.description"
             name="durations"
-            onChange={() => console.log('change')}
+            onChange={this.props.onChange}
             type="select"
-            value={'24'}
             selectOptions={[ { value: '24' }, { value: '48' }]}
             validations={{}}
+            value={get(this.props.values, 'durations')}
           />
-
         </div>
       </div>
 
@@ -66,9 +59,9 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   }
 }
 
-// Uncomment to use PropTypes
-// EditForm.proptypes = {
-  // foo: PropTypes.string,
-// };
+EditForm.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
+};
 
 export default EditForm;

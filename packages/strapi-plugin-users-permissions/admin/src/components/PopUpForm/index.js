@@ -6,9 +6,10 @@
 
 import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { router } from 'app';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
+import { router } from 'app';
 
 import Input from 'components/Input';
 
@@ -16,7 +17,6 @@ import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   toggleModal = () => router.push(router.location.pathname);
-  state = { value: '' }
 
   renderButton = () => {
     if (this.props.showLoader) {
@@ -41,23 +41,24 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       return (
         <div className="row">
           <Input
+            autoFocus
             label="users-permissions.popUpForm.inputSelect.providers.label"
             name="provider"
-            onChange={() => console.log('change')}
+            onChange={this.props.onChange}
             selectOptions={[{ value: 'Email'}, { value: 'Facebook' }, { value: 'Google' }]}
             type="select"
             validations={{ required: true }}
-            value="email"
+            value={get(this.props.values, 'provider')}
           />
           <div className="col-md-6" />
           <Input
             inputDescription="users-permissions.popUpForm.inputToggle.providers.description"
             label="users-permissions.popUpForm.inputToggle.providers.label"
             name="enabled"
-            onChange={() => console.log('change')}
-            value={true}
+            onChange={this.props.onChange}
             type="toggle"
             validations={{}}
+            value={get(this.props.values, 'enabled')}
           />
         </div>
       );
@@ -66,54 +67,54 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     return (
       <div className="row">
         <Input
+          autoFocus
           label="users-permissions.popUpForm.inputText.shipperName.label"
           name="shipperName"
-          onChange={() => console.log('change')}
-          value=""
+          onChange={this.props.onChange}
+          value={get(this.props.values, 'shipperName')}
           placeholder="users-permissions.popUpForm.inputText.shipperName.placeholder"
           type="text"
           validations={{}}
-          autoFocus
         />
         <Input
           label="users-permissions.popUpForm.inputEmail.shipperEmail.label"
           name="shipperEmail"
-          onChange={({ target }) => this.setState({ value: target.value })}
-          value={this.state.value}
+          onChange={this.props.onChange}
           placeholder="users-permissions.popUpForm.inputEmail.placeholder"
           type="email"
           validations={{ required: true }}
+          value={get(this.props.values, 'shipperEmail')}
         />
         <Input
           label="users-permissions.popUpForm.inputEmail.responseEmail.label"
           name="responseEmail"
-          onChange={() => console.log('change')}
-          value=""
+          onChange={this.props.onChange}
           placeholder="users-permissions.popUpForm.inputEmail.placeholder"
           type="email"
           validations={{}}
+          value={get(this.props.values, 'responseEmail')}
         />
         <div className="col-md-6" />
-          <Input
-            customBootstrapClass="col-md-12"
-            label="users-permissions.popUpForm.inputText.emailObject.label"
-            name="emailObject"
-            onChange={() => console.log('change')}
-            value=""
-            placeholder="users-permissions.popUpForm.inputText.emailObject.placeholder"
-            type="text"
-            validations={{}}
-          />
-          <Input
-            customBootstrapClass="col-md-12"
-            label="users-permissions.popUpForm.inputTextArea.message.label"
-            name="message"
-            onChange={() => console.log('change')}
-            value=""
-            placeholder="users-permissions.popUpForm.inputTextArea.message.placeholder"
-            type="textarea"
-            validations={{}}
-          />
+        <Input
+          customBootstrapClass="col-md-12"
+          label="users-permissions.popUpForm.inputText.emailObject.label"
+          name="emailObject"
+          onChange={this.props.onChange}
+          placeholder="users-permissions.popUpForm.inputText.emailObject.placeholder"
+          type="text"
+          validations={{}}
+          value={get(this.props.values, 'emailObject')}
+        />
+        <Input
+          customBootstrapClass="col-md-12"
+          label="users-permissions.popUpForm.inputTextArea.message.label"
+          name="message"
+          onChange={this.props.onChange}
+          placeholder="users-permissions.popUpForm.inputTextArea.message.placeholder"
+          type="textarea"
+          validations={{}}
+          value={get(this.props.values, 'message')}
+        />
       </div>
     );
   }
@@ -130,27 +131,38 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               ) : <div />}
             </div>
           </div>
-          <ModalBody className={styles.modalBody}>
-            <div className="container-fluid">
-              {this.renderForm()}
-            </div>
-          </ModalBody>
-          <ModalFooter className={styles.modalFooter}>
-            <Button onClick={this.toggleModal} className={styles.secondary}>
-              <FormattedMessage id="users-permissions.popUpForm.button.cancel" />
-            </Button>
-            {this.renderButton()}
-          </ModalFooter>
+          <form onSubmit={this.props.onSubmit}>
+            <ModalBody className={styles.modalBody}>
+              <div className="container-fluid">
+                {this.renderForm()}
+              </div>
+            </ModalBody>
+            <ModalFooter className={styles.modalFooter}>
+              <Button onClick={() => router.push(router.location.pathname)} className={styles.secondary}>
+                <FormattedMessage id="users-permissions.popUpForm.button.cancel" />
+              </Button>
+              {this.renderButton()}
+            </ModalFooter>
+          </form>
         </Modal>
       </div>
     );
   }
 }
 
-PopUpForm.proptypes = {
+PopUpForm.defaultProps = {
+  settingType: 'providers',
+  showLoader: false,
+};
+
+PopUpForm.propTypes = {
   actionType: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  settingType: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  settingType: PropTypes.string,
+  showLoader: PropTypes.bool,
+  values: PropTypes.object.isRequired,
 };
 
 export default PopUpForm;

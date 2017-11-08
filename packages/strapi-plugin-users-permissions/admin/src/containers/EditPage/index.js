@@ -139,7 +139,9 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
+  editPage: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
   onChangeInput: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,

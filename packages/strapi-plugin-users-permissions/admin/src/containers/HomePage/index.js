@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
@@ -34,6 +33,7 @@ import styles from './styles.scss';
 import {
   deleteData,
   fetchData,
+  onChange,
 } from './actions';
 
 import reducer from './reducer';
@@ -50,7 +50,7 @@ export class HomePage extends React.Component {
     }
   }
 
-  onButtonClick = () => {
+  handleButtonClick = () => {
     if (this.props.match.params.settingType === 'roles') {
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else {
@@ -58,37 +58,67 @@ export class HomePage extends React.Component {
     }
   }
 
+  pluginHeaderActions = [
+    {
+      label: 'users-permissions.EditPage.cancel',
+      kind: 'secondary',
+      onClick: () => console.log('cancel'),
+      type: 'button',
+    },
+    {
+      kind: 'primary',
+      label: 'users-permissions.EditPage.submit',
+      onClick: () => console.log('submit'),
+      type: 'submit',
+    },
+  ];
+
   render() {
+    const headerActions = this.props.match.params.settingType === 'advanced-settings' && this.props.showButtons ?
+      this.pluginHeaderActions : [];
     const noButtonList = this.props.match.params.settingType === 'email-templates';
     const component = this.props.match.params.settingType === 'advanced-settings' ?
-      <EditForm /> :
+      <EditForm onChange={this.props.onChange} values={this.props.modifiedData} /> : (
         <List
           data={this.props.data}
           deleteActionSucceeded={this.props.deleteActionSucceeded}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
-          onButtonClick={this.onButtonClick}
+          onButtonClick={this.handleButtonClick}
           settingType={this.props.match.params.settingType}
-        />;
-
-      const hashArray = replace(this.props.location.hash, '#', '').split('::');
+        />
+      );
+    const hashArray = replace(this.props.location.hash, '#', '').split('::');
 
     return (
       <div>
-        <div className={cn('container-fluid', styles.containerFluid)}>
-          <PluginHeader
-            title={{ id: 'users-permissions.HomePage.header.title' }}
-            description={{ id: 'users-permissions.HomePage.header.description' }}
-            actions={[]}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log('submit');
+          }}
+        >
+          <div className={cn('container-fluid', styles.containerFluid)}>
+            <PluginHeader
+              title={{ id: 'users-permissions.HomePage.header.title' }}
+              description={{ id: 'users-permissions.HomePage.header.description' }}
+              actions={headerActions}
+            />
+            <HeaderNav />
+            {component}
+          </div>
+          <PopUpForm
+            actionType={hashArray[0]}
+            isOpen={!isEmpty(this.props.location.hash)}
+            onChange={this.props.onChange}
+            onSubmit={(e) => {
+              e.preventDefault();
+              console.log('submit popUp');
+            }}
+            settingType={hashArray[1]}
+            values={this.props.modifiedData}
           />
-          <HeaderNav />
-          {component}
-        </div>
-        <PopUpForm
-          actionType={hashArray[0]}
-          settingType={hashArray[1]}
-          isOpen={!isEmpty(this.props.location.hash)}
-        />
+        </form>
       </div>
     );
   }
@@ -101,6 +131,12 @@ HomePage.propTypes = {
   deleteActionSucceeded: PropTypes.bool.isRequired,
   deleteData: PropTypes.func.isRequired,
   fetchData: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  showButtons: PropTypes.bool.isRequired,
 };
 
 
@@ -109,6 +145,7 @@ function mapDispatchToProps(dispatch) {
     {
       deleteData,
       fetchData,
+      onChange,
     },
     dispatch,
   );

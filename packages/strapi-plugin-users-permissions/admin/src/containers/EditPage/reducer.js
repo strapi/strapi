@@ -40,12 +40,13 @@ const initialState = fromJS({
 function editPageReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_USER:
-      return state.updateIn(['modifiedData', 'users'], list => list.push(action.newUser));
+      return state
+        .updateIn(['modifiedData', 'users'], list => list.push(action.newUser));
     case ON_CANCEL:
       return state
-      .set('showButtons', false)
-      .set('didDeleteUser', !state.get('didDeleteUser'))
-      .set('modifiedData', state.get('initialData'));
+        .set('showButtons', false)
+        .set('didDeleteUser', !state.get('didDeleteUser'))
+        .set('modifiedData', state.get('initialData'));
     case ON_CHANGE_INPUT:
       return state
         .set('showButtons', true)

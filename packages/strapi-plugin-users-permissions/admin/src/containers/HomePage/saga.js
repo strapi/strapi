@@ -1,9 +1,16 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { takeLatest, put, fork, take, cancel, select } from 'redux-saga/effects';
 import { findIndex } from 'lodash';
+import { takeLatest, put, fork, take, cancel, select } from 'redux-saga/effects';
 
-import { deleteDataSucceeded, fetchDataSucceeded } from './actions';
-import { DELETE_DATA, FETCH_DATA } from './constants';
+import {
+  deleteDataSucceeded,
+  fetchDataSucceeded,
+  setForm,
+} from './actions';
+import {
+  DELETE_DATA,
+  FETCH_DATA,
+} from './constants';
 import data from './data.json';
 import {
   makeSelectAllData,
@@ -20,10 +27,8 @@ export function* dataDelete() {
     if (indexDataToDelete !== -1) {
       yield put(deleteDataSucceeded(indexDataToDelete));
 
-      window.Strapi.notification.success('users-permissions.notification.success.delete')
+      window.Strapi.notification.success('users-permissions.notification.success.delete');
     }
-
-
   } catch(err) {
     window.Strapi.notification.error('users-permissions.notification.error.delete');
   }
@@ -34,6 +39,7 @@ export function* dataFetch(action) {
     const response = data[action.endPoint];
 
     yield put(fetchDataSucceeded(response));
+    yield put(setForm(action.endPoint));
 
   } catch(err) {
     window.Strapi.notification.error('users-permissions.notification.error.fetch');

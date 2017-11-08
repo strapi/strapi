@@ -32,7 +32,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
       },
       {
         icoType: 'trash',
-        onClick: () => { this.setState({ showModalDelete: true }) },
+        onClick: () => { this.setState({ showModalDelete: true }); },
       },
     ];
 
@@ -153,9 +153,9 @@ ListRow.defaultProps = {
     nb_users: 1,
   },
   settingType: 'roles',
-}
+};
 
-ListRow.proptypes = {
+ListRow.propTypes = {
   deleteActionSucceeded: PropTypes.bool.isRequired,
   deleteData: PropTypes.func.isRequired,
   item: PropTypes.object,

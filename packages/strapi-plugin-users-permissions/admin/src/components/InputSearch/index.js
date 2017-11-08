@@ -25,8 +25,8 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
 
   handleChange = ({ target }) => {
     const filteredUsers = isEmpty(target.value) ?
-    this.state.users
-    : this.state.users.filter((user) => {
+      this.state.users
+      : this.state.users.filter((user) => {
         if (includes(toLower(user.name), toLower(target.value))) {
           return user;
         }
@@ -72,16 +72,16 @@ InputSearch.defaultProps = {
   labelValues: {
     number: 0,
   },
-  value: '',
-}
+  values: [],
+};
 
-InputSearch.proptypes = {
+InputSearch.propTypes = {
+  didDeleteUser: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   labelValues: PropTypes.object,
   name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
-  value: PropTypes.string,
+  values: PropTypes.array,
 };
 
 export default InputSearch;

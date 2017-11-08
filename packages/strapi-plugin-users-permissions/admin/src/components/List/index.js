@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
 import { map, size } from 'lodash';
 
 // Design
@@ -18,12 +17,14 @@ import styles from './styles.scss';
 
 const generateListTitle = (data, settingType) => {
   switch (settingType) {
-    case 'roles':
+    case 'roles': {
       const title = size(data) < 2 ?
         <FormattedMessage id="users-permissions.List.title.roles.singular" values={{ number: size(data) }} />
         : <FormattedMessage id="users-permissions.List.title.roles.plural" values={{ number: size(data) }} />;
+
       return title;
-    case 'providers':
+    }
+    case 'providers': {
       const enabledProvidersSize = data.filter(o => o.enabled).length;
 
       const enabledProviders = enabledProvidersSize > 1 ?
@@ -36,15 +37,16 @@ const generateListTitle = (data, settingType) => {
 
       return <div>{enabledProviders}&nbsp;{disabledProviders}</div>;
 
-    case 'email-templates':
+    }
+    case 'email-templates': {
       return size(data) > 1 ?
         <FormattedMessage id="users-permissions.List.title.emailTemplates.plural" values={{ number: size(data) }} />
         : <FormattedMessage id="users-permissions.List.title.emailTemplates.singular" values={{ number: size(data) }} />;
+    }
     default:
       return '';
   }
-}
-
+};
 
 function List({ data, deleteActionSucceeded, deleteData, noButton, onButtonClick, settingType }) {
   return (
@@ -85,11 +87,13 @@ List.defaultProps = {
   onButtonClick: () => {},
 };
 
-List.proptypes = {
+List.propTypes = {
+  data: PropTypes.array.isRequired,
   deleteActionSucceeded: PropTypes.bool.isRequired,
   deleteData: PropTypes.func.isRequired,
   noButton: PropTypes.bool,
   onButtonClick: PropTypes.func,
+  settingType: PropTypes.string.isRequired,
 };
 
 export default List;

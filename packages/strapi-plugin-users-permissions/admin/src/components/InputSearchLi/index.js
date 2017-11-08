@@ -26,10 +26,10 @@ function InputSearchLi({ item, onClickDelete }) {
 InputSearchLi.defaultProps = {
   item: {
     name: '',
-  }
-}
+  },
+};
 
-InputSearchLi.proptypes = {
+InputSearchLi.propTypes = {
   item: PropTypes.object,
   onClickDelete: PropTypes.func.isRequired,
 };

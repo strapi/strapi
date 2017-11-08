@@ -10,6 +10,8 @@ import {
   DELETE_DATA,
   DELETE_DATA_SUCCEEDED,
   FETCH_DATA_SUCCEEDED,
+  ON_CHANGE,
+  SET_FORM,
 } from './constants';
 
 const initialState = fromJS({
@@ -17,6 +19,9 @@ const initialState = fromJS({
   dataToDelete: Map({}),
   deleteActionSucceeded: false,
   deleteEndPoint: '',
+  initialData: Map({}),
+  modifiedData: Map({}),
+  showButtons: false,
 });
 
 function homePageReducer(state = initialState, action) {
@@ -33,6 +38,14 @@ function homePageReducer(state = initialState, action) {
         .set('deleteActionSucceeded', !state.get('deleteActionSucceeded'));
     case FETCH_DATA_SUCCEEDED:
       return state.set('data', List(action.data));
+    case ON_CHANGE:
+      return state
+        .updateIn(['modifiedData', action.key], () => action.value)
+        .set('showButtons', true);
+    case SET_FORM:
+      return state
+        .set('initialData', action.form)
+        .set('modifiedData', action.form);
     default:
       return state;
   }

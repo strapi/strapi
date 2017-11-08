@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { map } from 'lodash';
-import cn from 'classnames';
+
 // Utils
 import { darken } from 'utils/colors';
 
@@ -54,8 +54,6 @@ function HeaderNav() {
   );
 }
 
-HeaderNav.proptypes = {
-
-};
+HeaderNav.propTypes = {};
 
 export default HeaderNav;
