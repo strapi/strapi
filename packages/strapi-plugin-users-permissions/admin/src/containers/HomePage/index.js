@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { isEmpty, replace } from 'lodash';
+import { clone, includes, isEmpty, replace } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
@@ -39,9 +39,15 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 
+const keyBoardShortCuts = [18, 78];
+
 export class HomePage extends React.Component {
+  state = { mapKey: {} };
+
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
+    document.addEventListener('keydown', this.handleKeyBoardShortCut);
+    document.addEventListener('keyup', this.handleKeyBoardShortCut);
   }
 
   componentDidUpdate(prevProps) {
@@ -50,10 +56,30 @@ export class HomePage extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyBoardShortCut);
+    document.removeEventListener('keyup', this.handleKeyBoardShortCut);
+  }
+
+  handleKeyBoardShortCut = (e) => {
+    if (includes(keyBoardShortCuts, e.keyCode)) {
+      const mapKey = clone(this.state.mapKey);
+      mapKey[e.keyCode] = e.type === 'keydown';
+      this.setState({ mapKey });
+
+      // Check if user pressed option + n;
+      if (mapKey[18] && mapKey[78]) {
+        this.setState({ mapKey: {} });
+        this.handleButtonClick();
+      }
+    }
+
+  }
+
   handleButtonClick = () => {
     if (this.props.match.params.settingType === 'roles') {
       this.props.history.push(`${this.props.location.pathname}/create`);
-    } else {
+    } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
     }
   }
