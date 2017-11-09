@@ -9,8 +9,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, map } from 'lodash';
-
+import cn from 'classnames';
 // Design
+import Button from 'components/Button';
 import Input from 'components/Input';
 
 // Utils
@@ -19,6 +20,7 @@ import injectReducer from 'utils/injectReducer';
 
 import {
   onChangeInput,
+  setErrors,
   setForm,
 } from './actions';
 import form from './form.json';
@@ -39,6 +41,35 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO formErrors
+    this.props.setErrors();
+    console.log('ok');
+  }
+
+  renderButton = () => {
+    if (this.props.match.params.authType === 'login') {
+      return (
+        <div className={cn('col-md-6', styles.loginButton)}>
+          <Button primary label="users-permissions.Auth.form.button.login" type="submit" />
+        </div>
+      );
+    }
+
+    return (
+      <div className={cn('col-md-12', styles.buttonContainer)}>
+        <Button
+          label={`users-permissions.Auth.form.button.${this.props.match.params.authType}`}
+          secondary={this.props.match.params.authType !== 'register'}
+          style={{ width: '100%' }}
+          primary={this.props.match.params.authType === 'register'}
+          type="submit"
+        />
+      </div>
+    );
+  }
+
   render() {
     const borderTop = this.props.match.params.authType === 'login' || this.props.match.params.authType === 'register' ? { borderTop: '2px solid #1C5DE7'} : { borderTop: '2px solid #F64D0A'};
     const inputs = get(form, ['form', this.props.match.params.authType]);
@@ -49,23 +80,27 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
           {/* TODO Handle header */}
           <span>strapi</span>
           <div className={styles.formContainer} style={borderTop}>
-            <div className="container-fluid">
-              <div className="row" style={{ textAlign: 'start' }}>
-                {map(inputs, input => (
-                  <Input
-                    customBootstrapClass={get(input, 'customBootstrapClass')}
-                    key={get(input, 'name')}
-                    label={get(input, 'label')}
-                    name={get(input, 'name')}
-                    onChange={this.props.onChangeInput}
-                    placeholder={get(input, 'placeholder')}
-                    type={get(input, 'type')}
-                    validations={{}}
-                    value={get(this.props.modifiedData, get(input, 'name'))}
-                  />
-                ))}
+            <form onSubmit={this.handleSubmit}>
+              <div className="container-fluid">
+                <div className="row" style={{ textAlign: 'start' }}>
+                    {map(inputs, (input, key) => (
+                      <Input
+                        autoFocus={key === 0}
+                        customBootstrapClass={get(input, 'customBootstrapClass')}
+                        key={get(input, 'name')}
+                        label={get(input, 'label')}
+                        name={get(input, 'name')}
+                        onChange={this.props.onChangeInput}
+                        placeholder={get(input, 'placeholder')}
+                        type={get(input, 'type')}
+                        validations={{ required: true }}
+                        value={get(this.props.modifiedData, get(input, 'name'))}
+                      />
+                    ))}
+                    {this.renderButton()}
+                </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -77,6 +112,7 @@ AuthPage.propTypes = {
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChangeInput: PropTypes.func.isRequired,
+  setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
 };
 
@@ -86,6 +122,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       onChangeInput,
+      setErrors,
       setForm,
     },
     dispatch

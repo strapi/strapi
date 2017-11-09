@@ -1,4 +1,29 @@
 {
+  "Auth.form.button.register-success": "Envoyer à nouveau",
+  "Auth.form.button.forgot-password": "Envoyer à nouveau",
+  "Auth.form.button.login": "Se connecter",
+  "Auth.form.button.register": "Prêt à commencer",
+
+  "Auth.form.forgot-password.email.label": "Entrez votre email",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.login.password.label": "Mot de Passe",
+
+  "Auth.form.login.rememberMe.label": "Se souvenir de moi",
+
+  "Auth.form.login.username.label": "Username",
+  "Auth.form.login.username.placeholder": "Soupette",
+
+  "Auth.form.register.email.label": "Email",
+  "Auth.form.register.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.register.username.label": "Username",
+  "Auth.form.register.username.placeholder": "Soupette",
+  "Auth.form.register.password.label": "Mot de Passe",
+  "Auth.form.register.confirmPassword.label": "Confirmez le Mot de Passe",
+
+  "Auth.form.register-success.email.label": "Email envoyé avec succès à",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
   "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
   "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
   "EditForm.inputSelect.durations.label": "Duration",

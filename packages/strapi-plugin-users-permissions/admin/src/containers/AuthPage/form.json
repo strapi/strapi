@@ -30,7 +30,34 @@
         "type": "checkbox"
       }
     ],
-    "register": [],
+    "register": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.register.username.label",
+        "name": "username",
+        "type": "text",
+        "placeholder": "users-permissions.Auth.form.register.username.placeholder"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.register.password.label",
+        "name": "password",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.register.confirmPassword.label",
+        "name": "confirmPassword",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.register.email.label",
+        "name": "email",
+        "placeholder": "users-permissions.Auth.form.register.email.placeholder",
+        "type": "email"
+      }
+    ],
     "register-success": [
       {
         "customBootstrapClass": "col-md-12",

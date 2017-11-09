@@ -6,6 +6,7 @@
 
 import {
   ON_CHANGE_INPUT,
+  SET_ERRORS,
   SET_FORM,
 } from './constants';
 
@@ -14,6 +15,13 @@ export function onChangeInput({ target }) {
     type: ON_CHANGE_INPUT,
     key: target.name,
     value: target.value,
+  };
+}
+
+export function setErrors(formErrors) {
+  return {
+    type: SET_ERRORS,
+    formErrors,
   };
 }
 
