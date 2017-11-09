@@ -15,8 +15,10 @@ import styles from './styles.scss';
 
 export class Content extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const style = this.props.showLeftMenu ? styles.content : styles.wrapper;
+
     return (
-      <div className={styles.content}>
+      <div className={style}>
         {React.Children.toArray(this.props.children)}
       </div>
     );
@@ -25,6 +27,7 @@ export class Content extends React.Component { // eslint-disable-line react/pref
 
 Content.propTypes = {
   children: PropTypes.node.isRequired,
+  showLeftMenu: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = createSelector(

@@ -1,4 +1,19 @@
 {
+  "Auth.form.button.sendAgain": "Send again",
+
+  "Auth.form.forgot-password.email.label": "Enter your email",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.login.password.label": "Password",
+
+  "Auth.form.login.rememberMe.label": "Remember me",
+
+  "Auth.form.login.username.label": "Username",
+  "Auth.form.login.username.placeholder": "Soupette",
+
+  "Auth.form.register-success.email.label": "Email send with success to",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
   "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
   "EditForm.inputSelect.durations.label": "Duration",

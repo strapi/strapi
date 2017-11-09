@@ -16,6 +16,7 @@ import { bindActionCreators, compose } from 'redux';
 import { pluginId } from 'app';
 
 // Containers
+import AuthPage from 'containers/AuthPage';
 import EditPage from 'containers/EditPage';
 import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';
@@ -37,6 +38,7 @@ class App extends React.Component {
     return (
       <div className={pluginId}>
         <Switch>
+          <Route path={`/plugins/${pluginId}/auth/:authType/:id?`} component={AuthPage} exact />
           <Route path={`/plugins/${pluginId}/:settingType/:id`} component={EditPage} exact />
           <Route path={`/plugins/${pluginId}/:settingType`} component={HomePage} exact />
           <Route component={NotFoundPage} />

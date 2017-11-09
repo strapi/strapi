@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
+import { get, includes, isUndefined } from 'lodash';
 
 import HomePage from 'containers/HomePage';
 import PluginPage from 'containers/PluginPage';
@@ -39,13 +40,19 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
   )
 
+  showLeftMenu = () => !includes(this.props.location.pathname, '/plugins/users-permissions/auth') && !isUndefined(get(this.props.plugins.toJS(), 'users-permissions'));
+
   render() {
+    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
+    const header = this.showLeftMenu() ? <Header /> : '';
+    const style = this.showLeftMenu() ? {} : { width: '100%' };
+
     return (
       <div className={styles.adminPage}>
-        <LeftMenu plugins={this.props.plugins} />
-        <div className={styles.adminPageRightWrapper}>
-          <Header />
-          <Content {...this.props}>
+        {leftMenu}
+        <div className={styles.adminPageRightWrapper} style={style}>
+          {header}
+          <Content {...this.props} showLeftMenu={this.showLeftMenu()}>
             <Switch>
               <Route path="/" component={HomePage} exact />
               <Route path="/plugins/:pluginId" component={PluginPage} />
@@ -72,6 +79,7 @@ AdminPage.contextTypes = {
 };
 
 AdminPage.propTypes = {
+  location: PropTypes.object.isRequired,
   plugins: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };

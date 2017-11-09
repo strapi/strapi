@@ -1,0 +1,44 @@
+{
+  "form": {
+    "forgot-password": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.forgot-password.email.label",
+        "name": "email",
+        "type": "email",
+        "placeholder": "users-permissions.Auth.form.forgot-password.email.placeholder"
+      }
+    ],
+    "login": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.login.username.label",
+        "name": "username",
+        "type": "text",
+        "placeholder": "users-permissions.Auth.form.login.username.placeholder"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": "users-permissions.Auth.form.login.password.label",
+        "name": "password",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-6",
+        "label": "users-permissions.Auth.form.login.rememberMe.label",
+        "name": "rememberMe",
+        "type": "checkbox"
+      }
+    ],
+    "register": [],
+    "register-success": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "email",
+        "type": "email",
+        "label": "users-permissions.Auth.form.register-success.email.label",
+        "placeholder": "users-permissions.Auth.form.register-success.email.placeholder"
+      }
+    ]
+  }
+}
