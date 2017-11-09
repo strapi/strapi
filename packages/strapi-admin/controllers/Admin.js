@@ -43,6 +43,14 @@ module.exports = {
     }
   },
 
+  plugins: async ctx => {
+    try {
+      ctx.send({ plugins: strapi.plugins });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
   uninstallPlugin: async ctx => {
     try {
       const { plugin } = ctx.params;

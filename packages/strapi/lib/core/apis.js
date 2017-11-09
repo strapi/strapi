@@ -32,7 +32,8 @@ module.exports = function() {
     }),
     new Promise((resolve, reject) => {
       // Load configurations.
-      glob('./plugins/*/!(config|node_modules)/*.*(js|json)', {}, (err, files) => {
+      glob('{./plugins/*/!(config|node_modules)/*.*(js|json),./plugins/*/package.json}', {}, (err, files) => {
+      
         if (err) {
           return reject(err);
         }
