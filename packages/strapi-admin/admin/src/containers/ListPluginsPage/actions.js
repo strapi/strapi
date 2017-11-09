@@ -18,13 +18,7 @@ export function getPlugins() {
   };
 }
 
-export function getPluginsSucceeded(data) {
-  const plugins = Object.keys(data.plugins).reduce((acc, key) => {
-    acc[key] = data.plugins[key].package.strapi;
-
-    return acc;
-  }, {});
-
+export function getPluginsSucceeded({ plugins }) {
   return {
     type: GET_PLUGINS_SUCCEEDED,
     plugins,

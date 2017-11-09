@@ -63,9 +63,7 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
   }
 }
 
-ListPluginsPage.contextTypes = {
-  // plugins: PropTypes.object,
-};
+ListPluginsPage.contextTypes = {};
 
 ListPluginsPage.propTypes = {
   getPlugins: PropTypes.func.isRequired,

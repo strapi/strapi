@@ -45,7 +45,13 @@ module.exports = {
 
   plugins: async ctx => {
     try {
-      ctx.send({ plugins: strapi.plugins });
+      const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
+        acc[key] = strapi.plugins[key].package.strapi;
+
+        return acc;
+      }, {});
+
+      ctx.send({ plugins });
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
