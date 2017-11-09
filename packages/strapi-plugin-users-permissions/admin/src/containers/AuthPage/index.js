@@ -83,21 +83,21 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
             <form onSubmit={this.handleSubmit}>
               <div className="container-fluid">
                 <div className="row" style={{ textAlign: 'start' }}>
-                    {map(inputs, (input, key) => (
-                      <Input
-                        autoFocus={key === 0}
-                        customBootstrapClass={get(input, 'customBootstrapClass')}
-                        key={get(input, 'name')}
-                        label={get(input, 'label')}
-                        name={get(input, 'name')}
-                        onChange={this.props.onChangeInput}
-                        placeholder={get(input, 'placeholder')}
-                        type={get(input, 'type')}
-                        validations={{ required: true }}
-                        value={get(this.props.modifiedData, get(input, 'name'))}
-                      />
-                    ))}
-                    {this.renderButton()}
+                  {map(inputs, (input, key) => (
+                    <Input
+                      autoFocus={key === 0}
+                      customBootstrapClass={get(input, 'customBootstrapClass')}
+                      key={get(input, 'name')}
+                      label={get(input, 'label')}
+                      name={get(input, 'name')}
+                      onChange={this.props.onChangeInput}
+                      placeholder={get(input, 'placeholder')}
+                      type={get(input, 'type')}
+                      validations={{ required: true }}
+                      value={get(this.props.modifiedData, get(input, 'name'))}
+                    />
+                  ))}
+                  {this.renderButton()}
                 </div>
               </div>
             </form>
