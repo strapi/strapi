@@ -12,19 +12,21 @@ const pluginId = pkg.name.replace(/^strapi-/i, '');
 
 // Define remote and backend URLs.
 const URLs = {
-  remote: '',
-  backend: ''
+  remote: null,
+  backend: null
 };
 
-const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+if (process.env.PWD.indexOf('/admin') !== -1) {
+  const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 
-try {
-  const server = require(serverConfig);
+  try {
+    const server = require(serverConfig);
 
-  URLs.remote = _.get(server, 'admin.remoteURL', null) ? _.get(server, 'admin.remoteURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}/admin`;
-  URLs.backend = _.get(server, 'admin.backendURL', null) ? _.get(server, 'admin.backendURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
-} catch (e) {
-  throw new Error('Impossible to open ' + serverConfig);
+    URLs.remote = _.get(server, 'admin.remoteURL', null) ? _.get(server, 'admin.remoteURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}/admin`;
+    URLs.backend = _.get(server, 'admin.backendURL', null) ? _.get(server, 'admin.backendURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
+  } catch (e) {
+    throw new Error('Impossible to open ' + serverConfig);
+  }
 }
 
 // Load plugins into the same build in development mode.

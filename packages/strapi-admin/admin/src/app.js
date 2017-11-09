@@ -29,12 +29,6 @@ import { translationMessages, languages } from './i18n';
 const remoteURL = process.env.REMOTE_URL || 'http://localhost:1337/admin';
 const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
 
-window.strapi = {
-  remoteURL,
-  backendURL,
-  languages,
-};
-
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
@@ -146,7 +140,9 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-window.strapi = Object.assign(window.strapi, {
+window.strapi = {
+  remoteURL,
+  backendURL,
   registerPlugin,
   notification: {
     success: (message) => {
@@ -171,7 +167,8 @@ window.strapi = Object.assign(window.strapi, {
     },
   }),
   router: history,
-});
+  languages,
+};
 
 const dispatch = store.dispatch;
 export {
