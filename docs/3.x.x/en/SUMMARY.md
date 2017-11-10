@@ -34,6 +34,7 @@
 * [Helpers](plugins/utils.md)
 * [UI Components](plugins/ui-components.md)
 * [Advanced usage](plugins/advanced.md)
+* [Keyboard shortcuts](plguins/plugins-keyboard-shortcuts.md)
 
 ### Advanced Usage
 * [Admin panel](advanced/customize-admin.md)
