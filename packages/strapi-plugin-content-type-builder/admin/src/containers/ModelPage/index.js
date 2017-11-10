@@ -58,7 +58,7 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
 
-const keyBoardShortCuts = [18, 78];
+const keyBoardShortCuts = [18, 65, 78, 83];
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -200,8 +200,21 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
       // Check if user pressed option + n;
       if (mapKeys[18] && mapKeys[78]) {
-        this.setState({ mapKey: {} });
+        this.setState({ mapKeys: {} });
         this.handleAddLinkClick();
+      }
+
+      // Check if user pressed option + a
+      if (mapKeys[18] && mapKeys[65]) {
+        this.setState({ mapKeys: {} });
+        this.handleClickAddAttribute();
+      }
+
+      // Check if the user pressed option + s
+      if (mapKeys[18] && mapKeys[83]) {
+        if (get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons) {
+          this.handleSubmit();
+        }
       }
     }
   }
@@ -280,7 +293,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
-    // Url to redirects the user if he modifies the temporary content type name
+    // Url to redirect the user if he modifies the temporary content type name
     const redirectRoute = replace(this.props.match.path, '/:modelName', '');
     const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
     const showNoTableWarning = this.props.modelPage.tableExists ? '' : <NoTableWarning modelName={this.props.modelPage.model.name} />;
