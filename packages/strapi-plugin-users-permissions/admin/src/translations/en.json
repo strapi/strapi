@@ -24,6 +24,8 @@
   "Auth.form.register-success.email.label": "Email send with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
+  "components.Input.error.password.noMatch": "Password don't match",
+  
   "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
   "EditForm.inputSelect.durations.label": "Duration",
