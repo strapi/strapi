@@ -107,8 +107,6 @@ export class Edit extends React.Component {
     } else {
       this.props.loadRecord(this.props.match.params.id);
     }
-
-    document.addEventListener('keydown', this.handleSubmitOnEnterPress);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -123,9 +121,9 @@ export class Edit extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleSubmitOnEnterPress);
     this.props.recordEdited();
     this.props.resetEditSuccess();
+    this.props.setInitialState();
   }
 
   handleChange = (e) => {
@@ -150,12 +148,6 @@ export class Edit extends React.Component {
       this.props.editRecord();
     } else {
       this.props.setFormErrors(formErrors);
-    }
-  }
-
-  handleSubmitOnEnterPress = (e) => {
-    if (e.keyCode === 13) {
-      this.handleSubmit(e);
     }
   }
 
