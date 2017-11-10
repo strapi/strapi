@@ -51,17 +51,42 @@ module.exports = strapi => {
         ]
       });
 
+      // Match every route with an extension.
+      // The file without extension will not be served.
+      // Note: This route could be override by the user.
+      strapi.router.route({
+        method: 'GET',
+        path: '/*',
+        handler: [
+          async (ctx, next) => {
+            const parse = path.parse(ctx.url);
+
+            ctx.url = path.join(parse.dir, parse.base);
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(strapi.config.middleware.settings.public.path || strapi.config.paths.static, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.folder') ?
+        strapi.config.currentEnvironment.server.admin.folder :
+        '/admin';
+
       // Serve /admin index page.
       strapi.router.route({
         method: 'GET',
-        path: '/admin',
+        path: basename,
         handler: [
           async (ctx, next) => {
             ctx.url = 'index.html';
 
             await next();
           },
-          strapi.koaMiddlewares.static('./admin/admin/build', {
+          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })
@@ -71,14 +96,14 @@ module.exports = strapi => {
       // Serve admin assets.
       strapi.router.route({
         method: 'GET',
-        path: '/admin/*.*',
+        path: `${basename}/*.*`,
         handler: [
           async (ctx, next) => {
             ctx.url = path.basename(ctx.url);
 
             await next();
           },
-          strapi.koaMiddlewares.static('./admin/admin/build', {
+          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })
@@ -88,7 +113,7 @@ module.exports = strapi => {
       // Serve plugins assets.
       strapi.router.route({
         method: 'GET',
-        path: '/admin/:resource/*.*',
+        path: `${basename}/:resource/*.*`,
         handler: async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
 
@@ -100,7 +125,7 @@ module.exports = strapi => {
           }
 
           // Handle subfolders.
-          return await strapi.koaMiddlewares.static('./admin/admin/build/' + ctx.params.resource, {
+          return await strapi.koaMiddlewares.static(`.${basename}/admin/build/${ctx.params.resource}`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })(ctx, next);
@@ -110,35 +135,14 @@ module.exports = strapi => {
       // Allow page refresh
       strapi.router.route({
         method: 'GET',
-        path: '/admin/plugins/*',
+        path: `${basename}/plugins/*`,
         handler: [
           async (ctx, next) => {
             ctx.url = 'index.html';
 
             await next();
           },
-          strapi.koaMiddlewares.static('./admin/admin/build', {
-            maxage: strapi.config.middleware.settings.public.maxAge,
-            defer: true
-          })
-        ]
-      });
-
-      // Match every route with an extension.
-      // The file without extension will not be served.
-      // Note: This route could be override by the user.
-      strapi.router.route({
-        method: 'GET',
-        path: '/*.*',
-        handler: [
-          async (ctx, next) => {
-            const parse = path.parse(ctx.url);
-
-            ctx.url = path.join(parse.dir, parse.base);
-
-            await next();
-          },
-          strapi.koaMiddlewares.static(strapi.config.middleware.settings.public.path || strapi.config.paths.static, {
+          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })

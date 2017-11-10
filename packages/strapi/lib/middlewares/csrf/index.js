@@ -31,7 +31,7 @@ module.exports = strapi => {
         async (ctx, next) => {
           if (ctx.request.admin) return await next();
 
-          await strapi.koaMiddlewares.convert(
+          return await strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.csrf({
               key: strapi.config.middleware.settings.csrf.key,
               secret: strapi.config.middleware.settings.csrf.secret

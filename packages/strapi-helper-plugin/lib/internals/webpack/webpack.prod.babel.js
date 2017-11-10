@@ -1,4 +1,5 @@
 // Important modules this config uses
+const _ = require('lodash');
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -15,15 +16,17 @@ const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 const dllPlugin = pkg.dllPlugin;
 
-let pluginsToInitialize;
-
-try {
-  pluginsToInitialize = require(path.resolve(process.cwd(), 'admin', 'src', 'config', 'plugins.json'));
-} catch (e) {
-  pluginsToInitialize = [];
-}
-
 const isAdmin = process.env.IS_ADMIN === 'true';
+
+// Necessary configuration file to ensure that plugins will be loaded.
+const pluginsToInitialize = (() => {
+  try {
+    return require(path.resolve(process.cwd(), 'admin', 'src', 'config', 'plugins.json'));
+  } catch (e) {
+    return [];
+  }
+})();
+
 
 const plugins = [
   new webpack.DllReferencePlugin({
@@ -43,8 +46,27 @@ const plugins = [
   // new BundleAnalyzerPlugin(),
 ];
 
+let folder = 'admin';
+let remoteURL = undefined;
+
 // Build the `index.html file`
 if (isAdmin) {
+  // Load server configuration.
+  const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+  const server = require(serverConfig);
+
+  if (_.get(server, 'admin.remoteURL')) {
+    remoteURL = server.admin.remoteURL;
+  }
+
+  folder = _.get(server, 'admin.folder') ?
+    server.admin.folder :
+    'admin';
+
+  if (folder[0] === '/') {
+    folder = folder.substring(1);
+  }
+
   plugins.push(new HtmlWebpackPlugin({
     template: 'admin/src/index.html',
     minify: {
@@ -79,6 +101,18 @@ const appPath = isAdmin
   ? path.join(process.cwd(), 'admin', 'src', 'app.js')
   : path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 
+const publicPath = (() => {
+  if (isAdmin) {
+      if (remoteURL) {
+        return `${remoteURL}/`;
+      }
+
+      return `/${folder}/`;
+  }
+
+  return `/${pluginId}/assets/`;
+})();
+
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: {
@@ -89,7 +123,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: `${isAdmin ? '/admin/' : `/${pluginId}/assets/`}`,
+    publicPath,
   },
 
   // In production, we minify our CSS with cssnano

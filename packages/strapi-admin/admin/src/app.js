@@ -32,7 +32,7 @@ const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
-  basename: '/admin',
+  basename: remoteURL.replace(window.location.origin, ''),
 });
 const store = configureStore(initialState, history);
 

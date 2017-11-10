@@ -16,16 +16,20 @@ const URLs = {
   backend: null
 };
 
-if (process.env.PWD.indexOf('/admin') !== -1) {
+if (process.env.IS_ADMIN === 'true') {
+  // Load server configuration.
   const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 
   try {
     const server = require(serverConfig);
+    const folder = _.get(server, 'admin.folder') ? server.admin.folder : '/admin';
 
-    URLs.remote = _.get(server, 'admin.remoteURL', null) ? _.get(server, 'admin.remoteURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}/admin`;
-    URLs.backend = _.get(server, 'admin.backendURL', null) ? _.get(server, 'admin.backendURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
+    if (process.env.PWD.indexOf(folder) !== -1) {
+      URLs.remote = _.get(server, 'admin.remoteURL', null) ? _.get(server, 'admin.remoteURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${folder}`;
+      URLs.backend = _.get(server, 'admin.backendURL', null) ? _.get(server, 'admin.backendURL', null) : `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
+    }
   } catch (e) {
-    throw new Error('Impossible to open ' + serverConfig);
+    throw new Error(`Impossible to access to ${serverConfig}`)
   }
 }
 
@@ -64,7 +68,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.resolve(process.cwd(), 'admin', 'build'),
+    path: path.join(process.cwd(), 'admin', 'build'),
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
