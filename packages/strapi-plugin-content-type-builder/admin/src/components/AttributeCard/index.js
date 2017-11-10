@@ -35,7 +35,14 @@ const asset = {
 function AttributeCard({ attribute, autoFocus, handleClick, tabIndex }) {
   return (
     <div className="col-md-6">
-      <button className={styles.attributeCardContainer} style={{ width: '100%' }} onClick={() => handleClick(attribute.type)} type="button" tabIndex={tabIndex + 1} autoFocus={autoFocus}>
+      <button
+        autoFocus={autoFocus}
+        className={styles.attributeCardContainer}
+        onClick={() => handleClick(attribute.type)}
+        style={{ width: '100%' }}
+        type="button"
+        tabIndex={tabIndex + 1}
+      >
         <div className={styles.attributeCard}>
           <img src={asset[attribute.type]} alt="ico" />
           <FormattedMessage id={`content-type-builder.popUpForm.attributes.${attribute.type}.name`}>

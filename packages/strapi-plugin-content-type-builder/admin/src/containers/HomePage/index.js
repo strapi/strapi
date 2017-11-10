@@ -78,7 +78,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
       // Check if user pressed option + n;
       if (mapKeys[18] && mapKeys[78]) {
-        this.setState({ mapKey: {} });
+        this.setState({ mapKeys: {} });
         this.handleButtonClick();
       }
     }
