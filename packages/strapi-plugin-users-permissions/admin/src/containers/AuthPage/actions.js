@@ -8,6 +8,9 @@ import {
   ON_CHANGE_INPUT,
   SET_ERRORS,
   SET_FORM,
+  SUBMIT,
+  SUBMIT_ERROR,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 export function onChangeInput({ target }) {
@@ -63,5 +66,24 @@ export function setForm(formType, email) {
   return {
     type: SET_FORM,
     data,
+  };
+}
+
+export function submit() {
+  return {
+    type: SUBMIT,
+  };
+}
+
+export function submitError(errors) {
+  return {
+    type: SUBMIT_ERROR,
+    errors,
+  };
+}
+
+export function submitSucceeded() {
+  return {
+    type: SUBMIT_SUCCEEDED,
   };
 }

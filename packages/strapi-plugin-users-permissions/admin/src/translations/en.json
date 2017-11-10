@@ -7,10 +7,14 @@
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
 
+  "Auth.header.register.description": "To finish setup and secure your app, please create the first user (root admin) by filling informations below.",
+  "Auth.form.header.login": "strapi",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "Welcome!",
+  "Auth.form.header.register-success": "strapi",
+
   "Auth.form.login.password.label": "Password",
-
   "Auth.form.login.rememberMe.label": "Remember me",
-
   "Auth.form.login.username.label": "Username",
   "Auth.form.login.username.placeholder": "Soupette",
 
@@ -24,8 +28,11 @@
   "Auth.form.register-success.email.label": "Email send with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
+  "Auth.link.forgot-password": "Forgot your password?",
+  "Auth.link.ready": "Reasy to sign-in?",
+
   "components.Input.error.password.noMatch": "Password don't match",
-  
+
   "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
   "EditForm.inputSelect.durations.label": "Duration",

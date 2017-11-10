@@ -8,8 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
+import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isBoolean, isEmpty, map } from 'lodash';
 import cn from 'classnames';
+
+// Logo
+import LogoStrapi from 'assets/images/logo_strapi.png';
+
 // Design
 import Button from 'components/Button';
 import Input from 'components/Input';
@@ -22,6 +28,7 @@ import {
   onChangeInput,
   setErrors,
   setForm,
+  submit,
 } from './actions';
 import form from './form.json';
 import reducer from './reducer';
@@ -37,7 +44,20 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
 
   componentWillReceiveProps(nextProps) {
     if (this.props.match.params.authType !== nextProps.match.params.authType) {
-      this.props.setForm(nextProps.match.params.authType, nextProps.match.params.authType);
+      this.props.setForm(nextProps.match.params.authType, nextProps.match.params.id);
+    }
+
+    if (nextProps.submitSuccess) {
+      switch (this.props.match.params.authType) {
+        case 'login':
+          this.props.history.push('/');
+          break;
+        case 'register':
+          this.props.history.push(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
+          break;
+        default:
+
+      }
     }
   }
 
@@ -58,6 +78,10 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     }, []);
 
     this.props.setErrors(formErrors);
+
+    if (isEmpty(formErrors)) {
+      this.props.submit();
+    }
   }
 
   renderButton = () => {
@@ -73,25 +97,57 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
       <div className={cn('col-md-12', styles.buttonContainer)}>
         <Button
           label={`users-permissions.Auth.form.button.${this.props.match.params.authType}`}
-          secondary={this.props.match.params.authType !== 'register'}
           style={{ width: '100%' }}
-          primary={this.props.match.params.authType === 'register'}
+          primary
           type="submit"
         />
       </div>
     );
   }
 
+  renderLink = () => {
+
+    if (this.props.match.params.authType === 'login') {
+      return (
+        <Link to="/plugins/users-permissions/auth/forgot-password">
+          <FormattedMessage id="users-permissions.Auth.link.forgot-password" />
+        </Link>
+      );
+    }
+
+    if (this.props.match.params.authType === 'forgot-password' || this.props.match.params.authType === 'register-success') {
+      return (
+        <Link to="/plugins/users-permissions/auth/login">
+          <FormattedMessage id="users-permissions.Auth.link.ready" />
+        </Link>
+      );
+    }
+
+    return <div />;
+  }
+
   render() {
-    const borderTop = this.props.match.params.authType === 'login' || this.props.match.params.authType === 'register' ? { borderTop: '2px solid #1C5DE7'} : { borderTop: '2px solid #F64D0A'};
     const inputs = get(form, ['form', this.props.match.params.authType]);
-    
+    const divStyle = this.props.match.params.authType === 'register' ? {} : { marginTop: '.9rem' };
+    const headerDescription = this.props.match.params.authType === 'register' ?
+      <FormattedMessage id="users-permissions.Auth.header.register.description" />
+      : <span />;
+
     return (
       <div className={styles.authPage}>
         <div className={styles.wrapper}>
-          {/* TODO Handle header */}
-          <span>strapi</span>
-          <div className={styles.formContainer} style={borderTop}>
+          <div className={styles.headerContainer}>
+            {this.props.match.params.authType === 'register' ? (
+              <FormattedMessage id="users-permissions.Auth.form.header.register" />
+            ) : (
+              <img src={LogoStrapi} alt="logo" />
+            )}
+          </div>
+          <div className={styles.headerDescription}>
+            {headerDescription}
+          </div>
+
+          <div className={styles.formContainer} style={divStyle}>
             <form onSubmit={this.handleSubmit}>
               <div className="container-fluid">
                 <div className="row" style={{ textAlign: 'start' }}>
@@ -116,6 +172,9 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
               </div>
             </form>
           </div>
+          <div className={styles.linkContainer}>
+            {this.renderLink()}
+          </div>
         </div>
       </div>
     );
@@ -125,11 +184,14 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
 AuthPage.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChangeInput: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
+  submitSuccess: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = makeSelectAuthPage();
@@ -140,6 +202,7 @@ function mapDispatchToProps(dispatch) {
       onChangeInput,
       setErrors,
       setForm,
+      submit,
     },
     dispatch
   );

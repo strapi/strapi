@@ -9,12 +9,14 @@ import {
   ON_CHANGE_INPUT,
   SET_ERRORS,
   SET_FORM,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
   didCheckErrors: false,
   formErrors: List([]),
   modifiedData: Map({}),
+  submitSuccess: false,
 });
 
 function authPageReducer(state = initialState, action) {
@@ -27,7 +29,12 @@ function authPageReducer(state = initialState, action) {
         .set('didCheckErrors', !state.get('didCheckErrors'))
         .set('formErrors', List(action.formErrors));
     case SET_FORM:
-      return state.set('modifiedData', Map(action.data));
+      return state
+        .set('formErrors', List([]))
+        .set('submitSuccess', false)
+        .set('modifiedData', Map(action.data));
+    case SUBMIT_SUCCEEDED:
+      return state.set('submitSuccess', true);
     default:
       return state;
   }
