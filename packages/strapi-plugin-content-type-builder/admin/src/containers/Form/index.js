@@ -457,10 +457,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   renderModalBodyChooseAttributes = () => (
     map(forms.attributesDisplay.items, (attribute, key) => (
       <AttributeCard
+        autoFocus={key === 0}
         key={key}
         attribute={attribute}
         routePath={this.props.routePath}
         handleClick={this.goToAttributeTypeView}
+        tabIndex={key}
       />
     ))
   )

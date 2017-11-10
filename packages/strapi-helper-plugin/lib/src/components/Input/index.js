@@ -182,6 +182,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           disabled={this.props.disabled}
           onBlur={handleBlur}
           tabIndex={this.props.tabIndex}
+          autoFocus={this.props.autoFocus}
         >
           {map(this.props.selectOptions, (option, key) => (
             option.name ?
@@ -229,6 +230,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               onFocus={this.props.onFocus}
               placeholder={placeholder}
               disabled={this.props.disabled}
+              autoFocus={this.props.autoFocus}
             />
           )}
         </FormattedMessage>
@@ -297,6 +299,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           placeholder={message}
           autoComplete="off"
           disabled={this.props.disabled}
+          autoFocus={this.props.autoFocus}
         />
       )}
     </FormattedMessage>
@@ -332,6 +335,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               placeholder={placeholder}
               disabled={this.props.disabled}
               type={type}
+              autoFocus={this.props.autoFocus}
             />
           )}
         </FormattedMessage>
@@ -374,6 +378,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                 placeholder={placeholder}
                 disabled={this.props.disabled}
                 type="text"
+                autoFocus={this.props.autoFocus}
               />
             )}
           </FormattedMessage>
@@ -413,6 +418,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
         placeholder={placeholder}
         disabled={this.props.disabled}
+        autoFocus={this.props.autoFocus}
       />;
 
     const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
@@ -473,6 +479,7 @@ Input.propTypes = {
     PropTypes.string,
   ]),
   addRequiredInputDesign: PropTypes.bool,
+  autoFocus: PropTypes.bool,
   customBootstrapClass: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
@@ -512,6 +519,7 @@ Input.propTypes = {
 Input.defaultProps = {
   addon: false,
   addRequiredInputDesign: false,
+  autoFocus: false,
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,

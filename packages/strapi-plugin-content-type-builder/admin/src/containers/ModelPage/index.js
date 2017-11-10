@@ -8,7 +8,16 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, size, replace, startCase, findIndex } from 'lodash';
+import {
+  clone,
+  get,
+  findIndex,
+  has,
+  includes,
+  replace,
+  size,
+  startCase,
+} from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -49,12 +58,15 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
 
+const keyBoardShortCuts = [18, 78];
+
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
 
     this.state = {
       contentTypeTemporary: false,
+      mapKeys: {},
     };
 
     this.popUpHeaderNavLinks = [
@@ -70,6 +82,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidMount() {
     this.fetchModel(this.props);
+    document.addEventListener('keydown', this.handleShortCut);
+    document.addEventListener('keyup', this.handleShortCut);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -95,6 +109,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   componentWillUnmount() {
     this.props.resetShowButtonsProps();
+    document.removeEventListener('keydown', this.handleShortCut);
+    document.removeEventListener('keyup', this.handleShortCut);
   }
 
   addCustomSection = (sectionStyles) => (
@@ -174,6 +190,20 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     }
 
     router.push(`/plugins/content-type-builder/models/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::attribute${attributeType}::${settingsType}::${index}${hasParallelAttribute}`);
+  }
+
+  handleShortCut = (e) => {
+    if (includes(keyBoardShortCuts, e.keyCode)) {
+      const mapKeys = clone(this.state.mapKeys);
+      mapKeys[e.keyCode] = e.type === 'keydown';
+      this.setState({ mapKeys });
+
+      // Check if user pressed option + n;
+      if (mapKeys[18] && mapKeys[78]) {
+        this.setState({ mapKey: {} });
+        this.handleAddLinkClick();
+      }
+    }
   }
 
   handleSubmit = () => {

@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { size } from 'lodash';
+import { clone, includes, size } from 'lodash';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
 import { router } from 'app';
@@ -32,14 +32,30 @@ import styles from './styles.scss';
 import saga from './sagas';
 import reducer from './reducer';
 
+const keyBoardShortCuts = [18, 78];
+
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
+
+    this.state = {
+      mapKeys: {},
+    };
 
     this.popUpHeaderNavLinks = [
       { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
       { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
     ];
+  }
+
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleShortCut);
+    document.addEventListener('keyup', this.handleShortCut);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleShortCut);
+    document.removeEventListener('keyup', this.handleShortCut);
   }
 
   handleButtonClick = () => {
@@ -52,6 +68,20 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleDelete = (contentTypeName) => {
     this.props.deleteContentType(contentTypeName, this.context);
+  }
+
+  handleShortCut = (e) => {
+    if (includes(keyBoardShortCuts, e.keyCode)) {
+      const mapKeys = clone(this.state.mapKeys);
+      mapKeys[e.keyCode] = e.type === 'keydown';
+      this.setState({ mapKeys });
+
+      // Check if user pressed option + n;
+      if (mapKeys[18] && mapKeys[78]) {
+        this.setState({ mapKey: {} });
+        this.handleButtonClick();
+      }
+    }
   }
 
   toggleModal = () => {
