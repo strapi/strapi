@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const uuid = require('uuid/v4');
 
 /**
  * Expose main package JSON of the application
@@ -21,6 +22,13 @@ module.exports = scope => {
     'private': true,
     'version': '0.1.0',
     'description': 'A Strapi application.',
+    'main': './server.js',
+    'scripts': {
+      'start': 'node server.js',
+      'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
+      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js',
+      'postinstall': 'node node_modules/strapi/lib/utils/post-install.js'
+    },
     'devDependencies': {
       'babel-eslint': '^7.1.1',
       'eslint': '^3.12.2',
@@ -31,16 +39,7 @@ module.exports = scope => {
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-generate': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-generate-api': getDependencyVersion(cliPkg, 'strapi')
-    },
-    'main': './server.js',
-    'scripts': {
-      'start': 'node server.js',
-      'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
-      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js',
-      'postinstall': 'node node_modules/strapi-utils/script/plugin-install.js'
+      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi')
     },
     'author': {
       'name': scope.author || 'A Strapi developer',
@@ -52,6 +51,9 @@ module.exports = scope => {
       'email': scope.email || '',
       'url': scope.website || ''
     }],
+    'strapi': {
+      'uuid': uuid()
+    },
     'engines': {
       'node': '>= 7.0.0',
       'npm': '>= 3.0.0'

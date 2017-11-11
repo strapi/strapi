@@ -29,9 +29,15 @@ const makeSelectPluginDeleteAction = () => createSelector(
   (substate) => substate.get('deleteActionSucceeded'),
 );
 
+const makeSelectPlugins = () => createSelector(
+  selectListPluginsPageDomain(),
+  (substate) => substate.get('plugins').toJS(),
+);
+
 export default makeSelectListPluginsPage;
 export {
   selectListPluginsPageDomain,
   makeSelectPluginToDelete,
   makeSelectPluginDeleteAction,
+  makeSelectPlugins,
 };

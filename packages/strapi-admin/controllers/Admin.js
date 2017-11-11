@@ -43,6 +43,20 @@ module.exports = {
     }
   },
 
+  plugins: async ctx => {
+    try {
+      const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
+        acc[key] = strapi.plugins[key].package.strapi;
+
+        return acc;
+      }, {});
+
+      ctx.send({ plugins });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
   uninstallPlugin: async ctx => {
     try {
       const { plugin } = ctx.params;
