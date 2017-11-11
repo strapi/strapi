@@ -46,25 +46,26 @@ const plugins = [
   // new BundleAnalyzerPlugin(),
 ];
 
-let folder = 'admin';
-let remoteURL = undefined;
+// Load server configuration.
+const serverConfig = isAdmin ?
+  path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'):
+  path.resolve(process.env.PWD, '..', '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+const server = require(serverConfig);
+
+const settings = {
+  path: 'admin',
+  folder: 'plugins',
+  host: _.get(server, 'admin.build.host')
+};
 
 // Build the `index.html file`
 if (isAdmin) {
-  // Load server configuration.
-  const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
-  const server = require(serverConfig);
+  settings.path = _.get(server, 'admin.path', 'admin');
+  settings.folder = _.get(server, 'admin.build.plugins.folder', 'plugins');
 
-  if (_.get(server, 'admin.remoteURL')) {
-    remoteURL = server.admin.remoteURL;
-  }
-
-  folder = _.get(server, 'admin.folder') ?
-    server.admin.folder :
-    'admin';
-
-  if (folder[0] === '/') {
-    folder = folder.substring(1);
+  if (settings.path[0] === '/') {
+    settings.path = settings.path.substring(1);
   }
 
   plugins.push(new HtmlWebpackPlugin({
@@ -103,14 +104,16 @@ const appPath = isAdmin
 
 const publicPath = (() => {
   if (isAdmin) {
-      if (remoteURL) {
-        return `${remoteURL}/`;
+      if (settings.host) {
+        return `${settings.host}/`;
       }
 
-      return `/${folder}/`;
+      return `/${settings.path}/`;
   }
 
-  return `/${pluginId}/assets/`;
+  return settings.host ?
+  `${settings.host}/${settings.folder}/${pluginId}/`:
+  `/${settings.folder}/${pluginId}/`;
 })();
 
 module.exports = require('./webpack.base.babel')({

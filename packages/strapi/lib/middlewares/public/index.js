@@ -72,8 +72,8 @@ module.exports = strapi => {
         ]
       });
 
-      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.folder') ?
-        strapi.config.currentEnvironment.server.admin.folder :
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path') ?
+        strapi.config.currentEnvironment.server.admin.path :
         '/admin';
 
       // Serve /admin index page.
@@ -86,7 +86,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })
@@ -103,7 +103,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })
@@ -125,7 +125,7 @@ module.exports = strapi => {
           }
 
           // Handle subfolders.
-          return await strapi.koaMiddlewares.static(`.${basename}/admin/build/${ctx.params.resource}`, {
+          return await strapi.koaMiddlewares.static(`./admin/admin/build/${ctx.params.resource}`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })(ctx, next);
@@ -142,7 +142,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(`.${basename}/admin/build`, {
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true
           })
@@ -158,28 +158,19 @@ module.exports = strapi => {
             async (ctx, next) => {
               ctx.url = path.basename(ctx.url);
 
-              await next();
+              // Try to find assets into the build first.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
             },
-            strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true
-            })
-          ]
-        });
-
-        strapi.router.route({
-          method: 'GET',
-          path: `/${plugin}/assets/*.*`,
-          handler: [
             async (ctx, next) => {
-              ctx.url = path.basename(ctx.url);
-
-              await next();
+              // Try to find assets in the source then.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
             },
-            strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true
-            })
           ]
         });
       });

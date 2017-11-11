@@ -7,35 +7,27 @@ const fs = require('fs');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
-    const folder = (() => {
-      if (_.get(strapi.config.currentEnvironment.server, 'admin.folder')) {
-        // Relative URL
-        if (strapi.config.currentEnvironment.server.admin.folder[0] === '/') {
-          return strapi.config.currentEnvironment.server.admin.folder.substring(1);
-        }
-
-        return strapi.config.currentEnvironment.server.admin.folder;
-      }
-
-      return 'admin';
-    })();
+    const folder = ((url = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin')) =>
+      url[0] === '/' ? url.substring(1) : url
+    )();
 
     const configuratePlugin = (acc, current, source, x) => {
       switch (source) {
-        case 'remote':
-          if (!_.get(this.config.environments[current].server, 'admin.remoteURL')) {
-            throw new Error(`You can't use \`remote\` as a source without set the \`remoteURL\` configuration.`);
+        case 'host': {
+          if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
+            throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
           }
 
-          const subFolder = _.get(this.config.environments[current].server, 'admin.plugins.subFolder', null);
+          const folder = _.get(this.config.environments[current].server, 'admin.build.plugins.folder', null);
 
-          if (_.isString(subFolder)) {
-            const cleanSubFolder = subFolder[0] === '/' ? subFolder.substring(1) : subFolder;
+          if (_.isString(folder)) {
+            const cleanFolder = folder[0] === '/' ? folder.substring(1) : folder;
 
-            return `${this.config.environments[current].server.admin.remoteURL}/${cleanSubFolder}/${x}/main.js`;
+            return `${this.config.environments[current].server.admin.build.host}/${cleanFolder}/${x}/main.js`;
           }
 
-          return `${this.config.environments[current].server.admin.remoteURL}/${x}/main.js`;
+          return `${this.config.environments[current].server.admin.build.host}/${x}/main.js`;
+        }
         case 'custom':
           if (!_.isEmpty(_.get(this.plugins[x].config, `sources.${current}`, {}))) {
             return acc[current] = this.plugins[x].config.sources[current];
@@ -49,14 +41,14 @@ module.exports = function() {
     };
 
     const sourcePath = process.env.NODE_ENV !== 'test' ?
-      path.resolve(this.config.appPath, folder, 'admin', 'src', 'config', 'plugins.json'):
+      path.resolve(this.config.appPath, 'admin', 'admin', 'src', 'config', 'plugins.json'):
       path.resolve(this.config.appPath, 'packages', 'strapi-admin', 'admin', 'src', 'config', 'plugins.json');
     const buildPath = process.env.NODE_ENV !== 'test' ?
-      path.resolve(this.config.appPath, folder, 'admin', 'build', 'config', 'plugins.json'):
+      path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'config', 'plugins.json'):
       path.resolve(this.config.appPath, 'packages', 'strapi-admin', 'admin', 'build', 'config', 'plugins.json');
 
     try {
-      fs.access(path.resolve(this.config.appPath, folder, 'admin'), err => {
+      fs.access(path.resolve(this.config.appPath, 'admin', 'admin'), err => {
         if (err && err.code !== 'ENOENT') {
           return reject(err);
         }
@@ -96,7 +88,7 @@ module.exports = function() {
             const data =  Object.keys(this.plugins).map(x => ({
               id: x,
               source: Object.keys(this.config.environments).reduce((acc, current) => {
-                const source = _.get(this.config.environments[current].server, 'admin.plugins.source', 'origin');
+                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'origin');
 
                 if (_.isString(source)) {
                   acc[current] = configuratePlugin(acc, current, source, x);

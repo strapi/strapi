@@ -30,7 +30,7 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = process.cwd();
+      const cwd = this.config.appPath;
 
       glob(
         './node_modules/*(koa-*|kcors)',
@@ -47,7 +47,7 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = process.cwd();
+      const cwd = this.config.appPath;
 
       glob(
         './node_modules/*(strapi-middleware-*)',
@@ -81,7 +81,7 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = path.resolve(process.cwd(), 'middlewares');
+      const cwd = path.resolve(this.config.appPath, 'middlewares');
 
       glob(
         './*',
