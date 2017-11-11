@@ -8,7 +8,7 @@ const path = require('path');
 const cluster = require('cluster');
 const { includes, get, assign } = require('lodash');
 const { logger, models } = require('strapi-utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins } = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { EventEmitter } = require('events');
@@ -95,6 +95,8 @@ class Strapi extends EventEmitter {
       await this.bootstrap();
       // Freeze object.
       await this.freeze();
+      // Update source admin.
+      await admin.call(this);
       // Launch server.
       this.server.listen(this.config.port, err => {
         if (err) {

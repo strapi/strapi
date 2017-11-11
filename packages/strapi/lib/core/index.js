@@ -5,6 +5,7 @@ const apis = require('./apis');
 const middlewares = require('./middlewares');
 const hooks = require('./hooks');
 const plugins = require('./plugins');
+const admin = require('./admin');
 
 module.exports = {
   nestedConfigurations: nested,
@@ -12,5 +13,6 @@ module.exports = {
   apis,
   middlewares,
   hooks,
-  plugins
+  plugins,
+  admin
 };

@@ -4,6 +4,7 @@
  * This is the entry file for the application,
  * only setup and plugin code.
  */
+import './public-path.js'; // eslint-disabled-line
 
 import React from 'react';
 import { Provider } from 'react-redux';

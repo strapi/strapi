@@ -11,7 +11,7 @@ const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 const isAdmin = process.env.IS_ADMIN === 'true';
 
-const appPath = isAdmin ? path.resolve(process.env.PWD, '..'): path.resolve(process.env.PWD, '..', '..');
+const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 
 try {
   // Load app' configurations to update `plugins.json` automatically.
@@ -24,6 +24,7 @@ try {
     await strapi.load();
   })();
 } catch (e) {
+  console.log(e);
   throw new Error(`You need to start the WebPack server from the /admin or /plugins/**/admin directories in a Strapi's project.`);
 }
 
@@ -79,8 +80,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.join(process.cwd(), 'admin', 'build'),
-    publicPath: '/',
+    path: path.join(process.cwd(), 'admin', 'build')
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{

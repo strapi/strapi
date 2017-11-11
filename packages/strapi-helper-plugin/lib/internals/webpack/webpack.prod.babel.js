@@ -119,14 +119,13 @@ const publicPath = (() => {
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: {
-    main: appPath
+    main: appPath,
   },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
   output: {
     filename: '[name].js',
-    chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath,
+    chunkFilename: '[name].[chunkhash].chunk.js'
   },
 
   // In production, we minify our CSS with cssnano

@@ -4,6 +4,17 @@
  * This is the entry file for the application, only setup and boilerplate
  * code.
  */
+
+/* eslint-disable */
+// Retrieve remote and backend URLs.
+const remoteURL = process.env.REMOTE_URL || 'http://localhost:1337/admin';
+const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+
+// Retrieve development URL to avoid to re-build.
+const devFrontURL = document.getElementsByTagName('body')[0].getAttribute('front');
+const devBackendURL = document.getElementsByTagName('body')[0].getAttribute('back');
+
+import './public-path';
 import 'babel-polyfill';
 
 // Import all the third party stuff
@@ -24,15 +35,12 @@ import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
-
-// Retrieve remote and backend URLs.
-const remoteURL = process.env.REMOTE_URL || 'http://localhost:1337/admin';
-const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+/* eslint-enable */
 
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
-  basename: remoteURL.replace(window.location.origin, ''),
+  basename: (devFrontURL || remoteURL).replace(window.location.origin, ''),
 });
 const store = configureStore(initialState, history);
 
@@ -48,7 +56,6 @@ const render = (translatedMessages) => {
     document.getElementById('app')
   );
 };
-
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -74,7 +81,7 @@ window.onload = function onLoad() {
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
-  fetch(`${remoteURL}/config/plugins.json`)
+  fetch(`${devFrontURL || remoteURL}/config/plugins.json`)
     .then(response => {
       return response.json();
     })
@@ -140,9 +147,9 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-window.strapi = {
-  remoteURL,
-  backendURL,
+window.strapi = Object.assign(window.strapi || {}, {
+  remoteURL: devFrontURL || remoteURL,
+  backendURL: devBackendURL || backendURL,
   registerPlugin,
   notification: {
     success: (message) => {
@@ -168,7 +175,7 @@ window.strapi = {
   }),
   router: history,
   languages,
-};
+});
 
 const dispatch = store.dispatch;
 export {

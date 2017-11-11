@@ -110,6 +110,27 @@ module.exports = strapi => {
         ]
       });
 
+      // Allow page refresh
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/plugins/*`,
+        handler: [
+          async (ctx, next) => {
+            const parse = path.parse(ctx.url);
+
+            if (parse.ext === '') {
+              ctx.url = 'index.html';
+            }
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
       // Serve plugins assets.
       strapi.router.route({
         method: 'GET',
@@ -132,28 +153,34 @@ module.exports = strapi => {
         }
       });
 
-      // Allow page refresh
-      strapi.router.route({
-        method: 'GET',
-        path: `${basename}/plugins/*`,
-        handler: [
-          async (ctx, next) => {
-            ctx.url = 'index.html';
-
-            await next();
-          },
-          strapi.koaMiddlewares.static(`./admin/admin/build`, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
-            defer: true
-          })
-        ]
-      });
-
       // Plugins.
       _.forEach(strapi.plugins, (value, plugin) => {
         strapi.router.route({
           method: 'GET',
           path: `/plugins/${plugin}/*.*`,
+          handler: [
+            async (ctx, next) => {
+              ctx.url = path.basename(ctx.url);
+
+              // Try to find assets into the build first.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
+            },
+            async (ctx, next) => {
+              // Try to find assets in the source then.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
+            },
+          ]
+        });
+
+        strapi.router.route({
+          method: 'GET',
+          path: `${basename}/plugins/${plugin}/*.*`,
           handler: [
             async (ctx, next) => {
               ctx.url = path.basename(ctx.url);
