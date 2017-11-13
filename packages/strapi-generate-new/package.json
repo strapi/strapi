@@ -20,7 +20,7 @@
     "strapi-utils": "3.0.0-alpha.6.4"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",
