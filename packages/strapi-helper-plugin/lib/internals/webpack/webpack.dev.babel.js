@@ -31,7 +31,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 
   plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins')).filter(x => x[0] !== '.') : [];
 
-  plugins.folders = plugins.reduce((acc, current) => {
+  plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
 
     return acc;

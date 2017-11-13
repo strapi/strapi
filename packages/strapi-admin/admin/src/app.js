@@ -7,7 +7,7 @@
 
 /* eslint-disable */
 // Retrieve remote and backend URLs.
-const remoteURL = process.env.REMOTE_URL || 'http://localhost:1337/admin';
+const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin' : process.env.REMOTE_URL || 'http://localhost:1337/admin';
 const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
 
 // Retrieve development URL to avoid to re-build.

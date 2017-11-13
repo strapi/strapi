@@ -84,6 +84,17 @@ module.exports = function() {
               fs.unlinkSync(buildPath);
             }
 
+            // Create `./config` folder
+            try {
+              fs.accessSync(path.resolve(buildPath, '..'));
+            } catch (err) {
+              if (err && err.code !== 'ENOENT') {
+                reject(err);
+              }
+
+              fs.mkdirSync(path.resolve(buildPath, '..'));
+            }
+
             // Create `plugins.json` file.
             const data =  Object.keys(this.plugins).map(name => ({
               id: name,
