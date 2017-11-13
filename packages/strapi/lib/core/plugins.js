@@ -11,7 +11,7 @@ module.exports = function() {
       url[0] === '/' ? url.substring(1) : url
     )();
 
-    const configuratePlugin = (acc, current, source, x) => {
+    const configuratePlugin = (acc, current, source, name) => {
       switch (source) {
         case 'host': {
           if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
@@ -23,20 +23,20 @@ module.exports = function() {
           if (_.isString(folder)) {
             const cleanFolder = folder[0] === '/' ? folder.substring(1) : folder;
 
-            return `${this.config.environments[current].server.admin.build.host}/${cleanFolder}/${x}/main.js`;
+            return `${this.config.environments[current].server.admin.build.host}/${cleanFolder}/${name}/main.js`;
           }
 
-          return `${this.config.environments[current].server.admin.build.host}/${x}/main.js`;
+          return `${this.config.environments[current].server.admin.build.host}/${name}/main.js`;
         }
         case 'custom':
-          if (!_.isEmpty(_.get(this.plugins[x].config, `sources.${current}`, {}))) {
-            return acc[current] = this.plugins[x].config.sources[current];
+          if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
+            return acc[current] = this.plugins[name].config.sources[current];
           }
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
         case 'origin':
         default:
-          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${x}/main.js`;
+          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${name}/main.js`;
       }
     };
 
@@ -85,15 +85,15 @@ module.exports = function() {
             }
 
             // Create `plugins.json` file.
-            const data =  Object.keys(this.plugins).map(x => ({
-              id: x,
+            const data =  Object.keys(this.plugins).map(name => ({
+              id: name,
               source: Object.keys(this.config.environments).reduce((acc, current) => {
                 const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'origin');
 
                 if (_.isString(source)) {
-                  acc[current] = configuratePlugin(acc, current, source, x);
+                  acc[current] = configuratePlugin(acc, current, source, name);
                 } else if (_.isOject(source)) {
-                  acc[current] = configuratePlugin(acc, current, source[current], x);
+                  acc[current] = configuratePlugin(acc, current, source[current], name);
                 }
 
                 return acc;

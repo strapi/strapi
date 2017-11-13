@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.1.1",
-    "eslint": "^4.10.0",
+    "eslint": "^4.11.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-config-prettier": "^2.7.0",
@@ -46,7 +46,7 @@
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "plop": "^1.9.0",
-    "prettier": "^1.7.4",
+    "prettier": "^1.8.2",
     "rimraf": "^2.6.2",
     "webpack": "^3.8.1"
   },
