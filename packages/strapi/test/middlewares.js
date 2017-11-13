@@ -11,6 +11,8 @@ const strapi = require('../lib/');
    */
   describe('middleware', () => {
     before(function(done) {
+      strapi.log.level = 'silent';
+      
       // runs before all tests in this block
       strapi.start({
         port: 1338
