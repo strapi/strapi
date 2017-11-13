@@ -32,6 +32,7 @@ import styles from './styles.scss';
 import saga from './sagas';
 import reducer from './reducer';
 
+// KeyCode 18 === alt; 78 === n;
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function

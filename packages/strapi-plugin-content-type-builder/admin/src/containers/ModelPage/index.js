@@ -58,6 +58,8 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
 
+// KeyCode 19 === alt; 78 === n;
+// KeyCode 65 === a; 83 === s;
 const keyBoardShortCuts = [18, 65, 78, 83];
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
