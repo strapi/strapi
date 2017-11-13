@@ -26,6 +26,7 @@ shell.exec('npm install ../strapi-utils');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm run build');
 
 shell.cd('../strapi-generate-admin');
 shell.exec('npm install ../strapi-admin');
@@ -47,11 +48,13 @@ shell.cd('../strapi-plugin-content-manager');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm run build');
 
 shell.cd('../strapi-plugin-settings-manager');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm run build');
 
 shell.cd('../strapi-plugin-content-type-builder');
 shell.exec('npm install ../strapi-helper-plugin');
@@ -59,6 +62,7 @@ shell.exec('npm install ../strapi-generate');
 shell.exec('npm install ../strapi-generate-api');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm run build');
 
 // Log installation duration.
 const installationEndDate = new Date();

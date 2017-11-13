@@ -12,12 +12,12 @@ try {
 
     packageJSON.version = pkgJSON.version;
 
-    Object.keys(packageJSON.dependencies).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
+    Object.keys(packageJSON.dependencies || []).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
       packageJSON.dependencies[dependency] = pkgJSON.version;
     });
 
     if (packageJSON.devDependencies) {
-      Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+      Object.keys(packageJSON.devDependencies || []).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
         packageJSON.devDependencies[devDependency] = pkgJSON.version;
       });
     }
