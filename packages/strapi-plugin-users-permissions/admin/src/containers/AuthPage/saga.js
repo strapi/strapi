@@ -1,6 +1,18 @@
-// import { take, call, put, select } from 'redux-saga/effects';
+import { fork, takeLatest, put } from 'redux-saga/effects';
 
-// Individual exports for testing
+import { submitSucceeded } from './actions';
+import { SUBMIT } from './constants';
+
+export function* submitForm() {
+  try {
+    // TODO dynamic
+    yield put(submitSucceeded());
+
+  } catch(error) {
+    window.Strapi.notification.error('An error occured');
+  }
+}
+
 export default function* defaultSaga() {
-  // See example in containers/HomePage/saga.js
+  yield fork(takeLatest, SUBMIT, submitForm);
 }
