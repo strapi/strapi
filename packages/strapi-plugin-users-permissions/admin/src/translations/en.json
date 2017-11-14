@@ -23,7 +23,7 @@
   "Auth.form.register.username.label": "Username",
   "Auth.form.register.username.placeholder": "Soupette",
   "Auth.form.register.password.label": "Password",
-  "Auth.form.register.confirmPassword.label": "Confirm Password",
+  "Auth.form.register.confirmPassword.label": "Confirmation Password",
 
   "Auth.form.register-success.email.label": "Email send with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",

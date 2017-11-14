@@ -5,6 +5,7 @@
   padding: 17rem 0;
   background: #FAFAFB;
   height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 .wrapper {
@@ -32,10 +33,11 @@
 }
 .headerDescription {
   width: 41.6rem;
+  text-align: center;
   margin: auto;
   padding: 13px 30px 0 30px;
   line-height: 18px;
-  text-align: left;
+  color: #333740;
 }
 
 .formContainer {
@@ -43,7 +45,7 @@
   width: 41.6rem;
   margin: 1.4rem auto;
   margin-bottom: 0;
-  padding: 3.9rem 15px;
+  padding: 3.9rem 1.5rem 1.5rem 1.5rem;
   border-radius: 2px;
   border-top: 2px solid #1C5DE7;
   background-color: #FFFFFF;
@@ -54,6 +56,10 @@
   margin-top: -6px;
   padding-right: 0;
   text-align: right;
+
+  > button {
+    margin-right: 1.4rem;
+  }
 }
 
 .buttonContainer {
@@ -61,7 +67,7 @@
 }
 
 .linkContainer {
-  padding-top: 1.4rem;
+  padding-top: 1.8rem;
   > a {
     color: #262931;
     font-size: 13px;

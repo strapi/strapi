@@ -14,7 +14,7 @@
   color: #333740;
   font-family: Lato;
   font-size: 1.8rem;
-  font-weight: bold;
+  font-weight: 500;
   line-height: 2.2rem;
   align-items: flex-start;
 }
@@ -24,6 +24,9 @@
     margin-top: 1.5rem;
     padding: 0;
     list-style: none;
+    > li:last-child {
+      border-bottom: none;
+    }
   }
 }
 

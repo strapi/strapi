@@ -51,6 +51,7 @@
     content: '\f002';
     display: inline-table;
     font-family: 'FontAwesome';
+    color: #B3B5B9;
   }
 }
 
@@ -140,7 +141,7 @@
 }
 
 .checkboxLabel {
-  font-weight: 500;
+  font-weight: 400;
 
   > input {
     margin-right: 1.2rem;
@@ -259,6 +260,7 @@
     padding: 0;
     line-height: 3.4rem;
     border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
 
     margin-bottom: 2.8rem;
 

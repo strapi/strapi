@@ -128,7 +128,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
 
   render() {
     const inputs = get(form, ['form', this.props.match.params.authType]);
-    const divStyle = this.props.match.params.authType === 'register' ? {} : { marginTop: '.9rem' };
+    const divStyle = this.props.match.params.authType === 'register' ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
     const headerDescription = this.props.match.params.authType === 'register' ?
       <FormattedMessage id="users-permissions.Auth.header.register.description" />
       : <span />;
