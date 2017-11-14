@@ -35,8 +35,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             inputDescription="users-permissions.EditForm.inputSelect.subscriptions.description"
             name="subscriptions"
             onChange={this.props.onChange}
-            type="select"
-            selectOptions={[ { value: '100' }, { value: '200' }]}
+            type="number"
             validations={{}}
             value={get(this.props.values, 'subscriptions')}
           />
@@ -47,8 +46,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             inputDescription="users-permissions.EditForm.inputSelect.durations.description"
             name="durations"
             onChange={this.props.onChange}
-            type="select"
-            selectOptions={[ { value: '24' }, { value: '48' }]}
+            type="number"
             validations={{}}
             value={get(this.props.values, 'durations')}
           />

@@ -18,9 +18,12 @@
     content: '\F002';
     display: inline-table;
     margin-top: .2rem;
+    margin-left: .1rem;
     color: #B3B5B9;
     font-weight: 400;
+    font-size: 13px;
     font-family: 'FontAwesome';
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -47,6 +50,7 @@
     line-height: 3.4rem;
     font-size: 1.3rem;
     font-family: 'Lato' !important;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   }
 }
 
