@@ -16,7 +16,7 @@ export default function setParallelAttribute(newAttribute) {
 }
 
 export function setTempAttribute() {
-  const newAttribute = this.props.modifiedDataAttribute;
+  const newAttribute = cloneDeep(this.props.modifiedDataAttribute);
 
   forEach(newAttribute.params, (value, key) => {
     if (includes(key, 'Value')) {

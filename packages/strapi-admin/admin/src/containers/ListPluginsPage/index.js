@@ -18,13 +18,17 @@ import ListPlugins from 'components/ListPlugins';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectPluginDeleteAction } from './selectors';
-import { onDeletePluginClick, onDeletePluginConfirm } from './actions';
+import { makeSelectPluginDeleteAction, makeSelectPlugins } from './selectors';
+import { getPlugins, onDeletePluginClick, onDeletePluginConfirm } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
 
 export class ListPluginsPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    this.props.getPlugins();
+  }
+
   render() {
     return (
       <div>
@@ -48,7 +52,7 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
           />
           <ListPlugins
             history={this.props.history}
-            plugins={this.context.plugins.toJS()}
+            plugins={this.props.plugins}
             pluginActionSucceeded={this.props.pluginActionSucceeded}
             onDeleteClick={this.props.onDeletePluginClick}
             onDeleteConfirm={this.props.onDeletePluginConfirm}
@@ -59,24 +63,26 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
   }
 }
 
-ListPluginsPage.contextTypes = {
-  plugins: PropTypes.object,
-};
+ListPluginsPage.contextTypes = {};
 
 ListPluginsPage.propTypes = {
+  getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
   onDeletePluginConfirm: PropTypes.func.isRequired,
   pluginActionSucceeded: PropTypes.bool.isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
+  plugins: makeSelectPlugins(),
 });
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      getPlugins,
       onDeletePluginClick,
       onDeletePluginConfirm,
     },
