@@ -30,6 +30,7 @@ module.exports = function() {
   try {
     const strapi = function () {
       try {
+        console.log(path.resolve(process.cwd(), 'node_modules', 'strapi'));
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
       } catch (e) {
         return require('strapi');
