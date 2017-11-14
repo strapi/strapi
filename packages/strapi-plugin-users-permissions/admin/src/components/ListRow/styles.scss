@@ -23,10 +23,11 @@
 .flex {
   display: flex;
   justify-content: space-between;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: capitalize;
   > div:last-child {
     width: 80%;
+    padding-left: 7px;
     text-align: left;
   }
 }
@@ -45,9 +46,15 @@
 .wrapper {
   > div:first-child {
     text-align: left;
+
+
   }
 
   > div:nth-of-type(2) {
     text-align: center;
+  }
+
+  b {
+    font-weight: 600;
   }
 }

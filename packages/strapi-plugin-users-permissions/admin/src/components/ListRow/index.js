@@ -72,7 +72,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
                 </div>
               </div>
             </div>
-            <div className="col-md-6" style={{ fontWeight: '600' }}>
+            <div className="col-md-6" style={{ fontWeight: '500' }}>
               {this.props.item.enabled ? (
                 <span style={{ color: '#5A9E06' }}>Enabled</span>
               ) : (

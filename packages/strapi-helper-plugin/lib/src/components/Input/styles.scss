@@ -51,6 +51,7 @@
     content: '\f002';
     display: inline-table;
     font-family: 'FontAwesome';
+    color: #B3B5B9;
   }
 }
 
@@ -70,9 +71,13 @@
   text-transform: capitalize;
   -moz-appearance: none;
   -webkit-appearance: none;
+  -webkit-font-smoothing: antialiased;
   &:after {
     content: '@';
     display: inline-table;
+    color: #B3B5B9;
+    font-size: 16px;
+    font-weight: 600;
     font-family: Lato;
   }
 }
@@ -108,6 +113,7 @@
     line-height: 3.4rem;
     font-size: 1.3rem;
     font-family: 'Lato' !important;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   }
 
   select {
@@ -125,6 +131,7 @@
     font-family: 'Lato' !important;
     -moz-appearance: none;
     -webkit-appearance: none;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   }
 
 }
@@ -140,7 +147,7 @@
 }
 
 .checkboxLabel {
-  font-weight: 500;
+  font-weight: 400;
 
   > input {
     margin-right: 1.2rem;
@@ -203,6 +210,7 @@
     line-height: 1.8rem;
     font-size: 1.3rem;
     font-family: 'Lato' !important;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   }
 }
 
@@ -227,6 +235,8 @@
     input {
       width: 100%;
       padding-left: 42px;
+
+      box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
 
       &:focus{
         outline: none;
@@ -259,6 +269,7 @@
     padding: 0;
     line-height: 3.4rem;
     border: 1px solid #E3E9F3;
+    border-radius: 0.25rem;
 
     margin-bottom: 2.8rem;
 
@@ -271,6 +282,7 @@
     letter-spacing: 0.1rem;
     font-family: Lato;
     cursor: pointer;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
     &:first-of-type {
       border-right: none;
     }
