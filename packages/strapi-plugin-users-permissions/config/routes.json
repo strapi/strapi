@@ -7,6 +7,62 @@
       "config": {
         "policies": []
       }
+    },
+
+    {
+      "method": "POST",
+      "path": "/auth/local",
+      "handler": "Auth.callback",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+
+    {
+      "method": "GET",
+      "path": "/user",
+      "handler": "User.find",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/user/:_id",
+      "handler": "User.findOne",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/user",
+      "handler": "User.create",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/user/:_id",
+      "handler": "User.update",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/:_id",
+      "handler": "User.destroy",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
     }
   ]
 }
