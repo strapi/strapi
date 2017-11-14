@@ -60,7 +60,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   isUrlProtected = (props) => !includes(props.location.pathname, '/plugins/users-permissions/auth');
 
-  showLeftMenu = () => !includes(this.props.location.pathname, '/plugins/users-permissions/auth') && !isUndefined(get(this.props.plugins.toJS(), 'users-permissions'));
+  showLeftMenu = () => !includes(this.props.location.pathname, '/plugins/users-permissions/auth');
 
   render() {
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
