@@ -62,15 +62,15 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   hasAdminUser = () => get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
-  isUrlProtected = (props) => !includes(props.location.pathname, '/plugins/users-permissions/auth');
+  isUrlProtected = (props) => !includes(props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
-  showLeftMenu = () => !includes(this.props.location.pathname, '/plugins/users-permissions/auth');
+  showLeftMenu = () => !includes(this.props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
   render() {
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-    
+
     return (
       <div className={styles.adminPage}>
         {leftMenu}

@@ -94,6 +94,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                     <div className="col-md-6">
                       <div className="row">
                         <Input
+                          autoFocus
                           customBootstrapClass="col-md-12"
                           label="users-permissions.EditPage.form.roles.label.name"
                           name="name"
