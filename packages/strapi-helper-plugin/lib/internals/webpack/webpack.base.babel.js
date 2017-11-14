@@ -12,20 +12,23 @@ const pluginId = pkg.name.replace(/^strapi-/i, '');
 const isAdmin = process.env.IS_ADMIN === 'true';
 
 const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 
-try {
-  // Load app' configurations to update `plugins.json` automatically.
-  const strapi = require(path.join(appPath, 'node_modules', 'strapi'));
+if (!isSetup) {
+  try {
+    // Load app' configurations to update `plugins.json` automatically.
+    const strapi = require(path.join(appPath, 'node_modules', 'strapi'));
 
-  strapi.config.appPath = appPath;
-  strapi.log.level = 'silent';
+    strapi.config.appPath = appPath;
+    strapi.log.level = 'silent';
 
-  (async () => {
-    await strapi.load();
-  })();
-} catch (e) {
-  console.log(e);
-  throw new Error(`You need to start the WebPack server from the /admin or /plugins/**/admin directories in a Strapi's project.`);
+    (async () => {
+      await strapi.load();
+    })();
+  } catch (e) {
+    console.log(e);
+    throw new Error(`You need to start the WebPack server from the /admin or /plugins/**/admin directories in a Strapi's project.`);
+  }
 }
 
 // Define remote and backend URLs.
@@ -34,7 +37,7 @@ const URLs = {
   backend: null
 };
 
-if (isAdmin) {
+if (isAdmin && !isSetup) {
   // Load server configuration.
   const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 

@@ -18,6 +18,8 @@ const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+
 // Necessary configuration file to ensure that plugins will be loaded.
 const pluginsToInitialize = (() => {
   try {
@@ -46,28 +48,31 @@ const plugins = [
   // new BundleAnalyzerPlugin(),
 ];
 
-// Load server configuration.
-const serverConfig = isAdmin ?
-  path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'):
-  path.resolve(process.env.PWD, '..', '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
-
-const server = require(serverConfig);
-
+// Default configurations.
 const settings = {
   path: 'admin',
   folder: 'plugins',
-  host: _.get(server, 'admin.build.host')
+  host: 'http://localhost:1337'
 };
+
+if (!isSetup) {
+  // Load server configurations.
+  const serverConfig = isAdmin ?
+    path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'):
+    path.resolve(process.env.PWD, '..', '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+  const server = require(serverConfig);
+  const pathAccess =  _.get(server, 'admin.path', 'admin');
+
+  Object.assign(settings, {
+    path: pathAccess[0] === '/' ? pathAccess.substring(1) : pathAccess,
+    folder: _.get(server, 'admin.build.plugins.folder', 'plugins'),
+    host: _.get(server, 'admin.build.host', 'http://localhost:1337')
+  });
+}
 
 // Build the `index.html file`
 if (isAdmin) {
-  settings.path = _.get(server, 'admin.path', 'admin');
-  settings.folder = _.get(server, 'admin.build.plugins.folder', 'plugins');
-
-  if (settings.path[0] === '/') {
-    settings.path = settings.path.substring(1);
-  }
-
   plugins.push(new HtmlWebpackPlugin({
     template: 'admin/src/index.html',
     minify: {
@@ -101,20 +106,6 @@ if (isAdmin) {
 const appPath = isAdmin
   ? path.join(process.cwd(), 'admin', 'src', 'app.js')
   : path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
-
-const publicPath = (() => {
-  if (isAdmin) {
-      if (settings.host) {
-        return `${settings.host}/`;
-      }
-
-      return `/${settings.path}/`;
-  }
-
-  return settings.host ?
-  `${settings.host}/${settings.folder}/${pluginId}/`:
-  `/${settings.folder}/${pluginId}/`;
-})();
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
