@@ -43,6 +43,11 @@ shell.cd('../strapi');
 shell.exec('npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 shell.exec('npm link');
 
+shell.cd('../strapi-plugin-users-permissions');
+shell.exec('npm install ../strapi-helper-plugin');
+shell.rm('-f', 'package-lock.json');
+shell.exec('npm link');
+
 shell.cd('../strapi-plugin-content-manager');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
