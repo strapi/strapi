@@ -40,7 +40,7 @@ export function setForm(formType, email) {
       break;
     case 'login':
       data = {
-        username: '',
+        identifier: '',
         password: '',
         rememberMe: false,
       };

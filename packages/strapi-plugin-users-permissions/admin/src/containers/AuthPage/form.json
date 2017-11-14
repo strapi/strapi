@@ -13,7 +13,7 @@
       {
         "customBootstrapClass": "col-md-12",
         "label": "users-permissions.Auth.form.login.username.label",
-        "name": "username",
+        "name": "identifier",
         "type": "text",
         "placeholder": "users-permissions.Auth.form.login.username.placeholder"
       },
