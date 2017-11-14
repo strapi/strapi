@@ -8,6 +8,17 @@
         "policies": []
       }
     },
+
+    {
+      "method": "POST",
+      "path": "/auth/local",
+      "handler": "Auth.callback",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+
     {
       "method": "GET",
       "path": "/user",
