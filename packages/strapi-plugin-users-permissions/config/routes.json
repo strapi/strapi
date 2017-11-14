@@ -8,6 +8,14 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/init/:hasAdmin",
+      "handler": "UsersPermissions.init",
+      "config": {
+        "policies": []
+      }
+    },
 
     {
       "method": "POST",

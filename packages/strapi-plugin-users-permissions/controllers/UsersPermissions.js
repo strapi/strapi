@@ -21,5 +21,10 @@ module.exports = {
     ctx.send({
       message: 'ok'
     });
+  },
+
+  init: async (ctx) => {
+    // Will be deleted
+    ctx.send({ hasAdmin: ctx.params.hasAdmin === 'true' });
   }
 };
