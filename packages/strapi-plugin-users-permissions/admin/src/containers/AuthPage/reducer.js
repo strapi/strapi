@@ -15,6 +15,7 @@ import {
 const initialState = fromJS({
   didCheckErrors: false,
   formErrors: List([]),
+  formType: 'login',
   modifiedData: Map({}),
   submitSuccess: false,
 });
@@ -31,6 +32,7 @@ function authPageReducer(state = initialState, action) {
     case SET_FORM:
       return state
         .set('formErrors', List([]))
+        .set('formType', action.formType)
         .set('submitSuccess', false)
         .set('modifiedData', Map(action.data));
     case SUBMIT_SUCCEEDED:

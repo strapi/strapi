@@ -66,6 +66,7 @@ export function setForm(formType, email) {
   return {
     type: SET_FORM,
     data,
+    formType,
   };
 }
 
