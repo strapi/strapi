@@ -50,6 +50,7 @@
     "koa-static": "^4.0.1",
     "lodash": "^4.16.5",
     "node-schedule": "^1.2.0",
+    "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",
     "strapi-generate": "3.0.0-alpha.6.4",
