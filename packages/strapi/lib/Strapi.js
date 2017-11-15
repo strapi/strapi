@@ -248,18 +248,20 @@ class Strapi extends EventEmitter {
     });
   }
 
-  query(entity) {
+  query(entity, plugin) {
     if (!entity) {
       return this.log.error(`You can't call the query method without passing the model's name as a first argument.`);
     }
 
     const model = entity.toLowerCase();
 
-    if (!this.models.hasOwnProperty(model)) {
+    const Model = get(strapi, ['models', model]) || get(strapi.plugins, [plugin, 'models', model]) || undefined;
+
+    if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
-    const connector = this.models[model].orm;
+    const connector = Model.orm;
 
     if (!connector) {
       return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
@@ -298,7 +300,7 @@ class Strapi extends EventEmitter {
 
     // Bind queries with the current model to allow the use of `this`.
     const bindQueries = Object.keys(queries).reduce((acc, current) => {
-      return acc[current] = queries[current].bind(this.models[model]), acc;
+      return acc[current] = queries[current].bind(Model), acc;
     }, {});
 
     // Send ORM to the called function.

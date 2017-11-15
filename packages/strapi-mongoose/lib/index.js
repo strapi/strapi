@@ -79,16 +79,11 @@ module.exports = function (strapi) {
             return cb();
           }
 
-          const mountModels = (models, target) => {
+          const mountModels = (models, target, plugin = false) => {
             if (!target) return;
 
             const loadedAttributes = _.after(_.size(models), () => {
               _.forEach(models, (definition, model) => {
-                if (!definition.globalId) {
-                  definition.globalId = _.upperFirst(model);
-                  definition.globalName = _.upperFirst(model);
-                }
-
                 try {
                   let collection = strapi.config.hook.settings.mongoose.collections[mongooseUtils.toCollectionName(definition.globalName)];
 
@@ -148,13 +143,18 @@ module.exports = function (strapi) {
                     virtuals: true
                   });
 
-                  global[definition.globalName] = instance.model(definition.globalName, collection.schema);
+
+                  if (!plugin) {
+                    global[definition.globalName] = instance.model(definition.globalName, collection.schema);
+                  } else {
+                    instance.model(definition.globalName, collection.schema);
+                  }
 
                   // Expose ORM functions through the `target` object.
                   target[model] = _.assign(instance.model(definition.globalName), target[model]);
 
                   // Push model to strapi global variables.
-                  collection = global[definition.globalName];
+                  collection = instance.model(definition.globalName, collection.schema);
 
                   // Push attributes to be aware of model schema.
                   target[model]._attributes = definition.attributes;
@@ -168,6 +168,10 @@ module.exports = function (strapi) {
 
             // Parse every registered model.
             _.forEach(models, (definition, model) => {
+              if (plugin) {
+                definition.globalId = _.upperFirst(_.camelCase(`${plugin}-${model}`));
+              }
+
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
               // Make sure the model has a connection.
@@ -186,12 +190,14 @@ module.exports = function (strapi) {
               definition.orm = 'mongoose';
               definition.client = _.get(strapi.config.connections[definition.connection], 'client');
 
-              // Register the final model for Bookshelf.
+              // Register the final model for Mongoose.
               definition.loadedModel = _.cloneDeep(definition.attributes);
 
               // Initialize the global variable with the
               // capitalized model name.
-              global[definition.globalName] = {};
+              if (!plugin) {
+                global[definition.globalName] = {};
+              }
 
               if (_.isEmpty(definition.attributes)) {
                 // Generate empty schema
@@ -305,7 +311,7 @@ module.exports = function (strapi) {
           mountModels(models, strapi.models);
 
           _.forEach(strapi.plugins, (plugin, name) => {
-            mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models);
+            mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
           });
 
           cb();

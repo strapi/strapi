@@ -30,6 +30,8 @@ module.exports = {
       admin: true
     });
 
+    console.log(await strapi.query('user', 'users-permissions'));
+
     ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
   }
 };
