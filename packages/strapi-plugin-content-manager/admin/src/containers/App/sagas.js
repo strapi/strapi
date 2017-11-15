@@ -10,17 +10,17 @@ import { makeSelectModels } from './selectors';
 
 export function* modelEntriesGet(action) {
   try {
-    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${action.modelName}/count`;
+    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${action.modelName}/count`;
     const response = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(getModelEntriesSucceeded(response.count));
   } catch(error) {
-    window.Strapi.notification.error('content-manager.error.model.fetch');
+    strapi.notification.error('content-manager.error.model.fetch');
   }
 }
 
 export const generateMenu = function () {
-  return request(`${window.Strapi.apiUrl}/content-manager/models`, {
+  return request(`${strapi.backendURL}/content-manager/models`, {
     method: 'GET',
   })
     .then(response => generateSchema(response))
@@ -34,7 +34,7 @@ export const generateMenu = function () {
       }];
     })
     .catch((error) => {
-      window.Strapi.notification.error('content-manager.error.model.fetch');
+      strapi.notification.error('content-manager.error.model.fetch');
       throw Error(error);
     });
 };
@@ -42,13 +42,13 @@ export const generateMenu = function () {
 export function* getModels() {
   try {
     const response = yield call(request,
-      `${window.Strapi.apiUrl}/content-manager/models`, {
+      `${strapi.backendURL}/content-manager/models`, {
         method: 'GET',
       });
 
     yield put(loadedModels(response));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.model.fetch');
+    strapi.notification.error('content-manager.error.model.fetch');
   }
 }
 
@@ -59,7 +59,7 @@ export function* modelsLoaded() {
   try {
     schema = generateSchema(models);
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.schema.generation');
+    strapi.notification.error('content-manager.error.schema.generation');
     throw new Error(err);
   }
 

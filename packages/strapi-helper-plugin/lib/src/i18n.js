@@ -44,7 +44,8 @@ const requireTranslations = language => {
 /**
  * Dynamically generate `translationsMessages object`.
  */
-const translationMessages = reduce(window.Strapi.languages, (result, language) => {
+
+const translationMessages = reduce(strapi.languages, (result, language) => {
   const obj = result;
   const messages = requireTranslations(language);
   obj[language] = formatMessages(messages);

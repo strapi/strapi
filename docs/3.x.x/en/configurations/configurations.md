@@ -328,6 +328,14 @@ Most of the application's configurations are defined by environment. It means th
  - `autoReload` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+ - `admin`
+  - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
+  - `build`
+    - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
+    - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
+      - `plugins`
+        - `source` (string): Define the source mode (origin, host, custom).
+        - `folder` (string): Indicate what the plugins folder in `host` source mode.
 
 ***
 

@@ -8,7 +8,7 @@ import { fromJS } from 'immutable';
 import { first, get, includes, split } from 'lodash';
 
 // Import supported languages from admin config.
-import { languages } from '../../../../config/admin.json';
+import { languages } from '../../config/languages.json';
 
 import {
   CHANGE_LOCALE,

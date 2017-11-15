@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.6.4",
+  "version": "3.0.0-alpha.6.6",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 8.0.0",
@@ -113,6 +113,7 @@
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-middleware": "^1.12.0",
     "webpack-hot-middleware": "^2.18.2",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "write-json-webpack-plugin": "^1.0.2"
   }
 }

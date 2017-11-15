@@ -10,7 +10,9 @@ module.exports.nested = function() {
   return Promise.all([
     // Load root configurations.
     new Promise((resolve, reject) => {
-      glob('./config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -20,7 +22,9 @@ module.exports.nested = function() {
     }),
     // Load APIs configurations.
     new Promise((resolve, reject) => {
-      glob('./api/*/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./api/*/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -30,7 +34,9 @@ module.exports.nested = function() {
     }),
     // Load plugins configurations.
     new Promise((resolve, reject) => {
-      glob('./plugins/*/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./plugins/*/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -40,7 +46,9 @@ module.exports.nested = function() {
     }),
     // Load admin configurations.
     new Promise((resolve, reject) => {
-      glob('./admin/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./admin/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -64,6 +72,7 @@ module.exports.nested = function() {
 
 module.exports.app = async function() {
     // Retrieve Strapi version.
+    this.config.uuid = get(this.config.info, 'strapi.uuid', '');
     this.config.info.strapi = (get(this.config, 'info.dependencies.strapi') || '').replace(/(\^|~)/g, ''),
     this.config.info.node = process.versions.node;
 

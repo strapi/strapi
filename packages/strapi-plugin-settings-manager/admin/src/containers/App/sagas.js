@@ -17,7 +17,7 @@ export function* fetchMenu() {
     yield put(fetchMenuSucceeded(data));
 
   } catch(err) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -33,7 +33,7 @@ export function* fetchEnvironments() {
     yield put(environmentsFetchSucceeded(data));
 
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 

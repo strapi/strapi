@@ -38,7 +38,7 @@ module.exports = function() {
 
       // Load configurations.
       glob('./*', {
-        cwd: path.resolve(process.cwd(), 'hooks')
+        cwd: path.resolve(this.config.appPath, 'hooks')
       }, (err, files) => {
         if (err) {
           return reject(err);

@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.6.4",
+  "version": "3.0.0-alpha.6.6",
   "description": "An open source solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -32,6 +32,7 @@
   "dependencies": {
     "async": "^2.1.2",
     "boom": "^5.2.0",
+    "cheerio": "^1.0.0-rc.2",
     "delegates": "^1.0.0",
     "glob": "^7.1.2",
     "kcors": "^2.2.0",
@@ -49,16 +50,17 @@
     "koa-session": "^5.5.0",
     "koa-static": "^4.0.1",
     "lodash": "^4.16.5",
+    "node-fetch": "^1.7.3",
     "node-schedule": "^1.2.0",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",
-    "strapi-generate": "3.0.0-alpha.6.4",
-    "strapi-generate-admin": "3.0.0-alpha.6.4",
-    "strapi-generate-api": "3.0.0-alpha.6.4",
-    "strapi-generate-new": "3.0.0-alpha.6.4",
-    "strapi-generate-policy": "3.0.0-alpha.6.4",
-    "strapi-generate-service": "3.0.0-alpha.6.4",
-    "strapi-utils": "3.0.0-alpha.6.4"
+    "strapi-generate": "3.0.0-alpha.6.6",
+    "strapi-generate-admin": "3.0.0-alpha.6.6",
+    "strapi-generate-api": "3.0.0-alpha.6.6",
+    "strapi-generate-new": "3.0.0-alpha.6.6",
+    "strapi-generate-policy": "3.0.0-alpha.6.6",
+    "strapi-generate-service": "3.0.0-alpha.6.6",
+    "strapi-utils": "3.0.0-alpha.6.6"
   },
   "author": {
     "email": "hi@strapi.io",
