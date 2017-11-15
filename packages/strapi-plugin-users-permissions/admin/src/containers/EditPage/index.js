@@ -25,6 +25,8 @@ import injectReducer from 'utils/injectReducer';
 // Actions
 import {
   addUser,
+  getPermissions,
+  getRole,
   onCancel,
   onChangeInput,
   onClickDelete,
@@ -43,6 +45,9 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   componentDidMount() {
     if (this.props.match.params.actionType === 'create') {
       this.props.setForm();
+      this.props.getPermissions();
+    } else {
+      this.props.getRole(this.props.match.params.id);
     }
   }
 
@@ -69,7 +74,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       'users-permissions.EditPage.header.description.create'
       : 'users-permissions.EditPage.header.description';
     const pluginHeaderActions = this.props.editPage.showButtons ? this.pluginHeaderActions : [];
-
+    
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />
@@ -78,18 +83,18 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             title={{
               id: pluginHeaderTitle,
               values: {
-                name: '',
+                name: get(this.props.editPage.initialData, 'name'),
               },
             }}
             description={{
               id: pluginHeaderDescription,
               values: {
-                description: '',
+                description: get(this.props.editPage.initialData, 'description') || '',
               },
             }}
             actions={pluginHeaderActions}
           />
-          <div className="row">
+          <div className={cn("row", styles.container)}>
             <div className="col-md-12">
               <div className={styles.main_wrapper}>
                 <div className={styles.titleContainer}>
@@ -148,6 +153,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
+  getPermissions: PropTypes.func.isRequired,
+  getRole: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
@@ -164,6 +171,8 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       addUser,
+      getPermissions,
+      getRole,
       onCancel,
       onChangeInput,
       onClickDelete,

@@ -3,9 +3,12 @@
  * EditPage actions
  *
  */
-import { List, Map } from 'immutable';
+import { fromJS, List, Map } from 'immutable';
+import { get } from 'lodash';
 import {
   ADD_USER,
+  GET_PERMISSIONS,
+  GET_PERMISSIONS_SUCCEEDED,
   GET_ROLE,
   GET_ROLE_SUCCEEDED,
   ON_CANCEL,
@@ -21,16 +24,39 @@ export function addUser(newUser) {
   };
 }
 
-export function getRole() {
+export function getPermissions() {
+  return {
+    type: GET_PERMISSIONS,
+  };
+}
+
+export function getPermissionsSucceeded(data) {
+  const permissions = Map(fromJS(data.permissions));
+
+  return {
+    type: GET_PERMISSIONS_SUCCEEDED,
+    permissions,
+  };
+}
+
+export function getRole(id) {
   return {
     type: GET_ROLE,
+    id,
   };
 }
 
 export function getRoleSucceeded(data) {
+  const form = Map({
+    name: get(data, ['role', 'name']),
+    description: get(data, ['role', 'description']),
+    users: List(get(data, ['role', 'users'])),
+    permissions: Map(fromJS(get(data, ['role', 'permissions']))),
+  });
+
   return {
     type: GET_ROLE_SUCCEEDED,
-    data,
+    form,
   };
 }
 
@@ -65,6 +91,7 @@ export function setForm() {
       { name: 'Aurelien Georget' },
       { name: 'Cyril Lopez' },
     ]),
+    permissions: Map({}),
   });
 
   return {

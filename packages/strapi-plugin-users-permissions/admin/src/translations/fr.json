@@ -47,10 +47,14 @@
   "EditPage.form.roles.label.description": "Description",
   "EditPage.form.roles.label.name": "Nom",
   "EditPage.form.roles.label.users": "Utilisateurs associés avec ce rôle ({number})",
-  "EditPage.header.title": "{name}",
+  "EditPage.header.title": "{name} ",
   "EditPage.header.title.create": "Créez un nouveau rôle",
-  "EditPage.header.description": "{description}",
+  "EditPage.header.description": "{description} ",
   "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "Une erreur est survenue en récupérant les permissions",
+  "EditPage.notification.role.error": "Une erreur est survenue en récupérant le rôle",
+
 
   "HeaderNav.link.advancedSettings": "Paramètres avancés",
   "HeaderNav.link.emailTemplates": "Templates d'email",

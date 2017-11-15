@@ -7,6 +7,8 @@
 import { fromJS, Map } from 'immutable';
 import {
   ADD_USER,
+  GET_PERMISSIONS_SUCCEEDED,
+  GET_ROLE_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
@@ -26,6 +28,15 @@ function editPageReducer(state = initialState, action) {
     case ADD_USER:
       return state
         .updateIn(['modifiedData', 'users'], list => list.push(action.newUser));
+    case GET_PERMISSIONS_SUCCEEDED:
+      return state
+        .updateIn(['initialData', 'permissions'], () => action.permissions)
+        .updateIn(['modifiedData', 'permissions'], () => action.permissions);
+    case GET_ROLE_SUCCEEDED:
+      return state
+        .set('didGetUsers', !state.get('didGetUsers'))
+        .set('initialData', action.form)
+        .set('modifiedData', action.form);
     case ON_CANCEL:
       return state
         .set('showButtons', false)

@@ -1,5 +1,7 @@
 'use strict';
 
+const fakeData = require('../config/fakeData.json');
+const _ = require('lodash');
 /**
  * UsersPermissions.js controller
  *
@@ -13,10 +15,24 @@ module.exports = {
    *
    * @return {Object}
    */
+
+  getPermissions: async(ctx) => {
+    try {
+      ctx.send({ permissions: fakeData.permissions });
+    } catch(err) {
+      ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
+    }
+  },
+
   getRole: async(ctx) => {
     const { id } = ctx.params;
+    const role = fakeData[id];
 
-    ctx.send({ ok: true });
+    if (_.isEmpty(role)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Role don\'t exist' }] }]);
+    }
+
+    return ctx.send({ role });
   },
 
   index: async (ctx) => {

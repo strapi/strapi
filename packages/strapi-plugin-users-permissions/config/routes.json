@@ -24,6 +24,14 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/permissions",
+      "handler": "UsersPermissions.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
 
     {
       "method": "POST",

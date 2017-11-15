@@ -40,5 +40,25 @@
         }
       }
     }
+  },
+  "permissions": {
+    "application": {
+      "icon": "",
+      "description": "users-permissions.EditPage.permissions.application.description",
+      "controllers": {
+        "invoices": {
+          "actions": {
+            "delete": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "update": {
+              "enabled": false,
+              "policy": "entriesCreatedByUser"
+            }
+          }
+        }
+      }
+    }
   }
 }
