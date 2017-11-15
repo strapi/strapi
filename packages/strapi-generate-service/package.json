@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-service",
-  "version": "3.0.0-alpha.6.6",
+  "version": "3.0.0-alpha.6.7",
   "description": "Generate a service for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,7 +17,7 @@
     "lodash": "^4.17.4"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",

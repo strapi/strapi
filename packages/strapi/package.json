@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.6.6",
+  "version": "3.0.0-alpha.6.7",
   "description": "An open source solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -52,15 +52,16 @@
     "lodash": "^4.16.5",
     "node-fetch": "^1.7.3",
     "node-schedule": "^1.2.0",
+    "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",
-    "strapi-generate": "3.0.0-alpha.6.6",
-    "strapi-generate-admin": "3.0.0-alpha.6.6",
-    "strapi-generate-api": "3.0.0-alpha.6.6",
-    "strapi-generate-new": "3.0.0-alpha.6.6",
-    "strapi-generate-policy": "3.0.0-alpha.6.6",
-    "strapi-generate-service": "3.0.0-alpha.6.6",
-    "strapi-utils": "3.0.0-alpha.6.6"
+    "strapi-generate": "3.0.0-alpha.6.7",
+    "strapi-generate-admin": "3.0.0-alpha.6.7",
+    "strapi-generate-api": "3.0.0-alpha.6.7",
+    "strapi-generate-new": "3.0.0-alpha.6.7",
+    "strapi-generate-policy": "3.0.0-alpha.6.7",
+    "strapi-generate-service": "3.0.0-alpha.6.7",
+    "strapi-utils": "3.0.0-alpha.6.7"
   },
   "author": {
     "email": "hi@strapi.io",

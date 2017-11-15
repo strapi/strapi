@@ -1,6 +1,6 @@
 {
   "name": "strapi-ejs",
-  "version": "3.0.0-alpha.6.6",
+  "version": "3.0.0-alpha.6.7",
   "description": "EJS hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,7 +20,7 @@
     "isHook": true
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",

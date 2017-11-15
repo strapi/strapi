@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/plugins",
+      "handler": "Admin.plugins",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/plugins/uninstall/:plugin",
+      "handler": "Admin.uninstallPlugin",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

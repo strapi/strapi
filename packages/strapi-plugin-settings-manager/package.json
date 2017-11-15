@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.6.6",
+  "version": "3.0.0-alpha.6.7",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -8,48 +8,25 @@
     "description": "settings-manager.plugin.description"
   },
   "scripts": {
-    "analyze:clean": "rimraf stats.json",
+    "analyze:clean": "node node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
     "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "prebuild": "npm run build:clean && npm run test",
-    "build:dev": "cross-env NODE_ENV=development webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:clean": "rimraf admin/build",
-    "start": "cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
-    "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "build:dev": "node node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build": "node node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=production node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "node node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
+    "start": "node node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
+    "generate": "node node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "node node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "pretest": "npm run lint",
-    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
+    "prettier": "node node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo Tests are not implemented.",
-    "prepublish": "npm run build",
-    "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
-  },
-  "dependencies": {
-    "bootstrap": "^4.0.0-alpha.6",
-    "flag-icon-css": "^2.8.0",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "react-select": "^1.0.0-rc.5",
-    "react-transition-group": "^1.2.0",
-    "reactstrap": "^4.8.0",
-    "strapi-helper-plugin": "3.0.0-alpha.6.6"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "cross-env": "^5.1.1",
-    "eslint": "^4.11.0",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-config-prettier": "^2.7.0",
-    "eslint-import-resolver-webpack": "^0.8.3",
-    "eslint-plugin-babel": "^4.1.2",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.4.0",
-    "eslint-plugin-redux-saga": "^0.4.0",
-    "plop": "^1.9.0",
-    "prettier": "^1.8.2",
-    "rimraf": "^2.6.2",
-    "webpack": "^3.8.1"
+    "flag-icon-css": "^2.8.0",
+    "react-select": "^1.0.0-rc.5",
+    "strapi-helper-plugin": "3.0.0-alpha.6.7"
   },
   "author": {
     "name": "Strapi team",
@@ -64,7 +41,7 @@
     }
   ],
   "engines": {
-    "node": ">= 7.0.0",
+    "node": ">= 8.0.0",
     "npm": ">= 3.0.0"
   },
   "license": "MIT"
