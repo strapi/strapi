@@ -13,6 +13,11 @@ module.exports = {
    *
    * @return {Object}
    */
+  getRole: async(ctx) => {
+    const { id } = ctx.params;
+
+    ctx.send({ ok: true });
+  },
 
   index: async (ctx) => {
     // Add your own logic here.

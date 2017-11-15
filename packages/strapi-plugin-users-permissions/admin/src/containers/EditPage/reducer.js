@@ -4,36 +4,20 @@
  *
  */
 
-import { fromJS, List, Map } from 'immutable';
+import { fromJS, Map } from 'immutable';
 import {
   ADD_USER,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
+  SET_FORM,
 } from './constants';
 
 const initialState = fromJS({
   didDeleteUser: false,
-  initialData: Map({
-    name: '',
-    description: '',
-    users: List([
-      { name: 'Pierre Burgy' },
-      { name: 'Jim Laurie' },
-      { name: 'Aurelien Georget' },
-      { name: 'Cyril Lopez' },
-    ]),
-  }),
-  modifiedData: Map({
-    name: '',
-    description: '',
-    users: List([
-      { name: 'Pierre Burgy' },
-      { name: 'Jim Laurie' },
-      { name: 'Aurelien Georget' },
-      { name: 'Cyril Lopez' },
-    ]),
-  }),
+  didGetUsers: false,
+  initialData: Map({}),
+  modifiedData: Map({}),
   showButtons: false,
 });
 
@@ -56,6 +40,11 @@ function editPageReducer(state = initialState, action) {
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .set('showButtons', true)
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
+    case SET_FORM:
+      return state
+        .set('didGetUsers', !state.get('didGetUsers'))
+        .set('initialData', action.form)
+        .set('modifiedData', action.form);
     default:
       return state;
   }

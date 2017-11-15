@@ -16,6 +16,14 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "UsersPermissions.getRole",
+      "config": {
+        "policies": []
+      }
+    },
 
     {
       "method": "POST",

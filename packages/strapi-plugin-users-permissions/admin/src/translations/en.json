@@ -47,9 +47,9 @@
   "EditPage.form.roles.label.description": "Description",
   "EditPage.form.roles.label.name": "Name",
   "EditPage.form.roles.label.users": "Users associated with this role ({number})",
-  "EditPage.header.title": "{name}",
+  "EditPage.header.title": "{name} ",
   "EditPage.header.title.create": "Create a new role",
-  "EditPage.header.description": "{description}",
+  "EditPage.header.description": "{description} ",
   "EditPage.header.description.create": " ",
 
   "HeaderNav.link.advancedSettings": "Advanced settings",
