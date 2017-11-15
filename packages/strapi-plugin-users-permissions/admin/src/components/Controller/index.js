@@ -6,9 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 
-import Input from 'components/Input';
+import InputCheckbox from 'components/InputCheckbox';
 import styles from './styles.scss';
 
 function Controller({ actions, name }) {
@@ -19,15 +19,9 @@ function Controller({ actions, name }) {
       </div>
       <div className="row">
         {map(actions, (action, key) => (
-          <Input
+          <InputCheckbox
             key={key}
-            label="users-permissions.Controller.input.label"
-            labelValues={{ label: key }}
-            name="willBeNamed"
-            onChange={() => console.log('change')}
-            type="checkbox"
-            value
-            validations={{}}
+            value={get(action, 'enabled')}
           />
         ))}
       </div>
