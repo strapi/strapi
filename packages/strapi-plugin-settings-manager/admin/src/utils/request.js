@@ -52,7 +52,7 @@ function formatQueryParams(params) {
 */
 function serverRestartWatcher(response) {
   return new Promise((resolve) => {
-    fetch(`${Strapi.apiUrl}/_health`, {
+    fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
       headers: {
@@ -90,7 +90,7 @@ export default function request(url, options, shouldWatchServerRestart = false) 
 
   // Add parameters to url
   let urlFormatted = startsWith(url, '/')
-    ? `${Strapi.apiUrl}${url}`
+    ? `${strapi.backendURL}${url}`
     : url;
 
   if (optionsObj && optionsObj.params) {

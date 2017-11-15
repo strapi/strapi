@@ -14,28 +14,24 @@ const postcssReporter = require('postcss-reporter');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
-let noPlugin = false;
-let plugins = [];
-let pluginFolders = {};
+// Load plugins into the same build in development mode.
+const plugins = {
+  exist: false,
+  src: [],
+  folders: {}
+};
 
 if (process.env.npm_lifecycle_event === 'start') {
   try {
     fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
   } catch (e) {
-    try {
-      fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
-
-      // Allow app without plugins.
-      noPlugin = true;
-    } catch (e) {
-      throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
-    }
+    // Allow app without plugins.
+    plugins.exist = true;
   }
 
-  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
-    .filter(x => x[0] !== '.') : [];
+  plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins')).filter(x => x[0] !== '.') : [];
 
-  pluginFolders = plugins.reduce((acc, current) => {
+  plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
 
     return acc;
@@ -52,8 +48,8 @@ module.exports = require('./webpack.base.babel')({
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
         appPath,
       ]
-    }, plugins.reduce((acc, current) => {
-        acc[current] = path.resolve(pluginFolders[current], 'app.js');
+    }, plugins.src.reduce((acc, current) => {
+        acc[current] = path.resolve(plugins.folders[current], 'app.js');
 
         return acc;
       }, {})

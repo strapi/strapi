@@ -54,10 +54,10 @@ export function* editContentType(action) {
         leftMenuContentTypes[0].links = sortBy(leftMenuContentTypes[0].links, 'label');
         action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
       }
-      window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+      strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
     }
   } catch(error) {
-    window.Strapi.notification.error(error);
+    strapi.notification.error(error);
   }
 }
 
@@ -69,7 +69,7 @@ export function* fetchConnections() {
     yield put(connectionsFetchSucceeded(data));
 
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message');
+    strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 
@@ -83,7 +83,7 @@ export function* fetchContentType(action) {
     yield put(contentTypeFetchSucceeded(data));
 
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message');
+    strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 
