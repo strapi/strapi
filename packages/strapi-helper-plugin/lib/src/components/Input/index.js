@@ -102,7 +102,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       <div className={`${styles.inputCheckbox} ${requiredClass} ${this.props.customBootstrapClass || 'col-md-3'}`}>
         <div className="form-check">
           {title}
-          <FormattedMessage id={this.props.label} defaultMessage={this.props.label}>
+          <FormattedMessage id={this.props.label} values={this.props.labelValues}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.name}>
                 <input

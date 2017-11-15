@@ -1,0 +1,49 @@
+.plugin {
+  min-height: 5.4rem;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+.banner {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 0 28px;
+  color: #787E8F;
+
+  line-height: 5.4rem;
+
+  > div:first-child {
+    > span:first-child {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    > span:last-child {
+      color: #8B91A0;
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+}
+
+.chevronDown {
+  &:before {
+    content: '\F078';
+    display: block;
+    color: #787E8F;
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
+
+.chevronUp {
+  &:before {
+    content: '\F077';
+    display: block;
+    color: #787E8F;
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
