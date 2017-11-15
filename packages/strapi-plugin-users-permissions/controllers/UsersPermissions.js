@@ -6,6 +6,8 @@
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
 
+const _ = require('lodash');
+
 module.exports = {
 
   /**
@@ -24,7 +26,10 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    // Will be deleted
-    ctx.send({ hasAdmin: ctx.params.hasAdmin === 'true' });
+    const hasAdmin = await strapi.plugins['users-permissions'].models.user.find({
+      admin: true
+    });
+
+    ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
   }
 };

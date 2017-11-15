@@ -10,7 +10,7 @@
     },
     {
       "method": "GET",
-      "path": "/init/:hasAdmin",
+      "path": "/init",
       "handler": "UsersPermissions.init",
       "config": {
         "policies": []
