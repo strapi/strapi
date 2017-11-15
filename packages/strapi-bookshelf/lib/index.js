@@ -100,9 +100,13 @@ module.exports = function(strapi) {
           done();
         });
 
-        const mountModels: (models, target) => {
+        const mountModels = (models, target, plugin = false) => {
           // Parse every registered model.
           _.forEach(models, (definition, model) => {
+            if (plugin) {
+              definition.globalId = _.upperFirst(_.camelCase(`${plugin}-${model}`));
+            }
+
             globalName = _.upperFirst(_.camelCase(definition.globalId));
 
             _.defaults(definition, {
@@ -159,7 +163,9 @@ module.exports = function(strapi) {
 
             // Initialize the global variable with the
             // capitalized model name.
-            global[globalName] = {};
+            if (!plugin) {
+              global[globalName] = {};
+            }
 
             // Call this callback function after we are done parsing
             // all attributes for relationships-- see below.
@@ -194,8 +200,8 @@ module.exports = function(strapi) {
                   };
 
                   _.forEach(lifecycle, (fn, key) => {
-                    if (_.isFunction(strapi.models[model.toLowerCase()][fn])) {
-                      this.on(key, strapi.models[model.toLowerCase()][fn]);
+                    if (_.isFunction(target[model.toLowerCase()][fn])) {
+                      this.on(key, target[model.toLowerCase()][fn]);
                     }
                   });
 
@@ -204,9 +210,9 @@ module.exports = function(strapi) {
                     attrs = mapper(attrs);
 
                     return _.isFunction(
-                      strapi.models[model.toLowerCase()]['beforeSave']
+                      target[model.toLowerCase()]['beforeSave']
                     )
-                      ? strapi.models[model.toLowerCase()]['beforeSave']
+                      ? target[model.toLowerCase()]['beforeSave']
                       : Promise.resolve();
                   });
                 };
@@ -226,16 +232,18 @@ module.exports = function(strapi) {
                   )
                 );
 
-                global[globalName] = ORM.Model.extend(loadedModel);
-                global[pluralize(globalName)] = ORM.Collection.extend({
-                  model: global[globalName]
-                });
+                if (!plugin) {
+                  global[globalName] = ORM.Model.extend(loadedModel);
+                  global[pluralize(globalName)] = ORM.Collection.extend({
+                    model: global[globalName]
+                  });
 
-                // Expose ORM functions through the `strapi.models` object.
-                strapi.models[model] = _.assign(global[globalName], strapi.models[model]);
+                  // Expose ORM functions through the `target` object.
+                  target[model] = _.assign(global[globalName], target[model]);
+                }
 
                 // Push attributes to be aware of model schema.
-                strapi.models[model]._attributes = definition.attributes;
+                target[model]._attributes = definition.attributes;
 
                 loadedHook();
               } catch (err) {
@@ -418,7 +426,11 @@ module.exports = function(strapi) {
           });
         };
 
-        mountModels(models);
+        mountModels(models, strapi.models);
+
+        _.forEach(strapi.plugins, (plugin, name) => {
+          mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
+        });
       });
     },
 
