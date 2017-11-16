@@ -1,13 +1,12 @@
 'use strict';
 
-const fakeData = require('../config/fakeData.json');
-const _ = require('lodash');
 /**
  * UsersPermissions.js controller
  *
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
 
+const fakeData = require('../config/fakeData.json');
 const _ = require('lodash');
 
 module.exports = {

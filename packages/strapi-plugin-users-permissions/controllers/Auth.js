@@ -6,6 +6,8 @@
  * @description: A set of functions called "actions" for managing `Auth`.
  */
 
+const _ = require('lodash');
+
 module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
@@ -100,6 +102,54 @@ module.exports = {
           message: err.message
         };
       }
+    }
+  },
+
+  register: async (ctx) => {
+    const params = _.assign(ctx.request.body, {
+      provider: 'local'
+    });
+
+    // Password is required.
+    if (!params.password) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'Invalid password field.'
+      };
+    }
+
+    // Throw an error if the password selected by the user
+    // contains more than two times the symbol '$'.
+    if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'Your password can not contain more than three times the symbol `$`.'
+      };
+    }
+
+    // First, check if the user is the first one to register.
+    try {
+      const usersCount = await strapi.query('user', 'users-permissions').count();
+
+      // Check if the user is the first to register
+      if (usersCount === 0) {
+        params.admin = true;
+      }
+
+      const user = await strapi.query('user', 'users-permissions').create({
+        values: params
+      });
+
+      ctx.status = 200;
+      ctx.body = {
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: user
+      };
+    } catch (err) {
+      ctx.status = 500;
+      return ctx.body = {
+        message: err.message
+      };
     }
   }
 };

@@ -46,10 +46,11 @@ module.exports = {
 
   // Before creating a value.
   // Fired before `insert` query.
-  // beforeCreate: function (next) {
-  //   // Use `this` to get your current object
-  //   next();
-  // },
+  beforeCreate: async function (next) {
+    // Use `this` to get your current object
+    this.password = await strapi.plugins['users-permissions'].services.user.hashPassword(this);
+    next();
+  },
 
   // After creating a value.
   // Fired after `insert` query.

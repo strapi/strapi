@@ -42,6 +42,15 @@
         "prefix": ""
       }
     },
+    {
+      "method": "POST",
+      "path": "/auth/local/register",
+      "handler": "Auth.register",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
 
     {
       "method": "GET",

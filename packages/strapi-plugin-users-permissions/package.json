@@ -23,7 +23,10 @@
     "prepublish": "npm run build",
     "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.1.0"
+  },
   "devDependencies": {
     "cross-env": "^5.1.1",
     "eslint": "^4.11.0",

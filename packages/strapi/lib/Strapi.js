@@ -255,7 +255,7 @@ class Strapi extends EventEmitter {
 
     const model = entity.toLowerCase();
 
-    const Model = get(strapi, ['models', model]) || get(strapi.plugins, [plugin, 'models', model]) || undefined;
+    const Model = get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
 
     if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
