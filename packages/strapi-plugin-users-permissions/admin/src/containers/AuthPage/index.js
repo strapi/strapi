@@ -53,7 +53,9 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
           this.props.history.push('/');
           break;
         case 'register':
-          this.props.history.push(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
+          this.props.history.push('/');
+          // NOTE: prepare for comfirm email;
+          // this.props.history.push(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
           break;
         default:
 
