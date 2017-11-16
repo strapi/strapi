@@ -51,6 +51,15 @@
         "prefix": ""
       }
     },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "handler": "Auth.forgotPassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
 
     {
       "method": "GET",

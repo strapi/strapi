@@ -23,9 +23,6 @@
     "prepublish": "npm run build",
     "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
   },
-  "dependencies": {
-    "nodemailer": "^4.4.0"
-  },
   "devDependencies": {
     "cross-env": "^5.1.1",
     "eslint": "^4.11.0",
@@ -60,5 +57,8 @@
     "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "sendmail": "^1.2.0"
+  }
 }

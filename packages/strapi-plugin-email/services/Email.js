@@ -7,37 +7,22 @@
  */
 
 const _ = require('lodash');
-const nodemailer = require('nodemailer');
+const sendmail = require('sendmail')({
+  silent: true
+});
 
 module.exports = {
   send: (options, cb) => {
     return new Promise((resolve, reject) => {
       try {
-        const config = strapi.plugins['email'].config[strapi.config.environment];
-
-        // Format transport config.
-        let transportConfig;
-        if (config.smtp && config.smtp.service && config.smtp.service.name) {
-          transportConfig = {
-            service: config.smtp.service.name,
-            auth: {
-              user: config.smtp.service.user,
-              pass: config.smtp.service.pass
-            }
-          };
-        }
-
-        // Init the transporter.
-        const transporter = nodemailer.createTransport(transportConfig);
-
         // Default values.
         options = _.isObject(options) ? options : {};
-        options.from = config.smtp.from || '';
+        options.from = 'admin@strapiapp.com';
         options.text = options.text || options.html;
         options.html = options.html || options.text;
 
         // Send the email.
-        transporter.sendMail({
+        sendmail({
           from: options.from,
           to: options.to,
           subject: options.subject,
