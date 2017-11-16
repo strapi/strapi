@@ -21,6 +21,10 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
       this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
     }
+
+    if (nextProps.didGetUsers !== this.props.didGetUsers) {
+      this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
+    }
   }
 
   handleChange = ({ target }) => {
@@ -77,6 +81,7 @@ InputSearch.defaultProps = {
 
 InputSearch.propTypes = {
   didDeleteUser: PropTypes.bool.isRequired,
+  didGetUsers: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   labelValues: PropTypes.object,
   name: PropTypes.string.isRequired,

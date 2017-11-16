@@ -25,9 +25,12 @@ import injectReducer from 'utils/injectReducer';
 // Actions
 import {
   addUser,
+  getPermissions,
+  getRole,
   onCancel,
   onChangeInput,
   onClickDelete,
+  setForm,
 } from './actions';
 
 // Selectors
@@ -39,6 +42,15 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    if (this.props.match.params.actionType === 'create') {
+      this.props.setForm();
+      this.props.getPermissions();
+    } else {
+      this.props.getRole(this.props.match.params.id);
+    }
+  }
+
   pluginHeaderActions = [
     {
       label: 'users-permissions.EditPage.cancel',
@@ -55,15 +67,14 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   ];
 
   render() {
-    const pluginHeaderTitle = this.props.match.params.id === 'create' ?
+    const pluginHeaderTitle = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.title.create'
       : 'users-permissions.EditPage.header.title';
-    const pluginHeaderDescription = this.props.match.params.id === 'create' ?
+    const pluginHeaderDescription = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.description.create'
       : 'users-permissions.EditPage.header.description';
-
     const pluginHeaderActions = this.props.editPage.showButtons ? this.pluginHeaderActions : [];
-
+    
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />
@@ -72,18 +83,18 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             title={{
               id: pluginHeaderTitle,
               values: {
-                name: '',
+                name: get(this.props.editPage.initialData, 'name'),
               },
             }}
             description={{
               id: pluginHeaderDescription,
               values: {
-                description: '',
+                description: get(this.props.editPage.initialData, 'description') || '',
               },
             }}
             actions={pluginHeaderActions}
           />
-          <div className="row">
+          <div className={cn("row", styles.container)}>
             <div className="col-md-12">
               <div className={styles.main_wrapper}>
                 <div className={styles.titleContainer}>
@@ -119,6 +130,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                     <InputSearch
                       addUser={this.props.addUser}
                       didDeleteUser={this.props.editPage.didDeleteUser}
+                      didGetUsers={this.props.editPage.didGetUsers}
                       label="users-permissions.EditPage.form.roles.label.users"
                       labelValues={{ number: size(get(this.props.editPage, ['modifiedData', 'users'])) }}
                       type="text"
@@ -141,11 +153,14 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
+  getPermissions: PropTypes.func.isRequired,
+  getRole: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
   onChangeInput: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  setForm: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -156,9 +171,12 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       addUser,
+      getPermissions,
+      getRole,
       onCancel,
       onChangeInput,
       onClickDelete,
+      setForm,
     },
     dispatch,
   );

@@ -119,7 +119,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
   handleClick = () => {
     switch (this.props.settingType) {
       case 'roles':
-        return router.push(`${router.location.pathname}/${this.props.item.id}`);
+        return router.push(`${router.location.pathname}/edit/${this.props.item.id}`);
       case 'providers':
       case 'email-templates':
         return router.push(`${router.location.pathname}#edit::${this.props.settingType}::${this.props.item.id}`);
