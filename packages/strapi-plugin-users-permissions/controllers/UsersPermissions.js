@@ -19,8 +19,10 @@ module.exports = {
 
   getPermissions: async(ctx) => {
     try {
-      ctx.send({ permissions: fakeData.permissions });
+      const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
+      ctx.send({ permissions });
     } catch(err) {
+      console.log(err);
       ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
     }
   },
