@@ -11,7 +11,14 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 class InputCheckbox extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { showBackground: false };
+  state = { showBackground: false, showCog: false };
+
+  componentWillReceiveProps(nextProps) {
+    // Remove background if another input is selected
+    if (nextProps.inputSelected !== this.props.inputSelected && nextProps.inputSelected !== this.props.name) {
+      this.setState({ showBackground: false });
+    }
+  }
 
   handleChange = () => {
     const target = {
@@ -20,13 +27,35 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
       value: !this.props.value,
     };
 
+    // Don't show the label background if the user unselects the input
+    if (!this.props.value) {
+      this.setState({ showBackground: true });
+      // Tell the Parent component that another input has been selected
+      this.props.setNewInputSelected(this.props.name);
+    } else {
+      this.setState({ showBackground: false, showCog: false });
+      this.props.setNewInputSelected('');
+    }
+
     this.context.onChange({ target });
-    this.setState({ showBackground: true });
+  }
+
+  handleClick = () => {
+    this.setState({ showBackground: !this.state.showBackground });
+    this.props.setNewInputSelected(this.props.name);
   }
 
   render() {
     return (
-      <div className={cn(styles.inputCheckbox, 'col-md-4')}>
+      <div
+        className={cn(styles.inputCheckbox, 'col-md-4')}
+        onMouseEnter={() => {
+          if (this.props.value) {
+            this.setState({ showCog: true });
+          }
+        }}
+        onMouseLeave={() => this.setState({ showCog: false })}
+      >
         <div className={cn('form-check', this.state.showBackground ? styles.highlighted : '')}>
           <label className={cn('form-check-label', styles.label, this.props.value ? styles.checked : '')} htmlFor={this.props.name}>
             <input
@@ -39,6 +68,9 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
             />
             {this.props.label}
           </label>
+          {this.state.showCog || this.state.showBackground ? (
+            <i className="fa fa-cog" onClick={this.handleClick} />
+          ) : ''}
         </div>
       </div>
     );
@@ -55,8 +87,10 @@ InputCheckbox.defaultProps = {
 };
 
 InputCheckbox.propTypes = {
+  inputSelected: PropTypes.string.isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
+  setNewInputSelected: PropTypes.func.isRequired,
   value: PropTypes.bool,
 };
 

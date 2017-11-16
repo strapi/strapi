@@ -7,12 +7,20 @@
     height: 26px;
     padding-left: 15px;
     line-height: 26px;
+
+    > i {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      color: #787E8F;
+      cursor: pointer;
+    }
   }
 }
 
 .label {
-
   margin-left: 9px;
+  cursor: pointer;
   > input {
     display: none;
     margin-right: 9px;

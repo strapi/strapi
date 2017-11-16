@@ -13,24 +13,38 @@ import Plugin from 'components/Plugin';
 
 import styles from './styles.scss';
 
-function Plugins({ plugins }) {
-  return (
-    <div className={cn('col-md-7', styles.wrapper)}>
-      <div className={styles.plugins}>
-        <div className={styles.headerContainer}>
-          <div>
-            <FormattedMessage id="users-permissions.Plugins.header.title" />
+class Plugins extends React.Component {
+  state = { pluginSelected: '' };
+
+  changePluginSelected = (name) => this.setState({ pluginSelected: name });
+
+  render() {
+    return (
+      <div className={cn('col-md-7', styles.wrapper)}>
+        <div className={styles.plugins}>
+          <div className={styles.headerContainer}>
+            <div>
+              <FormattedMessage id="users-permissions.Plugins.header.title" />
+            </div>
+            <div>
+              <FormattedMessage id="users-permissions.Plugins.header.description" />
+            </div>
           </div>
-          <div>
-            <FormattedMessage id="users-permissions.Plugins.header.description" />
+          <div className={styles.pluginsContainer}>
+            {map(this.props.plugins, (plugin, key) => (
+              <Plugin
+                changePluginSelected={this.changePluginSelected}
+                key={key}
+                name={key}
+                plugin={plugin}
+                pluginSelected={this.state.pluginSelected}
+              />
+            ))}
           </div>
-        </div>
-        <div className={styles.pluginsContainer}>
-          {map(plugins, (plugin, key) => <Plugin key={key} name={key} plugin={plugin} />)}
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 Plugins.defaultProps = {

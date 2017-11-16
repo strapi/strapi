@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import { get, size } from 'lodash';
+import { get, isEqual, size } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -80,7 +80,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     const pluginHeaderDescription = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.description.create'
       : 'users-permissions.EditPage.header.description';
-    const pluginHeaderActions = this.props.editPage.showButtons ? this.pluginHeaderActions : [];
+    const pluginHeaderActions = !isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData) ? this.pluginHeaderActions : [];
 
     return (
       <div>

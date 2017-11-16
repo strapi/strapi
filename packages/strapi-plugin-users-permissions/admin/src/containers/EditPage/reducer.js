@@ -20,7 +20,6 @@ const initialState = fromJS({
   didGetUsers: false,
   initialData: Map({}),
   modifiedData: Map({}),
-  showButtons: false,
 });
 
 function editPageReducer(state = initialState, action) {
@@ -39,17 +38,14 @@ function editPageReducer(state = initialState, action) {
         .set('modifiedData', action.form);
     case ON_CANCEL:
       return state
-        .set('showButtons', false)
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .set('modifiedData', state.get('initialData'));
     case ON_CHANGE_INPUT:
       return state
-        .set('showButtons', true)
         .updateIn(action.keys, () => action.value);
     case ON_CLICK_DELETE:
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
-        .set('showButtons', true)
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
     case SET_FORM:
       return state

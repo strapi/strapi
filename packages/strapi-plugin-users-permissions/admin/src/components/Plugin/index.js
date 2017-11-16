@@ -17,7 +17,16 @@ import styles from './styles.scss';
 class Plugin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { collapse: false };
 
-  handleClick = () => this.setState({ collapse: !this.state.collapse });
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.pluginSelected !== this.props.pluginSelected && nextProps.pluginSelected !== this.props.name) {
+      this.setState({ collapse: false });
+    }
+  }
+
+  handleClick = () => {
+    this.props.changePluginSelected(this.props.name);
+    this.setState({ collapse: !this.state.collapse });
+  }
 
   render() {
     return (
@@ -55,10 +64,12 @@ Plugin.defaultProps = {
 };
 
 Plugin.propTypes = {
+  changePluginSelected: PropTypes.func.isRequired,
   name: PropTypes.string,
   plugin: PropTypes.shape({
     description: PropTypes.string,
   }),
+  pluginSelected: PropTypes.string.isRequired,
 };
 
 export default Plugin;
