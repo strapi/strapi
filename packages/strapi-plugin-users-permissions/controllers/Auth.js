@@ -35,7 +35,7 @@ module.exports = {
 
       // Check if the provided identifier is an email or not.
 
-      const  isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
+      const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
       if (isEmail) {
@@ -46,14 +46,7 @@ module.exports = {
 
       // Check if the user exists.
       try {
-        let user = undefined;
-
-        if (query.email === 'test@strapi.io' && params.password === 'strapi') {
-          user = query;
-          user.password = '******';
-          user.username = 'Strapi user';
-          user.validPassword = true;
-        }
+        const user = await strapi.query('user', 'users-permissions').findOne(query);
 
         if (!user) {
           ctx.status = 403;
@@ -70,7 +63,7 @@ module.exports = {
           };
         }
 
-        const { validPassword } = user;
+        const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(params.password, user.password);
 
         if (!validPassword) {
           ctx.status = 403;
@@ -80,7 +73,7 @@ module.exports = {
         } else {
           ctx.status = 200;
           ctx.body = {
-            jwt: 'strapi-jwt',
+            jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
             user: user
           };
         }
@@ -135,6 +128,8 @@ module.exports = {
       if (usersCount === 0) {
         params.admin = true;
       }
+
+      params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
       const user = await strapi.query('user', 'users-permissions').create({
         values: params

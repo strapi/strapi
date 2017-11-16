@@ -16,9 +16,7 @@ module.exports = {
 
   findOne: async function (params) {
     return this
-      .findOne({
-        [this.primaryKey]: params[this.primaryKey] || params.id
-      })
+      .findOne(params)
       .populate(this.associations.map(x => x.alias).join(' '));
   },
 

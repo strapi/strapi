@@ -95,8 +95,6 @@ module.exports = {
 
   hashPassword: function (user) {
     return new Promise((resolve) => {
-      user = user.toJSON();
-
       if (!user.hasOwnProperty('password') || !user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {
@@ -114,4 +112,8 @@ module.exports = {
 
     return password.split('$').length === 4;
   },
+
+  validatePassword: (password, hash) => {
+    return bcrypt.compareSync(password, hash);
+  }
 };
