@@ -1,7 +1,7 @@
 {
   "1": {
     "description": "Allow editing and deleting (except users)",
-    "name": "moderateur",
+    "name": "owner",
     "users": [
       {
         "id": "11",
@@ -27,11 +27,39 @@
         "controllers": {
           "invoices": {
             "actions": {
+              "create": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "find": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "payInvoice": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
               "delete": {
                 "enabled": true,
                 "policy": "entriesCreatedByUser"
               },
               "update": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "updateAddress": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "findOne": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "updateRelationship": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "changeOwner": {
                 "enabled": false,
                 "policy": "entriesCreatedByUser"
               }

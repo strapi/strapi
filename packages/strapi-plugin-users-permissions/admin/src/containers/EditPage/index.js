@@ -43,6 +43,12 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => (
+    {
+      onChange: this.props.onChangeInput,
+    }
+  );
+
   componentDidMount() {
     if (this.props.match.params.actionType === 'create') {
       this.props.setForm();
@@ -158,6 +164,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     );
   }
 }
+
+EditPage.childContextTypes = {
+  onChange: PropTypes.func.isRequired,
+};
 
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,

@@ -111,7 +111,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                   id={this.props.name}
                   name={this.props.name}
                   onChange={this.handleChangeCheckbox}
-                  type="checkbox" id={this.props.name}
+                  type="checkbox"
                 />
                 {message}
               </label>

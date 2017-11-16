@@ -11,17 +11,19 @@ import { get, map } from 'lodash';
 import InputCheckbox from 'components/InputCheckbox';
 import styles from './styles.scss';
 
-function Controller({ actions, name }) {
+function Controller({ actions, name, inputNamePath }) {
   return (
     <div className={styles.controller}>
       <div className={styles.controllerHeader}>
         <span>{name}</span>
       </div>
       <div className="row">
-        {map(actions, (action, key) => (
+        {map(Object.keys(actions).sort(), (actionKey) => (
           <InputCheckbox
-            key={key}
-            value={get(action, 'enabled')}
+            key={actionKey}
+            name={`${inputNamePath}.controllers.${name}.actions.${actionKey}.enabled`}
+            label={actionKey}
+            value={get(actions[actionKey], 'enabled')}
           />
         ))}
       </div>
@@ -31,11 +33,13 @@ function Controller({ actions, name }) {
 
 Controller.defaultProps = {
   actions: {},
+  inputNamePath: 'permissions.application',
   name: '',
 };
 
 Controller.propTypes = {
   actions: PropTypes.object,
+  inputNamePath: PropTypes.string,
   name: PropTypes.string,
 };
 

@@ -21,8 +21,8 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 
   render() {
     return (
-      <div className={styles.plugin} onClick={this.handleClick}>
-        <div className={styles.banner}>
+      <div className={styles.plugin}>
+        <div className={styles.banner} onClick={this.handleClick}>
           <div>
             <span>{this.props.name}</span>
             &nbsp;—&nbsp;
@@ -33,7 +33,12 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
         </div>
         <Collapse isOpen={this.state.collapse}>
           {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
-            <Controller key={key} name={key} actions={get(controllerActions, 'actions')} />
+            <Controller
+              inputNamePath={`permissions.${this.props.name}`}
+              key={key}
+              name={key}
+              actions={get(controllerActions, 'actions')}
+            />
           ))}
         </Collapse>
       </div>
