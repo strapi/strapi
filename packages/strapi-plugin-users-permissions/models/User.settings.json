@@ -6,6 +6,28 @@
     "description": ""
   },
   "attributes": {
-    
+    "username": {
+      "type": "string",
+      "minLength": 3,
+      "unique": true
+    },
+    "email": {
+      "type": "string",
+      "minLength": 6,
+      "unique": true
+    },
+    "provider": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string",
+      "minLength": 6
+    },
+    "resetPasswordToken": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    }
   }
 }

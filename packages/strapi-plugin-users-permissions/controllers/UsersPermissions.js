@@ -1,12 +1,13 @@
 'use strict';
 
-const fakeData = require('../config/fakeData.json');
-const _ = require('lodash');
 /**
  * UsersPermissions.js controller
  *
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
+
+const fakeData = require('../config/fakeData.json');
+const _ = require('lodash');
 
 module.exports = {
 
@@ -45,7 +46,12 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    // Will be deleted
-    ctx.send({ hasAdmin: ctx.params.hasAdmin === 'true' });
+    const hasAdmin = await strapi.query('user', 'users-permissions').find({
+      where: {
+        admin: true
+      }
+    });
+
+    ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
   }
 };

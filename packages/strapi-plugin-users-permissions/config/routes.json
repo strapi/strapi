@@ -10,7 +10,7 @@
     },
     {
       "method": "GET",
-      "path": "/init/:hasAdmin",
+      "path": "/init",
       "handler": "UsersPermissions.init",
       "config": {
         "policies": []
@@ -37,6 +37,15 @@
       "method": "POST",
       "path": "/auth/local",
       "handler": "Auth.callback",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/local/register",
+      "handler": "Auth.register",
       "config": {
         "policies": [],
         "prefix": ""

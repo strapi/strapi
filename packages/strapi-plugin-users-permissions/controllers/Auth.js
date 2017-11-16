@@ -6,6 +6,8 @@
  * @description: A set of functions called "actions" for managing `Auth`.
  */
 
+const _ = require('lodash');
+
 module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
@@ -33,7 +35,7 @@ module.exports = {
 
       // Check if the provided identifier is an email or not.
 
-      const  isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
+      const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
       if (isEmail) {
@@ -44,14 +46,7 @@ module.exports = {
 
       // Check if the user exists.
       try {
-        let user = undefined;
-
-        if (query.email === 'test@strapi.io' && params.password === 'strapi') {
-          user = query;
-          user.password = '******';
-          user.username = 'Strapi user';
-          user.validPassword = true;
-        }
+        const user = await strapi.query('user', 'users-permissions').findOne(query);
 
         if (!user) {
           ctx.status = 403;
@@ -68,7 +63,7 @@ module.exports = {
           };
         }
 
-        const { validPassword } = user;
+        const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(params.password, user.password);
 
         if (!validPassword) {
           ctx.status = 403;
@@ -78,7 +73,7 @@ module.exports = {
         } else {
           ctx.status = 200;
           ctx.body = {
-            jwt: 'strapi-jwt',
+            jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
             user: user
           };
         }
@@ -100,6 +95,56 @@ module.exports = {
           message: err.message
         };
       }
+    }
+  },
+
+  register: async (ctx) => {
+    const params = _.assign(ctx.request.body, {
+      provider: 'local'
+    });
+
+    // Password is required.
+    if (!params.password) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'Invalid password field.'
+      };
+    }
+
+    // Throw an error if the password selected by the user
+    // contains more than two times the symbol '$'.
+    if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'Your password can not contain more than three times the symbol `$`.'
+      };
+    }
+
+    // First, check if the user is the first one to register.
+    try {
+      const usersCount = await strapi.query('user', 'users-permissions').count();
+
+      // Check if the user is the first to register
+      if (usersCount === 0) {
+        params.admin = true;
+      }
+
+      params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+      const user = await strapi.query('user', 'users-permissions').create({
+        values: params
+      });
+
+      ctx.status = 200;
+      ctx.body = {
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: user
+      };
+    } catch (err) {
+      ctx.status = 500;
+      return ctx.body = {
+        message: err.message
+      };
     }
   }
 };

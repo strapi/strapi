@@ -8,6 +8,7 @@
 
 // Public dependencies.
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 module.exports = {
 
@@ -90,5 +91,29 @@ module.exports = {
     });
 
     return data;
+  },
+
+  hashPassword: function (user) {
+    return new Promise((resolve) => {
+      if (!user.hasOwnProperty('password') || !user.password || this.isHashed(user.password)) {
+        resolve(null);
+      } else {
+        bcrypt.hash(user.password, 10, (err, hash) => {
+          resolve(hash)
+        });
+      }
+    });
+  },
+
+  isHashed: (password) => {
+    if (typeof password !== 'string' || !password) {
+      return false;
+    }
+
+    return password.split('$').length === 4;
+  },
+
+  validatePassword: (password, hash) => {
+    return bcrypt.compareSync(password, hash);
   }
 };

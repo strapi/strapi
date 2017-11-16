@@ -47,8 +47,8 @@ module.exports = {
   // Before creating a value.
   // Fired before `insert` query.
   // beforeCreate: function (next) {
-  //   // Use `this` to get your current object
-  //   next();
+    // Use `this` to get your current object
+    // next();
   // },
 
   // After creating a value.
