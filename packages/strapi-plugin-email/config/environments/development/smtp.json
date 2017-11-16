@@ -1,0 +1,10 @@
+{
+  "smtp": {
+    "from": "<no-reply@website.com>",
+    "service": {
+      "name": "",
+      "user": "",
+      "pass": ""
+    }
+  }
+}

@@ -83,7 +83,7 @@ module.exports = (scope, cb) => {
   // Install default plugins and link dependencies.
   function pluginsInstallation() {
     // Define the list of default plugins.
-    const defaultPlugins = ['settings-manager', 'content-type-builder', 'content-manager', 'users-permissions'];
+    const defaultPlugins = ['settings-manager', 'content-type-builder', 'content-manager', 'users-permissions', 'email'];
 
     // Install each plugin.
     defaultPlugins.forEach(defaultPlugin => {
