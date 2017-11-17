@@ -29,8 +29,10 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
   }
 
   render() {
+    const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
+
     return (
-      <div className={styles.plugin}>
+      <div className={styles.plugin} style={divStyle}>
         <div className={styles.banner} onClick={this.handleClick}>
           <div>
             <span>{this.props.name}</span>
@@ -52,14 +54,17 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
           </div>
         </div>
         <Collapse isOpen={this.state.collapse}>
-          {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
-            <Controller
-              inputNamePath={`permissions.${this.props.name}`}
-              key={key}
-              name={key}
-              actions={controllerActions}
-            />
-          ))}
+          <div />
+          <div className={styles.controllerContainer}>
+            {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
+              <Controller
+                inputNamePath={`permissions.${this.props.name}`}
+                key={key}
+                name={key}
+                actions={controllerActions}
+              />
+            ))}
+          </div>
         </Collapse>
       </div>
     );
