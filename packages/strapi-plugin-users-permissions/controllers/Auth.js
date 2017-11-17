@@ -122,7 +122,7 @@ module.exports = {
 
     // First, check if the user is the first one to register as admin.
     try {
-      const adminUsers = await strapi.query('user', 'users-permissions').findAll({ admin: true });
+      const adminUsers = await strapi.query('user', 'users-permissions').find({ admin: true });
 
       // Check if the user is the first to register
       if (adminUsers.length === 0) {

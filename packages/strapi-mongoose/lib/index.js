@@ -358,8 +358,12 @@ module.exports = function (strapi) {
     },
 
     manageRelations: async function (model, params) {
-      const models = strapi.models;
-      const Model = strapi.models[model];
+      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
+        _.assign(acc, strapi.plugins[current].models);
+        return acc;
+      }, {}));
+
+      const Model = models[model];
 
       const virtualFields = [];
       const response = await Model
