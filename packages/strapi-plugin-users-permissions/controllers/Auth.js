@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const crypto = require('crypto');
 
 module.exports = {
   callback: async (ctx) => {
@@ -144,6 +145,51 @@ module.exports = {
       ctx.status = 500;
       return ctx.body = {
         message: err.message
+      };
+    }
+  },
+
+  forgotPassword: async (ctx) => {
+    const email = ctx.request.body.email;
+    const url = ctx.request.body.url;
+
+    // Find the user user thanks to his email.
+    const user = await strapi.query('user', 'users-permissions').findOne({ email });
+
+    // User not found.
+    if (!user) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'This email does not exist.'
+      };
+    }
+
+    // Generate random token.
+    const resetPasswordToken = crypto.randomBytes(64).toString('hex');
+
+    // Set the property code of the local passport.
+    user.resetPasswordToken = resetPasswordToken;
+
+    // Update the user.
+    await strapi.query('user', 'users-permissions').update({
+      id: user.id,
+      values: user
+    });
+
+    // Send an email to the user.
+    try {
+      await strapi.plugins['email'].services.email.send({
+        to: user.email,
+        subject: 'Reset password',
+        text: url + '?code=' + resetPasswordToken,
+        html: url + '?code=' + resetPasswordToken
+      });
+      ctx.status = 200;
+      ctx.body = {};
+    } catch (err) {
+      ctx.status = 500;
+      ctx.body = {
+        message: 'Error sending the email'
       };
     }
   }
