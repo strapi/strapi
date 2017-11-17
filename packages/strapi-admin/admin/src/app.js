@@ -4,6 +4,17 @@
  * This is the entry file for the application, only setup and boilerplate
  * code.
  */
+
+/* eslint-disable */
+// Retrieve remote and backend URLs.
+const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin' : process.env.REMOTE_URL || 'http://localhost:1337/admin';
+const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+
+// Retrieve development URL to avoid to re-build.
+const devFrontURL = document.getElementsByTagName('body')[0].getAttribute('front');
+const devBackendURL = document.getElementsByTagName('body')[0].getAttribute('back');
+
+import './public-path';
 import 'babel-polyfill';
 
 // Import all the third party stuff
@@ -24,11 +35,12 @@ import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
+/* eslint-enable */
 
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
-  basename: '/admin',
+  basename: (devFrontURL || remoteURL).replace(window.location.origin, ''),
 });
 const store = configureStore(initialState, history);
 
@@ -44,7 +56,6 @@ const render = (translatedMessages) => {
     document.getElementById('app')
   );
 };
-
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -67,6 +78,27 @@ window.onload = function onLoad() {
     render(translationMessages);
   }
 };
+
+// Don't inject plugins in development mode.
+if (window.location.port !== '4000') {
+  fetch(`${devFrontURL || remoteURL}/config/plugins.json`)
+    .then(response => {
+      return response.json();
+    })
+    .then(plugins => {
+      const body = document.getElementsByTagName('body')[0];
+
+      (plugins || []).forEach(plugin => {
+        const script = document.createElement('script');
+        script.src = plugin.source[process.env.NODE_ENV];
+
+        body.appendChild(script);
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
 
 /**
  * Public Strapi object exposed to the `window` object
@@ -115,10 +147,9 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-const port = window.Strapi && window.Strapi.port ? window.Strapi.port : 1337;
-const apiUrl = window.Strapi && window.Strapi.apiUrl ? window.Strapi.apiUrl : `http://localhost:${port}`;
-
-window.Strapi = {
+window.strapi = Object.assign(window.strapi || {}, {
+  remoteURL: devFrontURL || remoteURL,
+  backendURL: devBackendURL || backendURL,
   registerPlugin,
   notification: {
     success: (message) => {
@@ -134,8 +165,6 @@ window.Strapi = {
       displayNotification(message, 'info');
     },
   },
-  port,
-  apiUrl,
   refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
       render(merge({}, translationMessages, translationMessagesUpdated));
@@ -146,7 +175,7 @@ window.Strapi = {
   }),
   router: history,
   languages,
-};
+});
 
 const dispatch = store.dispatch;
 export {

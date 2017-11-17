@@ -27,10 +27,10 @@ export function* dataDelete() {
     if (indexDataToDelete !== -1) {
       yield put(deleteDataSucceeded(indexDataToDelete));
 
-      window.Strapi.notification.success('users-permissions.notification.success.delete');
+      srapi.notification.success('users-permissions.notification.success.delete');
     }
   } catch(err) {
-    window.Strapi.notification.error('users-permissions.notification.error.delete');
+    strapi.notification.error('users-permissions.notification.error.delete');
   }
 }
 
@@ -42,7 +42,7 @@ export function* dataFetch(action) {
     yield put(setForm(action.endPoint));
 
   } catch(err) {
-    window.Strapi.notification.error('users-permissions.notification.error.fetch');
+    strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }
 

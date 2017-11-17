@@ -59,7 +59,7 @@ export default function request(url, options = {}) {
 
   // Add parameters to url
   url = _.startsWith(url, '/')
-    ? `${Strapi.apiUrl}${url}`
+    ? `${strapi.backendURL}${url}`
     : url;
 
   if (options && options.params) {

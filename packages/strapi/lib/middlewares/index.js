@@ -6,7 +6,7 @@ const { parallel } = require('async');
 const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
 
 module.exports = function() {
-  const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat(['^\/admin/']);
+  const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat([`^${get(this.config.currentEnvironment.server, 'admin.path', '/admin')}/`]);
 
   // Set if is admin destination for middleware application.
   // TODO: Use dynamic config for admin url.

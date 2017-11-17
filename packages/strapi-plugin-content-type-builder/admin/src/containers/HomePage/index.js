@@ -44,7 +44,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   handleButtonClick = () => {
     if (storeData.getIsModelTemporary()) {
-      window.Strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
+      strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
     } else {
       this.toggleModal();
     }

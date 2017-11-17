@@ -41,7 +41,7 @@ export function* getRecords() {
   };
 
   try {
-    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}`;
+    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${currentModel}`;
     // Call our request helper (see 'utils/request')
     const response = yield call(request, requestUrl, {
       method: 'GET',
@@ -50,7 +50,7 @@ export function* getRecords() {
 
     yield put(loadedRecord(response));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.records.fetch');
+    strapi.notification.error('content-manager.error.records.fetch');
   }
 }
 
@@ -60,12 +60,12 @@ export function* getCount() {
   try {
     const response = yield call(
       request,
-      `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}/count`,
+      `${strapi.backendURL}/content-manager/explorer/${currentModel}/count`,
     );
 
     yield put(loadedCount(response.count));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.records.count');
+    strapi.notification.error('content-manager.error.records.count');
   }
 }
 

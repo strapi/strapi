@@ -53,14 +53,14 @@ export function* editDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
+      strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
       yield put(databaseActionSucceeded());
     }
   } catch(error) {
     const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
 
     yield put(databaseActionError(formErrors));
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -72,11 +72,11 @@ export function* deleteDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
+      strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
     }
   } catch(error) {
     yield put(databaseActionError([]));
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -90,11 +90,11 @@ export function* deleteLanguage(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.languageDelete');
+      strapi.notification.success('settings-manager.strapi.notification.success.languageDelete');
     }
   } catch(error) {
     yield put(languageActionError());
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -108,7 +108,7 @@ export function* fetchConfig(action) {
     const data = yield call(request, requestUrl, opts);
     yield put(configFetchSucceded(data));
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -127,7 +127,7 @@ export function* fetchDatabases(action) {
     ];
     yield put(databasesFetchSucceeded(listDatabasesData, appDatabaseData));
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -145,7 +145,7 @@ export function* fetchLanguages() {
     ];
     yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -174,12 +174,12 @@ export function* postLanguage() {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
+      strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
       yield put(languageActionSucceeded());
     }
   } catch(error) {
     yield put(languageActionError());
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -201,7 +201,7 @@ export function* postDatabase(action) {
 
     if (resp.ok) {
       yield put(databaseActionSucceeded());
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
+      strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
     }
   } catch(error) {
     const formErrors = map(error.response.payload.message, (err) => {
@@ -213,7 +213,7 @@ export function* postDatabase(action) {
 
     yield put(databaseActionError(formErrors));
 
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
@@ -230,12 +230,12 @@ export function* settingsEdit(action) {
     const resp = yield  call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      window.Strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
+      strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
       yield put(editSettingsSucceeded());
       yield put(unsetLoader());
     }
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
     yield put(unsetLoader());
   }
 }
@@ -251,7 +251,7 @@ export function* fetchSpecificDatabase(action) {
 
     yield put(specificDatabaseFetchSucceeded(data));
   } catch(error) {
-    window.Strapi.notification.error('settings-manager.strapi.notification.error');
+    strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 

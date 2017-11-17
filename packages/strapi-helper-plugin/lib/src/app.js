@@ -4,6 +4,7 @@
  * This is the entry file for the application,
  * only setup and plugin code.
  */
+import './public-path.js'; // eslint-disabled-line
 
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -41,11 +42,11 @@ const pluginId = pluginPkg.name.replace(
 );
 const pluginName = pluginPkg.strapi.name;
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const apiUrl = window.Strapi && `${window.Strapi.apiUrl}/${pluginId}`;
-const router = window.Strapi.router;
+const apiUrl = `${strapi.backendURL}/${pluginId}`;
+const router = strapi.router;
 
 // Create redux store with Strapi admin history
-const store = configureStore({}, window.Strapi.router);
+const store = configureStore({}, strapi.router);
 
 // Define the plugin root component
 function Comp(props) {
@@ -61,10 +62,10 @@ if (module.hot) {
   // modules.hot.accept does not accept dynamic dependencies,
   // have to be constants at compile-time
   module.hot.accept('./i18n', () => {
-    if (window.Strapi) {
+    if (strapi) {
       System.import('./i18n').then(result => {
         const translationMessagesUpdated = result.translationMessages;
-        window.Strapi
+        strapi
           .refresh(pluginId)
           .translationMessages(translationMessagesUpdated);
       });
@@ -73,7 +74,7 @@ if (module.hot) {
 }
 
 // Register the plugin.
-window.Strapi.registerPlugin({
+strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   icon: pluginPkg.strapi.icon,
   description: pluginDescription,

@@ -23,7 +23,7 @@ export function* submitForm() {
 
     yield put(submitSucceeded());
   } catch(error) {
-    window.Strapi.notification.error('An error occured');
+    strapi.notification.error('An error occured');
   }
 }
 

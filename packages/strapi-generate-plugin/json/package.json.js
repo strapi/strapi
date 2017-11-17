@@ -30,6 +30,7 @@ module.exports = scope => {
       'preanalyze': 'npm run analyze:clean',
       'analyze': 'node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js',
       'prebuild': 'npm run build:clean && npm run test',
+      'build:dev': 'cross-env NODE_ENV=development webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress',
       'build': 'cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress',
       'build:clean': 'rimraf admin/build',
       'start': 'cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server',

@@ -21,7 +21,7 @@ export function* deletePlugin() {
 
   } catch(error) {
     yield put(deletePluginSucceeded(false));
-    window.Strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
+    strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
   }
 }
 
@@ -31,7 +31,7 @@ export function* pluginsGet() {
 
     yield put(getPluginsSucceeded(response));
   } catch(err) {
-    window.Strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
+    strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
   }
 }
 // Individual exports for testing

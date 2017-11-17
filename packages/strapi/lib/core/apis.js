@@ -8,7 +8,9 @@ module.exports = function() {
   return Promise.all([
     new Promise((resolve, reject) => {
       // Load configurations.
-      glob('./api/*/!(config)/*.*(js|json)', {}, (err, files) => {
+      glob('./api/*/!(config)/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -20,7 +22,9 @@ module.exports = function() {
     }),
     new Promise((resolve, reject) => {
       // Load configurations.
-      glob('./admin/!(config|node_modules)/*.*(js|json)', {}, (err, files) => {
+      glob('./admin/!(config|node_modules)/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -32,7 +36,9 @@ module.exports = function() {
     }),
     new Promise((resolve, reject) => {
       // Load configurations.
-      glob('{./plugins/*/!(config|node_modules)/*.*(js|json),./plugins/*/package.json}', {}, (err, files) => {
+      glob('{./plugins/*/!(config|node_modules)/*.*(js|json),./plugins/*/package.json}', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }

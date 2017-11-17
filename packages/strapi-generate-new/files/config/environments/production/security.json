@@ -6,9 +6,11 @@
   },
   "csp": {
     "enabled": true,
-    "policy": {
-      "default-src": "'self'"
-    }
+    "policy": [{
+        "img-src": "'self' http:"
+      },
+      "block-all-mixed-content"
+    ]
   },
   "p3p": {
     "enabled": true,
@@ -29,7 +31,7 @@
   },
   "cors": {
     "enabled": true,
-    "origin": "http://localhost",
+    "origin": "*",
     "expose": [
       "WWW-Authenticate",
       "Server-Authorization"

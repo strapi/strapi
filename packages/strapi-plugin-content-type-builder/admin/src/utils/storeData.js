@@ -50,7 +50,7 @@ export const storeData = {
       return localStorage.setItem(contentType, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('This plugin is optimized with your localStorage');
   },
 
   setMenu(data, menu = MENU) {
@@ -58,7 +58,7 @@ export const storeData = {
       return localStorage.setItem(menu, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('This plugin is optimized with your localStorage');
   },
 
   setModel(data, model = MODEL) {
@@ -66,7 +66,7 @@ export const storeData = {
       return localStorage.setItem(model, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('This plugin is optimized with your localStorage');
   },
 
   setIsModelTemporary(isModelTemporay = IS_MODEL_TEMPORARY) {
@@ -74,6 +74,6 @@ export const storeData = {
       return localStorage.setItem(isModelTemporay, true);
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('This plugin is optimized with your localStorage');
   },
 };

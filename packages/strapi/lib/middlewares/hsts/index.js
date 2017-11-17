@@ -31,7 +31,7 @@ module.exports = strapi => {
         async (ctx, next) => {
           if (ctx.request.admin) return next();
 
-          strapi.koaMiddlewares.convert(
+          return await strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.hsts({
               maxAge: strapi.config.middleware.settings.hsts.maxAge,
               includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains

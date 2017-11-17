@@ -25,7 +25,7 @@ export function* permissionsGet() {
     const response = yield call(request, '/users-permissions/permissions', { method: 'GET' });
     yield put(getPermissionsSucceeded(response));
   } catch(err) {
-    window.Strapi.notification.error('users-permissions.EditPage.notification.permissions.error');
+    strapi.notification.error('users-permissions.EditPage.notification.permissions.error');
   }
 }
 
@@ -35,7 +35,7 @@ export function* roleGet(action) {
 
     yield put(getRoleSucceeded(role));
   } catch(err) {
-    window.Strapi.notification.error('users-permissions.EditPage.notification.role.error');
+    strapi.notification.error('users-permissions.EditPage.notification.role.error');
   }
 }
 
