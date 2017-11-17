@@ -20,7 +20,7 @@ module.exports = {
         return acc;
     }, {}));
 
-    const appControllers = Object.keys(strapi.api).reduce((acc, key) => {
+    const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
       acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
 
       return acc;
