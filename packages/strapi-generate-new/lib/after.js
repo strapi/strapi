@@ -101,9 +101,19 @@ module.exports = (scope, cb) => {
       logger.info(`Linking \`${dependency.key}\` dependency to the project...`);
 
       if (dependency.global) {
-        fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        try {
+          fs.accessSync(dependency.path, fs.constants.W_OK | fs.constants.F_OK);
+          fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        } catch (e) {
+          // Silent.
+        }
       } else {
-        fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        try {
+          fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.W_OK | fs.constants.F_OK);
+          fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+        } catch (e) {
+          // Silent.
+        }
       }
     });
 
