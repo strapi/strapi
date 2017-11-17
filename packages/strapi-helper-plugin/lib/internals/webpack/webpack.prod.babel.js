@@ -17,22 +17,21 @@ const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
-
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 
 // Necessary configuration file to ensure that plugins will be loaded.
 const pluginsToInitialize = (() => {
   try {
-    return require(path.resolve(process.cwd(), 'admin', 'src', 'config', 'plugins.json'));
+    return require(path.resolve(appPath, 'admin', 'src', 'config', 'plugins.json'));
   } catch (e) {
     return [];
   }
 })();
 
-
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(path.join(__dirname, 'manifest.json')),
+    manifest: require(path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')),
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
@@ -57,9 +56,7 @@ const settings = {
 
 if (!isSetup) {
   // Load server configurations.
-  const serverConfig = isAdmin ?
-    path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json'):
-    path.resolve(process.env.PWD, '..', '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 
   const server = require(serverConfig);
   const pathAccess =  _.get(server, 'admin.path', 'admin');
@@ -103,14 +100,14 @@ if (isAdmin) {
   }));
 }
 
-const appPath = isAdmin
-  ? path.join(process.cwd(), 'admin', 'src', 'app.js')
-  : path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+const main = isAdmin
+  ? path.join(appPath, 'admin', 'admin', 'src', 'app.js')
+  : path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: {
-    main: appPath,
+    main
   },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
@@ -149,12 +146,13 @@ module.exports = require('./webpack.base.babel')({
 
   alias: {
     moment: 'moment/moment.js',
-    'lodash': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'),
-    'immutable': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
-    'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
-    'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group')
+    'lodash': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   devtool: 'cheap-module-source-map',

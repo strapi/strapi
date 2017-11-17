@@ -39,7 +39,7 @@ const URLs = {
 
 if (isAdmin && !isSetup) {
   // Load server configuration.
-  const serverConfig = path.resolve(process.env.PWD, '..', 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 
   try {
     const server = require(serverConfig);
@@ -63,18 +63,18 @@ const plugins = {
 
 if (process.env.npm_lifecycle_event === 'start') {
   try {
-    fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
+    fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
   } catch (e) {
     // Allow app without plugins.
     plugins.exist = true;
   }
 
   // Read `plugins` directory.
-  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins')).filter(x => x[0] !== '.') : [];
+  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => x[0] !== '.') : [];
 
   // Construct object of plugin' paths.
   plugins.folders = plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+    acc[current] = path.resolve(appPath, 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
 
     return acc;
   }, {});
@@ -83,7 +83,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.join(process.cwd(), 'admin', 'build')
+    path: path.join(process.env.PWD, 'admin', 'build')
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -111,13 +111,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [path.join(process.cwd(), 'admin', 'src')]
+      include: [path.join(process.env.PWD, 'admin', 'src')]
         .concat(plugins.src.reduce((acc, current) => {
-          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), plugins.folders[current]);
+          acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
           return acc;
         }, []))
-        .concat([path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
+        .concat([path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,

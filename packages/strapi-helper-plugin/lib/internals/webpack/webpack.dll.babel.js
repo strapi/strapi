@@ -10,6 +10,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const isAdmin = process.env.IS_ADMIN === 'true';
+
+const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 
 module.exports = {
   context: process.cwd(),
@@ -19,7 +22,7 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   output: {
     filename: '[name].dll.js',
-    path: path.resolve(__dirname, 'dist/'),
+    path: path.join(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'dist'),
 
     // The name of the global variable which the library's
     // require() function will be assigned to
@@ -28,7 +31,7 @@ module.exports = {
   plugins: [
     new webpack.DllPlugin({
       name: '[name]_lib',
-      path: path.join(__dirname, 'manifest.json'),
+      path: path.join(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json'),
     })
   ],
   resolve: {
@@ -40,13 +43,13 @@ module.exports = {
     ],
     alias: {
       moment: 'moment/moment.js',
-      'lodash': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'),
-      'immutable': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'),
-      'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
-      'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
-      'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
-      'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'),
-      'reactstrap': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap')
+      'lodash': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+      'immutable': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+      'react-intl': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+      'react': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+      'react-dom': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+      'react-transition-group': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+      'reactstrap': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
     },
     symlinks: false,
     extensions: [
