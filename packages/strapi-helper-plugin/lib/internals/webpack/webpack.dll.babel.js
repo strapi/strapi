@@ -15,7 +15,7 @@ const isAdmin = process.env.IS_ADMIN === 'true';
 const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 
 module.exports = {
-  context: process.cwd(),
+  context: appPath,
   entry: {
     vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash'] // Shared dependencies accross the admin and plugins.
   },
