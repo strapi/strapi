@@ -35,7 +35,6 @@ module.exports = {
       const query = {};
 
       // Check if the provided identifier is an email or not.
-
       const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
@@ -167,7 +166,7 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    // Set the property code of the local passport.
+    // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
     // Update the user.
@@ -190,6 +189,56 @@ module.exports = {
       ctx.status = 500;
       ctx.body = {
         message: 'Error sending the email'
+      };
+    }
+  },
+
+  changePassword: async (ctx) => {
+    const params = _.assign({}, ctx.request.body, ctx.params);
+
+    if (params.password && params.passwordConfirmation && params.password === params.passwordConfirmation && params.code) {
+      try {
+        const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
+
+        if (!user) {
+          ctx.status = 400;
+          return ctx.body = {
+            message: 'Incorrect code provided.'
+          };
+        }
+
+        // Delete the current code
+        user.resetPasswordToken = null;
+
+        user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+        // Update the user.
+        await strapi.query('user', 'users-permissions').update({
+          id: user.id,
+          values: user
+        });
+
+        ctx.status = 200;
+        return ctx.body = {
+          jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+          user: user
+        };
+      } catch (err) {
+        ctx.status = 500;
+        return ctx.body = {
+          message: err.message
+        };
+      }
+    } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
+      ctx.status = 400;
+      return ctx.body = {
+        message: 'Passwords not matching.'
+      };
+    } else {
+      ctx.status = 400;
+      return ctx.body = {
+        status: 'error',
+        message: 'Incorrect params provided.'
       };
     }
   }
