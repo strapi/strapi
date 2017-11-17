@@ -1,7 +1,7 @@
 {
   "1": {
     "description": "Allow editing and deleting (except users)",
-    "name": "moderateur",
+    "name": "owner",
     "users": [
       {
         "id": "11",
@@ -23,7 +23,53 @@
     "permissions": {
       "application": {
         "icon": "",
-        "description": "users-permissions.EditPage.permissions.application.description",
+        "description": "users-permissions.Plugin.permissions.application.description",
+        "controllers": {
+          "invoices": {
+            "actions": {
+              "create": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "find": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "payInvoice": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "delete": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "update": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "updateAddress": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "findOne": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "updateRelationship": {
+                "enabled": true,
+                "policy": "entriesCreatedByUser"
+              },
+              "changeOwner": {
+                "enabled": false,
+                "policy": "entriesCreatedByUser"
+              }
+            }
+          }
+        }
+      },
+      "mailchimp": {
+        "icon": "",
+        "description": "content-type-builder.form.attribute.item.requiredField.description",
         "controllers": {
           "invoices": {
             "actions": {
@@ -44,7 +90,7 @@
   "permissions": {
     "application": {
       "icon": "",
-      "description": "users-permissions.EditPage.permissions.application.description",
+      "description": "users-permissions.Plugin.permissions.application.description",
       "controllers": {
         "invoices": {
           "actions": {

@@ -33,6 +33,8 @@
 
   "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
 
+  "Controller.input.label": "{label} ",
+
   "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
   "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
   "EditForm.inputSelect.durations.label": "Duration",
@@ -85,6 +87,12 @@
   "notification.success.delete": "L'élément a bien été supprimé",
 
   "plugin.description": "Protegez votre API avec un système d'authentification complet",
+
+  "Plugin.permissions.application.description": "Définissez les action autorisé dans votre projet.",
+  "Plugin.permissions.description.empty": " ",
+
+  "Plugins.header.title": "Permissions",
+  "Plugins.header.description": "Sont listés uniquement les actions associées à une route.",
 
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",

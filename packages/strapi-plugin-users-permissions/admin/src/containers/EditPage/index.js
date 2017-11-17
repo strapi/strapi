@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import { get, size } from 'lodash';
+import { get, isEqual, size } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -18,6 +18,7 @@ import BackHeader from 'components/BackHeader';
 import Input from 'components/Input';
 import InputSearch from 'components/InputSearch';
 import PluginHeader from 'components/PluginHeader';
+import Plugins from 'components/Plugins';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -42,6 +43,12 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => (
+    {
+      onChange: this.props.onChangeInput,
+    }
+  );
+
   componentDidMount() {
     if (this.props.match.params.actionType === 'create') {
       this.props.setForm();
@@ -73,8 +80,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     const pluginHeaderDescription = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.description.create'
       : 'users-permissions.EditPage.header.description';
-    const pluginHeaderActions = this.props.editPage.showButtons ? this.pluginHeaderActions : [];
-    
+    const pluginHeaderActions = !isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData) ? this.pluginHeaderActions : [];
+
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />
@@ -94,7 +101,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             }}
             actions={pluginHeaderActions}
           />
-          <div className={cn("row", styles.container)}>
+          <div className={cn('row', styles.container)}>
             <div className="col-md-12">
               <div className={styles.main_wrapper}>
                 <div className={styles.titleContainer}>
@@ -139,6 +146,14 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       name="users"
                       onClickDelete={this.props.onClickDelete}
                     />
+                    <div className="col-md-12">
+                      <div className={styles.separator} />
+                    </div>
+                  </div>
+                  <div className="row">
+                    <Plugins
+                      plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
+                    />
                   </div>
                 </form>
               </div>
@@ -149,6 +164,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     );
   }
 }
+
+EditPage.childContextTypes = {
+  onChange: PropTypes.func.isRequired,
+};
 
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
