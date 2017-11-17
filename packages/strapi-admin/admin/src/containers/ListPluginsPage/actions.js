@@ -5,15 +5,23 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  GET_PLUGINS,
+  GET_PLUGINS_SUCCEEDED,
   ON_DELETE_PLUGIN_CLICK,
   ON_DELETE_PLUGIN_CONFIRM,
   DELETE_PLUGIN_SUCCEEDED,
 } from './constants';
 
-export function defaultAction() {
+export function getPlugins() {
   return {
-    type: DEFAULT_ACTION,
+    type: GET_PLUGINS,
+  };
+}
+
+export function getPluginsSucceeded({ plugins }) {
+  return {
+    type: GET_PLUGINS_SUCCEEDED,
+    plugins,
   };
 }
 
@@ -30,8 +38,9 @@ export function onDeletePluginConfirm() {
   };
 }
 
-export function deletePluginSucceeded() {
+export function deletePluginSucceeded(plugin) {
   return {
     type: DELETE_PLUGIN_SUCCEEDED,
+    plugin,
   };
 }
