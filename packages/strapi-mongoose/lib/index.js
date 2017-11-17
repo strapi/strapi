@@ -16,7 +16,7 @@ const utils = require('./utils/');
 const { models: utilsModels, logger }  = require('strapi-utils');
 
 /**
- * Bookshelf hook
+ * Mongoose hook
  */
 
 module.exports = function (strapi) {
@@ -39,11 +39,6 @@ module.exports = function (strapi) {
 
     initialize: cb => {
       let globalName;
-
-      // Return callback if there is no model
-      if (_.isEmpty(strapi.models) || !_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'})) {
-        return cb();
-      }
 
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
@@ -73,11 +68,6 @@ module.exports = function (strapi) {
         instance.connection.on('open', () => {
           // Select models concerned by this connection
           const models = _.pickBy(strapi.models, { connection: connectionName });
-
-          // Return callback if there is no model
-          if (_.isEmpty(models)) {
-            return cb();
-          }
 
           const mountModels = (models, target, plugin = false) => {
             if (!target) return;
