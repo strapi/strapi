@@ -6,7 +6,7 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get, assign } = require('lodash');
+const { includes, get, assign, forEach } = require('lodash');
 const { logger, models } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -196,45 +196,57 @@ class Strapi extends EventEmitter {
   }
 
   async bootstrap() {
-    if (!this.config.functions.bootstrap) {
-      return Promise.resolve();
-    }
+    const bootstrapFunctions = [];
 
-    return new Promise((resolve, reject) => {
-      const timeoutMs = this.config.bootstrapTimeout || 3500;
-      const timer = setTimeout(() => {
-        this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
-        this.log.warn('Perhaps you forgot to call it?');
-      }, timeoutMs);
+    const execBootstrap = (fn) => {
+      bootstrapFunctions.push(new Promise((resolve, reject) => {
+        const timeoutMs = this.config.bootstrapTimeout || 3500;
+        const timer = setTimeout(() => {
+          this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
+          this.log.warn('Perhaps you forgot to call it?');
+        }, timeoutMs);
 
-      let ranBootstrapFn = false;
+        let ranBootstrapFn = false;
 
-      try {
-        this.config.functions.bootstrap(err => {
+        try {
+          fn(err => {
+            if (ranBootstrapFn) {
+              this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+
+              return reject();
+            }
+
+            ranBootstrapFn = true;
+            clearTimeout(timer);
+
+            return resolve(err);
+          });
+        } catch (e) {
           if (ranBootstrapFn) {
-            this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+            this.log.error('The bootstrap function threw an error after its callback was called.');
 
-            return reject();
+            return reject(e);
           }
 
           ranBootstrapFn = true;
           clearTimeout(timer);
 
-          return resolve(err);
-        });
-      } catch (e) {
-        if (ranBootstrapFn) {
-          this.log.error('The bootstrap function threw an error after its callback was called.');
-
-          return reject(e);
+          return resolve(e);
         }
+      }));
+    };
 
-        ranBootstrapFn = true;
-        clearTimeout(timer);
+    if (this.config.functions.bootstrap) {
+      execBootstrap(this.config.functions.bootstrap);
+    }
 
-        return resolve(e);
+    forEach(this.plugins, plugin => {
+      if (get(plugin, 'config.functions.bootstrap')) {
+        execBootstrap(plugin.config.functions.bootstrap);
       }
     });
+
+    return Promise.all(bootstrapFunctions);
   }
 
   async freeze() {
