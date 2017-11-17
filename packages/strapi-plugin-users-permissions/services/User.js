@@ -21,13 +21,13 @@ module.exports = {
   fetchAll: (params) => {
     const convertedParams = strapi.utils.models.convertParams('user', params);
 
-    return User
+    return strapi.plugins['users-permissions'].models.user
       .find()
       .where(convertedParams.where)
       .sort(convertedParams.sort)
       .skip(convertedParams.start)
       .limit(convertedParams.limit)
-      .populate(_.keys(_.groupBy(_.reject(strapi.models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
+      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
   },
 
   /**
@@ -37,9 +37,9 @@ module.exports = {
    */
 
   fetch: (params) => {
-    return User
+    return strapi.plugins['users-permissions'].models.user
       .findOne(params)
-      .populate(_.keys(_.groupBy(_.reject(strapi.models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
+      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
   },
 
   /**
@@ -49,7 +49,7 @@ module.exports = {
    */
 
   add: async (values) => {
-    const data = await User.create(_.omit(values, _.keys(_.groupBy(strapi.models.user.associations, 'alias'))));
+    const data = await strapi.plugins['users-permissions'].models.user.create(_.omit(values, _.keys(_.groupBy(strapi.plugins['users-permissions'].models.user.associations, 'alias'))));
     await strapi.hook.mongoose.manageRelations('user', _.merge(_.clone(data), { values }));
     return data;
   },
@@ -65,7 +65,7 @@ module.exports = {
     // To get the updated object, you have to execute the `findOne()` method
     // or use the `findOneOrUpdate()` method with `{ new:true }` option.
     await strapi.hook.mongoose.manageRelations('user', _.merge(_.clone(params), { values }));
-    return User.update(params, values, { multi: true });
+    return strapi.plugins['users-permissions'].models.user.update(params, values, { multi: true });
   },
 
   /**
@@ -77,8 +77,8 @@ module.exports = {
   remove: async params => {
     // Note: To get the full response of Mongo, use the `remove()` method
     // or add spent the parameter `{ passRawResult: true }` as second argument.
-    const data = await User.findOneAndRemove(params, {})
-      .populate(_.keys(_.groupBy(_.reject(strapi.models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
+    const data = await strapi.plugins['users-permissions'].models.user.findOneAndRemove(params, {})
+      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
 
     _.forEach(User.associations, async association => {
       const search = (_.endsWith(association.nature, 'One')) ? { [association.via]: data._id } : { [association.via]: { $in: [data._id] } };
