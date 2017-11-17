@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path');
 const stringify = JSON.stringify;
 const _ = require('lodash');
+// const Service = strapi.plugins['users-permissions'].services;
 /**
  * UsersPermissions.js service
  *
@@ -12,15 +13,6 @@ const _ = require('lodash');
 
 module.exports = {
   getActions: () => {
-    // Plugin user-permissions path
-    const roleConfigPath = path.join(
-      strapi.config.appPath,
-      'plugins',
-      'users-permissions',
-      'config',
-      'roles.json',
-    );
-
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
         acc[key] = { enabled: false, policy: '' };
@@ -55,20 +47,73 @@ module.exports = {
       },
     };
 
-
     const allPermissions = _.merge(permissions, pluginsPermissions);
 
-    try {
-      const permissionsJSON = require(roleConfigPath);
-
-      if (_.isEmpty(_.get(permissionsJSON, ['0', 'permissions']))) {
-        _.set(permissionsJSON, ['0', 'permissions'], allPermissions);
-        fs.writeFileSync(roleConfigPath, stringify(permissionsJSON, null, 2), 'utf8');
-      }
-    } catch(err) {
-      console.log(err);
-    }
-
     return allPermissions;
+  },
+
+  getRoleConfigPath: () => (
+    path.join(
+      strapi.config.appPath,
+      'plugins',
+      'users-permissions',
+      'config',
+      'roles.json',
+    )
+  ),
+
+  updateData: (data, diff = 'unset') => {
+    const dataToCompare = strapi.plugins['users-permissions'].services.userspermissions.getActions();
+
+    _.forEach(data, (roleData, roleId) => {
+      const obj = diff === 'unset' ? roleData.permissions : dataToCompare;
+
+      _.forEach(obj, (pluginData, pluginName) => {
+        _.forEach(pluginData.controllers, (controllerActions, controllerName) => {
+          _.forEach(controllerActions, (actionData, actionName) => {
+            if (diff === 'unset') {
+              if (!_.get(dataToCompare, [pluginName, 'controllers', controllerName])) {
+                _.unset(data, [roleId, 'permissions',  pluginName, 'controllers', controllerName]);
+                return;
+              }
+
+              if (!_.get(dataToCompare, [pluginName, 'controllers', controllerName, actionName])) {
+                _.unset(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName]);
+              }
+            } else {
+              if (!_.get(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName])) {
+                _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled: false, policy: '' })
+              }
+            }
+          });
+        });
+      });
+    });
+
+    return data;
+  },
+
+  updatePermissions: async () => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions
+    const appActions = Service.getActions();
+    const roleConfigPath = Service.getRoleConfigPath();
+    const writePermissions = Service.writePermissions;
+    const currentRoles = require(roleConfigPath);
+    const remove = await Service.updateData(_.cloneDeep(currentRoles));
+    const added = await Service.updateData(_.cloneDeep(remove), 'set');
+
+    if (!_.isEqual(currentRoles, added)) {
+      writePermissions(added);
+    }
+  },
+
+  writePermissions: (data) => {
+    const roleConfigPath = strapi.plugins['users-permissions'].services.userspermissions.getRoleConfigPath();
+
+    try {
+      fs.writeFileSync(roleConfigPath, stringify(data, null, 2), 'utf8');
+    } catch(err) {
+      strapi.log.error(err);
+    }
   }
 };

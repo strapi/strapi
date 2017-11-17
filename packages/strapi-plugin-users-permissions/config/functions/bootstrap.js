@@ -9,5 +9,6 @@
  */
 
 module.exports = cb => {
+  strapi.plugins['users-permissions'].services.userspermissions.updatePermissions();
   cb();
 };
