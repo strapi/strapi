@@ -97,5 +97,10 @@
         }
       }
     }
+  },
+  "initRole": {
+    "description": "",
+    "name": "",
+    "permissions": {}
   }
 }

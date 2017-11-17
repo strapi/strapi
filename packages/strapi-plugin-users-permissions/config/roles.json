@@ -1,7 +1,7 @@
 {
   "0": {
-    "description": "Allow editing and deleting (except users)",
-    "name": "owner",
+    "description": "",
+    "name": "",
     "permissions": {}
   }
 }

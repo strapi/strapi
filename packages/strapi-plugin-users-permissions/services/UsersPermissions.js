@@ -1,6 +1,8 @@
 'use strict';
 
-const fakeData = require('../config/fakeData.json');
+const fs = require('fs')
+const path = require('path');
+const stringify = JSON.stringify;
 const _ = require('lodash');
 /**
  * UsersPermissions.js service
@@ -10,29 +12,32 @@ const _ = require('lodash');
 
 module.exports = {
   getActions: () => {
+    // Plugin user-permissions path
+    const roleConfigPath = path.join(
+      strapi.config.appPath,
+      'plugins',
+      'users-permissions',
+      'config',
+      'roles.json',
+    );
 
-    // TODO
+    const generateActions = (data) => (
+      Object.keys(data).reduce((acc, key) => {
+        acc[key] = { enabled: false, policy: '' };
+
+        return acc;
+    }, {}));
+
     const appControllers = Object.keys(strapi.api).reduce((acc, key) => {
-      const actions = Object.keys(strapi.api[key].controllers[key]).reduce((obj, k) => {
-        obj[k] = { enabled: false, policy: 'test' };
-
-        return obj;
-      }, {});
-      acc.controllers[key] = actions;
+      acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
 
       return acc;
     }, { controllers: {} });
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce((acc, key) => {
       const pluginControllers = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
-        const actions = Object.keys(strapi.plugins[key].controllers[k]).reduce((obj, k) => {
-          obj[k] = { enabled: false, policy: 'test' };
-
-          return obj;
-        }, {});
-
         obj.icon = strapi.plugins[key].package.strapi.icon;
-        obj.controllers[k] = actions;
+        obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
 
         return obj;
 
@@ -50,7 +55,19 @@ module.exports = {
       },
     };
 
+
     const allPermissions = _.merge(permissions, pluginsPermissions);
+
+    try {
+      const permissionsJSON = require(roleConfigPath);
+
+      if (_.isEmpty(_.get(permissionsJSON, ['0', 'permissions']))) {
+        _.set(permissionsJSON, ['0', 'permissions'], allPermissions);
+        fs.writeFileSync(roleConfigPath, stringify(permissionsJSON, null, 2), 'utf8');
+      }
+    } catch(err) {
+      console.log(err);
+    }
 
     return allPermissions;
   }
