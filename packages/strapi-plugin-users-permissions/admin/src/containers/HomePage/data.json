@@ -4,7 +4,7 @@
       "name": "Owner",
       "description": "Rule them all. This role can't be deleted",
       "nb_users": 1,
-      "id": 1
+      "id": 0
     },
     {
       "name": "Administrator",

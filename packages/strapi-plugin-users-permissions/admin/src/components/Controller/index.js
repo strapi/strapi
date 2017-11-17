@@ -28,7 +28,7 @@ class Controller extends React.Component {
               inputSelected={this.state.inputSelected}
               key={actionKey}
               label={actionKey}
-              name={`${this.props.inputNamePath}.controllers.${this.props.name}.actions.${actionKey}.enabled`}
+              name={`${this.props.inputNamePath}.controllers.${this.props.name}.${actionKey}.enabled`}
               setNewInputSelected={this.setNewInputSelected}
               value={get(this.props.actions[actionKey], 'enabled')}
             />

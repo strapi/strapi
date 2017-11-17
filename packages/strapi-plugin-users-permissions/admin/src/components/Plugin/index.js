@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
-import { get, map } from 'lodash';
+import { capitalize, get, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import Controller from 'components/Controller';
@@ -29,26 +29,42 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
   }
 
   render() {
+    const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
+
     return (
-      <div className={styles.plugin}>
+      <div className={styles.plugin} style={divStyle}>
         <div className={styles.banner} onClick={this.handleClick}>
           <div>
             <span>{this.props.name}</span>
             &nbsp;—&nbsp;
-            <span><FormattedMessage id={get(this.props.plugin, 'description')} /></span>
+            <span>
+              {this.props.name === 'application' ? (
+                <FormattedMessage
+                  id="users-permissions.Plugin.permissions.application.description"
+                />
+              ) : (
+                <FormattedMessage
+                  id="users-permissions.Plugin.permissions.plugins.description"
+                  values={{ name: capitalize(this.props.name) }}
+                />
+              )}
+            </span>
           </div>
           <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}>
           </div>
         </div>
         <Collapse isOpen={this.state.collapse}>
-          {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
-            <Controller
-              inputNamePath={`permissions.${this.props.name}`}
-              key={key}
-              name={key}
-              actions={get(controllerActions, 'actions')}
-            />
-          ))}
+          <div />
+          <div className={styles.controllerContainer}>
+            {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
+              <Controller
+                inputNamePath={`permissions.${this.props.name}`}
+                key={key}
+                name={key}
+                actions={controllerActions}
+              />
+            ))}
+          </div>
         </Collapse>
       </div>
     );

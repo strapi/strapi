@@ -11,7 +11,7 @@
   padding: 0 28px;
   color: #787E8F;
 
-  line-height: 5.4rem;
+  line-height: 5.3rem;
 
   > div:first-child {
     > span:first-child {
@@ -45,5 +45,12 @@
     color: #787E8F;
     font-family: 'FontAwesome';
     font-size: 10px;
+  }
+}
+
+
+.controllerContainer {
+  > div:not(:first-child) {
+    padding-top: 2.3rem;
   }
 }

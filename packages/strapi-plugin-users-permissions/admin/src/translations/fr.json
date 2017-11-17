@@ -88,8 +88,8 @@
 
   "plugin.description": "Protegez votre API avec un système d'authentification complet",
 
-  "Plugin.permissions.application.description": "Définissez les action autorisé dans votre projet.",
-  "Plugin.permissions.description.empty": " ",
+  "Plugin.permissions.application.description": "Définissez les actions autorisées dans votre projet.",
+  "Plugin.permissions.plugins.description": "Définissez les actions autorisées dans le {name} plugin.",
 
   "Plugins.header.title": "Permissions",
   "Plugins.header.description": "Sont listés uniquement les actions associées à une route.",

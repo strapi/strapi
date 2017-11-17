@@ -1,24 +1,7 @@
 {
-  "1": {
-    "description": "Allow editing and deleting (except users)",
-    "name": "moderateur",
-    "permissions": {
-      "application": {
-        "controllers": {
-          "invoices": {
-            "actions": {
-              "delete": {
-                "enabled": true,
-                "policy": "entriesCreatedByUser"
-              },
-              "update": {
-                "enabled": false,
-                "policy": "entriesCreatedByUser"
-              }
-            }
-          }
-        }
-      }
-    }
+  "0": {
+    "description": "",
+    "name": "",
+    "permissions": {}
   }
 }

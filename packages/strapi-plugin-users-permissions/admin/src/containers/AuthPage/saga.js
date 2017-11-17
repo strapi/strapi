@@ -11,8 +11,9 @@ export function* submitForm() {
     const formType = yield select(makeSelectFormType());
     const body = yield select(makeSelectModifiedData());
 
-    if (formType === 'login') {
-      const response = yield call(request, '/auth/local', { method: 'POST', body });
+    if (formType === 'login' || formType === 'register') {
+      const endPoint = formType === 'login' ? '' : '/register';
+      const response = yield call(request, `/auth/local${endPoint}`, { method: 'POST', body });
 
       if (response.jwt) {
         yield call(auth.setToken, response.jwt, body.rememberMe);
