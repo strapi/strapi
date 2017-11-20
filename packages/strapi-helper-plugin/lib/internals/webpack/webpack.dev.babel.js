@@ -16,7 +16,7 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
-
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 
 // Load plugins into the same build in development mode.
 const plugins = {
@@ -111,13 +111,27 @@ module.exports = require('./webpack.base.babel')({
   ],
   alias: {
     moment: 'moment/moment.js',
-    'lodash': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+    'lodash': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   // Emit a source map for easier debugging

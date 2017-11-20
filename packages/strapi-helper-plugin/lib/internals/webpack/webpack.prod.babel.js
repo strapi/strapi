@@ -31,7 +31,10 @@ const pluginsToInitialize = (() => {
 
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')),
+    manifest: require(isSetup ?
+      path.join(__dirname, 'manifest.json'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')
+    ),
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
@@ -100,9 +103,15 @@ if (isAdmin) {
   }));
 }
 
-const main = isAdmin
-  ? path.join(appPath, 'admin', 'admin', 'src', 'app.js')
-  : path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+const main = (() => {
+  if (isAdmin && isSetup) {
+    return path.join(process.cwd(), 'admin', 'src', 'app.js');
+  } else if (isAdmin) {
+    return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
+  }
+
+  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+})();
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
@@ -146,13 +155,27 @@ module.exports = require('./webpack.base.babel')({
 
   alias: {
     moment: 'moment/moment.js',
-    'lodash': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+    'lodash': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   devtool: 'cheap-module-source-map',
