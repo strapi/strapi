@@ -43,18 +43,19 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   );
 
   componentDidMount() {
-    if (this.hasUsersPlugin() && this.isUrlProtected(this.props) && !auth.getToken()) {
-      const endPoint = this.hasAdminUser() ? 'login' : 'register';
-      this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
-    }
+    this.checkLogin(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
-      if (this.hasUsersPlugin() && this.isUrlProtected(nextProps) && !auth.getToken()) {
-        const endPoint = this.hasAdminUser() ? 'login' : 'register';
-        this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
-      }
+      this.checkLogin(nextProps);
+    }
+  }
+
+  checkLogin = (props) => {
+    if (this.hasUsersPlugin() && this.isUrlProtected(props) && !auth.getToken()) {
+      const endPoint = this.hasAdminUser() ? 'login': 'register';
+      this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
   }
 
@@ -70,7 +71,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-
+  
     return (
       <div className={styles.adminPage}>
         {leftMenu}
