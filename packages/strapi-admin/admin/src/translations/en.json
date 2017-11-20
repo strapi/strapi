@@ -31,6 +31,7 @@
   "components.popUpWarning.button.confirm": "Confirm",
   "components.popUpWarning.title": "Please confirm",
   "components.popUpWarning.message": "Are you sure you want to delete this?",
+  "components.Input.error.validation.email": "This is not an email",
   "components.Input.error.validation.required": "This value input is required.",
   "components.Input.error.validation.regex": "The value not match the regex.",
   "components.Input.error.validation.max": "The value is too high.",
@@ -43,5 +44,9 @@
   "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.ErrorBoundary.title": "Something wen't wrong...",
-  "components.ListRow.empty": "There is no data to be shown."
+  "components.ListRow.empty": "There is no data to be shown.",
+  "Auth & Permissions": "Auth & Permissions",
+  "Content Manager": "Content Manager",
+  "Content Type Builder": "Content Type Builder",
+  "Settings Manager": "Settings Manager"
 }

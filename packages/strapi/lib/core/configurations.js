@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach } = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign} = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -296,9 +296,9 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   // Couldn't find configurations for this hook.
   if (isEmpty(get(flattenHooksConfig, name, true))) {
     // Check if database connector is used
-    const modelsUsed = Object.keys(this.api || {})
-      .filter(x => isObject(this.api[x].models)) // Filter API with models
-      .map(x => this.api[x].models) // Keep models
+    const modelsUsed = Object.keys(assign(this.api || {}, this.plugins || {}))
+      .filter(x => isObject(get(this.api, [x, 'models']) || get(this.plugins, [x, 'models']))) // Filter API with models
+      .map(x => get(this.api, [x, 'models']) || get(this.plugins, [x, 'models'])) // Keep models
       .filter(models => {
         const apiModelsUsed = Object.keys(models).filter(model => {
           const connector = get(this.config.connections, models[model].connection, {}).connector;
