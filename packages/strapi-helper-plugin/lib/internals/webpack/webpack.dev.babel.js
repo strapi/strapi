@@ -98,7 +98,7 @@ module.exports = require('./webpack.base.babel')({
   // Tell babel that we want presets and to hot-reload
   babelPresets: [
     [
-      require.resolve('babel-preset-latest'),
+      require.resolve('babel-preset-env'),
       {
         es2015: {
           modules: false,
