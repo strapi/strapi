@@ -1,6 +1,7 @@
 {
   "Auth.form.button.register-success": "Send again",
-  "Auth.form.button.forgot-password": "Send again",
+  "Auth.form.button.forgot-password": "Send email",
+  "Auth.form.button.reset-password": "Change password",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
 
@@ -83,6 +84,7 @@
 
   "notification.error.delete": "An error occured while trying to delete the item",
   "notification.error.fetch": "An error occured while trying to fetch data",
+  "notification.info.emailSent": "The email has been sent",
   "notification.success.delete": "The item has been deleted",
 
   "plugin.description": "Protect your API with a full-authentication process",
@@ -93,21 +95,21 @@
   "Plugins.header.title": "Permissions",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
 
-  "popUpForm.button.cancel": "Cancel",
-  "popUpForm.button.save": "Save",
-  "popUpForm.header.add.providers": "Add New Provider",
-  "popUpForm.header.edit.email-templates": "Edit Email Templates",
-  "popUpForm.header.edit.providers": "Edit Provider",
-  "popUpForm.inputSelect.providers.label": "Choose the provider",
-  "popUpForm.inputToggle.providers.label": "Enable",
-  "popUpForm.inputToggle.providers.description": "If disabled, the users won't be able to use this provider.",
-  "popUpForm.inputText.shipperName.label": "Shipper name",
-  "popUpForm.inputEmail.shipperEmail.label": "Shipper email",
-  "popUpForm.inputEmail.responseEmail.label": "Response email",
-  "popUpForm.inputText.emailObject.label": "Object",
-  "popUpForm.inputText.emailObject.placeholder": "Please confirm your email address for %APP_NAME%",
-  "popUpForm.inputTextArea.message.label": "Message",
-  "popUpForm.inputTextArea.message.placeholder": "<p>Please click on this link to validate your account</p>",
-  "popUpForm.inputEmail.placeholder": "johndoe@gmail.com",
-  "popUpForm.inputText.shipperName.placeholder": "John Doe"
+  "PopUpForm.button.cancel": "Cancel",
+  "PopUpForm.button.save": "Save",
+  "PopUpForm.header.add.providers": "Add New Provider",
+  "PopUpForm.header.edit.email-templates": "Edit Email Templates",
+  "PopUpForm.header.edit.providers": "Edit Provider",
+  "PopUpForm.inputSelect.providers.label": "Choose the provider",
+  "PopUpForm.inputToggle.providers.label": "Enable",
+  "PopUpForm.inputToggle.providers.description": "If disabled, the users won't be able to use this provider.",
+  "PopUpForm.inputText.shipperName.label": "Shipper name",
+  "PopUpForm.inputEmail.shipperEmail.label": "Shipper email",
+  "PopUpForm.inputEmail.responseEmail.label": "Response email",
+  "PopUpForm.inputText.emailObject.label": "Object",
+  "PopUpForm.inputText.emailObject.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.inputTextArea.message.label": "Message",
+  "PopUpForm.inputTextArea.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.inputEmail.placeholder": "johndoe@gmail.com",
+  "PopUpForm.inputText.shipperName.placeholder": "John Doe"
 }

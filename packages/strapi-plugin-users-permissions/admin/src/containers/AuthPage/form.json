@@ -66,6 +66,20 @@
         "label": "users-permissions.Auth.form.register-success.email.label",
         "placeholder": "users-permissions.Auth.form.register-success.email.placeholder"
       }
+    ],
+    "reset-password": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "password",
+        "type": "password",
+        "label": "users-permissions.Auth.form.register.password.label"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "passwordConfirmation",
+        "type": "password",
+        "label": "users-permissions.Auth.form.register.confirmPassword.label"
+      }
     ]
   }
 }

@@ -4,7 +4,7 @@
  *
  */
 import { fromJS, List, Map } from 'immutable';
-import { concat, get } from 'lodash';
+import { get } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS,
@@ -67,8 +67,8 @@ export function onCancel() {
 }
 
 export function onChangeInput({ target }) {
-  const keys = concat(['modifiedData'], target.name.split('.'));
-  
+  const keys = ['modifiedData'].concat(target.name.split('.'));
+
   return {
     type: ON_CHANGE_INPUT,
     keys,

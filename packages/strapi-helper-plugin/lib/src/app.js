@@ -19,6 +19,7 @@ const tryRequire = (bootstrap = false) => {
     const config = bootstrap ? require('bootstrap').default : require('requirements').default;
     return config;
   } catch(err) {
+    console.log('ee', err)
     return null;
   }
 };
