@@ -18,18 +18,12 @@ module.exports = {
     if (provider === 'local') {
       // The identifier is required.
       if (!params.identifier) {
-        ctx.status = 400;
-        return ctx.body = {
-          message: 'Please provide your username or your e-mail.'
-        };
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]);
       }
 
       // The password is required.
       if (!params.password) {
-        ctx.status = 400;
-        return ctx.body = {
-          message: 'Please provide your password.'
-        };
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]);
       }
 
       const query = {};
@@ -45,56 +39,32 @@ module.exports = {
       }
 
       // Check if the user exists.
-      try {
-        const user = await strapi.query('user', 'users-permissions').findOne(query);
+      const user = await strapi.query('user', 'users-permissions').findOne(query);
 
-        if (!user) {
-          ctx.status = 403;
-          return ctx.body = {
-            message: 'Identifier or password invalid.'
-          };
-        }
+      if (!user) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.invalid' }] }]);
+      }
 
-        // The user never registered with the `local` provider.
-        if (!user.password) {
-          ctx.status = 400;
-          return ctx.body = {
-            message: 'This user never set a local password, please login thanks to the provider used during account creation.'
-          };
-        }
+      // The user never registered with the `local` provider.
+      if (!user.password) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.local' }] }]);
+      }
 
-        const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(params.password, user.password);
+      const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(params.password, user.password);
 
-        if (!validPassword) {
-          ctx.status = 403;
-          return ctx.body = {
-            message: 'Identifier or password invalid.'
-          };
-        } else {
-          ctx.status = 200;
-          ctx.body = {
-            jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-            user: user
-          };
-        }
-      } catch (err) {
-        ctx.status = 500;
-        return ctx.body = {
-          message: err.message
-        };
+      if (!validPassword) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.invalid' }] }]);
+      } else {
+        ctx.send({
+          jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+          user: user
+        });
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      try {
-        const user = await strapi.api.user.services.grant.connect(provider, access_token);
+      const user = await strapi.api.user.services.grant.connect(provider, access_token);
 
-        ctx.redirect(strapi.config.frontendUrl || strapi.config.url + '?jwt=' + strapi.api.user.services.jwt.issue(user) + '&user=' + JSON.stringify(user));
-      } catch (err) {
-        ctx.status = 500;
-        return ctx.body = {
-          message: err.message
-        };
-      }
+      ctx.redirect(strapi.config.frontendUrl || strapi.config.url + '?jwt=' + strapi.api.user.services.jwt.issue(user) + '&user=' + JSON.stringify(user));
     }
   },
 
@@ -105,47 +75,33 @@ module.exports = {
 
     // Password is required.
     if (!params.password) {
-      ctx.status = 400;
-      return ctx.body = {
-        message: 'Invalid password field.'
-      };
+      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]);
     }
 
     // Throw an error if the password selected by the user
     // contains more than two times the symbol '$'.
     if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
-      ctx.status = 400;
-      return ctx.body = {
-        message: 'Your password can not contain more than three times the symbol `$`.'
-      };
+      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.format' }] }]);
     }
 
     // First, check if the user is the first one to register as admin.
-    try {
-      const adminUsers = await strapi.query('user', 'users-permissions').find({ admin: true });
+    const adminUsers = await strapi.query('user', 'users-permissions').find({ admin: true });
 
-      // Check if the user is the first to register
-      if (adminUsers.length === 0) {
-        params.admin = true;
-      }
-
-      params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
-
-      const user = await strapi.query('user', 'users-permissions').create({
-        values: params
-      });
-
-      ctx.status = 200;
-      ctx.body = {
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: user
-      };
-    } catch (err) {
-      ctx.status = 500;
-      return ctx.body = {
-        message: err.message
-      };
+    // Check if the user is the first to register
+    if (adminUsers.length === 0) {
+      params.admin = true;
     }
+
+    params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+    const user = await strapi.query('user', 'users-permissions').create({
+      values: params
+    });
+
+    ctx.send({
+      jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+      user: user
+    });
   },
 
   forgotPassword: async (ctx) => {
@@ -157,10 +113,7 @@ module.exports = {
 
     // User not found.
     if (!user) {
-      ctx.status = 400;
-      return ctx.body = {
-        message: 'This email does not exist.'
-      };
+      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]);
     }
 
     // Generate random token.
@@ -176,70 +129,45 @@ module.exports = {
     });
 
     // Send an email to the user.
-    try {
-      await strapi.plugins['email'].services.email.send({
-        to: user.email,
-        subject: 'Reset password',
-        text: url + '?code=' + resetPasswordToken,
-        html: url + '?code=' + resetPasswordToken
-      });
-      ctx.status = 200;
-      ctx.body = {};
-    } catch (err) {
-      ctx.status = 500;
-      ctx.body = {
-        message: 'Error sending the email'
-      };
-    }
+    await strapi.plugins['email'].services.email.send({
+      to: user.email,
+      subject: 'Reset password',
+      text: url + '?code=' + resetPasswordToken,
+      html: url + '?code=' + resetPasswordToken
+    });
+
+    ctx.send();
   },
 
   changePassword: async (ctx) => {
     const params = _.assign({}, ctx.request.body, ctx.params);
 
     if (params.password && params.passwordConfirmation && params.password === params.passwordConfirmation && params.code) {
-      try {
-        const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
+      const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
 
-        if (!user) {
-          ctx.status = 400;
-          return ctx.body = {
-            message: 'Incorrect code provided.'
-          };
-        }
-
-        // Delete the current code
-        user.resetPasswordToken = null;
-
-        user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
-
-        // Update the user.
-        await strapi.query('user', 'users-permissions').update({
-          id: user.id,
-          values: user
-        });
-
-        ctx.status = 200;
-        return ctx.body = {
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-          user: user
-        };
-      } catch (err) {
-        ctx.status = 500;
-        return ctx.body = {
-          message: err.message
-        };
+      if (!user) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]);
       }
+
+      // Delete the current code
+      user.resetPasswordToken = null;
+
+      user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+      // Update the user.
+      await strapi.query('user', 'users-permissions').update({
+        id: user.id,
+        values: user
+      });
+
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: user
+      });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
-      ctx.status = 400;
-      return ctx.body = {
-        message: 'Passwords not matching.'
-      };
+      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]);
     } else {
-      ctx.status = 400;
-      return ctx.body = {
-        status: 'error',
-        message: 'Incorrect params provided.'
-      };
+      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]);
     }
   }
 };

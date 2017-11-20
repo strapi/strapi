@@ -29,6 +29,16 @@
   "Auth.form.register-success.email.label": "Email send with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
+  "Auth.form.error.email.provide": "Please provide your username or your e-mail.",
+  "Auth.form.error.password.provide": "Please provide your password.",
+  "Auth.form.error.invalid": "Identifier or password invalid.",
+  "Auth.form.error.password.local": "This user never set a local password, please login thanks to the provider used during account creation.",
+  "Auth.form.error.password.format": "Your password can not contain more than three times the symbol `$`.",
+  "Auth.form.error.user.not-exist": "This email does not exist.",
+  "Auth.form.error.code.provide": "Incorrect code provided.",
+  "Auth.form.error.password.matching": "Passwords not matching.",
+  "Auth.form.error.params.provide": "Incorrect params provided.",
+
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Reasy to sign-in?",
 

@@ -31,7 +31,7 @@ module.exports = {
     const entry = await this
       .forge()
       .save(Object.keys(params.values).reduce((acc, current) => {
-      if (this._attributes[current].type) {
+      if (_.get(this, ['_attributes', current, 'type'])) {
         acc[current] = params.values[current];
       }
 

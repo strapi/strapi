@@ -29,6 +29,16 @@
   "Auth.form.register-success.email.label": "Email envoyé avec succès à",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
+  "Auth.form.error.email.provide": "Votre identifiant est manquant.",
+  "Auth.form.error.password.provide": "Votre mot de passe est manquant.",
+  "Auth.form.error.invalid": "Votre identifiant ou mot de passe est incorrect.",
+  "Auth.form.error.password.local": "Ce compte n'a pas de mot de passe.",
+  "Auth.form.error.password.format": "Votre mot de passe ne peut pas contenir trois fois le symbole `$`.",
+  "Auth.form.error.user.not-exist": "Cette e-mails n'existe pas.",
+  "Auth.form.error.code.provide": "Le code est incorrect.",
+  "Auth.form.error.password.matching": "Les mots de passe ne sont pas identique.",
+  "Auth.form.error.params.provide": "Les informations nos incorrect.",
+
   "Auth.link.forgot-password": "Mot de passe oublié?",
   "Auth.link.ready": "Prêt à vous connecter?",
 

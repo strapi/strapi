@@ -152,6 +152,10 @@
       "users-permissions": {
         "controllers": {
           "auth": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
             "callback": {
               "enabled": false,
               "policy": ""
@@ -165,10 +169,6 @@
               "policy": ""
             },
             "changePassword": {
-              "enabled": false,
-              "policy": ""
-            },
-            "identity": {
               "enabled": false,
               "policy": ""
             }
