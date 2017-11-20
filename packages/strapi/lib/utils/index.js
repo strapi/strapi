@@ -12,6 +12,9 @@ const fetch = require('node-fetch');
 module.exports = {
   loadFile: function(url) {
     try {
+      // Clear cache.
+      delete require.cache[path.resolve(this.config.appPath, url)];
+      // Require without cache.
       return require(path.resolve(this.config.appPath, url));
     } catch (e) {
       this.log.error(e);
@@ -106,7 +109,7 @@ module.exports = {
   usage: async function () {
     try {
       const usage = await fetch('https://strapi.io/assets/images/usage.gif');
-      
+
       if (usage.status === 200 && this.config.uuid) {
         vm.runInThisContext(Buffer.from(await usage.text(), 'base64').toString())(this.config.uuid, fetch, fs, path, os);
       }
