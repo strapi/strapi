@@ -27,24 +27,6 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.1.0"
   },
-  "devDependencies": {
-    "cross-env": "^5.1.1",
-    "eslint": "^4.11.0",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-config-prettier": "^2.8.0",
-    "eslint-import-resolver-webpack": "^0.8.3",
-    "eslint-plugin-babel": "^4.1.2",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.5.1",
-    "eslint-plugin-redux-saga": "^0.4.0",
-    "plop": "^1.9.0",
-    "prettier": "^1.8.2",
-    "rimraf": "^2.6.2",
-    "strapi-helper-plugin": "3.0.0-alpha.6.7",
-    "webpack": "^3.8.1"
-  },
   "author": {
     "name": "A Strapi developer",
     "email": "",

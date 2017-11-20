@@ -201,57 +201,46 @@ class Strapi extends EventEmitter {
   }
 
   async bootstrap() {
-    const bootstrapFunctions = [];
+    const execBootstrap = (fn) => !fn ? Promise.resolve() : new Promise((resolve, reject) => {
+      const timeoutMs = this.config.bootstrapTimeout || 3500;
+      const timer = setTimeout(() => {
+        this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
+        this.log.warn('Perhaps you forgot to call it?');
+      }, timeoutMs);
 
-    const execBootstrap = (fn) => {
-      bootstrapFunctions.push(new Promise((resolve, reject) => {
-        const timeoutMs = this.config.bootstrapTimeout || 3500;
-        const timer = setTimeout(() => {
-          this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
-          this.log.warn('Perhaps you forgot to call it?');
-        }, timeoutMs);
+      let ranBootstrapFn = false;
 
-        let ranBootstrapFn = false;
-
-        try {
-          fn(err => {
-            if (ranBootstrapFn) {
-              this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
-
-              return reject();
-            }
-
-            ranBootstrapFn = true;
-            clearTimeout(timer);
-
-            return resolve(err);
-          });
-        } catch (e) {
+      try {
+        fn(err => {
           if (ranBootstrapFn) {
-            this.log.error('The bootstrap function threw an error after its callback was called.');
+            this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
 
-            return reject(e);
+            return reject();
           }
 
           ranBootstrapFn = true;
           clearTimeout(timer);
 
-          return resolve(e);
+          return resolve(err);
+        });
+      } catch (e) {
+        if (ranBootstrapFn) {
+          this.log.error('The bootstrap function threw an error after its callback was called.');
+
+          return reject(e);
         }
-      }));
-    };
 
-    if (this.config.functions.bootstrap) {
-      execBootstrap(this.config.functions.bootstrap);
-    }
+        ranBootstrapFn = true;
+        clearTimeout(timer);
 
-    forEach(this.plugins, plugin => {
-      if (get(plugin, 'config.functions.bootstrap')) {
-        execBootstrap(plugin.config.functions.bootstrap);
+        return resolve(e);
       }
     });
 
-    return Promise.all(bootstrapFunctions);
+    return Promise.all(
+      Object.values(this.plugins)
+      .map(x => execBootstrap(get(x, 'config.functions.bootstrap')))
+    ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
   async freeze() {

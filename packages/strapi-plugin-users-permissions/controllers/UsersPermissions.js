@@ -22,7 +22,6 @@ module.exports = {
       const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
       ctx.send({ permissions });
     } catch(err) {
-      console.log(err);
       ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
     }
   },
@@ -32,7 +31,7 @@ module.exports = {
     const role = fakeData[id];
 
     if (_.isEmpty(role)) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Role don\'t exist' }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
     }
 
     return ctx.send({ role });

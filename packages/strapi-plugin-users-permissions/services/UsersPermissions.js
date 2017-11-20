@@ -27,15 +27,12 @@ module.exports = {
     }, { controllers: {} });
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce((acc, key) => {
-      const pluginControllers = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
-        obj.icon = strapi.plugins[key].package.strapi.icon;
+      acc[key] = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
         obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
 
         return obj;
 
-      }, { icon: '', controllers: {} });
-
-      acc[key] = pluginControllers;
+      }, { controllers: {} });
 
       return acc;
     }, {});
@@ -93,8 +90,8 @@ module.exports = {
     return data;
   },
 
-  updatePermissions: async () => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions
+  updatePermissions: async (cb) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appActions = Service.getActions();
     const roleConfigPath = Service.getRoleConfigPath();
     const writePermissions = Service.writePermissions;
@@ -104,6 +101,10 @@ module.exports = {
 
     if (!_.isEqual(currentRoles, added)) {
       writePermissions(added);
+    }
+
+    if (cb) {
+      cb();
     }
   },
 
