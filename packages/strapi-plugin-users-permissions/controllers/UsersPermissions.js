@@ -31,7 +31,7 @@ module.exports = {
     const role = fakeData[id];
 
     if (_.isEmpty(role)) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Role don\'t exist' }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
     }
 
     return ctx.send({ role });

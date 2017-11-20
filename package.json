@@ -17,7 +17,7 @@
     "shelljs": "^0.7.7"
   },
   "scripts": {
-    "clean": "npm run removesymlinkdependencies && node ./scripts/clean.js",
+    "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
     "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
     "doc": "node ./scripts/documentation.js",
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
