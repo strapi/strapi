@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, get, isBoolean, isEmpty, map } from 'lodash';
+import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
 
 // Logo
@@ -39,17 +39,20 @@ import styles from './styles.scss';
 
 export class AuthPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    this.props.setForm(this.props.match.params.authType, this.props.match.params.id);
+    const params = this.props.location.search ? replace(this.props.location.search, '?code=', '') : this.props.match.params.id;
+    this.props.setForm(this.props.match.params.authType, params);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.match.params.authType !== nextProps.match.params.authType) {
-      this.props.setForm(nextProps.match.params.authType, nextProps.match.params.id);
+      const params = nextProps.location.search ? replace(nextProps.location.search, '?code=', '') : nextProps.match.params.id;
+      this.props.setForm(nextProps.match.params.authType, params);
     }
 
     if (nextProps.submitSuccess) {
       switch (this.props.match.params.authType) {
         case 'login':
+        case 'reset-password':
           this.props.history.push('/');
           break;
         case 'register':
@@ -187,6 +190,7 @@ AuthPage.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChangeInput: PropTypes.func.isRequired,

@@ -7,6 +7,18 @@ const parse = JSON.parse;
 const stringify = JSON.stringify;
 
 const auth = {
+  clear(key) {
+    if (localStorage && localStorage.getItem(key)) {
+      return localStorage.removeItem(key);
+    }
+
+    if (sessionStorage && sessionStorage.getItem(key)) {
+      return sessionStorage.removeItem(key);
+    }
+
+    return null;
+  },
+
   clearAppStorage() {
     if (localStorage) {
       return localStorage.clear();
@@ -20,84 +32,56 @@ const auth = {
   },
 
   clearToken(tokenKey = TOKEN_KEY) {
-    if (localStorage) {
-      return localStorage.removeItem(tokenKey);
-    }
-
-    if (sessionStorage) {
-      return sessionStorage.removeItem(tokenKey);
-    }
-
-    return null;
+    return auth.clear(tokenKey);
   },
 
   clearUserInfo(userInfo = USER_INFO) {
-    if (localStorage) {
-      return localStorage.removeItem(userInfo);
+    return auth.clear(userInfo);
+  },
+
+  get(key) {
+    if (localStorage && localStorage.getItem(key)) {
+      return parse(localStorage.getItem(key)) || null;
     }
 
-    if (sessionStorage) {
-      return sessionStorage.removeItem(userInfo);
+    if (sessionStorage && sessionStorage.getItem(key)) {
+      return parse(sessionStorage.getItem(key)) || null;
     }
 
     return null;
   },
 
   getToken(tokenKey = TOKEN_KEY) {
-    if (localStorage && localStorage.getItem(tokenKey)) {
-      return parse(localStorage.getItem(tokenKey)) || null;
-    }
-
-    if (sessionStorage && sessionStorage.getItem(tokenKey)) {
-      return parse(sessionStorage.getItem(tokenKey)) || null;
-    }
-
-    return null;
+    return auth.get(tokenKey);
   },
 
   getUserInfo(userInfo = USER_INFO) {
-    if (localStorage && localStorage.getItem(userInfo)) {
-      return parse(localStorage.getItem(userInfo)) || null;
-    }
-
-    if (sessionStorage && sessionStorage.getItem(userInfo)) {
-      return parse(sessionStorage.getItem(userInfo)) || null;
-    }
-
-    return null;
+    return auth.get(userInfo);
   },
 
-  setToken(value = '', isLocalStorage = false, tokenKey = TOKEN_KEY) {
+  set(value, key, isLocalStorage) {
     if (isEmpty(value)) {
       return null;
     }
 
     if (isLocalStorage && localStorage) {
-      console.log('ok')
-      return localStorage.setItem(tokenKey, stringify(value));
-    }
-
-    if (sessionStorage && sessionStorage) {
-      return sessionStorage.setItem(tokenKey, stringify(value));
-    }
-
-    return null;
-  },
-
-  setUserInfo(value = '', isLocalStorage = false, userInfo = USER_INFO) {
-    if (isEmpty(value)) {
-      return null;
-    }
-
-    if (isLocalStorage && localStorage) {
-      return localStorage.setItem(userInfo, stringify(value));
+      return localStorage.setItem(key, stringify(value));
     }
 
     if (sessionStorage) {
-      return sessionStorage.setItem(userInfo, stringify(value));
+      return sessionStorage.setItem(key, stringify(value));
     }
 
     return null;
+  },
+
+
+  setToken(value = '', isLocalStorage = false, tokenKey = TOKEN_KEY) {
+    return auth.set(value, tokenKey, isLocalStorage);
+  },
+
+  setUserInfo(value = '', isLocalStorage = false, userInfo = USER_INFO) {
+    return auth.set(value, userInfo, isLocalStorage);
   },
 }
 

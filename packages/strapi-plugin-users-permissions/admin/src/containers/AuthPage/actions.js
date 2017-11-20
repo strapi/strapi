@@ -59,6 +59,13 @@ export function setForm(formType, email) {
         email,
       };
       break;
+    case 'reset-password':
+      data = {
+        password: '',
+        passwordConfirmation: '',
+        code: email,
+      };
+      break;
     default:
       data = {};
   }
@@ -76,10 +83,10 @@ export function submit() {
   };
 }
 
-export function submitError(errors) {
+export function submitError(formErrors) {
   return {
     type: SUBMIT_ERROR,
-    errors,
+    formErrors,
   };
 }
 

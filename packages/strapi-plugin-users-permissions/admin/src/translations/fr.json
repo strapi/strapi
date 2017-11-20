@@ -1,6 +1,7 @@
 {
   "Auth.form.button.register-success": "Envoyer à nouveau",
   "Auth.form.button.forgot-password": "Envoyer à nouveau",
+  "Auth.form.button.reset-password": "Changez votre mot de passe",
   "Auth.form.button.login": "Se connecter",
   "Auth.form.button.register": "Prêt à commencer",
 
@@ -84,6 +85,7 @@
 
   "notification.error.delete": "Une erreur est survenue en essayant de supprimer cet élément",
   "notification.error.fetch": "Une erreur est survenue en essayant de récupérer les données",
+  "notification.info.emailSent": "L'email a été envoyé",
   "notification.success.delete": "L'élément a bien été supprimé",
 
   "plugin.description": "Protegez votre API avec un système d'authentification complet",

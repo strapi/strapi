@@ -9,6 +9,7 @@ import {
   ON_CHANGE_INPUT,
   SET_ERRORS,
   SET_FORM,
+  SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
@@ -26,6 +27,7 @@ function authPageReducer(state = initialState, action) {
       return state
         .updateIn(['modifiedData', action.key], () => action.value);
     case SET_ERRORS:
+    case SUBMIT_ERROR:
       return state
         .set('didCheckErrors', !state.get('didCheckErrors'))
         .set('formErrors', List(action.formErrors));

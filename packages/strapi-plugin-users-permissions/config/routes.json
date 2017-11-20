@@ -60,6 +60,15 @@
         "prefix": ""
       }
     },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "handler": "Auth.changePassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
 
     {
       "method": "GET",
