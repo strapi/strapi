@@ -14,10 +14,10 @@
   "contentType.temporaryDisplay": "(Not saved)",
   "home.contentTypeBuilder.name": "Content Types",
   "home.contentTypeBuilder.description": "Create, update your own content types.",
-  "home.emptyContentType.title": "There is no Content Type Available",
+  "home.emptyContentType.title": "There are no Content Types Available",
   "home.emptyContentType.description": "Create your first Content Type to be able to retrieve data from your API.",
 
-  "home.emptyAttributes.title": "There is no fields yet",
+  "home.emptyAttributes.title": "There are no fields yet",
   "home.emptyAttributes.description": "Add your first field to your new Content Type",
 
   "button.contentType.create": "Create Content Type",
@@ -25,7 +25,7 @@
   "button.attributes.add": "Add New Field",
 
   "error.validation.required": "This value input is required.",
-  "error.validation.regex": "The value not match the regex.",
+  "error.validation.regex": "The value does not match the regex.",
   "error.validation.max": "The value is too high.",
   "error.validation.min": "The value is too low.",
   "error.validation.maxLength": "The value is too long.",
