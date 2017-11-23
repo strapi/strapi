@@ -16,6 +16,19 @@ module.exports = {
    *
    * @return {Object}
    */
+  createRole: async(ctx) => {
+    console.log(ctx.request.body);
+
+    if (_.isEmpty(ctx.request.body)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
+    }
+    
+    try {
+      ctx.send({ ok: true });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
 
   getPermissions: async(ctx) => {
     try {
