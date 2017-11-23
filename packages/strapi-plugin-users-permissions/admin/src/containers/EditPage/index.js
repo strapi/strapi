@@ -31,6 +31,7 @@ import {
   getUser,
   onCancel,
   onChangeInput,
+  onClickAdd,
   onClickDelete,
   setActionType,
   setErrors,
@@ -173,6 +174,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       getUser={this.props.getUser}
                       label="users-permissions.EditPage.form.roles.label.users"
                       labelValues={{ number: size(get(this.props.editPage, ['modifiedData', 'users'])) }}
+                      onClickAdd={this.props.onClickAdd}
                       onClickDelete={this.props.onClickDelete}
                       name="users"
                       type="text"
@@ -213,6 +215,7 @@ EditPage.propTypes = {
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
   onChangeInput: PropTypes.func.isRequired,
+  onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
@@ -233,6 +236,7 @@ function mapDispatchToProps(dispatch) {
       getUser,
       onCancel,
       onChangeInput,
+      onClickAdd,
       onClickDelete,
       setActionType,
       setErrors,

@@ -13,6 +13,7 @@ export const GET_USER = 'UsersPermissions/EditPage/GET_USER';
 export const GET_USER_SUCCEEDED = 'UsersPermissions/EditPage/GET_USER_SUCCEEDED';
 export const ON_CANCEL = 'UsersPermissions/EditPage/ON_CANCEL';
 export const ON_CHANGE_INPUT = 'UsersPermissions/EditPage/ON_CHANGE_INPUT';
+export const ON_CLICK_ADD = 'UsersPermissions/EditPage/ON_CLICK_ADD';
 export const ON_CLICK_DELETE = 'UsersPermissions/EditPage/ON_CLICK_DELETE';
 export const SET_ACTION_TYPE = 'UsersPermissions/EditPage/SET_ACTION_TYPE';
 export const SET_ERRORS = 'UsersPermissions/EditPage/SET_ERRORS';

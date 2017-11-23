@@ -15,7 +15,13 @@ import InputSearchLi from 'components/InputSearchLi';
 import styles from './styles.scss';
 
 class InputSearch extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { errors: [], value: '', users: this.props.values, filteredUsers: this.props.values };
+  state = {
+    errors: [],
+    filteredUsers: this.props.values,
+    isAdding: false,
+    users: this.props.values,
+    value: '',
+  };
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
@@ -27,7 +33,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     }
 
     if (nextProps.didFetchUsers !== this.props.didFetchUsers) {
-      this.setState({ filteredUsers: nextProps.users });
+      this.setState({ filteredUsers: nextProps.users, isAdding: true });
     }
   }
 
@@ -44,7 +50,19 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
       this.props.getUser(target.value);
     }
 
+    if (isEmpty(target.value)) {
+      return this.setState({ value: target.value, isAdding: false, users: this.props.values, filteredUsers: this.props.values });
+    }
+
     this.setState({ value: target.value, filteredUsers });
+  }
+
+  handleClick = (item) => {
+    if (this.state.isAdding) {
+      this.props.onClickAdd(item);
+    } else {
+      this.props.onClickDelete(item);
+    }
   }
 
   render() {
@@ -72,7 +90,12 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
         <div className={styles.ulContainer}>
           <ul>
             {map(this.state.filteredUsers, (user) => (
-              <InputSearchLi key={user.name} item={user} onClickDelete={this.props.onClickDelete} />
+              <InputSearchLi
+                key={user.name}
+                item={user}
+                isAdding={this.state.isAdding}
+                onClick={this.handleClick}
+              />
             ))}
           </ul>
         </div>
@@ -97,6 +120,7 @@ InputSearch.propTypes = {
   label: PropTypes.string.isRequired,
   labelValues: PropTypes.object,
   name: PropTypes.string.isRequired,
+  onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
   users: PropTypes.array,
   values: PropTypes.array,

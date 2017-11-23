@@ -12,6 +12,7 @@ import {
   GET_USER_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
+  ON_CLICK_ADD,
   ON_CLICK_DELETE,
   SET_ACTION_TYPE,
   SET_ERRORS,
@@ -60,6 +61,9 @@ function editPageReducer(state = initialState, action) {
     case ON_CHANGE_INPUT:
       return state
         .updateIn(action.keys, () => action.value);
+    case ON_CLICK_ADD:
+      return state
+        .updateIn(['modifiedData', 'users'], list => list.push(action.itemToAdd));
     case ON_CLICK_DELETE:
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))

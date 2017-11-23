@@ -15,6 +15,7 @@ import {
   GET_USER_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
+  ON_CLICK_ADD,
   ON_CLICK_DELETE,
   SET_ACTION_TYPE,
   SET_ERRORS,
@@ -94,6 +95,13 @@ export function onChangeInput({ target }) {
     type: ON_CHANGE_INPUT,
     keys,
     value: target.value,
+  };
+}
+
+export function onClickAdd(itemToAdd) {
+  return {
+    type: ON_CLICK_ADD,
+    itemToAdd,
   };
 }
 
