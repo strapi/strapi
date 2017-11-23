@@ -16,7 +16,7 @@ import { translationMessages } from './i18n';
 
 const tryRequire = (bootstrap = false) => {
   try {
-    const config = bootstrap ? require('bootstrap').default : require('requirements').default;
+    const config = bootstrap ? require('../../../../admin/src/bootstrap.js').default : require('../../../../admin/src/requirements.js').default;
     return config;
   } catch(err) {
     return null;

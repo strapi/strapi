@@ -1,0 +1,119 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "UsersPermissions.index",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/init",
+      "handler": "UsersPermissions.init",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "UsersPermissions.getRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/permissions",
+      "handler": "UsersPermissions.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "POST",
+      "path": "/auth/local",
+      "handler": "Auth.callback",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/local/register",
+      "handler": "Auth.register",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "handler": "Auth.forgotPassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "handler": "Auth.changePassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+
+    {
+      "method": "GET",
+      "path": "/user",
+      "handler": "User.find",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/user/:_id",
+      "handler": "User.findOne",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/user",
+      "handler": "User.create",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/user/:_id",
+      "handler": "User.update",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/:_id",
+      "handler": "User.destroy",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    }
+  ]
+}

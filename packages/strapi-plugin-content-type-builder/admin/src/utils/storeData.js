@@ -9,7 +9,10 @@ const stringify = JSON.stringify;
 export const storeData = {
   clearAppStorage() {
     if (localStorage) {
-      return localStorage.clear();
+      localStorage.removeItem(CONTENT_TYPE);
+      localStorage.removeItem(IS_MODEL_TEMPORARY);
+      localStorage.removeItem(MENU);
+      return localStorage.removeItem(MODEL);
     }
   },
 

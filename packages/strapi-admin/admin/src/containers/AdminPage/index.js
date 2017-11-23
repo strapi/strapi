@@ -14,7 +14,13 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
+import { get, includes, isUndefined } from 'lodash';
 
+import { updatePlugin } from 'containers/App/actions';
+import { selectPlugins } from 'containers/App/selectors';
+import { hideNotification } from 'containers/NotificationProvider/actions';
+
+// Design
 import HomePage from 'containers/HomePage';
 import PluginPage from 'containers/PluginPage';
 import ComingSoonPage from 'containers/ComingSoonPage';
@@ -22,12 +28,9 @@ import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage';
 import Content from 'containers/Content';
 import NotFoundPage from 'containers/NotFoundPage';
-
-import { updatePlugin } from 'containers/App/actions';
-import { selectPlugins } from 'containers/App/selectors';
-import { hideNotification } from 'containers/NotificationProvider/actions';
-
 import Header from 'components/Header/index';
+
+import auth from 'utils/auth';
 
 import styles from './styles.scss';
 
@@ -37,15 +40,44 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       plugins: this.props.plugins,
       updatePlugin: this.props.updatePlugin,
     }
-  )
+  );
+
+  componentDidMount() {
+    this.checkLogin(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.checkLogin(nextProps);
+    }
+  }
+
+  checkLogin = (props) => {
+    if (this.hasUsersPlugin() && this.isUrlProtected(props) && !auth.getToken()) {
+      const endPoint = this.hasAdminUser() ? 'login': 'register';
+      this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
+    }
+  }
+
+  hasUsersPlugin = () => !isUndefined(get(this.props.plugins.toJS(), 'users-permissions'));
+
+  hasAdminUser = () => get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
+
+  isUrlProtected = (props) => !includes(props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
+
+  showLeftMenu = () => !includes(this.props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
   render() {
+    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
+    const header = this.showLeftMenu() ? <Header /> : '';
+    const style = this.showLeftMenu() ? {} : { width: '100%' };
+  
     return (
       <div className={styles.adminPage}>
-        <LeftMenu plugins={this.props.plugins} />
-        <div className={styles.adminPageRightWrapper}>
-          <Header />
-          <Content {...this.props}>
+        {leftMenu}
+        <div className={styles.adminPageRightWrapper} style={style}>
+          {header}
+          <Content {...this.props} showLeftMenu={this.showLeftMenu()}>
             <Switch>
               <Route path="/" component={HomePage} exact />
               <Route path="/plugins/:pluginId" component={PluginPage} />
@@ -72,6 +104,8 @@ AdminPage.contextTypes = {
 };
 
 AdminPage.propTypes = {
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   plugins: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };

@@ -56,6 +56,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         didCheckErrors={this.props.didCheckErrors}
         pluginID={this.props.pluginID}
         linkContent={item.linkContent}
+        autoFocus={key === 0}
       />
     );
   }

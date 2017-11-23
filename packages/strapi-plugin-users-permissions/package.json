@@ -1,0 +1,48 @@
+{
+  "name": "strapi-plugin-users-permissions",
+  "version": "3.0.0-alpha.6.7",
+  "description": "This is the description of the plugin.",
+  "strapi": {
+    "name": "Auth & Permissions",
+    "icon": "users",
+    "description": "users-permissions.plugin.description"
+  },
+  "scripts": {
+    "analyze:clean": "rimraf stats.json",
+    "preanalyze": "npm run analyze:clean",
+    "analyze": "node node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
+    "prebuild": "npm run build:clean && npm run test",
+    "build": "cross-env NODE_ENV=production webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "rimraf admin/build",
+    "start": "cross-env NODE_ENV=development node node_modules/strapi-helper-plugin/lib/server",
+    "generate": "plop --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "lint": "eslint --ignore-path .gitignore --config node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "pretest": "npm run lint",
+    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
+    "test": "echo Tests are not implemented.",
+    "prepublish": "npm run build",
+    "postinstall": "node node_modules/strapi-helper-plugin/lib/internals/scripts/postinstall.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.1.0",
+    "sendmail": "^1.2.0"
+  },
+  "author": {
+    "name": "A Strapi developer",
+    "email": "",
+    "url": ""
+  },
+  "maintainers": [
+    {
+      "name": "A Strapi developer",
+      "email": "",
+      "url": ""
+    }
+  ],
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
+}

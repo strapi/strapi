@@ -1,0 +1,106 @@
+{
+  "0": {
+    "description": "Allow editing and deleting (except users)",
+    "name": "owner",
+    "users": [
+      {
+        "id": "11",
+        "name": "John Lennon"
+      },
+      {
+        "id": "12",
+        "name": "Paul McCartney"
+      },
+      {
+        "id": "13",
+        "name": "George Harrison"
+      },
+      {
+        "id": "14",
+        "name": "Ringo Starr"
+      }
+    ],
+    "permissions": {
+      "application": {
+        "icon": "",
+        "controllers": {
+          "invoices": {
+            "create": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "find": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "payInvoice": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "delete": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "update": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "updateAddress": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "updateRelationship": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "changeOwner": {
+              "enabled": false,
+              "policy": "entriesCreatedByUser"
+            }
+          }
+        }
+      },
+      "mailchimp": {
+        "icon": "",
+        "controllers": {
+          "invoices": {
+            "delete": {
+              "enabled": true,
+              "policy": "entriesCreatedByUser"
+            },
+            "update": {
+              "enabled": false,
+              "policy": "entriesCreatedByUser"
+            }
+          }
+        }
+      }
+    }
+  },
+  "permissions": {
+    "application": {
+      "icon": "",
+      "controllers": {
+        "invoices": {
+          "delete": {
+            "enabled": true,
+            "policy": "entriesCreatedByUser"
+          },
+          "update": {
+            "enabled": false,
+            "policy": "entriesCreatedByUser"
+          }
+        }
+      }
+    }
+  },
+  "initRole": {
+    "description": "",
+    "name": "",
+    "permissions": {}
+  }
+}

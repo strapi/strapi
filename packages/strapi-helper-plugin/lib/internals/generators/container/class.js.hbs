@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 {{#if wantHeaders}}
 import { Helmet } from 'react-helmet';
@@ -51,9 +51,7 @@ export class {{ properCase name }} extends {{{ type }}} { // eslint-disable-line
   }
 }
 
-{{ properCase name }}.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-};
+{{ properCase name }}.propTypes = {};
 
 {{#if wantActionsAndReducer}}
 const mapStateToProps = createStructuredSelector({
@@ -64,7 +62,7 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {},
-    dispatch
+    dispatch,
   );
 }
 

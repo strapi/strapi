@@ -1,0 +1,166 @@
+.headerContainer {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: flex;
+  padding: 1.6rem 2.9rem 0 2.9rem;
+  > div {
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+}
+
+.modalBody {
+  padding: 2.2rem 1.4rem 0 1.4rem;
+}
+
+.modalFooter {
+  padding: 1.1rem 1rem 2.8rem 1rem;
+  border: none;
+  > button {
+    height: 3rem;
+    position: relative;
+    border-radius: 0.3rem;
+    text-transform: capitalize;
+    margin-right: 1.8rem;
+    cursor: pointer;
+    font-family: Lato;
+    &:focus {
+      outline: 0;
+    }
+    > i {
+      margin-right: 1.3rem;
+    }
+    &:hover {
+     &::after {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       top: 0;
+       left: 0;
+       border-radius: 0.3rem;
+       content: '';
+       opacity: 0.1;
+       background: #FFFFFF;
+     }
+   }
+  }
+}
+
+.modalHeader {
+  margin: 0 2.9rem;
+  padding: 1.4rem 0 2.8rem 0;
+  border-bottom: 1px solid #F6F6F6;
+  position: relative;
+  > button {
+    margin-right: -1.5rem;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    z-index: 999;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0!important;
+    }
+    > span {
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+  }
+}
+
+.modalPosition {
+  > div {
+    border:none;
+    border-radius: 2px;
+    width: 74.5rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.primary {
+  height: 3rem;
+  font-family: Lato!important;
+  margin-left: 1.9rem!important;
+  cursor: pointer;
+  font-family: Lato;
+  &:focus {
+    outline: 0;
+  }
+  border: none!important;
+  width: 15rem;
+  line-height: 1.6rem;
+  font-weight: 600;
+  border-radius: 3px;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white!important;
+  &:hover, &:active {
+    border: none!important;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    color: white;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-top: -1.2rem;
+}
+
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  font-size: 5rem;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: .4s;
+}
+
+
+.secondary {
+  min-width: 100px;
+  font-family: Lato;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  cursor: pointer;
+  background-color: transparent;
+  &:hover, &:active {
+    color: #F64D0A;
+    background-color: white;
+    border: 0.1rem solid #F64D0A;
+  }
+  height: 3rem;
+  color: #F64D0A;
+  border: 0.1rem solid #F64D0A;
+  position: relative;
+  border-radius: 3px;
+}
