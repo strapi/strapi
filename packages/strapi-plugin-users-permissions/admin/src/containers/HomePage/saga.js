@@ -27,7 +27,7 @@ export function* dataDelete() {
     if (indexDataToDelete !== -1) {
       yield put(deleteDataSucceeded(indexDataToDelete));
 
-      srapi.notification.success('users-permissions.notification.success.delete');
+      strapi.notification.success('users-permissions.notification.success.delete');
     }
   } catch(err) {
     strapi.notification.error('users-permissions.notification.error.delete');
