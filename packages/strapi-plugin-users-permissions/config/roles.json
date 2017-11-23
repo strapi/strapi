@@ -200,6 +200,22 @@
             }
           },
           "userspermissions": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteProvider": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteRole": {
+              "enabled": false,
+              "policy": ""
+            },
             "getPermissions": {
               "enabled": false,
               "policy": ""
@@ -213,14 +229,6 @@
               "policy": ""
             },
             "init": {
-              "enabled": false,
-              "policy": ""
-            },
-            "identity": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createRole": {
               "enabled": false,
               "policy": ""
             },

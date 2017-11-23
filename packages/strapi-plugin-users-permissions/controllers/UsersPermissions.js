@@ -28,6 +28,28 @@ module.exports = {
     }
   },
 
+  deleteProvider: async ctx => {
+    const { provider } = ctx.params;
+
+    if (!provider) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
+
+    // TODO handle dynamic
+    return ctx.send({ ok: true });
+  },
+
+  deleteRole: async ctx => {
+    const { role } = ctx.params;
+
+    if (!role) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
+
+    // TODO handle dynamic
+    return ctx.send({ ok: true });
+  },
+
   getPermissions: async (ctx) => {
     try {
       const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
