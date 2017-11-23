@@ -16,13 +16,11 @@ module.exports = {
    *
    * @return {Object}
    */
-  createRole: async(ctx) => {
-    console.log(ctx.request.body);
-
+  createRole: async (ctx) => {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
-    
+
     try {
       ctx.send({ ok: true });
     } catch(err) {
@@ -30,7 +28,7 @@ module.exports = {
     }
   },
 
-  getPermissions: async(ctx) => {
+  getPermissions: async (ctx) => {
     try {
       const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
       ctx.send({ permissions });
@@ -39,7 +37,7 @@ module.exports = {
     }
   },
 
-  getRole: async(ctx) => {
+  getRole: async (ctx) => {
     const { id } = ctx.params;
     const role = fakeData[id];
 
@@ -67,5 +65,13 @@ module.exports = {
     });
 
     ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
+  },
+
+  updateRole: async (ctx) => {
+    try {
+      ctx.send({ ok: true });
+    } catch(error) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
+    }
   }
 };

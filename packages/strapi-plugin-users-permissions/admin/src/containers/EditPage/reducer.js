@@ -17,6 +17,7 @@ import {
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_ROLE_ID,
   SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
 } from './constants';
@@ -31,6 +32,7 @@ const initialState = fromJS({
   formErrors: List([]),
   initialData: Map({}),
   modifiedData: Map({}),
+  roleId: '',
   users: List([]),
 });
 
@@ -81,6 +83,8 @@ function editPageReducer(state = initialState, action) {
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SET_ROLE_ID:
+      return state.set('roleId', action.roleId);
     case SUBMIT_ERROR:
       return state
         .set('formErrors', List(action.errors));

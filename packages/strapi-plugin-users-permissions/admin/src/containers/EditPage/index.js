@@ -36,6 +36,7 @@ import {
   setActionType,
   setErrors,
   setForm,
+  setRoleId,
   submit,
 } from './actions';
 
@@ -63,6 +64,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       // Get the available permissions
       this.props.getPermissions();
     } else {
+      this.props.setRoleId(this.props.match.params.id);
       this.props.getRole(this.props.match.params.id);
     }
   }
@@ -220,6 +222,7 @@ EditPage.propTypes = {
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
+  setRoleId: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
@@ -241,6 +244,7 @@ function mapDispatchToProps(dispatch) {
       setActionType,
       setErrors,
       setForm,
+      setRoleId,
       submit,
     },
     dispatch,

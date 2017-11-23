@@ -28,6 +28,7 @@ import {
 import {
   makeSelectActionType,
   makeSelectModifiedData,
+  makeSelectRoleId,
 } from './selectors';
 
 export function* fetchUser(action) {
@@ -86,17 +87,16 @@ export function* submit() {
   try {
     const actionType = yield select(makeSelectActionType());
     const body = yield select(makeSelectModifiedData());
+    const roleId = yield select(makeSelectRoleId());
     const opts = {
       method: actionType,
       body,
     };
 
-    // TODO : handle PUT url
-    const requestURL = actionType === 'POST' ? '/users-permissions/roles' : '/users-permissions/roles/id';
+    const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
+
     yield call(request, requestURL, opts);
-
     yield put(submitSucceeded());
-
   } catch(error) {
     console.log(error.response.payload);
     // TODO handle error message

@@ -40,6 +40,14 @@
         "policies": []
       }
     },
+    {
+      "method": "PUT",
+      "path": "/roles/:role",
+      "handler": "UsersPermissions.updateRole",
+      "config": {
+        "policies": []
+      }
+    },
 
     {
       "method": "POST",

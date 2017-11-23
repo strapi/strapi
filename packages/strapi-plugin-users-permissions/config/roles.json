@@ -223,6 +223,10 @@
             "createRole": {
               "enabled": false,
               "policy": ""
+            },
+            "updateRole": {
+              "enabled": false,
+              "policy": ""
             }
           }
         }
