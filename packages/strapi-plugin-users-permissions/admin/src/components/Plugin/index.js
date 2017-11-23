@@ -30,14 +30,20 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 
   render() {
     const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
+    const icon = get(this.context.plugins.toJS(), [this.props.name, 'icon']);
 
     return (
       <div className={styles.plugin} style={divStyle}>
         <div className={styles.banner} onClick={this.handleClick}>
           <div>
-            <span>{this.props.name}</span>
+            { icon ? (
+              <div className={styles.iconContainer}>
+                <i className={`fa fa-${icon}`} />
+              </div>
+            ) : ''}
+            <span className={styles.name}>{this.props.name}</span>
             &nbsp;—&nbsp;
-            <span>
+            <span className={styles.description}>
               {this.props.name === 'application' ? (
                 <FormattedMessage
                   id="users-permissions.Plugin.permissions.application.description"
@@ -70,6 +76,10 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
     );
   }
 }
+
+Plugin.contextTypes = {
+  plugins: PropTypes.object.isRequired,
+};
 
 Plugin.defaultProps = {
   name: '',
