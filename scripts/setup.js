@@ -22,8 +22,8 @@ shell.cd('../strapi-helper-plugin');
 shell.exec('npm link');
 
 shell.cd('../strapi-admin');
-shell.exec('npm install ../strapi-utils');
 shell.exec('npm install ../strapi-helper-plugin');
+shell.exec('npm install ../strapi-utils');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
 shell.exec('npm run build');
