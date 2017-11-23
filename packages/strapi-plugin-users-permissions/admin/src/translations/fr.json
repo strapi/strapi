@@ -60,6 +60,7 @@
   "EditPage.form.roles.label.description": "Description",
   "EditPage.form.roles.label.name": "Nom",
   "EditPage.form.roles.label.users": "Utilisateurs associés avec ce rôle ({number})",
+  "EditPage.form.roles.name.error": "Ce champ est obligatoire.",
   "EditPage.header.title": "{name} ",
   "EditPage.header.title.create": "Créez un nouveau rôle",
   "EditPage.header.description": "{description} ",

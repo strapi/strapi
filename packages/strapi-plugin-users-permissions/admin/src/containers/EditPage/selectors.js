@@ -16,10 +16,22 @@ const selectEditPageDomain = () => (state) => state.get('editPage');
 
 const makeSelectEditPage = () => createSelector(
   selectEditPageDomain(),
-  (substate) => substate.toJS()
+  (substate) => substate.toJS(),
+);
+
+const makeSelectActionType = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('actionType'),
+);
+
+const makeSelectModifiedData = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
 );
 
 export default makeSelectEditPage;
 export {
+  makeSelectActionType,
+  makeSelectModifiedData,
   selectEditPageDomain,
 };

@@ -34,7 +34,7 @@
     },
     {
       "method": "POST",
-      "path": "/permissions",
+      "path": "/roles",
       "handler": "UsersPermissions.createRole",
       "config": {
         "policies": []

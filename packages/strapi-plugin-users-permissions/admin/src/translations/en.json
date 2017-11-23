@@ -60,6 +60,7 @@
   "EditPage.form.roles.label.description": "Description",
   "EditPage.form.roles.label.name": "Name",
   "EditPage.form.roles.label.users": "Users associated with this role ({number})",
+  "EditPage.form.roles.name.error": "This value input is required.",
   "EditPage.header.title": "{name} ",
   "EditPage.header.title.create": "Create a new role",
   "EditPage.header.description": "{description} ",

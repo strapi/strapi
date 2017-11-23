@@ -14,7 +14,12 @@ import {
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
+  SET_ACTION_TYPE,
+  SET_ERRORS,
   SET_FORM,
+  SUBMIT,
+  SUBMIT_ERROR,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 export function addUser(newUser) {
@@ -82,22 +87,51 @@ export function onClickDelete(itemToDelete) {
     itemToDelete,
   };
 }
+export function setActionType(action) {
+  const actionType = action === 'create' ? 'POST' : 'PUT';
+
+  return {
+    type: SET_ACTION_TYPE,
+    actionType,
+  };
+}
+
+export function setErrors(formErrors) {
+  return {
+    type: SET_ERRORS,
+    formErrors,
+  };
+}
 
 export function setForm() {
   const form = Map({
     name: '',
     description: '',
-    users: List([
-      { name: 'Pierre Burgy' },
-      { name: 'Jim Laurie' },
-      { name: 'Aurelien Georget' },
-      { name: 'Cyril Lopez' },
-    ]),
+    users: List([]),
     permissions: Map({}),
   });
 
   return {
     type: SET_FORM,
     form,
+  };
+}
+
+export function submit() {
+  return {
+    type: SUBMIT,
+  };
+}
+
+export function submitError(errors) {
+  return {
+    type: SUBMIT_ERROR,
+    errors,
+  };
+}
+
+export function submitSucceeded() {
+  return {
+    type: SUBMIT_SUCCEEDED,
   };
 }

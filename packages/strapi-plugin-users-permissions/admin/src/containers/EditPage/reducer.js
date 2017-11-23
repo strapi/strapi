@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS, Map } from 'immutable';
+import { fromJS, List, Map } from 'immutable';
 import {
   ADD_USER,
   GET_PERMISSIONS_SUCCEEDED,
@@ -12,12 +12,20 @@ import {
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
+  SET_ACTION_TYPE,
+  SET_ERRORS,
   SET_FORM,
+  SUBMIT_ERROR,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
+  actionType: '',
+  didCheckErrors: false,
   didDeleteUser: false,
   didGetUsers: false,
+  didSubmit: false,
+  formErrors: List([]),
   initialData: Map({}),
   modifiedData: Map({}),
 });
@@ -38,6 +46,8 @@ function editPageReducer(state = initialState, action) {
         .set('modifiedData', action.form);
     case ON_CANCEL:
       return state
+        .set('didCheckErrors', !state.get('didCheckErrors'))
+        .set('formErrors', List([]))
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .set('modifiedData', state.get('initialData'));
     case ON_CHANGE_INPUT:
@@ -47,11 +57,25 @@ function editPageReducer(state = initialState, action) {
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
+    case SET_ACTION_TYPE:
+      return state
+        .set('formErrors', List([]))
+        .set('actionType', action.actionType);
+    case SET_ERRORS:
+      return state
+        .set('formErrors', List(action.formErrors))
+        .set('didCheckErrors', !state.get('didCheckErrors'));
     case SET_FORM:
       return state
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SUBMIT_ERROR:
+      return state
+        .set('formErrors', List(action.errors));
+    case SUBMIT_SUCCEEDED:
+      return state
+        .set('didSubmit', !state.get('didSubmit'));
     default:
       return state;
   }

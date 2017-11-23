@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import { get, isEqual, size } from 'lodash';
+import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -31,7 +31,10 @@ import {
   onCancel,
   onChangeInput,
   onClickDelete,
+  setActionType,
+  setErrors,
   setForm,
+  submit,
 } from './actions';
 
 // Selectors
@@ -50,12 +53,37 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   );
 
   componentDidMount() {
+    this.props.setActionType(this.props.match.params.actionType);
+
     if (this.props.match.params.actionType === 'create') {
+      // Set reducer modifiedData
       this.props.setForm();
+      // Get the available permissions
       this.props.getPermissions();
     } else {
       this.props.getRole(this.props.match.params.id);
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Redirect user to HomePage if submit ok
+    if (nextProps.editPage.didSubmit !== this.props.editPage.didSubmit) {
+      this.props.history.push('/plugins/users-permissions/roles');
+    }
+  }
+
+  componentWillUnmount() {
+    // Empty formErrors
+    this.props.setErrors([]);
+  }
+
+  handleSubmit = () => {
+    // Check if the name field is filled
+    if (isEmpty(get(this.props.editPage, ['modifiedData', 'name']))) {
+      return this.props.setErrors([{ name: 'name', errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }] }]);
+    }
+    
+    this.props.submit();
   }
 
   pluginHeaderActions = [
@@ -68,7 +96,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     {
       kind: 'primary',
       label: 'users-permissions.EditPage.submit',
-      onClick: () => console.log('submit'),
+      onClick: this.handleSubmit,
       type: 'submit',
     },
   ];
@@ -114,6 +142,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                         <Input
                           autoFocus
                           customBootstrapClass="col-md-12"
+                          errors={get(this.props.editPage, ['formErrors', findIndex(this.props.editPage.formErrors, ['name', 'name']), 'errors'])}
+                          didCheckErrors={this.props.editPage.didCheckErrors}
                           label="users-permissions.EditPage.form.roles.label.name"
                           name="name"
                           onChange={this.props.onChangeInput}
@@ -179,7 +209,10 @@ EditPage.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onChangeInput: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  setActionType: PropTypes.func.isRequired,
+  setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -195,7 +228,10 @@ function mapDispatchToProps(dispatch) {
       onCancel,
       onChangeInput,
       onClickDelete,
+      setActionType,
+      setErrors,
       setForm,
+      submit,
     },
     dispatch,
   );
