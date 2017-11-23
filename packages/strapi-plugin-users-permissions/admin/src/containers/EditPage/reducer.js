@@ -9,6 +9,7 @@ import {
   ADD_USER,
   GET_PERMISSIONS_SUCCEEDED,
   GET_ROLE_SUCCEEDED,
+  GET_USER_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
@@ -24,10 +25,12 @@ const initialState = fromJS({
   didCheckErrors: false,
   didDeleteUser: false,
   didGetUsers: false,
+  didFetchUsers: false,
   didSubmit: false,
   formErrors: List([]),
   initialData: Map({}),
   modifiedData: Map({}),
+  users: List([]),
 });
 
 function editPageReducer(state = initialState, action) {
@@ -44,6 +47,10 @@ function editPageReducer(state = initialState, action) {
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case GET_USER_SUCCEEDED:
+      return state
+        .set('didFetchUsers', !state.get('didFetchUsers'))
+        .setIn(['users'], List(action.users));
     case ON_CANCEL:
       return state
         .set('didCheckErrors', !state.get('didCheckErrors'))

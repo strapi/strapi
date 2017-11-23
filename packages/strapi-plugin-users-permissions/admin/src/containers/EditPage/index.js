@@ -28,6 +28,7 @@ import {
   addUser,
   getPermissions,
   getRole,
+  getUser,
   onCancel,
   onChangeInput,
   onClickDelete,
@@ -82,7 +83,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     if (isEmpty(get(this.props.editPage, ['modifiedData', 'name']))) {
       return this.props.setErrors([{ name: 'name', errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }] }]);
     }
-    
+
     this.props.submit();
   }
 
@@ -167,14 +168,17 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                     <InputSearch
                       addUser={this.props.addUser}
                       didDeleteUser={this.props.editPage.didDeleteUser}
+                      didFetchUsers={this.props.editPage.didFetchUsers}
                       didGetUsers={this.props.editPage.didGetUsers}
+                      getUser={this.props.getUser}
                       label="users-permissions.EditPage.form.roles.label.users"
                       labelValues={{ number: size(get(this.props.editPage, ['modifiedData', 'users'])) }}
+                      onClickDelete={this.props.onClickDelete}
+                      name="users"
                       type="text"
+                      users={get(this.props.editPage, 'users')}
                       validations={{ required: true }}
                       values={get(this.props.editPage, ['modifiedData', 'users'])}
-                      name="users"
-                      onClickDelete={this.props.onClickDelete}
                     />
                     <div className="col-md-12">
                       <div className={styles.separator} />
@@ -204,6 +208,7 @@ EditPage.propTypes = {
   editPage: PropTypes.object.isRequired,
   getPermissions: PropTypes.func.isRequired,
   getRole: PropTypes.func.isRequired,
+  getUser: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
@@ -225,6 +230,7 @@ function mapDispatchToProps(dispatch) {
       addUser,
       getPermissions,
       getRole,
+      getUser,
       onCancel,
       onChangeInput,
       onClickDelete,

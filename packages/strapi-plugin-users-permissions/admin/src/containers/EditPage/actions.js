@@ -11,6 +11,8 @@ import {
   GET_PERMISSIONS_SUCCEEDED,
   GET_ROLE,
   GET_ROLE_SUCCEEDED,
+  GET_USER,
+  GET_USER_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_DELETE,
@@ -62,6 +64,20 @@ export function getRoleSucceeded(data) {
   return {
     type: GET_ROLE_SUCCEEDED,
     form,
+  };
+}
+
+export function getUser(user) {
+  return {
+    type: GET_USER,
+    user,
+  };
+}
+
+export function getUserSucceeded(users) {
+  return {
+    type: GET_USER_SUCCEEDED,
+    users,
   };
 }
 

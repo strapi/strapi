@@ -96,6 +96,7 @@
 
   "notification.error.delete": "Une erreur est survenue en essayant de supprimer cet élément",
   "notification.error.fetch": "Une erreur est survenue en essayant de récupérer les données",
+  "notification.error.fetchUser": "Une erreur est survenue en esssayent de récupérer les users",
   "notification.info.emailSent": "L'email a été envoyé",
   "notification.success.delete": "L'élément a bien été supprimé",
 

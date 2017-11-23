@@ -25,6 +25,10 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     if (nextProps.didGetUsers !== this.props.didGetUsers) {
       this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
     }
+
+    if (nextProps.didFetchUsers !== this.props.didFetchUsers) {
+      this.setState({ filteredUsers: nextProps.users });
+    }
   }
 
   handleChange = ({ target }) => {
@@ -35,6 +39,11 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
           return user;
         }
       });
+
+    if (isEmpty(filteredUsers) && !isEmpty(target.value)) {
+      this.props.getUser(target.value);
+    }
+
     this.setState({ value: target.value, filteredUsers });
   }
 
@@ -76,16 +85,20 @@ InputSearch.defaultProps = {
   labelValues: {
     number: 0,
   },
+  users: [],
   values: [],
 };
 
 InputSearch.propTypes = {
   didDeleteUser: PropTypes.bool.isRequired,
+  didFetchUsers: PropTypes.bool.isRequired,
   didGetUsers: PropTypes.bool.isRequired,
+  getUser: PropTypes.func.isRequired,
   label: PropTypes.string.isRequired,
   labelValues: PropTypes.object,
   name: PropTypes.string.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  users: PropTypes.array,
   values: PropTypes.array,
 };
 

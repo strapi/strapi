@@ -1,4 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
+import { includes, toLower } from 'lodash';
 import {
   call,
   cancel,
@@ -13,12 +14,14 @@ import request from 'utils/request';
 import {
   getPermissionsSucceeded,
   getRoleSucceeded,
+  getUserSucceeded,
   submitSucceeded,
 } from './actions';
 
 import {
   GET_PERMISSIONS,
   GET_ROLE,
+  GET_USER,
   SUBMIT,
 } from './constants';
 
@@ -26,6 +29,39 @@ import {
   makeSelectActionType,
   makeSelectModifiedData,
 } from './selectors';
+
+export function* fetchUser(action) {
+  try {
+    const fakeUser = [
+      {
+        id: '11',
+        name: 'John Lennon',
+      },
+      {
+        id: '12',
+        name: 'Paul McCartney',
+      },
+      {
+        id: '13',
+        name: 'George Harrison',
+      },
+      {
+        id: '14',
+        name: 'Ringo Starr',
+      },
+    ];
+    // Temporary waiting for backend dynamic
+    const filteredUsers = fakeUser.filter((user) => {
+      if (includes(toLower(user.name), toLower(action.user))) {
+        return user;
+      }
+    });
+
+    yield put(getUserSucceeded(filteredUsers));
+  } catch(error) {
+    strapi.notification.error('users-permissions.notification.error.fetchUser');
+  }
+}
 
 export function* permissionsGet() {
   try {
@@ -71,7 +107,9 @@ export default function* defaultSaga() {
   const loadPermissionsWatcher = yield fork(takeLatest, GET_PERMISSIONS, permissionsGet);
   const loadRoleWatcher = yield fork(takeLatest, GET_ROLE, roleGet);
 
+  yield fork(takeLatest, GET_USER, fetchUser);
   yield fork(takeLatest, SUBMIT, submit);
+
   yield take(LOCATION_CHANGE);
 
   yield cancel(loadPermissionsWatcher);
