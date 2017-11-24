@@ -11,17 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      xframe: {
-        enabled: true,
-        value: 'SAMEORIGIN'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

@@ -7,16 +7,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      logger: {
-        enabled: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

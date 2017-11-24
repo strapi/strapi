@@ -14,17 +14,6 @@ const path = require('path');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      favicon: {
-        path: 'favicon.ico',
-        maxAge: 86400000
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

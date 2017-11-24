@@ -11,17 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      xss: {
-        enabled: false,
-        mode: 'block'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

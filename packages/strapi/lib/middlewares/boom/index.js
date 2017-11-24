@@ -12,16 +12,6 @@ const delegate = require('delegates');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      boom: {
-        enabled: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

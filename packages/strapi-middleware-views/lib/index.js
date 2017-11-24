@@ -19,16 +19,6 @@ const views = require('koa-views');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      views: {
-        enabled: false
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

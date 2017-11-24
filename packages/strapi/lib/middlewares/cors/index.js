@@ -11,36 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      cors: {
-        enabled: false,
-        origin: true,
-        expose: [
-          'WWW-Authenticate',
-          'Server-Authorization'
-        ],
-        maxAge: 31536000,
-        credentials: true,
-        methods: [
-          'GET',
-          'POST',
-          'PUT',
-          'PATCH',
-          'DELETE',
-          'HEAD'
-        ],
-        headers: [
-          'Content-Type',
-          'Authorization'
-        ],
-        keepHeadersOnError: false
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
