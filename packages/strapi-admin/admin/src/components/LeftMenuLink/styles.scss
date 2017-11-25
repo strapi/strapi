@@ -17,6 +17,7 @@
   color: $left-menu-link-color;
   text-decoration: none;
   display: block;
+  -webkit-font-smoothing: antialiased;
 
   &:hover {
     color: $white;
@@ -43,7 +44,6 @@
 .linkIcon {
   position: relative;
   margin-right: 1.2rem;
-  vertical-align: middle;
   font-size: 1.2rem;
   width: 1.4rem;
   height: 1.2rem;
