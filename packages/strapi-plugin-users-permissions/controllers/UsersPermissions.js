@@ -22,6 +22,7 @@ module.exports = {
     }
 
     try {
+      await strapi.plugins['users-permissions'].services.userspermissions.createRole(ctx.request.body);
       ctx.send({ ok: true });
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
