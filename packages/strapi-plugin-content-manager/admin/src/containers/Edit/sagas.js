@@ -85,8 +85,8 @@ export function* deleteRecord({ id, modelName, source }) {
       const requestUrl = `${strapi.backendURL}/content-manager/explorer/${modelName}/${id}`;
       const params = {};
 
-      if (action.source !== undefined) {
-        params.source = action.source;
+      if (source !== undefined) {
+        params.source = source;
       }
       // Call our request helper (see 'utils/request')
       yield call(request, requestUrl, {
@@ -100,9 +100,7 @@ export function* deleteRecord({ id, modelName, source }) {
       // Redirect to the list page.
       router.push({
         pathname: `/plugins/content-manager/${modelName}`,
-        state: {
-          source,
-        },
+        search: `?source=${source}`,
       });
     } catch (err) {
       yield put(recordDeleteError());

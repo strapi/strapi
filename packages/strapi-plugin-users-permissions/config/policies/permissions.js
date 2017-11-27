@@ -15,6 +15,10 @@ module.exports = async (ctx, next) => {
 
   const permission = _.get(_.clone(strapi.plugins['users-permissions'].config), [role.toString(), 'permissions', route.plugin || 'application', 'controllers', route.controller, route.action]);
 
+  if (!permission) {
+    return await next();
+  }
+
   if (permission.enabled && permission.policy) {
     try {
       await require(`./${permission.policy}.js`)(ctx, next);
