@@ -26,6 +26,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.1.0",
+    "path-to-regexp": "^2.1.0",
     "sendmail": "^1.2.0",
     "strapi-helper-plugin": "3.0.0-alpha.6.7"
   },
