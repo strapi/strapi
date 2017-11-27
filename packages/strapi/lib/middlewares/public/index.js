@@ -18,18 +18,6 @@ const Koa = require('koa');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      public: {
-        enabled: true,
-        maxAge: 60000,
-        path: './public'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

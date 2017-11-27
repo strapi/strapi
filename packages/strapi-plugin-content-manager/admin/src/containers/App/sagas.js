@@ -1,4 +1,4 @@
-import { map } from 'lodash';
+import { map, omit } from 'lodash';
 import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
@@ -10,7 +10,8 @@ import { makeSelectModels } from './selectors';
 
 export function* modelEntriesGet(action) {
   try {
-    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${action.modelName}/count`;
+    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${action.modelName}/count${action.source !== undefined ? `?source=${action.source}`: ''}`;
+
     const response = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(getModelEntriesSucceeded(response.count));
@@ -27,7 +28,7 @@ export const generateMenu = function () {
     .then(displayedModels => {
       return [{
         name: 'Content Types',
-        links: map(displayedModels, (model, key) => ({
+        links: map(omit(displayedModels, 'plugins'), (model, key) => ({
           label: model.labelPlural || model.label || key,
           destination: key,
         })),

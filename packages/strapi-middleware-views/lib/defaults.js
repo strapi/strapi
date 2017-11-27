@@ -1,0 +1,5 @@
+{
+  "views": {
+    "enabled": false
+  }
+}

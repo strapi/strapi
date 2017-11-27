@@ -25,7 +25,7 @@ import {
   makeSelectSort,
 } from './selectors';
 
-export function* getRecords() {
+export function* getRecords(action) {
   const currentModel = yield select(makeSelectCurrentModelName());
   const limit = yield select(makeSelectLimit());
   const currentPage = yield select(makeSelectCurrentPage());
@@ -39,6 +39,10 @@ export function* getRecords() {
     limit,
     sort,
   };
+
+  if (action.source !== undefined) {
+    params.source = action.source;
+  }
 
   try {
     const requestUrl = `${strapi.backendURL}/content-manager/explorer/${currentModel}`;
@@ -54,14 +58,19 @@ export function* getRecords() {
   }
 }
 
-export function* getCount() {
+export function* getCount(action) {
   const currentModel = yield select(makeSelectCurrentModelName());
+  const params = {};
+
+  if (action.source !== undefined) {
+    params.source = action.source;
+  }
 
   try {
-    const response = yield call(
-      request,
-      `${strapi.backendURL}/content-manager/explorer/${currentModel}/count`,
-    );
+    const response = yield call(request,`${strapi.backendURL}/content-manager/explorer/${currentModel}/count`, {
+      method: 'GET',
+      params,
+    });
 
     yield put(loadedCount(response.count));
   } catch (err) {

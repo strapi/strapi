@@ -174,7 +174,7 @@ module.exports.app = async function() {
     // Preset config in alphabetical order.
     this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
-      const currentSettings = flattenMiddlewaresConfig[current] || this.config[current];
+      const currentSettings = merge(get(this.middleware[current], ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config[current]);
       acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
       if (!acc[current].hasOwnProperty('enabled')) {

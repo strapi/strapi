@@ -11,18 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      ip: {
-        enabled: false,
-        whiteList: [],
-        blackList: []
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

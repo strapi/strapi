@@ -85,11 +85,13 @@ module.exports = {
     }
 
     // First, check if the user is the first one to register as admin.
-    const adminUsers = await strapi.query('user', 'users-permissions').find({ admin: true });
+    const adminUsers = await strapi.query('user', 'users-permissions').find({ role: '0' });
 
     // Check if the user is the first to register
     if (adminUsers.length === 0) {
-      params.admin = true;
+      params.role = '0';
+    } else {
+      params.role = '1';
     }
 
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);

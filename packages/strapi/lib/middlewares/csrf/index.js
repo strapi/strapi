@@ -11,18 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      csrf: {
-        enabled: false,
-        key: '_csrf',
-        secret: '_csrfSecret'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

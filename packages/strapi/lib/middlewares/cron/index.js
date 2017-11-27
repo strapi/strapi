@@ -15,16 +15,6 @@ const cron = require('node-schedule');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      cron: {
-        enabled: false
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

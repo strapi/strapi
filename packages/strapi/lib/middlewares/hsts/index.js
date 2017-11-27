@@ -11,18 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      hsts: {
-        enabled: true,
-        maxAge: 31536000,
-        includeSubDomains: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

@@ -22,3 +22,7 @@ npm run test
 # Test `strapi-plugin-content-type-builder`
 cd ../strapi-plugin-content-type-builder
 npm run test
+
+# Test `strapi-plugin-content-type-builder`
+cd ../strapi-plugin-users-permissions
+npm run test

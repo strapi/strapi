@@ -6,6 +6,10 @@
       "content-manager": {
         "controllers": {
           "contentmanager": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
             "models": {
               "enabled": false,
               "policy": ""
@@ -31,10 +35,6 @@
               "policy": ""
             },
             "delete": {
-              "enabled": false,
-              "policy": ""
-            },
-            "identity": {
               "enabled": false,
               "policy": ""
             }
@@ -153,29 +153,29 @@
         "controllers": {
           "auth": {
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "callback": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "register": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "changePassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
           "user": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
@@ -248,7 +248,34 @@
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "category": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   }
