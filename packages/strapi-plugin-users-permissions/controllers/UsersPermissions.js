@@ -70,6 +70,16 @@ module.exports = {
     return ctx.send({ role });
   },
 
+  getRoles: async (ctx) => {
+    try {
+      const roles = await strapi.plugins['users-permissions'].services.userspermissions.getRoles();
+
+      ctx.send({ roles });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
+    }
+  },
+
   index: async (ctx) => {
     // Add your own logic here.
 

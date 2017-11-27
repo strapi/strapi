@@ -12,7 +12,10 @@ import {
   DELETE_DATA,
   FETCH_DATA,
 } from './constants';
-import data from './data.json';
+
+// TODO uncomment to test design providers and so on...
+// import data from './data.json';
+
 import {
   makeSelectAllData,
   makeSelectDataToDelete,
@@ -44,11 +47,14 @@ export function* dataDelete() {
 
 export function* dataFetch(action) {
   try {
-    const response = data[action.endPoint];
+    const response = yield call(request, `/users-permissions/${action.endPoint}`, { method: 'GET' });
 
-    yield put(fetchDataSucceeded(response));
+    yield put(fetchDataSucceeded(response[action.endPoint]));
+    // To test other views
+    // const response = data[action.endPoint];
+    // yield put(fetchDataSucceeded(response));
+
     yield put(setForm(action.endPoint));
-
   } catch(err) {
     strapi.notification.error('users-permissions.notification.error.fetch');
   }

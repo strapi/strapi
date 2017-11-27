@@ -26,6 +26,14 @@
     },
     {
       "method": "GET",
+      "path": "/permissions",
+      "handler": "UsersPermissions.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/roles/:id",
       "handler": "UsersPermissions.getRole",
       "config": {
@@ -34,12 +42,13 @@
     },
     {
       "method": "GET",
-      "path": "/permissions",
-      "handler": "UsersPermissions.getPermissions",
+      "path": "/roles",
+      "handler": "UsersPermissions.getRoles",
       "config": {
         "policies": []
       }
     },
+
     {
       "method": "POST",
       "path": "/roles",
