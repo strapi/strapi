@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { isEmpty, isUndefined, map, replace, split } from 'lodash';
+import { isEmpty, isUndefined, map, get, toInteger } from 'lodash';
 import { router } from 'app';
 
 // Selectors.
@@ -23,6 +23,9 @@ import PopUpWarning from 'components/PopUpWarning';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+
+// Utils
+import getQueryParameters from 'utils/getQueryParameters';
 
 // Actions.
 import {
@@ -88,24 +91,24 @@ export class List extends React.Component {
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    const searchParams = split(replace(props.location.search, '?', ''), '&');
+    const source = getQueryParameters(props.location.search, 'source');
 
-    const sort = isEmpty(props.location.search) ?
-      this.props.models[slug.toLowerCase()].primaryKey || 'id' :
-      replace(searchParams[2], 'sort=', '');
+    const sort = (isEmpty(props.location.search) ?
+      get(this.props.models, ['models', slug.toLowerCase(), 'primaryKey']) || get(this.props.models.plugins, [source, 'models', slug.toLowerCase(), 'primaryKey']) :
+      getQueryParameters('sort')) || 'id';
 
     if (!isEmpty(props.location.search)) {
-      this.props.changePage(parseInt(replace(searchParams[0], 'page=', ''), 10));
-      this.props.changeLimit(parseInt(replace(searchParams[1], 'limit=', ''), 10));
+      this.props.changePage(toInteger(getQueryParameters('page')));
+      this.props.changeLimit(toInteger(getQueryParameters('limit')));
     }
 
     this.props.changeSort(sort);
 
     // Load records
-    this.props.loadRecords();
+    this.props.loadRecords(source);
 
     // Get the records count
-    this.props.loadCount();
+    this.props.loadCount(source);
 
     // Define the `create` route url
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
@@ -139,7 +142,9 @@ export class List extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.deleteRecord(this.state.target, this.props.currentModelName);
+    const source = getQueryParameters(this.props.location.search, 'source');
+
+    this.props.deleteRecord(this.state.target, this.props.currentModelName, source);
     this.setState({ showWarning: false });
   }
 
@@ -156,18 +161,20 @@ export class List extends React.Component {
   }
 
   render() {
-    if (!this.props.currentModelName || !this.props.schema) {
+    // Detect current model structure from models list
+    const source = getQueryParameters(this.props.location.search, 'source');
+    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', source, 'models', this.props.currentModelName]);
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+
+    if (!this.props.currentModelName || !currentSchema) {
       return <div />;
     }
 
-    // Detect current model structure from models list
-    const currentModel = this.props.models[this.props.currentModelName];
-
     // Define table headers
-    const tableHeaders = map(this.props.schema[this.props.currentModelName].list, (value) => ({
+    const tableHeaders = map(currentSchema.list, (value) => ({
       name: value,
-      label: this.props.schema[this.props.currentModelName].fields[value].label,
-      type: this.props.schema[this.props.currentModelName].fields[value].type,
+      label: currentSchema.fields[value].label,
+      type: currentSchema.fields[value].type,
     }));
 
     tableHeaders.splice(0, 0, { name: currentModel.primaryKey || 'id', label: 'Id', type: 'string' });
@@ -183,12 +190,12 @@ export class List extends React.Component {
         history={this.props.history}
         primaryKey={currentModel.primaryKey || 'id'}
         handleDelete={this.toggleModalWarning}
-        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}`}
+        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}&source=${source}`}
       />
     );
 
     // Plugin header config
-    const pluginHeaderTitle = this.props.schema[this.props.currentModelName].label || 'Content Manager';
+    const pluginHeaderTitle = currentSchema.label || 'Content Manager';
 
     // Define plugin header actions
     const pluginHeaderActions = [

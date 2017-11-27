@@ -11,9 +11,9 @@ const bootstrap = (plugin) => new Promise((resolve, reject) => {
         links: [{
           label: 'Users',
           destination: 'user',
-          plugin: 'content-manager'
+          plugin: 'content-manager',
         }],
-        name: 'Content Types'
+        name: 'Content Types',
       });
 
       return resolve(plugin);
