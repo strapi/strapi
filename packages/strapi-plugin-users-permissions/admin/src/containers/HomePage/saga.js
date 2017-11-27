@@ -1,6 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { findIndex } from 'lodash';
-import { takeLatest, put, fork, take, cancel, select } from 'redux-saga/effects';
+import { takeLatest, put, fork, take, cancel, select, call } from 'redux-saga/effects';
+import request from 'utils/request';
 
 import {
   deleteDataSucceeded,
@@ -11,11 +12,14 @@ import {
   DELETE_DATA,
   FETCH_DATA,
 } from './constants';
-import data from './data.json';
+
+// TODO uncomment to test design providers and so on...
+// import data from './data.json';
+
 import {
   makeSelectAllData,
   makeSelectDataToDelete,
-  // makeSelectDeleteEndPoint,
+  makeSelectDeleteEndPoint,
 } from './selectors';
 
 export function* dataDelete() {
@@ -23,11 +27,18 @@ export function* dataDelete() {
     const allData = yield select(makeSelectAllData());
     const dataToDelete = yield select(makeSelectDataToDelete());
     const indexDataToDelete = findIndex(allData, ['name', dataToDelete.name]);
+    const endPointAPI = yield select(makeSelectDeleteEndPoint());
 
     if (indexDataToDelete !== -1) {
-      yield put(deleteDataSucceeded(indexDataToDelete));
+      const id = dataToDelete.id;
+      const requestURL = `/users-permissions/${endPointAPI}/${id}`;
+      // TODO watchServerRestart
+      const response = yield call(request, requestURL, { method: 'DELETE' });
 
-      srapi.notification.success('users-permissions.notification.success.delete');
+      if (response.ok) {
+        yield put(deleteDataSucceeded(indexDataToDelete));
+        strapi.notification.success('users-permissions.notification.success.delete');
+      }
     }
   } catch(err) {
     strapi.notification.error('users-permissions.notification.error.delete');
@@ -36,11 +47,14 @@ export function* dataDelete() {
 
 export function* dataFetch(action) {
   try {
-    const response = data[action.endPoint];
+    const response = yield call(request, `/users-permissions/${action.endPoint}`, { method: 'GET' });
 
-    yield put(fetchDataSucceeded(response));
+    yield put(fetchDataSucceeded(response[action.endPoint]));
+    // To test other views
+    // const response = data[action.endPoint];
+    // yield put(fetchDataSucceeded(response));
+
     yield put(setForm(action.endPoint));
-
   } catch(err) {
     strapi.notification.error('users-permissions.notification.error.fetch');
   }

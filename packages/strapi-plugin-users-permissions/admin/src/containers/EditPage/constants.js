@@ -18,6 +18,7 @@ export const ON_CLICK_DELETE = 'UsersPermissions/EditPage/ON_CLICK_DELETE';
 export const SET_ACTION_TYPE = 'UsersPermissions/EditPage/SET_ACTION_TYPE';
 export const SET_ERRORS = 'UsersPermissions/EditPage/SET_ERRORS';
 export const SET_FORM = 'UsersPermissions/EditPage/SET_FORM';
+export const SET_ROLE_ID = 'UsersPermissions/EditPage/SET_ROLE_ID';
 export const SUBMIT = 'UsersPermissions/EditPage/SUBMIT';
 export const SUBMIT_ERROR = 'UsersPermissions/EditPage/SUBMIT_ERROR';
 export const SUBMIT_SUCCEEDED = 'UsersPermissions/EditPage/SUBMIT_SUCCEEDED';

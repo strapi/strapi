@@ -20,6 +20,7 @@ import {
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_ROLE_ID,
   SUBMIT,
   SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
@@ -138,6 +139,13 @@ export function setForm() {
   return {
     type: SET_FORM,
     form,
+  };
+}
+
+export function setRoleId(roleId) {
+  return {
+    type: SET_ROLE_ID,
+    roleId,
   };
 }
 

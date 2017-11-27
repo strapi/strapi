@@ -1,7 +1,7 @@
 {
   "0": {
     "description": "",
-    "name": "",
+    "name": "Administrator",
     "permissions": {
       "content-manager": {
         "controllers": {
@@ -200,6 +200,22 @@
             }
           },
           "userspermissions": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteProvider": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteRole": {
+              "enabled": false,
+              "policy": ""
+            },
             "getPermissions": {
               "enabled": false,
               "policy": ""
@@ -216,11 +232,15 @@
               "enabled": false,
               "policy": ""
             },
-            "identity": {
+            "updateRole": {
               "enabled": false,
               "policy": ""
             },
-            "createRole": {
+            "searchUsers": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoles": {
               "enabled": false,
               "policy": ""
             }

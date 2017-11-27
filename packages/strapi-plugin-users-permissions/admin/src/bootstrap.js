@@ -6,6 +6,16 @@ const bootstrap = (plugin) => new Promise((resolve, reject) => {
       plugin.hasAdminUser = response.hasAdmin;
       plugin.nonProtectedUrl = '/plugins/users-permissions/auth';
 
+      // Add Users to Content Types section.
+      plugin.leftMenuSections.push({
+        links: [{
+          label: 'Users',
+          destination: 'user',
+          plugin: 'content-manager',
+        }],
+        name: 'Content Types',
+      });
+
       return resolve(plugin);
     })
     .catch(err => reject(err));

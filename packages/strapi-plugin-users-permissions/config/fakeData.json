@@ -5,19 +5,19 @@
     "users": [
       {
         "id": "11",
-        "name": "John Lennon"
+        "username": "John Lennon"
       },
       {
         "id": "12",
-        "name": "Paul McCartney"
+        "username": "Paul McCartney"
       },
       {
         "id": "13",
-        "name": "George Harrison"
+        "username": "George Harrison"
       },
       {
         "id": "14",
-        "name": "Ringo Starr"
+        "username": "Ringo Starr"
       }
     ],
     "permissions": {

@@ -7,6 +7,7 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import { get, includes } from 'lodash';
 import { router } from 'app';
 
 // Design
@@ -24,6 +25,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     }
   }
 
+  // Roles that can't be deleted
+  // Don't delete this line
+  protectedRoleIDs = ['0', '2'];
+
   generateContent = () => {
     let icons = [
       {
@@ -38,6 +43,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
     switch (this.props.settingType) {
       case 'roles':
+        if (includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
+          icons = [{ icoType: 'pencil', onClick: this.handleClick }];
+        }
+
         return (
           <div className={cn('row', styles.wrapper)}>
             <div className="col-md-2">

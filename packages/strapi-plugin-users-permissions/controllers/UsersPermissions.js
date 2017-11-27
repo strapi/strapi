@@ -16,13 +16,11 @@ module.exports = {
    *
    * @return {Object}
    */
-  createRole: async(ctx) => {
-    console.log(ctx.request.body);
-
+  createRole: async (ctx) => {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
-    
+
     try {
       ctx.send({ ok: true });
     } catch(err) {
@@ -30,7 +28,29 @@ module.exports = {
     }
   },
 
-  getPermissions: async(ctx) => {
+  deleteProvider: async ctx => {
+    const { provider } = ctx.params;
+
+    if (!provider) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
+
+    // TODO handle dynamic
+    return ctx.send({ ok: true });
+  },
+
+  deleteRole: async ctx => {
+    const { role } = ctx.params;
+
+    if (!role) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
+
+    // TODO handle dynamic
+    return ctx.send({ ok: true });
+  },
+
+  getPermissions: async (ctx) => {
     try {
       const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
       ctx.send({ permissions });
@@ -39,7 +59,7 @@ module.exports = {
     }
   },
 
-  getRole: async(ctx) => {
+  getRole: async (ctx) => {
     const { id } = ctx.params;
     const role = fakeData[id];
 
@@ -48,6 +68,16 @@ module.exports = {
     }
 
     return ctx.send({ role });
+  },
+
+  getRoles: async (ctx) => {
+    try {
+      const roles = await strapi.plugins['users-permissions'].services.userspermissions.getRoles();
+
+      ctx.send({ roles });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
+    }
   },
 
   index: async (ctx) => {
@@ -67,5 +97,19 @@ module.exports = {
     });
 
     ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
+  },
+
+  searchUsers: async (ctx) => {
+    const data = await strapi.query('user', 'users-permissions').search(ctx.params);
+
+    return ctx.send(data);
+  },
+
+  updateRole: async (ctx) => {
+    try {
+      ctx.send({ ok: true });
+    } catch(error) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
+    }
   }
 };

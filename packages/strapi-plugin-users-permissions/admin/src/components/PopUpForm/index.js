@@ -31,7 +31,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     return (
       <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
-        <FormattedMessage id="users-permissions.popUpForm.button.save" />
+        <FormattedMessage id="users-permissions.PopUpForm.button.save" />
       </Button>
     );
   }
@@ -42,7 +42,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         <div className="row">
           <Input
             autoFocus
-            label="users-permissions.popUpForm.inputSelect.providers.label"
+            label="users-permissions.PopUpForm.inputSelect.providers.label"
             name="provider"
             onChange={this.props.onChange}
             selectOptions={[{ value: 'Email'}, { value: 'Facebook' }, { value: 'Google' }]}
@@ -52,8 +52,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           />
           <div className="col-md-6" />
           <Input
-            inputDescription="users-permissions.popUpForm.inputToggle.providers.description"
-            label="users-permissions.popUpForm.inputToggle.providers.label"
+            inputDescription="users-permissions.PopUpForm.inputToggle.providers.description"
+            label="users-permissions.PopUpForm.inputToggle.providers.label"
             name="enabled"
             onChange={this.props.onChange}
             type="toggle"
@@ -68,28 +68,28 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       <div className="row">
         <Input
           autoFocus
-          label="users-permissions.popUpForm.inputText.shipperName.label"
+          label="users-permissions.PopUpForm.inputText.shipperName.label"
           name="shipperName"
           onChange={this.props.onChange}
           value={get(this.props.values, 'shipperName')}
-          placeholder="users-permissions.popUpForm.inputText.shipperName.placeholder"
+          placeholder="users-permissions.PopUpForm.inputText.shipperName.placeholder"
           type="text"
           validations={{}}
         />
         <Input
-          label="users-permissions.popUpForm.inputEmail.shipperEmail.label"
+          label="users-permissions.PopUpForm.inputEmail.shipperEmail.label"
           name="shipperEmail"
           onChange={this.props.onChange}
-          placeholder="users-permissions.popUpForm.inputEmail.placeholder"
+          placeholder="users-permissions.PopUpForm.inputEmail.placeholder"
           type="email"
           validations={{ required: true }}
           value={get(this.props.values, 'shipperEmail')}
         />
         <Input
-          label="users-permissions.popUpForm.inputEmail.responseEmail.label"
+          label="users-permissions.PopUpForm.inputEmail.responseEmail.label"
           name="responseEmail"
           onChange={this.props.onChange}
-          placeholder="users-permissions.popUpForm.inputEmail.placeholder"
+          placeholder="users-permissions.PopUpForm.inputEmail.placeholder"
           type="email"
           validations={{}}
           value={get(this.props.values, 'responseEmail')}
@@ -97,20 +97,20 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         <div className="col-md-6" />
         <Input
           customBootstrapClass="col-md-12"
-          label="users-permissions.popUpForm.inputText.emailObject.label"
+          label="users-permissions.PopUpForm.inputText.emailObject.label"
           name="emailObject"
           onChange={this.props.onChange}
-          placeholder="users-permissions.popUpForm.inputText.emailObject.placeholder"
+          placeholder="users-permissions.PopUpForm.inputText.emailObject.placeholder"
           type="text"
           validations={{}}
           value={get(this.props.values, 'emailObject')}
         />
         <Input
           customBootstrapClass="col-md-12"
-          label="users-permissions.popUpForm.inputTextArea.message.label"
+          label="users-permissions.PopUpForm.inputTextArea.message.label"
           name="message"
           onChange={this.props.onChange}
-          placeholder="users-permissions.popUpForm.inputTextArea.message.placeholder"
+          placeholder="users-permissions.PopUpForm.inputTextArea.message.placeholder"
           type="textarea"
           validations={{}}
           value={get(this.props.values, 'message')}
@@ -127,7 +127,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <div className={styles.headerContainer}>
             <div>
               {this.props.actionType ? (
-                <FormattedMessage id={`users-permissions.popUpForm.header.${this.props.actionType}.${this.props.settingType}`} />
+                <FormattedMessage id={`users-permissions.PopUpForm.header.${this.props.actionType}.${this.props.settingType}`} />
               ) : <div />}
             </div>
           </div>
@@ -139,7 +139,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             </ModalBody>
             <ModalFooter className={styles.modalFooter}>
               <Button onClick={() => router.push(router.location.pathname)} className={styles.secondary}>
-                <FormattedMessage id="users-permissions.popUpForm.button.cancel" />
+                <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
               </Button>
               {this.renderButton()}
             </ModalFooter>

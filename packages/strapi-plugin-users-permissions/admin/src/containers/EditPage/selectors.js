@@ -29,9 +29,15 @@ const makeSelectModifiedData = () => createSelector(
   (substate) => substate.get('modifiedData').toJS(),
 );
 
+const makeSelectRoleId = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('roleId'),
+);
+
 export default makeSelectEditPage;
 export {
   makeSelectActionType,
   makeSelectModifiedData,
+  makeSelectRoleId,
   selectEditPageDomain,
 };

@@ -1,5 +1,4 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { includes, toLower } from 'lodash';
 import {
   call,
   cancel,
@@ -28,36 +27,14 @@ import {
 import {
   makeSelectActionType,
   makeSelectModifiedData,
+  makeSelectRoleId,
 } from './selectors';
 
 export function* fetchUser(action) {
   try {
-    const fakeUser = [
-      {
-        id: '11',
-        name: 'John Lennon',
-      },
-      {
-        id: '12',
-        name: 'Paul McCartney',
-      },
-      {
-        id: '13',
-        name: 'George Harrison',
-      },
-      {
-        id: '14',
-        name: 'Ringo Starr',
-      },
-    ];
-    // Temporary waiting for backend dynamic
-    const filteredUsers = fakeUser.filter((user) => {
-      if (includes(toLower(user.name), toLower(action.user))) {
-        return user;
-      }
-    });
+    const data = yield call(request, `/users-permissions/search/${action.user}`, { method: 'GET' });
 
-    yield put(getUserSucceeded(filteredUsers));
+    yield put(getUserSucceeded(data));
   } catch(error) {
     strapi.notification.error('users-permissions.notification.error.fetchUser');
   }
@@ -86,17 +63,16 @@ export function* submit() {
   try {
     const actionType = yield select(makeSelectActionType());
     const body = yield select(makeSelectModifiedData());
+    const roleId = yield select(makeSelectRoleId());
     const opts = {
       method: actionType,
       body,
     };
 
-    // TODO : handle PUT url
-    const requestURL = actionType === 'POST' ? '/users-permissions/roles' : '/users-permissions/roles/id';
+    const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
+
     yield call(request, requestURL, opts);
-
     yield put(submitSucceeded());
-
   } catch(error) {
     console.log(error.response.payload);
     // TODO handle error message

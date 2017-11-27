@@ -18,8 +18,8 @@
     },
     {
       "method": "GET",
-      "path": "/roles/:id",
-      "handler": "UsersPermissions.getRole",
+      "path": "/search/:id",
+      "handler": "UsersPermissions.searchUsers",
       "config": {
         "policies": []
       }
@@ -33,9 +33,50 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "UsersPermissions.getRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "UsersPermissions.getRoles",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
       "method": "POST",
       "path": "/roles",
       "handler": "UsersPermissions.createRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/roles/:role",
+      "handler": "UsersPermissions.updateRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/roles/:role",
+      "handler": "UsersPermissions.deleteRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/providers/:provider",
+      "handler": "UsersPermissions.deleteProvider",
       "config": {
         "policies": []
       }
