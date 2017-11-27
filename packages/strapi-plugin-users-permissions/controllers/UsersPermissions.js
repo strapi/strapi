@@ -89,6 +89,12 @@ module.exports = {
     ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
   },
 
+  searchUsers: async (ctx) => {
+    const data = await strapi.query('user', 'users-permissions').search(ctx.params);
+
+    return ctx.send(data);
+  },
+
   updateRole: async (ctx) => {
     try {
       ctx.send({ ok: true });

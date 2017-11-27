@@ -18,6 +18,14 @@
     },
     {
       "method": "GET",
+      "path": "/search/:id",
+      "handler": "UsersPermissions.searchUsers",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/roles/:id",
       "handler": "UsersPermissions.getRole",
       "config": {

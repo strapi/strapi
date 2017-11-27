@@ -235,6 +235,10 @@
             "updateRole": {
               "enabled": false,
               "policy": ""
+            },
+            "searchUsers": {
+              "enabled": false,
+              "policy": ""
             }
           }
         }
