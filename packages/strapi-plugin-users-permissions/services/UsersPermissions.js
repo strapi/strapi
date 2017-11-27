@@ -31,7 +31,7 @@ module.exports = {
   deleteRole: (roleId) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = require(Service.getRoleConfigPath());
-    
+
     Service.writePermissions(_.omit(appRoles, [roleId]))
   },
 
@@ -69,6 +69,13 @@ module.exports = {
     const allPermissions = _.merge(permissions, pluginsPermissions);
 
     return allPermissions;
+  },
+
+  getRole: (roleId) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+
+    return _.pick(appRoles, [roleId]);
   },
 
   getRoles: () => {
@@ -145,6 +152,15 @@ module.exports = {
     if (cb) {
       cb();
     }
+  },
+
+  updateRole: (roleId, body) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+    const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
+    _.set(appRoles, [roleId], updatedRole);
+
+    Service.writePermissions(appRoles);
   },
 
   writePermissions: (data) => {

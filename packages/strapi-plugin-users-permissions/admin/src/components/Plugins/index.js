@@ -31,12 +31,12 @@ class Plugins extends React.Component {
             </div>
           </div>
           <div className={styles.pluginsContainer}>
-            {map(this.props.plugins, (plugin, key) => (
+            {map(Object.keys(this.props.plugins).sort(), (plugin) => (
               <Plugin
                 changePluginSelected={this.changePluginSelected}
-                key={key}
-                name={key}
-                plugin={plugin}
+                key={plugin}
+                name={plugin}
+                plugin={this.props.plugins[plugin]}
                 pluginSelected={this.state.pluginSelected}
               />
             ))}
