@@ -1,4 +1,3 @@
-const pathToRegexp = require('path-to-regexp');
 const _ = require('lodash');
 
 module.exports = strapi => {
