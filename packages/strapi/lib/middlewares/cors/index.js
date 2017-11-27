@@ -15,17 +15,19 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
+      const defaults = require('./defaults.json');
+
       strapi.app.use(
         async (ctx, next) => {
           if (ctx.request.admin) {
             return strapi.koaMiddlewares.kcors({
               origin: '*',
-              exposeHeaders: this.defaults.cors.expose,
-              maxAge: this.defaults.cors.maxAge,
-              credentials: this.defaults.cors.credentials,
-              allowMethods: this.defaults.cors.methods,
-              allowHeaders: this.defaults.cors.headers,
-              keepHeadersOnError: this.defaults.cors.keepHeadersOnError
+              exposeHeaders: defaults.cors.expose,
+              maxAge: defaults.cors.maxAge,
+              credentials: defaults.cors.credentials,
+              allowMethods: defaults.cors.methods,
+              allowHeaders: defaults.cors.headers,
+              keepHeadersOnError: defaults.cors.keepHeadersOnError
             })(ctx, next);
           } else if (strapi.config.currentEnvironment.security.cors.enabled) {
             return strapi.koaMiddlewares.kcors({
