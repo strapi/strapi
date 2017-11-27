@@ -244,7 +244,34 @@
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "category": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   }
