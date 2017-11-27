@@ -47,8 +47,16 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
 
-    // TODO handle dynamic
-    return ctx.send({ ok: true });
+    if (role === '0' || role === '1') {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
+    }
+
+    try {
+      await strapi.plugins['users-permissions'].services.userspermissions.deleteRole(role);
+      return ctx.send({ ok: true });
+    } catch(err) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
   },
 
   getPermissions: async (ctx) => {

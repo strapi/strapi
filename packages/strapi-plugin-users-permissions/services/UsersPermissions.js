@@ -14,9 +14,8 @@ const _ = require('lodash');
 module.exports = {
   createRole: (role) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const roleConfigPath = Service.getRoleConfigPath();
-    const currentRoles = require(Service.getRoleConfigPath());
-    const highestId = _.last(Object.keys(currentRoles).reduce((acc, key) => {
+    const appRoles = require(Service.getRoleConfigPath());
+    const highestId = _.last(Object.keys(appRoles).reduce((acc, key) => {
       acc.push(_.toNumber(key));
 
       return acc;
@@ -24,9 +23,16 @@ module.exports = {
 
     const newRole = _.pick(role, ['name', 'description', 'permissions']);
 
-    _.set(currentRoles, highestId.toString(), newRole);
+    _.set(appRoles, highestId.toString(), newRole);
 
-    Service.writePermissions(currentRoles);
+    Service.writePermissions(appRoles);
+  },
+
+  deleteRole: (roleId) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+    
+    Service.writePermissions(_.omit(appRoles, [roleId]))
   },
 
   getActions: () => {
