@@ -187,5 +187,17 @@ module.exports = {
 
   removeRelation: async function (params) {
     return module.exports.update.call(this, params);
+  },
+
+  search: async function (params) {
+    const re = new RegExp(params.id);
+
+    return this
+      .find({
+        '$or': [
+          { username: re },
+          { email: re }
+        ]
+      });
   }
 };

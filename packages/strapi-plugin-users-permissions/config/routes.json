@@ -18,8 +18,8 @@
     },
     {
       "method": "GET",
-      "path": "/roles/:id",
-      "handler": "UsersPermissions.getRole",
+      "path": "/search/:id",
+      "handler": "UsersPermissions.searchUsers",
       "config": {
         "policies": []
       }
@@ -32,6 +32,23 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "UsersPermissions.getRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "UsersPermissions.getRoles",
+      "config": {
+        "policies": []
+      }
+    },
+
     {
       "method": "POST",
       "path": "/roles",

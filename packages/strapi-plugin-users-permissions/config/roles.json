@@ -1,7 +1,7 @@
 {
   "0": {
     "description": "",
-    "name": "",
+    "name": "Administrator",
     "permissions": {
       "content-manager": {
         "controllers": {
@@ -153,29 +153,29 @@
         "controllers": {
           "auth": {
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "callback": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "register": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "changePassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
           "user": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
@@ -235,13 +235,21 @@
             "updateRole": {
               "enabled": false,
               "policy": ""
+            },
+            "searchUsers": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoles": {
+              "enabled": false,
+              "policy": ""
             }
           }
         }
       },
       "application": {
         "controllers": {
-          "category": {
+          "article": {
             "find": {
               "enabled": false,
               "policy": ""

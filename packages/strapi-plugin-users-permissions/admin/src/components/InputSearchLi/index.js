@@ -15,7 +15,7 @@ function InputSearchLi({ onClick, isAdding, item }) {
     <li className={styles.li}>
       <div>
         <div>
-          {item.name}
+          {item.username}
         </div>
         <div onClick={() => onClick(item)}>
           <i className={`fa ${icon}`} />

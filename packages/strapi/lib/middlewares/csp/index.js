@@ -11,16 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      csp: {
-        enabled: false
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

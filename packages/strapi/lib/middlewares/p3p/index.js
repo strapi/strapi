@@ -11,17 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      p3p: {
-        enabled: false,
-        value: ''
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

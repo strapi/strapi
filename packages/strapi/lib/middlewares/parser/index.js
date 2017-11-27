@@ -7,17 +7,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      parser: {
-        enabled: true,
-        multipart: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

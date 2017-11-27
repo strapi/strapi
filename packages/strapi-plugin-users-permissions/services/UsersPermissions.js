@@ -49,6 +49,23 @@ module.exports = {
     return allPermissions;
   },
 
+  getRoles: () => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const roles = require(Service.getRoleConfigPath());
+    const formattedRoles = Object.keys(roles).reduce((acc, key) => {
+      const role = _.pick(roles[key], ['name', 'description']);
+
+      _.set(role, 'id', key);
+      // TODO get number_users
+      _.set(role, 'nb_users', 0);
+      acc.push(role);
+
+      return acc;
+    }, []);
+
+    return formattedRoles;
+  },
+
   getRoleConfigPath: () => (
     path.join(
       strapi.config.appPath,

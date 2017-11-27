@@ -91,7 +91,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
           <ul>
             {map(this.state.filteredUsers, (user) => (
               <InputSearchLi
-                key={user.name}
+                key={user.id || user._id}
                 item={user}
                 isAdding={this.state.isAdding}
                 onClick={this.handleClick}

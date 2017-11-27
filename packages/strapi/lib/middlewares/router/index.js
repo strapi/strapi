@@ -17,18 +17,6 @@ module.exports = strapi => {
 
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      router: {
-        enabled: true,
-        prefix: '',
-        routes: {}
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
