@@ -21,14 +21,15 @@ import { selectPlugins } from 'containers/App/selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
 // Design
-import HomePage from 'containers/HomePage';
-import PluginPage from 'containers/PluginPage';
 import ComingSoonPage from 'containers/ComingSoonPage';
+import Content from 'containers/Content';
+import Header from 'components/Header/index';
+import HomePage from 'containers/HomePage';
 import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage';
-import Content from 'containers/Content';
+import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage';
-import Header from 'components/Header/index';
+import PluginPage from 'containers/PluginPage';
 
 import auth from 'utils/auth';
 
@@ -71,10 +72,13 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-  
+
     return (
       <div className={styles.adminPage}>
         {leftMenu}
+        { auth.getToken() && this.hasUsersPlugin() && this.isUrlProtected(this.props) ? (
+          <Logout />
+        ) : ''}
         <div className={styles.adminPageRightWrapper} style={style}>
           {header}
           <Content {...this.props} showLeftMenu={this.showLeftMenu()}>

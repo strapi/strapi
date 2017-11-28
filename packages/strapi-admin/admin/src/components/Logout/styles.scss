@@ -1,0 +1,66 @@
+.logout {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 19rem;
+  -webkit-font-smoothing: antialiased;
+  > div {
+    height: 6rem;
+    width: 100%;
+    line-height: 6rem;
+    z-index: 99999;
+
+    > button {
+      width: 100%;
+      padding-right: 30px;
+      background-color: #FAFAFB !important;
+      border: none;
+      border-radius: 0;
+      color: #333740;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: right;
+      text-transform: capitalize;
+      &:hover {
+        color: #333740;
+      }
+
+      > i {
+        margin-left: 10px;
+      }
+    }
+  }
+}
+
+.dropDownContent {
+  // top: -1px;
+  left: 4px!important;
+  right: 0;
+  min-width: 100%!important;
+  margin: 0 !important;
+  padding: 12px 0 !important;
+  line-height: 1.8rem;
+  border: none!important;
+  border-top-left-radius: 0!important;
+  border-top-right-radius: 0!important;
+  box-shadow: 0 1px 2px 0 rgba(40, 42, 49, 0.16);
+  font-size: 14px;
+
+  > button {
+    &:hover, :focus {
+      background-color: #ffff;
+      cursor: pointer;
+    }
+  }
+
+  > button:first-child {
+    margin-bottom: 13px;
+  }
+
+  > button:not(:first-child) {
+    color: #F75B1D;
+    > i {
+      margin-left: 10px
+    }
+  }
+}
