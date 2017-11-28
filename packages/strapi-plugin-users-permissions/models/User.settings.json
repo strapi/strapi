@@ -12,7 +12,7 @@
       "unique": true
     },
     "email": {
-      "type": "string",
+      "type": "email",
       "minLength": 6,
       "unique": true
     },
@@ -27,7 +27,7 @@
       "type": "string"
     },
     "role": {
-      "type": "string"
+      "type": "integer"
     }
   }
 }

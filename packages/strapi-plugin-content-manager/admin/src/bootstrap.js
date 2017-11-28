@@ -5,7 +5,7 @@ const bootstrap = (plugin) => new Promise((resolve, reject) => {
   generateMenu()
     .then(menu => {
       plugin.leftMenuSections = menu;
-
+      console.log(plugin.leftMenuSections);
       resolve(plugin);
     })
     .catch(e => reject(e));

@@ -31,6 +31,7 @@ The following types are currently available:
   - `uuid`
   - `enumeration`
   - `json`
+  - `email`
 
 #### Example
 

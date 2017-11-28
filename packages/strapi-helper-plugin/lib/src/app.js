@@ -14,25 +14,33 @@ import App from 'containers/App'; // eslint-disable-line
 import configureStore from './store';
 import { translationMessages } from './i18n';
 
-const tryRequire = (bootstrap = false) => {
+const tryRequireRoot = (source) => {
   try {
-    const config = bootstrap ? require('../../../../admin/src/bootstrap.js').default : require('../../../../admin/src/requirements.js').default;
-    return config;
+    return require('../../../../admin/src/' + source + '.js').default;
   } catch(err) {
     return null;
   }
 };
 
-const bootstrap = tryRequire(true);
-const pluginRequirements = tryRequire();
+const tryRequireConfig = (source) => {
+  try {
+    return require('../../../../config/' + source + '.js').default;
+  } catch(err) {
+    return null;
+  }
+};
 
-let injectedComponents;
+const bootstrap = tryRequireRoot('bootstrap');
+const pluginRequirements = tryRequireRoot('requirements');
+const layout = tryRequireConfig('layout');
 
-try {
-  injectedComponents = require('injectedComponents').default;
-} catch(err) {
-  injectedComponents = [];
-}
+const injectedComponents = (() => {
+  try {
+    return require('injectedComponents').default;
+  } catch(err) {
+    return [];
+  }
+});
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -84,6 +92,7 @@ strapi.registerPlugin({
   translationMessages,
   bootstrap,
   pluginRequirements,
+  layout,
   preventComponentRendering: false,
   blockerComponent: null,
   injectedComponents,
