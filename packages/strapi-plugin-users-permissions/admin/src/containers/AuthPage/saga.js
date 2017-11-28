@@ -45,7 +45,18 @@ export function* submitForm() {
     yield put(submitSucceeded());
   } catch(error) {
     const formType = yield select(makeSelectFormType());
-    const errors = [{ id: error.response.payload.message }];
+
+    const errors = error.response.payload.message.reduce((acc, key) => {
+      const err = key.messages.reduce((acc, key) => {
+        acc.id = `users-permissions.${key.id}`;
+
+        return acc;
+      }, { id: '' });
+
+      acc.push(err);
+
+      return acc;
+    }, []);
 
     let formErrors;
 
@@ -53,12 +64,12 @@ export function* submitForm() {
       case 'forgot-password':
         formErrors = [{ name: 'email', errors }];
         break;
-      // TODO : handle other error type;
+      case 'login':
+        formErrors = [{ name: 'identifier', errors }];
+        break;
       default:
 
     }
-
-    strapi.notification.error(error.response.payload.message);
 
     yield put(submitError(formErrors));
   }
