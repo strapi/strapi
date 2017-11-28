@@ -6,7 +6,8 @@ module.exports = {
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
-      .skip(Number(params.skip));
+      .skip(Number(params.skip))
+      .populate(this.associations.map(x => x.alias).join(' '));
   },
 
   count: async function (params) {
