@@ -39,7 +39,6 @@ module.exports = function (strapi) {
 
     initialize: cb => {
       let globalName;
-
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
         const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
@@ -67,7 +66,10 @@ module.exports = function (strapi) {
         // Handle success
         instance.connection.on('open', () => {
           // Select models concerned by this connection
-          const models = _.pickBy(strapi.models, { connection: connectionName });
+          let models = _.pickBy(strapi.models, { connection: connectionName });
+          if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
+            _.assign(models, _.pickBy(strapi.models, (model) => model.connection === undefined));
+          }
 
           const mountModels = (models, target, plugin = false) => {
             if (!target) return;
@@ -167,7 +169,7 @@ module.exports = function (strapi) {
               // Make sure the model has a connection.
               // If not, use the default connection.
               if (_.isEmpty(definition.connection)) {
-                definition.connection = strapi.config.defaultConnection;
+                definition.connection = strapi.config.currentEnvironment.database.defaultConnection;
               }
 
               // Make sure this connection exists.
@@ -301,7 +303,12 @@ module.exports = function (strapi) {
           mountModels(models, strapi.models);
 
           _.forEach(strapi.plugins, (plugin, name) => {
-            mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
+            models = _.pickBy(strapi.plugins[name].models, { connection: connectionName })
+            if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
+              _.assign(models, _.pickBy(strapi.plugins[name].models, (model) => model.connection === undefined));
+            }
+
+            mountModels(models, plugin.models, name);
           });
 
           cb();
