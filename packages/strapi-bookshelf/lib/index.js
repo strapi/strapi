@@ -84,9 +84,12 @@ module.exports = function(strapi) {
         }
 
         // Select models concerned by this connection
-        const models = _.pickBy(strapi.models, {
+        let models = _.pickBy(strapi.models, {
           connection: connectionName
         });
+        if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
+          _.assign(models, _.pickBy(strapi.models, (model) => model.connection === undefined));
+        }
 
         // Return callback if there is no model
         if (_.isEmpty(models)) {
@@ -240,6 +243,8 @@ module.exports = function(strapi) {
 
                   // Expose ORM functions through the `target` object.
                   target[model] = _.assign(global[globalName], target[model]);
+                } else {
+                  target[model] = _.assign(ORM.Model.extend(loadedModel), target[model]);
                 }
 
                 // Push attributes to be aware of model schema.
@@ -429,7 +434,12 @@ module.exports = function(strapi) {
         mountModels(models, strapi.models);
 
         _.forEach(strapi.plugins, (plugin, name) => {
-          mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
+          models = _.pickBy(strapi.plugins[name].models, { connection: connectionName })
+          if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
+            _.assign(models, _.pickBy(strapi.plugins[name].models, (model) => model.connection === undefined));
+          }
+
+          mountModels(models, plugin.models, name);
         });
       });
     },

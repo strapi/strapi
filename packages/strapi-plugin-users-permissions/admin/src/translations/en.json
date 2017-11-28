@@ -40,7 +40,7 @@
   "Auth.form.error.params.provide": "Incorrect params provided.",
 
   "Auth.link.forgot-password": "Forgot your password?",
-  "Auth.link.ready": "Reasy to sign-in?",
+  "Auth.link.ready": "Ready to sign-in?",
 
   "components.Input.error.password.noMatch": "Password don't match",
 

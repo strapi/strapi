@@ -180,11 +180,11 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={`${this.props.label}`} />
         </label>
         <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
-          <span className={`input-group-addon ${styles.addonEmail}`} />
+          <span className={`input-group-addon ${styles.addonEmail} ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? styles.errorAddon: ''}`} />
           <FormattedMessage id={this.props.placeholder || this.props.label} values={this.props.labelValues}>
             {(placeholder) => (
               <input
-                className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'form-control-danger is-invalid': ''}`}
+                className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? `form-control-danger is-invalid ${styles.error}`: ''}`}
                 onChange={this.props.onChange}
                 value={this.props.value}
                 name={this.props.name}

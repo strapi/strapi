@@ -8,8 +8,12 @@ module.exports = async (ctx, next) => {
     try {
       ctx.state.user = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
       role = ctx.state.user.role;
+
+      if (role.toString() === '0') {
+        return await next();
+      }
     } catch (err) {
-      ctx.unauthorized(err);
+      return ctx.unauthorized(err);
     }
   }
 
