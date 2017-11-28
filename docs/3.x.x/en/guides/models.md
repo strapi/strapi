@@ -21,6 +21,7 @@ The following types are currently available:
   - `biginteger`
   - `float`
   - `decimal`
+  - `password`
   - `date`
   - `time`
   - `datetime`
@@ -47,6 +48,9 @@ The following types are currently available:
     },
     "lastname": {
       "type": "string"
+    },
+    "password": {
+      "type": "password"
     },
     "about": {
       "type": "description"
@@ -392,7 +396,7 @@ Additional settings can be set on models:
   "collectionName": "Users_v1",
   "globalId": "Users",
   "attributes": {
-    
+
   }
 }
 ```
