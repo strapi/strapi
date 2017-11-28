@@ -5,7 +5,7 @@ const path = require('path');
 const { parallel } = require('async');
 const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
 
-module.exports = function() {
+module.exports = async function() {
   const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat([`^${get(this.config.currentEnvironment.server, 'admin.path', '/admin')}/`]);
 
   // Set if is admin destination for middleware application.
@@ -45,6 +45,25 @@ module.exports = function() {
       resolve();
     });
   };
+
+  await Promise.all(
+    Object.keys(this.middleware).map(
+      middleware =>
+        new Promise((resolve, reject) => {
+          if (this.config.middleware.settings[middleware].enabled === false) {
+            return resolve();
+          }
+
+          const module = this.middleware[middleware].load;
+
+          if (module.beforeInitialize) {
+            module.beforeInitialize.call(module);
+          }
+
+          resolve();
+        })
+    )
+  );
 
   return Promise.all(
     Object.keys(this.middleware).map(

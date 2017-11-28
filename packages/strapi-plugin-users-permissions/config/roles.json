@@ -249,7 +249,7 @@
       },
       "application": {
         "controllers": {
-          "category": {
+          "article": {
             "find": {
               "enabled": false,
               "policy": ""
