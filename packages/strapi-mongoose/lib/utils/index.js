@@ -14,6 +14,7 @@ module.exports = mongoose => {
     convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
         case 'string':
+        case 'password':
         case 'text':
           return 'String';
         case 'integer':

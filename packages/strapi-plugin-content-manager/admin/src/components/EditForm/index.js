@@ -25,6 +25,8 @@ class EditForm extends React.Component {
 
   getInputType = (type = '') => {
     switch (type.toLowerCase()) {
+      case 'password':
+        return 'password';
       case 'boolean':
         return 'checkbox';
       case 'text':

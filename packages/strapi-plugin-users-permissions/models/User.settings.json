@@ -20,7 +20,7 @@
       "type": "string"
     },
     "password": {
-      "type": "string",
+      "type": "password",
       "minLength": 6
     },
     "resetPasswordToken": {
