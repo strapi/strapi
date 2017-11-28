@@ -38,10 +38,6 @@ export function* submitForm() {
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }
 
-    if (formType === 'forgot-password') {
-      strapi.notification.info('The email has been sent');
-    }
-
     yield put(submitSucceeded());
   } catch(error) {
     const formType = yield select(makeSelectFormType());

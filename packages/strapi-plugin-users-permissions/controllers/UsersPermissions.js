@@ -101,7 +101,7 @@ module.exports = {
   init: async (ctx) => {
     const hasAdmin = await strapi.query('user', 'users-permissions').find({
       where: {
-        admin: true
+        role: '0'
       }
     });
 
