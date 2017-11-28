@@ -19,15 +19,7 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    const convertedParams = strapi.utils.models.convertParams('user', params);
-
-    return strapi.plugins['users-permissions'].models.user
-      .find()
-      .where(convertedParams.where)
-      .sort(convertedParams.sort)
-      .skip(convertedParams.start)
-      .limit(convertedParams.limit)
-      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
+    return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
   },
 
   /**
@@ -37,9 +29,7 @@ module.exports = {
    */
 
   fetch: (params) => {
-    return strapi.plugins['users-permissions'].models.user
-      .findOne(params)
-      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
+    return strapi.query('user', 'users-permissions').findOne(_.pick(params, '_id'));
   },
 
   /**
