@@ -1,0 +1,12 @@
+{
+  "0": {
+    "description": "",
+    "name": "Administrator",
+    "permissions": {}
+  },
+  "1": {
+    "description": "",
+    "name": "Guest",
+    "permissions": {}
+  }
+}
