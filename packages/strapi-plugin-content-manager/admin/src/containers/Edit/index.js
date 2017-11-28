@@ -94,14 +94,18 @@ export class Edit extends React.Component {
       },
     ];
 
+    this.source = getQueryParameters(this.props.location.search, 'source');
     this.layout = bindLayout.call(this, layout);
   }
 
   componentDidMount() {
-    const source = getQueryParameters(this.props.location.search, 'source');
     const attributes =
       get(this.props.models, ['models', this.props.match.params.slug.toLowerCase(), 'attributes']) ||
-      get(this.props.models, ['plugins', source, 'models', this.props.match.params.slug.toLowerCase(), 'attributes']);
+      get(this.props.models, ['plugins', this.source, 'models', this.props.match.params.slug.toLowerCase(), 'attributes']);
+
+    if (this.source) {
+      this.layout = bindLayout.call(this, get(this.context.plugins.toJS(), `${this.source}.layout`, layout));
+    }
 
     this.props.setInitialState();
     this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
@@ -111,7 +115,7 @@ export class Edit extends React.Component {
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
     } else {
-      this.props.loadRecord(this.props.match.params.id, source);
+      this.props.loadRecord(this.props.match.params.id, this.source);
     }
   }
 
@@ -133,8 +137,7 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
-    const source = getQueryParameters(this.props.location.search, 'source');
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
 
     let formattedValue = e.target.value;
 
@@ -154,10 +157,8 @@ export class Edit extends React.Component {
     map(this.props.record.toJS(), (value, key) => form[key] = value);
     const formErrors = checkFormValidity(form, this.props.formValidations.toJS());
 
-    const source = getQueryParameters(this.props.location.search, 'source');
-
     if (isEmpty(formErrors)) {
-      this.props.editRecord(source);
+      this.props.editRecord(this.source);
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -168,8 +169,7 @@ export class Edit extends React.Component {
       return <p>Loading...</p>;
     }
 
-    const source = getQueryParameters(this.props.location.search, 'source');
-    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', source, 'models', this.props.currentModelName]);
+    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', this.source, 'models', this.props.currentModelName]);
 
     // Plugin header config
     const primaryKey = currentModel.primaryKey;

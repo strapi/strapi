@@ -250,7 +250,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
             <input
               className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
               onChange={this.props.onChange}
-              value={this.props.value}
+              value={type === 'password' ? '********' : this.props.value}
               name={this.props.name}
               id={this.props.label}
               onBlur={handleBlur}

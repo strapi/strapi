@@ -25,10 +25,14 @@ class EditForm extends React.Component {
 
   getInputType = (type = '') => {
     switch (type.toLowerCase()) {
+      case 'password':
+        return 'password';
       case 'boolean':
         return 'checkbox';
       case 'text':
         return 'textarea';
+      case 'email':
+        return 'email';
       case 'string':
         return 'text';
       case 'date':
@@ -47,7 +51,7 @@ class EditForm extends React.Component {
   render() {
     const source = getQueryParameters(this.props.location.search, 'source');
     const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
-    const currentLayout = source === undefined || source === 'content-manager' ? get(this.props.layout, [this.props.currentModelName]) : get(this.props.layout, ['plugins', source, this.props.currentModelName]);
+    const currentLayout = get(this.props.layout, [this.props.currentModelName]);
 
     // Remove `id` field
     const displayedFields = merge(currentLayout, omit(currentSchema.fields, 'id'));
@@ -71,7 +75,7 @@ class EditForm extends React.Component {
       return (
         <Input
           key={attr}
-          type={this.getInputType(details.type)}
+          type={get(layout, 'type', this.getInputType(details.type))}
           label={get(layout, 'label') || details.label || ''}
           name={attr}
           customBootstrapClass={get(layout, 'className') || ''}
