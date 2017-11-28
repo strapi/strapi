@@ -2,11 +2,21 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params) {
-    return await this
-      .forge()
-      .fetchAll({
-        withRelated: this.associations.map(x => x.alias)
+    return Article.query(function(qb) {
+      _.forEach(params.where, (where, key) => {
+        qb.where(key, where.symbol, where.value);
       });
+
+      if (params.sort) {
+        qb.orderBy(params.sort);
+      }
+
+      qb.offset(params.start);
+
+      qb.limit(params.limit);
+    }).fetchAll({
+      withRelated: _.keys(_.groupBy(_.reject(this.associations, {autoPopulate: false}), 'alias'))
+    });
   },
 
   count: async function (params) {
@@ -16,10 +26,13 @@ module.exports = {
   },
 
   findOne: async function (params) {
+    if (_.get(params, 'where._id')) {
+      params.where.id = params.where._id;
+      delete params.where._id;
+    }
+
     const record = await this
-      .forge({
-        [this.primaryKey]: params[this.primaryKey]
-      })
+      .forge(params.where)
       .fetch({
         withRelated: this.associations.map(x => x.alias)
       });
