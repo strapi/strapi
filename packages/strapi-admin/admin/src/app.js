@@ -11,8 +11,12 @@ const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin
 const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
 
 // Retrieve development URL to avoid to re-build.
-const devFrontURL = document.getElementsByTagName('body')[0].getAttribute('front');
-const devBackendURL = document.getElementsByTagName('body')[0].getAttribute('back');
+const $body = document.getElementsByTagName('body')[0];
+const devFrontURL = $body.getAttribute('front');
+const devBackendURL = $body.getAttribute('back');
+
+$body.removeAttribute('front');
+$body.removeAttribute('back');
 
 import './public-path';
 import 'babel-polyfill';
@@ -86,13 +90,29 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
-      const body = document.getElementsByTagName('body')[0];
-
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
-        script.src = plugin.source[process.env.NODE_ENV];
+        script.type = 'text/javascript';
+        script.onerror = function (oError) {
+          const source = new URL(oError.target.src);
+          const url = new URL(`${devFrontURL || remoteURL}`);
 
-        body.appendChild(script);
+          if (!source || !url) {
+            throw new Error(`Impossible to load: ${oError.target.src}`);
+          }
+
+          // Remove tag.
+          $body.removeChild(script);
+          
+          // New attempt with new src.
+          const newScript = document.createElement('script');
+          newScript.type = 'text/javascript';
+          newScript.src = `${url.origin}${source.pathname}`;
+          $body.appendChild(newScript);
+        };
+
+        script.src = plugin.source[process.env.NODE_ENV];
+        $body.appendChild(script);
       });
     })
     .catch(err => {
