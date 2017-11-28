@@ -68,11 +68,12 @@ export function* submit() {
       method: actionType,
       body,
     };
-
     const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
+    const response = yield call(request, requestURL, opts);
 
-    yield call(request, requestURL, opts);
-    yield put(submitSucceeded());
+    if (response.ok) {
+      yield put(submitSucceeded());
+    }
   } catch(error) {
     console.log(error.response.payload);
     // TODO handle error message

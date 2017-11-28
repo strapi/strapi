@@ -8,8 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, map, size } from 'lodash';
 
+// Components.
 import SelectOne from 'components/SelectOne';
 import SelectMany from 'components/SelectMany';
+
+// Utils.
+import getQueryParameters from 'utils/getQueryParameters';
+
+// Style.
 import styles from './styles.scss';
 
 class EditFormRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -20,7 +26,10 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
   }
 
   render() {
-    const relations = map(this.props.schema[this.props.currentModelName].relations, (relation, i) => {
+    const source = getQueryParameters(this.props.location.search, 'source');
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+
+    const relations = map(currentSchema.relations, (relation, i) => {
 
       switch (relation.nature) {
         case 'oneToOne':
@@ -75,6 +84,9 @@ EditFormRelations.propTypes = {
     PropTypes.string,
   ]).isRequired,
   isNull: PropTypes.bool.isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string,
+  }).isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,

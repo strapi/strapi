@@ -19,10 +19,11 @@ export function emptyStore() {
   };
 }
 
-export function getModelEntries(modelName) {
+export function getModelEntries(modelName, source) {
   return {
     type: GET_MODEL_ENTRIES,
     modelName,
+    source,
   };
 }
 

@@ -12,6 +12,29 @@ const _ = require('lodash');
  */
 
 module.exports = {
+  createRole: (role) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+    const highestId = _.last(Object.keys(appRoles).reduce((acc, key) => {
+      acc.push(_.toNumber(key));
+
+      return acc;
+    }, []).sort()) + 1;
+
+    const newRole = _.pick(role, ['name', 'description', 'permissions']);
+
+    _.set(appRoles, highestId.toString(), newRole);
+
+    Service.writePermissions(appRoles);
+  },
+
+  deleteRole: (roleId) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+
+    Service.writePermissions(_.omit(appRoles, [roleId]))
+  },
+
   getActions: () => {
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
@@ -39,7 +62,6 @@ module.exports = {
 
     const permissions = {
       application: {
-        icon: '',
         controllers: appControllers.controllers,
       },
     };
@@ -47,6 +69,13 @@ module.exports = {
     const allPermissions = _.merge(permissions, pluginsPermissions);
 
     return allPermissions;
+  },
+
+  getRole: (roleId) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+
+    return _.pick(appRoles, [roleId]);
   },
 
   getRoles: () => {
@@ -123,6 +152,15 @@ module.exports = {
     if (cb) {
       cb();
     }
+  },
+
+  updateRole: (roleId, body) => {
+    const Service = strapi.plugins['users-permissions'].services.userspermissions;
+    const appRoles = require(Service.getRoleConfigPath());
+    const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
+    _.set(appRoles, [roleId], updatedRole);
+
+    Service.writePermissions(appRoles);
   },
 
   writePermissions: (data) => {

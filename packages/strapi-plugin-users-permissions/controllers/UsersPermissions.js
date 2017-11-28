@@ -22,6 +22,7 @@ module.exports = {
     }
 
     try {
+      await strapi.plugins['users-permissions'].services.userspermissions.createRole(ctx.request.body);
       ctx.send({ ok: true });
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
@@ -46,8 +47,16 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
 
-    // TODO handle dynamic
-    return ctx.send({ ok: true });
+    if (role === '0') {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
+    }
+
+    try {
+      await strapi.plugins['users-permissions'].services.userspermissions.deleteRole(role);
+      return ctx.send({ ok: true });
+    } catch(err) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
   },
 
   getPermissions: async (ctx) => {
@@ -61,7 +70,7 @@ module.exports = {
 
   getRole: async (ctx) => {
     const { id } = ctx.params;
-    const role = fakeData[id];
+    const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id)[id];
 
     if (_.isEmpty(role)) {
       return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
@@ -106,7 +115,18 @@ module.exports = {
   },
 
   updateRole: async (ctx) => {
+    const roleId = ctx.params.role;
+    // Prevent from updating the Administrator role
+    if (roleId === '0') {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
+    }
+
+    if (_.isEmpty(ctx.request.body)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+    }
+
     try {
+      await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleId, ctx.request.body);
       ctx.send({ ok: true });
     } catch(error) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);

@@ -27,7 +27,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
   // Roles that can't be deleted
   // Don't delete this line
-  protectedRoleIDs = ['0', '2'];
+  protectedRoleIDs = ['0'];
 
   generateContent = () => {
     let icons = [
@@ -44,7 +44,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     switch (this.props.settingType) {
       case 'roles':
         if (includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
-          icons = [{ icoType: 'pencil', onClick: this.handleClick }];
+          icons = [];
         }
 
         return (
@@ -127,8 +127,12 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
   handleClick = () => {
     switch (this.props.settingType) {
-      case 'roles':
-        return router.push(`${router.location.pathname}/edit/${this.props.item.id}`);
+      case 'roles': {
+        if (!includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
+          return router.push(`${router.location.pathname}/edit/${this.props.item.id}`);
+        }
+        return;
+      }
       case 'providers':
       case 'email-templates':
         return router.push(`${router.location.pathname}#edit::${this.props.settingType}::${this.props.item.id}`);

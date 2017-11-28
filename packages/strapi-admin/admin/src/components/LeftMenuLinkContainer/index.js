@@ -23,7 +23,8 @@ function LeftMenuLinkContainer({ plugins }) {
       acc[snakeCase(section.name)] = {
         name: section.name,
         links: (get(acc[snakeCase(section.name)], 'links') || []).concat(section.links.map(link => {
-          link.plugin = !isEmpty(pluginsObject[link.plugin] ? link.plugin : pluginsObject[current].id);
+          link.source = current;
+          link.plugin = !isEmpty(pluginsObject[link.plugin]) ? link.plugin : pluginsObject[current].id;
 
           return link;
         })),
@@ -38,7 +39,7 @@ function LeftMenuLinkContainer({ plugins }) {
       <p className={styles.title}>{pluginsSections[current].name}</p>
       <ul className={styles.list}>
         {sortBy(pluginsSections[current].links, 'label').map(link =>
-          <LeftMenuLink key={link.label} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} />
+          <LeftMenuLink key={link.label} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} source={link.source} />
         )}
       </ul>
     </div>

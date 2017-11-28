@@ -42,15 +42,17 @@ export function changeSort(sort) {
   };
 }
 
-export function loadCount() {
+export function loadCount(source) {
   return {
     type: LOAD_COUNT,
+    source,
   };
 }
 
-export function loadRecords() {
+export function loadRecords(source) {
   return {
     type: LOAD_RECORDS,
+    source,
   };
 }
 

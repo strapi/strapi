@@ -12,6 +12,9 @@ import { findIndex, get, omit, isFunction, merge } from 'lodash';
 // Components.
 import Input from 'components/Input';
 
+// Utils.
+import getQueryParameters from 'utils/getQueryParameters';
+
 // Styles.
 import styles from './styles.scss';
 
@@ -42,8 +45,12 @@ class EditForm extends React.Component {
   }
 
   render() {
+    const source = getQueryParameters(this.props.location.search, 'source');
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+    const currentLayout = source === undefined || source === 'content-manager' ? get(this.props.layout, [this.props.currentModelName]) : get(this.props.layout, ['plugins', source, this.props.currentModelName]);
+
     // Remove `id` field
-    const displayedFields = merge(this.props.layout[this.props.currentModelName], omit(this.props.schema[this.props.currentModelName].fields, 'id'));
+    const displayedFields = merge(currentLayout, omit(currentSchema.fields, 'id'));
 
     // List fields inputs
     const fields = Object.keys(displayedFields).map(attr => {
@@ -53,14 +60,14 @@ class EditForm extends React.Component {
       const validationsIndex = findIndex(this.props.formValidations, ['name', attr]);
       const validations = get(this.props.formValidations[validationsIndex], 'validations') || {};
 
-      const layout = Object.keys(get(this.props.layout[this.props.currentModelName], attr, {})).reduce((acc, current) => {
-        acc[current] = isFunction(this.props.layout[this.props.currentModelName][attr][current]) ?
-          this.props.layout[this.props.currentModelName][attr][current](this) :
-          this.props.layout[this.props.currentModelName][attr][current];
+      const layout = Object.keys(get(currentLayout, attr, {})).reduce((acc, current) => {
+        acc[current] = isFunction(currentLayout[attr][current]) ?
+          currentLayout[attr][current](this) :
+          currentLayout[attr][current];
 
         return acc;
       }, {});
-    
+
       return (
         <Input
           key={attr}
@@ -95,6 +102,9 @@ EditForm.propTypes = {
   formErrors: PropTypes.array.isRequired,
   formValidations: PropTypes.array.isRequired,
   layout: PropTypes.object.isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string,
+  }).isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([

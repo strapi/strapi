@@ -6,6 +6,10 @@
       "content-manager": {
         "controllers": {
           "contentmanager": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
             "models": {
               "enabled": false,
               "policy": ""
@@ -31,10 +35,6 @@
               "policy": ""
             },
             "delete": {
-              "enabled": false,
-              "policy": ""
-            },
-            "identity": {
               "enabled": false,
               "policy": ""
             }
@@ -249,7 +249,7 @@
       },
       "application": {
         "controllers": {
-          "article": {
+          "category": {
             "find": {
               "enabled": false,
               "policy": ""
