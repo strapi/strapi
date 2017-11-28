@@ -56,7 +56,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
               {this.props.item.description}
             </div>
             <div className="col-md-1">
-              <b>{this.props.item.nb_users}</b>&nbsp;
+              <strong>{this.props.item.nb_users}</strong>&nbsp;
               {this.props.item.nb_users > 1 ? (
                 'users'
               ) : (
