@@ -24,7 +24,7 @@ const tryRequireRoot = (source) => {
 
 const tryRequireConfig = (source) => {
   try {
-    return require('../../../../config/' + source + '.js').default;
+    return require('../../../../config/' + source + '.js');
   } catch(err) {
     return null;
   }
