@@ -125,7 +125,11 @@ module.exports = {
               }
             } else {
               if (!_.get(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName])) {
-                _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled: false, policy: '' })
+                const isCallback = actionName === 'callback' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+                const isRegister = actionName === 'register' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+                const enabled = isCallback || isRegister || roleId === '0';
+
+                _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
               }
             }
           });
