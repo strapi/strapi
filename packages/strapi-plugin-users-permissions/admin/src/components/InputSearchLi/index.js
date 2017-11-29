@@ -10,14 +10,22 @@ import styles from './styles.scss';
 
 function InputSearchLi({ onClick, isAdding, item }) {
   const icon = isAdding ? 'fa-plus' : 'fa-minus-circle';
+  const liStyle = isAdding ? { cursor: 'pointer' } : {};
+  const handleClick = isAdding ? () => onClick(item) : () => {};
 
   return (
-    <li className={styles.li}>
+    <li className={styles.li} style={liStyle} onClick={handleClick}>
       <div>
         <div>
           {item.username}
         </div>
-        <div onClick={() => onClick(item)}>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onClick(item);
+          }}
+        >
           <i className={`fa ${icon}`} />
         </div>
       </div>

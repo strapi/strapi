@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { includes, isEmpty, map, toLower } from 'lodash';
+import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -21,6 +21,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     isAdding: false,
     users: this.props.values,
     value: '',
+    autoFocus: false,
   };
 
   componentWillReceiveProps(nextProps) {
@@ -59,7 +60,18 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
 
   handleClick = (item) => {
     if (this.state.isAdding) {
-      this.props.onClickAdd(item);
+      const id = has(item, '_id') ? '_id' : 'id';
+      const users = this.props.values;
+      // Check if user is already associated with this role
+      if (findIndex(this.props.values, [id, item[id]]) === -1) {
+        this.props.onClickAdd(item);
+        users.push(item);
+      }
+
+      // Reset the input focus
+      this.searchInput.focus();
+      // Empty the input and display users
+      this.setState({ value: '', isAdding: false, users, filteredUsers: users });
     } else {
       this.props.onClickDelete(item);
     }
@@ -83,6 +95,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
                 value={this.state.value}
                 placeholder={message}
                 type="text"
+                ref={(input) => { this.searchInput = input; }}
               />
             )}
           </FormattedMessage>
