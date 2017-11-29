@@ -68,6 +68,12 @@ module.exports = {
     }
   },
 
+  getPolicies: async (ctx) => {
+    return ctx.send({
+      policies: _.without(_.keys(strapi.plugins['users-permissions'].config.policies), 'permissions')
+    });
+  },
+
   getRole: async (ctx) => {
     const { id } = ctx.params;
     const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id)[id];

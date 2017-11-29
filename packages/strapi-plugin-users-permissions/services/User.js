@@ -60,8 +60,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    await strapi.hook.mongoose.manageRelations('user', _.merge(_.clone(params), { values }));
-    return strapi.plugins['users-permissions'].models.user.update(params, values, { multi: true });
+    return strapi.query('user', 'users-permissions').update(_.assign(params, values));
   },
 
   /**
@@ -71,22 +70,7 @@ module.exports = {
    */
 
   remove: async params => {
-    // Note: To get the full response of Mongo, use the `remove()` method
-    // or add spent the parameter `{ passRawResult: true }` as second argument.
-    const data = await strapi.plugins['users-permissions'].models.user.findOneAndRemove(params, {})
-      .populate(_.keys(_.groupBy(_.reject(strapi.plugins['users-permissions'].models.user.associations, {autoPopulate: false}), 'alias')).join(' '));
-
-    _.forEach(User.associations, async association => {
-      const search = (_.endsWith(association.nature, 'One')) ? { [association.via]: data._id } : { [association.via]: { $in: [data._id] } };
-      const update = (_.endsWith(association.nature, 'One')) ? { [association.via]: null } : { $pull: { [association.via]: data._id } };
-
-      await strapi.models[association.model || association.collection].update(
-        search,
-        update,
-        { multi: true });
-    });
-
-    return data;
+    return strapi.query('user', 'users-permissions').delete(params);
   },
 
   hashPassword: function (user = {}) {

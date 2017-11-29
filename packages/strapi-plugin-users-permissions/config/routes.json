@@ -34,6 +34,14 @@
     },
     {
       "method": "GET",
+      "path": "/policies",
+      "handler": "UsersPermissions.getPolicies",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/roles/:id",
       "handler": "UsersPermissions.getRole",
       "config": {

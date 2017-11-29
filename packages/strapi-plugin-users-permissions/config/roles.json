@@ -200,6 +200,10 @@
             }
           },
           "userspermissions": {
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            },
             "createRole": {
               "enabled": true,
               "policy": ""
@@ -213,6 +217,10 @@
               "policy": ""
             },
             "getPermissions": {
+              "enabled": true,
+              "policy": ""
+            },
+            "getPolicies": {
               "enabled": true,
               "policy": ""
             },
@@ -239,6 +247,32 @@
             "updateRole": {
               "enabled": true,
               "policy": ""
+            }
+          }
+        }
+      },
+      "application": {
+        "controllers": {
+          "article": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
             },
             "identity": {
               "enabled": true,
@@ -246,9 +280,6 @@
             }
           }
         }
-      },
-      "application": {
-        "controllers": {}
       }
     }
   },
@@ -453,55 +484,86 @@
             }
           },
           "userspermissions": {
-            "createRole": {
+            "identity": {
               "enabled": true,
+              "policy": ""
+            },
+            "createRole": {
+              "enabled": false,
               "policy": ""
             },
             "deleteProvider": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getPermissions": {
-              "enabled": true,
+              "enabled": false,
+              "policy": ""
+            },
+            "getPolicies": {
+              "enabled": false,
               "policy": ""
             },
             "getRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getRoles": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "index": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "init": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "searchUsers": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "updateRole": {
-              "enabled": true,
-              "policy": ""
-            },
-            "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           }
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "article": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   }
