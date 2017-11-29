@@ -87,9 +87,9 @@ function serverRestartWatcher(response) {
    const token = auth.getToken();
 
    if (token) {
-     option.headers = Object.assign({
+     options.headers = Object.assign({
        'Authorization': `Bearer ${token}`,
-     }, option.headers);
+     }, options.headers);
    }
 
    // Add parameters to url
