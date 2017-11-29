@@ -313,35 +313,35 @@
         "controllers": {
           "contentmanager": {
             "models": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "count": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "create": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "delete": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           }
@@ -351,39 +351,39 @@
         "controllers": {
           "contenttypebuilder": {
             "getModels": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "getModel": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "getConnections": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "createModel": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "updateModel": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "deleteModel": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "autoReload": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "checkTableExists": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           }
@@ -393,63 +393,63 @@
         "controllers": {
           "settingsmanager": {
             "menu": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "environments": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "languages": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "databases": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "database": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "databaseModel": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "get": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "createLanguage": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "deleteLanguage": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "createDatabase": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "updateDatabase": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "deleteDatabase": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "autoReload": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           }
@@ -459,95 +459,95 @@
         "controllers": {
           "auth": {
             "callback": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "register": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "changePassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
           "user": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "create": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "destroy": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
           "userspermissions": {
             "createRole": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "deleteProvider": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "deleteRole": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "getPermissions": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "getRole": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "getRoles": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "index": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "init": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "searchUsers": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "updateRole": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           }
@@ -557,53 +557,53 @@
         "controllers": {
           "bite": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "create": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "destroy": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
           "fsqdqsd": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "create": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "destroy": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           }

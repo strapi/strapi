@@ -82,8 +82,15 @@ function serverRestartWatcher(response) {
    // Set headers
    options.headers = Object.assign({
      'Content-Type': 'application/json',
-     'Authorization': `Bearer ${auth.getToken()}`
    }, options.headers);
+
+   const token = auth.getToken();
+
+   if (token) {
+     option.headers = Object.assign({
+       'Authorization': `Bearer ${token}`,
+     }, option.headers);
+   }
 
    // Add parameters to url
    url = _.startsWith(url, '/')

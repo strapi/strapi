@@ -87,8 +87,15 @@ export default function request(url, options, shouldWatchServerRestart = false) 
   // Set headers
   optionsObj.headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${auth.getToken()}`,
   };
+
+  const token = auth.getToken();
+
+  if (token) {
+    optionsObj.headers = Object.assign({
+      'Authorization': `Bearer ${token}`,
+    }, optionsObj.headers);
+  }
 
   // Add parameters to url
   let urlFormatted = startsWith(url, '/')
