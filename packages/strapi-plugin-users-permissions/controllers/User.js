@@ -41,6 +41,7 @@ module.exports = {
    */
 
   create: async (ctx) => {
+
     const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
 
     // Send 201 `created`
