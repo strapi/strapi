@@ -110,7 +110,6 @@ module.exports = {
 
   searchUsers: async (ctx) => {
     const data = await strapi.query('user', 'users-permissions').search(ctx.params);
-
     return ctx.send(data);
   },
 

@@ -238,5 +238,15 @@ module.exports = {
         // Resolve silently.
         return Promise.resolve();
     }
+  },
+
+  search: async function (params) {
+    return this
+      .query(function(qb) {
+        qb
+        .where('username', 'LIKE', `%${params.id}%`)
+        .orWhere('email', 'LIKE', `%${params.id}%`);
+      })
+      .fetchAll();
   }
 };
