@@ -311,6 +311,10 @@ Callbacks on `fetch`:
  - beforeFetch
  - afterFetch
 
+Callbacks on `fetchAll`:
+ - beforeFetchAll
+ - afterFetchAll
+
 Callbacks on `create`:
  - beforeCreate
  - afterCreate
@@ -334,20 +338,12 @@ module.exports = {
  /**
   * Triggered before user creation.
   */
- beforeCreate: function (next) {
+ beforeCreate: async (model) => {
    // Hash password.
-   strapi.api.user.services.user.hashPassword(this.password)
-     .then((passwordHashed) => {
-       // Set the password.
-       this.password = passwordHashed;
+   const passwordHashed = await strapi.api.user.services.user.hashPassword(this.password);
 
-       // Execute the callback.
-       next();
-     })
-     .catch((error) => {
-       next(error);
-     });
-   }
+   // Set the password.
+   model.password = passwordHashed;
  }
 }
 ```
@@ -363,21 +359,12 @@ module.exports = {
   /**
    * Triggered before user creation.
    */
-  beforeCreate: function (model, attrs, options) {
-    return new Promise((resolve, reject) => {
+  beforeCreate: async (model, attrs, options) => {
       // Hash password.
-      strapi.api.user.services.user.hashPassword(model.attributes.password)
-        .then((passwordHashed) => {
-          // Set the password.
-          model.set('password', passwordHashed);
+      const passwordHashed = await strapi.api.user.services.user.hashPassword(model.attributes.password);
 
-          // Execute the callback.
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-      }
+      // Set the password.
+      model.set('password', passwordHashed);
     });
   }
 }

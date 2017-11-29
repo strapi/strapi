@@ -113,7 +113,9 @@ module.exports = function (strapi) {
 
                   _.forEach(postLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
-                      collection.schema.post(key, target[model.toLowerCase()][fn]);
+                      collection.schema.post(key, function (doc, next) {
+                        target[model.toLowerCase()][fn](this, doc).then(next).catch(err => strapi.log.error(err))
+                      });
                     }
                   });
 
