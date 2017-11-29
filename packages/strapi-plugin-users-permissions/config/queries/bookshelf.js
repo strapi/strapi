@@ -41,22 +41,15 @@ module.exports = {
   },
 
   create: async function (params) {
-    const entry = await this
+    return this
       .forge()
-      .save(Object.keys(params.values).reduce((acc, current) => {
+      .save(Object.keys(params).reduce((acc, current) => {
       if (_.get(this, ['_attributes', current, 'type'])) {
-        acc[current] = params.values[current];
+        acc[current] = params[current];
       }
 
       return acc;
     }, {}));
-
-    return module.exports.update.call(this, {
-      [this.primaryKey]: entry[this.primaryKey],
-      values: _.merge({
-        id: entry[this.primaryKey]
-      }, params.values)
-    });
   },
 
   update: async function (params) {

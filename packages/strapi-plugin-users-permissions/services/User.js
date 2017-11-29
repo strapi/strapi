@@ -43,9 +43,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.plugins['users-permissions'].models.user.create(_.omit(values, _.keys(_.groupBy(strapi.plugins['users-permissions'].models.user.associations, 'alias'))));
-    await strapi.hook.mongoose.manageRelations('user', _.merge(_.clone(data), { values }));
-    return data;
+    return strapi.query('user', 'users-permissions').create(values);
   },
 
   /**

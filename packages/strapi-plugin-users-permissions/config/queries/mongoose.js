@@ -22,22 +22,13 @@ module.exports = {
   },
 
   create: async function (params) {
-    const entry = await this.create(Object.keys(params.values).reduce((acc, current) => {
+    return this.create(Object.keys(params).reduce((acc, current) => {
       if (_.get(this._attributes, [current, 'type'])) {
-        acc[current] = params.values[current];
+        acc[current] = params[current];
       }
 
       return acc;
     }, {}));
-
-    await module.exports.update.call(this, {
-      [this.primaryKey]: entry[this.primaryKey],
-      values: _.merge({
-        id: entry[this.primaryKey]
-      }, params.values)
-    });
-
-    return entry;
   },
 
   update: async function (params) {
