@@ -33,6 +33,7 @@ import {
   onChangeInput,
   onClickAdd,
   onClickDelete,
+  selectAllActions,
   setActionType,
   setErrors,
   setForm,
@@ -52,6 +53,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   getChildContext = () => (
     {
       onChange: this.props.onChangeInput,
+      selectAllActions: this.props.selectAllActions,
     }
   );
 
@@ -205,6 +207,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 
 EditPage.childContextTypes = {
   onChange: PropTypes.func.isRequired,
+  selectAllActions: PropTypes.func.isRequired,
 };
 
 EditPage.propTypes = {
@@ -219,6 +222,7 @@ EditPage.propTypes = {
   onChangeInput: PropTypes.func.isRequired,
   onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  selectAllActions: PropTypes.func.isRequired,
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
@@ -241,6 +245,7 @@ function mapDispatchToProps(dispatch) {
       onChangeInput,
       onClickAdd,
       onClickDelete,
+      selectAllActions,
       setActionType,
       setErrors,
       setForm,

@@ -17,6 +17,7 @@ import {
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
@@ -112,6 +113,15 @@ export function onClickDelete(itemToDelete) {
     itemToDelete,
   };
 }
+
+export function selectAllActions(name, shouldEnable) {
+  return {
+    type: SELECT_ALL_ACTIONS,
+    keys: ['modifiedData'].concat(name.split('.')),
+    shouldEnable,
+  };
+}
+
 export function setActionType(action) {
   const actionType = action === 'create' ? 'POST' : 'PUT';
 

@@ -5,6 +5,7 @@
  */
 
 import { fromJS, List, Map } from 'immutable';
+import { map } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS_SUCCEEDED,
@@ -14,6 +15,7 @@ import {
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
@@ -70,6 +72,14 @@ function editPageReducer(state = initialState, action) {
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
+    case SELECT_ALL_ACTIONS: {
+      const controllerActions = state.getIn(action.keys).toJS();
+      map(controllerActions, (value, key) => {
+        controllerActions[key].enabled = action.shouldEnable;
+      });
+      return state
+        .updateIn(action.keys, () => Map(fromJS(controllerActions)));
+    }
     case SET_ACTION_TYPE:
       return state
         .set('formErrors', List([]))

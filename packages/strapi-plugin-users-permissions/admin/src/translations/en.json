@@ -45,6 +45,7 @@
   "components.Input.error.password.noMatch": "Password don't match",
 
   "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Select all",
 
   "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",

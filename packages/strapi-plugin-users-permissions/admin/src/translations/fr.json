@@ -45,6 +45,7 @@
   "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
 
   "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Tout cocher",
 
   "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
   "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
