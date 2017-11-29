@@ -5,7 +5,7 @@
       "path": "/models",
       "handler": "ContentManager.models",
       "config": {
-        "policies": ["routing"]
+        "policies": []
       }
     },
     {
