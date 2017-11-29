@@ -66,6 +66,7 @@ export class List extends React.Component {
 
     this.state = {
       showWarning: false,
+      source: getQueryParameters(props.location.search, 'source'),
     };
   }
 
@@ -91,10 +92,8 @@ export class List extends React.Component {
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
-    const source = getQueryParameters(props.location.search, 'source');
-
     const sort = (isEmpty(props.location.search) ?
-      get(this.props.models, ['models', slug.toLowerCase(), 'primaryKey']) || get(this.props.models.plugins, [source, 'models', slug.toLowerCase(), 'primaryKey']) :
+      get(this.props.models, ['models', slug.toLowerCase(), 'primaryKey']) || get(this.props.models.plugins, [this.state.source, 'models', slug.toLowerCase(), 'primaryKey']) :
       getQueryParameters('sort')) || 'id';
 
     if (!isEmpty(props.location.search)) {
@@ -105,10 +104,10 @@ export class List extends React.Component {
     this.props.changeSort(sort);
 
     // Load records
-    this.props.loadRecords(source);
+    this.props.loadRecords(this.state.source);
 
     // Get the records count
-    this.props.loadCount(source);
+    this.props.loadCount(this.state.source);
 
     // Define the `create` route url
     this.addRoute = `${this.props.match.path.replace(':slug', slug)}/create`;
@@ -118,14 +117,14 @@ export class List extends React.Component {
     this.props.changeLimit(parseInt(target.value));
     router.push({
       pathname: this.props.location.pathname,
-      search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}`,
+      search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}&source=${this.state.source}`,
     });
   }
 
   handleChangePage = (page) => {
     router.push({
       pathname: this.props.location.pathname,
-      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}`,
+      search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}&source=${this.state.source}`,
     });
     this.props.changePage(page);
   }
@@ -133,7 +132,7 @@ export class List extends React.Component {
   handleChangeSort = (sort) => {
     router.push({
       pathname: this.props.location.pathname,
-      search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}`,
+      search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}&source=${this.state.source}`,
     });
     this.props.changeSort(sort);
   }
@@ -142,9 +141,7 @@ export class List extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    const source = getQueryParameters(this.props.location.search, 'source');
-
-    this.props.deleteRecord(this.state.target, this.props.currentModelName, source);
+    this.props.deleteRecord(this.state.target, this.props.currentModelName, this.state.source);
     this.setState({ showWarning: false });
   }
 
@@ -162,9 +159,8 @@ export class List extends React.Component {
 
   render() {
     // Detect current model structure from models list
-    const source = getQueryParameters(this.props.location.search, 'source');
-    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', source, 'models', this.props.currentModelName]);
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', this.state.source, 'models', this.props.currentModelName]);
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.state.source, this.props.currentModelName]);
 
     if (!this.props.currentModelName || !currentSchema) {
       return <div />;
@@ -190,7 +186,7 @@ export class List extends React.Component {
         history={this.props.history}
         primaryKey={currentModel.primaryKey || 'id'}
         handleDelete={this.toggleModalWarning}
-        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}&source=${source}`}
+        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}&source=${this.state.source}`}
       />
     );
 
@@ -205,7 +201,10 @@ export class List extends React.Component {
           entity: pluginHeaderTitle,
         },
         kind: 'primaryAddShape',
-        onClick: () => this.context.router.history.push(this.addRoute),
+        onClick: () => this.context.router.history.push({
+          pathname: this.addRoute,
+          search: `?source=${this.state.source}`,
+        }),
       },
     ];
 
