@@ -40,6 +40,13 @@ program
   .description('output your version of Strapi')
   .action(program.versionInformation);
 
+
+// `$ strapi console`
+program
+  .command('console')
+  .description('open the Strapi framework console')
+  .action(require('./strapi-console'));
+
 // `$ strapi new`
 program
   .command('new')
