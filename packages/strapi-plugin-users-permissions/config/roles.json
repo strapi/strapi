@@ -249,7 +249,7 @@
       },
       "application": {
         "controllers": {
-          "plombier": {
+          "bite": {
             "find": {
               "enabled": true,
               "policy": ""
@@ -275,7 +275,7 @@
               "policy": ""
             }
           },
-          "rdv": {
+          "fsqdqsd": {
             "find": {
               "enabled": true,
               "policy": ""
@@ -313,35 +313,35 @@
         "controllers": {
           "contentmanager": {
             "models": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "find": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "count": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "findOne": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "create": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "update": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "delete": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           }
@@ -351,39 +351,39 @@
         "controllers": {
           "contenttypebuilder": {
             "getModels": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getModel": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getConnections": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "createModel": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "updateModel": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteModel": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "autoReload": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "checkTableExists": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           }
@@ -393,63 +393,63 @@
         "controllers": {
           "settingsmanager": {
             "menu": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "environments": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "languages": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "databases": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "database": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "databaseModel": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "get": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "update": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "createLanguage": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteLanguage": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "createDatabase": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "updateDatabase": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteDatabase": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "autoReload": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           }
@@ -459,95 +459,95 @@
         "controllers": {
           "auth": {
             "callback": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "register": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "changePassword": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           },
           "user": {
             "find": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "findOne": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "create": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "update": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "destroy": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           },
           "userspermissions": {
             "createRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteProvider": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "deleteRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getPermissions": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "getRoles": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "index": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "init": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "searchUsers": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "updateRole": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "identity": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             }
           }
@@ -555,7 +555,7 @@
       },
       "application": {
         "controllers": {
-          "plombier": {
+          "bite": {
             "find": {
               "enabled": false,
               "policy": ""
@@ -581,7 +581,7 @@
               "policy": ""
             }
           },
-          "rdv": {
+          "fsqdqsd": {
             "find": {
               "enabled": false,
               "policy": ""

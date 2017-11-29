@@ -1,5 +1,6 @@
 import 'whatwg-fetch';
 import { startsWith } from 'lodash';
+import auth from 'utils/auth';
 
 /**
  * Parses the JSON returned by a network request
@@ -86,6 +87,7 @@ export default function request(url, options, shouldWatchServerRestart = false) 
   // Set headers
   optionsObj.headers = {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${auth.getToken()}`,
   };
 
   // Add parameters to url

@@ -1,5 +1,5 @@
 import 'whatwg-fetch';
-
+import auth from 'utils/auth';
 /**
  * Parses the JSON returned by a network request
  *
@@ -82,6 +82,7 @@ function serverRestartWatcher(response) {
    // Set headers
    options.headers = Object.assign({
      'Content-Type': 'application/json',
+     'Authorization': `Bearer ${auth.getToken()}`
    }, options.headers);
 
    // Add parameters to url
