@@ -21,14 +21,12 @@ const auth = {
 
   clearAppStorage() {
     if (localStorage) {
-      return localStorage.clear();
+      localStorage.clear();
     }
 
     if (sessionStorage) {
-      return sessionStorage.clear();
+      sessionStorage.clear();
     }
-
-    return null;
   },
 
   clearToken(tokenKey = TOKEN_KEY) {

@@ -2,14 +2,13 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 19rem;
+  min-width: 19rem;
   -webkit-font-smoothing: antialiased;
   > div {
     height: 6rem;
     width: 100%;
     line-height: 6rem;
     z-index: 99999;
-
     > button {
       width: 100%;
       padding-right: 30px;
@@ -21,6 +20,7 @@
       font-weight: 500;
       text-align: right;
       text-transform: capitalize;
+      cursor: pointer;
       &:hover {
         color: #333740;
       }
@@ -47,13 +47,16 @@
   font-size: 14px;
 
   > button {
-    &:hover, :focus {
-      background-color: #ffff;
+    &:hover, &:focus, &:active {
+      background-color: #ffff!important;
       cursor: pointer;
     }
   }
 
   > button:first-child {
+    &:hover {
+      color: #333740;
+    }
     margin-bottom: 13px;
   }
 

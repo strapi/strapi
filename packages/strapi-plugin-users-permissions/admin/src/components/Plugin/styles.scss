@@ -10,7 +10,7 @@
 
   padding: 0 28px;
   color: #787E8F;
-
+  cursor: pointer;
   > div:first-child {
     display: flex;
     line-height: 5.3rem;
@@ -18,6 +18,8 @@
 }
 
 .chevronDown {
+  margin: auto;
+  margin-right: 0;
   &:before {
     content: '\F078';
     display: block;
@@ -28,6 +30,8 @@
 }
 
 .chevronUp {
+  margin: auto;
+  margin-right: 0;
   &:before {
     content: '\F077';
     display: block;
@@ -39,6 +43,7 @@
 
 
 .controllerContainer {
+  margin-top: 1px;
   > div:not(:first-child) {
     padding-top: 2.3rem;
   }
