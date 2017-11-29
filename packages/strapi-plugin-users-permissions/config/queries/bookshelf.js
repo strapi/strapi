@@ -2,9 +2,9 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params) {
-    return Article.query(function(qb) {
+    return this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
-        qb.where(key, where.symbol, where.value);
+        qb.where(key, where[0].symbol, where[0].value);
       });
 
       if (params.sort) {
