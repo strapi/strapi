@@ -122,7 +122,6 @@ export class Edit extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
       if (!isEmpty(this.props.location.search)) {
-        strapi.notification.success('content-manager.success.record.save');
         router.push(replace(this.props.location.search, '?redirectUrl=', ''));
       } else {
         router.push(replace(this.props.location.pathname, 'create', ''));

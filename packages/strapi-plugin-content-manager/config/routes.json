@@ -5,7 +5,7 @@
       "path": "/models",
       "handler": "ContentManager.models",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },
     {
@@ -13,7 +13,7 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },
     {
@@ -21,7 +21,7 @@
       "path": "/explorer/:model/count",
       "handler": "ContentManager.count",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },
     {
@@ -29,14 +29,14 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },{
       "method": "POST",
       "path": "/explorer/:model",
       "handler": "ContentManager.create",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },
     {
@@ -44,7 +44,7 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.update",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     },
     {
@@ -52,7 +52,7 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.delete",
       "config": {
-        "policies": []
+        "policies": ["routing"]
       }
     }
   ]

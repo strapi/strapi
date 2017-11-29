@@ -8,9 +8,8 @@ module.exports = {
 
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  // beforeSave: function (next) {
-  //   // Use `this` to get your current object
-  //   next();
+  // beforeSave: (model) => {
+  //   return Promise.resolve();
   // },
 
   // After saving a value.
@@ -21,10 +20,11 @@ module.exports = {
 
   // Before fetching all values.
   // Fired before a `fetchAll` operation.
-  // beforeFetchAll: function (next) {
-  //   // Use `this` to get your current object
-  //   next();
-  // },
+  beforeFetchAll: (model) => {
+    // Use `this` to get your current object
+    console.log(model);
+    return Promise.resolve();
+  },
 
   // After fetching all values.
   // Fired after a `fetchAll` operation.

@@ -64,7 +64,7 @@ class EditForm extends React.Component {
       const validationsIndex = findIndex(this.props.formValidations, ['name', attr]);
       const validations = get(this.props.formValidations[validationsIndex], 'validations') || {};
 
-      const layout = Object.keys(get(currentLayout, attr, {})).reduce((acc, current) => {
+      const layout = Object.keys(get(currentLayout, `attributes.${attr}`, {})).reduce((acc, current) => {
         acc[current] = isFunction(currentLayout[attr][current]) ?
           currentLayout[attr][current](this) :
           currentLayout[attr][current];

@@ -83,7 +83,7 @@ export class List extends React.Component {
     }
 
     if (!isEmpty(nextProps.location.search) && this.props.location.search !== nextProps.location.search) {
-      this.props.loadRecords();
+      this.props.loadRecords(this.state.source);
     }
   }
 
@@ -97,11 +97,11 @@ export class List extends React.Component {
       getQueryParameters('sort')) || 'id';
 
     if (!isEmpty(props.location.search)) {
-      this.props.changePage(toInteger(getQueryParameters('page')));
-      this.props.changeLimit(toInteger(getQueryParameters('limit')));
+      this.props.changePage(toInteger(getQueryParameters('page')), this.state.source);
+      this.props.changeLimit(toInteger(getQueryParameters('limit')), this.state.source);
     }
 
-    this.props.changeSort(sort);
+    this.props.changeSort(sort, this.state.source);
 
     // Load records
     this.props.loadRecords(this.state.source);
@@ -114,7 +114,7 @@ export class List extends React.Component {
   }
 
   handleChangeLimit = ({ target }) => {
-    this.props.changeLimit(parseInt(target.value));
+    this.props.changeLimit(toInteger(target.value), this.state.source);
     router.push({
       pathname: this.props.location.pathname,
       search: `?page=${this.props.currentPage}&limit=${target.value}&sort=${this.props.sort}&source=${this.state.source}`,
@@ -126,7 +126,7 @@ export class List extends React.Component {
       pathname: this.props.location.pathname,
       search: `?page=${page}&limit=${this.props.limit}&sort=${this.props.sort}&source=${this.state.source}`,
     });
-    this.props.changePage(page);
+    this.props.changePage(page, this.state.source);
   }
 
   handleChangeSort = (sort) => {
@@ -134,7 +134,7 @@ export class List extends React.Component {
       pathname: this.props.location.pathname,
       search: `?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${sort}&source=${this.state.source}`,
     });
-    this.props.changeSort(sort);
+    this.props.changeSort(sort, this.state.source);
   }
 
   handleDelete = (e) => {

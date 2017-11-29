@@ -84,7 +84,8 @@ module.exports = {
         p.indexOf('hook') !== -1 ||
         p.indexOf('middleware') !== -1 ||
         p.indexOf('language') !== -1 ||
-        p.indexOf('queries') !== -1
+        p.indexOf('queries') !== -1 ||
+        p.indexOf('layout') !== -1
     );
     const optional = difference(files, aggregate);
 

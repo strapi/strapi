@@ -96,7 +96,9 @@ module.exports = function (strapi) {
 
                   _.forEach(preLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
-                      collection.schema.pre(key, target[model.toLowerCase()][fn]);
+                      collection.schema.pre(key, function (next) {
+                        target[model.toLowerCase()][fn](this).then(next).catch(err => strapi.log.error(err));
+                      });
                     }
                   });
 
