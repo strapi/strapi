@@ -32,7 +32,7 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
             {!this.props.shouldDisplayPoliciesHint ? (
               <Input
                 customBootstrapClass="col-md-12"
-                label="users-permissions.Policies.InputSelect.empty"
+                label="users-permissions.Policies.InputSelect.label"
                 name={this.props.inputSelectName}
                 onChange={this.handleChange}
                 selectOptions={this.props.selectOptions}

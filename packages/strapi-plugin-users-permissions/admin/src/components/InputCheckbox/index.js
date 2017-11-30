@@ -51,6 +51,12 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
     this.setState({ showBackground: !this.state.showBackground });
     this.props.setNewInputSelected(this.props.name);
     this.context.setInputPoliciesPath(this.props.name);
+
+    if (this.state.showBackground) {
+      this.context.resetShouldDisplayPoliciesHint();
+    } else {
+      this.context.setShouldDisplayPolicieshint();
+    }
   }
 
   render() {
@@ -87,6 +93,7 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
 
 InputCheckbox.contextTypes = {
   onChange: PropTypes.func.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
   setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
 };
