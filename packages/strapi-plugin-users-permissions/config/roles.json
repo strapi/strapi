@@ -254,23 +254,23 @@
     }
   },
   "1": {
-    "description": "",
     "name": "Guest",
+    "description": "",
     "permissions": {
       "content-manager": {
         "controllers": {
           "contentmanager": {
             "models": {
               "enabled": true,
-              "policy": ""
+              "policy": "isauthenticated"
             },
             "find": {
               "enabled": false,
               "policy": ""
             },
             "count": {
-              "enabled": false,
-              "policy": ""
+              "enabled": true,
+              "policy": "isauthenticated"
             },
             "findOne": {
               "enabled": false,
@@ -302,27 +302,7 @@
               "enabled": false,
               "policy": ""
             },
-            "getModel": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getConnections": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createModel": {
-              "enabled": false,
-              "policy": ""
-            },
             "updateModel": {
-              "enabled": false,
-              "policy": ""
-            },
-            "deleteModel": {
-              "enabled": false,
-              "policy": ""
-            },
-            "autoReload": {
               "enabled": false,
               "policy": ""
             },
@@ -330,7 +310,27 @@
               "enabled": false,
               "policy": ""
             },
+            "autoReload": {
+              "enabled": true,
+              "policy": ""
+            },
+            "createModel": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getModel": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteModel": {
+              "enabled": false,
+              "policy": ""
+            },
             "identity": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getConnections": {
               "enabled": false,
               "policy": ""
             }
@@ -340,47 +340,11 @@
       "settings-manager": {
         "controllers": {
           "settingsmanager": {
-            "menu": {
-              "enabled": false,
-              "policy": ""
-            },
             "environments": {
               "enabled": false,
               "policy": ""
             },
-            "languages": {
-              "enabled": false,
-              "policy": ""
-            },
-            "databases": {
-              "enabled": false,
-              "policy": ""
-            },
-            "database": {
-              "enabled": false,
-              "policy": ""
-            },
-            "databaseModel": {
-              "enabled": false,
-              "policy": ""
-            },
-            "get": {
-              "enabled": false,
-              "policy": ""
-            },
-            "update": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createLanguage": {
-              "enabled": false,
-              "policy": ""
-            },
             "deleteLanguage": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createDatabase": {
               "enabled": false,
               "policy": ""
             },
@@ -396,7 +360,43 @@
               "enabled": false,
               "policy": ""
             },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "databaseModel": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createLanguage": {
+              "enabled": false,
+              "policy": ""
+            },
+            "get": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createDatabase": {
+              "enabled": false,
+              "policy": ""
+            },
+            "databases": {
+              "enabled": false,
+              "policy": ""
+            },
+            "languages": {
+              "enabled": false,
+              "policy": ""
+            },
+            "database": {
+              "enabled": false,
+              "policy": ""
+            },
             "identity": {
+              "enabled": false,
+              "policy": ""
+            },
+            "menu": {
               "enabled": false,
               "policy": ""
             }
@@ -454,6 +454,38 @@
             }
           },
           "userspermissions": {
+            "searchUsers": {
+              "enabled": false,
+              "policy": ""
+            },
+            "deleteRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getPolicies": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoles": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getPermissions": {
+              "enabled": false,
+              "policy": ""
+            },
+            "init": {
+              "enabled": true,
+              "policy": ""
+            },
+            "index": {
+              "enabled": false,
+              "policy": ""
+            },
             "createRole": {
               "enabled": false,
               "policy": ""
@@ -462,43 +494,11 @@
               "enabled": false,
               "policy": ""
             },
-            "deleteRole": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getPermissions": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getPolicies": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getRole": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getRoles": {
-              "enabled": false,
-              "policy": ""
-            },
-            "index": {
-              "enabled": false,
-              "policy": ""
-            },
-            "init": {
-              "enabled": true,
-              "policy": ""
-            },
-            "searchUsers": {
+            "identity": {
               "enabled": false,
               "policy": ""
             },
             "updateRole": {
-              "enabled": false,
-              "policy": ""
-            },
-            "identity": {
               "enabled": false,
               "policy": ""
             }

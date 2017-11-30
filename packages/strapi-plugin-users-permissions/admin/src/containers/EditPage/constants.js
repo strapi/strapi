@@ -22,6 +22,7 @@ export const SELECT_ALL_ACTIONS = 'UsersPermissions/EditPage/SELECT_ALL_ACTIONS'
 export const SET_ACTION_TYPE = 'UsersPermissions/EditPage/SET_ACTION_TYPE';
 export const SET_ERRORS = 'UsersPermissions/EditPage/SET_ERRORS';
 export const SET_FORM = 'UsersPermissions/EditPage/SET_FORM';
+export const SET_INPUT_POLICIES_PATH = 'UsersPermissions/EditPage/SET_INPUT_POLICIES_PATH';
 export const SET_ROLE_ID = 'UsersPermissions/EditPage/SET_ROLE_ID';
 export const SET_SHOULD_DISPLAY_POLICIES_HINT = 'UsersPermissions/EditPage/SET_SHOULD_DISPLAY_POLICIES_HINT';
 export const SUBMIT = 'UsersPermissions/EditPage/SUBMIT';

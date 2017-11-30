@@ -4,7 +4,7 @@
  *
  */
 import { fromJS, List, Map } from 'immutable';
-import { get } from 'lodash';
+import { get, replace } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS,
@@ -24,6 +24,7 @@ import {
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_INPUT_POLICIES_PATH,
   SET_ROLE_ID,
   SET_SHOULD_DISPLAY_POLICIES_HINT,
   SUBMIT,
@@ -61,9 +62,15 @@ export function getPolicies() {
 }
 
 export function getPoliciesSucceeded(policies) {
+  const formattedPolicies = policies.policies.reduce((acc, current) => {
+    acc.push({ value: current });
+
+    return acc;
+  },[]);
+
   return {
     type: GET_POLICIES_SUCCEEDED,
-    policies,
+    policies: [{ name: 'users-permissions.Policies.InputSelect.empty', value: '' }].concat(formattedPolicies),
   };
 }
 
@@ -173,6 +180,15 @@ export function setForm() {
   return {
     type: SET_FORM,
     form,
+  };
+}
+
+export function setInputPoliciesPath(path) {
+  const inputPath = replace(path, 'enabled', 'policy');
+
+  return {
+    type: SET_INPUT_POLICIES_PATH,
+    inputPath,
   };
 }
 

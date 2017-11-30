@@ -54,6 +54,7 @@ class Controller extends React.Component {
           {map(Object.keys(this.props.actions).sort(), (actionKey) => (
             <InputCheckbox
               inputSelected={this.state.inputSelected}
+              isOpen={this.props.isOpen}
               key={actionKey}
               label={actionKey}
               name={`${this.props.inputNamePath}.controllers.${this.props.name}.${actionKey}.enabled`}
@@ -80,6 +81,7 @@ Controller.defaultProps = {
 Controller.propTypes = {
   actions: PropTypes.object,
   inputNamePath: PropTypes.string,
+  isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
 };
 

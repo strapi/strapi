@@ -108,6 +108,7 @@
 
   "Plugins.header.title": "Permissions",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
+  "Policies.InputSelect.empty": "None",
   "Policies.header.hint": "Select the application's actions or the plugin's actions and put your mouse over to display the bounded route",
   "Policies.header.title": "Advanced settings",
   "PopUpForm.button.cancel": "Cancel",

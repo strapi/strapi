@@ -27,6 +27,10 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
   handleClick = () => {
     this.props.changePluginSelected(this.props.name);
     this.setState({ collapse: !this.state.collapse });
+
+    if (this.state.collapse) {
+      this.context.resetShouldDisplayPoliciesHint();
+    }
   }
 
   render() {
@@ -66,9 +70,11 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
             {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
               <Controller
                 inputNamePath={`permissions.${this.props.name}`}
+                isOpen={this.state.collapse}
                 key={key}
                 name={key}
                 actions={controllerActions}
+                resetInputBackground={this.state.resetInputBackground}
               />
             ))}
           </div>

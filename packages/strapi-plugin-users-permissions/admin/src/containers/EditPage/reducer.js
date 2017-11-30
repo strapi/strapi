@@ -21,6 +21,7 @@ import {
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_INPUT_POLICIES_PATH,
   SET_ROLE_ID,
   SET_SHOULD_DISPLAY_POLICIES_HINT,
   SUBMIT_ERROR,
@@ -36,6 +37,7 @@ const initialState = fromJS({
   didSubmit: false,
   formErrors: List([]),
   initialData: Map({}),
+  inputPoliciesPath: '',
   modifiedData: Map({}),
   policies: List([]),
   roleId: '',
@@ -52,9 +54,8 @@ function editPageReducer(state = initialState, action) {
       return state
         .updateIn(['initialData', 'permissions'], () => action.permissions)
         .updateIn(['modifiedData', 'permissions'], () => action.permissions);
-
     case GET_POLICIES_SUCCEEDED:
-      return state.set('policies', List(action.policies.policies));
+      return state.set('policies', List(action.policies));
     case GET_ROLE_SUCCEEDED:
       return state
         .set('didGetUsers', !state.get('didGetUsers'))
@@ -103,6 +104,8 @@ function editPageReducer(state = initialState, action) {
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SET_INPUT_POLICIES_PATH:
+      return state.set('inputPoliciesPath', action.inputPath);
     case SET_ROLE_ID:
       return state.set('roleId', action.roleId);
     case SET_SHOULD_DISPLAY_POLICIES_HINT:

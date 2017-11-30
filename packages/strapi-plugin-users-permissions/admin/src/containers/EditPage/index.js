@@ -39,6 +39,7 @@ import {
   setActionType,
   setErrors,
   setForm,
+  setInputPoliciesPath,
   setRoleId,
   setShouldDisplayPolicieshint,
   submit,
@@ -58,6 +59,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     {
       onChange: this.props.onChangeInput,
       selectAllActions: this.props.selectAllActions,
+      setInputPoliciesPath: this.props.setInputPoliciesPath,
       setShouldDisplayPolicieshint: this.props.setShouldDisplayPolicieshint,
       resetShouldDisplayPoliciesHint: this.props.resetShouldDisplayPoliciesHint,
     }
@@ -88,6 +90,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   componentWillUnmount() {
     // Empty formErrors
     this.props.setErrors([]);
+    this.props.resetShouldDisplayPoliciesHint();
   }
 
   handleSubmit = () => {
@@ -203,6 +206,9 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                     />
                     <Policies
                       shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
+                      inputSelectName={this.props.editPage.inputPoliciesPath}
+                      selectOptions={this.props.editPage.policies}
+                      values={this.props.editPage.modifiedData}
                     />
                   </div>
                 </form>
@@ -218,6 +224,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 EditPage.childContextTypes = {
   onChange: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
+  setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
 };
@@ -240,6 +247,7 @@ EditPage.propTypes = {
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
+  setInputPoliciesPath: PropTypes.func.isRequired,
   setRoleId: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
@@ -265,6 +273,7 @@ function mapDispatchToProps(dispatch) {
       setActionType,
       setErrors,
       setForm,
+      setInputPoliciesPath,
       setRoleId,
       setShouldDisplayPolicieshint,
       submit,

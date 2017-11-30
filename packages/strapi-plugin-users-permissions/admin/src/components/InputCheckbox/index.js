@@ -18,6 +18,10 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
     if (nextProps.inputSelected !== this.props.inputSelected && nextProps.inputSelected !== this.props.name) {
       this.setState({ showBackground: false });
     }
+
+    if (!nextProps.isOpen) {
+      this.setState({ showBackground: false, showCog: false });
+    }
   }
 
   handleChange = () => {
@@ -34,6 +38,7 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
       this.props.setNewInputSelected(this.props.name);
       // Tell the policies component to show the associated routes
       this.context.setShouldDisplayPolicieshint();
+      this.context.setInputPoliciesPath(this.props.name);
     } else {
       this.setState({ showBackground: false, showCog: false });
       this.props.setNewInputSelected('');
@@ -45,6 +50,7 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
   handleClick = () => {
     this.setState({ showBackground: !this.state.showBackground });
     this.props.setNewInputSelected(this.props.name);
+    this.context.setInputPoliciesPath(this.props.name);
   }
 
   render() {
@@ -81,6 +87,7 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
 
 InputCheckbox.contextTypes = {
   onChange: PropTypes.func.isRequired,
+  setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
 };
 
@@ -91,6 +98,7 @@ InputCheckbox.defaultProps = {
 
 InputCheckbox.propTypes = {
   inputSelected: PropTypes.string.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   setNewInputSelected: PropTypes.func.isRequired,
