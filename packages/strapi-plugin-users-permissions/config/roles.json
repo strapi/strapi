@@ -262,7 +262,7 @@
           "contentmanager": {
             "models": {
               "enabled": true,
-              "policy": "isauthenticated"
+              "policy": ""
             },
             "find": {
               "enabled": false,
@@ -270,14 +270,14 @@
             },
             "count": {
               "enabled": true,
-              "policy": "isauthenticated"
+              "policy": ""
             },
             "findOne": {
               "enabled": false,
               "policy": ""
             },
             "create": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "update": {
