@@ -78,15 +78,15 @@ module.exports = {
     return _.pick(appRoles, [roleId]);
   },
 
-  getRoles: () => {
+  getRoles: async () => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const roles = require(Service.getRoleConfigPath());
+    const usersCount = await strapi.query('user', 'users-permissions').countByRoles();
     const formattedRoles = Object.keys(roles).reduce((acc, key) => {
       const role = _.pick(roles[key], ['name', 'description']);
 
       _.set(role, 'id', key);
-      // TODO get number_users
-      _.set(role, 'nb_users', 0);
+      _.set(role, 'nb_users', _.get(_.find(usersCount, { _id: parseFloat(key) }), 'total'));
       acc.push(role);
 
       return acc;

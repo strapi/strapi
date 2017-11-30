@@ -57,5 +57,16 @@ module.exports = {
           { email: re }
         ]
       });
+  },
+
+  countByRoles: async function () {
+    return this.aggregate([
+      {
+        $group: {
+          _id: "$role",
+          total: {$sum: 1}
+        }
+      }
+    ]);
   }
 };
