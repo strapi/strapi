@@ -11,6 +11,7 @@ export const GET_POLICIES = 'UsersPermissions/EditPage/GET_POLICIES';
 export const GET_POLICIES_SUCCEEDED = 'UsersPermissions/EditPage/GET_POLICIES_SUCCEEDED';
 export const GET_ROLE = 'UsersPermissions/EditPage/GET_ROLE';
 export const GET_ROLE_SUCCEEDED = 'UsersPermissions/EditPage/GET_ROLE_SUCCEEDED';
+export const GET_ROUTES_SUCCEEDED = 'UsersPermissions/EditPage/GET_ROUTES_SUCCEEDED';
 export const GET_USER = 'UsersPermissions/EditPage/GET_USER';
 export const GET_USER_SUCCEEDED = 'UsersPermissions/EditPage/GET_USER_SUCCEEDED';
 export const ON_CANCEL = 'UsersPermissions/EditPage/ON_CANCEL';

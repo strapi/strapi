@@ -95,6 +95,14 @@ module.exports = {
     return formattedRoles;
   },
 
+  getRoutes: async () => {
+    return Object.keys(strapi.plugins).reduce((acc, current) => {
+      acc[current] = strapi.plugins[current].config.routes;
+
+      return acc;
+    }, {});
+  },
+
   getRoleConfigPath: () => (
     path.join(
       strapi.config.appPath,

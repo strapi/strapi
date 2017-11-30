@@ -247,6 +247,10 @@
             "identity": {
               "enabled": true,
               "policy": ""
+            },
+            "getRoutes": {
+              "enabled": true,
+              "policy": ""
             }
           }
         }
@@ -499,6 +503,10 @@
               "policy": ""
             },
             "identity": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoutes": {
               "enabled": false,
               "policy": ""
             }

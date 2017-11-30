@@ -13,6 +13,7 @@ import {
   GET_POLICIES_SUCCEEDED,
   GET_ROLE,
   GET_ROLE_SUCCEEDED,
+  GET_ROUTES_SUCCEEDED,
   GET_USER,
   GET_USER_SUCCEEDED,
   ON_CANCEL,
@@ -92,6 +93,13 @@ export function getRoleSucceeded(data) {
   return {
     type: GET_ROLE_SUCCEEDED,
     form,
+  };
+}
+
+export function getRoutesSucceeded(routes) {
+  return {
+    type: GET_ROUTES_SUCCEEDED,
+    routes,
   };
 }
 

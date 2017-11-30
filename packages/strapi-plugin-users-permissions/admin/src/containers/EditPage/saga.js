@@ -14,6 +14,7 @@ import {
   getPermissionsSucceeded,
   getPoliciesSucceeded,
   getRoleSucceeded,
+  getRoutesSucceeded,
   getUserSucceeded,
   submitSucceeded,
 } from './actions';
@@ -53,9 +54,13 @@ export function* permissionsGet() {
 
 export function* policiesGet() {
   try {
-    const response = yield call(request, '/users-permissions/policies', { method: 'GET' });
+    const response = yield [
+      call(request, '/users-permissions/policies', { method: 'GET' }),
+      call(request, '/users-permissions/routes', { method: 'GET' }),
+    ];
 
-    yield put(getPoliciesSucceeded(response));
+    yield put(getPoliciesSucceeded(response[0]));
+    yield put(getRoutesSucceeded(response[1]));
   } catch(err) {
     strapi.notification.error('users-permissions.EditPage.notification.policies.error');
   }

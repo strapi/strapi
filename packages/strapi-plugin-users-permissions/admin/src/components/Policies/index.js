@@ -21,7 +21,7 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
     const baseTitle = 'users-permissions.Policies.header';
     const title = this.props.shouldDisplayPoliciesHint ? 'hint' : 'title';
     const value = get(this.props.values, this.props.inputSelectName);
-
+    console.log(this.props.routes);
     return (
       <div className={cn('col-md-5',styles.policies)}>
         <div className="container-fluid">
@@ -52,8 +52,13 @@ Policies.contextTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
+Policies.defaultProps = {
+  routes: {},
+};
+
 Policies.propTypes = {
   inputSelectName: PropTypes.string.isRequired,
+  routes: PropTypes.object,
   selectOptions: PropTypes.array.isRequired,
   shouldDisplayPoliciesHint: PropTypes.bool.isRequired,
   values: PropTypes.object.isRequired,
