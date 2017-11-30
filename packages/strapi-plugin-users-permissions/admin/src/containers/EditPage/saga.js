@@ -12,6 +12,7 @@ import request from 'utils/request';
 
 import {
   getPermissionsSucceeded,
+  getPoliciesSucceeded,
   getRoleSucceeded,
   getUserSucceeded,
   submitSucceeded,
@@ -19,6 +20,7 @@ import {
 
 import {
   GET_PERMISSIONS,
+  GET_POLICIES,
   GET_ROLE,
   GET_USER,
   SUBMIT,
@@ -46,6 +48,16 @@ export function* permissionsGet() {
     yield put(getPermissionsSucceeded(response));
   } catch(err) {
     strapi.notification.error('users-permissions.EditPage.notification.permissions.error');
+  }
+}
+
+export function* policiesGet() {
+  try {
+    const response = yield call(request, '/users-permissions/policies', { method: 'GET' });
+
+    yield put(getPoliciesSucceeded(response));
+  } catch(err) {
+    strapi.notification.error('users-permissions.EditPage.notification.policies.error');
   }
 }
 
@@ -82,6 +94,7 @@ export function* submit() {
 
 export default function* defaultSaga() {
   const loadPermissionsWatcher = yield fork(takeLatest, GET_PERMISSIONS, permissionsGet);
+  const loadPoliciesWatcher = yield fork(takeLatest, GET_POLICIES, policiesGet);
   const loadRoleWatcher = yield fork(takeLatest, GET_ROLE, roleGet);
 
   yield fork(takeLatest, GET_USER, fetchUser);
@@ -90,5 +103,6 @@ export default function* defaultSaga() {
   yield take(LOCATION_CHANGE);
 
   yield cancel(loadPermissionsWatcher);
+  yield cancel(loadPoliciesWatcher);
   yield cancel(loadRoleWatcher);
 }

@@ -7,6 +7,8 @@
 export const ADD_USER = 'UsersPermissions/EditPage/ADD_USER';
 export const GET_PERMISSIONS = 'UsersPermissions/EditPage/GET_PERMISSIONS';
 export const GET_PERMISSIONS_SUCCEEDED = 'UsersPermissions/EditPage/GET_PERMISSIONS_SUCCEEDED';
+export const GET_POLICIES = 'UsersPermissions/EditPage/GET_POLICIES';
+export const GET_POLICIES_SUCCEEDED = 'UsersPermissions/EditPage/GET_POLICIES_SUCCEEDED';
 export const GET_ROLE = 'UsersPermissions/EditPage/GET_ROLE';
 export const GET_ROLE_SUCCEEDED = 'UsersPermissions/EditPage/GET_ROLE_SUCCEEDED';
 export const GET_USER = 'UsersPermissions/EditPage/GET_USER';

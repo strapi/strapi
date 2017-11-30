@@ -9,6 +9,8 @@ import {
   ADD_USER,
   GET_PERMISSIONS,
   GET_PERMISSIONS_SUCCEEDED,
+  GET_POLICIES,
+  GET_POLICIES_SUCCEEDED,
   GET_ROLE,
   GET_ROLE_SUCCEEDED,
   GET_USER,
@@ -46,6 +48,21 @@ export function getPermissionsSucceeded(data) {
   return {
     type: GET_PERMISSIONS_SUCCEEDED,
     permissions,
+  };
+}
+
+
+export function getPolicies() {
+  return {
+    type: GET_POLICIES,
+  };
+}
+
+export function getPoliciesSucceeded(policies) {
+  console.log(policies);
+  return {
+    type: GET_POLICIES_SUCCEEDED,
+    policies,
   };
 }
 

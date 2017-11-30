@@ -9,6 +9,7 @@ import { map } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS_SUCCEEDED,
+  GET_POLICIES_SUCCEEDED,
   GET_ROLE_SUCCEEDED,
   GET_USER_SUCCEEDED,
   ON_CANCEL,
@@ -34,6 +35,7 @@ const initialState = fromJS({
   formErrors: List([]),
   initialData: Map({}),
   modifiedData: Map({}),
+  policies: List([]),
   roleId: '',
   users: List([]),
 });
@@ -47,6 +49,9 @@ function editPageReducer(state = initialState, action) {
       return state
         .updateIn(['initialData', 'permissions'], () => action.permissions)
         .updateIn(['modifiedData', 'permissions'], () => action.permissions);
+
+    case GET_POLICIES_SUCCEEDED:
+      return state.set('policies', List(action.policies.policies));
     case GET_ROLE_SUCCEEDED:
       return state
         .set('didGetUsers', !state.get('didGetUsers'))

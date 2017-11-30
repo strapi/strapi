@@ -68,6 +68,7 @@
   "EditPage.header.description.create": " ",
 
   "EditPage.notification.permissions.error": "Une erreur est survenue en récupérant les permissions",
+  "EditPage.notification.policies.error": "Une erreur est survenue en récupérant les policies",
   "EditPage.notification.role.error": "Une erreur est survenue en récupérant le rôle",
 
 

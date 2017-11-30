@@ -27,6 +27,7 @@ import injectReducer from 'utils/injectReducer';
 import {
   addUser,
   getPermissions,
+  getPolicies,
   getRole,
   getUser,
   onCancel,
@@ -59,6 +60,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 
   componentDidMount() {
     this.props.setActionType(this.props.match.params.actionType);
+    this.props.getPolicies();
 
     if (this.props.match.params.actionType === 'create') {
       // Set reducer modifiedData
@@ -214,6 +216,7 @@ EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getPermissions: PropTypes.func.isRequired,
+  getPolicies: PropTypes.func.isRequired,
   getRole: PropTypes.func.isRequired,
   getUser: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -239,6 +242,7 @@ function mapDispatchToProps(dispatch) {
     {
       addUser,
       getPermissions,
+      getPolicies,
       getRole,
       getUser,
       onCancel,
