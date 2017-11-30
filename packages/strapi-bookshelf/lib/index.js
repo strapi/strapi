@@ -45,11 +45,6 @@ module.exports = function(strapi) {
       // Initialize collections
       _.set(strapi, 'bookshelf.collections', {});
 
-      // Return callback if there is no model
-      if (_.isEmpty(strapi.models)) {
-        return cb();
-      }
-
       const connections = _.pickBy(strapi.config.connections, {
         connector: 'strapi-bookshelf'
       });
@@ -89,14 +84,6 @@ module.exports = function(strapi) {
         });
         if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
           _.assign(models, _.pickBy(strapi.models, (model) => model.connection === undefined));
-        }
-
-        // Return callback if there is no model
-        if (_.isEmpty(models)) {
-          cb();
-
-          // Break the loop.
-          return false;
         }
 
         const loadedHook = _.after(_.size(models), () => {
