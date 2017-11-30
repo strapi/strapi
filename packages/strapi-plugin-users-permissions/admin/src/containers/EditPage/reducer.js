@@ -9,17 +9,21 @@ import { map } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS_SUCCEEDED,
+  GET_POLICIES_SUCCEEDED,
   GET_ROLE_SUCCEEDED,
   GET_USER_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  RESET_SHOULD_DISPLAY_POLICIES_HINT,
   SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_INPUT_POLICIES_PATH,
   SET_ROLE_ID,
+  SET_SHOULD_DISPLAY_POLICIES_HINT,
   SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
 } from './constants';
@@ -33,8 +37,11 @@ const initialState = fromJS({
   didSubmit: false,
   formErrors: List([]),
   initialData: Map({}),
+  inputPoliciesPath: '',
   modifiedData: Map({}),
+  policies: List([]),
   roleId: '',
+  shouldDisplayPoliciesHint: true,
   users: List([]),
 });
 
@@ -47,6 +54,8 @@ function editPageReducer(state = initialState, action) {
       return state
         .updateIn(['initialData', 'permissions'], () => action.permissions)
         .updateIn(['modifiedData', 'permissions'], () => action.permissions);
+    case GET_POLICIES_SUCCEEDED:
+      return state.set('policies', List(action.policies));
     case GET_ROLE_SUCCEEDED:
       return state
         .set('didGetUsers', !state.get('didGetUsers'))
@@ -72,6 +81,8 @@ function editPageReducer(state = initialState, action) {
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
+    case RESET_SHOULD_DISPLAY_POLICIES_HINT:
+      return state.set('shouldDisplayPoliciesHint', true);
     case SELECT_ALL_ACTIONS: {
       const controllerActions = state.getIn(action.keys).toJS();
       map(controllerActions, (value, key) => {
@@ -93,8 +104,12 @@ function editPageReducer(state = initialState, action) {
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SET_INPUT_POLICIES_PATH:
+      return state.set('inputPoliciesPath', action.inputPath);
     case SET_ROLE_ID:
       return state.set('roleId', action.roleId);
+    case SET_SHOULD_DISPLAY_POLICIES_HINT:
+      return state.set('shouldDisplayPoliciesHint', false);
     case SUBMIT_ERROR:
       return state
         .set('formErrors', List(action.errors));

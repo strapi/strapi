@@ -68,6 +68,7 @@
   "EditPage.header.description.create": " ",
 
   "EditPage.notification.permissions.error": "An error occurred while fetching permissions",
+  "EditPage.notification.policies.error": "An error occurred while fetching policies",
   "EditPage.notification.role.error": "An error occurred while fetching the role",
 
   "HeaderNav.link.advancedSettings": "Advanced settings",
@@ -107,6 +108,11 @@
 
   "Plugins.header.title": "Permissions",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
+
+  "Policies.InputSelect.empty": "None",
+  "Policies.InputSelect.label": "Allow to perform this action for:",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and put your mouse over to display the bounded route",
+  "Policies.header.title": "Advanced settings",
 
   "PopUpForm.button.cancel": "Cancel",
   "PopUpForm.button.save": "Save",

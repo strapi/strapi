@@ -19,6 +19,7 @@ import Input from 'components/Input';
 import InputSearch from 'components/InputSearch';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
+import Policies from 'components/Policies';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -27,6 +28,7 @@ import injectReducer from 'utils/injectReducer';
 import {
   addUser,
   getPermissions,
+  getPolicies,
   getRole,
   getUser,
   onCancel,
@@ -37,8 +39,11 @@ import {
   setActionType,
   setErrors,
   setForm,
+  setInputPoliciesPath,
   setRoleId,
+  setShouldDisplayPolicieshint,
   submit,
+  resetShouldDisplayPoliciesHint,
 } from './actions';
 
 // Selectors
@@ -54,11 +59,15 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     {
       onChange: this.props.onChangeInput,
       selectAllActions: this.props.selectAllActions,
+      setInputPoliciesPath: this.props.setInputPoliciesPath,
+      setShouldDisplayPolicieshint: this.props.setShouldDisplayPolicieshint,
+      resetShouldDisplayPoliciesHint: this.props.resetShouldDisplayPoliciesHint,
     }
   );
 
   componentDidMount() {
     this.props.setActionType(this.props.match.params.actionType);
+    this.props.getPolicies();
 
     if (this.props.match.params.actionType === 'create') {
       // Set reducer modifiedData
@@ -81,6 +90,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   componentWillUnmount() {
     // Empty formErrors
     this.props.setErrors([]);
+    this.props.resetShouldDisplayPoliciesHint();
   }
 
   handleSubmit = () => {
@@ -190,9 +200,15 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       <div className={styles.separator} />
                     </div>
                   </div>
-                  <div className="row">
+                  <div className="row" style={{ marginRight: '-30px'}}>
                     <Plugins
                       plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
+                    />
+                    <Policies
+                      shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
+                      inputSelectName={this.props.editPage.inputPoliciesPath}
+                      selectOptions={this.props.editPage.policies}
+                      values={this.props.editPage.modifiedData}
                     />
                   </div>
                 </form>
@@ -208,12 +224,16 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 EditPage.childContextTypes = {
   onChange: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
+  setInputPoliciesPath: PropTypes.func.isRequired,
+  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
 };
 
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getPermissions: PropTypes.func.isRequired,
+  getPolicies: PropTypes.func.isRequired,
   getRole: PropTypes.func.isRequired,
   getUser: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -222,11 +242,14 @@ EditPage.propTypes = {
   onChangeInput: PropTypes.func.isRequired,
   onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
+  setInputPoliciesPath: PropTypes.func.isRequired,
   setRoleId: PropTypes.func.isRequired,
+  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
@@ -239,6 +262,7 @@ function mapDispatchToProps(dispatch) {
     {
       addUser,
       getPermissions,
+      getPolicies,
       getRole,
       getUser,
       onCancel,
@@ -249,8 +273,11 @@ function mapDispatchToProps(dispatch) {
       setActionType,
       setErrors,
       setForm,
+      setInputPoliciesPath,
       setRoleId,
+      setShouldDisplayPolicieshint,
       submit,
+      resetShouldDisplayPoliciesHint,
     },
     dispatch,
   );

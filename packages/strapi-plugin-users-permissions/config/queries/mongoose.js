@@ -26,7 +26,7 @@ module.exports = {
       if (_.get(this._attributes, [current, 'type'])) {
         acc[current] = params[current];
       }
-
+      
       return acc;
     }, {}));
   },

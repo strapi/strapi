@@ -4,11 +4,13 @@
  *
  */
 import { fromJS, List, Map } from 'immutable';
-import { get } from 'lodash';
+import { get, replace } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS,
   GET_PERMISSIONS_SUCCEEDED,
+  GET_POLICIES,
+  GET_POLICIES_SUCCEEDED,
   GET_ROLE,
   GET_ROLE_SUCCEEDED,
   GET_USER,
@@ -17,11 +19,14 @@ import {
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  RESET_SHOULD_DISPLAY_POLICIES_HINT,
   SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
   SET_ERRORS,
   SET_FORM,
+  SET_INPUT_POLICIES_PATH,
   SET_ROLE_ID,
+  SET_SHOULD_DISPLAY_POLICIES_HINT,
   SUBMIT,
   SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
@@ -46,6 +51,26 @@ export function getPermissionsSucceeded(data) {
   return {
     type: GET_PERMISSIONS_SUCCEEDED,
     permissions,
+  };
+}
+
+
+export function getPolicies() {
+  return {
+    type: GET_POLICIES,
+  };
+}
+
+export function getPoliciesSucceeded(policies) {
+  const formattedPolicies = policies.policies.reduce((acc, current) => {
+    acc.push({ value: current });
+
+    return acc;
+  },[]);
+
+  return {
+    type: GET_POLICIES_SUCCEEDED,
+    policies: [{ name: 'users-permissions.Policies.InputSelect.empty', value: '' }].concat(formattedPolicies),
   };
 }
 
@@ -114,6 +139,12 @@ export function onClickDelete(itemToDelete) {
   };
 }
 
+export function resetShouldDisplayPoliciesHint() {
+  return {
+    type: RESET_SHOULD_DISPLAY_POLICIES_HINT,
+  };
+}
+
 export function selectAllActions(name, shouldEnable) {
   return {
     type: SELECT_ALL_ACTIONS,
@@ -152,10 +183,25 @@ export function setForm() {
   };
 }
 
+export function setInputPoliciesPath(path) {
+  const inputPath = replace(path, 'enabled', 'policy');
+
+  return {
+    type: SET_INPUT_POLICIES_PATH,
+    inputPath,
+  };
+}
+
 export function setRoleId(roleId) {
   return {
     type: SET_ROLE_ID,
     roleId,
+  };
+}
+
+export function setShouldDisplayPolicieshint() {
+  return {
+    type: SET_SHOULD_DISPLAY_POLICIES_HINT,
   };
 }
 

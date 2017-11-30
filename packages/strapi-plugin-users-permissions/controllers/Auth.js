@@ -96,9 +96,7 @@ module.exports = {
 
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
-    const user = await strapi.query('user', 'users-permissions').create({
-      values: params
-    });
+    const user = await strapi.query('user', 'users-permissions').create(params);
 
     ctx.send({
       jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
@@ -125,10 +123,7 @@ module.exports = {
     user.resetPasswordToken = resetPasswordToken;
 
     // Update the user.
-    await strapi.query('user', 'users-permissions').update({
-      id: user.id,
-      values: user
-    });
+    await strapi.query('user', 'users-permissions').update(user);
 
     // Send an email to the user.
     await strapi.plugins['email'].services.email.send({
@@ -157,10 +152,7 @@ module.exports = {
       user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
       // Update the user.
-      await strapi.query('user', 'users-permissions').update({
-        id: user.id,
-        values: user
-      });
+      await strapi.query('user', 'users-permissions').update(user);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),

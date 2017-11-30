@@ -257,8 +257,8 @@
     }
   },
   "1": {
-    "description": "",
     "name": "Guest",
+    "description": "",
     "permissions": {
       "content-manager": {
         "controllers": {
