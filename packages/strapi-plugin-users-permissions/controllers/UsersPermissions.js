@@ -76,7 +76,7 @@ module.exports = {
 
   getRole: async (ctx) => {
     const { id } = ctx.params;
-    const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id)[id];
+    const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id);
 
     if (_.isEmpty(role)) {
       return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);

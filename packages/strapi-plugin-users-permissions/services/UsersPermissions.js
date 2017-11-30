@@ -71,11 +71,12 @@ module.exports = {
     return allPermissions;
   },
 
-  getRole: (roleId) => {
+  getRole: async (roleId) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = require(Service.getRoleConfigPath());
+    appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
 
-    return _.pick(appRoles, [roleId]);
+    return appRoles[roleId];
   },
 
   getRoles: async () => {
@@ -86,7 +87,7 @@ module.exports = {
       const role = _.pick(roles[key], ['name', 'description']);
 
       _.set(role, 'id', key);
-      _.set(role, 'nb_users', _.get(_.find(usersCount, { _id: parseFloat(key) }), 'total'));
+      _.set(role, 'nb_users', _.get(_.find(usersCount, { _id: parseFloat(key) }), 'total', 0));
       acc.push(role);
 
       return acc;
