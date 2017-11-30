@@ -82,5 +82,17 @@ module.exports = {
         .orWhere('email', 'LIKE', `%${params.id}%`);
       })
       .fetchAll();
+  },
+
+  countByRoles: async function () {
+    const result = await strapi.connections[this.connection].raw('SELECT COUNT("id") AS total, "role" FROM "user" GROUP BY "role";');
+    return result.rows.reduce((acc, current) => {
+      acc.push({
+        _id: parseFloat(current.role),
+        total: parseFloat(current.total)
+      });
+
+      return acc;
+    }, []);
   }
 };
