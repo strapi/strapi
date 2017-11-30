@@ -19,6 +19,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.pluginSelected !== this.props.pluginSelected && nextProps.pluginSelected !== this.props.name) {
+      this.context.resetShouldDisplayPoliciesHint();
       this.setState({ collapse: false });
     }
   }
@@ -79,6 +80,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 
 Plugin.contextTypes = {
   plugins: PropTypes.object.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
 };
 
 Plugin.defaultProps = {

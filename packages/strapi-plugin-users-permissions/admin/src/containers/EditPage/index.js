@@ -19,6 +19,7 @@ import Input from 'components/Input';
 import InputSearch from 'components/InputSearch';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
+import Policies from 'components/Policies';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -39,7 +40,9 @@ import {
   setErrors,
   setForm,
   setRoleId,
+  setShouldDisplayPolicieshint,
   submit,
+  resetShouldDisplayPoliciesHint,
 } from './actions';
 
 // Selectors
@@ -55,6 +58,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     {
       onChange: this.props.onChangeInput,
       selectAllActions: this.props.selectAllActions,
+      setShouldDisplayPolicieshint: this.props.setShouldDisplayPolicieshint,
+      resetShouldDisplayPoliciesHint: this.props.resetShouldDisplayPoliciesHint,
     }
   );
 
@@ -192,9 +197,12 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       <div className={styles.separator} />
                     </div>
                   </div>
-                  <div className="row">
+                  <div className="row" style={{ marginRight: '-30px'}}>
                     <Plugins
                       plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
+                    />
+                    <Policies
+                      shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
                     />
                   </div>
                 </form>
@@ -210,6 +218,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 EditPage.childContextTypes = {
   onChange: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
+  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
 };
 
 EditPage.propTypes = {
@@ -225,11 +235,13 @@ EditPage.propTypes = {
   onChangeInput: PropTypes.func.isRequired,
   onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
   setActionType: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
   setRoleId: PropTypes.func.isRequired,
+  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
@@ -254,7 +266,9 @@ function mapDispatchToProps(dispatch) {
       setErrors,
       setForm,
       setRoleId,
+      setShouldDisplayPolicieshint,
       submit,
+      resetShouldDisplayPoliciesHint,
     },
     dispatch,
   );

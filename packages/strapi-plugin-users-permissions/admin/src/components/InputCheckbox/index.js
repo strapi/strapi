@@ -32,6 +32,8 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
       this.setState({ showBackground: true });
       // Tell the Parent component that another input has been selected
       this.props.setNewInputSelected(this.props.name);
+      // Tell the policies component to show the associated routes
+      this.context.setShouldDisplayPolicieshint();
     } else {
       this.setState({ showBackground: false, showCog: false });
       this.props.setNewInputSelected('');
@@ -79,6 +81,7 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
 
 InputCheckbox.contextTypes = {
   onChange: PropTypes.func.isRequired,
+  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
 };
 
 InputCheckbox.defaultProps = {

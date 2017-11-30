@@ -110,6 +110,8 @@
   "Plugins.header.title": "Permissions",
   "Plugins.header.description": "Sont listés uniquement les actions associées à une route.",
 
+  "Policies.header.hint": "Sélectionnez ...",
+  "Policies.header.tile": "Paramètres avancés",
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",
   "popUpForm.header.add.providers": "Ajouter un Nouveau Provider",
