@@ -8,8 +8,9 @@ import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { findIndex, get, takeRight, toLower, without } from 'lodash';
 
+import BoundRoute from 'components/BoundRoute';
 import Input from 'components/Input';
 
 import styles from './styles.scss';
@@ -21,7 +22,9 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
     const baseTitle = 'users-permissions.Policies.header';
     const title = this.props.shouldDisplayPoliciesHint ? 'hint' : 'title';
     const value = get(this.props.values, this.props.inputSelectName);
-    console.log(this.props.routes);
+    const path = without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy');
+    const routes = get(this.props.routes, without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]);
+
     return (
       <div className={cn('col-md-5',styles.policies)}>
         <div className="container-fluid">
@@ -39,6 +42,13 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
                 type="select"
                 validations={{}}
                 value={value}
+              />
+            ) : ''}
+          </div>
+          <div className="row">
+            {!this.props.shouldDisplayPoliciesHint ? (
+              <BoundRoute
+                route={routes[findIndex(routes, (o) => toLower(o.handler) === toLower(takeRight(path, 2).join('.')))]}
               />
             ) : ''}
           </div>

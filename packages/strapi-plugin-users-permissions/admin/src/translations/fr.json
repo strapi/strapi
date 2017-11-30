@@ -42,6 +42,8 @@
   "Auth.link.forgot-password": "Mot de passe oublié?",
   "Auth.link.ready": "Prêt à vous connecter?",
 
+  "BoundRoute.title": "Route associée à",
+
   "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
 
   "Controller.input.label": "{label} ",
