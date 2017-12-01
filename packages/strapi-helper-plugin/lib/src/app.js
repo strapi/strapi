@@ -83,20 +83,20 @@ if (module.hot) {
 
 // Register the plugin.
 strapi.registerPlugin({
-  name: pluginPkg.strapi.name,
-  icon: pluginPkg.strapi.icon,
+  blockerComponent: null,
+  blockerComponentProps: {},
+  bootstrap,
   description: pluginDescription,
+  icon: pluginPkg.strapi.icon,
   id: pluginId,
+  injectedComponents,
+  layout,
   leftMenuLinks: [],
   mainComponent: Comp,
-  translationMessages,
-  bootstrap,
+  name: pluginPkg.strapi.name,
   pluginRequirements,
-  layout,
   preventComponentRendering: false,
-  blockerComponent: null,
-  injectedComponents,
-  blockerComponentProps: {},
+  translationMessages,
 });
 
 // Export store

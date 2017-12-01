@@ -36,6 +36,7 @@ import LanguageProvider from 'containers/LanguageProvider';
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
+import auth from 'utils/auth';
 
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
@@ -103,7 +104,7 @@ if (window.location.port !== '4000') {
 
           // Remove tag.
           $body.removeChild(script);
-          
+
           // New attempt with new src.
           const newScript = document.createElement('script');
           newScript.type = 'text/javascript';
@@ -120,6 +121,9 @@ if (window.location.port !== '4000') {
     });
 }
 
+// const isPluginAllowedToRegister = (plugin) => true;
+const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
+
 /**
  * Public Strapi object exposed to the `window` object
  */
@@ -134,10 +138,11 @@ const registerPlugin = (plugin) => {
   merge(translationMessages, plugin.translationMessages);
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
+  const shouldAllowRegister = isPluginAllowedToRegister(plugin);
 
   switch (true) {
     // Execute bootstrap function and check if plugin can be rendered
-    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
+    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
       plugin.pluginRequirements(plugin)
         .then(plugin => {
           return plugin.bootstrap(plugin);
@@ -153,7 +158,7 @@ const registerPlugin = (plugin) => {
       });
       break;
     // Execute bootstrap function
-    case isFunction(plugin.bootstrap):
+    case isFunction(plugin.bootstrap) && shouldAllowRegister:
       plugin.bootstrap(plugin).then(plugin => {
         store.dispatch(pluginLoaded(plugin));
       });
