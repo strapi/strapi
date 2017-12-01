@@ -4,7 +4,7 @@
  *
  */
 import { fromJS, List, Map } from 'immutable';
-import { get, replace } from 'lodash';
+import { get, replace, toString } from 'lodash';
 import {
   ADD_USER,
   GET_PERMISSIONS,
@@ -113,7 +113,7 @@ export function getUser(user) {
 export function getUserSucceeded(users) {
   return {
     type: GET_USER_SUCCEEDED,
-    users: users.filter(o => o.role.toString() !== '0'),
+    users: users.filter(o => toString(o.role) !== '0'),
   };
 }
 

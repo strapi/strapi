@@ -84,7 +84,7 @@ function editPageReducer(state = initialState, action) {
     case ON_CLICK_DELETE:
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
-        .updateIn(['modifiedData', 'users'], list => list.filter(o => o.name !== action.itemToDelete.name));
+        .updateIn(['modifiedData', 'users'], list => list.filter(o => o[o.id ? 'id' : '_id'] !== action.itemToDelete[o.id ? 'id' : '_id']));
     case RESET_SHOULD_DISPLAY_POLICIES_HINT:
       return state.set('shouldDisplayPoliciesHint', true);
     case SELECT_ALL_ACTIONS: {

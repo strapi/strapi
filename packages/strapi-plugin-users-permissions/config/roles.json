@@ -256,7 +256,138 @@
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "azeaz": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          },
+          "bite": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          },
+          "erza": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          },
+          "ez": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          },
+          "reaz": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   },
@@ -517,7 +648,138 @@
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "azeaz": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          },
+          "bite": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          },
+          "erza": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          },
+          "ez": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          },
+          "reaz": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   }
