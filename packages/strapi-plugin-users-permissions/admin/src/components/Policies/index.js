@@ -8,7 +8,7 @@ import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, get, takeRight, toLower, without } from 'lodash';
+import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
 
 import BoundRoute from 'components/BoundRoute';
 import Input from 'components/Input';
@@ -23,7 +23,8 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
     const title = this.props.shouldDisplayPoliciesHint ? 'hint' : 'title';
     const value = get(this.props.values, this.props.inputSelectName);
     const path = without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy');
-    const routes = get(this.props.routes, without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]);
+    const controllerRoutes = get(this.props.routes, without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]);
+    const routes = isEmpty(controllerRoutes) ? [] : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
 
     return (
       <div className={cn('col-md-5',styles.policies)}>
@@ -47,9 +48,7 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
           </div>
           <div className="row">
             {!this.props.shouldDisplayPoliciesHint ? (
-              <BoundRoute
-                route={routes[findIndex(routes, (o) => toLower(o.handler) === toLower(takeRight(path, 2).join('.')))]}
-              />
+              map(routes, (route, key) => <BoundRoute key={key} route={route} />)
             ) : ''}
           </div>
         </div>
