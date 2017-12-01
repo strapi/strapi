@@ -95,6 +95,17 @@ module.exports = {
     }
   },
 
+  getRoutes: async (ctx) => {
+    try {
+      const routes = await strapi.plugins['users-permissions'].services.userspermissions.getRoutes();
+
+      ctx.send({ routes });
+    } catch(err) {
+      console.log(err);
+      ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
+    }
+  },
+
   index: async (ctx) => {
     // Add your own logic here.
 

@@ -12,6 +12,7 @@ import {
   GET_POLICIES_SUCCEEDED,
   GET_ROLE_SUCCEEDED,
   GET_USER_SUCCEEDED,
+  GET_ROUTES_SUCCEEDED,
   ON_CANCEL,
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
@@ -41,6 +42,7 @@ const initialState = fromJS({
   modifiedData: Map({}),
   policies: List([]),
   roleId: '',
+  routes: Map([]),
   shouldDisplayPoliciesHint: true,
   users: List([]),
 });
@@ -61,6 +63,8 @@ function editPageReducer(state = initialState, action) {
         .set('didGetUsers', !state.get('didGetUsers'))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case GET_ROUTES_SUCCEEDED:
+      return state.set('routes', Map(action.routes.routes));
     case GET_USER_SUCCEEDED:
       return state
         .set('didFetchUsers', !state.get('didFetchUsers'))

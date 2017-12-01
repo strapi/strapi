@@ -207,6 +207,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                     <Policies
                       shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
                       inputSelectName={this.props.editPage.inputPoliciesPath}
+                      routes={this.props.editPage.routes}
                       selectOptions={this.props.editPage.policies}
                       values={this.props.editPage.modifiedData}
                     />

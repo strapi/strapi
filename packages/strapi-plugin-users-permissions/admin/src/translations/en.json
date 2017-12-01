@@ -42,6 +42,8 @@
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign-in?",
 
+  "BoundRoute.title": "Bound route to",
+
   "components.Input.error.password.noMatch": "Password don't match",
 
   "Controller.input.label": "{label} ",

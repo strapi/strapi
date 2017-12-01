@@ -56,6 +56,14 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/routes",
+      "handler": "UsersPermissions.getRoutes",
+      "config": {
+        "policies": []
+      }
+    },
 
     {
       "method": "POST",
