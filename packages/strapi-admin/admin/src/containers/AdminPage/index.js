@@ -14,9 +14,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { get, includes, isUndefined } from 'lodash';
+import { get, includes, isFunction, isUndefined, map, omit } from 'lodash';
 
-import { updatePlugin } from 'containers/App/actions';
+import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import { selectPlugins } from 'containers/App/selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
@@ -36,6 +36,8 @@ import auth from 'utils/auth';
 import styles from './styles.scss';
 
 export class AdminPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  state = { hasAlreadyRegistereOtherPlugins: false };
+
   getChildContext = () => (
     {
       plugins: this.props.plugins,
@@ -65,6 +67,20 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
     if (!this.isUrlProtected(props) && includes(props.location.pathname, 'register') && this.hasAdminUser()) {
       this.props.history.push('/plugins/users-permissions/auth/login');
+    }
+
+    if (!this.hasUsersPlugin() || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
+      map(omit(this.props.plugins.toJS(), ['users-permissions', 'email']), plugin => {
+        if (isFunction(plugin.bootstrap)) {
+          plugin.bootstrap(plugin)
+            .then(updatedPlugin => this.props.pluginLoaded(updatedPlugin))
+            .catch(err => {
+              console.log(err);
+            });
+        }
+      });
+
+      this.setState({ hasAlreadyRegistereOtherPlugins: true });
     }
   }
 
@@ -118,6 +134,7 @@ AdminPage.contextTypes = {
 AdminPage.propTypes = {
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
+  pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
@@ -130,6 +147,7 @@ function mapDispatchToProps(dispatch) {
   return {
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
     updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
+    pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
     dispatch,
   };
 }

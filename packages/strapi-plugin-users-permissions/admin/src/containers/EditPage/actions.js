@@ -113,7 +113,7 @@ export function getUser(user) {
 export function getUserSucceeded(users) {
   return {
     type: GET_USER_SUCCEEDED,
-    users,
+    users: users.filter(o => o.role.toString() !== '0'),
   };
 }
 

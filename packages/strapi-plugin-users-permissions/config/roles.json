@@ -268,7 +268,7 @@
         "controllers": {
           "contentmanager": {
             "models": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "find": {
