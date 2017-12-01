@@ -25,14 +25,26 @@ module.exports = {
 
     _.set(appRoles, highestId.toString(), newRole);
 
+    _.forEach(role.users, (user) => {
+      Service.updateUserRole(user, highestId);
+    });
+
     Service.writePermissions(appRoles);
   },
 
-  deleteRole: (roleId) => {
+  deleteRole: async (roleId) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = require(Service.getRoleConfigPath());
 
-    Service.writePermissions(_.omit(appRoles, [roleId]))
+    Service.writePermissions(_.omit(appRoles, [roleId]));
+
+    const users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
+      role: roleId
+    }));
+
+    _.forEach(users, (user) => {
+      Service.updateUserRole(user, '1');
+    });
   },
 
   getActions: () => {
@@ -169,13 +181,25 @@ module.exports = {
     }
   },
 
-  updateRole: (roleId, body) => {
+  updateRole: async (roleId, body) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = require(Service.getRoleConfigPath());
     const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
     _.set(appRoles, [roleId], updatedRole);
 
     Service.writePermissions(appRoles);
+
+    const diffUser = _.differenceBy(body.users, await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
+      role: roleId
+    })), 'id');
+
+    _.forEach(diffUser, (user) => {
+      if (_.find(body.user, { id: user.id})) {
+        Service.updateUserRole(user, '1');
+      } else {
+        Service.updateUserRole(user, roleId);
+      }
+    });
   },
 
   writePermissions: (data) => {
@@ -186,5 +210,12 @@ module.exports = {
     } catch(err) {
       strapi.log.error(err);
     }
+  },
+
+  updateUserRole: async (user, role) => {
+    return await strapi.query('user', 'users-permissions').update({
+      _id: user._id || user.id,
+      role: role.toString()
+    });
   }
 };
