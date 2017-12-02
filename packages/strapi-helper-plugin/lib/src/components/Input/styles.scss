@@ -41,13 +41,14 @@
 }
 
 .addonSearch {
-  width: 3.4rem;
+  width: 3.2rem;
   height: 3.4rem;
   margin-top: .9rem;
-  padding-left: 1.1rem;
   background-color: rgba(16, 22, 34, 0.02);
-  border: 1px solid #E3E9F3;
+  border: 1px solid #E3E9F3!important;
+  border-right: none !important;
   border-radius: 0.25rem;
+  border-bottom-left-radius: 0;
   color: rgba(16, 22, 34, 0.5);
   line-height: 3.2rem;
   font-size: 1.3rem;
@@ -56,12 +57,38 @@
   text-transform: capitalize;
   -moz-appearance: none;
   -webkit-appearance: none;
-  &:after {
-    content: '\f002';
+  &:before {
+    content: '\F002';
     display: inline-table;
-    font-family: 'FontAwesome';
+    margin-top: 0px;
+    margin-left: 2px;
     color: #B3B5B9;
+    font-weight: 400;
+    font-size: 14px;
+    font-family: 'FontAwesome';
+    -webkit-font-smoothing: antialiased;
   }
+  // width: 3.4rem;
+  // height: 3.4rem;
+  // margin-top: .9rem;
+  // padding-left: 1.1rem;
+  // background-color: rgba(16, 22, 34, 0.02);
+  // border: 1px solid #E3E9F3;
+  // border-radius: 0.25rem;
+  // color: rgba(16, 22, 34, 0.5);
+  // line-height: 3.2rem;
+  // font-size: 1.3rem;
+  // font-family: 'Lato';
+  // font-weight: 600!important;
+  // text-transform: capitalize;
+  // -moz-appearance: none;
+  // -webkit-appearance: none;
+  // &:after {
+  //   content: '\f002';
+  //   display: inline-table;
+  //   font-family: 'FontAwesome';
+  //   color: #B3B5B9;
+  // }
 }
 
 .addonEmail {
@@ -252,6 +279,37 @@
       &:focus{
         outline: none;
       }
+    }
+  }
+}
+
+.inputSearch {
+  min-width: 200px;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+
+  label {
+    margin-bottom: 0;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
+  input {
+    height: 3.4rem;
+    margin-top: .9rem;
+    padding-left: 1rem;
+    background-size: 0 !important;
+    border: 1px solid #E3E9F3;
+    // border-left: none;
+    border-radius: 0.25rem;
+    border-bottom-right-radius: 0;
+    line-height: 3.4rem;
+    font-size: 1.3rem;
+    font-family: 'Lato' !important;
+    box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
+    &:focus {
+      // border-left: 1px solid #78caff!important;
+      border-color: #78caff;
     }
   }
 }

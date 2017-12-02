@@ -331,7 +331,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         <label htmlFor={this.props.label}>
           <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
         </label>
-        <div className={`input-group ${styles.input}`} style={{ marginBottom: '1rem'}}>
+        <div className={`input-group ${styles.inputSearch}`} style={{ marginBottom: '1rem'}}>
           <span className={`input-group-addon ${styles.addonSearch}`} />
           <FormattedMessage id={this.props.placeholder || this.props.label} defaultMessage={this.props.label}>
             {(placeholder) => (
