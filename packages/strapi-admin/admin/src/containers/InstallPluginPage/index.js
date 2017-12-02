@@ -69,9 +69,10 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
               value={this.props.search}
             />
           </div>
-          <div className="row">
+          <div className={cn('row', styles.wrapper)}>
             {map(this.props.availablePlugins, (plugin) => (
               <PluginCard
+                history={this.props.history}
                 key={plugin.id}
                 plugin={plugin}
                 showSupportUsButton={plugin.id === 'support-us'}
@@ -93,6 +94,7 @@ InstallPluginPage.propTypes = {
   availablePlugins: PropTypes.array.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
   getPlugins: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   search: PropTypes.string.isRequired,
 };

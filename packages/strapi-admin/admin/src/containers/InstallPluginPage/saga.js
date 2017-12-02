@@ -25,6 +25,7 @@ export function* pluginsGet() {
       name: 'buy a t-shirt',
       price: 30,
       ratings: 5,
+      isCompatible: true,
     };
 
     yield put(getPluginsSucceeded(availablePlugins.concat([supportUs])));

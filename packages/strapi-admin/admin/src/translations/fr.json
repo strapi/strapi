@@ -24,9 +24,6 @@
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
 
-  "app.components.NotFoundPage.description": "Page introuvable",
-  "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
-
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.ListPluginsPage.description": "Liste des plugins installés dans le projet.",
@@ -35,6 +32,16 @@
   "app.components.listPlugins.title.plural": "{number} sont disponibles",
   "app.components.listPlugins.title.none": "Aucun plugin n'est installé",
   "app.components.listPlugins.button": "Ajouter un Nouveau Plugin",
+
+  "app.components.NotFoundPage.description": "Page introuvable",
+  "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
+
+  "app.components.PluginCard.compatible": "Compatble avec votre app",
+  "app.components.PluginCard.compatibleCommunity": "Compatble avec la communauté",
+  "app.components.PluginCard.Button.label.download": "Télécharger",
+  "app.components.PluginCard.Button.label.install": "Déjà installé",
+  "app.components.PluginCard.Button.label.support": "Nous soutenir",
+  "app.components.PluginCard.price.free": "Gratuit",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
