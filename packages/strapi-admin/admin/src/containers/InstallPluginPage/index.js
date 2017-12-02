@@ -11,9 +11,11 @@ import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
+import { get, isUndefined, map } from 'lodash';
 
 // Design
 import Input from 'components/Input';
+import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
 
 import injectSaga from 'utils/injectSaga';
@@ -55,7 +57,7 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
             description={{ id: 'app.components.InstallPluginPage.description' }}
             actions={[]}
           />
-          <div className="row">
+          <div className={cn('row', styles.inputContainer)}>
             <Input
               customBootstrapClass="col-md-12"
               label="app.components.InstallPluginPage.InputSearch.label"
@@ -66,6 +68,16 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
               validations={{}}
               value={this.props.search}
             />
+          </div>
+          <div className="row">
+            {map(this.props.availablePlugins, (plugin) => (
+              <PluginCard
+                key={plugin.id}
+                plugin={plugin}
+                showSupportUsButton={plugin.id === 'support-us'}
+                isAlreadyInstalled={isUndefined(get(this.context.plugins.toJS(), plugin.id))}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -78,6 +90,7 @@ InstallPluginPage.contextTypes = {
 };
 
 InstallPluginPage.propTypes = {
+  availablePlugins: PropTypes.array.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
   getPlugins: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,

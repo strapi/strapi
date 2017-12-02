@@ -21,7 +21,7 @@ function installPluginPageReducer(state = initialState, action) {
     case GET_PLUGINS_SUCCEEDED:
       return state
         .set('didFetchPlugins', true)
-        .set('plugins', List(action.availablePlugins));
+        .set('availablePlugins', List(action.availablePlugins));
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
     default:

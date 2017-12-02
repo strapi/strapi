@@ -24,6 +24,7 @@ export function* pluginsGet() {
       icon: '',
       name: 'buy a t-shirt',
       price: 30,
+      ratings: 5,
     };
 
     yield put(getPluginsSucceeded(availablePlugins.concat([supportUs])));
