@@ -1,11 +1,21 @@
 {
   "app.components.ComingSoonPage.comingSoon": "Bientôt disponible",
   "app.components.ComingSoonPage.featuresNotAvailable": "Cette fonctionnalité est toujours en cours de développement.",
+
+
   "app.components.HomePage.welcome": "Bienvenue à bord!",
   "app.components.HomePage.description.part1": "Nous somme heureux de vous compter parmi nos utilisateurs",
   "app.components.HomePage.description.part2": "Vous faites désormais parti de notre communauté qui peut vous aider à développer votre application.",
   "app.components.HomePage.button": "Créez votre premier type de contenu",
   "app.components.HomePage.feedback": "N'hésitez pas à utiliser un des channels ci-dessous pour poser vos questions ou nous donner vos retours.",
+
+  "app.components.InstallPluginPage.helmet": "Installez des plugins",
+  "app.components.InstallPluginPage.title": "Installez des nouveaux plugins",
+  "app.components.InstallPluginPage.description": "Améliorez votre app sans efforts",
+  "app.components.InstallPluginPage.plugin.support-us.description": "Soutenez-nous en achetant un Strapi tee shirt. Cela nous aidera a continuer de travailler sur le projet pour vous donner la meilleure expérience possible!",
+  "app.components.InstallPluginPage.InputSearch.label": " ",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Recherchez un plugin... (ex: authentification)",
+
   "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",
   "app.components.LeftMenuLinkContainer.general": "Général",
@@ -13,8 +23,10 @@
   "app.components.LeftMenuLinkContainer.listPlugins": "Liste des plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
+
   "app.components.NotFoundPage.description": "Page introuvable",
   "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
+
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.ListPluginsPage.description": "Liste des plugins installés dans le projet.",
@@ -23,14 +35,20 @@
   "app.components.listPlugins.title.plural": "{number} sont disponibles",
   "app.components.listPlugins.title.none": "Aucun plugin n'est installé",
   "app.components.listPlugins.button": "Ajouter un Nouveau Plugin",
+
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
+
+  "components.ErrorBoundary.title": "Une erreur est survenue...",
+
   "components.ProductionBlocker.header": "Ce plugin est disponible uniquement en développement.",
   "components.ProductionBlocker.description": "Pour des raisons de sécurité il est désactivé dans les autres environnements.",
-  "comonents.popUpWarning.button.cancel": "Annuler",
-  "comonents.popUpWarning.button.confirm": "Confirmer",
+
+  "components.popUpWarning.button.cancel": "Annuler",
+  "components.popUpWarning.button.confirm": "Confirmer",
   "components.popUpWarning.title": "Merci de confirmer",
   "components.popUpWarning.message": "Etes-vous sure de vouloir le supprimer?",
+
   "components.Input.error.validation.email": "Le format n'est pas de type email",
   "components.Input.error.validation.required": "Ce champ est obligatoire.",
   "components.Input.error.validation.regex": "La valeur ne correspond pas au format attendu.",
@@ -43,8 +61,11 @@
   "components.Input.error.attribute.key.taken": "Cette valeur existe déjà",
   "components.Input.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.Input.error.validation.minSupMax": "Ne peut pas être plus grand",
-  "components.ErrorBoundary.title": "Une erreur est survenue...",
+
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
+
+  "notification.error": "Une erreur est survenue",
+
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",

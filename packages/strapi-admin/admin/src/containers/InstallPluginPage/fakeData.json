@@ -1,0 +1,32 @@
+{
+  "availablePlugins": [
+    {
+      "description": "content-manager.plugin.description",
+      "id": "content-manager",
+      "icon": "plug",
+      "name": "Content Manager",
+      "price": 0
+    },
+    {
+      "description": "content-type-builder.plugin.description",
+      "id": "content-type-builder",
+      "icon": "brush",
+      "name": "content type builder",
+      "price": 0
+    },
+    {
+      "description": "settings-manager.plugin.description",
+      "id": "settings-manager",
+      "icon": "wrench",
+      "name": "settings manager",
+      "price": 0
+    },
+    {
+      "description": "users-permissions.plugin.description",
+      "id": "users-permissions",
+      "icon": "users",
+      "name": "Auth & Permissions",
+      "price": 0
+    }
+  ]
+}

@@ -483,6 +483,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         return this.renderInputToggle();
       case 'email':
         return this.renderInputEmail(requiredClass, inputDescription, handleBlur);
+      case 'search':
+        return this.renderInputSearch(requiredClass, inputDescription, handleBlur)
       default:
     }
 

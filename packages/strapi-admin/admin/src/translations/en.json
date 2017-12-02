@@ -1,11 +1,20 @@
 {
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
   "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
+
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.description.part1": "We are happy to have you as one of our users!",
   "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dreamed app.",
   "app.components.HomePage.button": "Create your first content type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
+
+  "app.components.InstallPluginPage.helmet": "Install plugins",
+  "app.components.InstallPluginPage.title": "Install new plugins",
+  "app.components.InstallPluginPage.description": "Extend your app with no efforts",
+  "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
+  "app.components.InstallPluginPage.InputSearch.label": " ",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Search a plugin... (ex: authentication)",
+
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",
   "app.components.LeftMenuLinkContainer.general": "General",
@@ -13,8 +22,10 @@
   "app.components.LeftMenuLinkContainer.listPlugins": "List plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
+
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.NotFoundPage.back": "Back to homepage",
+
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",
@@ -23,14 +34,20 @@
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.none": "No plugin is installed",
   "app.components.listPlugins.button": "Add New Plugin",
+
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
+
+  "components.ErrorBoundary.title": "Something wen't wrong...",
+
   "components.ProductionBlocker.header": "This plugin is only available in development.",
   "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments.",
+
   "components.popUpWarning.button.cancel": "Cancel",
   "components.popUpWarning.button.confirm": "Confirm",
   "components.popUpWarning.title": "Please confirm",
   "components.popUpWarning.message": "Are you sure you want to delete this?",
+
   "components.Input.error.validation.email": "This is not an email",
   "components.Input.error.validation.required": "This value input is required.",
   "components.Input.error.validation.regex": "The value not match the regex.",
@@ -43,8 +60,11 @@
   "components.Input.error.attribute.key.taken": "This value already exists",
   "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
   "components.Input.error.validation.minSupMax": "Can't be superior",
-  "components.ErrorBoundary.title": "Something wen't wrong...",
+
   "components.ListRow.empty": "There is no data to be shown.",
+
+  "notification.error": "An error occurred",
+
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",
