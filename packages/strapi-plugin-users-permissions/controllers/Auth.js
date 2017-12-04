@@ -123,12 +123,22 @@ module.exports = {
     user.resetPasswordToken = resetPasswordToken;
 
     // Send an email to the user.
+    const template = `
+      <p>We heard that you lost your password. Sorry about that!</p>
+
+      <p>But don’t worry! You can use the following link to reset your password:</p>
+
+      <p>${url}?code=${resetPasswordToken}</p>
+
+      <p>Thanks.</p>
+    `;
+
     try {
       await strapi.plugins['email'].services.email.send({
         to: user.email,
         subject: 'Reset password',
-        text: url + '?code=' + resetPasswordToken,
-        html: url + '?code=' + resetPasswordToken
+        text: template,
+        html: template
       });
     } catch (err) {
       return ctx.badRequest(null, err);
