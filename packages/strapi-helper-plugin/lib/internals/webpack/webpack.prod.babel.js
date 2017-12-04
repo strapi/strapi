@@ -39,8 +39,12 @@ const plugins = [
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
     sourceMap: true,
+    parallel: true,
     compress: {
       warnings: false
+    },
+    uglifyOptions: {
+      ecma: 8,
     },
   }),
   new webpack.LoaderOptionsPlugin({
