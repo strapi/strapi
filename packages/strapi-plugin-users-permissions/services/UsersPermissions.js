@@ -151,7 +151,7 @@ module.exports = {
                 const isPassword = actionName === 'forgotPassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
                 const isNewPassword = actionName === 'changePassword-password' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
                 const isInit = actionName === 'init' && controllerName === 'userspermissions';
-                const enabled = isCallback || isRegister || roleId === '0' || isInit || isModelContentManager;
+                const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword;
 
                 _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
               }
