@@ -36,7 +36,7 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
             <i className={`fa fa-caret-${this.state.isOpen ? 'up' : 'down'}`} />
           </DropdownToggle>
           <DropdownMenu className={styles.dropDownContent}>
-            <DropdownItem onClick={this.handleGoTo}>
+            <DropdownItem onClick={this.handleGoTo} className={styles.item}>
               Profile
             </DropdownItem>
             <DropdownItem onClick={this.handleLogout}>

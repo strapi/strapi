@@ -1,11 +1,13 @@
 {
   "Auth.form.button.register-success": "Send again",
-  "Auth.form.button.forgot-password": "Send email",
+  "Auth.form.button.forgot-password.success": "Send again",
+  "Auth.form.button.forgot-password": "Send Email",
   "Auth.form.button.reset-password": "Change password",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
 
   "Auth.form.forgot-password.email.label": "Enter your email",
+  "Auth.form.forgot-password.email.label.success": "Email sent with success to",
   "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
 
   "Auth.header.register.description": "To finish setup and secure your app, please create the first user (root admin) by filling informations below.",
@@ -26,7 +28,7 @@
   "Auth.form.register.password.label": "Password",
   "Auth.form.register.confirmPassword.label": "Confirmation Password",
 
-  "Auth.form.register-success.email.label": "Email send with success to",
+  "Auth.form.register-success.email.label": "Email sent with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
   "Auth.form.error.email.provide": "Please provide your username or your e-mail.",
@@ -37,7 +39,7 @@
   "Auth.form.error.password.format": "Your password can not contain more than three times the symbol `$`.",
   "Auth.form.error.user.not-exist": "This email does not exist.",
   "Auth.form.error.code.provide": "Incorrect code provided.",
-  "Auth.form.error.password.matching": "Passwords not matching.",
+  "Auth.form.error.password.matching": "Passwords do not match.",
   "Auth.form.error.params.provide": "Incorrect params provided.",
 
   "Auth.link.forgot-password": "Forgot your password?",

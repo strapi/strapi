@@ -63,6 +63,9 @@ export function* submitForm() {
       case 'login':
         formErrors = [{ name: 'identifier', errors }];
         break;
+      case 'reset-password':
+        formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
+        break;
       default:
 
     }

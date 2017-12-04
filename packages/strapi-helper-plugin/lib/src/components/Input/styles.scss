@@ -132,6 +132,14 @@
   }
 }
 
+.inputEmail {
+  > input {
+    &:focus {
+      border-color: #E3E9F3;
+    }
+  }
+}
+
 .input {
   min-width: 200px;
   margin-bottom: 1.5rem;
