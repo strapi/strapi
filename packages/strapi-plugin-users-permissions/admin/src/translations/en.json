@@ -17,12 +17,12 @@
   "Auth.form.login.password.label": "Password",
   "Auth.form.login.rememberMe.label": "Remember me",
   "Auth.form.login.username.label": "Username",
-  "Auth.form.login.username.placeholder": "Soupette",
+  "Auth.form.login.username.placeholder": "John Doe",
 
   "Auth.form.register.email.label": "Email",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
   "Auth.form.register.username.label": "Username",
-  "Auth.form.register.username.placeholder": "Soupette",
+  "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Password",
   "Auth.form.register.confirmPassword.label": "Confirmation Password",
 

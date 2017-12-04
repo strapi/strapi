@@ -422,7 +422,7 @@
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "changePassword": {

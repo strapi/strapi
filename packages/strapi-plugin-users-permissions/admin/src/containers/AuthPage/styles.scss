@@ -77,3 +77,13 @@
     }
   }
 }
+
+
+.logoContainer {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  > img {
+    height: 20px;
+  }
+}
