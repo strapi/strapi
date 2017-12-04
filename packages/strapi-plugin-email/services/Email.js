@@ -17,7 +17,7 @@ module.exports = {
       try {
         // Default values.
         options = _.isObject(options) ? options : {};
-        options.from = 'admin@strapiapp.com';
+        options.from = 'admin-dashboard@your-strapi-app.com';
         options.text = options.text || options.html;
         options.html = options.html || options.text;
 

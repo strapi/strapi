@@ -133,7 +133,7 @@ module.exports = {
       html: url + '?code=' + resetPasswordToken
     });
 
-    ctx.send();
+    ctx.send({ ok: true });
   },
 
   changePassword: async (ctx) => {
