@@ -46,9 +46,17 @@
   > div:not(:first-child) {
     padding-top: 2.3rem;
   }
+  > div:last-child {
+    padding-bottom: 1.8rem;
+  }
 }
 
 .description {
+  // width: 50%;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #8B91A0;
   font-size: 12px;
   font-weight: 400;

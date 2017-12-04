@@ -114,8 +114,8 @@
 
   "Policies.InputSelect.empty": "Aucune",
   "Policies.InputSelect.label": "Autorisez cette action pour :",
-  "Policies.header.hint": "Sélectionnez ...",
-  "Policies.header.tile": "Paramètres avancés",
+  "Policies.header.hint": "Sélectionnez les actions de l'application ou d'un plugin et cliquer sur l'icon de paramètres pour voir les routes associées à cette action",
+  "Policies.header.title": "Paramètres avancés",
 
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",

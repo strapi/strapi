@@ -113,7 +113,7 @@
 
   "Policies.InputSelect.empty": "None",
   "Policies.InputSelect.label": "Allow to perform this action for:",
-  "Policies.header.hint": "Select the application's actions or the plugin's actions and put your mouse over to display the bounded route",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
   "Policies.header.title": "Advanced settings",
 
   "PopUpForm.button.cancel": "Cancel",

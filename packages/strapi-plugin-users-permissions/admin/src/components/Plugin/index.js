@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
-import { capitalize, get, map } from 'lodash';
+import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import Controller from 'components/Controller';
@@ -26,7 +26,10 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
 
   handleClick = () => {
     this.props.changePluginSelected(this.props.name);
-    this.setState({ collapse: !this.state.collapse });
+
+    if (!isEmpty(get(this.props.plugin, 'controllers'))) {
+      this.setState({ collapse: !this.state.collapse });
+    }
 
     if (this.state.collapse) {
       this.context.resetShouldDisplayPoliciesHint();
@@ -46,9 +49,9 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
                 <i className={`fa fa-${icon}`} />
               </div>
             ) : ''}
-            <span className={styles.name}>{this.props.name}</span>
+            <div className={styles.name} style={{ width:'30%'}}>{this.props.name}</div>
             &nbsp;—&nbsp;
-            <span className={styles.description}>
+            <div className={styles.description}>
               {this.props.name === 'application' ? (
                 <FormattedMessage
                   id="users-permissions.Plugin.permissions.application.description"
@@ -59,7 +62,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
                   values={{ name: capitalize(this.props.name) }}
                 />
               )}
-            </span>
+            </div>
           </div>
           <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}>
           </div>
