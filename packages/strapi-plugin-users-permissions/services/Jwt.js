@@ -13,7 +13,7 @@ module.exports = {
   issue: (payload) => {
     return jwt.sign(
       _.clone(payload.toJSON()),
-      process.env.JWT_SECRET || _.get(strapi, 'api.user.config.jwtSecret') || 'oursecret'
+      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret'
     );
   },
 
@@ -21,7 +21,7 @@ module.exports = {
     return new Promise(function (resolve, reject) {
       jwt.verify(
         token,
-        process.env.JWT_SECRET || _.get(strapi, 'api.user.config.jwtSecret') || 'oursecret',
+        process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
         {},
         function (err, user) {
           if (err || !user || !user.id) {

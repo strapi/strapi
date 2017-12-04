@@ -4,6 +4,7 @@ build
 node_modules
 stats.json
 roles.json
+jwt.json
 
 # Cruft
 .DS_Store
