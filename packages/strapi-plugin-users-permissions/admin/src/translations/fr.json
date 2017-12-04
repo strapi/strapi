@@ -30,6 +30,7 @@
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
   "Auth.form.error.email.provide": "Votre identifiant est manquant.",
+  "Auth.form.error.email.invalid": "Cette e-mail n'est pas valide.",
   "Auth.form.error.password.provide": "Votre mot de passe est manquant.",
   "Auth.form.error.invalid": "Votre identifiant ou mot de passe est incorrect.",
   "Auth.form.error.password.local": "Ce compte n'a pas de mot de passe.",

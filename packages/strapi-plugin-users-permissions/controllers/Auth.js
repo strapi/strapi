@@ -122,16 +122,20 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
+    // Send an email to the user.
+    try {
+      await strapi.plugins['email'].services.email.send({
+        to: user.email,
+        subject: 'Reset password',
+        text: url + '?code=' + resetPasswordToken,
+        html: url + '?code=' + resetPasswordToken
+      });
+    } catch (err) {
+      return ctx.badRequest(null, err);
+    }
+
     // Update the user.
     await strapi.query('user', 'users-permissions').update(user);
-
-    // Send an email to the user.
-    await strapi.plugins['email'].services.email.send({
-      to: user.email,
-      subject: 'Reset password',
-      text: url + '?code=' + resetPasswordToken,
-      html: url + '?code=' + resetPasswordToken
-    });
 
     ctx.send({ ok: true });
   },
