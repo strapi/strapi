@@ -32,6 +32,7 @@ class Controller extends React.Component {
       <div className={styles.controller}>
         <div className={styles.controllerHeader}>
           <div>{this.props.name}</div>
+          <div className={styles.separator}></div>
           <div>
             <div className={cn(styles.inputCheckbox)}>
               <div className="form-check">

@@ -117,7 +117,7 @@ if (window.location.port !== '4000') {
       });
     })
     .catch(err => {
-      console.log(err);
+      console.log('kkk', err);
     });
 }
 
