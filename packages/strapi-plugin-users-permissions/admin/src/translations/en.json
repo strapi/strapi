@@ -30,6 +30,7 @@
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
 
   "Auth.form.error.email.provide": "Please provide your username or your e-mail.",
+  "Auth.form.error.email.invalid": "This e-mail is invalid.",
   "Auth.form.error.password.provide": "Please provide your password.",
   "Auth.form.error.invalid": "Identifier or password invalid.",
   "Auth.form.error.password.local": "This user never set a local password, please login thanks to the provider used during account creation.",
