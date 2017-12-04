@@ -17,12 +17,12 @@
   "Auth.form.login.password.label": "Password",
   "Auth.form.login.rememberMe.label": "Remember me",
   "Auth.form.login.username.label": "Username",
-  "Auth.form.login.username.placeholder": "Soupette",
+  "Auth.form.login.username.placeholder": "John Doe",
 
   "Auth.form.register.email.label": "Email",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
   "Auth.form.register.username.label": "Username",
-  "Auth.form.register.username.placeholder": "Soupette",
+  "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Password",
   "Auth.form.register.confirmPassword.label": "Confirmation Password",
 
@@ -114,7 +114,7 @@
 
   "Policies.InputSelect.empty": "None",
   "Policies.InputSelect.label": "Allow to perform this action for:",
-  "Policies.header.hint": "Select the application's actions or the plugin's actions and put your mouse over to display the bounded route",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
   "Policies.header.title": "Advanced settings",
 
   "PopUpForm.button.cancel": "Cancel",

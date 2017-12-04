@@ -256,34 +256,7 @@
         }
       },
       "application": {
-        "controllers": {
-          "product": {
-            "find": {
-              "enabled": true,
-              "policy": ""
-            },
-            "findOne": {
-              "enabled": true,
-              "policy": ""
-            },
-            "create": {
-              "enabled": true,
-              "policy": ""
-            },
-            "update": {
-              "enabled": true,
-              "policy": ""
-            },
-            "destroy": {
-              "enabled": true,
-              "policy": ""
-            },
-            "identity": {
-              "enabled": true,
-              "policy": ""
-            }
-          }
-        }
+        "controllers": {}
       }
     }
   }

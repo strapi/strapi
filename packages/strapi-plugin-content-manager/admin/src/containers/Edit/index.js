@@ -11,7 +11,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace, toNumber, toString } from 'lodash';
+import {
+  get,
+  includes,
+  isObject,
+  isEmpty,
+  map,
+  replace,
+  toNumber,
+  toString,
+} from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -121,7 +130,7 @@ export class Edit extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
-      if (!isEmpty(this.props.location.search)) {
+      if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         router.push(replace(this.props.location.search, '?redirectUrl=', ''));
       } else {
         router.push(replace(this.props.location.pathname, 'create', ''));
@@ -169,7 +178,6 @@ export class Edit extends React.Component {
     }
 
     const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', this.source, 'models', this.props.currentModelName]);
-
     // Plugin header config
     const primaryKey = currentModel.primaryKey;
     const mainField = get(currentModel, 'info.mainField') || primaryKey;

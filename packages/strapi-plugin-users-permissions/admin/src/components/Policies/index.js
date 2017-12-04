@@ -29,7 +29,7 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
     return (
       <div className={cn('col-md-5',styles.policies)}>
         <div className="container-fluid">
-          <div className="row">
+          <div className={cn('row', styles.inputWrapper)}>
             <div className={cn('col-md-12', styles.header)}>
               <FormattedMessage id={`${baseTitle}.${title}`} />
             </div>

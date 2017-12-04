@@ -25,9 +25,12 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     }
   }
 
-  // Roles that can't be deleted
+  // Roles that can't be deleted && modified
   // Don't delete this line
   protectedRoleIDs = ['0'];
+
+  // Roles that can't be deleted;
+  undeletableIDs = ['1'];
 
   generateContent = () => {
     let icons = [
@@ -45,6 +48,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
       case 'roles':
         if (includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
           icons = [];
+        }
+
+        if (includes(this.undeletableIDs, get(this.props.item, 'id').toString())) {
+          icons = [{ icoType: 'pencil', onClick: this.handleClick }];
         }
 
         return (

@@ -14,7 +14,7 @@ import cn from 'classnames';
 import { get, isUndefined, map } from 'lodash';
 
 // Design
-import Input from 'components/Input';
+// import Input from 'components/Input';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
 
@@ -57,7 +57,7 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
             description={{ id: 'app.components.InstallPluginPage.description' }}
             actions={[]}
           />
-          <div className={cn('row', styles.inputContainer)}>
+          {/*}<div className={cn('row', styles.inputContainer)}>
             <Input
               customBootstrapClass="col-md-12"
               label="app.components.InstallPluginPage.InputSearch.label"
@@ -68,7 +68,7 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
               validations={{}}
               value={this.props.search}
             />
-          </div>
+          </div>*/}
           <div className={cn('row', styles.wrapper)}>
             {map(this.props.availablePlugins, (plugin) => (
               <PluginCard
@@ -95,8 +95,8 @@ InstallPluginPage.propTypes = {
   didFetchPlugins: PropTypes.bool.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
-  search: PropTypes.string.isRequired,
+  // onChange: PropTypes.func.isRequired,
+  // search: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = makeSelectInstallPluginPage();

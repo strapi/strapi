@@ -60,6 +60,9 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
           // NOTE: prepare for comfirm email;
           // this.props.history.push(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
           break;
+        case 'forgot-password':
+          console.log('fuck');
+          break;
         default:
 
       }
@@ -134,6 +137,9 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
   render() {
     const inputs = get(form, ['form', this.props.match.params.authType]);
     const divStyle = this.props.match.params.authType === 'register' ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
+    const withLogo = this.props.match.params.authType === 'register' ? (
+      <div className={styles.logoContainer}><img src={LogoStrapi} alt="logo" /></div>
+    ) : '';
     const headerDescription = this.props.match.params.authType === 'register' ?
       <FormattedMessage id="users-permissions.Auth.header.register.description" />
       : <span />;
@@ -181,6 +187,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
             {this.renderLink()}
           </div>
         </div>
+        {withLogo}
       </div>
     );
   }

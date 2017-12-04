@@ -17,12 +17,12 @@
   "Auth.form.login.password.label": "Mot de Passe",
   "Auth.form.login.rememberMe.label": "Se souvenir de moi",
   "Auth.form.login.username.label": "Username",
-  "Auth.form.login.username.placeholder": "Soupette",
+  "Auth.form.login.username.placeholder": "John Doe",
 
   "Auth.form.register.email.label": "Email",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
   "Auth.form.register.username.label": "Username",
-  "Auth.form.register.username.placeholder": "Soupette",
+  "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Mot de Passe",
   "Auth.form.register.confirmPassword.label": "Confirmez le Mot de Passe",
 
@@ -115,8 +115,8 @@
 
   "Policies.InputSelect.empty": "Aucune",
   "Policies.InputSelect.label": "Autorisez cette action pour :",
-  "Policies.header.hint": "Sélectionnez ...",
-  "Policies.header.tile": "Paramètres avancés",
+  "Policies.header.hint": "Sélectionnez les actions de l'application ou d'un plugin et cliquer sur l'icon de paramètres pour voir les routes associées à cette action",
+  "Policies.header.title": "Paramètres avancés",
 
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",
