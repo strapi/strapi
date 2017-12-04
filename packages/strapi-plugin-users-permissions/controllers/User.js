@@ -6,6 +6,8 @@
  * @description: A set of functions called "actions" for managing `User`.
  */
 
+const _ = require('lodash');
+
 module.exports = {
 
   /**
@@ -41,7 +43,6 @@ module.exports = {
    */
 
   create: async (ctx) => {
-
     const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
 
     // Send 201 `created`
@@ -55,6 +56,12 @@ module.exports = {
    */
 
   update: async (ctx, next) => {
+    const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
+
+    if (_.get(ctx.request, 'body.password') === user.password) {
+      delete ctx.request.body.password;
+    }
+
     const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
 
     // Send 200 `ok`
