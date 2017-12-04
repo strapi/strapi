@@ -22,17 +22,16 @@ const tryRequireRoot = (source) => {
   }
 };
 
-const tryRequireConfig = (source) => {
+const bootstrap = tryRequireRoot('bootstrap');
+const pluginRequirements = tryRequireRoot('requirements');
+
+const layout = (() => {
   try {
-    return require('../../../../config/' + source + '.js');
+    return require('../../../../config/layout.js');
   } catch(err) {
     return null;
   }
-};
-
-const bootstrap = tryRequireRoot('bootstrap');
-const pluginRequirements = tryRequireRoot('requirements');
-const layout = tryRequireConfig('layout');
+})();
 
 const injectedComponents = (() => {
   try {

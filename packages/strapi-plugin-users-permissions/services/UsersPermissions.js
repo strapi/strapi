@@ -48,7 +48,6 @@ module.exports = {
   },
 
   getActions: () => {
-    console.log(strapi);
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
         acc[key] = { enabled: false, policy: '' };

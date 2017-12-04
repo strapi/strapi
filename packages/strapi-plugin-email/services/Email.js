@@ -14,30 +14,26 @@ const sendmail = require('sendmail')({
 module.exports = {
   send: (options, cb) => {
     return new Promise((resolve, reject) => {
-      try {
-        // Default values.
-        options = _.isObject(options) ? options : {};
-        options.from = 'admin@strapiapp.com';
-        options.text = options.text || options.html;
-        options.html = options.html || options.text;
+      // Default values.
+      options = _.isObject(options) ? options : {};
+      options.from = 'admin-dashboard@your-strapi-app.com';
+      options.text = options.text || options.html;
+      options.html = options.html || options.text;
 
-        // Send the email.
-        sendmail({
-          from: options.from,
-          to: options.to,
-          subject: options.subject,
-          text: options.text,
-          html: options.html
-        }, function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      } catch (err) {
-        reject(err);
-      }
+      // Send the email.
+      sendmail({
+        from: options.from,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html
+      }, function (err) {
+        if (err) {
+          reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
+        } else {
+          resolve();
+        }
+      });
     });
   }
 };

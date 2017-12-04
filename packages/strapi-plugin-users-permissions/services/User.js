@@ -43,6 +43,10 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
+    if (!values.provider) {
+      values.password = 'local';
+    }
+
     return strapi.query('user', 'users-permissions').create(values);
   },
 
