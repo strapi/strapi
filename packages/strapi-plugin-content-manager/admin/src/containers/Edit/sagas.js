@@ -71,8 +71,8 @@ export function* editRecord(action) {
       params,
     });
 
-    yield put(recordEdited());
     strapi.notification.success('content-manager.success.record.save');
+    yield put(recordEdited());
   } catch (err) {
     yield put(recordEditError());
     strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
