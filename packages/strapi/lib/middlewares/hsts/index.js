@@ -11,18 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      hsts: {
-        enabled: true,
-        maxAge: 31536000,
-        includeSubDomains: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
@@ -31,7 +19,7 @@ module.exports = strapi => {
         async (ctx, next) => {
           if (ctx.request.admin) return next();
 
-          strapi.koaMiddlewares.convert(
+          return await strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.hsts({
               maxAge: strapi.config.middleware.settings.hsts.maxAge,
               includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains

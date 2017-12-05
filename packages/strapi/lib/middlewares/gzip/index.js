@@ -7,16 +7,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      gzip: {
-        enabled: false
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

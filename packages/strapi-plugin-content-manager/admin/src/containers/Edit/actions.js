@@ -33,24 +33,27 @@ export function cancelChanges() {
   };
 }
 
-export function deleteRecord(id, modelName) {
+export function deleteRecord(id, modelName, source) {
   return {
     type: DELETE_RECORD,
     id,
     modelName,
+    source,
   };
 }
 
-export function editRecord() {
+export function editRecord(source) {
   return {
     type: EDIT_RECORD,
+    source,
   };
 }
 
-export function loadRecord(id) {
+export function loadRecord(id, source) {
   return {
     type: LOAD_RECORD,
     id,
+    source,
   };
 }
 

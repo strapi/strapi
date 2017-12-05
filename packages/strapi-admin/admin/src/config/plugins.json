@@ -1,0 +1,42 @@
+[
+  {
+    "id": "content-manager",
+    "source": {
+      "development": "http://localhost:1337/admin/content-manager/main.js",
+      "production": "http://localhost:1337/admin/content-manager/main.js",
+      "test": "http://localhost:1337/admin/content-manager/main.js"
+    }
+  },
+  {
+    "id": "content-type-builder",
+    "source": {
+      "development": "http://localhost:1337/admin/content-type-builder/main.js",
+      "production": "http://localhost:1337/admin/content-type-builder/main.js",
+      "test": "http://localhost:1337/admin/content-type-builder/main.js"
+    }
+  },
+  {
+    "id": "email",
+    "source": {
+      "development": "http://localhost:1337/admin/email/main.js",
+      "production": "http://localhost:1337/admin/email/main.js",
+      "test": "http://localhost:1337/admin/email/main.js"
+    }
+  },
+  {
+    "id": "settings-manager",
+    "source": {
+      "development": "http://localhost:1337/admin/settings-manager/main.js",
+      "production": "http://localhost:1337/admin/settings-manager/main.js",
+      "test": "http://localhost:1337/admin/settings-manager/main.js"
+    }
+  },
+  {
+    "id": "users-permissions",
+    "source": {
+      "development": "http://localhost:1337/admin/users-permissions/main.js",
+      "production": "http://localhost:1337/admin/users-permissions/main.js",
+      "test": "http://localhost:1337/admin/users-permissions/main.js"
+    }
+  }
+]

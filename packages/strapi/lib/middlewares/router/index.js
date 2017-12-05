@@ -17,18 +17,6 @@ module.exports = strapi => {
 
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      router: {
-        enabled: true,
-        prefix: '',
-        routes: {}
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
@@ -64,7 +52,7 @@ module.exports = strapi => {
           const router = strapi.koaMiddlewares.routerJoi();
 
           // Exclude routes with prefix.
-          const excludedRoutes = _.omitBy(plugin.config.routes, o => !o.hasOwnProperty('prefix'));
+          const excludedRoutes = _.omitBy(plugin.config.routes, o => !o.config.hasOwnProperty('prefix'));
 
           _.forEach(_.omit(plugin.config.routes, _.keys(excludedRoutes)), value => {
             composeEndpoint(value, name, router)(cb);

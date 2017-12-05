@@ -11,17 +11,6 @@
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      p3p: {
-        enabled: false,
-        value: ''
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
@@ -30,7 +19,7 @@ module.exports = strapi => {
         async (ctx, next) => {
           if (ctx.request.admin) return next();
 
-          strapi.koaMiddlewares.convert(
+          return await strapi.koaMiddlewares.convert(
             strapi.koaMiddlewares.lusca.p3p({
               value: strapi.config.middleware.settings.p3p.value
             })

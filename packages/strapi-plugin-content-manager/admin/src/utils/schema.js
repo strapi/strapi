@@ -1,4 +1,4 @@
-import { forEach, upperFirst, mapValues, pickBy, slice, findKey, keys, get } from 'lodash';
+import { forEach, upperFirst, mapValues, pickBy, slice, findKey, keys, get, set } from 'lodash';
 import pluralize from 'pluralize';
 
 /**
@@ -7,11 +7,13 @@ import pluralize from 'pluralize';
  *
  * @param models
  */
-const generateSchema = (models) => {
+const generateSchema = (responses) => {
   // Init `schema` object
-  const schema = {};
+  const schema = {
+    plugins: {},
+  };
 
-  forEach(models, (model, name) => {
+  const buildSchema = (model, name, plugin = false) => {
     // Model data
     const schemaModel = {
       label: upperFirst(name),
@@ -46,8 +48,24 @@ const generateSchema = (models) => {
       }, {});
     }
 
+    if (plugin) {
+      return set(schema.plugins, `${plugin}.${name}`, schemaModel);
+    }
+
     // Set the formatted model to the schema
     schema[name] = schemaModel;
+  };
+
+  // Generate schema for plugins.
+  forEach(responses.plugins, (plugin, pluginName) => {
+    forEach(plugin.models, (model, name) => {
+      buildSchema(model, name, pluginName);
+    });
+  });
+
+  // Generate schema for models.
+  forEach(responses.models, (model, name) => {
+    buildSchema(model, name);
   });
 
   return schema;

@@ -1,5 +1,5 @@
 import 'whatwg-fetch';
-
+import auth from 'utils/auth';
 /**
  * Parses the JSON returned by a network request
  *
@@ -50,7 +50,7 @@ function formatQueryParams(params) {
 */
 function serverRestartWatcher(response) {
   return new Promise((resolve, reject) => {
-    fetch(`${Strapi.apiUrl}/_health`, {
+    fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
       headers: {
@@ -84,9 +84,17 @@ function serverRestartWatcher(response) {
      'Content-Type': 'application/json',
    }, options.headers);
 
+   const token = auth.getToken();
+
+   if (token) {
+     options.headers = Object.assign({
+       'Authorization': `Bearer ${token}`,
+     }, options.headers);
+   }
+
    // Add parameters to url
    url = _.startsWith(url, '/')
-     ? `${Strapi.apiUrl}${url}`
+     ? `${strapi.backendURL}${url}`
      : url;
 
    if (options && options.params) {

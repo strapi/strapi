@@ -17,29 +17,6 @@ const _ = require('lodash');
 module.exports = strapi => {
   const hook = {
     /**
-     * Default options
-     */
-
-    defaults: {
-      session: {
-        enabled: true,
-        client: 'cookie',
-        key: 'strapi.sid',
-        prefix: 'strapi:sess:',
-        ttl: 24 * 60 * 60 * 1000, // One day in ms
-        rolling: false,
-        secretKeys: ['mySecretKey1', 'mySecretKey2'],
-        cookie: {
-          path: '/',
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000, // One day in ms
-          rewrite: true,
-          signed: false
-        }
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

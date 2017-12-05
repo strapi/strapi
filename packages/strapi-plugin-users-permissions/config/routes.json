@@ -1,0 +1,184 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "UsersPermissions.index",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/init",
+      "handler": "UsersPermissions.init",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/search/:id",
+      "handler": "UsersPermissions.searchUsers",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/permissions",
+      "handler": "UsersPermissions.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/policies",
+      "handler": "UsersPermissions.getPolicies",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "UsersPermissions.getRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "UsersPermissions.getRoles",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/routes",
+      "handler": "UsersPermissions.getRoutes",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "POST",
+      "path": "/roles",
+      "handler": "UsersPermissions.createRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/roles/:role",
+      "handler": "UsersPermissions.updateRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/roles/:role",
+      "handler": "UsersPermissions.deleteRole",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/providers/:provider",
+      "handler": "UsersPermissions.deleteProvider",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "POST",
+      "path": "/auth/local",
+      "handler": "Auth.callback",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/local/register",
+      "handler": "Auth.register",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "handler": "Auth.forgotPassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "handler": "Auth.changePassword",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+
+    {
+      "method": "GET",
+      "path": "/user",
+      "handler": "User.find",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/user/:_id",
+      "handler": "User.findOne",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/user",
+      "handler": "User.create",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/user/:_id",
+      "handler": "User.update",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/:_id",
+      "handler": "User.destroy",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    }
+  ]
+}

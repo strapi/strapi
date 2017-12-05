@@ -21,36 +21,41 @@ import {
   SET_CURRENT_MODEL_NAME,
 } from './constants';
 
-export function changeLimit(limit) {
+export function changeLimit(limit, source) {
   return {
     type: CHANGE_LIMIT,
-    limit,
+    limit: limit <= 0 ? 20 : limit,
+    source,
   };
 }
 
-export function changePage(page) {
+export function changePage(page, source) {
   return {
     type: CHANGE_PAGE,
-    page,
+    page: page <= 0 ? 1 : page,
+    source,
   };
 }
 
-export function changeSort(sort) {
+export function changeSort(sort, source) {
   return {
     type: CHANGE_SORT,
     sort,
+    source,
   };
 }
 
-export function loadCount() {
+export function loadCount(source) {
   return {
     type: LOAD_COUNT,
+    source,
   };
 }
 
-export function loadRecords() {
+export function loadRecords(source) {
   return {
     type: LOAD_RECORDS,
+    source,
   };
 }
 

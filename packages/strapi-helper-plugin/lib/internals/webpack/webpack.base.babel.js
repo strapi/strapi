@@ -2,37 +2,79 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
+const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-
 const webpack = require('webpack');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
+const isAdmin = process.env.IS_ADMIN === 'true';
 
-let noPlugin = false;
-let plugins = [];
-let pluginFolders = {};
+const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+
+if (!isSetup) {
+  try {
+    // Load app' configurations to update `plugins.json` automatically.
+    const strapi = require(path.join(appPath, 'node_modules', 'strapi'));
+
+    strapi.config.appPath = appPath;
+    strapi.log.level = 'silent';
+
+    (async () => {
+      await strapi.load();
+    })();
+  } catch (e) {
+    console.log(e);
+    throw new Error(`You need to start the WebPack server from the /admin or /plugins/**/admin directories in a Strapi's project.`);
+  }
+}
+
+// Define remote and backend URLs.
+const URLs = {
+  host: null,
+  backend: null
+};
+
+if (isAdmin && !isSetup) {
+  // Load server configuration.
+  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+  try {
+    const server = require(serverConfig);
+    const path = _.get(server, 'admin.path', '/admin');
+
+    if (process.env.PWD.indexOf('/admin') !== -1) {
+      URLs.host = _.get(server, 'admin.build.host', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${path}`);
+      URLs.backend = _.get(server, 'admin.build.backend', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`);
+    }
+  } catch (e) {
+    throw new Error(`Impossible to access to ${serverConfig}`)
+  }
+}
+
+// Load plugins into the same build in development mode.
+const plugins = {
+  exist: false,
+  src: [],
+  folders: {}
+};
 
 if (process.env.npm_lifecycle_event === 'start') {
   try {
-    fs.accessSync(path.resolve(process.env.PWD, '..', 'plugins'), fs.constants.R_OK);
+    fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
   } catch (e) {
-    try {
-      fs.accessSync(path.resolve(process.env.PWD, '..', 'api'), fs.constants.R_OK);
-
-      // Allow app without plugins.
-      noPlugin = true;
-    } catch (e) {
-      throw new Error(`You need to start the WebPack server from the /admin directory in a Strapi's project.`);
-    }
+    // Allow app without plugins.
+    plugins.exist = true;
   }
 
-  plugins = process.env.IS_ADMIN === 'true' && !noPlugin ? fs.readdirSync(path.resolve(process.env.PWD, '..', 'plugins'))
-    .filter(x => x[0] !== '.') : [];
+  // Read `plugins` directory.
+  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => x[0] !== '.') : [];
 
-  pluginFolders = plugins.reduce((acc, current) => {
-    acc[current] = path.resolve(process.env.PWD, '..', 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+  // Construct object of plugin' paths.
+  plugins.folders = plugins.src.reduce((acc, current) => {
+    acc[current] = path.resolve(appPath, 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
 
     return acc;
   }, {});
@@ -41,8 +83,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.resolve(process.cwd(), 'admin', 'build'),
-    publicPath: '/',
+    path: path.join(process.env.PWD, 'admin', 'build')
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -70,13 +111,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [path.join(process.cwd(), 'admin', 'src')]
-        .concat(plugins.reduce((acc, current) => {
-          acc.push(path.resolve(process.env.PWD, '..', 'plugins', current, 'admin', 'src'), pluginFolders[current]);
+      include: [path.join(process.env.PWD, 'admin', 'src')]
+        .concat(plugins.src.reduce((acc, current) => {
+          acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
           return acc;
         }, []))
-        .concat([path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
+        .concat([path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
@@ -146,9 +187,6 @@ module.exports = (options) => ({
       test: /\.html$/,
       loader: 'html-loader',
     }, {
-      test: /\.json$/,
-      loader: 'json-loader',
-    }, {
       test: /\.(mp4|webm)$/,
       loader: 'url-loader?limit=10000',
     }],
@@ -165,6 +203,8 @@ module.exports = (options) => ({
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        REMOTE_URL: JSON.stringify(URLs.host),
+        BACKEND_URL: JSON.stringify(URLs.backend),
       },
     }),
     new webpack.NamedModulesPlugin()

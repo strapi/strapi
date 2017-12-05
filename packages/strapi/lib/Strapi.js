@@ -6,9 +6,9 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get, assign } = require('lodash');
+const { includes, get, assign, forEach } = require('lodash');
 const { logger, models } = require('strapi-utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks } = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { EventEmitter } = require('events');
@@ -95,6 +95,8 @@ class Strapi extends EventEmitter {
       await this.bootstrap();
       // Freeze object.
       await this.freeze();
+      // Update source admin.
+      await admin.call(this);
       // Launch server.
       this.server.listen(this.config.port, err => {
         if (err) {
@@ -182,6 +184,9 @@ class Strapi extends EventEmitter {
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
+
+    // Harmonize plugins configuration.
+    await plugins.call(this);
   }
 
   reload() {
@@ -196,11 +201,7 @@ class Strapi extends EventEmitter {
   }
 
   async bootstrap() {
-    if (!this.config.functions.bootstrap) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
+    const execBootstrap = (fn) => !fn ? Promise.resolve() : new Promise((resolve, reject) => {
       const timeoutMs = this.config.bootstrapTimeout || 3500;
       const timer = setTimeout(() => {
         this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
@@ -210,7 +211,7 @@ class Strapi extends EventEmitter {
       let ranBootstrapFn = false;
 
       try {
-        this.config.functions.bootstrap(err => {
+        fn(err => {
           if (ranBootstrapFn) {
             this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
 
@@ -235,6 +236,11 @@ class Strapi extends EventEmitter {
         return resolve(e);
       }
     });
+
+    return Promise.all(
+      Object.values(this.plugins)
+      .map(x => execBootstrap(get(x, 'config.functions.bootstrap')))
+    ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
   async freeze() {
@@ -248,18 +254,20 @@ class Strapi extends EventEmitter {
     });
   }
 
-  query(entity) {
+  query(entity, plugin) {
     if (!entity) {
       return this.log.error(`You can't call the query method without passing the model's name as a first argument.`);
     }
 
     const model = entity.toLowerCase();
 
-    if (!this.models.hasOwnProperty(model)) {
+    const Model = get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+
+    if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
-    const connector = this.models[model].orm;
+    const connector = Model.orm;
 
     if (!connector) {
       return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
@@ -298,7 +306,7 @@ class Strapi extends EventEmitter {
 
     // Bind queries with the current model to allow the use of `this`.
     const bindQueries = Object.keys(queries).reduce((acc, current) => {
-      return acc[current] = queries[current].bind(this.models[model]), acc;
+      return acc[current] = queries[current].bind(Model), acc;
     }, {});
 
     // Send ORM to the called function.

@@ -15,14 +15,15 @@ const joijson = require('strapi-utils').joijson;
 
 // Middleware used for every routes.
 // Expose the endpoint in `this`.
-function globalPolicy(endpoint, value, route) {
+function globalPolicy(endpoint, value, route, plugin) {
   return async (ctx, next) => {
     ctx.request.route = {
       endpoint: _.trim(endpoint),
-      controller: _.trim(value.controller),
-      action: _.trim(value.action),
+      controller: value.handler.split('.')[0].toLowerCase(),
+      action: value.handler.split('.')[1].toLowerCase(),
       splittedEndpoint: _.trim(route.endpoint),
-      verb: route.verb && _.trim(route.verb.toLowerCase())
+      verb: route.verb && _.trim(route.verb.toLowerCase()),
+      plugin
     };
 
     await next();
@@ -51,7 +52,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
   const policies = [];
 
   // Add the `globalPolicy`.
-  policies.push(globalPolicy(endpoint, value, route));
+  policies.push(globalPolicy(endpoint, value, route, plugin));
 
   // Allow string instead of array of policies.
   if (

@@ -1,0 +1,49 @@
+{
+  "availablePlugins": [
+    {
+      "description": "content-manager.plugin.description",
+      "id": "content-manager",
+      "icon": "plug",
+      "isCompatible": true,
+      "name": "Content Manager",
+      "price": 0,
+      "ratings": 1
+    },
+    {
+      "description": "content-type-builder.plugin.description",
+      "id": "content-type-builder",
+      "icon": "paint-brush",
+      "isCompatible": true,
+      "name": "content type builder",
+      "price": 0,
+      "ratings": 4.4
+    },
+    {
+      "description": "settings-manager.plugin.description",
+      "id": "settings-manager",
+      "icon": "wrench",
+      "isCompatible": true,
+      "name": "settings manager",
+      "price": 0,
+      "ratings": 2.6
+    },
+    {
+      "description": "users-permissions.plugin.description",
+      "id": "users-permissions",
+      "icon": "users",
+      "isCompatible": true,
+      "name": "Auth & Permissions",
+      "price": 0,
+      "ratings": 1
+    },
+    {
+      "description": "users-permissions.plugin.description",
+      "id": "test",
+      "icon": "users",
+      "isCompatible": true,
+      "name": "test",
+      "price": 0,
+      "ratings": 1
+    }
+  ]
+}
