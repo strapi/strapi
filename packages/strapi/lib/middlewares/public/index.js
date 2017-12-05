@@ -81,6 +81,27 @@ module.exports = strapi => {
         ]
       });
 
+      // Allow refresh in admin page.
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/*`,
+        handler: [
+          async (ctx, next) => {
+            const parse = path.parse(ctx.url);
+
+            if (parse.ext === '') {
+              ctx.url = 'index.html';
+            }
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
       // Serve admin assets.
       strapi.router.route({
         method: 'GET',
