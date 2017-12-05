@@ -38,7 +38,7 @@
   right: -3px !important;
   min-width: 100%!important;
   margin: 0 !important;
-  padding: 12px 0 !important;
+  padding: 0px;
   line-height: 1.8rem;
   border: none!important;
   border-top-left-radius: 0!important;
@@ -47,20 +47,24 @@
   font-size: 14px;
 
   > button {
+    padding: 12px 15px 0 15px;
     &:hover, &:focus, &:active {
-      background-color: #ffff!important;
+      background-color: #FAFAFB!important;
+      border-radius: 0px;
       cursor: pointer;
     }
   }
 
   > button:first-child {
+    padding-top: 16px;
+    padding-bottom: 5px;
     &:hover, &:active {
       color: #333740;
     }
-    margin-bottom: 13px;
   }
 
   > button:not(:first-child) {
+    padding-bottom: 16px;
     color: #F75B1D;
     > i {
       margin-left: 10px
@@ -71,5 +75,8 @@
 .item {
   &:active {
     color: black;
+  }
+  &:hover {
+    background-color: #FAFAFB !important;
   }
 }

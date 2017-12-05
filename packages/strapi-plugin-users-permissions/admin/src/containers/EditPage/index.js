@@ -102,21 +102,6 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     this.props.submit();
   }
 
-  pluginHeaderActions = [
-    {
-      label: 'users-permissions.EditPage.cancel',
-      kind: 'secondary',
-      onClick: this.props.onCancel,
-      type: 'button',
-    },
-    {
-      kind: 'primary',
-      label: 'users-permissions.EditPage.submit',
-      onClick: this.handleSubmit,
-      type: 'submit',
-    },
-  ];
-
   render() {
     const pluginHeaderTitle = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.title.create'
@@ -124,8 +109,22 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
     const pluginHeaderDescription = this.props.match.params.actionType === 'create' ?
       'users-permissions.EditPage.header.description.create'
       : 'users-permissions.EditPage.header.description';
-    const pluginHeaderActions = !isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData) ? this.pluginHeaderActions : [];
-
+    const pluginHeaderActions = [
+      {
+        label: 'users-permissions.EditPage.cancel',
+        kind: 'secondary',
+        onClick: this.props.onCancel,
+        type: 'button',
+      },
+      {
+        kind: 'primary',
+        label: 'users-permissions.EditPage.submit',
+        onClick: this.handleSubmit,
+        type: 'submit',
+        disabled: isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData),
+      },
+    ];
+  
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />

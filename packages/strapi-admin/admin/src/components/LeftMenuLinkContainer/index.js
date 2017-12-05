@@ -47,14 +47,17 @@ function LeftMenuLinkContainer({ plugins }) {
 
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(pluginsObject) ?
-    map(sortBy(pluginsObject, 'name'), plugin => (
-      <LeftMenuLink
-        key={get(plugin, 'id')}
-        icon={get(plugin, 'icon') || 'plug'}
-        label={get(plugin, 'name')}
-        destination={`/plugins/${get(plugin, 'id')}`}
-      />
-    ))
+    map(sortBy(pluginsObject, 'name'), plugin => {
+      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
+        return (
+          <LeftMenuLink
+            key={get(plugin, 'id')}
+            icon={get(plugin, 'icon') || 'plug'}
+            label={get(plugin, 'name')}
+            destination={`/plugins/${get(plugin, 'id')}`}
+          />
+        );
+      }})
     : (
       <li className={styles.noPluginsInstalled}>
         <FormattedMessage {...messages.noPluginsInstalled} />.

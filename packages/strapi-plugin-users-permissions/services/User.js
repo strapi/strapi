@@ -44,7 +44,7 @@ module.exports = {
     }
 
     if (!values.provider) {
-      values.password = 'local';
+      values.provider = 'local';
     }
 
     return strapi.query('user', 'users-permissions').create(values);

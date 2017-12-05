@@ -64,14 +64,14 @@ class ListPlugins extends React.Component {
               <ul>
                 {map(this.props.plugins, (plugin, key) => (
                   <ListRow key={plugin.name}>
-                    <div className="col-md-1">
-                      <div className={styles.icoContainer}>
+                    <div className={cn("col-md-11", styles.nameWrapper)}>
+                      <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
                         <i className={`fa fa-${plugin.icon}`} />
                       </div>
-                    </div>
-                    <div className={cn(styles.pluginContent, 'col-md-10')}>
-                      <span>{plugin.name} —&nbsp;</span>
-                      <FormattedMessage id={plugin.description} />
+                      <div className={styles.pluginContent}>
+                        <span>{plugin.name} —&nbsp;</span>
+                        <FormattedMessage id={plugin.description} />
+                      </div>
                     </div>
                     <div className="col-md-1">
                       <div className={styles.actionContainer}>
