@@ -14,10 +14,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { get, includes, isFunction, isUndefined, map, omit } from 'lodash';
+import { get, includes, isFunction, map, omit } from 'lodash';
 
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
-import { selectPlugins } from 'containers/App/selectors';
+import { selectHasUserPlugin, selectPlugins } from 'containers/App/selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
 // Design
@@ -58,7 +58,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   }
 
   checkLogin = (props) => {
-    if (this.hasUsersPlugin() && this.isUrlProtected(props) && !auth.getToken()) {
+    if (this.props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser() ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
@@ -71,22 +71,29 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
-    if (!this.hasUsersPlugin() || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
+    if (!this.props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
       map(omit(this.props.plugins.toJS(), ['users-permissions', 'email']), plugin => {
-        if (isFunction(plugin.bootstrap)) {
-          plugin.bootstrap(plugin)
-            .then(updatedPlugin => this.props.pluginLoaded(updatedPlugin))
-            .catch(err => {
-              console.log('kkk', err);
-            });
+        switch (true) {
+          case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
+            plugin.pluginRequirements(plugin)
+              .then(plugin => {
+                return plugin.bootstrap(plugin);
+              })
+              .then(plugin => this.props.pluginLoaded(plugin));
+            break;
+          case isFunction(plugin.pluginRequirements):
+            plugin.pluginRequirements(plugin).then(plugin => this.props.pluginLoaded(plugin));
+            break;
+          case isFunction(plugin.bootstrap):
+            plugin.bootstrap(plugin).then(plugin => this.props.pluginLoaded(plugin));
+            break;
+          default:
         }
       });
 
       this.setState({ hasAlreadyRegistereOtherPlugins: true });
     }
   }
-
-  hasUsersPlugin = () => !isUndefined(get(this.props.plugins.toJS(), 'users-permissions'));
 
   hasAdminUser = () => get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
@@ -102,7 +109,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     return (
       <div className={styles.adminPage}>
         {leftMenu}
-        { auth.getToken() && this.hasUsersPlugin() && this.isUrlProtected(this.props) ? (
+        { auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props) ? (
           <Logout />
         ) : ''}
         <div className={styles.adminPageRightWrapper} style={style}>
@@ -133,7 +140,12 @@ AdminPage.contextTypes = {
   router: PropTypes.object.isRequired,
 };
 
+AdminPage.defaultProps = {
+  hasUserPlugin: true,
+};
+
 AdminPage.propTypes = {
+  hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   pluginLoaded: PropTypes.func.isRequired,
@@ -142,6 +154,7 @@ AdminPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
+  hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
 });
 

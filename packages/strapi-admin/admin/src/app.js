@@ -35,13 +35,15 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import { pluginLoaded, updatePlugin } from 'containers/App/actions';
+import { pluginLoaded, updatePlugin, setHasUserPlugin } from 'containers/App/actions';
 import auth from 'utils/auth';
-
+import plugins from './config/plugins.json';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
+import { findIndex } from 'lodash';
 /* eslint-enable */
 
+let appPlugins = plugins;
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
@@ -91,6 +93,7 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
+      appPlugins = plugins;
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
@@ -117,7 +120,7 @@ if (window.location.port !== '4000') {
       });
     })
     .catch(err => {
-      console.log('kkk', err);
+      console.log(err);
     });
 }
 
@@ -171,6 +174,10 @@ const registerPlugin = (plugin) => {
 const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
+
+if (findIndex(appPlugins, ['id', 'users-permissions']) === -1) {
+  store.dispatch(setHasUserPlugin());
+}
 
 window.strapi = Object.assign(window.strapi || {}, {
   remoteURL: devFrontURL || remoteURL,

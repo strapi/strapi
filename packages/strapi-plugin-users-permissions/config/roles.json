@@ -254,6 +254,9 @@
             }
           }
         }
+      },
+      "application": {
+        "controllers": {}
       }
     }
   },
@@ -512,6 +515,9 @@
             }
           }
         }
+      },
+      "application": {
+        "controllers": {}
       }
     }
   }
