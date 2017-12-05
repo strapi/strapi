@@ -65,7 +65,7 @@ function LeftMenuLinkContainer({ plugins }) {
         <p className={styles.title}><FormattedMessage {...messages.general} /></p>
         <ul className={styles.list}>
           <LeftMenuLink
-            icon="cubes"
+            icon="puzzle-piece"
             label={messages.listPlugins.id}
             destination="/list-plugins"
           />
