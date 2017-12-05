@@ -52,14 +52,17 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.checkLogin(nextProps);
+    }
 
+    if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
       this.checkLogin(nextProps);
     }
   }
 
   checkLogin = (props) => {
     if (this.props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
-      const endPoint = this.hasAdminUser() ? 'login': 'register';
+      const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
@@ -95,11 +98,11 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
   }
 
-  hasAdminUser = () => get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
+  hasAdminUser = (props) => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
   isUrlProtected = (props) => !includes(props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
-  showLeftMenu = () => !includes(this.props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
+  showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   render() {
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
