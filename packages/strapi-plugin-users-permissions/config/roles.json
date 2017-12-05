@@ -517,7 +517,7 @@
               "policy": ""
             },
             "init": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "index": {
