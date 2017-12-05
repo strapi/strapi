@@ -66,10 +66,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
-    // if (!this.isUrlProtected(props) && includes(props.location.pathname, 'login') && !this.hasAdminUser()) {
-    //   this.props.history.push('/plugins/users-permissions/auth/register');
-    // }
-
     if (!this.isUrlProtected(props) && includes(props.location.pathname, 'register') && this.hasAdminUser()) {
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
