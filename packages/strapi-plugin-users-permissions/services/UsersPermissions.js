@@ -190,16 +190,18 @@ module.exports = {
 
     Service.writePermissions(appRoles);
 
-    const diffUser = _.differenceBy(body.users, await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
+    const currentUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
       role: roleId
-    })), 'id');
+    }));
 
-    _.forEach(diffUser, (user) => {
-      if (_.find(body.user, { id: user.id})) {
-        Service.updateUserRole(user, '1');
-      } else {
-        Service.updateUserRole(user, roleId);
-      }
+    const userToAdd = _.differenceBy(body.users, currentUsers, 'id');
+    const userToRemove = _.differenceBy(currentUsers, body.users, 'id');
+
+    _.forEach(userToAdd, (user) => {
+      Service.updateUserRole(user, roleId);
+    });
+    _.forEach(userToRemove, (user) => {
+      Service.updateUserRole(user, '1');
     });
   },
 
@@ -214,7 +216,7 @@ module.exports = {
   },
 
   updateUserRole: async (user, role) => {
-    return await strapi.query('user', 'users-permissions').update({
+    await strapi.query('user', 'users-permissions').update({
       _id: user._id || user.id,
       role: role.toString()
     });
