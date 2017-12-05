@@ -57,6 +57,7 @@
 .icoContainer {
   width: 70px;
   height: 36px;
+  margin: auto 0;
   line-height: 36px;
   text-align: center;
   border: 1px solid rgba(28,93,231,0.1);
@@ -67,4 +68,8 @@
 .actionContainer {
   display: flex;
   justify-content: flex-end;
+}
+
+.nameWrapper {
+  display: flex;
 }

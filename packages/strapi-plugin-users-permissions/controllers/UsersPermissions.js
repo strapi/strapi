@@ -6,7 +6,6 @@
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
 
-const fakeData = require('../config/fakeData.json');
 const _ = require('lodash');
 
 module.exports = {
