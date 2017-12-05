@@ -152,6 +152,10 @@
       "users-permissions": {
         "controllers": {
           "auth": {
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            },
             "callback": {
               "enabled": true,
               "policy": ""
@@ -165,10 +169,6 @@
               "policy": ""
             },
             "changePassword": {
-              "enabled": true,
-              "policy": ""
-            },
-            "identity": {
               "enabled": true,
               "policy": ""
             }
@@ -254,6 +254,9 @@
             }
           }
         }
+      },
+      "application": {
+        "controllers": {}
       }
     }
   },
@@ -410,6 +413,10 @@
       "users-permissions": {
         "controllers": {
           "auth": {
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            },
             "callback": {
               "enabled": true,
               "policy": ""
@@ -423,10 +430,6 @@
               "policy": ""
             },
             "changePassword": {
-              "enabled": true,
-              "policy": ""
-            },
-            "identity": {
               "enabled": false,
               "policy": ""
             }
@@ -512,6 +515,9 @@
             }
           }
         }
+      },
+      "application": {
+        "controllers": {}
       }
     }
   }
