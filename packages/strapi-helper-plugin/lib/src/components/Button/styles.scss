@@ -52,6 +52,9 @@
      background: #FFFFFF;
    }
  }
+ &:disabled {
+   cursor: not-allowed;
+ }
 }
 
 .primary {
