@@ -257,7 +257,7 @@
       },
       "application": {
         "controllers": {
-          "toto": {
+          "raezarez": {
             "find": {
               "enabled": true,
               "policy": ""
@@ -545,7 +545,7 @@
       },
       "application": {
         "controllers": {
-          "toto": {
+          "raezarez": {
             "find": {
               "enabled": false,
               "policy": ""

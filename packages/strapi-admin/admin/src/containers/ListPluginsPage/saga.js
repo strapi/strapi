@@ -15,14 +15,13 @@ export function* deletePlugin() {
 
     const resp = yield call(request, requestUrl, { method: 'DELETE' });
 
-    // Remove the logout button
-    if (plugin === 'users-permissions') {
-      auth.clearAppStorage();
-    }
-
     if (resp.ok) {
       yield put(deletePluginSucceeded(plugin));
       yield put(pluginDeleted(plugin));
+
+      if (plugin === 'users-permissions') {
+        auth.clearAppStorage();
+      }
     }
 
   } catch(error) {

@@ -20,15 +20,17 @@ function LeftMenuLinkContainer({ plugins }) {
   // Generate the list of sections
   const pluginsSections = Object.keys(pluginsObject).reduce((acc, current) => {
     pluginsObject[current].leftMenuSections.forEach((section = {}) => {
-      acc[snakeCase(section.name)] = {
-        name: section.name,
-        links: (get(acc[snakeCase(section.name)], 'links') || []).concat(section.links.map(link => {
-          link.source = current;
-          link.plugin = !isEmpty(pluginsObject[link.plugin]) ? link.plugin : pluginsObject[current].id;
+      if (!isEmpty(section.links)) {
+        acc[snakeCase(section.name)] = {
+          name: section.name,
+          links: (get(acc[snakeCase(section.name)], 'links') || []).concat(section.links.map(link => {
+            link.source = current;
+            link.plugin = !isEmpty(pluginsObject[link.plugin]) ? link.plugin : pluginsObject[current].id;
 
-          return link;
-        })),
-      };
+            return link;
+          })),
+        };
+      }
     });
 
     return acc;
