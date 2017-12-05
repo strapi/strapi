@@ -131,9 +131,15 @@ export class Edit extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
-        router.push(replace(this.props.location.search, '?redirectUrl=', ''));
+        router.push({
+          pathname: replace(this.props.location.search, '?redirectUrl=', ''),
+          search: `?source=${this.source}`,
+        });
       } else {
-        router.push(replace(this.props.location.pathname, 'create', ''));
+        router.push({
+          pathname: replace(this.props.location.pathname, '/create', ''),
+          search: `?source=${this.source}`,
+        });
       }
     }
   }
