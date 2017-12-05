@@ -49,7 +49,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
                 <i className={`fa fa-${icon}`} />
               </div>
             ) : ''}
-            <div className={styles.name} style={{ width:'30%'}}>{this.props.name}</div>
+            <div className={styles.name}>{this.props.name}</div>
             &nbsp;—&nbsp;
             <div className={styles.description}>
               {this.props.name === 'application' ? (
