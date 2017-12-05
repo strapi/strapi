@@ -111,6 +111,9 @@ module.exports = require('./webpack.base.babel')({
   ],
   alias: {
     moment: 'moment/moment.js',
+    'babel-polyfill': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'babel-polyfill'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
     'lodash': isSetup ?
       path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
       path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),

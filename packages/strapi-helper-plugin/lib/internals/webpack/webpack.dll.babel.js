@@ -18,7 +18,7 @@ const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(proce
 module.exports = {
   context: appPath,
   entry: {
-    vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash'] // Shared dependencies accross the admin and plugins.
+    vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash', 'babel-polyfill'] // Shared dependencies accross the admin and plugins.
   },
   devtool: 'cheap-module-source-map',
   output: {
@@ -48,6 +48,9 @@ module.exports = {
     ],
     alias: {
       moment: 'moment/moment.js',
+      'babel-polyfill': isSetup ?
+        path.resolve(__dirname, '..', '..', '..', 'node_modules', 'babel-polyfill'):
+        path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
       'lodash': isSetup ?
         path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
         path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
