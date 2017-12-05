@@ -9,6 +9,7 @@ import {
   UPDATE_PLUGIN,
   PLUGIN_LOADED,
   PLUGIN_DELETED,
+  SET_HAS_USERS_PLUGIN,
 } from './constants';
 
 export function loadPlugin(newPlugin) {
@@ -38,5 +39,11 @@ export function pluginDeleted(plugin) {
   return {
     type: PLUGIN_DELETED,
     plugin,
+  };
+}
+
+export function setHasUserPlugin() {
+  return {
+    type: SET_HAS_USERS_PLUGIN,
   };
 }

@@ -1,6 +1,7 @@
 import { fork, call, put, select, takeLatest } from 'redux-saga/effects';
 
 import { pluginDeleted } from 'containers/App/actions';
+import auth from 'utils/auth';
 import request from 'utils/request';
 
 import { deletePluginSucceeded, getPluginsSucceeded } from './actions';
@@ -13,6 +14,11 @@ export function* deletePlugin() {
     const requestUrl = `/admin/plugins/uninstall/${plugin}`;
 
     const resp = yield call(request, requestUrl, { method: 'DELETE' });
+
+    // Remove the logout button
+    if (plugin === 'users-permissions') {
+      auth.clearAppStorage();
+    }
 
     if (resp.ok) {
       yield put(deletePluginSucceeded(plugin));
