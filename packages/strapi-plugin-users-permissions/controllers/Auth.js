@@ -136,7 +136,7 @@ module.exports = {
     try {
       await strapi.plugins['email'].services.email.send({
         to: user.email,
-        subject: 'Reset password',
+        subject: '­Reset password 🔑 ',
         text: template,
         html: template
       });

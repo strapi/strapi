@@ -6,6 +6,7 @@
   "Auth.form.button.register": "Prêt à commencer",
 
   "Auth.form.forgot-password.email.label": "Entrez votre email",
+  "Auth.form.forgot-password.email.label.success": "Email envoyé avec succès à l'adresse suivante",
   "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
 
   "Auth.form.header.login": "strapi",

@@ -16,7 +16,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       // Default values.
       options = _.isObject(options) ? options : {};
-      options.from = 'admin-dashboard@your-strapi-app.com';
+      options.from = options.from || '"Administration Panel" <no-reply@strapi.io>';
       options.text = options.text || options.html;
       options.html = options.html || options.text;
 
