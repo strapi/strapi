@@ -57,7 +57,7 @@ module.exports = {
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-          user: user
+          user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
         });
       }
     } else {
@@ -100,7 +100,7 @@ module.exports = {
 
     ctx.send({
       jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-      user: user
+      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
     });
   },
 
@@ -170,7 +170,7 @@ module.exports = {
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: user
+        user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');
