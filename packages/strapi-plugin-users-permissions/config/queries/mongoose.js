@@ -26,9 +26,15 @@ module.exports = {
       if (_.get(this._attributes, [current, 'type'])) {
         acc[current] = params[current];
       }
-      
+
       return acc;
-    }, {}));
+    }, {}))
+    .catch((error) => {
+      const field = _.last(_.words(error.message.split('_')[0]));
+      const err = { message: `This ${field} is already taken`, field };
+
+      throw err;
+    });
   },
 
   update: async function (params) {
@@ -36,6 +42,12 @@ module.exports = {
       [this.primaryKey]: params[this.primaryKey] || params.id
     }, params, {
       strict: false
+    })
+    .catch((error) => {
+      const field = _.last(_.words(error.message.split('_')[0]));
+      const err = { message: `This ${field} is already taken`, field };
+
+      throw err;
     });
   },
 

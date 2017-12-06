@@ -48,7 +48,8 @@
     "headers": [
       "Content-Type",
       "Authorization",
-      "X-Frame-Options"
+      "X-Frame-Options",
+      "X-Forwarded-Host"
     ]
   },
   "ip": {

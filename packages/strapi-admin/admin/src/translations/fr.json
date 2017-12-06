@@ -68,6 +68,7 @@
   "components.Input.error.attribute.key.taken": "Cette valeur existe déjà",
   "components.Input.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.Input.error.validation.minSupMax": "Ne peut pas être plus grand",
+  "components.Input.error.custom-error": "{errorMessage} ",
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 
@@ -76,5 +77,12 @@
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",
-  "Settings Manager": "Settings Manager"
+  "Settings Manager": "Settings Manager",
+  "Email": "Email",
+  "Password": "Mot de passe",
+  "Username": "Nom d'utilisateur",
+  "Provider": "Provider",
+  "ResetPasswordToken": "ResetPasswordToken",
+  "Role": "Rôle",
+  "New entry": "New Entry"
 }

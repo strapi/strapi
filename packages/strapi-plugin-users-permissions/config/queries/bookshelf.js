@@ -49,7 +49,13 @@ module.exports = {
       }
 
       return acc;
-    }, {}));
+    }, {}))
+    .catch((err) => {
+      const field = _.last(_.words(err.detail.split('=')[0]));
+      const error = { message: `This ${field} is already taken`, field };
+
+      throw error;
+    });
   },
 
   update: async function (params) {
@@ -63,6 +69,12 @@ module.exports = {
     })
     .save(params, {
       patch: true
+    })
+    .catch((err) => {
+      const field = _.last(_.words(err.detail.split('=')[0]));
+      const error = { message: `This ${field} is already taken`, field };
+
+      throw error;
     });
   },
 
