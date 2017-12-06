@@ -35,7 +35,7 @@ class App extends React.Component {
 
   componentWillUpdate(nextProps) {
     if (!isEmpty(nextProps.sections) && nextProps.location.pathname !== '/plugins/settings-manager') {
-      const allowedPath = nextProps.sections.reduce((acc, current) => {
+      const allowedPaths = nextProps.sections.reduce((acc, current) => {
         const slugs = current.items.reduce((acc, current) => {
           acc.push(current.slug);
 
@@ -45,7 +45,7 @@ class App extends React.Component {
       }, []);
 
       const slug = nextProps.location.pathname.split('/')[3];
-      const shouldRedirect = allowedPath.filter(el => el === slug).length === 0;
+      const shouldRedirect = allowedPaths.filter(el => el === slug).length === 0;
 
       if (shouldRedirect) {
         this.props.history.push('/404');

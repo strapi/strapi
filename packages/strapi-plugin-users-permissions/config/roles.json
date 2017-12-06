@@ -256,7 +256,34 @@
         }
       },
       "application": {
-        "controllers": {}
+        "controllers": {
+          "bite": {
+            "find": {
+              "enabled": true,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": true,
+              "policy": ""
+            },
+            "create": {
+              "enabled": true,
+              "policy": ""
+            },
+            "update": {
+              "enabled": true,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": true,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
+            }
+          }
+        }
       }
     }
   },
@@ -265,7 +292,34 @@
     "description": "",
     "permissions": {
       "application": {
-        "controllers": {}
+        "controllers": {
+          "bite": {
+            "find": {
+              "enabled": false,
+              "policy": ""
+            },
+            "findOne": {
+              "enabled": false,
+              "policy": ""
+            },
+            "create": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "destroy": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
+            }
+          }
+        }
       },
       "content-manager": {
         "controllers": {

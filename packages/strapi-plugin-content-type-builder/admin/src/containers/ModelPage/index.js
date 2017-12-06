@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, size, replace, startCase, findIndex } from 'lodash';
+import { get, has, isEmpty, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -83,6 +83,25 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     if (this.props.modelPage.didFetchModel !== nextProps.modelPage.didFetchModel) {
       this.props.checkIfTableExists();
+    }
+  }
+
+  componentWillUpdate(nextProps) {
+    if (!isEmpty(nextProps.menu)) {
+      const allowedPaths = nextProps.menu.reduce((acc, current) => {
+        const models = current.items.reduce((acc, current) => {
+          acc.push(current.name);
+
+          return acc;
+        }, []);
+        return acc.concat(models);
+      }, []);
+
+      const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName).length === 0;
+
+      if (shouldRedirect) {
+        this.props.history.push('/404');
+      }
     }
   }
 
@@ -321,6 +340,7 @@ ModelPage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   checkIfTableExists: PropTypes.func.isRequired,
   deleteAttribute: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   menu: PropTypes.array.isRequired,
