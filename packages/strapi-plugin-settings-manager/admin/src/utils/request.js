@@ -87,6 +87,7 @@ export default function request(url, options, shouldWatchServerRestart = false) 
   // Set headers
   optionsObj.headers = {
     'Content-Type': 'application/json',
+    'X-Forwarded-Host': 'strapi',
   };
 
   const token = auth.getToken();

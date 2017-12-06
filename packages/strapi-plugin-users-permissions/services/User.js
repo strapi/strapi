@@ -47,6 +47,10 @@ module.exports = {
       values.provider = 'local';
     }
 
+    if (!values.role) {
+      values.role = '1';
+    }
+
     return strapi.query('user', 'users-permissions').create(values);
   },
 

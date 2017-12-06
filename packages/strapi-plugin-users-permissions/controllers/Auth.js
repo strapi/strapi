@@ -18,12 +18,12 @@ module.exports = {
     if (provider === 'local') {
       // The identifier is required.
       if (!params.identifier) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }] : 'Please provide your username or your e-mail.');
       }
 
       // The password is required.
       if (!params.password) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }] : 'Please provide your password.');
       }
 
       const query = {};
@@ -42,18 +42,18 @@ module.exports = {
       const user = await strapi.query('user', 'users-permissions').findOne(query);
 
       if (!user) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.invalid' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
 
       // The user never registered with the `local` provider.
       if (!user.password) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.local' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.local' }] }] : 'This user never set a local password, please login thanks to the provider used during account creation.');
       }
 
       const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(params.password, user.password);
 
       if (!validPassword) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.invalid' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
@@ -75,13 +75,13 @@ module.exports = {
 
     // Password is required.
     if (!params.password) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]);
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }] : 'Please provide your password.');
     }
 
     // Throw an error if the password selected by the user
     // contains more than two times the symbol '$'.
     if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.format' }] }]);
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password can not contain more than three times the symbol `$`.');
     }
 
     // First, check if the user is the first one to register as admin.
@@ -120,7 +120,7 @@ module.exports = {
 
     // User not found.
     if (!user) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]);
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }] : 'This email does not exist.');
     }
 
     // Generate random token.
@@ -164,7 +164,7 @@ module.exports = {
       const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
 
       if (!user) {
-        return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]);
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }] : 'Incorrect code provided.');
       }
 
       // Delete the current code
@@ -180,9 +180,9 @@ module.exports = {
         user: user
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]);
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');
     } else {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]);
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }] : 'Incorrect params provided.');
     }
   }
 };

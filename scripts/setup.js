@@ -54,6 +54,7 @@ shell.cd('../strapi-plugin-users-permissions');
 shell.exec('npm install ../strapi-helper-plugin');
 shell.rm('-f', 'package-lock.json');
 shell.exec('npm link');
+shell.exec('npm run build');
 
 shell.cd('../strapi-plugin-content-manager');
 shell.exec('npm install ../strapi-helper-plugin');
