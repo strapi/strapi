@@ -43,7 +43,9 @@ import { translationMessages, languages } from './i18n';
 import { findIndex } from 'lodash';
 /* eslint-enable */
 
+// Retrieve plugins from config.
 let appPlugins = plugins;
+
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
@@ -93,7 +95,8 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
-      appPlugins = plugins;
+      appPlugins = plugins || [];
+
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
