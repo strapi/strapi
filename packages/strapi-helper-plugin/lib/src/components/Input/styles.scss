@@ -117,6 +117,10 @@
       border-color: #E3E9F3;
     }
   }
+
+  & + span {
+      border-color: #E3E9F3;
+  }
 }
 
 .input {

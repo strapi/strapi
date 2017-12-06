@@ -20,6 +20,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       errors: [],
       hasInitialValue: false,
       showPassword: false,
+      isFocus: false,
     };
   }
 
@@ -63,6 +64,24 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     };
 
     this.props.onChange({ target });
+  }
+
+  handleBlurEmail = (e) => {
+    this.setState({ isFocus: !this.state.isFocus });
+
+    if (this.props.handleBlur) {
+      this.props.handleBlur(e);
+    } else {
+      this.handleBlur(e);
+    }
+  }
+
+  handleFocusEmail = (e) => {
+    this.setState({ isFocus: !this.state.isFocus });
+
+    if (this.props.onFocus) {
+      this.props.onFocus(e);
+    }
   }
 
   handleToggle = (e) => {
@@ -180,7 +199,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           <FormattedMessage id={`${this.props.label}`} />
         </label>
         <div className={`input-group ${styles.input} ${styles.inputEmail}`} style={{ marginBottom: '1rem'}}>
-          <span className={`input-group-addon ${styles.addonEmail} ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? styles.errorAddon: ''}`} />
+          <span className={`input-group-addon ${styles.addonEmail} ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) && !this.state.isFocus ? styles.errorAddon: ''}`} />
           <FormattedMessage id={this.props.placeholder || this.props.label} values={this.props.labelValues}>
             {(placeholder) => (
               <input
@@ -189,8 +208,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                 value={this.props.value}
                 name={this.props.name}
                 id={this.props.label}
-                onBlur={this.props.onBlur || this.handleBlur}
-                onFocus={this.props.onFocus}
+                onBlur={this.handleBlurEmail}
+                onFocus={this.handleFocusEmail}
                 placeholder={placeholder}
                 disabled={this.props.disabled}
                 type="email"
