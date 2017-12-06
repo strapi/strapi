@@ -82,6 +82,7 @@ function serverRestartWatcher(response) {
    // Set headers
    options.headers = Object.assign({
      'Content-Type': 'application/json',
+     'X-Forwarded-Host': 'strapi',
    }, options.headers);
 
    const token = auth.getToken();

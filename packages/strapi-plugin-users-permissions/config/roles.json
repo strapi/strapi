@@ -436,11 +436,11 @@
           },
           "user": {
             "find": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "findOne": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "create": {
