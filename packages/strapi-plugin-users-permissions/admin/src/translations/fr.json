@@ -40,6 +40,8 @@
   "Auth.form.error.code.provide": "Le code est incorrect.",
   "Auth.form.error.password.matching": "Les mots de passe ne sont pas identique.",
   "Auth.form.error.params.provide": "Les informations nos incorrect.",
+  "Auth.form.error.username.taken": "Ce nom est déjà utilisé",
+  "Auth.form.error.email.taken": "Cet email est déjà utilisé",
 
   "Auth.link.forgot-password": "Mot de passe oublié?",
   "Auth.link.ready": "Prêt à vous connecter?",

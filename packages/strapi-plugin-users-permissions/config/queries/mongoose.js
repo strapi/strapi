@@ -30,7 +30,7 @@ module.exports = {
       return acc;
     }, {}))
     .catch((error) => {
-      throw [{ messages: [{ id: error.message }]}];
+      throw error.message;
     });
   },
 

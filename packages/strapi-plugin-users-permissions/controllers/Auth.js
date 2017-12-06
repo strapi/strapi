@@ -105,10 +105,10 @@ module.exports = {
       });
 
     } catch(err) {
+      const adminError = _.includes(err, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
 
-      ctx.badRequest(null, err)
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err);
     }
-
   },
 
   forgotPassword: async (ctx) => {

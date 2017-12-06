@@ -1,4 +1,4 @@
-import { set } from 'lodash';
+import { get, includes, set } from 'lodash';
 import { call, fork, takeLatest, put, select } from 'redux-saga/effects';
 import auth from 'utils/auth';
 import request from 'utils/request';
@@ -40,7 +40,6 @@ export function* submitForm() {
 
     yield put(submitSucceeded());
   } catch(error) {
-    console.log(error.response.payload);
     const formType = yield select(makeSelectFormType());
 
     const errors = error.response.payload.message.reduce((acc, key) => {
@@ -67,6 +66,11 @@ export function* submitForm() {
       case 'reset-password':
         formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
         break;
+      case 'register': {
+        const target = includes(get(errors, ['0', 'id']), 'username') ? 'username' : 'email';
+        formErrors = [{ name: target, errors }];
+        break;
+      }
       default:
 
     }

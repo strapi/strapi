@@ -49,7 +49,10 @@ module.exports = {
       }
 
       return acc;
-    }, {}));
+    }, {}))
+    .catch((err) => {
+      throw err.detail;
+    });
   },
 
   update: async function (params) {
