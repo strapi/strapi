@@ -414,23 +414,23 @@
         "controllers": {
           "auth": {
             "identity": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "callback": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "register": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             },
             "changePassword": {
-              "enabled": false,
+              "enabled": true,
               "policy": ""
             }
           },
