@@ -78,9 +78,8 @@ module.exports = {
 
   create: async ctx => {
     const { source } = ctx.request.query;
-    console.log('bite');
+
     try {
-      console.log('fuck');
       // Create an entry using `queries` system
       const entryCreated = await strapi.query(ctx.params.model, source).create({
         values: ctx.request.body
@@ -88,8 +87,7 @@ module.exports = {
 
       ctx.body = entryCreated;
     } catch(error) {
-      console.log('ok')
-      ctx.badRequest(null, [{ messages: [{ id: error }] }]);
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },
 
@@ -106,7 +104,8 @@ module.exports = {
       // Return the last one which is the current model.
       ctx.body = entry;
     } catch(error) {
-      ctx.badRequest(null, [{ messages: [{ id: error }] }]);
+      // TODO handle error update
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },
 

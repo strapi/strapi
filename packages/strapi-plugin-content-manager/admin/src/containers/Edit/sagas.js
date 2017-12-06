@@ -78,7 +78,7 @@ export function* editRecord(action) {
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
-          acc.errorMessage = current.message;
+          acc.errorMessage = current.id;
 
           return acc;
         }, { id: 'components.Input.error.custom-error', errorMessage: '' });

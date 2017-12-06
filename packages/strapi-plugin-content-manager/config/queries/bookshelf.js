@@ -36,7 +36,13 @@ module.exports = {
       }
 
       return acc;
-    }, {}));
+    }, {}))
+    .catch((err) => {
+      const field = _.last(_.words(err.detail.split('=')[0]));
+      const error = { message: `This ${field} is already taken`, field };
+
+      throw error;
+    });
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
