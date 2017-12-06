@@ -32,6 +32,7 @@ class TableRow extends React.Component {
     switch (type.toLowerCase()) {
       case 'string':
       case 'text':
+      case 'email':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'float':
       case 'integer':
@@ -50,6 +51,8 @@ class TableRow extends React.Component {
 
         return date.utc().format('YYYY-MM-DD HH:mm:ss');
       }
+      case 'password':
+        return '••••••••';
       default:
         return '-';
     }

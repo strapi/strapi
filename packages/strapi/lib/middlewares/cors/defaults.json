@@ -4,7 +4,8 @@
     "origin": true,
     "expose": [
       "WWW-Authenticate",
-      "Server-Authorization"
+      "Server-Authorization",
+      "X-Forwarded-Host"
     ],
     "maxAge": 31536000,
     "credentials": true,
@@ -18,7 +19,8 @@
     ],
     "headers": [
       "Content-Type",
-      "Authorization"
+      "Authorization",
+      "X-Forwarded-Host"
     ],
     "keepHeadersOnError": false
   }
