@@ -61,16 +61,16 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   }
 
   checkLogin = (props) => {
-    if (this.props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
+    if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
-    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'register') && this.hasAdminUser()) {
+    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'register') && this.hasAdminUser(props)) {
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
-    if (!this.props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
+    if (!props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
       map(omit(this.props.plugins.toJS(), ['users-permissions', 'email']), plugin => {
         switch (true) {
           case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
@@ -96,7 +96,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   hasAdminUser = (props) => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
-  isUrlProtected = (props) => !includes(props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
+  isUrlProtected = (props) => !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
