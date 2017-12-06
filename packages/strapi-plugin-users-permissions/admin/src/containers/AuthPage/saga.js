@@ -40,6 +40,7 @@ export function* submitForm() {
 
     yield put(submitSucceeded());
   } catch(error) {
+    console.log(error);
     const formType = yield select(makeSelectFormType());
 
     const errors = error.response.payload.message.reduce((acc, key) => {

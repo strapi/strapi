@@ -105,9 +105,9 @@ module.exports = {
       });
 
     } catch(err) {
-      const adminError = _.includes(err, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
+      const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
 
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err);
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message);
     }
   },
 

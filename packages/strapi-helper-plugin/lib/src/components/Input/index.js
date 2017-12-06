@@ -84,7 +84,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
       return (
         map(this.state.errors, (error, key) => {
           const displayError = isObject(error) && error.id
-            ? <FormattedMessage {...error} />
+            ? <FormattedMessage {...error} values={{ errorMessage: error.errorMessage }} />
             : error;
           return (
             <div key={key} className={`form-control-feedback invalid-feedback ${divStyle}`} style={{ display: 'block' }}>{displayError}</div>

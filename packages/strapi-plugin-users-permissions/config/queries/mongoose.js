@@ -30,7 +30,10 @@ module.exports = {
       return acc;
     }, {}))
     .catch((error) => {
-      throw error.message;
+      const field = _.last(_.words(error.message.split('_')[0]));
+      const err = { message: `This ${field} is already taken`, field };
+
+      throw err;
     });
   },
 
@@ -39,6 +42,12 @@ module.exports = {
       [this.primaryKey]: params[this.primaryKey] || params.id
     }, params, {
       strict: false
+    })
+    .catch((error) => {
+      const field = _.last(_.words(error.message.split('_')[0]));
+      const err = { message: `This ${field} is already taken`, field };
+
+      throw err;
     });
   },
 

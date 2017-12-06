@@ -43,10 +43,14 @@ module.exports = {
    */
 
   create: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
+    try {
+      const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
+      // Send 201 `created`
+      ctx.created(data);
+    } catch(error) {
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+    }
 
-    // Send 201 `created`
-    ctx.created(data);
   },
 
   /**
@@ -56,16 +60,20 @@ module.exports = {
    */
 
   update: async (ctx, next) => {
-    const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
+    try {
+      const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
 
-    if (_.get(ctx.request, 'body.password') === user.password) {
-      delete ctx.request.body.password;
+      if (_.get(ctx.request, 'body.password') === user.password) {
+        delete ctx.request.body.password;
+      }
+
+      const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
+
+      // Send 200 `ok`
+      ctx.send(data);
+    } catch(error) {
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
-
-    const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
-
-    // Send 200 `ok`
-    ctx.send(data);
   },
 
   /**
