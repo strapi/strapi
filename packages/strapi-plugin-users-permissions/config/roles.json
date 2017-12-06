@@ -264,6 +264,9 @@
     "name": "Guest",
     "description": "",
     "permissions": {
+      "application": {
+        "controllers": {}
+      },
       "content-manager": {
         "controllers": {
           "contentmanager": {
@@ -309,15 +312,11 @@
               "enabled": false,
               "policy": ""
             },
-            "updateModel": {
+            "getModel": {
               "enabled": false,
               "policy": ""
             },
-            "checkTableExists": {
-              "enabled": false,
-              "policy": ""
-            },
-            "autoReload": {
+            "getConnections": {
               "enabled": false,
               "policy": ""
             },
@@ -325,7 +324,7 @@
               "enabled": false,
               "policy": ""
             },
-            "getModel": {
+            "updateModel": {
               "enabled": false,
               "policy": ""
             },
@@ -333,11 +332,15 @@
               "enabled": false,
               "policy": ""
             },
-            "identity": {
+            "autoReload": {
               "enabled": false,
               "policy": ""
             },
-            "getConnections": {
+            "checkTableExists": {
+              "enabled": false,
+              "policy": ""
+            },
+            "identity": {
               "enabled": false,
               "policy": ""
             }
@@ -347,11 +350,47 @@
       "settings-manager": {
         "controllers": {
           "settingsmanager": {
+            "menu": {
+              "enabled": false,
+              "policy": ""
+            },
             "environments": {
               "enabled": false,
               "policy": ""
             },
+            "languages": {
+              "enabled": false,
+              "policy": ""
+            },
+            "databases": {
+              "enabled": false,
+              "policy": ""
+            },
+            "database": {
+              "enabled": false,
+              "policy": ""
+            },
+            "databaseModel": {
+              "enabled": false,
+              "policy": ""
+            },
+            "get": {
+              "enabled": false,
+              "policy": ""
+            },
+            "update": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createLanguage": {
+              "enabled": false,
+              "policy": ""
+            },
             "deleteLanguage": {
+              "enabled": false,
+              "policy": ""
+            },
+            "createDatabase": {
               "enabled": false,
               "policy": ""
             },
@@ -367,43 +406,7 @@
               "enabled": false,
               "policy": ""
             },
-            "update": {
-              "enabled": false,
-              "policy": ""
-            },
-            "databaseModel": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createLanguage": {
-              "enabled": false,
-              "policy": ""
-            },
-            "get": {
-              "enabled": false,
-              "policy": ""
-            },
-            "createDatabase": {
-              "enabled": false,
-              "policy": ""
-            },
-            "databases": {
-              "enabled": false,
-              "policy": ""
-            },
-            "languages": {
-              "enabled": false,
-              "policy": ""
-            },
-            "database": {
-              "enabled": false,
-              "policy": ""
-            },
             "identity": {
-              "enabled": false,
-              "policy": ""
-            },
-            "menu": {
               "enabled": false,
               "policy": ""
             }
@@ -413,10 +416,6 @@
       "users-permissions": {
         "controllers": {
           "auth": {
-            "identity": {
-              "enabled": true,
-              "policy": ""
-            },
             "callback": {
               "enabled": true,
               "policy": ""
@@ -432,13 +431,13 @@
             "changePassword": {
               "enabled": true,
               "policy": ""
+            },
+            "identity": {
+              "enabled": true,
+              "policy": ""
             }
           },
           "user": {
-            "identity": {
-              "enabled": false,
-              "policy": ""
-            },
             "find": {
               "enabled": false,
               "policy": ""
@@ -458,45 +457,13 @@
             "destroy": {
               "enabled": false,
               "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
             }
           },
           "userspermissions": {
-            "searchUsers": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getRoutes": {
-              "enabled": false,
-              "policy": ""
-            },
-            "deleteRole": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getPolicies": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getRoles": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getRole": {
-              "enabled": false,
-              "policy": ""
-            },
-            "getPermissions": {
-              "enabled": false,
-              "policy": ""
-            },
-            "init": {
-              "enabled": true,
-              "policy": ""
-            },
-            "index": {
-              "enabled": false,
-              "policy": ""
-            },
             "createRole": {
               "enabled": false,
               "policy": ""
@@ -505,19 +472,52 @@
               "enabled": false,
               "policy": ""
             },
-            "identity": {
+            "deleteRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getPermissions": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getPolicies": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRole": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoles": {
+              "enabled": false,
+              "policy": ""
+            },
+            "getRoutes": {
+              "enabled": false,
+              "policy": ""
+            },
+            "index": {
+              "enabled": false,
+              "policy": ""
+            },
+            "init": {
+              "enabled": true,
+              "policy": ""
+            },
+            "searchUsers": {
               "enabled": false,
               "policy": ""
             },
             "updateRole": {
               "enabled": false,
               "policy": ""
+            },
+            "identity": {
+              "enabled": false,
+              "policy": ""
             }
           }
         }
-      },
-      "application": {
-        "controllers": {}
       }
     }
   }

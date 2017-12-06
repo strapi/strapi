@@ -17,20 +17,32 @@ module.exports = {
    */
 
   find: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+
+    if (data) {
+      data = _.reduce(data, (acc, user) => {
+        acc.push(_.omit(user.toJSON(), ['password', 'resetPasswordToken']));
+        return acc;
+      }, []);
+    }
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   /**
+}
    * Retrieve a user record.
    *
    * @return {Object}
    */
 
   findOne: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
+    let data = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
+
+    if (data) {
+      data = _.omit(data.toJSON(), ['password', 'resetPasswordToken']);
+    }
 
     // Send 200 `ok`
     ctx.send(data);
