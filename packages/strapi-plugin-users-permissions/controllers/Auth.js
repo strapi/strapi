@@ -96,12 +96,19 @@ module.exports = {
 
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
-    const user = await strapi.query('user', 'users-permissions').create(params);
+    try {
+      const user = await strapi.query('user', 'users-permissions').create(params);
 
-    ctx.send({
-      jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-      user: user
-    });
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: user
+      });
+
+    } catch(err) {
+
+      ctx.badRequest(null, err)
+    }
+
   },
 
   forgotPassword: async (ctx) => {

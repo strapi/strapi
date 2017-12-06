@@ -26,9 +26,12 @@ module.exports = {
       if (_.get(this._attributes, [current, 'type'])) {
         acc[current] = params[current];
       }
-      
+
       return acc;
-    }, {}));
+    }, {}))
+    .catch((error) => {
+      throw [{ messages: [{ id: error.message }]}];
+    });
   },
 
   update: async function (params) {
