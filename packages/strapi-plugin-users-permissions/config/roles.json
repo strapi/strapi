@@ -418,15 +418,15 @@
               "policy": ""
             },
             "callback": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "register": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "forgotPassword": {
-              "enabled": true,
+              "enabled": false,
               "policy": ""
             },
             "changePassword": {
