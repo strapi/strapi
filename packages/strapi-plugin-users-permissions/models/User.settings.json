@@ -20,12 +20,10 @@
     },
     "password": {
       "type": "password",
-      "minLength": 6,
-      "select": false
+      "minLength": 6
     },
     "resetPasswordToken": {
-      "type": "string",
-      "select": false
+      "type": "string"
     },
     "role": {
       "type": "integer"
