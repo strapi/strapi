@@ -6,12 +6,9 @@ const { parallel } = require('async');
 const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
 
 module.exports = async function() {
-  const accepted = Object.keys(this.plugins).map(url => `^\/${url}/`).concat([`^${get(this.config.currentEnvironment.server, 'admin.path', '/admin')}/`]);
-
   // Set if is admin destination for middleware application.
-  // TODO: Use dynamic config for admin url.
   this.app.use(async (ctx, next) => {
-    ctx.request.admin = accepted.some(rx => new RegExp(rx).test(ctx.request.url));
+    ctx.request.admin = ctx.request.header['x-forwarded-host'] === 'strapi';
 
     await next();
   });
