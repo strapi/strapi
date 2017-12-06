@@ -50,6 +50,15 @@ export class HomePage extends React.Component {
     document.addEventListener('keyup', this.handleKeyBoardShortCut);
   }
 
+  componentWillUpdate(nextProps) {
+    const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced-settings'];
+    const shouldRedirect = allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+
+    if (shouldRedirect) {
+      this.props.history.push('/404');
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
       this.props.fetchData(this.props.match.params.settingType);
@@ -88,13 +97,13 @@ export class HomePage extends React.Component {
     {
       label: 'users-permissions.EditPage.cancel',
       kind: 'secondary',
-      onClick: () => console.log('cancel'),
+      onClick: () => {},
       type: 'button',
     },
     {
       kind: 'primary',
       label: 'users-permissions.EditPage.submit',
-      onClick: () => console.log('submit'),
+      onClick: () => {},
       type: 'submit',
     },
   ];
@@ -121,7 +130,6 @@ export class HomePage extends React.Component {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            console.log('submit');
           }}
         >
           <div className={cn('container-fluid', styles.containerFluid)}>
@@ -139,7 +147,6 @@ export class HomePage extends React.Component {
             onChange={this.props.onChange}
             onSubmit={(e) => {
               e.preventDefault();
-              console.log('submit popUp');
             }}
             settingType={hashArray[1]}
             values={this.props.modifiedData}
