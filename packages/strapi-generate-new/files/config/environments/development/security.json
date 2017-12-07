@@ -49,8 +49,7 @@
       "Content-Type",
       "Authorization",
       "X-Frame-Options",
-      "Origin",
-      "X-Forwarded-Host"
+      "Origin"
     ]
   },
   "ip": {
