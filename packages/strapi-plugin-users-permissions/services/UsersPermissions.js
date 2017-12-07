@@ -169,7 +169,33 @@ module.exports = {
     const appActions = Service.getActions();
     const roleConfigPath = Service.getRoleConfigPath();
     const writePermissions = Service.writePermissions;
-    const currentRoles = require(roleConfigPath);
+    let currentRoles;
+
+    try {
+      currentRoles = require(roleConfigPath);
+    } catch(err) {
+      currentRoles = {
+        '0': {
+          description: '',
+          name: 'Administrator',
+          permissions: {
+            application: {
+              controllers: {},
+            },
+          },
+        },
+        '1': {
+          description: '',
+          name: 'Guest',
+          permissions: {
+            application: {
+              controllers: {},
+            },
+          },
+        },
+      };
+    }
+
     const remove = await Service.updateData(_.cloneDeep(currentRoles));
     const added = await Service.updateData(_.cloneDeep(remove), 'set');
 
@@ -205,6 +231,13 @@ module.exports = {
     });
   },
 
+  updateUserRole: async (user, role) => {
+    await strapi.query('user', 'users-permissions').update({
+      _id: user._id || user.id,
+      role: role.toString()
+    });
+  },
+
   writePermissions: (data) => {
     const roleConfigPath = strapi.plugins['users-permissions'].services.userspermissions.getRoleConfigPath();
 
@@ -214,11 +247,4 @@ module.exports = {
       strapi.log.error(err);
     }
   },
-
-  updateUserRole: async (user, role) => {
-    await strapi.query('user', 'users-permissions').update({
-      _id: user._id || user.id,
-      role: role.toString()
-    });
-  }
 };
