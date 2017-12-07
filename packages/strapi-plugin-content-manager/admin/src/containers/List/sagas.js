@@ -45,7 +45,7 @@ export function* getRecords(action) {
   }
 
   try {
-    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${currentModel}`;
+    const requestUrl = `/content-manager/explorer/${currentModel}`;
     // Call our request helper (see 'utils/request')
     const response = yield call(request, requestUrl, {
       method: 'GET',
@@ -67,7 +67,7 @@ export function* getCount(action) {
   }
 
   try {
-    const response = yield call(request,`${strapi.backendURL}/content-manager/explorer/${currentModel}/count`, {
+    const response = yield call(request,`/content-manager/explorer/${currentModel}/count`, {
       method: 'GET',
       params,
     });

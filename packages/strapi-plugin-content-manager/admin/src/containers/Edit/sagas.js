@@ -29,7 +29,7 @@ export function* getRecord(action) {
   }
 
   try {
-    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${currentModelName}/${action.id}`;
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${action.id}`;
 
     // Call our request helper (see 'utils/request')
     const response = yield request(requestUrl, {
@@ -63,7 +63,7 @@ export function* editRecord(action) {
   }
 
   try {
-    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${currentModelName}/${id}`;
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
@@ -100,7 +100,7 @@ export function* editRecord(action) {
 export function* deleteRecord({ id, modelName, source }) {
   function* httpCall(id, modelName) {
     try {
-      const requestUrl = `${strapi.backendURL}/content-manager/explorer/${modelName}/${id}`;
+      const requestUrl = `/content-manager/explorer/${modelName}/${id}`;
       const params = {};
 
       if (source !== undefined) {
