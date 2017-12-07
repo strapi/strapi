@@ -93,7 +93,7 @@ module.exports = {
 
   getRoles: async () => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const roles = strapi.plugins['users-permissions'].config.roles
+    const roles = strapi.plugins['users-permissions'].config.roles;
     const usersCount = await strapi.query('user', 'users-permissions').countByRoles();
     const formattedRoles = Object.keys(roles).reduce((acc, key) => {
       const role = _.pick(roles[key], ['name', 'description']);

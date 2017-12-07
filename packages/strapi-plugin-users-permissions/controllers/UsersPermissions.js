@@ -90,6 +90,7 @@ module.exports = {
 
       ctx.send({ roles });
     } catch(err) {
+      console.log(err);
       ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
     }
   },

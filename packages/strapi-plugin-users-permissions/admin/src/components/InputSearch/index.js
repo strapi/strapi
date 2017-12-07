@@ -41,11 +41,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
   handleChange = ({ target }) => {
     const filteredUsers = isEmpty(target.value) ?
       this.state.users
-      : this.state.users.filter((user) => {
-        if (includes(toLower(user.name), toLower(target.value))) {
-          return user;
-        }
-      });
+      : this.state.users.filter((user) => includes(toLower(user.name), toLower(target.value)));
 
     if (isEmpty(filteredUsers) && !isEmpty(target.value)) {
       this.props.getUser(target.value);
