@@ -36,7 +36,7 @@ export function* pluginsGet() {
 
     yield put(getPluginsSucceeded(response));
   } catch(err) {
-    strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
+    strapi.notification.error('notification.error');
   }
 }
 // Individual exports for testing
