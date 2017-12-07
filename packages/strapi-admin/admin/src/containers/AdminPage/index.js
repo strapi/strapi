@@ -60,18 +60,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
   }
 
-  componentWillUpdate(nextProps) {
-    if (includes(nextProps.location.pathname, 'plugins') && nextProps.location.pathname !== '/list-plugins') {
-      const appPlugins = Object.keys(nextProps.plugins.toJS());
-      const pluginPath = nextProps.location.pathname.split('/')[2];
-      const shouldRedirect = appPlugins.filter(el => el === pluginPath).length === 0;
-
-      if (shouldRedirect) {
-        this.props.history.push('/404');
-      }
-    }
-  }
-
   checkLogin = (props) => {
     if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
