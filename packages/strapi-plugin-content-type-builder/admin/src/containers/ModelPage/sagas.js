@@ -43,7 +43,7 @@ export function* getTableExistance() {
     yield put(checkIfTableExistsSucceeded(tableExists));
 
   } catch(error) {
-    strapi.notification.error('An error occured');
+    strapi.notification.error('notification.error');
   }
 }
 
@@ -58,7 +58,7 @@ export function* fetchModel(action) {
     yield put(unsetButtonLoader());
 
   } catch(error) {
-    strapi.notification.error('An error occured');
+    strapi.notification.error('notification.error');
   }
 }
 
