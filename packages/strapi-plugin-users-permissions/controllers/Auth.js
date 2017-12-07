@@ -57,7 +57,7 @@ module.exports = {
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-          user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+          user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
     } else {
@@ -68,46 +68,32 @@ module.exports = {
     }
   },
 
-  register: async (ctx) => {
-    const params = _.assign(ctx.request.body, {
-      provider: 'local'
-    });
+  changePassword: async (ctx) => {
+    const params = _.assign({}, ctx.request.body, ctx.params);
 
-    // Password is required.
-    if (!params.password) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }] : 'Please provide your password.');
-    }
+    if (params.password && params.passwordConfirmation && params.password === params.passwordConfirmation && params.code) {
+      const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
 
-    // Throw an error if the password selected by the user
-    // contains more than two times the symbol '$'.
-    if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password can not contain more than three times the symbol `$`.');
-    }
+      if (!user) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }] : 'Incorrect code provided.');
+      }
 
-    // First, check if the user is the first one to register as admin.
-    const adminUsers = await strapi.query('user', 'users-permissions').find({ role: '0' });
+      // Delete the current code
+      user.resetPasswordToken = null;
 
-    // Check if the user is the first to register
-    if (adminUsers.length === 0) {
-      params.role = '0';
-    } else {
-      params.role = '1';
-    }
+      user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
-    params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
-
-    try {
-      const user = await strapi.query('user', 'users-permissions').create(params);
+      // Update the user.
+      await strapi.query('user', 'users-permissions').update(user);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
-
-    } catch(err) {
-      const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
-
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message);
+    } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');
+    } else {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }] : 'Incorrect params provided.');
     }
   },
 
@@ -157,32 +143,46 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  changePassword: async (ctx) => {
-    const params = _.assign({}, ctx.request.body, ctx.params);
+  register: async (ctx) => {
+    const params = _.assign(ctx.request.body, {
+      provider: 'local'
+    });
 
-    if (params.password && params.passwordConfirmation && params.password === params.passwordConfirmation && params.code) {
-      const user = await strapi.query('user', 'users-permissions').findOne({ resetPasswordToken: params.code });
+    // Password is required.
+    if (!params.password) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }] : 'Please provide your password.');
+    }
 
-      if (!user) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }] : 'Incorrect code provided.');
-      }
+    // Throw an error if the password selected by the user
+    // contains more than two times the symbol '$'.
+    if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password cannot contain more than three times the symbol `$`.');
+    }
 
-      // Delete the current code
-      user.resetPasswordToken = null;
+    // First, check if the user is the first one to register as admin.
+    const adminUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
 
-      user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+    // Check if the user is the first to register
+    if (adminUsers.length === 0) {
+      params.role = '0';
+    } else {
+      params.role = '1';
+    }
 
-      // Update the user.
-      await strapi.query('user', 'users-permissions').update(user);
+    params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+    try {
+      const user = await strapi.query('user', 'users-permissions').create(params);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
-    } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');
-    } else {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }] : 'Incorrect params provided.');
+
+    } catch(err) {
+      const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
+
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message);
     }
   }
 };

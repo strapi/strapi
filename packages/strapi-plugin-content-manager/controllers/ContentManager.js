@@ -35,7 +35,7 @@ module.exports = {
   },
 
   find: async ctx => {
-    const { limit, skip = 0, sort, query, queryAttribute, source } = ctx.request.query;
+    const { limit, skip = 0, sort, query, queryAttribute, source, page } = ctx.request.query;
 
     // Find entries using `queries` system
     const entries = await strapi.query(ctx.params.model, source).find({

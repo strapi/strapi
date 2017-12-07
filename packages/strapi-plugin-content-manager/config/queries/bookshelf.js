@@ -2,11 +2,21 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params) {
-    return await this
-      .forge()
-      .fetchAll({
-        withRelated: this.associations.map(x => x.alias)
+    return this.query(function(qb) {
+      _.forEach(params.where, (where, key) => {
+        qb.where(key, where[0].symbol, where[0].value);
       });
+
+      if (params.sort) {
+        qb.orderBy(params.sort);
+      }
+
+      qb.offset(params.skip);
+
+      qb.limit(params.limit);
+    }).fetchAll({
+      withRelated: this.associations.map(x => x.alias)
+    });
   },
 
   count: async function (params) {
@@ -38,10 +48,12 @@ module.exports = {
       return acc;
     }, {}))
     .catch((err) => {
-      const field = _.last(_.words(err.detail.split('=')[0]));
-      const error = { message: `This ${field} is already taken`, field };
+      if (err.detail) {
+        const field = _.last(_.words(err.detail.split('=')[0]));
+        err = { message: `This ${field} is already taken`, field };
+      }
 
-      throw error;
+      throw err;
     });
 
     return module.exports.update.call(this, {
