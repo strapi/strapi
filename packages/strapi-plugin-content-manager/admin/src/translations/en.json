@@ -37,6 +37,8 @@
   "error.attribute.sameKeyAndName": "Can't be equals",
   "error.validation.minSupMax": "Can't be superior",
 
+  "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
+  
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",
 

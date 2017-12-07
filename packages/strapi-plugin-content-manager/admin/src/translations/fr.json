@@ -38,6 +38,8 @@
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "error.validation.minSupMax": "Ne peut pas être plus grand",
 
+  "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
+
   "success.record.delete": "Supprimé",
   "success.record.save": "Sauvegardé",
 
