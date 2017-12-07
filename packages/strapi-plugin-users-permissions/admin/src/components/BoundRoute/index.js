@@ -5,28 +5,13 @@
 */
 
 import React from 'react';
-import { get, includes, map, tail } from 'lodash';
+import { get, includes, map, tail, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 import styles from './styles.scss';
 
 function BoundRoute({ route }) {
-  let color;
-
-  switch (get(route, 'method')) {
-    case 'GET':
-      color = '#008DFE';
-      break;
-    case 'POST':
-      color = '#69BA05';
-      break;
-    case 'PUT':
-      color = '#F68E0E';
-      break;
-    default:
-      color = '#F64D0A';
-
-  }
   const title = get(route, 'handler');
   const formattedRoute = get(route, 'path') ? tail(get(route, 'path').split('/')) : [];
   const [ controller = '', action = '' ] = title ? title.split('.') : [];
@@ -40,7 +25,7 @@ function BoundRoute({ route }) {
         <span>.{action} </span>
       </div>
       <div className={styles.boundRoute}>
-        <div className={styles.verb} style={{ backgroundColor: color }}>
+        <div className={cn(styles.verb, styles[toLower(get(route, 'method'))])}>
           {get(route, 'method')}
         </div>
         <div className={styles.path}>

@@ -1,4 +1,4 @@
-import { get, includes, set } from 'lodash';
+import { get, includes, isArray, set } from 'lodash';
 import { call, fork, takeLatest, put, select } from 'redux-saga/effects';
 import auth from 'utils/auth';
 import request from 'utils/request';
@@ -42,40 +42,45 @@ export function* submitForm() {
   } catch(error) {
     const formType = yield select(makeSelectFormType());
 
-    const errors = error.response.payload.message.reduce((acc, key) => {
-      const err = key.messages.reduce((acc, key) => {
-        acc.id = `users-permissions.${key.id}`;
+    if (isArray(error.response.payload.message)) {
+
+      const errors = error.response.payload.message.reduce((acc, key) => {
+        const err = key.messages.reduce((acc, key) => {
+          acc.id = `users-permissions.${key.id}`;
+
+          return acc;
+        }, { id: '' });
+
+        acc.push(err);
 
         return acc;
-      }, { id: '' });
+      }, []);
 
-      acc.push(err);
+      let formErrors;
 
-      return acc;
-    }, []);
+      switch (formType) {
+        case 'forgot-password':
+          formErrors = [{ name: 'email', errors }];
+          break;
+        case 'login':
+          formErrors = [{ name: 'identifier', errors }];
+          break;
+        case 'reset-password':
+          formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
+          break;
+        case 'register': {
+          const target = includes(get(errors, ['0', 'id']), 'username') ? 'username' : 'email';
+          formErrors = [{ name: target, errors }];
+          break;
+        }
+        default:
 
-    let formErrors;
-
-    switch (formType) {
-      case 'forgot-password':
-        formErrors = [{ name: 'email', errors }];
-        break;
-      case 'login':
-        formErrors = [{ name: 'identifier', errors }];
-        break;
-      case 'reset-password':
-        formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
-        break;
-      case 'register': {
-        const target = includes(get(errors, ['0', 'id']), 'username') ? 'username' : 'email';
-        formErrors = [{ name: target, errors }];
-        break;
       }
-      default:
 
+      yield put(submitError(formErrors));
+    } else {
+      strapi.notification.error('notification.error');
     }
-
-    yield put(submitError(formErrors));
   }
 }
 
