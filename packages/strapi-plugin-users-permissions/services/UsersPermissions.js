@@ -216,9 +216,8 @@ module.exports = {
     const currentUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
       role: roleId
     }));
-
-    const userToAdd = _.differenceBy(body.users, currentUsers, 'id');
-    const userToRemove = _.differenceBy(currentUsers, body.users, 'id');
+    const userToAdd = _.differenceBy(body.users, currentUsers.toJSON ? currentUsers.toJSON() : currentUsers, 'id');
+    const userToRemove = _.differenceBy(currentUsers.toJSON ? currentUsers.toJSON() : currentUsers, body.users, 'id');
 
     _.forEach(userToAdd, (user) => {
       Service.updateUserRole(user, roleId);
