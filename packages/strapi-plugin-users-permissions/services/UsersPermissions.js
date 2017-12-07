@@ -232,7 +232,7 @@ module.exports = {
   },
 
   updateUserRole: async (user, role) => {
-    await strapi.query('user', 'users-permissions').update({
+    strapi.query('user', 'users-permissions').update({
       _id: user._id || user.id,
       role: role.toString()
     });

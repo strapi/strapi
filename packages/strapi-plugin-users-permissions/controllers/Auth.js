@@ -98,8 +98,7 @@ module.exports = {
   },
 
   forgotPassword: async (ctx) => {
-    const email = ctx.request.body.email;
-    const url = ctx.request.body.url;
+    const { email, url } = ctx.request.body;
 
     // Find the user user thanks to his email.
     const user = await strapi.query('user', 'users-permissions').findOne({ email });
