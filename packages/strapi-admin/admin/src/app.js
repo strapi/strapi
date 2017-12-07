@@ -43,9 +43,6 @@ import { translationMessages, languages } from './i18n';
 import { findIndex } from 'lodash';
 /* eslint-enable */
 
-// Retrieve plugins from config.
-let appPlugins = plugins;
-
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
@@ -95,7 +92,9 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
-      appPlugins = plugins || [];
+      if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
+        store.dispatch(setHasUserPlugin());
+      }
 
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
@@ -125,14 +124,12 @@ if (window.location.port !== '4000') {
     .catch(err => {
       console.log(err);
     });
+} else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
+  store.dispatch(setHasUserPlugin());
 }
 
 // const isPluginAllowedToRegister = (plugin) => true;
 const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
-
-/**
- * Public Strapi object exposed to the `window` object
- */
 
 /**
  * Register a plugin
@@ -178,9 +175,10 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-if (findIndex(appPlugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(setHasUserPlugin());
-}
+
+/**
+ * Public Strapi object exposed to the `window` object
+ */
 
 window.strapi = Object.assign(window.strapi || {}, {
   remoteURL: devFrontURL || remoteURL,

@@ -42,10 +42,9 @@ export const generateMenu = function () {
 
 export function* getModels() {
   try {
-    const response = yield call(request,
-      `${strapi.backendURL}/content-manager/models`, {
-        method: 'GET',
-      });
+    const response = yield call(request, `/content-manager/models`, {
+      method: 'GET',
+    });
 
     yield put(loadedModels(response));
   } catch (err) {

@@ -36,12 +36,18 @@ const generateSchema = (responses) => {
     if (model.associations) {
       // Model relations
       schemaModel.relations = model.associations.reduce((acc, current) => {
+        const displayedAttribute = current.plugin ?
+          get(responses.plugins, [current.plugin, 'models', current.model || current.collection, 'info', 'mainField']) ||
+          findKey(get(responses.plugins, [current.plugin, 'models', current.model || current.collection, 'attributes']), { type : 'string'}) ||
+          'id' :
+          get(responses.models, [current.model || current.collection, 'info', 'mainField']) ||
+          findKey(get(responses.models, [current.model || current.collection, 'attributes']), { type : 'string'}) ||
+          'id';
+
         acc[current.alias] = {
           ...current,
           description: '',
-          displayedAttribute: get(models[current.model || current.collection], 'info.mainField') ||
-            findKey(models[current.model || current.collection].attributes, { type : 'string'}) ||
-            'id',
+          displayedAttribute,
         };
 
         return acc;
