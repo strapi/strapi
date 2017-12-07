@@ -14,7 +14,7 @@ import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
 
 // Logo
-import LogoStrapi from 'assets/images/logo.svg';
+import LogoStrapi from 'assets/images/logo_strapi.png';
 
 // Design
 import Button from 'components/Button';

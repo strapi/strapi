@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken');
 module.exports = {
   issue: (payload) => {
     return jwt.sign(
-      _.clone(payload.toJSON()),
+      _.clone(payload.toJSON ? payload.toJSON() : payload),
       process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret'
     );
   },

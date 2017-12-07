@@ -165,7 +165,7 @@ const mountMiddlewares = function (files, cwd) {
           loaded: false
         };
 
-        if (endsWith(p, 'index.js')) {
+        if (endsWith(p, 'index.js') && !this.middleware[name].load) {
           // Lazy loading.
           Object.defineProperty(this.middleware[name], 'load', {
             configurable: false,

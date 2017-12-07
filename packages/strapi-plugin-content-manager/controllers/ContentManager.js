@@ -79,25 +79,34 @@ module.exports = {
   create: async ctx => {
     const { source } = ctx.request.query;
 
-    // Create an entry using `queries` system
-    const entryCreated = await strapi.query(ctx.params.model, source).create({
-      values: ctx.request.body
-    });
+    try {
+      // Create an entry using `queries` system
+      const entryCreated = await strapi.query(ctx.params.model, source).create({
+        values: ctx.request.body
+      });
 
-    ctx.body = entryCreated;
+      ctx.body = entryCreated;
+    } catch(error) {
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+    }
   },
 
   update: async ctx => {
     const { source } = ctx.request.query;
 
-    // Add current model to the flow of updates.
-    const entry = strapi.query(ctx.params.model, source).update({
-      id: ctx.params.id,
-      values: ctx.request.body
-    });
+    try {
+      // Add current model to the flow of updates.
+      const entry = strapi.query(ctx.params.model, source).update({
+        id: ctx.params.id,
+        values: ctx.request.body
+      });
 
-    // Return the last one which is the current model.
-    ctx.body = entry;
+      // Return the last one which is the current model.
+      ctx.body = entry;
+    } catch(error) {
+      // TODO handle error update
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+    }
   },
 
   delete: async ctx => {

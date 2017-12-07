@@ -1,6 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
+import { get, isArray } from 'lodash';
 import { call, cancel, fork, put, take, select, takeLatest } from 'redux-saga/effects';
-
 import request from 'utils/request';
 import cleanData from 'utils/cleanData';
 import { router } from 'app';
@@ -11,6 +11,7 @@ import {
   recordEditError,
   recordDeleted,
   recordDeleteError,
+  setFormErrors,
 } from './actions';
 import { LOAD_RECORD, EDIT_RECORD, DELETE_RECORD } from './constants';
 import {
@@ -74,6 +75,23 @@ export function* editRecord(action) {
     strapi.notification.success('content-manager.success.record.save');
     yield put(recordEdited());
   } catch (err) {
+    if (isArray(err.response.payload.message)) {
+      const errors = err.response.payload.message.reduce((acc, current) => {
+        const error = current.messages.reduce((acc, current) => {
+          acc.errorMessage = current.id;
+
+          return acc;
+        }, { id: 'components.Input.error.custom-error', errorMessage: '' });
+        acc.push(error);
+
+        return acc;
+      }, []);
+
+      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field']);
+
+      yield put(setFormErrors([{ name, errors }]));
+    }
+
     yield put(recordEditError());
     strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
   }

@@ -60,8 +60,20 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
   }
 
+  componentWillUpdate(nextProps) {
+    if (includes(nextProps.location.pathname, 'plugins') && nextProps.location.pathname !== '/list-plugins') {
+      const appPlugins = Object.keys(nextProps.plugins.toJS());
+      const pluginPath = nextProps.location.pathname.split('/')[2];
+      const shouldRedirect = appPlugins.filter(el => el === pluginPath).length === 0;
+
+      if (shouldRedirect) {
+        this.props.history.push('/404');
+      }
+    }
+  }
+
   checkLogin = (props) => {
-    if (this.props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
+    if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
@@ -70,7 +82,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
-    if (!this.props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
+    if (!props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
       map(omit(this.props.plugins.toJS(), ['users-permissions', 'email']), plugin => {
         switch (true) {
           case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
@@ -96,7 +108,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   hasAdminUser = (props) => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
-  isUrlProtected = (props) => !includes(props.location.pathname, get(this.props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
+  isUrlProtected = (props) => !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
@@ -122,6 +134,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
               <Route path="/install-plugin" component={ComingSoonPage} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
+              <Route path="404" component={NotFoundPage} />
             </Switch>
           </Content>
         </div>
