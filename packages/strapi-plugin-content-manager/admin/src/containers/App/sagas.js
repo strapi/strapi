@@ -10,7 +10,7 @@ import { makeSelectModels } from './selectors';
 
 export function* modelEntriesGet(action) {
   try {
-    const requestUrl = `${strapi.backendURL}/content-manager/explorer/${action.modelName}/count${action.source !== undefined ? `?source=${action.source}`: ''}`;
+    const requestUrl = `/content-manager/explorer/${action.modelName}/count${action.source !== undefined ? `?source=${action.source}`: ''}`;
 
     const response = yield call(request, requestUrl, { method: 'GET' });
 
@@ -21,7 +21,7 @@ export function* modelEntriesGet(action) {
 }
 
 export const generateMenu = function () {
-  return request(`${strapi.backendURL}/content-manager/models`, {
+  return request(`/content-manager/models`, {
     method: 'GET',
   })
     .then(response => generateSchema(response))

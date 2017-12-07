@@ -23,7 +23,7 @@ function LeftMenuLinkContainer({ plugins }) {
       if (!isEmpty(section.links)) {
         acc[snakeCase(section.name)] = {
           name: section.name,
-          links: (get(acc[snakeCase(section.name)], 'links') || []).concat(section.links.map(link => {
+          links: get(acc[snakeCase(section.name)], 'links', []).concat(section.links.map(link => {
             link.source = current;
             link.plugin = !isEmpty(pluginsObject[link.plugin]) ? link.plugin : pluginsObject[current].id;
 

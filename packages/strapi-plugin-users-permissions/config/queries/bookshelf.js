@@ -26,13 +26,13 @@ module.exports = {
   },
 
   findOne: async function (params) {
-    if (_.get(params, 'where._id')) {
-      params.where.id = params.where._id;
-      delete params.where._id;
+    if (_.get(params, '_id')) {
+      params.id = params._id;
+      delete params._id;
     }
 
     const record = await this
-      .forge(params.where)
+      .forge(params)
       .fetch({
         withRelated: this.associations.map(x => x.alias)
       });
