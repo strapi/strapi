@@ -281,7 +281,7 @@ module.exports = {
     const connector = models[model].orm;
 
     if (!connector) {
-      throw new Error(`Impossible to determine the use ORM for the model ${model}.`);
+      throw new Error(`Impossible to determine the ORM used for the model ${model}.`);
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;

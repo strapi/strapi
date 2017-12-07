@@ -22,9 +22,9 @@ const pluginId = pluginPkg.name.replace(
  * @param messages
  */
 const formatMessages = messages => reduce(messages, (result, value, key) => {
-  const obj = result;
-  obj[`${pluginId}.${key}`] = value;
-  return obj;
+  result[`${pluginId}.${key}`] = value;
+  
+  return result;
 }, {});
 
 /**
@@ -37,7 +37,7 @@ const requireTranslations = language => {
     return require(`translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
     console.error(`Unable to load "${language}" translation for the plugin ${pluginId}. Please make sure "${language}.json" file exists in "pluginPath/admin/src/translations" folder.`);
-    return false;
+    return;
   }
 };
 
@@ -46,10 +46,9 @@ const requireTranslations = language => {
  */
 
 const translationMessages = reduce(strapi.languages, (result, language) => {
-  const obj = result;
-  const messages = requireTranslations(language);
-  obj[language] = formatMessages(messages);
-  return obj;
+  result[language] = formatMessages(requireTranslations(language));
+
+  return result;
 }, {});
 
 export { translationMessages };
