@@ -26,13 +26,13 @@ module.exports = {
   },
 
   findOne: async function (params) {
-    if (_.get(params, 'where._id')) {
-      params.where.id = params.where._id;
-      delete params.where._id;
+    if (_.get(params, '_id')) {
+      params.id = params._id;
+      delete params._id;
     }
 
     const record = await this
-      .forge(params.where)
+      .forge(params)
       .fetch({
         withRelated: this.associations.map(x => x.alias)
       });
@@ -99,7 +99,7 @@ module.exports = {
   },
 
   countByRoles: async function () {
-    const result = await strapi.connections[this.connection].raw('SELECT COUNT("id") AS total, "role" FROM "user" GROUP BY "role";');
+    const result = await strapi.connections[this.connection].raw(`SELECT COUNT("id") AS total, "role" FROM "${strapi.plugins['users-permissions'].models.user.collectionName}" GROUP BY "role";`);
     return result.rows.reduce((acc, current) => {
       acc.push({
         _id: parseFloat(current.role),

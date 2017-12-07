@@ -124,7 +124,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
         disabled: isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData),
       },
     ];
-  
+
     return (
       <div>
         <BackHeader onClick={() => this.props.history.goBack()} />
