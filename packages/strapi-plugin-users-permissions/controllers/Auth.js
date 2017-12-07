@@ -57,7 +57,7 @@ module.exports = {
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-          user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+          user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
     } else {
@@ -85,7 +85,7 @@ module.exports = {
     }
 
     // First, check if the user is the first one to register as admin.
-    const adminUsers = await strapi.query('user', 'users-permissions').find({ role: '0' });
+    const adminUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
 
     // Check if the user is the first to register
     if (adminUsers.length === 0) {
@@ -101,10 +101,12 @@ module.exports = {
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
 
     } catch(err) {
+
+      console.log(err);
       const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
 
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message);
@@ -177,7 +179,7 @@ module.exports = {
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
-        user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');

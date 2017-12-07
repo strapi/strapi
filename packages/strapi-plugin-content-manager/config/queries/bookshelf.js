@@ -38,10 +38,12 @@ module.exports = {
       return acc;
     }, {}))
     .catch((err) => {
-      const field = _.last(_.words(err.detail.split('=')[0]));
-      const error = { message: `This ${field} is already taken`, field };
+      if (err.detail) {
+        const field = _.last(_.words(err.detail.split('=')[0]));
+        err = { message: `This ${field} is already taken`, field };
+      }
 
-      throw error;
+      throw err;
     });
 
     return module.exports.update.call(this, {

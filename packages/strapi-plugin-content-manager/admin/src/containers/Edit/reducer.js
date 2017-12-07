@@ -36,8 +36,8 @@ const initialState = fromJS({
   deleting: false,
   isCreating: false,
   isRelationComponentNull: false,
-  formValidations: List(),
-  formErrors: List(),
+  formValidations: List([]),
+  formErrors: List([]),
   form: Map({}),
   didCheckErrors: false,
   editSuccess: false,
@@ -84,7 +84,9 @@ function editReducer(state = initialState, action) {
     case TOGGLE_NULL:
       return state.set('isRelationComponentNull', true);
     case CANCEL_CHANGES:
-      return state.set('record', state.get('initialRecord'));
+      return state
+        .set('formErrors', List([]))
+        .set('record', state.get('initialRecord'));
     case SET_FORM_VALIDATIONS:
       return state
         .set('formValidations', List(action.formValidations));
