@@ -58,7 +58,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         return {options};
       })
       .catch(() => {
-        strapi.notification.error('An error occurred during relationship fetch.');
+        strapi.notification.error('content-manager.notification.relationship.fetch');
       });
   }
 
@@ -72,7 +72,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       : '';
 
     const value = this.props.record.get(this.props.relation.alias);
-    
+
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectOne}`}>
