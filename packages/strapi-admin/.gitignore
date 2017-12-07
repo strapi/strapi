@@ -1,6 +1,7 @@
 # Don't check auto-generated stuff into git
 coverage
 node_modules
+build
 stats.json
 package-lock.json
 
