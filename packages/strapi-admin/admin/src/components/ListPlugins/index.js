@@ -9,32 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map, size } from 'lodash';
-import cn from 'classnames';
+
+// Design
 import Button from 'components/Button';
-import Ico from 'components/Ico';
-import ListRow from 'components/ListRow';
-import PopUpWarning from 'components/PopUpWarning';
+import Row from 'components/Row';
 
 import styles from './styles.scss';
 
 class ListPlugins extends React.Component {
-  state = { showModal: false };
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
-      this.setState({ showModal: false });
-    }
-  }
-
-  handleClick = (e) => {
-    this.setState({ showModal: !this.state.showModal });
-    this.props.onDeleteClick(e);
-  }
-
-  handleDelete = () => {
-    this.setState({ showModal: false });
-  }
-
   render() {
     const listSize = size(this.props.plugins);
     let titleType = listSize === 1 ? 'singular' : 'plural';
@@ -63,28 +45,14 @@ class ListPlugins extends React.Component {
             <div className={styles.ulContainer}>
               <ul>
                 {map(this.props.plugins, (plugin, key) => (
-                  <ListRow key={plugin.name}>
-                    <div className={cn("col-md-11", styles.nameWrapper)}>
-                      <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
-                        <i className={`fa fa-${plugin.icon}`} />
-                      </div>
-                      <div className={styles.pluginContent}>
-                        <span>{plugin.name} —&nbsp;</span>
-                        <FormattedMessage id={plugin.description} />
-                      </div>
-                    </div>
-                    <div className="col-md-1">
-                      <div className={styles.actionContainer}>
-                        <Ico onClick={this.handleClick} id={key} />
-                      </div>
-                    </div>
-                    <PopUpWarning
-                      isOpen={this.state.showModal}
-                      toggleModal={() => this.setState({ showModal: !this.state.showModal })}
-                      popUpWarningType="danger"
-                      onConfirm={this.props.onDeleteConfirm}
-                    />
-                  </ListRow>
+                  <Row
+                    name={key}
+                    key={plugin.name}
+                    plugin={plugin}
+                    onDeleteClick={this.props.onDeleteClick}
+                    pluginActionSucceeded={this.props.pluginActionSucceeded}
+                    onDeleteConfirm={this.props.onDeleteConfirm}
+                  />
                 ))}
               </ul>
             </div>
