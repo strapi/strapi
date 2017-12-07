@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path');
 const stringify = JSON.stringify;
 const _ = require('lodash');
-// const Service = strapi.plugins['users-permissions'].services;
+
 /**
  * UsersPermissions.js service
  *
@@ -14,7 +14,7 @@ const _ = require('lodash');
 module.exports = {
   createRole: (role) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const appRoles = require(Service.getRoleConfigPath());
+    const appRoles = strapi.plugins['users-permissions'].config.roles;
     const highestId = _.last(Object.keys(appRoles).reduce((acc, key) => {
       acc.push(_.toNumber(key));
 
@@ -34,7 +34,7 @@ module.exports = {
 
   deleteRole: async (roleId) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const appRoles = require(Service.getRoleConfigPath());
+    const appRoles = strapi.plugins['users-permissions'].config.roles
 
     Service.writePermissions(_.omit(appRoles, [roleId]));
 
@@ -85,7 +85,7 @@ module.exports = {
 
   getRole: async (roleId) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const appRoles = require(Service.getRoleConfigPath());
+    const appRoles = strapi.plugins['users-permissions'].config.roles
     appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
 
     return appRoles[roleId];
@@ -93,7 +93,7 @@ module.exports = {
 
   getRoles: async () => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const roles = require(Service.getRoleConfigPath());
+    const roles = strapi.plugins['users-permissions'].config.roles
     const usersCount = await strapi.query('user', 'users-permissions').countByRoles();
     const formattedRoles = Object.keys(roles).reduce((acc, key) => {
       const role = _.pick(roles[key], ['name', 'description']);
@@ -109,11 +109,17 @@ module.exports = {
   },
 
   getRoutes: async () => {
-    return Object.keys(strapi.plugins).reduce((acc, current) => {
+    const apiRoutes = Object.keys(strapi.api).reduce((acc, current) => {
+      return acc.concat(strapi.api[current].config.routes);
+    }, []);
+
+    const pluginsRoutes = Object.keys(strapi.plugins).reduce((acc, current) => {
       acc[current] = strapi.plugins[current].config.routes;
 
       return acc;
-    }, {});
+    }, []);
+
+    return _.merge({ application: apiRoutes}, pluginsRoutes);
   },
 
   getRoleConfigPath: () => (
@@ -144,17 +150,15 @@ module.exports = {
               if (!_.get(dataToCompare, [pluginName, 'controllers', controllerName, actionName])) {
                 _.unset(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName]);
               }
-            } else {
-              if (!_.get(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName])) {
-                const isCallback = actionName === 'callback' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-                const isRegister = actionName === 'register' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-                const isPassword = actionName === 'forgotPassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-                const isNewPassword = actionName === 'changePassword-password' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-                const isInit = actionName === 'init' && controllerName === 'userspermissions';
-                const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword;
+            } else if (!_.get(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName])) {
+              const isCallback = actionName === 'callback' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+              const isRegister = actionName === 'register' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+              const isPassword = actionName === 'forgotPassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+              const isNewPassword = actionName === 'changePassword-password' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+              const isInit = actionName === 'init' && controllerName === 'userspermissions';
+              const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword;
 
-                _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
-              }
+              _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
             }
           });
         });
@@ -167,34 +171,27 @@ module.exports = {
   updatePermissions: async (cb) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appActions = Service.getActions();
-    const roleConfigPath = Service.getRoleConfigPath();
     const writePermissions = Service.writePermissions;
-    let currentRoles;
-
-    try {
-      currentRoles = require(roleConfigPath);
-    } catch(err) {
-      currentRoles = {
-        '0': {
-          description: '',
-          name: 'Administrator',
-          permissions: {
-            application: {
-              controllers: {},
-            },
+    const currentRoles = strapi.plugins['users-permissions'].config.roles || {
+      '0': {
+        description: '',
+        name: 'Administrator',
+        permissions: {
+          application: {
+            controllers: {},
           },
         },
-        '1': {
-          description: '',
-          name: 'Guest',
-          permissions: {
-            application: {
-              controllers: {},
-            },
+      },
+      '1': {
+        description: '',
+        name: 'Guest',
+        permissions: {
+          application: {
+            controllers: {},
           },
         },
-      };
-    }
+      },
+    };
 
     const remove = await Service.updateData(_.cloneDeep(currentRoles));
     const added = await Service.updateData(_.cloneDeep(remove), 'set');
@@ -210,7 +207,7 @@ module.exports = {
 
   updateRole: async (roleId, body) => {
     const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const appRoles = require(Service.getRoleConfigPath());
+    const appRoles = strapi.plugins['users-permissions'].config.roles
     const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
     _.set(appRoles, [roleId], updatedRole);
 
@@ -242,7 +239,7 @@ module.exports = {
     const roleConfigPath = strapi.plugins['users-permissions'].services.userspermissions.getRoleConfigPath();
 
     try {
-      fs.writeFileSync(roleConfigPath, stringify(data, null, 2), 'utf8');
+      fs.writeFileSync(roleConfigPath, stringify({ roles: data }, null, 2), 'utf8');
     } catch(err) {
       strapi.log.error(err);
     }

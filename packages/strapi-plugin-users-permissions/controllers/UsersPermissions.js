@@ -100,7 +100,6 @@ module.exports = {
 
       ctx.send({ routes });
     } catch(err) {
-      console.log(err);
       ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
     }
   },
