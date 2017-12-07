@@ -10,29 +10,6 @@ const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  issue: (payload) => {
-    return jwt.sign(
-      _.clone(payload.toJSON ? payload.toJSON() : payload),
-      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret'
-    );
-  },
-
-  verify: (token) => {
-    return new Promise(function (resolve, reject) {
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
-        {},
-        function (err, user) {
-          if (err || !user || !user.id) {
-            return reject('Invalid token.');
-          }
-          resolve(user);
-        }
-      );
-    });
-  },
-
   getToken: function (ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
 
@@ -57,5 +34,28 @@ module.exports = {
     }
 
     return this.verify(token);
+  },
+
+  issue: (payload) => {
+    return jwt.sign(
+      _.clone(payload.toJSON ? payload.toJSON() : payload),
+      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret'
+    );
+  },
+
+  verify: (token) => {
+    return new Promise(function (resolve, reject) {
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
+        {},
+        function (err, user) {
+          if (err || !user || !user.id) {
+            return reject('Invalid token.');
+          }
+          resolve(user);
+        }
+      );
+    });
   }
 };

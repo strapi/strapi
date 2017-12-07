@@ -11,27 +11,6 @@ const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-
-  /**
-   * Promise to fetch all users.
-   *
-   * @return {Promise}
-   */
-
-  fetchAll: (params) => {
-    return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
-  },
-
-  /**
-   * Promise to fetch a/an user.
-   *
-   * @return {Promise}
-   */
-
-  fetch: (params) => {
-    return strapi.query('user', 'users-permissions').findOne(_.pick(params, '_id'));
-  },
-
   /**
    * Promise to add a/an user.
    *
@@ -72,13 +51,23 @@ module.exports = {
   },
 
   /**
-   * Promise to remove a/an user.
+   * Promise to fetch a/an user.
    *
    * @return {Promise}
    */
 
-  remove: async params => {
-    return strapi.query('user', 'users-permissions').delete(params);
+  fetch: (params) => {
+    return strapi.query('user', 'users-permissions').findOne(_.pick(params, '_id'));
+  },
+
+  /**
+   * Promise to fetch all users.
+   *
+   * @return {Promise}
+   */
+
+  fetchAll: (params) => {
+    return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
   },
 
   hashPassword: function (user = {}) {
@@ -99,6 +88,16 @@ module.exports = {
     }
 
     return password.split('$').length === 4;
+  },
+
+  /**
+   * Promise to remove a/an user.
+   *
+   * @return {Promise}
+   */
+
+  remove: async params => {
+    return strapi.query('user', 'users-permissions').delete(params);
   },
 
   validatePassword: (password, hash) => {
