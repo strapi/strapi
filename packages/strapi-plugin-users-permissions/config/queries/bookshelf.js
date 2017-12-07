@@ -99,7 +99,7 @@ module.exports = {
   },
 
   countByRoles: async function () {
-    const result = await strapi.connections[this.connection].raw('SELECT COUNT("id") AS total, "role" FROM "user" GROUP BY "role";');
+    const result = await strapi.connections[this.connection].raw(`SELECT COUNT("id") AS total, "role" FROM "${strapi.plugins['users-permissions'].models.user.collectionName}" GROUP BY "role";`);
     return result.rows.reduce((acc, current) => {
       acc.push({
         _id: parseFloat(current.role),
