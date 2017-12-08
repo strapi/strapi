@@ -59,7 +59,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
       const id = has(item, '_id') ? '_id' : 'id';
       const users = this.props.values;
       // Check if user is already associated with this role
-      if (findIndex(this.props.values, [id, item[id]]) === -1) {
+      if (findIndex(users, [id, item[id]]) === -1) {
         this.props.onClickAdd(item);
         users.push(item);
       }

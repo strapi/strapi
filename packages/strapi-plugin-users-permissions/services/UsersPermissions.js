@@ -13,7 +13,6 @@ const _ = require('lodash');
 
 module.exports = {
   createRole: (role) => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = strapi.plugins['users-permissions'].config.roles;
     const highestId = _.last(Object.keys(appRoles).reduce((acc, key) => {
       acc.push(_.toNumber(key));
@@ -26,24 +25,23 @@ module.exports = {
     _.set(appRoles, highestId.toString(), newRole);
 
     _.forEach(role.users, (user) => {
-      Service.updateUserRole(user, highestId);
+      module.exports.updateUserRole(user, highestId);
     });
 
-    Service.writePermissions(appRoles);
+    module.exports.writePermissions(appRoles);
   },
 
   deleteRole: async (roleId) => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = strapi.plugins['users-permissions'].config.roles
 
-    Service.writePermissions(_.omit(appRoles, [roleId]));
+    module.exports.writePermissions(_.omit(appRoles, [roleId]));
 
     const users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
       role: roleId
     }));
 
     _.forEach(users, (user) => {
-      Service.updateUserRole(user, '1');
+      module.exports.updateUserRole(user, '1');
     });
   },
 
@@ -84,7 +82,6 @@ module.exports = {
   },
 
   getRole: async (roleId) => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = strapi.plugins['users-permissions'].config.roles
     appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
 
@@ -92,7 +89,6 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const roles = strapi.plugins['users-permissions'].config.roles;
     const usersCount = await strapi.query('user', 'users-permissions').countByRoles();
     const formattedRoles = Object.keys(roles).reduce((acc, key) => {
@@ -109,9 +105,9 @@ module.exports = {
   },
 
   getRoutes: async () => {
-    const apiRoutes = Object.keys(strapi.api).reduce((acc, current) => {
+    const apiRoutes = strapi.api ? Object.keys(strapi.api).reduce((acc, current) => {
       return acc.concat(strapi.api[current].config.routes);
-    }, []);
+    }, []) : [];
 
     const pluginsRoutes = Object.keys(strapi.plugins).reduce((acc, current) => {
       acc[current] = strapi.plugins[current].config.routes;
@@ -169,9 +165,8 @@ module.exports = {
   },
 
   updatePermissions: async (cb) => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
-    const appActions = Service.getActions();
-    const writePermissions = Service.writePermissions;
+    const appActions = module.exports.getActions();
+    const writePermissions = module.exports.writePermissions;
     const currentRoles = strapi.plugins['users-permissions'].config.roles || {
       '0': {
         description: '',
@@ -193,8 +188,8 @@ module.exports = {
       },
     };
 
-    const remove = await Service.updateData(_.cloneDeep(currentRoles));
-    const added = await Service.updateData(_.cloneDeep(remove), 'set');
+    const remove = await module.exports.updateData(_.cloneDeep(currentRoles));
+    const added = await module.exports.updateData(_.cloneDeep(remove), 'set');
 
     if (!_.isEqual(currentRoles, added)) {
       writePermissions(added);
@@ -206,12 +201,11 @@ module.exports = {
   },
 
   updateRole: async (roleId, body) => {
-    const Service = strapi.plugins['users-permissions'].services.userspermissions;
     const appRoles = strapi.plugins['users-permissions'].config.roles
     const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
     _.set(appRoles, [roleId], updatedRole);
 
-    Service.writePermissions(appRoles);
+    module.exports.writePermissions(appRoles);
 
     const currentUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
       role: roleId
@@ -220,10 +214,10 @@ module.exports = {
     const userToRemove = _.differenceBy(currentUsers.toJSON ? currentUsers.toJSON() : currentUsers, body.users, 'id');
 
     _.forEach(userToAdd, (user) => {
-      Service.updateUserRole(user, roleId);
+      module.exports.updateUserRole(user, roleId);
     });
     _.forEach(userToRemove, (user) => {
-      Service.updateUserRole(user, '1');
+      module.exports.updateUserRole(user, '1');
     });
   },
 
@@ -235,7 +229,7 @@ module.exports = {
   },
 
   writePermissions: (data) => {
-    const roleConfigPath = strapi.plugins['users-permissions'].services.userspermissions.getRoleConfigPath();
+    const roleConfigPath = module.exports.getRoleConfigPath();
 
     try {
       fs.writeFileSync(roleConfigPath, stringify({ roles: data }, null, 2), 'utf8');
