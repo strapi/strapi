@@ -18,9 +18,6 @@ module.exports = async (ctx, next) => {
   }
 
   const permission = _.get(strapi.plugins['users-permissions'].config, ['roles', role.toString(), 'permissions', route.plugin || 'application', 'controllers', route.controller, route.action]);
-  console.log(permission);
-  console.log('---')
-  console.log(role);
 
   if (!permission) {
     return await next();

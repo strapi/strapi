@@ -14,12 +14,7 @@ const _ = require('lodash');
 module.exports = {
   createRole: (role) => {
     const appRoles = strapi.plugins['users-permissions'].config.roles;
-    const highestId = _.last(Object.keys(appRoles).reduce((acc, key) => {
-      acc.push(_.toNumber(key));
-
-      return acc;
-    }, []).sort()) + 1;
-
+    const highestId = Math.max(...Object.keys(appRoles).map(Number)) + 1;
     const newRole = _.pick(role, ['name', 'description', 'permissions']);
 
     _.set(appRoles, highestId.toString(), newRole);
