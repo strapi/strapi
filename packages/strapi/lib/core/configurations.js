@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone} = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone, cloneDeep} = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -269,7 +269,7 @@ module.exports.app = async function() {
     // Preset config in alphabetical order.
     this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
-      const currentSettings = merge(get(this.middleware[current], ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+      const currentSettings = merge(get(cloneDeep(this.middleware[current]), ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
       acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
       if (!acc[current].hasOwnProperty('enabled')) {
