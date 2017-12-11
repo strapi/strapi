@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
+import { findIndex, get, includes, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
 
 // Logo
@@ -171,7 +171,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
                       onChange={this.props.onChangeInput}
                       placeholder={get(input, 'placeholder')}
                       type={get(input, 'type')}
-                      validations={{ required: true }}
+                      validations={includes(get(input, 'name'), 'password') ? { required: true, minLength: '8' } : { required: true }}
                       value={get(this.props.modifiedData, get(input, 'name'))}
                     />
                   ))}

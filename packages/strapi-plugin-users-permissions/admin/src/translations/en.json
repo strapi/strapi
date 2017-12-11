@@ -49,7 +49,7 @@
 
   "BoundRoute.title": "Bound route to",
 
-  "components.Input.error.password.noMatch": "Password don't match",
+  "components.Input.error.password.noMatch": "Passwords don't match",
 
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Select all",
