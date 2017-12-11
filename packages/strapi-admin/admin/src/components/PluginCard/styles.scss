@@ -12,6 +12,11 @@
   margin-bottom: 9px;
   font-size: 12px;
   font-weight: 400;
+
+  > span:last-child {
+    color: #1C5DE7;
+  }
+  -webkit-font-smoothing: antialiased;
 }
 
 .cardFooter {

@@ -42,6 +42,7 @@
   "app.components.PluginCard.Button.label.install": "Déjà installé",
   "app.components.PluginCard.Button.label.support": "Nous soutenir",
   "app.components.PluginCard.price.free": "Gratuit",
+  "app.components.PluginCard.more-details": "Plus de détails",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",

@@ -72,6 +72,7 @@ class PluginCard extends React.Component {
           </div>
           <div className={styles.cardDescription}>
             <FormattedMessage id={this.props.plugin.description} />
+            &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
           </div>
           <div className={styles.cardScreenshot}>
 
