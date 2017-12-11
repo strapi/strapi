@@ -28,8 +28,17 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { router } from 'app';
 
-import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
+import {
+  temporaryContentTypeFieldsUpdated,
+  storeTemporaryMenu,
+} from 'containers/App/actions';
+import {
+  addAttributeToContentType,
+  addAttributeRelationToContentType,
+  editContentTypeAttribute,
+  editContentTypeAttributeRelation,
+  updateContentType,
+} from 'containers/ModelPage/actions';
 
 import AttributeCard from 'components/AttributeCard';
 import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
@@ -42,6 +51,7 @@ import { storeData } from '../../utils/storeData';
 
 import checkAttributeValidations from './utils/attributeValidations';
 import setParallelAttribute, { setTempAttribute } from './utils/setAttribute';
+
 import {
   changeInput,
   changeInputAttribute,
@@ -57,7 +67,9 @@ import {
   setAttributeFormEdit,
   setForm,
   setFormErrors,
+  unsetForm,
 } from './actions';
+// Selectors
 import selectForm from './selectors';
 
 import styles from './styles.scss';
@@ -450,6 +462,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         default:
       }
     } else {
+      this.props.unsetForm();
       this.setState({ showModal: false });
     }
   }
@@ -616,6 +629,7 @@ function mapDispatchToProps(dispatch) {
       setFormErrors,
       storeTemporaryMenu,
       temporaryContentTypeFieldsUpdated,
+      unsetForm,
       updateContentType,
     },
     dispatch
@@ -666,6 +680,7 @@ Form.propTypes = {
   storeTemporaryMenu: PropTypes.func.isRequired,
   temporaryContentTypeFieldsUpdated: PropTypes.func.isRequired,
   toggle: PropTypes.func.isRequired,
+  unsetForm: PropTypes.func.isRequired,
   updateContentType: PropTypes.func.isRequired,
 };
 

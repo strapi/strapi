@@ -31,6 +31,7 @@ import {
   SET_FORM,
   SET_FORM_ERRORS,
   UNSET_BUTTON_LOADING,
+  UNSET_FORM,
 } from './constants';
 
 import forms from './forms.json';
@@ -259,5 +260,11 @@ function setAttributeFormData(hash) {
   return {
     form,
     attribute,
+  };
+}
+
+export function unsetForm() {
+  return {
+    type: UNSET_FORM,
   };
 }

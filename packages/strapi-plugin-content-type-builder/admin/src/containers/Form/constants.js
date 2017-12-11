@@ -23,3 +23,4 @@ export const SET_BUTTON_LOADING = 'ContentTypeBuilder/Form/SET_BUTTON_LOADING';
 export const SET_FORM = 'ContentTypeBuilder/Form/SET_FORM';
 export const SET_FORM_ERRORS = 'ContentTypeBuilder/Form/SET_FORM_ERRORS';
 export const UNSET_BUTTON_LOADING = 'ContentTypeBuilder/Form/UNSET_BUTTON_LOADING';
+export const UNSET_FORM = 'ContentTypeBuilder/Form/UNSET_FORM';

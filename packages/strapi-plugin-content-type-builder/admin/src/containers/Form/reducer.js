@@ -22,6 +22,7 @@ import {
   SET_FORM_ERRORS,
   SET_BUTTON_LOADING,
   UNSET_BUTTON_LOADING,
+  UNSET_FORM,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -133,6 +134,9 @@ function formReducer(state = initialState, action) {
       return state
         .set('formErrors', List(action.formErrors))
         .set('didCheckErrors', !state.get('didCheckErrors'));
+    case UNSET_FORM:
+      return state
+        .set('modifiedData', Map([]));
     default:
       return state;
   }
