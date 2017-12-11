@@ -8,8 +8,8 @@
 
 .cardDescription {
   height: 54px;
-  margin-bottom: 19px;
-  padding-top: 10px;
+  margin-top: 28px;
+  margin-bottom: 9px;
   font-size: 12px;
   font-weight: 400;
 }
@@ -28,8 +28,8 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 2.7rem;
-  padding-top: 1.8rem;
+  margin-bottom: 8px;
+  padding-top: 2rem;
   > div:first-child {
     > i {
       margin-right: 10px;
@@ -48,6 +48,8 @@
 }
 
 .cardScreenshot {
+  height: 78px;
+  background-image: url('./screenshot.png');
   > img {
     width: 100%;
   }
@@ -119,9 +121,10 @@
 }
 
 .wrapper {
-  height: 320px;
+  min-height: 320px;
   margin-bottom: 4rem;
   padding: 1.2rem 1.5rem;
+  padding-bottom: 0;
   background-color: #fff;
   box-shadow: 0 2px 4px #E3E9F3;
   -webkit-font-smoothing: antialiased;

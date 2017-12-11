@@ -12,20 +12,39 @@ import { FormattedMessage } from 'react-intl';
 
 // Temporary picture
 import Button from 'components/Button';
-import FakeScreenShot from './screenshot.png';
 import styles from './styles.scss';
 
 class PluginCard extends React.Component {
-  state = { isOpen: false };
+  state = { isOpen: false, boostrapCol: 'col-lg-4' };
 
   componentDidMount() {
     this.shouldOpenModal(this.props);
+    window.addEventListener('resize', this.setBoostrapCol);
+    this.setBoostrapCol();
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.history.location.hash !== this.props.history.location.hash) {
       this.shouldOpenModal(nextProps);
     }
+  }
+
+  componentWillUnmount() {
+    this.removeEventListener('resize', this.setBoostrapCol);
+  }
+
+  setBoostrapCol = () => {
+    let boostrapCol = 'col-lg-4';
+
+    if (window.innerWidth > 1680) {
+      boostrapCol = 'col-lg-3';
+    }
+
+    if (window.innerWidth > 2300) {
+      boostrapCol = 'col-lg-2';
+    }
+
+    this.setState({ boostrapCol });
   }
 
   shouldOpenModal = (props) => {
@@ -45,7 +64,7 @@ class PluginCard extends React.Component {
     }
 
     return (
-      <div className={cn('col-md-4', styles.pluginCard)}>
+      <div className={cn(this.state.boostrapCol, styles.pluginCard)}>
         <div className={styles.wrapper}>
           <div className={styles.cardTitle}>
             <div><i className={`fa fa-${this.props.plugin.icon}`} /></div>
@@ -55,14 +74,14 @@ class PluginCard extends React.Component {
             <FormattedMessage id={this.props.plugin.description} />
           </div>
           <div className={styles.cardScreenshot}>
-            <img src={FakeScreenShot} alt='plugin screenshot' />
+
           </div>
           <div className={styles.cardPrice}>
             <div>
               <i className={`fa fa-${this.props.plugin.isCompatible ? 'check' : 'times'}`} />
               <FormattedMessage id={`app.components.PluginCard.compatible${this.props.plugin.id === 'support-us' ? 'Community' : ''}`} />
             </div>
-            <div>{this.props.plugin.price !== 0 ? `${this.props.plugin.price}€` : <FormattedMessage id="app.components.PluginCard.price.free" />}</div>
+            <div>{this.props.plugin.price !== 0 ? `${this.props.plugin.price}€` : ''}</div>
           </div>
           <div className={styles.cardFooter}>
             <div className={styles.ratings}>
