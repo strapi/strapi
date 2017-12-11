@@ -4,8 +4,7 @@
     "origin": true,
     "expose": [
       "WWW-Authenticate",
-      "Server-Authorization",
-      "X-Forwarded-Host"
+      "Server-Authorization"
     ],
     "maxAge": 31536000,
     "credentials": true,

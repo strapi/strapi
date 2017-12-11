@@ -79,7 +79,7 @@ module.exports = {
     };
 
     if (_.isUndefined(models)) {
-      models = global['strapi'].models;
+      models = association.plugin ? strapi.plugins[association.plugin].models : strapi.models;
     }
 
     if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {

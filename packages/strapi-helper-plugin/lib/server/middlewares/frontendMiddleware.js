@@ -15,6 +15,7 @@ const addDevMiddlewares = (app, webpackConfig) => {
     stats: 'errors-only',
     headers: {
       'Access-Control-Allow-Origin': '*',
+      'X-Forwarded-Host': 'strapi',
     }
   });
 
