@@ -50,7 +50,7 @@ class EditForm extends React.Component {
 
   render() {
     const source = getQueryParameters(this.props.location.search, 'source');
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+    const currentSchema = source !== 'content-manager' ? get(this.props.schema, ['plugins', source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
     const currentLayout = get(this.props.layout, [this.props.currentModelName, 'attributes']);
 
     // Remove `id` field

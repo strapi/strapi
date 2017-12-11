@@ -151,7 +151,7 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
+    const currentSchema = this.source !== 'content-manager' ? get(this.props.schema, ['plugins', this.source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
 
     let formattedValue = e.target.value;
 

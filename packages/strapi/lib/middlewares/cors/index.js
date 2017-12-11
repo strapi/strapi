@@ -8,6 +8,8 @@
  * CORS hook
  */
 
+const defaults = require('./defaults.json');
+
 module.exports = strapi => {
   return {
     /**
@@ -15,8 +17,6 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
-      const defaults = require('./defaults.json');
-
       strapi.app.use(
         async (ctx, next) => {
           if (ctx.request.admin) {

@@ -8,6 +8,10 @@ const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set,
 module.exports = async function() {
   // Set if is admin destination for middleware application.
   this.app.use(async (ctx, next) => {
+    if (ctx.request.header['origin'] === 'http://localhost:4000') {
+        ctx.request.header['x-forwarded-host'] = 'strapi';
+    }
+
     ctx.request.admin = ctx.request.header['x-forwarded-host'] === 'strapi';
 
     await next();

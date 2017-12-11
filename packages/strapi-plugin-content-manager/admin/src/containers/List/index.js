@@ -77,6 +77,8 @@ export class List extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.source = getQueryParameters(nextProps.location.search, 'source');
+
     const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
     if (locationChanged) {
@@ -161,7 +163,7 @@ export class List extends React.Component {
   render() {
     // Detect current model structure from models list
     const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', this.source, 'models', this.props.currentModelName]);
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
+    const currentSchema = this.source !== 'content-manager' ? get(this.props.schema, ['plugins', this.source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
 
     if (!this.props.currentModelName || !currentSchema) {
       return <div />;

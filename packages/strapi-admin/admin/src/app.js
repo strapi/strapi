@@ -37,11 +37,18 @@ import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
 import { pluginLoaded, updatePlugin, setHasUserPlugin } from 'containers/App/actions';
 import auth from 'utils/auth';
-import plugins from './config/plugins.json';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
 import { findIndex } from 'lodash';
 /* eslint-enable */
+
+const plugins = (() => {
+  try {
+    return require('./config/plugins.json');
+  } catch (e) {
+    return [];
+  }
+})();
 
 // Create redux store with history
 const initialState = {};
