@@ -114,13 +114,9 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    let hasAdmin = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
+    const hasAdmin = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
 
-    if (_.get(hasAdmin, 'length') === 0) {
-      hasAdmin = null;
-    }
-
-    ctx.send({ hasAdmin: !_.isEmpty(hasAdmin) });
+    ctx.send({ hasAdmin: hasAdmin.length > 0 });
   },
 
   searchUsers: async (ctx) => {

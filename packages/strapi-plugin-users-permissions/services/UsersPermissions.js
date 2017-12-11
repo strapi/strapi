@@ -71,9 +71,7 @@ module.exports = {
       },
     };
 
-    const allPermissions = _.merge(permissions, pluginsPermissions);
-
-    return allPermissions;
+    return _.merge(permissions, pluginsPermissions);;
   },
 
   getRole: async (roleId) => {
