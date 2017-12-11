@@ -7,12 +7,12 @@ try {
   packages.filter(pkg => pkg.indexOf('strapi') !== -1).forEach(pkg => {
     const packageJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), 'utf8'));
 
-    Object.keys(packageJSON.dependencies).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
+    Object.keys(packageJSON.dependencies || []).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
       packageJSON.dependencies[dependency] = 'file:../' + dependency;
     });
 
     if (packageJSON.devDependencies) {
-      Object.keys(packageJSON.devDependencies).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+      Object.keys(packageJSON.devDependencies || []).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
         packageJSON.devDependencies[devDependency] = 'file:../' + devDependency;
       });
     }

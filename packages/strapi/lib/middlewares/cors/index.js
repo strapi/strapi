@@ -8,38 +8,10 @@
  * CORS hook
  */
 
+const defaults = require('./defaults.json');
+
 module.exports = strapi => {
   return {
-    /**
-     * Default options
-     */
-
-    defaults: {
-      cors: {
-        enabled: false,
-        origin: true,
-        expose: [
-          'WWW-Authenticate',
-          'Server-Authorization'
-        ],
-        maxAge: 31536000,
-        credentials: true,
-        methods: [
-          'GET',
-          'POST',
-          'PUT',
-          'PATCH',
-          'DELETE',
-          'HEAD'
-        ],
-        headers: [
-          'Content-Type',
-          'Authorization'
-        ],
-        keepHeadersOnError: false
-      }
-    },
-
     /**
      * Initialize the hook
      */
@@ -50,12 +22,12 @@ module.exports = strapi => {
           if (ctx.request.admin) {
             return strapi.koaMiddlewares.kcors({
               origin: '*',
-              exposeHeaders: this.defaults.cors.expose,
-              maxAge: this.defaults.cors.maxAge,
-              credentials: this.defaults.cors.credentials,
-              allowMethods: this.defaults.cors.methods,
-              allowHeaders: this.defaults.cors.headers,
-              keepHeadersOnError: this.defaults.cors.keepHeadersOnError
+              exposeHeaders: defaults.cors.expose,
+              maxAge: defaults.cors.maxAge,
+              credentials: defaults.cors.credentials,
+              allowMethods: defaults.cors.methods,
+              allowHeaders: defaults.cors.headers,
+              keepHeadersOnError: defaults.cors.keepHeadersOnError
             })(ctx, next);
           } else if (strapi.config.currentEnvironment.security.cors.enabled) {
             return strapi.koaMiddlewares.kcors({

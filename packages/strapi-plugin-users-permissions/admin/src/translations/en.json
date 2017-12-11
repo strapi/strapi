@@ -1,0 +1,141 @@
+{
+  "Auth.form.button.register-success": "Send again",
+  "Auth.form.button.forgot-password.success": "Send again",
+  "Auth.form.button.forgot-password": "Send Email",
+  "Auth.form.button.reset-password": "Change password",
+  "Auth.form.button.login": "Log in",
+  "Auth.form.button.register": "Ready to start",
+
+  "Auth.form.forgot-password.email.label": "Enter your email",
+  "Auth.form.forgot-password.email.label.success": "Email sent with success to",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.header.register.description": "To finish setup and secure your app, please create the first user (root admin) by filling informations below.",
+  "Auth.form.header.login": "strapi",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "Welcome!",
+  "Auth.form.header.register-success": "strapi",
+
+  "Auth.form.login.password.label": "Password",
+  "Auth.form.login.rememberMe.label": "Remember me",
+  "Auth.form.login.username.label": "Username",
+  "Auth.form.login.username.placeholder": "John Doe",
+
+  "Auth.form.register.email.label": "Email",
+  "Auth.form.register.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.register.username.label": "Username",
+  "Auth.form.register.username.placeholder": "John Doe",
+  "Auth.form.register.password.label": "Password",
+  "Auth.form.register.confirmPassword.label": "Confirmation Password",
+
+  "Auth.form.register-success.email.label": "Email sent with success to",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.error.email.provide": "Please provide your username or your e-mail.",
+  "Auth.form.error.email.invalid": "This e-mail is invalid.",
+  "Auth.form.error.password.provide": "Please provide your password.",
+  "Auth.form.error.invalid": "Identifier or password invalid.",
+  "Auth.form.error.password.local": "This user never set a local password, please login thanks to the provider used during account creation.",
+  "Auth.form.error.password.format": "Your password can not contain more than three times the symbol `$`.",
+  "Auth.form.error.user.not-exist": "This email does not exist.",
+  "Auth.form.error.code.provide": "Incorrect code provided.",
+  "Auth.form.error.password.matching": "Passwords do not match.",
+  "Auth.form.error.params.provide": "Incorrect params provided.",
+  "Auth.form.error.username.taken": "Username is already taken",
+  "Auth.form.error.email.taken": "Email is already taken",
+
+  "Auth.link.forgot-password": "Forgot your password?",
+  "Auth.link.ready": "Ready to sign-in?",
+
+  "BoundRoute.title": "Bound route to",
+
+  "components.Input.error.password.noMatch": "Password don't match",
+
+  "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Select all",
+
+  "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
+  "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
+  "EditForm.inputSelect.durations.label": "Duration",
+  "EditForm.inputSelect.durations.description": "Number of hours during the user can't subscribe.",
+
+  "EditForm.inputToggle.label": "One account per email addres",
+  "EditForm.inputToggle.description": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+
+  "EditPage.cancel": "Cancel",
+  "EditPage.submit": "Save",
+  "EditPage.form.roles": "Roles details",
+  "EditPage.form.roles.label.description": "Description",
+  "EditPage.form.roles.label.name": "Name",
+  "EditPage.form.roles.label.users": "Users associated with this role ({number})",
+  "EditPage.form.roles.name.error": "This value input is required.",
+  "EditPage.header.title": "{name} ",
+  "EditPage.header.title.create": "Create a new role",
+  "EditPage.header.description": "{description} ",
+  "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "An error occurred while fetching permissions",
+  "EditPage.notification.policies.error": "An error occurred while fetching policies",
+  "EditPage.notification.role.error": "An error occurred while fetching the role",
+
+  "HeaderNav.link.advancedSettings": "Advanced settings",
+  "HeaderNav.link.emailTemplates": "Email templates",
+  "HeaderNav.link.providers": "Providers",
+  "HeaderNav.link.roles": "Roles",
+
+  "HomePage.header.title": "Auth & Permissions",
+  "HomePage.header.description": "Define the roles and permissions for every one of them",
+
+  "InputSearch.placeholder": "Search for a user",
+
+  "List.button.roles": "Add New Role",
+  "List.button.providers": "Add New Provider",
+
+  "List.title.emailTemplates.singular": "{number} email template is available",
+  "List.title.emailTemplates.plural": "{number} email templates are available",
+
+  "List.title.providers.disabled.singular": "{number} is disabled",
+  "List.title.providers.disabled.plural": "{number} are disabled",
+  "List.title.providers.enabled.singular": "{number} provider is enabled and",
+  "List.title.providers.enabled.plural": "{number} providers are enabled and",
+
+  "List.title.roles.singular": "{number} role is available",
+  "List.title.roles.plural": "{number} roles are available",
+
+  "notification.error.delete": "An error occurred while trying to delete the item",
+  "notification.error.fetch": "An error occurred while trying to fetch data",
+  "notification.error.fetchUser": "An error occurred while trying to fetch users",
+  "notification.info.emailSent": "The email has been sent",
+  "notification.success.delete": "The item has been deleted",
+
+  "plugin.description": "Protect your API with a full-authentication process",
+
+  "Plugin.permissions.application.description": "Define the allowed actions in your project.",
+  "Plugin.permissions.plugins.description": "Define the allowed actions in the {name} plugin.",
+
+  "Plugins.header.title": "Permissions",
+  "Plugins.header.description": "Only actions bound by a route are listed below.",
+
+  "Policies.InputSelect.empty": "None",
+  "Policies.InputSelect.label": "Allow to perform this action for:",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
+  "Policies.header.title": "Advanced settings",
+
+  "PopUpForm.button.cancel": "Cancel",
+  "PopUpForm.button.save": "Save",
+  "PopUpForm.header.add.providers": "Add New Provider",
+  "PopUpForm.header.edit.email-templates": "Edit Email Templates",
+  "PopUpForm.header.edit.providers": "Edit Provider",
+  "PopUpForm.inputSelect.providers.label": "Choose the provider",
+  "PopUpForm.inputToggle.providers.label": "Enable",
+  "PopUpForm.inputToggle.providers.description": "If disabled, the users won't be able to use this provider.",
+  "PopUpForm.inputText.shipperName.label": "Shipper name",
+  "PopUpForm.inputEmail.shipperEmail.label": "Shipper email",
+  "PopUpForm.inputEmail.responseEmail.label": "Response email",
+  "PopUpForm.inputText.emailObject.label": "Object",
+  "PopUpForm.inputText.emailObject.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.inputTextArea.message.label": "Message",
+  "PopUpForm.inputTextArea.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.inputEmail.placeholder": "johndoe@gmail.com",
+  "PopUpForm.inputText.shipperName.placeholder": "John Doe"
+}

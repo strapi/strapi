@@ -14,7 +14,13 @@ const selectPlugins = () => createSelector(
   (appState) => appState.get('plugins')
 );
 
+const selectHasUserPlugin = () => createSelector(
+  selectApp(),
+  (appState) => appState.get('hasUserPlugin'),
+);
+
 export {
   selectApp,
+  selectHasUserPlugin,
   selectPlugins,
 };

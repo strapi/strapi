@@ -1,6 +1,7 @@
 import { fork, call, put, select, takeLatest } from 'redux-saga/effects';
 
 import { pluginDeleted } from 'containers/App/actions';
+import auth from 'utils/auth';
 import request from 'utils/request';
 
 import { deletePluginSucceeded, getPluginsSucceeded } from './actions';
@@ -17,11 +18,15 @@ export function* deletePlugin() {
     if (resp.ok) {
       yield put(deletePluginSucceeded(plugin));
       yield put(pluginDeleted(plugin));
+
+      if (plugin === 'users-permissions') {
+        auth.clearAppStorage();
+      }
     }
 
   } catch(error) {
     yield put(deletePluginSucceeded(false));
-    window.Strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
+    strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
   }
 }
 
@@ -31,7 +36,7 @@ export function* pluginsGet() {
 
     yield put(getPluginsSucceeded(response));
   } catch(err) {
-    window.Strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
+    strapi.notification.error('notification.error');
   }
 }
 // Individual exports for testing

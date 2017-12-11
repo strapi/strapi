@@ -12,16 +12,6 @@ const delegate = require('delegates');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      boom: {
-        enabled: true
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
@@ -43,6 +33,10 @@ module.exports = strapi => {
           ctx.body = _.get(ctx.body, 'isBoom')
             ? ctx.body || error && error.message
             : Boom.wrap(error, ctx.status, ctx.body || error.message);
+        }
+
+        if (ctx.response.headers.location) {
+          return;
         }
 
         // Empty body is considered as `notFound` response.

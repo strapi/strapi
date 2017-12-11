@@ -1,0 +1,129 @@
+.button {
+  height: 26px;
+  min-width: 89px !important;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 13px;
+}
+
+.cardDescription {
+  height: 54px;
+  margin-bottom: 19px;
+  padding-top: 10px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  height: 54px;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  background-color: #FAFAFB;
+}
+
+.cardPrice {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2.7rem;
+  padding-top: 1.8rem;
+  > div:first-child {
+    > i {
+      margin-right: 10px;
+    }
+    color: #5A9E06;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 2.1rem;
+  }
+
+  > div:last-child {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.8rem;
+  }
+}
+
+.cardScreenshot {
+  > img {
+    width: 100%;
+  }
+}
+
+.cardTitle {
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 36px;
+  > div:first-child {
+    height: 36px;
+    width: 70px;
+    margin-right: 14px;
+    border: 1px solid #E8EEFC;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 20px;
+  }
+
+  > div:last-child {
+    height: 36px;
+  }
+}
+
+.pluginCard {
+
+}
+
+.primary {
+  font-weight: 500;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  -webkit-font-smoothing: antialiased;
+  color: white;
+  &:active {
+   box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+ }
+}
+
+.ratings {
+  display: flex;
+
+  > div:last-child {
+    padding-top: 1px;
+    font-style: italic;
+  }
+}
+
+.secondary {
+  border: 1px solid #DFE0E1;
+  font-weight: 600;
+}
+
+.starsContainer {
+  display: flex;
+  margin-right: 10px;
+  > div {
+    > i {
+      margin-right: 2px;
+    }
+  }
+  > div:first-child {
+    color: #EEA348;
+  }
+  > div:last-child {
+    color: #B3B5B9;
+  }
+}
+
+.wrapper {
+  height: 320px;
+  margin-bottom: 4rem;
+  padding: 1.2rem 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px #E3E9F3;
+  -webkit-font-smoothing: antialiased;
+  cursor: pointer;
+}

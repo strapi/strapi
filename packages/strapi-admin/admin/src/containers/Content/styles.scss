@@ -8,3 +8,9 @@
   margin-top: $header-height;
   margin-left: $left-menu-width;
 }
+
+.wrapper { /* stylelint-ignore */
+  background: $content-background;
+  min-height: 100%;
+  width: 100%;
+}

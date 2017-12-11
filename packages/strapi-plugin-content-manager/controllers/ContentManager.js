@@ -8,28 +8,37 @@ const _ = require('lodash');
 
 module.exports = {
   models: async ctx => {
-    ctx.body = _.mapValues(strapi.models, model =>
-      _.pick(model, [
-        'info',
-        'connection',
-        'collectionName',
-        'attributes',
-        'identity',
-        'globalId',
-        'globalName',
-        'orm',
-        'loadedModel',
-        'primaryKey',
-        'associations'
-      ])
-    );
+    const pickData = (model) => _.pick(model, [
+      'info',
+      'connection',
+      'collectionName',
+      'attributes',
+      'identity',
+      'globalId',
+      'globalName',
+      'orm',
+      'loadedModel',
+      'primaryKey',
+      'associations'
+    ]);
+
+    ctx.body = {
+      models: _.mapValues(strapi.models, pickData),
+      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
+        acc[current] = {
+          models: _.mapValues(strapi.plugins[current].models, pickData)
+        };
+
+        return acc;
+      }, {})
+    };
   },
 
   find: async ctx => {
-    const { limit, skip = 0, sort, query, queryAttribute } = ctx.request.query;
+    const { limit, skip = 0, sort, query, queryAttribute, source, page } = ctx.request.query;
 
     // Find entries using `queries` system
-    const entries = await strapi.query(ctx.params.model).find({
+    const entries = await strapi.query(ctx.params.model, source).find({
         limit,
         skip,
         sort,
@@ -41,8 +50,10 @@ module.exports = {
   },
 
   count: async ctx => {
+    const { source } = ctx.request.query;
+
     // Count using `queries` system
-    const count = await strapi.query(ctx.params.model).count();
+    const count = await strapi.query(ctx.params.model, source).count();
 
     ctx.body = {
       count: _.isNumber(count) ? count : _.toNumber(count)
@@ -50,8 +61,10 @@ module.exports = {
   },
 
   findOne: async ctx => {
+    const { source } = ctx.request.query;
+
     // Find an entry using `queries` system
-    const entry = await strapi.query(ctx.params.model).findOne({
+    const entry = await strapi.query(ctx.params.model, source).findOne({
       id: ctx.params.id
     });
 
@@ -64,33 +77,48 @@ module.exports = {
   },
 
   create: async ctx => {
-    // Create an entry using `queries` system
-    const entryCreated = await strapi.query(ctx.params.model).create({
-      values: ctx.request.body
-    });
+    const { source } = ctx.request.query;
 
-    ctx.body = entryCreated;
+    try {
+      // Create an entry using `queries` system
+      const entryCreated = await strapi.query(ctx.params.model, source).create({
+        values: ctx.request.body
+      });
+
+      ctx.body = entryCreated;
+    } catch(error) {
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+    }
   },
 
   update: async ctx => {
-    // Add current model to the flow of updates.
-    const entry = strapi.query(ctx.params.model).update({
-      id: ctx.params.id,
-      values: ctx.request.body
-    });
+    const { source } = ctx.request.query;
 
-    // Return the last one which is the current model.
-    ctx.body = entry;
+    try {
+      // Add current model to the flow of updates.
+      const entry = strapi.query(ctx.params.model, source).update({
+        id: ctx.params.id,
+        values: ctx.request.body
+      });
+
+      // Return the last one which is the current model.
+      ctx.body = entry;
+    } catch(error) {
+      // TODO handle error update
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+    }
   },
 
   delete: async ctx => {
+    const { source } = ctx.request.query;
     const params = ctx.params;
-    const response = await strapi.query(params.model).findOne({
+
+    const response = await strapi.query(params.model, source).findOne({
       id: params.id
     });
 
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
-      const association = strapi.models[params.model].associations.filter(x => x.alias === current)[0];
+      const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
       // Remove relationships.
       if (association) {
@@ -102,11 +130,11 @@ module.exports = {
 
     if (!_.isEmpty(params.values)) {
       // Run update to remove all relationships.
-      await strapi.query(params.model).update(params);
+      await strapi.query(params.model, source).update(params);
     }
 
     // Delete an entry using `queries` system
-    const entryDeleted = await strapi.query(params.model).delete({
+    const entryDeleted = await strapi.query(params.model, source).delete({
       id: params.id
     });
 

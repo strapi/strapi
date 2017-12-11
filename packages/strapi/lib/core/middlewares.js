@@ -5,7 +5,7 @@ const glob = require('glob');
 const path = require('path');
 const utils = require('../utils');
 const { parallel } = require('async');
-const { upperFirst, lowerFirst } = require('lodash');
+const { upperFirst, lowerFirst, endsWith } = require('lodash');
 
 module.exports = function() {
   this.middleware = {};
@@ -30,7 +30,7 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = process.cwd();
+      const cwd = this.config.appPath;
 
       glob(
         './node_modules/*(koa-*|kcors)',
@@ -47,10 +47,10 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = process.cwd();
+      const cwd = this.config.appPath;
 
       glob(
-        './node_modules/*(strapi-middleware-*)',
+        './node_modules/*(strapi-middleware-*)/*/*(index|defaults).*(js|json)',
         {
           cwd
         },
@@ -67,7 +67,7 @@ module.exports = function() {
       const cwd = path.resolve(__dirname, '..', 'middlewares');
 
       glob(
-        './!(index.js)',
+        './*/*(index|defaults).*(js|json)',
         {
           cwd
         },
@@ -81,10 +81,27 @@ module.exports = function() {
       );
     }),
     new Promise((resolve, reject) => {
-      const cwd = path.resolve(process.cwd(), 'middlewares');
+      const cwd = path.resolve(this.config.appPath, 'middlewares');
 
       glob(
-        './*',
+        './*/*(index|defaults).*(js|json)',
+        {
+          cwd
+        },
+        (err, files) => {
+          if (err) {
+            return reject(err);
+          }
+
+          mountMiddlewares.call(this, files, cwd)(resolve, reject);
+        }
+      );
+    }),
+    new Promise((resolve, reject) => {
+      const cwd = path.resolve(this.config.appPath, 'plugins');
+
+      glob(
+        './**/middlewares/*/*(index|defaults).*(js|json)',
         {
           cwd
         },
@@ -144,16 +161,20 @@ const mountMiddlewares = function (files, cwd) {
         const name = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
           .split('/')[1];
 
-        this.middleware[name] = {
+        this.middleware[name] = this.middleware[name] || {
           loaded: false
         };
 
-        // Lazy loading.
-        Object.defineProperty(this.middleware[name], 'load', {
-          configurable: false,
-          enumerable: true,
-          get: () => require(path.resolve(cwd, p))(this)
-        });
+        if (endsWith(p, 'index.js') && !this.middleware[name].load) {
+          // Lazy loading.
+          Object.defineProperty(this.middleware[name], 'load', {
+            configurable: false,
+            enumerable: true,
+            get: () => require(path.resolve(cwd, p))(this)
+          });
+        } else if (endsWith(p, 'defaults.json')) {
+          this.middleware[name].defaults = require(path.resolve(cwd, p));
+        }
 
         cb();
       }),

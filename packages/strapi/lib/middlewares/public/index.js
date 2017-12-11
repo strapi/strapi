@@ -18,23 +18,11 @@ const Koa = require('koa');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      public: {
-        enabled: true,
-        maxAge: 60000,
-        path: './public'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 
     initialize: function(cb) {
-      // Default index pages.
+      // Serve /public index page.
       strapi.router.route({
         method: 'GET',
         path: '/',
@@ -56,7 +44,7 @@ module.exports = strapi => {
       // Note: This route could be override by the user.
       strapi.router.route({
         method: 'GET',
-        path: '/*.*',
+        path: '/*',
         handler: [
           async (ctx, next) => {
             const parse = path.parse(ctx.url);
@@ -72,6 +60,108 @@ module.exports = strapi => {
         ]
       });
 
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path') ?
+        strapi.config.currentEnvironment.server.admin.path :
+        '/admin';
+
+      // Serve /admin index page.
+      strapi.router.route({
+        method: 'GET',
+        path: basename,
+        handler: [
+          async (ctx, next) => {
+            ctx.url = 'index.html';
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      // Allow refresh in admin page.
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/*`,
+        handler: [
+          async (ctx, next) => {
+            const parse = path.parse(ctx.url);
+
+            if (parse.ext === '') {
+              ctx.url = 'index.html';
+            }
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      // Serve admin assets.
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/*.*`,
+        handler: [
+          async (ctx, next) => {
+            ctx.url = path.basename(ctx.url);
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      // Allow page refresh
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/plugins/*`,
+        handler: [
+          async (ctx, next) => {
+            const parse = path.parse(ctx.url);
+
+            if (parse.ext === '') {
+              ctx.url = 'index.html';
+            }
+
+            await next();
+          },
+          strapi.koaMiddlewares.static(`./admin/admin/build`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })
+        ]
+      });
+
+      // Serve plugins assets.
+      strapi.router.route({
+        method: 'GET',
+        path: `${basename}/:resource/*.*`,
+        handler: async (ctx, next) => {
+          ctx.url = path.basename(ctx.url);
+
+          if (Object.keys(strapi.plugins).indexOf(ctx.params.resource) !== -1) {
+            return await strapi.koaMiddlewares.static(`./plugins/${ctx.params.resource}/admin/build`, {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true
+            })(ctx, next);
+          }
+
+          // Handle subfolders.
+          return await strapi.koaMiddlewares.static(`./admin/admin/build/${ctx.params.resource}`, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true
+          })(ctx, next);
+        }
+      });
+
       // Plugins.
       _.forEach(strapi.plugins, (value, plugin) => {
         strapi.router.route({
@@ -81,28 +171,42 @@ module.exports = strapi => {
             async (ctx, next) => {
               ctx.url = path.basename(ctx.url);
 
-              await next();
+              // Try to find assets into the build first.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
             },
-            strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true
-            })
+            async (ctx, next) => {
+              // Try to find assets in the source then.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
+            },
           ]
         });
 
         strapi.router.route({
           method: 'GET',
-          path: `/${plugin}/assets/*.*`,
+          path: `${basename}/plugins/${plugin}/*.*`,
           handler: [
             async (ctx, next) => {
               ctx.url = path.basename(ctx.url);
 
-              await next();
+              // Try to find assets into the build first.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
             },
-            strapi.koaMiddlewares.static(`./plugins/${plugin}/admin/build`, {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true
-            })
+            async (ctx, next) => {
+              // Try to find assets in the source then.
+              return await strapi.koaMiddlewares.static(`./plugins/${plugin}/${strapi.config.middleware.settings.public.path || strapi.config.paths.static}`, {
+                maxage: strapi.config.middleware.settings.public.maxAge,
+                defer: true
+              })(ctx, next);
+            },
           ]
         });
       });

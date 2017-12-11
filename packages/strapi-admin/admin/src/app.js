@@ -4,6 +4,21 @@
  * This is the entry file for the application, only setup and boilerplate
  * code.
  */
+
+/* eslint-disable */
+// Retrieve remote and backend URLs.
+const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin' : process.env.REMOTE_URL || 'http://localhost:1337/admin';
+const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+
+// Retrieve development URL to avoid to re-build.
+const $body = document.getElementsByTagName('body')[0];
+const devFrontURL = $body.getAttribute('front');
+const devBackendURL = $body.getAttribute('back');
+
+$body.removeAttribute('front');
+$body.removeAttribute('back');
+
+import './public-path';
 import 'babel-polyfill';
 
 // Import all the third party stuff
@@ -20,15 +35,25 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import { pluginLoaded, updatePlugin } from 'containers/App/actions';
-
+import { pluginLoaded, updatePlugin, setHasUserPlugin } from 'containers/App/actions';
+import auth from 'utils/auth';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
+import { findIndex } from 'lodash';
+
+const plugins = (() => {
+  try {
+    return require('./config/plugins.json');
+  } catch (e) {
+    return [];
+  }
+})();
+/* eslint-enable */
 
 // Create redux store with history
 const initialState = {};
 const history = createHistory({
-  basename: '/admin',
+  basename: (devFrontURL || remoteURL).replace(window.location.origin, ''),
 });
 const store = configureStore(initialState, history);
 
@@ -44,7 +69,6 @@ const render = (translatedMessages) => {
     document.getElementById('app')
   );
 };
-
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -68,9 +92,51 @@ window.onload = function onLoad() {
   }
 };
 
-/**
- * Public Strapi object exposed to the `window` object
- */
+// Don't inject plugins in development mode.
+if (window.location.port !== '4000') {
+  fetch(`${devFrontURL || remoteURL}/config/plugins.json`)
+    .then(response => {
+      return response.json();
+    })
+    .then(plugins => {
+      if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
+        store.dispatch(setHasUserPlugin());
+      }
+
+      (plugins || []).forEach(plugin => {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.onerror = function (oError) {
+          const source = new URL(oError.target.src);
+          const url = new URL(`${devFrontURL || remoteURL}`);
+
+          if (!source || !url) {
+            throw new Error(`Impossible to load: ${oError.target.src}`);
+          }
+
+          // Remove tag.
+          $body.removeChild(script);
+
+          // New attempt with new src.
+          const newScript = document.createElement('script');
+          newScript.type = 'text/javascript';
+          newScript.src = `${url.origin}${source.pathname}`;
+          $body.appendChild(newScript);
+        };
+
+        script.src = plugin.source[process.env.NODE_ENV];
+        $body.appendChild(script);
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+} else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
+  store.dispatch(setHasUserPlugin());
+}
+
+// const isPluginAllowedToRegister = (plugin) => true;
+const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
 
 /**
  * Register a plugin
@@ -82,10 +148,11 @@ const registerPlugin = (plugin) => {
   merge(translationMessages, plugin.translationMessages);
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
+  const shouldAllowRegister = isPluginAllowedToRegister(plugin);
 
   switch (true) {
     // Execute bootstrap function and check if plugin can be rendered
-    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
+    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
       plugin.pluginRequirements(plugin)
         .then(plugin => {
           return plugin.bootstrap(plugin);
@@ -101,7 +168,7 @@ const registerPlugin = (plugin) => {
       });
       break;
     // Execute bootstrap function
-    case isFunction(plugin.bootstrap):
+    case isFunction(plugin.bootstrap) && shouldAllowRegister:
       plugin.bootstrap(plugin).then(plugin => {
         store.dispatch(pluginLoaded(plugin));
       });
@@ -115,10 +182,14 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
-const port = window.Strapi && window.Strapi.port ? window.Strapi.port : 1337;
-const apiUrl = window.Strapi && window.Strapi.apiUrl ? window.Strapi.apiUrl : `http://localhost:${port}`;
 
-window.Strapi = {
+/**
+ * Public Strapi object exposed to the `window` object
+ */
+
+window.strapi = Object.assign(window.strapi || {}, {
+  remoteURL: devFrontURL || remoteURL,
+  backendURL: devBackendURL || backendURL,
   registerPlugin,
   notification: {
     success: (message) => {
@@ -134,8 +205,6 @@ window.Strapi = {
       displayNotification(message, 'info');
     },
   },
-  port,
-  apiUrl,
   refresh: (pluginId) => ({
     translationMessages: (translationMessagesUpdated) => {
       render(merge({}, translationMessages, translationMessagesUpdated));
@@ -146,7 +215,7 @@ window.Strapi = {
   }),
   router: history,
   languages,
-};
+});
 
 const dispatch = store.dispatch;
 export {

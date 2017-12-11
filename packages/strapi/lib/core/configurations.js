@@ -4,13 +4,15 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach } = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone, cloneDeep} = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
     // Load root configurations.
     new Promise((resolve, reject) => {
-      glob('./config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -20,7 +22,9 @@ module.exports.nested = function() {
     }),
     // Load APIs configurations.
     new Promise((resolve, reject) => {
-      glob('./api/*/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./api/*/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -30,7 +34,9 @@ module.exports.nested = function() {
     }),
     // Load plugins configurations.
     new Promise((resolve, reject) => {
-      glob('./plugins/*/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./plugins/*/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -40,7 +46,9 @@ module.exports.nested = function() {
     }),
     // Load admin configurations.
     new Promise((resolve, reject) => {
-      glob('./admin/config/**/*.*(js|json)', {}, (err, files) => {
+      glob('./admin/config/**/*.*(js|json)', {
+        cwd: this.config.appPath
+      }, (err, files) => {
         if (err) {
           return reject(err);
         }
@@ -86,6 +94,101 @@ module.exports.app = async function() {
 
     // Initialize main router to use it in middlewares.
     this.router = this.koaMiddlewares.routerJoi();
+
+    // Set controllers.
+    this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
+      for (let index in this.api[key].controllers) {
+        if (!this.api[key].controllers[index].identity) {
+          this.api[key].controllers[index].identity = upperFirst(index);
+        }
+
+        acc[index] = this.api[key].controllers[index];
+      }
+
+      return acc;
+    }, {});
+
+    // Set models.
+    this.models = Object.keys(this.api || []).reduce((acc, key) => {
+      for (let index in this.api[key].models) {
+        if (!this.api[key].models[index].globalId) {
+          this.api[key].models[index].globalId = upperFirst(index);
+        }
+
+        if (!this.api[key].models[index].connection) {
+          this.api[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
+        }
+
+        acc[index] = this.api[key].models[index];
+      }
+      return acc;
+    }, {});
+
+    // Set services.
+    this.services = Object.keys(this.api || []).reduce((acc, key) => {
+      for (let index in this.api[key].services) {
+        acc[index] = this.api[key].services[index];
+      }
+
+      return acc;
+    }, {});
+
+    // Set routes.
+    this.config.routes = Object.keys(this.api || []).reduce((acc, key) => {
+      return acc.concat(get(this.api[key], 'config.routes') || {});
+    }, []);
+
+    // Set admin controllers.
+    this.admin.controllers = Object.keys(this.admin.controllers || []).reduce((acc, key) => {
+      if (!this.admin.controllers[key].identity) {
+        this.admin.controllers[key].identity = key;
+      }
+
+      acc[key] = this.admin.controllers[key];
+
+      return acc;
+    }, {});
+
+    // Set admin models.
+    this.admin.models = Object.keys(this.admin.models || []).reduce((acc, key) => {
+      if (!this.admin.models[key].identity) {
+        this.admin.models[key].identity = upperFirst(key);
+      }
+
+      if (!this.admin.models[key].identity) {
+        this.admin.models[key].identity = this.config.currentEnvironment.database.defaultConnection;
+      }
+
+      acc[key] = this.admin.models[key];
+
+      return acc;
+    }, {});
+
+    this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
+      this.plugins[key].controllers = Object.keys(this.plugins[key].controllers || []).reduce((sum, index) => {
+        if (!this.plugins[key].controllers[index].identity) {
+          this.plugins[key].controllers[index].identity = index;
+        }
+
+        sum[index] = this.plugins[key].controllers[index];
+
+        return sum;
+      }, {});
+
+      this.plugins[key].models = Object.keys(this.plugins[key].models || []).reduce((sum, index) => {
+        if (!this.plugins[key].models[index].connection) {
+          this.plugins[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
+        }
+
+        sum[index] = this.plugins[key].models[index];
+
+        return sum;
+      }, {});
+
+      acc[key] = this.plugins[key];
+
+      return acc;
+    }, {});
 
     // Define required middlewares categories.
     const middlewareCategories = ['request', 'response', 'security', 'server'];
@@ -166,7 +269,7 @@ module.exports.app = async function() {
     // Preset config in alphabetical order.
     this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
       // Try to find the settings in the current environment, then in the main configurations.
-      const currentSettings = flattenMiddlewaresConfig[current] || this.config[current];
+      const currentSettings = merge(get(cloneDeep(this.middleware[current]), ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
       acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
       if (!acc[current].hasOwnProperty('enabled')) {
@@ -199,83 +302,6 @@ module.exports.app = async function() {
       return acc;
     }, {});
 
-    // Set controllers.
-    this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].controllers) {
-        if (!this.api[key].controllers[index].identity) {
-          this.api[key].controllers[index].identity = upperFirst(index);
-        }
-
-        acc[index] = this.api[key].controllers[index];
-      }
-
-      return acc;
-    }, {});
-
-    // Set models.
-    this.models = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].models) {
-        if (!this.api[key].models[index].globalId) {
-          this.api[key].models[index].globalId = upperFirst(index);
-        }
-
-        acc[index] = this.api[key].models[index];
-      }
-      return acc;
-    }, {});
-
-    // Set services.
-    this.services = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].services) {
-        acc[index] = this.api[key].services[index];
-      }
-
-      return acc;
-    }, {});
-
-    // Set routes.
-    this.config.routes = Object.keys(this.api || []).reduce((acc, key) => {
-      return acc.concat(get(this.api[key], 'config.routes') || {});
-    }, []);
-
-    // Set admin controllers.
-    this.admin.controllers = Object.keys(this.admin.controllers || []).reduce((acc, key) => {
-      if (!this.admin.controllers[key].identity) {
-        this.admin.controllers[key].identity = key;
-      }
-
-      acc[key] = this.admin.controllers[key];
-
-      return acc;
-    }, {});
-
-    // Set admin models.
-    this.admin.models = Object.keys(this.admin.models || []).reduce((acc, key) => {
-      if (!this.admin.models[key].identity) {
-        this.admin.models[key].identity = upperFirst(key);
-      }
-
-      acc[key] = this.admin.models[key];
-
-      return acc;
-    }, {});
-
-    this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
-      this.plugins[key].controllers = Object.keys(this.plugins[key].controllers || []).reduce((sum, index) => {
-        if (!this.plugins[key].controllers[index].identity) {
-          this.plugins[key].controllers[index].identity = index;
-        }
-
-        sum[index] = this.plugins[key].controllers[index];
-
-        return sum;
-      }, {});
-
-      acc[key] = this.plugins[key];
-
-      return acc;
-    }, {});
-
     this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
     this.config.url = `http://${this.config.host}:${this.config.port}`;
 };
@@ -288,9 +314,9 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   // Couldn't find configurations for this hook.
   if (isEmpty(get(flattenHooksConfig, name, true))) {
     // Check if database connector is used
-    const modelsUsed = Object.keys(this.api || {})
-      .filter(x => isObject(this.api[x].models)) // Filter API with models
-      .map(x => this.api[x].models) // Keep models
+    const modelsUsed = Object.keys(assign(clone(this.api) || {}, this.plugins))
+      .filter(x => isObject(get(this.api, [x, 'models']) || get(this.plugins, [x, 'models']))) // Filter API with models
+      .map(x => get(this.api, [x, 'models']) || get(this.plugins, [x, 'models'])) // Keep models
       .filter(models => {
         const apiModelsUsed = Object.keys(models).filter(model => {
           const connector = get(this.config.connections, models[model].connection, {}).connector;

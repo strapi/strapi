@@ -43,7 +43,7 @@ export function* getTableExistance() {
     yield put(checkIfTableExistsSucceeded(tableExists));
 
   } catch(error) {
-    window.Strapi.notification.error('An error occured');
+    strapi.notification.error('notification.error');
   }
 }
 
@@ -58,7 +58,7 @@ export function* fetchModel(action) {
     yield put(unsetButtonLoader());
 
   } catch(error) {
-    window.Strapi.notification.error('An error occured');
+    strapi.notification.error('notification.error');
   }
 }
 
@@ -116,10 +116,10 @@ export function* submitChanges(action) {
           action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
         }
 
-        window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
+        strapi.notification.success('content-type-builder.notification.success.message.contentType.create');
 
       } else {
-        window.Strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+        strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
       }
 
       yield put(submitActionSucceeded());
@@ -130,7 +130,7 @@ export function* submitChanges(action) {
     }
 
   } catch(error) {
-    window.Strapi.notification.error(error);
+    strapi.notification.error(error);
   }
 }
 

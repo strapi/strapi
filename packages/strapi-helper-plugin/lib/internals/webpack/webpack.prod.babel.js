@@ -1,4 +1,5 @@
 // Important modules this config uses
+const _ = require('lodash');
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -9,22 +10,41 @@ const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
+const WriteJsonPlugin = require('write-json-webpack-plugin');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+
+// Necessary configuration file to ensure that plugins will be loaded.
+const pluginsToInitialize = (() => {
+  try {
+    return require(path.resolve(appPath, 'admin', 'src', 'config', 'plugins.json'));
+  } catch (e) {
+    return [];
+  }
+})();
 
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(path.join(__dirname, 'manifest.json')),
+    manifest: require(isSetup ?
+      path.join(__dirname, 'manifest.json'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')
+    ),
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
     sourceMap: true,
+    parallel: true,
     compress: {
       warnings: false
+    },
+    uglifyOptions: {
+      ecma: 8,
     },
   }),
   new webpack.LoaderOptionsPlugin({
@@ -33,6 +53,27 @@ const plugins = [
   new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   // new BundleAnalyzerPlugin(),
 ];
+
+// Default configurations.
+const settings = {
+  path: 'admin',
+  folder: 'plugins',
+  host: 'http://localhost:1337'
+};
+
+if (!isSetup) {
+  // Load server configurations.
+  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+  const server = require(serverConfig);
+  const pathAccess =  _.get(server, 'admin.path', 'admin');
+
+  Object.assign(settings, {
+    path: pathAccess[0] === '/' ? pathAccess.substring(1) : pathAccess,
+    folder: _.get(server, 'admin.build.plugins.folder', 'plugins'),
+    host: _.get(server, 'admin.build.host', 'http://localhost:1337')
+  });
+}
 
 // Build the `index.html file`
 if (isAdmin) {
@@ -58,23 +99,34 @@ if (isAdmin) {
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
   }));
+  plugins.push(new WriteJsonPlugin({
+      object: pluginsToInitialize,
+      path: 'config',
+      // default output is timestamp.json
+      filename: 'plugins.json',
+  }));
 }
 
-const appPath = isAdmin
-  ? path.join(process.cwd(), 'admin', 'src', 'app.js')
-  : path.join(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+const main = (() => {
+  if (isAdmin && isSetup) {
+    return path.join(process.cwd(), 'admin', 'src', 'app.js');
+  } else if (isAdmin) {
+    return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
+  }
+
+  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+})();
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
   entry: {
-    main: appPath
+    main
   },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
   output: {
     filename: '[name].js',
-    chunkFilename: '[name].[chunkhash].chunk.js',
-    publicPath: `${isAdmin ? '/admin/' : `/${pluginId}/assets/`}`,
+    chunkFilename: '[name].[chunkhash].chunk.js'
   },
 
   // In production, we minify our CSS with cssnano
@@ -94,7 +146,7 @@ module.exports = require('./webpack.base.babel')({
   // Babel presets configuration
   babelPresets: [
     [
-      require.resolve('babel-preset-latest'),
+      require.resolve('babel-preset-env'),
       {
         es2015: {
           modules: false,
@@ -107,12 +159,30 @@ module.exports = require('./webpack.base.babel')({
 
   alias: {
     moment: 'moment/moment.js',
-    'lodash': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'),
-    'immutable': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'),
-    'react': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'),
-    'react-dom': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group')
+    'babel-polyfill': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'babel-polyfill'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
+    'lodash': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': isSetup ?
+      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap'):
+      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   devtool: 'cheap-module-source-map',

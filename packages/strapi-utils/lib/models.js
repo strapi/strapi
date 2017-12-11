@@ -269,14 +269,19 @@ module.exports = {
 
     const model = entity.toLowerCase();
 
-    if (!strapi.models.hasOwnProperty(model)) {
+    const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
+      _.assign(acc, _.get(strapi.plugins[current], ['models'], {}));
+      return acc;
+    }, {}));
+
+    if (!models.hasOwnProperty(model)) {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
-    const connector = strapi.models[model].orm;
+    const connector = models[model].orm;
 
     if (!connector) {
-      throw new Error(`Impossible to determine the use ORM for the model ${model}.`);
+      throw new Error(`Impossible to determine the ORM used for the model ${model}.`);
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;

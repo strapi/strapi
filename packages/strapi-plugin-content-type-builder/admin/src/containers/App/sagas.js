@@ -13,11 +13,11 @@ export function* deleteContentType(action) {
       if (action.updateLeftMenu) {
         action.updatePlugin('content-manager', 'leftMenuSections', action.leftMenuContentTypes);
       }
-      window.Strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
+      strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
     }
 
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message');
+    strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 
@@ -28,7 +28,7 @@ export function* fetchModels() {
 
     yield put(modelsFetchSucceeded(data));
   } catch(error) {
-    window.Strapi.notification.error('content-type-builder.notification.error.message');
+    strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
 

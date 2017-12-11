@@ -17,7 +17,6 @@
   "main": "./lib",
   "dependencies": {
     "bookshelf": "^0.10.3",
-    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0",
     "strapi-knex": "3.0.0-alpha.6.7",
@@ -30,7 +29,7 @@
     ]
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",

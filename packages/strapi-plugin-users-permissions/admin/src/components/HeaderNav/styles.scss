@@ -1,0 +1,71 @@
+.headerNav { /* stylelint-disable */
+
+}
+
+.headerContainer {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  margin-top: 4.3rem;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #E3E9F3;
+  > a {
+    box-shadow: 1px 0 0px rgba(#DBDBDB, 0.5), inset 0px -1px 0px -2px rgba(#DBDBDB, 0.5);
+    background-color: #F5F5F5;
+    &:first-child {
+      border-radius: 2px 0 0 0;
+    }
+    &:last-child {
+      border-radius: 0 2px 0 0;
+    }
+  }
+}
+
+.headerLink {
+  position: relative;
+  display: flex;
+  flex: 1 100%;
+  max-width: 33%;
+  height: 3.6rem;
+  border-radius: 2px 0 0 0;
+  background-color: darken(#F5F5F5, 50%);
+  text-decoration: none !important;
+  font-family: Lato;
+  font-size: 1.3rem;
+  color: #333740 !important;
+  line-height: 1.6rem;
+}
+
+.linkActive {
+  z-index: 10;
+}
+
+.linkActive:first-child {
+  background-color: #FFFFFF!important;
+  font-weight: bold;
+  text-decoration: none !important;
+  box-shadow: 0 0 2px rgba(#DBDBDB, 0.5);
+  border-top: 0.2rem solid #1C5DE7;
+}
+
+.linkActive:last-child {
+  background-color: #FFFFFF!important;
+  font-weight: bold;
+  text-decoration: none !important;
+  box-shadow: 0 0 2px rgba(#DBDBDB, 0.5);
+  border-top: 0.2rem solid #1C5DE7;
+}
+
+.linkActive:not(:first-child, :last-child) {
+  background-color: #FFFFFF!important;
+  font-weight: bold;
+  text-decoration: none !important;
+  box-shadow: 0 0 2px rgba(#DBDBDB, 0.5);
+  border-top: 0.2rem solid #1C5DE7;
+}
+
+.linkText {
+  display: flex;
+  margin: auto;
+  text-transform: capitalize;
+}

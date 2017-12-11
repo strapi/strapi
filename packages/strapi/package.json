@@ -32,6 +32,7 @@
   "dependencies": {
     "async": "^2.1.2",
     "boom": "^5.2.0",
+    "cheerio": "^1.0.0-rc.2",
     "delegates": "^1.0.0",
     "glob": "^7.1.2",
     "kcors": "^2.2.0",
@@ -51,6 +52,7 @@
     "lodash": "^4.16.5",
     "node-fetch": "^1.7.3",
     "node-schedule": "^1.2.0",
+    "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",
     "strapi-generate": "3.0.0-alpha.6.7",

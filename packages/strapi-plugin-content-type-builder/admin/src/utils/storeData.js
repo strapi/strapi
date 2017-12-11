@@ -9,7 +9,10 @@ const stringify = JSON.stringify;
 export const storeData = {
   clearAppStorage() {
     if (localStorage) {
-      return localStorage.clear();
+      localStorage.removeItem(CONTENT_TYPE);
+      localStorage.removeItem(IS_MODEL_TEMPORARY);
+      localStorage.removeItem(MENU);
+      return localStorage.removeItem(MODEL);
     }
   },
 
@@ -47,7 +50,7 @@ export const storeData = {
       return localStorage.setItem(contentType, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('content-type-builder.notification.info.optimized');
   },
 
   setMenu(data, menu = MENU) {
@@ -55,7 +58,7 @@ export const storeData = {
       return localStorage.setItem(menu, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('content-type-builder.notification.info.optimized');
   },
 
   setModel(data, model = MODEL) {
@@ -63,7 +66,7 @@ export const storeData = {
       return localStorage.setItem(model, stringify(data));
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('content-type-builder.notification.info.optimized');
   },
 
   setIsModelTemporary(isModelTemporay = IS_MODEL_TEMPORARY) {
@@ -71,6 +74,6 @@ export const storeData = {
       return localStorage.setItem(isModelTemporay, true);
     }
 
-    return window.Strapi.notification.info('This plugin is optimized with your localStorage');
+    return strapi.notification.info('content-type-builder.notification.info.optimized');
   },
 };

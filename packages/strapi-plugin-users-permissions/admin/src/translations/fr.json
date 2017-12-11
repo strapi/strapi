@@ -1,0 +1,141 @@
+{
+  "Auth.form.button.register-success": "Envoyer à nouveau",
+  "Auth.form.button.forgot-password": "Envoyer à nouveau",
+  "Auth.form.button.reset-password": "Changez votre mot de passe",
+  "Auth.form.button.login": "Se connecter",
+  "Auth.form.button.register": "Prêt à commencer",
+
+  "Auth.form.forgot-password.email.label": "Entrez votre email",
+  "Auth.form.forgot-password.email.label.success": "Email envoyé avec succès à l'adresse suivante",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.header.login": "strapi",
+  "Auth.header.register.description": "Pour finir le setup et sécuriser votre app, merci de créer le premier utilisateur (root admin) en remplissant le formulaire suivant.",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "Bienvenue!",
+  "Auth.form.header.register-success": "strapi",
+
+  "Auth.form.login.password.label": "Mot de Passe",
+  "Auth.form.login.rememberMe.label": "Se souvenir de moi",
+  "Auth.form.login.username.label": "Username",
+  "Auth.form.login.username.placeholder": "John Doe",
+
+  "Auth.form.register.email.label": "Email",
+  "Auth.form.register.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.register.username.label": "Username",
+  "Auth.form.register.username.placeholder": "John Doe",
+  "Auth.form.register.password.label": "Mot de Passe",
+  "Auth.form.register.confirmPassword.label": "Confirmez le Mot de Passe",
+
+  "Auth.form.register-success.email.label": "Email envoyé avec succès à",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.error.email.provide": "Votre identifiant est manquant.",
+  "Auth.form.error.email.invalid": "Cette e-mail n'est pas valide.",
+  "Auth.form.error.password.provide": "Votre mot de passe est manquant.",
+  "Auth.form.error.invalid": "Votre identifiant ou mot de passe est incorrect.",
+  "Auth.form.error.password.local": "Ce compte n'a pas de mot de passe.",
+  "Auth.form.error.password.format": "Votre mot de passe ne peut pas contenir trois fois le symbole `$`.",
+  "Auth.form.error.user.not-exist": "Cette e-mails n'existe pas.",
+  "Auth.form.error.code.provide": "Le code est incorrect.",
+  "Auth.form.error.password.matching": "Les mots de passe ne sont pas identique.",
+  "Auth.form.error.params.provide": "Les informations nos incorrect.",
+  "Auth.form.error.username.taken": "Ce nom est déjà utilisé",
+  "Auth.form.error.email.taken": "Cet email est déjà utilisé",
+
+  "Auth.link.forgot-password": "Mot de passe oublié?",
+  "Auth.link.ready": "Prêt à vous connecter?",
+
+  "BoundRoute.title": "Route associée à",
+
+  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
+
+  "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Tout cocher",
+
+  "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
+  "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
+  "EditForm.inputSelect.durations.label": "Duration",
+  "EditForm.inputSelect.durations.description": "Nombre d'heure pendant lesquelles un utilisateur ne peut souscrire.",
+
+  "EditForm.inputToggle.label": "Un compte par adresse email",
+  "EditForm.inputToggle.description": "Interdire l'utilisateur de créer de multiple comptes avec la même adresse email avec des providers différents",
+
+  "EditPage.cancel": "Cancel",
+  "EditPage.submit": "Sauvegarder",
+  "EditPage.form.roles": "Rôles détails",
+  "EditPage.form.roles.label.description": "Description",
+  "EditPage.form.roles.label.name": "Nom",
+  "EditPage.form.roles.label.users": "Utilisateurs associés avec ce rôle ({number})",
+  "EditPage.form.roles.name.error": "Ce champ est obligatoire.",
+  "EditPage.header.title": "{name} ",
+  "EditPage.header.title.create": "Créez un nouveau rôle",
+  "EditPage.header.description": "{description} ",
+  "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "Une erreur est survenue en récupérant les permissions",
+  "EditPage.notification.policies.error": "Une erreur est survenue en récupérant les policies",
+  "EditPage.notification.role.error": "Une erreur est survenue en récupérant le rôle",
+
+
+  "HeaderNav.link.advancedSettings": "Paramètres avancés",
+  "HeaderNav.link.emailTemplates": "Templates d'email",
+  "HeaderNav.link.providers": "Fournisseurs",
+  "HeaderNav.link.roles": "Rôles",
+
+  "HomePage.header.title": "Auth & Permissions",
+  "HomePage.header.description": "Définissez les rôles et permissions pour chacun d'eux",
+
+  "InputSearch.placeholder": "Recherez un utilisateur",
+
+  "List.button.roles": "Ajouter un Nouveau Rôle",
+  "List.button.providers": "Ajouter Un Nouveau Provider",
+
+  "List.title.emailTemplates.singular": "{number} template d'email est disponible",
+  "List.title.emailTemplates.plural": "{number} templates d'email sont disponibles",
+
+  "List.title.providers.enabled.singular": "{number} provider est disponible et",
+  "List.title.providers.enabled.plural": "{number} providers sont disponibles et",
+  "List.title.providers.disabled.singular": "{number} indisponible",
+  "List.title.providers.disabled.plural": "{number} indisponibles",
+
+  "List.title.roles.singular": "{number} rôle est disponible",
+  "List.title.roles.plural": "{number} rôles sont disponibles",
+
+  "notification.error.delete": "Une erreur est survenue en essayant de supprimer cet élément",
+  "notification.error.fetch": "Une erreur est survenue en essayant de récupérer les données",
+  "notification.error.fetchUser": "Une erreur est survenue en esssayent de récupérer les users",
+  "notification.info.emailSent": "L'email a été envoyé",
+  "notification.success.delete": "L'élément a bien été supprimé",
+
+  "plugin.description": "Protegez votre API avec un système d'authentification complet",
+
+  "Plugin.permissions.application.description": "Définissez les actions autorisées dans votre projet.",
+  "Plugin.permissions.plugins.description": "Définissez les actions autorisées dans le {name} plugin.",
+
+  "Plugins.header.title": "Permissions",
+  "Plugins.header.description": "Sont listés uniquement les actions associées à une route.",
+
+  "Policies.InputSelect.empty": "Aucune",
+  "Policies.InputSelect.label": "Autorisez cette action pour :",
+  "Policies.header.hint": "Sélectionnez les actions de l'application ou d'un plugin et cliquer sur l'icon de paramètres pour voir les routes associées à cette action",
+  "Policies.header.title": "Paramètres avancés",
+
+  "popUpForm.button.cancel": "Annuler",
+  "popUpForm.button.save": "Sauvegarder",
+  "popUpForm.header.add.providers": "Ajouter un Nouveau Provider",
+  "popUpForm.header.edit.email-templates": "Editer Email Templates",
+  "popUpForm.header.edit.providers": "Editer Le Provider",
+  "popUpForm.inputSelect.providers.label": "Sélectionnez le provider",
+  "popUpForm.inputToggle.providers.label": "Activer",
+  "popUpForm.inputToggle.providers.description": "S'il est désactivé les utilisateurs ne pourront pas utiliser ce provider.",
+  "popUpForm.inputText.shipperName.label": "Nom de l'envoyeur",
+  "popUpForm.inputEmail.shipperEmail.label": "Email de l'envoyeur",
+  "popUpForm.inputEmail.responseEmail.label": "Email de réponse",
+  "popUpForm.inputText.emailObject.label": "Objet",
+  "popUpForm.inputText.emailObject.placeholder": "Merci de confirmer votre adresse email pour %APP_NAME%",
+  "popUpForm.inputTextArea.message.label": "Message",
+  "popUpForm.inputTextArea.message.placeholder": "<p>Merci de cliquer sur ce lien pour valider votre compte</p>",
+  "popUpForm.inputEmail.placeholder": "arthurdupont@gmail.com",
+  "popUpForm.inputText.shipperName.placeholder": "Arthur Dupont"
+}

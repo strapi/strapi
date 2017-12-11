@@ -25,7 +25,7 @@ import {
   makeSelectSort,
 } from './selectors';
 
-export function* getRecords() {
+export function* getRecords(action) {
   const currentModel = yield select(makeSelectCurrentModelName());
   const limit = yield select(makeSelectLimit());
   const currentPage = yield select(makeSelectCurrentPage());
@@ -40,8 +40,12 @@ export function* getRecords() {
     sort,
   };
 
+  if (action.source !== undefined) {
+    params.source = action.source;
+  }
+
   try {
-    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}`;
+    const requestUrl = `/content-manager/explorer/${currentModel}`;
     // Call our request helper (see 'utils/request')
     const response = yield call(request, requestUrl, {
       method: 'GET',
@@ -50,22 +54,27 @@ export function* getRecords() {
 
     yield put(loadedRecord(response));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.records.fetch');
+    strapi.notification.error('content-manager.error.records.fetch');
   }
 }
 
-export function* getCount() {
+export function* getCount(action) {
   const currentModel = yield select(makeSelectCurrentModelName());
+  const params = {};
+
+  if (action.source !== undefined) {
+    params.source = action.source;
+  }
 
   try {
-    const response = yield call(
-      request,
-      `${window.Strapi.apiUrl}/content-manager/explorer/${currentModel}/count`,
-    );
+    const response = yield call(request,`/content-manager/explorer/${currentModel}/count`, {
+      method: 'GET',
+      params,
+    });
 
     yield put(loadedCount(response.count));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.records.count');
+    strapi.notification.error('content-manager.error.records.count');
   }
 }
 

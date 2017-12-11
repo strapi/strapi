@@ -1,0 +1,27 @@
+{
+  "cors": {
+    "enabled": false,
+    "origin": true,
+    "expose": [
+      "WWW-Authenticate",
+      "Server-Authorization",
+      "X-Forwarded-Host"
+    ],
+    "maxAge": 31536000,
+    "credentials": true,
+    "methods": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "HEAD"
+    ],
+    "headers": [
+      "Content-Type",
+      "Authorization",
+      "X-Forwarded-Host"
+    ],
+    "keepHeadersOnError": false
+  }
+}

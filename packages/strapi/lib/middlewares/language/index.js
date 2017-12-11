@@ -15,20 +15,6 @@ const path = require('path');
 module.exports = strapi => {
   return {
     /**
-     * Default options
-     */
-
-    defaults: {
-      language: {
-        enabled: false,
-        defaultLocale: 'en_us',
-        locales: ['en_us'],
-        modes: ['query', 'subdomain', 'cookie', 'header', 'url', 'tld'],
-        cookieName: 'locale'
-      }
-    },
-
-    /**
      * Initialize the hook
      */
 

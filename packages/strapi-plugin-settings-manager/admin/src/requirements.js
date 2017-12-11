@@ -10,7 +10,7 @@ const shouldRenderCompo = (plugin) => new Promise((resolve, reject) => {
         blockerComponentIcon: 'fa-refresh',
         blockerComponentContent: 'renderIde',
       };
-      
+
       if (response.environment !== 'development') {
         plugin.preventComponentRendering = true;
         plugin.blockerComponentProps = {

@@ -45,7 +45,8 @@
   text-align: left !important;
   > span:first-child {
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 600;
+    letter-spacing: 0.7px;
     text-transform: uppercase;
   }
   > span:last-child {
@@ -57,6 +58,7 @@
 .icoContainer {
   width: 70px;
   height: 36px;
+  margin: auto 0;
   line-height: 36px;
   text-align: center;
   border: 1px solid rgba(28,93,231,0.1);
@@ -67,4 +69,8 @@
 .actionContainer {
   display: flex;
   justify-content: flex-end;
+}
+
+.nameWrapper {
+  display: flex;
 }

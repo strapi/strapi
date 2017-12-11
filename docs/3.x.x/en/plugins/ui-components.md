@@ -34,6 +34,7 @@ Button library based on bootstrap classes.
 }
 ```
 
+
 **Path —** `./plugins/my-plugin/admin/src/components/Foo/index.js`.
 ```js
 // Make sure you don't have any other component called Button otherwise it will
@@ -202,7 +203,7 @@ Strapi provides a built-in input library which includes :
 | `deactivateErrorHighlight` | bool | no | Prevents from displaying error highlight in the input: Ex: `<Input {...this.props} deactivateErrorHighlight />` |
 | `didCheckErrors` | bool | no | Use this props to display errors after submitting a form. Ex: `<Input {...this.props} didCheckErrors={this.state.error} />` |
 | `disabled` | bool | no | Disable the input. Ex: `<Input {...this.props} disabled />` |
-| `errors` | array | no | Allows to display custom error messages. Ex: `<Input {...this.props} errors={[{ id: 'The value is not correct' }]} />` |
+| `errors` | array | no | Allows to display custom error messages. Ex: `<Input {...this.props} errors={[{ id: 'components.Input.error.custom-error', errorMessage: 'Something is wrong' }]} />` |
 | `inputDescription` | string | no | Allows to add an input description that is displayed like [bootstrap](https://v4-alpha.getbootstrap.com/components/forms/#defining-states). |
 | `label` | string | yes | Displays the input's label with i18n. |
 | `linkContent` | object | no | Allows to display a link within the input's description. Ex: {% raw %} ``` <Input {...this.props} linkContent={{ description: 'check out our', link: 'tutorial video' }} />``` {% endraw %} |

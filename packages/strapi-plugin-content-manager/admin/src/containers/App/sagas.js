@@ -1,4 +1,4 @@
-import { map } from 'lodash';
+import { map, omit } from 'lodash';
 import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
 
 import request from 'utils/request';
@@ -10,45 +10,45 @@ import { makeSelectModels } from './selectors';
 
 export function* modelEntriesGet(action) {
   try {
-    const requestUrl = `${window.Strapi.apiUrl}/content-manager/explorer/${action.modelName}/count`;
+    const requestUrl = `/content-manager/explorer/${action.modelName}/count${action.source !== undefined ? `?source=${action.source}`: ''}`;
+
     const response = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(getModelEntriesSucceeded(response.count));
   } catch(error) {
-    window.Strapi.notification.error('content-manager.error.model.fetch');
+    strapi.notification.error('content-manager.error.model.fetch');
   }
 }
 
 export const generateMenu = function () {
-  return request(`${window.Strapi.apiUrl}/content-manager/models`, {
+  return request(`/content-manager/models`, {
     method: 'GET',
   })
     .then(response => generateSchema(response))
     .then(displayedModels => {
       return [{
         name: 'Content Types',
-        links: map(displayedModels, (model, key) => ({
+        links: map(omit(displayedModels, 'plugins'), (model, key) => ({
           label: model.labelPlural || model.label || key,
           destination: key,
         })),
       }];
     })
     .catch((error) => {
-      window.Strapi.notification.error('content-manager.error.model.fetch');
+      strapi.notification.error('content-manager.error.model.fetch');
       throw Error(error);
     });
 };
 
 export function* getModels() {
   try {
-    const response = yield call(request,
-      `${window.Strapi.apiUrl}/content-manager/models`, {
-        method: 'GET',
-      });
+    const response = yield call(request, `/content-manager/models`, {
+      method: 'GET',
+    });
 
     yield put(loadedModels(response));
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.model.fetch');
+    strapi.notification.error('content-manager.error.model.fetch');
   }
 }
 
@@ -59,7 +59,7 @@ export function* modelsLoaded() {
   try {
     schema = generateSchema(models);
   } catch (err) {
-    window.Strapi.notification.error('content-manager.error.schema.generation');
+    strapi.notification.error('content-manager.error.schema.generation');
     throw new Error(err);
   }
 

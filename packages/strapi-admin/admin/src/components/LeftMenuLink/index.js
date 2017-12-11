@@ -20,7 +20,13 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
 
     return (
       <li className={styles.item}>
-        <Link className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`} to={this.props.destination}>
+        <Link
+          className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
+          to={{
+            pathname: this.props.destination,
+            search: this.props.source ? `?source=${this.props.source}` : '',
+          }}
+        >
           <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
           <FormattedMessage
             id={this.props.label}
@@ -40,6 +46,11 @@ LeftMenuLink.propTypes = {
   destination: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  source: PropTypes.string,
+};
+
+LeftMenuLink.defaultProps = {
+  source: '',
 };
 
 export default LeftMenuLink;

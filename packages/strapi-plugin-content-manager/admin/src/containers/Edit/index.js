@@ -11,7 +11,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { map, get, isObject, isEmpty, replace, toNumber, toString } from 'lodash';
+import {
+  get,
+  includes,
+  isObject,
+  isEmpty,
+  map,
+  replace,
+  toNumber,
+  toString,
+} from 'lodash';
 import { router } from 'app';
 
 // Components.
@@ -24,6 +33,7 @@ import PluginHeader from 'components/PluginHeader';
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 
 // Utils.
+import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import templateObject from 'utils/templateObject';
@@ -93,29 +103,43 @@ export class Edit extends React.Component {
       },
     ];
 
+    this.source = getQueryParameters(this.props.location.search, 'source');
     this.layout = bindLayout.call(this, layout);
   }
 
   componentDidMount() {
+    const attributes =
+      get(this.props.models, ['models', this.props.match.params.slug.toLowerCase(), 'attributes']) ||
+      get(this.props.models, ['plugins', this.source, 'models', this.props.match.params.slug.toLowerCase(), 'attributes']);
+
+    if (this.source) {
+      this.layout = bindLayout.call(this, get(this.context.plugins.toJS(), `${this.source}.layout`, layout));
+    }
+
     this.props.setInitialState();
     this.props.setCurrentModelName(this.props.match.params.slug.toLowerCase());
-    this.props.setFormValidations(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
-    this.props.setForm(this.props.models[this.props.match.params.slug.toLowerCase()].attributes);
+    this.props.setFormValidations(attributes);
+    this.props.setForm(attributes);
     // Detect that the current route is the `create` route or not
     if (this.props.match.params.id === 'create') {
       this.props.setIsCreating();
     } else {
-      this.props.loadRecord(this.props.match.params.id);
+      this.props.loadRecord(this.props.match.params.id, this.source);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
-      if (!isEmpty(this.props.location.search)) {
-        window.Strapi.notification.success('content-manager.success.record.save');
-        router.push(replace(this.props.location.search, '?redirectUrl=', ''));
+      if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
+        router.push({
+          pathname: replace(this.props.location.search, '?redirectUrl=', ''),
+          search: `?source=${this.source}`,
+        });
       } else {
-        router.push(replace(this.props.location.pathname, 'create', ''));
+        router.push({
+          pathname: replace(this.props.location.pathname, '/create', ''),
+          search: `?source=${this.source}`,
+        });
       }
     }
   }
@@ -127,11 +151,13 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
+    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
+
     let formattedValue = e.target.value;
 
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
       formattedValue = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
-    } else if (['float', 'integer', 'bigint'].indexOf(this.props.schema[this.props.currentModelName].fields[e.target.name].type) !== -1) {
+    } else if (['float', 'integer', 'bigint'].indexOf(currentSchema.fields[e.target.name].type) !== -1) {
       formattedValue = toNumber(e.target.value);
     }
 
@@ -140,12 +166,13 @@ export class Edit extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+
     const form = this.props.form.toJS();
     map(this.props.record.toJS(), (value, key) => form[key] = value);
     const formErrors = checkFormValidity(form, this.props.formValidations.toJS());
 
     if (isEmpty(formErrors)) {
-      this.props.editRecord();
+      this.props.editRecord(this.source);
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -156,9 +183,10 @@ export class Edit extends React.Component {
       return <p>Loading...</p>;
     }
 
+    const currentModel = get(this.props.models, ['models', this.props.currentModelName]) || get(this.props.models, ['plugins', this.source, 'models', this.props.currentModelName]);
     // Plugin header config
-    const primaryKey = this.props.models[this.props.currentModelName].primaryKey;
-    const mainField = get(this.props.models, `${this.props.currentModelName}.info.mainField`) || primaryKey;
+    const primaryKey = currentModel.primaryKey;
+    const mainField = get(currentModel, 'info.mainField') || primaryKey;
     const pluginHeaderTitle = this.props.isCreating ? 'New entry' : templateObject({ mainField }, this.props.record.toJS()).mainField;
     const pluginHeaderDescription = this.props.isCreating ? 'New entry' : `#${this.props.record && this.props.record.get(primaryKey)}`;
 
@@ -192,6 +220,7 @@ export class Edit extends React.Component {
                   didCheckErrors={this.props.didCheckErrors}
                   formValidations={this.props.formValidations.toJS()}
                   layout={this.layout}
+                  location={this.props.location}
                 />
               </div>
             </div>
@@ -204,6 +233,7 @@ export class Edit extends React.Component {
                   setRecordAttribute={this.props.setRecordAttribute}
                   isNull={this.props.isRelationComponentNull}
                   toggleNull={this.props.toggleNull}
+                  location={this.props.location}
                 />
               </div>
             </div>
