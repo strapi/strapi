@@ -132,7 +132,6 @@ module.exports = function (strapi) {
                     virtuals: true
                   });
 
-
                   if (!plugin) {
                     global[definition.globalName] = instance.model(definition.globalName, collection.schema);
                   } else {
@@ -162,7 +161,7 @@ module.exports = function (strapi) {
               }
 
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
-              
+
               // Make sure the model has a connection.
               // If not, use the default connection.
               if (_.isEmpty(definition.connection)) {
@@ -218,22 +217,24 @@ module.exports = function (strapi) {
                   definition.loadedModel[name].type = utils(instance).convertType(details.type);
                 }
 
-                let FK;
-
                 switch (verbose) {
-                  case 'hasOne':
+                  case 'hasOne': {
+                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.model}`)) : _.capitalize(details.model);
+
                     definition.loadedModel[name] = {
                       type: instance.Schema.Types.ObjectId,
-                      ref: _.capitalize(details.model)
+                      ref
                     };
                     break;
-                  case 'hasMany':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'hasMany': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.collection}`)) : _.capitalize(details.collection);
 
                     if (FK) {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(details.collection),
+                        ref,
                         via: FK.via,
                         justOne: false
                       };
@@ -243,17 +244,19 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = [{
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.collection)
+                        ref
                       }];
                     }
                     break;
-                  case 'belongsTo':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'belongsTo': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.model}`)) : _.capitalize(details.model);
 
                     if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(details.model),
+                        ref,
                         via: FK.via,
                         justOne: true
                       };
@@ -263,19 +266,21 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = {
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.model)
+                        ref
                       };
                     }
 
                     break;
-                  case 'belongsToMany':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'belongsToMany': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.collection}`)) : _.capitalize(details.collection);
 
                     // One-side of the relationship has to be a virtual field to be bidirectional.
                     if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(FK.collection),
+                        ref,
                         via: FK.via
                       };
 
@@ -284,10 +289,11 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = [{
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.collection)
+                        ref
                       }];
                     }
                     break;
+                  }
                   default:
                     break;
                 }

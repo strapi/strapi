@@ -40,7 +40,6 @@ import auth from 'utils/auth';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
 import { findIndex } from 'lodash';
-/* eslint-enable */
 
 const plugins = (() => {
   try {
@@ -49,6 +48,7 @@ const plugins = (() => {
     return [];
   }
 })();
+/* eslint-enable */
 
 // Create redux store with history
 const initialState = {};

@@ -30,6 +30,13 @@ module.exports = {
       values.role = '1';
     }
 
+    // Use Content Manager business logic to handle relation.
+    if (strapi.plugins['content-manager']) {
+      return await strapi.plugins['content-manager'].services['contentmanager'].add({
+        model: 'user'
+      }, values, 'users-permissions');
+    }
+
     return strapi.query('user', 'users-permissions').create(values);
   },
 
@@ -45,6 +52,11 @@ module.exports = {
     // or use the `findOneOrUpdate()` method with `{ new:true }` option.
     if (values.password) {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
+    }
+
+    // Use Content Manager business logic to handle relation.
+    if (strapi.plugins['content-manager']) {
+      return await strapi.plugins['content-manager'].services['contentmanager'].edit(params, values, 'users-permissions');
     }
 
     return strapi.query('user', 'users-permissions').update(_.assign(params, values));
@@ -97,6 +109,11 @@ module.exports = {
    */
 
   remove: async params => {
+    // Use Content Manager business logic to handle relation.
+    if (strapi.plugins['content-manager']) {
+      await strapi.plugins['content-manager'].services['contentmanager'].delete(params, 'users-permissions');
+    }
+
     return strapi.query('user', 'users-permissions').delete(params);
   },
 

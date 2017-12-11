@@ -32,7 +32,7 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
             id={this.props.label}
             defaultMessage='{label}'
             values={{
-              label: this.props.label,
+              label: `${this.props.label} ${this.props.source !== 'content-manager' ? '⬖' : ''}`,
             }}
             className={styles.linkLabel}
           />

@@ -35,25 +35,14 @@ module.exports = {
   },
 
   find: async ctx => {
-    const { limit, skip = 0, sort, query, queryAttribute, source, page } = ctx.request.query;
-
-    // Find entries using `queries` system
-    const entries = await strapi.query(ctx.params.model, source).find({
-        limit,
-        skip,
-        sort,
-        query,
-        queryAttribute
-      });
-
-    ctx.body = entries;
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll(ctx.params, ctx.request.query);
   },
 
   count: async ctx => {
     const { source } = ctx.request.query;
 
     // Count using `queries` system
-    const count = await strapi.query(ctx.params.model, source).count();
+    const count = await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, source);
 
     ctx.body = {
       count: _.isNumber(count) ? count : _.toNumber(count)
@@ -64,9 +53,7 @@ module.exports = {
     const { source } = ctx.request.query;
 
     // Find an entry using `queries` system
-    const entry = await strapi.query(ctx.params.model, source).findOne({
-      id: ctx.params.id
-    });
+    const entry = await strapi.plugins['content-manager'].services['contentmanager'].fetch(ctx.params, source);
 
     // Entry not found
     if (!entry) {
@@ -81,12 +68,9 @@ module.exports = {
 
     try {
       // Create an entry using `queries` system
-      const entryCreated = await strapi.query(ctx.params.model, source).create({
-        values: ctx.request.body
-      });
-
-      ctx.body = entryCreated;
+      ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].add(ctx.params, ctx.request.body, source);
     } catch(error) {
+      console.log(error);
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },
@@ -95,14 +79,8 @@ module.exports = {
     const { source } = ctx.request.query;
 
     try {
-      // Add current model to the flow of updates.
-      const entry = strapi.query(ctx.params.model, source).update({
-        id: ctx.params.id,
-        values: ctx.request.body
-      });
-
       // Return the last one which is the current model.
-      ctx.body = entry;
+      ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].edit(ctx.params, ctx.request.body, source);
     } catch(error) {
       // TODO handle error update
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
@@ -110,34 +88,6 @@ module.exports = {
   },
 
   delete: async ctx => {
-    const { source } = ctx.request.query;
-    const params = ctx.params;
-
-    const response = await strapi.query(params.model, source).findOne({
-      id: params.id
-    });
-
-    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
-      const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
-
-      // Remove relationships.
-      if (association) {
-        acc[current] = _.isArray(response[current]) ? [] : null;
-      }
-
-      return acc;
-    }, {});
-
-    if (!_.isEmpty(params.values)) {
-      // Run update to remove all relationships.
-      await strapi.query(params.model, source).update(params);
-    }
-
-    // Delete an entry using `queries` system
-    const entryDeleted = await strapi.query(params.model, source).delete({
-      id: params.id
-    });
-
-    ctx.body = entryDeleted;
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].delete(ctx.params, ctx.request.query);
   },
 };

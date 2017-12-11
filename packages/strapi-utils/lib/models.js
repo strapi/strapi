@@ -243,7 +243,8 @@ module.exports = {
         via: association.via || undefined,
         nature: infos.nature,
         autoPopulate: _.get(association, 'autoPopulate', true),
-        dominant: details.dominant !== true
+        dominant: details.dominant !== true,
+        plugin: association.plugin || undefined,
       });
     } else if (association.hasOwnProperty('model')) {
       definition.associations.push({
@@ -253,7 +254,8 @@ module.exports = {
         via: association.via || undefined,
         nature: infos.nature,
         autoPopulate: _.get(association, 'autoPopulate', true),
-        dominant: details.dominant !== true
+        dominant: details.dominant !== true,
+        plugin: association.plugin || undefined,
       });
     }
   },

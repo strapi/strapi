@@ -20,14 +20,17 @@ import styles from './styles.scss';
 
 class EditFormRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    if (size(get(this.props.schema, [this.props.currentModelName, 'relations'])) === 0 && !this.props.isNull) {
+    const source = getQueryParameters(this.props.location.search, 'source');
+    const currentSchema = source !== 'content-manager' ? get(this.props.schema, ['plugins', source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
+
+    if (size(get(currentSchema, ['relations'])) === 0 && !this.props.isNull) {
       this.props.toggleNull();
     }
   }
 
   render() {
     const source = getQueryParameters(this.props.location.search, 'source');
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', source, this.props.currentModelName]);
+    const currentSchema = source !== 'content-manager' ? get(this.props.schema, ['plugins', source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
 
     const relations = map(currentSchema.relations, (relation, i) => {
 
@@ -43,6 +46,7 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
                 relation={relation}
                 schema={this.props.schema}
                 setRecordAttribute={this.props.setRecordAttribute}
+                location={this.props.location}
               />
             );
           }
@@ -57,6 +61,7 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
               relation={relation}
               schema={this.props.schema}
               setRecordAttribute={this.props.setRecordAttribute}
+              location={this.props.location}
             />
           );
         default:
