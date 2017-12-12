@@ -15,6 +15,7 @@ import { get, isUndefined, map } from 'lodash';
 
 // Design
 // import Input from 'components/Input';
+import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
 
@@ -22,6 +23,7 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
 import {
+  downloadPlugin,
   getPlugins,
   onChange,
 } from './actions';
@@ -33,6 +35,12 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class InstallPluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => (
+    {
+      downloadPlugin: this.props.downloadPlugin,
+    }
+  );
+
   componentDidMount() {
     // Don't fetch the available plugins if it has already been done
     if (!this.props.didFetchPlugins) {
@@ -43,6 +51,7 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   render() {
     return (
       <div>
+        <OverlayBlocker isOpen={this.props.blockApp} />
         <FormattedMessage id="app.components.InstallPluginPage.helmet">
           {message => (
             <Helmet>
@@ -86,13 +95,19 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   }
 }
 
+InstallPluginPage.childContextTypes = {
+  downloadPlugin: PropTypes.func.isRequired,
+};
+
 InstallPluginPage.contextTypes = {
   plugins: PropTypes.object.isRequired,
 };
 
 InstallPluginPage.propTypes = {
   availablePlugins: PropTypes.array.isRequired,
+  blockApp: PropTypes.bool.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
+  downloadPlugin: PropTypes.func.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   // onChange: PropTypes.func.isRequired,
@@ -104,6 +119,7 @@ const mapStateToProps = makeSelectInstallPluginPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      downloadPlugin,
       getPlugins,
       onChange,
     },

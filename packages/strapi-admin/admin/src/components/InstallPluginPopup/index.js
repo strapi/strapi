@@ -15,6 +15,11 @@ import StarsContainer from 'components/StarsContainer';
 import styles from './styles.scss';
 
 class InstallPluginPopup extends React.Component {
+  handleClick = () => {
+    this.props.history.push({ pathname: this.props.history.location.pathname });
+    this.context.downloadPlugin(this.props.plugin.id);
+  }
+
   toggle = () => {
     this.props.history.push({
       pathname: this.props.history.location.pathname,
@@ -76,7 +81,7 @@ class InstallPluginPopup extends React.Component {
                       <span style={{ fontWeight: '600' }}>+{this.props.plugin.downloads_nb}k&nbsp;</span><FormattedMessage id="app.components.InstallPluginPopup.downloads" />
                       */}
                     </div>
-                    <div className={styles.buttonWrapper}>
+                    <div className={styles.buttonWrapper} onClick={this.handleClick}>
                       <div>
                         <FormattedMessage id="app.components.InstallPluginPopup.downloads" />
                       </div>
@@ -118,6 +123,9 @@ class InstallPluginPopup extends React.Component {
   }
 }
 
+InstallPluginPopup.contextTypes = {
+  downloadPlugin: PropTypes.func.isRequired,
+};
 
 InstallPluginPopup.propTypes = {
   history: PropTypes.object.isRequired,

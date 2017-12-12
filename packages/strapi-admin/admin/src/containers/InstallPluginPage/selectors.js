@@ -19,7 +19,13 @@ const makeSelectInstallPluginPage = () => createSelector(
   (substate) => substate.toJS()
 );
 
+const makeSelectPluginToDownload = () => createSelector(
+  selectInstallPluginPageDomain(),
+  (substate) => substate.get('pluginToDownload'),
+);
+
 export default makeSelectInstallPluginPage;
 export {
   selectInstallPluginPageDomain,
+  makeSelectPluginToDownload,
 };

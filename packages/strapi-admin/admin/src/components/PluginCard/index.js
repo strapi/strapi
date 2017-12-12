@@ -120,6 +120,7 @@ class PluginCard extends React.Component {
         </div>
         <InstallPluginPopup
           history={this.props.history}
+          isAlreadyInstalled={this.props.isAlreadyInstalled}
           isOpen={!isEmpty(this.props.history.location.hash) && replace(this.props.history.location.hash.split('::')[0], '#', '') === this.props.plugin.id}
           plugin={this.props.plugin}
         />

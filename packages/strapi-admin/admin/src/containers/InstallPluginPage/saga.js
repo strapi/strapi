@@ -4,15 +4,38 @@ import {
   cancel,
   fork,
   put,
-  // select,
+  select,
   take,
   takeLatest,
 } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
-import { getPluginsSucceeded } from './actions';
-import { GET_PLUGINS } from './constants';
+import {
+  downloadPluginError,
+  downloadPluginSucceeded,
+  getPluginsSucceeded,
+} from './actions';
+import { DOWNLOAD_PLUGIN, GET_PLUGINS } from './constants';
+import { makeSelectPluginToDownload } from './selectors';
+
+export function* pluginDownload() {
+  try {
+    const pluginToDownload = yield select(makeSelectPluginToDownload());
+
+    console.log(pluginToDownload);
+
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+
+    yield put(downloadPluginSucceeded());
+  } catch(err) {
+    yield put(downloadPluginError());
+  }
+}
 
 export function* pluginsGet() {
   try {
@@ -38,6 +61,7 @@ export function* pluginsGet() {
 // Individual exports for testing
 export default function* defaultSaga() {
   const loadPluginsWatcher = yield fork(takeLatest, GET_PLUGINS, pluginsGet);
+  yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
 
   yield take(LOCATION_CHANGE);
 
