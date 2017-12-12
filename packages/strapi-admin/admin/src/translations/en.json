@@ -18,6 +18,8 @@
   "app.components.InstallPluginPopup.navLink.description": "Description",
   "app.components.InstallPluginPopup.navLink.screenshots": "Screenshots",
   "app.components.InstallPluginPopup.navLink.avis": "avis",
+  "app.components.InstallPluginPopup.navLink.faq": "faq",
+  "app.components.InstallPluginPopup.navLink.changelog": "changelog",
 
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",

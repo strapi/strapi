@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { map } from 'lodash';
+import cn from 'classnames';
 
 import styles from './styles.scss';
 
@@ -24,14 +25,22 @@ class InstallPluginPopup extends React.Component {
       content: 'app.components.InstallPluginPopup.navLink.description',
       name: 'description',
     },
-    // {
-    //   content: 'app.components.InstallPluginPopup.navLink.screenshots',
-    //   name: 'screenshots',
-    // },
-    // {
-    //   content: 'app.components.InstallPluginPopup.navLink.avis',
-    //   name: 'avis',
-    // },
+    {
+      content: 'app.components.InstallPluginPopup.navLink.screenshots',
+      name: 'screenshots',
+    },
+    {
+      content: 'app.components.InstallPluginPopup.navLink.avis',
+      name: 'avis',
+    },
+    {
+      content: 'app.components.InstallPluginPopup.navLink.faq',
+      name: 'faq',
+    },
+    {
+      content: 'app.components.InstallPluginPopup.navLink.changelog',
+      name: 'changelog',
+    },
   ];
 
   render() {
@@ -87,7 +96,16 @@ class InstallPluginPopup extends React.Component {
               const isActive = this.props.history.location.hash.split('::')[1] === link.name;
 
               return (
-                <div key={link.name} className={isActive ? styles.navLink : ''} onClick={() => this.props.history.push({ pathname: this.props.history.location.pathname, hash: `${this.props.plugin.id}::${link.name}` })} style={isActive ? { paddingTop: '5px'} : { paddingTop: '7px' }}>
+                <div
+                  key={link.name}
+                  className={cn(isActive ? styles.navLink : '', link.name !== 'description' ? styles.notAllowed : '')}
+                  onClick={() => {
+                    if (link.name === 'description') {
+                      this.props.history.push({ pathname: this.props.history.location.pathname, hash: `${this.props.plugin.id}::${link.name}` });
+                    }
+                  }}
+                  style={isActive ? { paddingTop: '5px'} : { paddingTop: '7px' }}
+                >
                   <FormattedMessage id={link.content} />
                 </div>
               );
