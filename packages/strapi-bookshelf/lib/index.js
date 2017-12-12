@@ -40,8 +40,6 @@ module.exports = function(strapi) {
      */
 
     initialize: cb => {
-      let globalName;
-
       // Initialize collections
       _.set(strapi, 'bookshelf.collections', {});
 
@@ -97,7 +95,7 @@ module.exports = function(strapi) {
               definition.globalId = _.upperFirst(_.camelCase(`${plugin}-${model}`));
             }
 
-            globalName = _.upperFirst(_.camelCase(definition.globalId));
+            definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
             _.defaults(definition, {
               primaryKey: 'id'
@@ -105,10 +103,7 @@ module.exports = function(strapi) {
 
             // Make sure the model has a table name.
             // If not, use the model name.
-            if (_.isEmpty(definition.collectionName)) {
-              definition.collectionName = model;
-            }
-
+            definition.collectionName = _.isEmpty(definition.collectionName) ? definition.globalName.toLowerCase() : definition.collectionName;
             // Add some informations about ORM & client connection
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
@@ -154,7 +149,7 @@ module.exports = function(strapi) {
             // Initialize the global variable with the
             // capitalized model name.
             if (!plugin) {
-              global[globalName] = {};
+              global[definition.globalName] = {};
             }
 
             // Call this callback function after we are done parsing
@@ -223,13 +218,13 @@ module.exports = function(strapi) {
                 );
 
                 if (!plugin) {
-                  global[globalName] = ORM.Model.extend(loadedModel);
-                  global[pluralize(globalName)] = ORM.Collection.extend({
-                    model: global[globalName]
+                  global[definition.globalName] = ORM.Model.extend(loadedModel);
+                  global[pluralize(definition.globalName)] = ORM.Collection.extend({
+                    model: global[definition.globalName]
                   });
 
                   // Expose ORM functions through the `target` object.
-                  target[model] = _.assign(global[globalName], target[model]);
+                  target[model] = _.assign(global[definition.globalName], target[model]);
                 } else {
                   target[model] = _.assign(ORM.Model.extend(loadedModel), target[model]);
                 }
@@ -261,7 +256,7 @@ module.exports = function(strapi) {
 
               // Build associations key
               utilsModels.defineAssociations(
-                globalName,
+                definition.globalName,
                 definition,
                 details,
                 name
@@ -418,15 +413,13 @@ module.exports = function(strapi) {
           });
         };
 
-        mountModels(models, strapi.models);
 
+        // Mount `./api` models.
+        mountModels(_.pickBy(strapi.models, { connection: connectionName }), strapi.models);
+
+        // Mount `./plugins` models.
         _.forEach(strapi.plugins, (plugin, name) => {
-          models = _.pickBy(strapi.plugins[name].models, { connection: connectionName })
-          if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
-            _.assign(models, _.pickBy(strapi.plugins[name].models, (model) => model.connection === undefined));
-          }
-
-          mountModels(models, plugin.models, name);
+          mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
         });
       });
     },

@@ -30,7 +30,7 @@
     },
     "post": {
       "model": "post",
-      "via": "authors"
+      "via": "author"
     }
   }
 }
