@@ -7,7 +7,12 @@
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   color: white;
   font-size: 13px;
+  font-style: normal;
   font-weight: 600;
+  cursor: pointer;
+  &:focus {
+    outline: 0;
+  }
   > div {
     text-transform: capitalize;
 
@@ -71,12 +76,12 @@
 }
 
 .modalHeader {
-  margin: 0 1.4rem;
+  margin: 0 1.4rem !important;
   padding: 1.4rem 0 0 0 !important;
   border-bottom: 0 !important;
   position: relative;
   > button {
-    margin-right: -1.5rem;
+    margin-right: -1rem !important;
     color: #C3C5C8;
     opacity: 1;
     font-size: 1.8rem;
@@ -140,6 +145,12 @@
 
 .navLink {
   border-top: 2px solid #1C5DE7;
+}
+
+.pluginDescription {
+  padding: 26px 30px;
+  font-size: 13px;
+  line-height: 18px;
 }
 
 .ratings {

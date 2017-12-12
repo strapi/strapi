@@ -24,14 +24,14 @@ class InstallPluginPopup extends React.Component {
       content: 'app.components.InstallPluginPopup.navLink.description',
       name: 'description',
     },
-    {
-      content: 'app.components.InstallPluginPopup.navLink.screenshots',
-      name: 'screenshots',
-    },
-    {
-      content: 'app.components.InstallPluginPopup.navLink.avis',
-      name: 'avis',
-    },
+    // {
+    //   content: 'app.components.InstallPluginPopup.navLink.screenshots',
+    //   name: 'screenshots',
+    // },
+    // {
+    //   content: 'app.components.InstallPluginPopup.navLink.avis',
+    //   name: 'avis',
+    // },
   ];
 
   render() {
@@ -87,16 +87,14 @@ class InstallPluginPopup extends React.Component {
               const isActive = this.props.history.location.hash.split('::')[1] === link.name;
 
               return (
-                <div
-                  key={link.name}
-                  className={isActive ? styles.navLink : ''}
-                  onClick={() => this.props.history.push({ pathname: this.props.history.location.pathname, hash: `${this.props.plugin.id}::${link.name}` })}
-                  style={isActive ? { paddingTop: '5px'} : { paddingTop: '7px' }}
-                >
+                <div key={link.name} className={isActive ? styles.navLink : ''} onClick={() => this.props.history.push({ pathname: this.props.history.location.pathname, hash: `${this.props.plugin.id}::${link.name}` })} style={isActive ? { paddingTop: '5px'} : { paddingTop: '7px' }}>
                   <FormattedMessage id={link.content} />
                 </div>
               );
             })}
+          </div>
+          <div className={styles.pluginDescription}>
+            {this.props.plugin.longDescription}
           </div>
         </ModalBody>
       </Modal>
