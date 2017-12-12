@@ -50,10 +50,14 @@ class PluginCard extends React.Component {
   }
 
   handleClick = () => {
-    this.props.history.push({
-      pathname: this.props.history.location.pathname,
-      hash: `${this.props.plugin.id}::description`,
-    });
+    if (this.props.plugin.id !== 'support-us') {
+      this.props.history.push({
+        pathname: this.props.history.location.pathname,
+        hash: `${this.props.plugin.id}::description`,
+      });
+    } else {
+      this.aTag.click();
+    }
   }
 
   shouldOpenModal = (props) => {
@@ -102,7 +106,15 @@ class PluginCard extends React.Component {
               <Button
                 className={cn(buttonClass, styles.button)}
                 label={buttonLabel}
+                onClick={this.handleClick}
               />
+              <a
+                href="mailto:hi@strapi.io?subject=I'd like to support Strapi"
+                style={{ display: 'none' }}
+                ref={(a) => { this.aTag = a; }}
+              >
+                &nbsp;
+              </a>
             </div>
           </div>
         </div>

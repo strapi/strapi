@@ -72,7 +72,9 @@ class InstallPluginPopup extends React.Component {
                   </div>
                   <div>
                     <div>
+                      {/*}
                       <span style={{ fontWeight: '600' }}>+{this.props.plugin.downloads_nb}k&nbsp;</span><FormattedMessage id="app.components.InstallPluginPopup.downloads" />
+                      */}
                     </div>
                     <div className={styles.buttonWrapper}>
                       <div>

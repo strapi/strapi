@@ -1,6 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import {
-  // call,
+  call,
   cancel,
   fork,
   put,
@@ -9,15 +9,14 @@ import {
   takeLatest,
 } from 'redux-saga/effects';
 
-// import request from 'utils/request';
-import fakeData from './fakeData.json';
+import request from 'utils/request';
 
 import { getPluginsSucceeded } from './actions';
 import { GET_PLUGINS } from './constants';
 
 export function* pluginsGet() {
   try {
-    const availablePlugins = fakeData.availablePlugins;
+    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', { method: 'GET' });
     const supportUs = {
       description: 'app.components.InstallPluginPage.plugin.support-us.description',
       id: 'support-us',
