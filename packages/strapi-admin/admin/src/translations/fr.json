@@ -2,6 +2,8 @@
   "app.components.ComingSoonPage.comingSoon": "Bientôt disponible",
   "app.components.ComingSoonPage.featuresNotAvailable": "Cette fonctionnalité est toujours en cours de développement.",
 
+  "app.components.DownloadInfo.download": "Téléchargement en cours...",
+  "app.components.DownloadInfo.text": "Cela peut prendre une minute. Merci de patienter.",
 
   "app.components.HomePage.welcome": "Bienvenue à bord!",
   "app.components.HomePage.description.part1": "Nous somme heureux de vous compter parmi nos utilisateurs",

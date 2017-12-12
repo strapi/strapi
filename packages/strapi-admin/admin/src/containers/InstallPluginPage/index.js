@@ -15,6 +15,7 @@ import { get, isUndefined, map } from 'lodash';
 
 // Design
 // import Input from 'components/Input';
+import DownloadInfo from 'components/DownloadInfo';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
@@ -51,7 +52,9 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   render() {
     return (
       <div>
-        <OverlayBlocker isOpen={this.props.blockApp} />
+        <OverlayBlocker isOpen={this.props.blockApp}>
+          <DownloadInfo />
+        </OverlayBlocker>
         <FormattedMessage id="app.components.InstallPluginPage.helmet">
           {message => (
             <Helmet>
