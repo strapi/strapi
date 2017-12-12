@@ -3,6 +3,7 @@
   justify-content: space-between;
   min-width: 136px;
   height: 30px;
+  margin-left: 20px;
   border-radius: 0.3rem;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
 
@@ -22,16 +23,16 @@
       flex-grow: 2;
     }
   }
-  > div:last-child {
-    width: 50px;
-    border-left: 1px solid #0774D9;
-  }
+  // > div:last-child {
+  //   width: 50px;
+  //   border-left: 1px solid #0774D9;
+  // }
 }
 
 .headerButtonContainer {
   display: flex;
   justify-content: space-between;
-  padding-top: 22px;
+  padding-top: 13px;
   line-height: 29px;
 
   > div {
@@ -47,6 +48,7 @@
   }
 
   > div:nth-child(2) {
+    display: flex;
     > span:nth-child(2) {
       font-style: normal;
     }
@@ -54,13 +56,14 @@
 }
 
 .headerDescription {
-  padding-top: 17px;
+  height: 48px;
+  padding-top: 13px;
   font-size: 12px;
 }
 
 .headerInfo {
   flex-grow: 1;
-  padding-top: 9px;
+  padding-top: 7px;
   padding-left: 30px;
 }
 
@@ -108,7 +111,7 @@
 }
 
 .modalBody {
-  padding: 15px 0px !important;
+  padding: 5px 0px !important;
 }
 
 .modalPosition {
@@ -157,13 +160,14 @@
   cursor: not-allowed !important;
 }
 .pluginDescription {
-  padding: 26px 30px;
+  padding: 24px 30px;
   font-size: 13px;
   line-height: 18px;
 }
 
 .ratings {
   display: flex;
+  line-height: 18px;
 
   > div:last-child {
     padding-top: 1px;

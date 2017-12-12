@@ -7,12 +7,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { isEmpty, map, replace, times } from 'lodash';
+import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 // Temporary picture
 import Button from 'components/Button';
 import InstallPluginPopup from 'components/InstallPluginPopup';
+import StarsContainer from 'components/StarsContainer';
 import styles from './styles.scss';
 
 class PluginCard extends React.Component {
@@ -60,9 +61,6 @@ class PluginCard extends React.Component {
   }
 
   render() {
-    const stars = Math.round(this.props.plugin.ratings);
-    const coloredStars = times(stars, String);
-    const emptyStars = times(5 - stars, String);
     const buttonClass = !this.props.isAlreadyInstalled || this.props.showSupportUsButton ? styles.primary : styles.secondary;
 
     let buttonLabel = this.props.isAlreadyInstalled ? 'app.components.PluginCard.Button.label.install' : 'app.components.PluginCard.Button.label.download';
@@ -94,14 +92,7 @@ class PluginCard extends React.Component {
           </div>
           <div className={styles.cardFooter}>
             <div className={styles.ratings}>
-              <div className={styles.starsContainer}>
-                <div>
-                  {map(coloredStars, star => <i key={star} className="fa fa-star" />)}
-                </div>
-                <div>
-                  {map(emptyStars, s => <i key={s} className="fa fa-star" />)}
-                </div>
-              </div>
+              <StarsContainer ratings={this.props.plugin.ratings} />
               <div>
                 <span style={{ fontWeight: '600', color: '#333740' }}>{this.props.plugin.ratings}</span>
                 <span style={{ fontWeight: '500', color: '#666666' }}>/5</span>
@@ -119,8 +110,6 @@ class PluginCard extends React.Component {
           history={this.props.history}
           isOpen={!isEmpty(this.props.history.location.hash) && replace(this.props.history.location.hash.split('::')[0], '#', '') === this.props.plugin.id}
           plugin={this.props.plugin}
-          coloredStars={coloredStars}
-          emptyStars={emptyStars}
         />
       </div>
     );

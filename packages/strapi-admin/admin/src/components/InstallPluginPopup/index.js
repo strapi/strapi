@@ -11,6 +11,7 @@ import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { map } from 'lodash';
 import cn from 'classnames';
 
+import StarsContainer from 'components/StarsContainer';
 import styles from './styles.scss';
 
 class InstallPluginPopup extends React.Component {
@@ -55,14 +56,7 @@ class InstallPluginPopup extends React.Component {
               <div className={styles.headerInfo}>
                 <div className={styles.name}>{this.props.plugin.name}</div>
                 <div className={styles.ratings}>
-                  <div className={styles.starsContainer}>
-                    <div>
-                      {map(this.props.coloredStars, star => <i key={star} className="fa fa-star" />)}
-                    </div>
-                    <div>
-                      {map(this.props.emptyStars, star => <i key={star} className="fa fa-star" />)}
-                    </div>
-                  </div>
+                  <StarsContainer ratings={this.props.plugin.ratings} />
                   <div>
                     <span style={{ fontWeight: '600', color: '#333740', fontSize: '12px'}}>{this.props.plugin.ratings}</span>
                     <span style={{ fontWeight: '500', color: '#666666', fontSize: '11px' }}>/5</span>
@@ -77,14 +71,16 @@ class InstallPluginPopup extends React.Component {
                     <FormattedMessage id={`app.components.PluginCard.compatible${this.props.plugin.id === 'support-us' ? 'Community' : ''}`} />
                   </div>
                   <div>
-                    <span style={{ fontWeight: '600' }}>+{this.props.plugin.downloads_nb}k&nbsp;</span><FormattedMessage id="app.components.InstallPluginPopup.downloads" />
-                  </div>
-                  <div>
+                    <div>
+                      <span style={{ fontWeight: '600' }}>+{this.props.plugin.downloads_nb}k&nbsp;</span><FormattedMessage id="app.components.InstallPluginPopup.downloads" />
+                    </div>
                     <div className={styles.buttonWrapper}>
                       <div>
                         <FormattedMessage id="app.components.InstallPluginPopup.downloads" />
                       </div>
+                      {/* Uncomment whebn prices are running}
                       <div>{this.props.plugin.price}&nbsp;€</div>
+                    */}
                     </div>
                   </div>
                 </div>
@@ -104,7 +100,7 @@ class InstallPluginPopup extends React.Component {
                       this.props.history.push({ pathname: this.props.history.location.pathname, hash: `${this.props.plugin.id}::${link.name}` });
                     }
                   }}
-                  style={isActive ? { paddingTop: '5px'} : { paddingTop: '7px' }}
+                  style={isActive ? { paddingTop: '4px'} : { paddingTop: '6px' }}
                 >
                   <FormattedMessage id={link.content} />
                 </div>
@@ -122,8 +118,6 @@ class InstallPluginPopup extends React.Component {
 
 
 InstallPluginPopup.propTypes = {
-  coloredStars: PropTypes.array.isRequired,
-  emptyStars: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   plugin: PropTypes.object.isRequired,
