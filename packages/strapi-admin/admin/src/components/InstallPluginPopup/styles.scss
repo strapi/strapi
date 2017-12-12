@@ -1,0 +1,156 @@
+.buttonWrapper {
+  display: flex;
+  justify-content: space-between;
+  min-width: 136px;
+  height: 30px;
+  border-radius: 0.3rem;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  > div {
+    text-transform: capitalize;
+
+    text-align: center;
+    &:first-child {
+      flex-grow: 2;
+    }
+  }
+  > div:last-child {
+    width: 50px;
+    border-left: 1px solid #0774D9;
+  }
+}
+
+.headerButtonContainer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 22px;
+  line-height: 29px;
+  > div {
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  > div:first-child {
+    > i {
+      margin-right: 10px;
+    }
+    color: #5A9E06;
+  }
+
+  > div:nth-child(2) {
+    > span:nth-child(2) {
+      font-style: normal;
+    }
+  }
+}
+
+.headerDescription {
+  padding-top: 17px;
+  font-size: 12px;
+}
+
+.headerInfo {
+  flex-grow: 1;
+  padding-top: 9px;
+  padding-left: 30px;
+}
+
+.headerWrapper {
+  display: flex;
+}
+
+.logo {
+  width: 144px;
+  height: 144px;
+  border: 1px solid #E8EEFC;
+  border-radius: 3px;
+  background-size: contain;
+  flex-shrink: 0;
+}
+
+.modalHeader {
+  margin: 0 1.4rem;
+  padding: 1.4rem 0 0 0 !important;
+  border-bottom: 0 !important;
+  position: relative;
+  > button {
+    margin-right: -1.5rem;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    z-index: 999;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0!important;
+    }
+    > span {
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+  }
+}
+
+.modalBody {
+  padding: 15px 30px;
+}
+
+.modalPosition {
+  > div {
+    border:none;
+    border-radius: 2px;
+    width: 74.5rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.name {
+  padding-bottom: 1px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.navContainer {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 -30px;
+  padding: 0 70px;
+  background-color: #FAFAFB;
+  > div {
+
+  }
+}
+
+.ratings {
+  display: flex;
+
+  > div:last-child {
+    padding-top: 1px;
+    font-style: italic;
+  }
+}
+
+.starsContainer {
+  display: flex;
+  > div {
+    color: #EED348;
+    > i {
+      margin-right: 2px;
+    }
+  }
+  > div:last-child {
+    color: #B3B5B9;
+  }
+}

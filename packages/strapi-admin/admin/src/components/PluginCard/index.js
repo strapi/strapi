@@ -7,11 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { isEmpty, map, times } from 'lodash';
+import { isEmpty, map, replace, times } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 // Temporary picture
 import Button from 'components/Button';
+import InstallPluginPopup from 'components/InstallPluginPopup';
 import styles from './styles.scss';
 
 class PluginCard extends React.Component {
@@ -30,7 +31,7 @@ class PluginCard extends React.Component {
   }
 
   componentWillUnmount() {
-    this.removeEventListener('resize', this.setBoostrapCol);
+    window.removeEventListener('resize', this.setBoostrapCol);
   }
 
   setBoostrapCol = () => {
@@ -45,6 +46,13 @@ class PluginCard extends React.Component {
     }
 
     this.setState({ boostrapCol });
+  }
+
+  handleClick = () => {
+    this.props.history.push({
+      pathname: this.props.history.location.pathname,
+      hash: `${this.props.plugin.id}::description`,
+    });
   }
 
   shouldOpenModal = (props) => {
@@ -64,7 +72,7 @@ class PluginCard extends React.Component {
     }
 
     return (
-      <div className={cn(this.state.boostrapCol, styles.pluginCard)}>
+      <div className={cn(this.state.boostrapCol, styles.pluginCard)} onClick={this.handleClick}>
         <div className={styles.wrapper}>
           <div className={styles.cardTitle}>
             <div><i className={`fa fa-${this.props.plugin.icon}`} /></div>
@@ -88,7 +96,7 @@ class PluginCard extends React.Component {
             <div className={styles.ratings}>
               <div className={styles.starsContainer}>
                 <div>
-                  {map(coloredStars, star => <i key={star} className=" fa fa-star" />)}
+                  {map(coloredStars, star => <i key={star} className="fa fa-star" />)}
                 </div>
                 <div>
                   {map(emptyStars, s => <i key={s} className="fa fa-star" />)}
@@ -107,6 +115,13 @@ class PluginCard extends React.Component {
             </div>
           </div>
         </div>
+        <InstallPluginPopup
+          history={this.props.history}
+          isOpen={!isEmpty(this.props.history.location.hash) && replace(this.props.history.location.hash.split('::')[0], '#', '') === this.props.plugin.id}
+          plugin={this.props.plugin}
+          coloredStars={coloredStars}
+          emptyStars={emptyStars}
+        />
       </div>
     );
   }
