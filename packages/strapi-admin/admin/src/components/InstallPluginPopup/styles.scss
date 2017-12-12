@@ -102,7 +102,7 @@
 }
 
 .modalBody {
-  padding: 15px 30px;
+  padding: 15px 0px !important;
 }
 
 .modalPosition {
@@ -125,12 +125,21 @@
 .navContainer {
   display: flex;
   justify-content: space-between;
-  margin: 0 -30px;
+  height: 36px;
+  margin-top: 40px;
   padding: 0 70px;
   background-color: #FAFAFB;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
   > div {
-
+    min-width: 153px;
+    text-align: center;
   }
+}
+
+.navLink {
+  border-top: 2px solid #1C5DE7;
 }
 
 .ratings {
@@ -153,4 +162,8 @@
   > div:last-child {
     color: #B3B5B9;
   }
+}
+
+.wrapper {
+  padding: 0 30px;
 }
