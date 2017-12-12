@@ -11,9 +11,9 @@ module.exports = {
         qb.orderBy(params.sort);
       }
 
-      qb.offset(params.skip);
+      qb.offset(_.toNumber(params.skip));
 
-      qb.limit(params.limit);
+      qb.limit(_.toNumber(params.limit));
     }).fetchAll({
       withRelated: this.associations.map(x => x.alias)
     });
