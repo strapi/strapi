@@ -16,9 +16,12 @@ const uuid = require('uuid/v4');
 module.exports = cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     try {
+      const jwtSecret = uuid();
       fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'jwt.json'), JSON.stringify({
-        jwtSecret: uuid()
+        jwtSecret
       }, null, 2), 'utf8');
+
+       _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
     } catch(err) {
       strapi.log.error(err);
     }
