@@ -516,7 +516,7 @@ module.exports = function(strapi) {
                     .then(response => {
                       const record = response ? response.toJSON() : response;
 
-                      if (record && _.isObject(record[details.via])) {
+                      if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
                         return this.manageRelations(model, {
                           id: record[details.via][models[details.model || details.collection].primaryKey] || record[details.via].id,
                           values: {

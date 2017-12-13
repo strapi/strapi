@@ -408,7 +408,7 @@ module.exports = function (strapi) {
                     .findOne({ id : recordId })
                     .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
                     .then(record => {
-                      if (record && _.isObject(record[details.via])) {
+                      if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
                         return this.manageRelations(details.model || details.collection, {
                           id: record[details.via][Model.primaryKey] || record[details.via].id,
                           values: {

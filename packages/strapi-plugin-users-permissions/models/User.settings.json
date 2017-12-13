@@ -28,8 +28,9 @@
     "role": {
       "type": "integer"
     },
-    "post": {
-      "model": "post"
+    "posts": {
+      "collection": "post",
+      "via": "author"
     }
   }
 }
