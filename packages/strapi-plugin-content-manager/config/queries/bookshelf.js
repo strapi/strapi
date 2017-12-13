@@ -34,10 +34,6 @@ module.exports = {
         withRelated: this.associations.map(x => x.alias)
       });
 
-    console.log("RECORD");
-    console.log(record ? record.toJSON() : record);
-    console.log("_______");
-    
     return record ? record.toJSON() : record;
   },
 
@@ -71,7 +67,7 @@ module.exports = {
   update: async function (params) {
     const virtualFields = [];
     const response = await module.exports.findOne.call(this, params);
-
+    
     // Only update fields which are on this document.
     const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
       const association = this.associations.filter(x => x.alias === current)[0];
@@ -84,12 +80,11 @@ module.exports = {
           case 'oneToOne':
             if (response[current] !== params.values[current]) {
               const value = _.isNull(params.values[current]) ? response[current] : params.values;
-
               const recordId = _.isNull(params.values[current]) ? value[this.primaryKey] || value.id || value._id : value[current];
 
               if (response[current] && _.isObject(response[current]) && response[current][this.primaryKey] !== value[current]) {
                 virtualFields.push(
-                  strapi.query(details.collection || details.model).update({
+                  strapi.query(details.collection || details.model, details.plugin).update({
                     id: response[current][this.primaryKey],
                     values: {
                       [details.via]: null
@@ -101,9 +96,9 @@ module.exports = {
 
               // Remove previous relationship asynchronously if it exists.
               virtualFields.push(
-                strapi.query(details.model || details.collection).findOne({ id : recordId })
+                strapi.query(details.model || details.collection, details.plugin).findOne({ id : recordId })
                   .then(record => {
-                    if (record && _.isObject(record[details.via])) {
+                    if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
                       return module.exports.update.call(this, {
                         id: record[details.via][this.primaryKey] || record[details.via].id,
                         values: {
@@ -119,7 +114,7 @@ module.exports = {
 
               // Update the record on the other side.
               // When params.values[current] is null this means that we are removing the relation.
-              virtualFields.push(strapi.query(details.model || details.collection).update({
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).update({
                 id: recordId,
                 values: {
                   [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
@@ -151,7 +146,7 @@ module.exports = {
               toAdd.forEach(value => {
                 value[details.via] = params.values[this.primaryKey] || params[this.primaryKey];
 
-                virtualFields.push(strapi.query(details.model || details.collection).addRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
@@ -161,7 +156,7 @@ module.exports = {
               toRemove.forEach(value => {
                 value[details.via] = null;
 
-                virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
