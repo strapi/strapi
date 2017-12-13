@@ -77,9 +77,10 @@ export function setForm(formType, email) {
   };
 }
 
-export function submit() {
+export function submit(context) {
   return {
     type: SUBMIT,
+    context,
   };
 }
 
