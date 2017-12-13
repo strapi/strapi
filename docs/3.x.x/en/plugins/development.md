@@ -166,7 +166,7 @@ module.exports = {
 
 #### Advanced usage
 
-Each function in the query file is bound with the ORM's model. It means that you can create generic query very easily. This feature is useful for CRUD such as we did in the [Content Manager plugin](https://github.com/strapi/strapi/tree/alpha.6/packages/strapi-plugin-content-manager/config/queries).
+Each function in the query file is bound with the ORM's model. It means that you can create generic query very easily. This feature is useful for CRUD such as we did in the [Content Manager plugin](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-content-manager/config/queries).
 
 Mongoose ORM generic queries:
 
