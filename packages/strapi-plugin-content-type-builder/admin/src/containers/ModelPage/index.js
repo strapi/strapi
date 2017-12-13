@@ -176,7 +176,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
-
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
 
@@ -187,6 +186,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       case 'float':
       case 'decimal':
         attributeType = 'number';
+        break;
+      case 'email':
+      case 'password':
+        attributeType = 'string';
         break;
       default:
         attributeType = attribute.params.type ? attribute.params.type : 'relation';

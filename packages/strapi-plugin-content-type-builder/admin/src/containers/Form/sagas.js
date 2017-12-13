@@ -75,10 +75,15 @@ export function* fetchConnections() {
 
 export function* fetchContentType(action) {
   try {
+    const requestUrl = `/content-type-builder/models/${action.contentTypeName.split('&source=')[0]}`;
+    const params = {};
+    const source = action.contentTypeName.split('&source=')[1];
 
-    const requestUrl = `/content-type-builder/models/${action.contentTypeName}`;
+    if (source) {
+      params.source = source;
+    }
 
-    const data = yield call(request, requestUrl, { method: 'GET' });
+    const data = yield call(request, requestUrl, { method: 'GET', params });
 
     yield put(contentTypeFetchSucceeded(data));
 

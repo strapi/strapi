@@ -9,6 +9,8 @@
   "attribute.date": "Date",
   "attribute.json": "JSON",
   "attribute.media": "Media",
+  "attribute.email": "Email",
+  "attribute.password": "Password",
   "attribute.relation": "Relation",
 
   "contentType.temporaryDisplay": "(Not saved)",

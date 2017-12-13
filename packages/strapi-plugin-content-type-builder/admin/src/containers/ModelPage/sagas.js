@@ -35,6 +35,7 @@ import { makeSelectModel } from './selectors';
 
 export function* getTableExistance() {
   try {
+    // TODO check table existance for plugin model
     const model = yield select(makeSelectModel());
     const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
     const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
@@ -49,9 +50,15 @@ export function* getTableExistance() {
 
 export function* fetchModel(action) {
   try {
-    const requestUrl = `/content-type-builder/models/${action.modelName}`;
+    const requestUrl = `/content-type-builder/models/${action.modelName.split('&source=')[0]}`;
+    const params = {};
+    const source = action.modelName.split('&source=')[1];
 
-    const data = yield call(request, requestUrl, { method: 'GET' });
+    if (source) {
+      params.source = source;
+    }
+
+    const data = yield call(request, requestUrl, { method: 'GET', params });
 
     yield put(modelFetchSucceeded(data));
 

@@ -13,13 +13,19 @@ module.exports = {
 
   getModel: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+    const { source } = ctx.request.query;
+
     let { model } = ctx.params;
 
     model = _.toLower(model);
 
-    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (!source && !_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
-    ctx.send({ model: Service.getModel(model) });
+    if (source && !_.get(strapi.plugins, [source, 'models', model])) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    }
+
+    ctx.send({ model: Service.getModel(model, source) });
   },
 
   getConnections: async ctx => {

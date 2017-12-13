@@ -35,10 +35,12 @@ module.exports = {
     return models.concat(pluginModels);
   },
 
-  getModel: name => {
+  getModel: (name, source) => {
     name = _.toLower(name);
 
-    const model = _.get(strapi.models, name);
+    const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
+    
+    // const model = _.get(strapi.models, name);
 
     const attributes = [];
     _.forEach(model.attributes, (params, name) => {
