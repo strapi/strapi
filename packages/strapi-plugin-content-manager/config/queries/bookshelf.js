@@ -67,7 +67,7 @@ module.exports = {
   update: async function (params) {
     const virtualFields = [];
     const response = await module.exports.findOne.call(this, params);
-    
+
     // Only update fields which are on this document.
     const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
       const association = this.associations.filter(x => x.alias === current)[0];
@@ -211,6 +211,7 @@ module.exports = {
     switch (association.nature) {
       case 'oneToOne':
       case 'oneToMany':
+      case 'manyToOne':
         return module.exports.update.call(this, params);
       case 'manyToMany':
         return this.forge({
@@ -233,6 +234,7 @@ module.exports = {
     switch (association.nature) {
       case 'oneToOne':
       case 'oneToMany':
+      case 'manyToOne':
         return module.exports.update.call(this, params);
       case 'manyToMany':
         return this.forge({
