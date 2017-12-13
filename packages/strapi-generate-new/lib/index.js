@@ -36,6 +36,9 @@ module.exports = {
     '.npmignore': {
       copy: 'npmignore'
     },
+    '.gitignore': {
+      copy: 'gitignore'
+    },
 
     // Copy Markdown files with some information.
     'README.md': {
