@@ -17,6 +17,14 @@ import styles from './styles.scss';
 class Plugin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { collapse: false };
 
+  componentDidMount() {
+    // Open the application's permissions section if there are APIs
+    if (this.props.name === 'application' && !isEmpty(get(this.props.plugin, 'controllers'))) {
+      this.props.changePluginSelected('application');
+      this.setState({ collapse: !this.state.collapse });
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.pluginSelected !== this.props.pluginSelected && nextProps.pluginSelected !== this.props.name) {
       this.context.resetShouldDisplayPoliciesHint();
