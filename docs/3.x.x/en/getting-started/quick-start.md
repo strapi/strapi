@@ -126,11 +126,11 @@ After creating [your first Content Type](#create-your-first-api), it would be gr
 Your API is now ready and [contains data](#manage-your-data). At this point, you'll probably want to use this data in mobile or desktop applications.
 In order to do so, you'll need to allow access to other users (identified as 'Guest').
 
-**1 -** Go to the [** Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu and click on the **Guest Role** item.
+**1 -** Go to the [**Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu and click on the **Guest Role** item.
 
 ![Auth & Permissions - Home](../assets/getting-started_manage_role_home.png)
 
-**2 -** Manage your APIs permissions in the **Permissions** section of the [** Edit Guest Role view**](http://localhost:1337/admin/plugins/users-permissions/roles/edit/1) by enabling or disabling specific actions.
+**2 -** Manage your APIs permissions in the **Permissions** section of the [**Edit Guest Role view**](http://localhost:1337/admin/plugins/users-permissions/roles/edit/1) by enabling or disabling specific actions.
 
 ![Auth & Permissions - Edit Guest](../assets/getting-started_allow_access.png)
 
