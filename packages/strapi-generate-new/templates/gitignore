@@ -102,10 +102,3 @@ node_modules
 
 testApp
 coverage
-
-
-############################
-# Front-end workflow
-############################
-
-bower_components
