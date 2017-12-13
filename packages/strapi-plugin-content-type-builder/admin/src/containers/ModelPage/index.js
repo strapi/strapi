@@ -97,7 +97,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         return acc.concat(models);
       }, []);
 
-      const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName).length === 0;
+      const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName.split('&')[0]).length === 0;
 
       if (shouldRedirect) {
         this.props.history.push('/404');
@@ -225,7 +225,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
-        <NavLink className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}`} activeClassName={linkStyles.linkActive}>
+        <NavLink className={linkStyles.link} to={`/plugins/content-type-builder/models/${props.link.name}${props.link.source ? `&source=${props.link.source}` : ''}`} activeClassName={linkStyles.linkActive}>
           <div>
             <i className={`fa fa-caret-square-o-right`} />
           </div>

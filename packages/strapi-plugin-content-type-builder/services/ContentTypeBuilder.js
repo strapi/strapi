@@ -18,7 +18,21 @@ module.exports = {
       });
     });
 
-    return models;
+    const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
+      _.forEach(strapi.plugins[current].models, (model, name) => {
+        acc.push({
+          icon: 'fa-diamond',
+          name: _.get(model, 'info.name', 'model.name.missing'),
+          description: _.get(model, 'info.description', 'model.description.missing'),
+          fields: _.keys(model.attributes).length,
+          source: current,
+        });
+      });
+
+      return acc;
+    }, []);
+
+    return models.concat(pluginModels);
   },
 
   getModel: name => {

@@ -31,6 +31,6 @@
     "posts": {
       "collection": "post",
       "via": "author"
-    }
+   }
   }
 }

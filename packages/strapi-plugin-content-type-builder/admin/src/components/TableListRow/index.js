@@ -35,7 +35,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   }
 
   handleGoTo = () => {
-    router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}`);
+    router.push(`/plugins/content-type-builder/models/${this.props.rowItem.name}${this.props.rowItem.source ? `&source=${this.props.rowItem.source}`: ''}`);
   }
 
   toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
