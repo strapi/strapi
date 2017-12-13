@@ -156,10 +156,6 @@ module.exports = function (strapi) {
 
             // Parse every registered model.
             _.forEach(models, (definition, model) => {
-              if (plugin) {
-                definition.globalId = _.upperFirst(_.camelCase(_.get(strapi.config.hook.settings.mongoose.collections, mongooseUtils.toCollectionName(model)) ? `${plugin}-${model}` : model));
-              }
-
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
               // Make sure the model has a connection.

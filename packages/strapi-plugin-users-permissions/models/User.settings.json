@@ -29,8 +29,7 @@
       "type": "integer"
     },
     "post": {
-      "model": "post",
-      "via": "author"
+      "model": "post"
     }
   }
 }

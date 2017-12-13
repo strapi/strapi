@@ -4,7 +4,7 @@
 const path = require('path');
 const glob = require('glob');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone, cloneDeep} = require('lodash');
+const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone, cloneDeep, camelCase} = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -112,7 +112,7 @@ module.exports.app = async function() {
     this.models = Object.keys(this.api || []).reduce((acc, key) => {
       for (let index in this.api[key].models) {
         if (!this.api[key].models[index].globalId) {
-          this.api[key].models[index].globalId = upperFirst(index);
+          this.api[key].models[index].globalId = upperFirst(camelCase(index));
         }
 
         if (!this.api[key].models[index].connection) {
@@ -155,8 +155,12 @@ module.exports.app = async function() {
         this.admin.models[key].identity = upperFirst(key);
       }
 
-      if (!this.admin.models[key].identity) {
-        this.admin.models[key].identity = this.config.currentEnvironment.database.defaultConnection;
+      if (!this.admin.models[key].globalId) {
+        this.admin.models[key].globalId = upperFirst(camelCase(`admin-${key}`));
+      }
+
+      if (!this.admin.models[key].connection) {
+        this.admin.models[key].connection = this.config.currentEnvironment.database.defaultConnection;
       }
 
       acc[key] = this.admin.models[key];
@@ -178,6 +182,12 @@ module.exports.app = async function() {
       this.plugins[key].models = Object.keys(this.plugins[key].models || []).reduce((sum, index) => {
         if (!this.plugins[key].models[index].connection) {
           this.plugins[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
+        }
+
+        if (!this.plugins[key].models[index].globalId) {
+          this.plugins[key].models[index].globalId = get(this.models[index], 'globalId') === upperFirst(camelCase(index)) ?
+            upperFirst(camelCase(`${key}-${index}`)):
+            upperFirst(camelCase(index));
         }
 
         sum[index] = this.plugins[key].models[index];

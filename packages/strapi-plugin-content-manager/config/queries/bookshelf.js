@@ -34,6 +34,10 @@ module.exports = {
         withRelated: this.associations.map(x => x.alias)
       });
 
+    console.log("RECORD");
+    console.log(record ? record.toJSON() : record);
+    console.log("_______");
+    
     return record ? record.toJSON() : record;
   },
 
