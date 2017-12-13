@@ -60,7 +60,7 @@ In order to use the admin panel and to consume your API you first need to regist
 
 If your using MongoDB for your database you don't have to create your table manually (it's already handled by Strapi) otherwise you'll have to create your user table first.
 
-To create your first user, start your server (`strapi start`) and go to : http://localhost:1337/admin/plugins/users-permissions/auth/register.
+To create your first user, start your server (`strapi start`) and go to : http://localhost:1337/admin.
 
 ![Register View](../assets/getting-started_register.png)
 
