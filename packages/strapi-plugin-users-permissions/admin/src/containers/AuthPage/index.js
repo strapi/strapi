@@ -85,7 +85,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     this.props.setErrors(formErrors);
 
     if (isEmpty(formErrors)) {
-      this.props.submit();
+      this.props.submit(this.context);
     }
   }
 
@@ -189,6 +189,10 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     );
   }
 }
+
+AuthPage.contextTypes = {
+  updatePlugin: PropTypes.func,
+};
 
 AuthPage.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,

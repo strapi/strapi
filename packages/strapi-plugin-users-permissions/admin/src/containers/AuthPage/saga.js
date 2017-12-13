@@ -7,7 +7,7 @@ import { makeSelectFormType, makeSelectModifiedData } from './selectors';
 import { submitError, submitSucceeded } from './actions';
 import { SUBMIT } from './constants';
 
-export function* submitForm() {
+export function* submitForm(action) {
   try {
     const formType = yield select(makeSelectFormType());
     const body = yield select(makeSelectModifiedData());
@@ -38,11 +38,15 @@ export function* submitForm() {
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }
 
+    if (formType === 'register') {
+      action.context.updatePlugin('users-permissions', 'hasAdminUser', true);
+    }
+
     yield put(submitSucceeded());
   } catch(error) {
     const formType = yield select(makeSelectFormType());
 
-    if (isArray(error.response.payload.message)) {
+    if (isArray(get(error, ['response', 'payload', 'message']))) {
 
       const errors = error.response.payload.message.reduce((acc, key) => {
         const err = key.messages.reduce((acc, key) => {
