@@ -79,24 +79,30 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Write new documentation~~.
 
 `strapi@alpha.7` *(expected release date: 24/11/2017)*:
-- [Admin] Define push area into the plugins.
-- [Admin] Harmonise sharing components between plugins.
-- [Admin] `List plugins` page.
-- [Admin] Use latest available version of Bootstrap.
-- [Plugin] Users & groups (with full authentication process).
-- Improve generated APIs (especially the relation part).
+- ~~[Admin] Define push area into the plugins~~.
+- ~~[Admin] Harmonise sharing components between plugins~~.
+- ~~[Admin] `List plugins` page~~.
+- ~~[Admin] Use latest available version of Bootstrap~~.
+- ~~[Plugin] Email~~.
+- ~~[Plugin] Users & groups (with full authentication process)~~.
+- ~~Improve generated APIs (especially the relation part)~~.
 
 `strapi@alpha.8` *(expected release date: 22/12/2017)*:
+- [Admin] Install plugins directly from the interface.
+- Ask database settings during the project creation.
+- Ping database before generating the project.
+- Allow associations between app's models and plugins' models.
+
+`strapi@alpha.9` *(expected release date: 12/01/2018)*:
+- [Plugin - Users & Permissions] Integrate providers authentication, email templates and advanced settings.
+
+`strapi@alpha.10` *(expected release date: 29/01/2018)*:
+- [Plugin] Analytics.
+
+`strapi@alpha.11` *(expected release date: 12/02/2018)*:
 - [Plugin] Upload.
-- [Plugin] Email.
-- [Plugin] GraphQL.
-- [Plugin] Content Manager v2
-  - Search (filters).
-  - WYSWYG.
-  - Required relation.
 - Re-design & improve the DX of the validations layer.
 
-`strapi@alpha.9` *(expected release date: 19/01/2018)*:
-- [Plugin] Be able to reinstall a plugin without loosing the user's configurations.
-- [Plugin] Settings Manager v2 (add/update configurations in each every environment).
-- HTTP/2.
+`strapi@alpha.12` *(expected release date: 02/03/2018)*:
+- [Plugin] Media Library.
+- [Plugin] GraphQL.

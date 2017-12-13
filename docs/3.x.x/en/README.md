@@ -12,10 +12,10 @@ The most advanced open-source Content Management Framework to build powerful API
 
 {% endcenter %}
 
-## v3@alpha.6 is available!
+## v3@alpha.7 is available!
 We've been working on a major update for Strapi during the past months, rewriting the core framework and the dashboard.
 
-This documentation is only related to Strapi v3@alpha.6 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
+This documentation is only related to Strapi v3@alpha.7 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
 
 **[Get Started](getting-started/installation.md)**<br />
 Learn how to install Strapi and start developing your API.
@@ -36,4 +36,4 @@ Understand how to install plugins and develop your owns.
 Learn about Strapi's API, the `strapi` object that is available in your backend.
 
 **[Migration guide](migration/migration-guide.md)**<br />
-Migrate from v1 to v3@alpha.6.
+Migrate from v1 to v3@alpha.7.
