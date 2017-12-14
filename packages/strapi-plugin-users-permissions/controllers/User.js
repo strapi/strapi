@@ -17,8 +17,11 @@ module.exports = {
    */
 
   find: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query)
-      .map(user => _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
+    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+    data.reduce((acc, user) => {
+      acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
+      return acc;
+    }, []);
 
     // Send 200 `ok`
     ctx.send(data);
