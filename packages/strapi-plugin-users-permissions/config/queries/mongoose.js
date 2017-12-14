@@ -16,6 +16,11 @@ module.exports = {
   },
 
   findOne: async function (params) {
+    if (!params[this.primaryKey] && params.id) {
+      params[this.primaryKey] = params.id;
+      delete params.id;
+    }
+
     return this
       .findOne(params)
       .populate(this.associations.map(x => x.alias).join(' '));
