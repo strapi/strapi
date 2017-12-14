@@ -1,17 +1,20 @@
 .button {
   height: 26px;
   min-width: 89px !important;
+  padding-top: 2px;
   padding-left: 15px;
   padding-right: 15px;
+  border-radius: 2px !important;
   font-size: 13px;
+  font-weight: 500 !important;
   cursor: pointer;
 }
 
 .cardDescription {
   height: 54px;
-  margin-top: 28px;
+  margin-top: 27px;
   margin-bottom: 9px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 
   > span:last-child {
@@ -55,10 +58,8 @@
 
 .cardScreenshot {
   height: 78px;
-  background-image: url('./screenshot.png');
-  > img {
-    width: 100%;
-  }
+  border-radius: 2px;
+  background-size: cover;
 }
 
 .cardTitle {
@@ -67,6 +68,7 @@
   font-weight: 700;
   text-transform: uppercase;
   line-height: 36px;
+  letter-spacing: 0.5px;
   > div:first-child {
     height: 36px;
     width: 70px;
@@ -98,9 +100,11 @@
 
 .ratings {
   display: flex;
+  padding-top: 1px;
 
   > div:last-child {
-    padding-top: 1px;
+    padding-top: 4px;
+    font-size: 12px;
     font-style: italic;
   }
 }

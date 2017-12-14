@@ -15,6 +15,7 @@ import Button from 'components/Button';
 import InstallPluginPopup from 'components/InstallPluginPopup';
 import StarsContainer from 'components/StarsContainer';
 import styles from './styles.scss';
+import Screenshot from './screenshot.png';
 
 class PluginCard extends React.Component {
   state = { isOpen: false, boostrapCol: 'col-lg-4' };
@@ -84,7 +85,7 @@ class PluginCard extends React.Component {
             <FormattedMessage id={this.props.plugin.description} />
             &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
           </div>
-          <div className={styles.cardScreenshot}>
+          <div className={styles.cardScreenshot} style={{ backgroundImage: `url(${Screenshot})` }}>
 
           </div>
           <div className={styles.cardPrice}>

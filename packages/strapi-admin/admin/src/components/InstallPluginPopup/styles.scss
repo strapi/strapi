@@ -36,7 +36,7 @@
   line-height: 29px;
 
   > div {
-    font-size: 12px;
+    font-size: 13px;
     font-style: italic;
   }
 
@@ -57,8 +57,8 @@
 
 .headerDescription {
   height: 48px;
-  padding-top: 13px;
-  font-size: 12px;
+  padding-top: 12px;
+  font-size: 13px;
 }
 
 .headerInfo {
@@ -136,7 +136,7 @@
   justify-content: space-between;
   height: 36px;
 
-  margin-top: 40px;
+  margin-top: 38px;
   padding: 0 30px;
 
   background-color: #FAFAFB;
@@ -147,6 +147,7 @@
   > div {
     flex-grow: 2;
     text-align: center;
+    line-height: 23px;
     cursor: pointer;
   }
 }
