@@ -19,6 +19,8 @@ module.exports = {
     if (!params[this.primaryKey] && params.id) {
       params[this.primaryKey] = params.id;
       delete params.id;
+    } else if (params.id) {
+      delete params.id;
     }
 
     return this
