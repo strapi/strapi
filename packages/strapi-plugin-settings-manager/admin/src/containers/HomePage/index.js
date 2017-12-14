@@ -346,9 +346,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   renderPopUpFormLanguage = (section) => (
     map(section.items, (item) => {
       const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
-
+      
       return (
-        <div className={`col-md-6`}>
+        <div className={`col-md-6`} key={item.name}>
           <div className={styles.modalLanguageLabel}>
             <FormattedMessage id={`settings-manager.${item.name}`} />
           </div>
