@@ -199,7 +199,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleSubmit = () => {
-    this.props.submit(this.context);
+    this.props.submit(this.context, this.props.match.params.modelName);
   }
 
   toggleModal = () => {

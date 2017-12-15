@@ -161,7 +161,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 
     const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
     const handleToggle = this.props.toggle;
-
+  
     return (
       <div className={styles.popUpRelations}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
