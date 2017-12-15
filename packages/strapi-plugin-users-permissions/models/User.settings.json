@@ -27,6 +27,10 @@
     },
     "role": {
       "type": "integer"
+    },
+    "posts": {
+      "collection": "post",
+      "via": "author"
     }
   }
 }
