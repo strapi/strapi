@@ -39,7 +39,7 @@ module.exports = {
     name = _.toLower(name);
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
-    
+
     // const model = _.get(strapi.models, name);
 
     const attributes = [];
@@ -265,94 +265,89 @@ module.exports = {
   },
 
   createRelations: (model, attributes) => {
-    model = _.toLower(model);
-
     const errors = [];
-    const apiPath = path.join(strapi.config.appPath, 'api');
+    const structure = {
+      models: strapi.models,
+      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
+        acc[current] = {
+          models: strapi.plugins[current].models
+        };
 
-    try {
-      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
+        return acc;
+      }, {})
+    };
 
-      _.forEach(apis, api => {
-        const modelsPath = path.join(apiPath, api, 'models');
+    // Method to update the model
+    const update = (models, plugin) => {
+      Object.keys(models).forEach(name => {
+        // TODO:
+        // - Retrieve right relation in plugin case.
+        const relationsToCreate = attributes.filter(attribute => {
+          if (!plugin) {
+            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.plugin', false) === false;
+          }
 
-        try {
-          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
+          return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.plugin', false) === true;
+        });
 
-          _.forEach(models, modelPath => {
-            if (_.endsWith(modelPath, '.settings.json')) {
-              const modelName = _.lowerCase(_.first(modelPath.split('.')));
+        if (!_.isEmpty(relationsToCreate)) {
+          // Retrieve where is located the model.
+          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
+            .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
 
-              const relationsToCreate = _.filter(attributes, attribute => {
-                return _.get(attribute, 'params.target') === modelName;
-              });
+          // Retrieve the filename of the model.
+          const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
+            .filter(x => x[0] !== '.')
+            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
 
-              if (!_.isEmpty(relationsToCreate)) {
-                const modelFilePath = path.join(modelsPath, modelPath);
+          const pathToModel = path.join(strapi.config.appPath, 'api', target, 'models', filename);
 
-                try {
-                  const modelJSON = require(modelFilePath);
+          const modelJSON = require(pathToModel);
 
-                  _.forEach(relationsToCreate, ({ name, params }) => {
-                    const attr = {
-                      columnName: params.targetColumnName,
-                    };
+          _.forEach(relationsToCreate, ({ name, params }) => {
+            const attr = {
+              columnName: params.targetColumnName,
+              plugin: params.pluginValue
+            };
 
-                    switch (params.nature) {
-                      case 'oneToOne':
-                      case 'oneToMany':
-                        attr.model = model;
-                        break;
-                      case 'manyToOne':
-                      case 'manyToMany':
-                        attr.collection = model;
-                        break;
-                      default:
-                    }
+            switch (params.nature) {
+              case 'oneToOne':
+              case 'oneToMany':
+                attr.model = model.toLowerCase();
+                break;
+              case 'manyToOne':
+              case 'manyToMany':
+                attr.collection = model.toLowerCase();
+                break;
+              default:
+            }
 
-                    attr.via = name;
+            attr.via = name;
 
-                    modelJSON.attributes[params.key] = attr;
+            modelJSON.attributes[params.key] = attr;
 
-                    try {
-                      fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
-                    } catch (e) {
-                      errors.push({
-                        id: 'request.error.model.write',
-                        params: {
-                          filePath: modelFilePath
-                        }
-                      });
-                    }
-                  });
-                } catch (e) {
-                  errors.push({
-                    id: 'request.error.model.read',
-                    params: {
-                      filePath: modelFilePath
-                    }
-                  });
+            try {
+              fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
+            } catch (e) {
+              errors.push({
+                id: 'request.error.model.write',
+                params: {
+                  filePath: pathToModel
                 }
-              }
-            }
-          });
-        } catch (e) {
-          errors.push({
-            id: 'request.error.folder.read',
-            params: {
-              folderPath: modelsPath
+              });
             }
           });
         }
       });
-    } catch (e) {
-      errors.push({
-        id: 'request.error.folder.read',
-        params: {
-          folderPath: apiPath
-        }
-      });
-    }
+    };
+
+    // Update `./api` models.
+    update(structure.models);
+
+    // Object.keys(structure.plugins).forEach(name => {
+    //   // Update `./plugins/${name}` models.
+    //   update(structure.plugins[name].models, name);
+    // });
 
     return errors;
   },
