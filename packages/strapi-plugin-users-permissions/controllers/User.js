@@ -76,7 +76,7 @@ module.exports = {
         delete ctx.request.body.password;
       }
 
-      if (_.get(ctx.request, 'body.role') && _.get(ctx.request, 'body.role').toString() === '0' && (!_.get(ctx.state, 'user.role') || (_.get(ctx.state, 'user.role') && _.get(ctx.state, 'user.role').toSting() !== '0'))) {
+      if (_.get(ctx.request, 'body.role', '').toString() === '0' && (!_.get(ctx.state, 'user.role') || _.get(ctx.state, 'user.role', '').toString() !== '0')) {
         delete ctx.request.body.role;
       }
 
