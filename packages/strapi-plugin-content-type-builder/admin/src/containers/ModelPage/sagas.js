@@ -1,6 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   capitalize,
+  cloneDeep,
   forEach,
   get,
   includes,
@@ -75,8 +76,8 @@ export function* submitChanges(action) {
     yield put(setButtonLoader());
 
     const modelName = get(storeData.getContentType(), 'name');
-
-    const body = yield select(makeSelectModel());
+    const data = yield select(makeSelectModel());
+    const body = cloneDeep(data);
 
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
@@ -89,10 +90,14 @@ export function* submitChanges(action) {
           delete body.attributes[index].params.dominant;
         }
 
-        if (includes(key, 'Value')) {
+        if (includes(key, 'Value') && key !== 'pluginValue') {
           // Remove and set needed keys for params
           set(body.attributes[index].params, replace(key, 'Value', ''), value);
           unset(body.attributes[index].params, key);
+        }
+
+        if (key === 'pluginValue' && value) {
+          set(body.attributes[index].params, 'plugin', true);
         }
 
         if (!value) {
@@ -101,6 +106,11 @@ export function* submitChanges(action) {
         }
       });
     });
+    const pluginModel = action.modelName.split('&source=')[1];
+
+    if (pluginModel) {
+      set(body, 'plugin', pluginModel);
+    }
 
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';

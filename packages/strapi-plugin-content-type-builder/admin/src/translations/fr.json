@@ -14,6 +14,9 @@
   "attribute.relation": "Relation",
 
   "contentType.temporaryDisplay": "(Non sauvegardé)",
+
+  "from": "De",
+
   "home.contentTypeBuilder.name": "Content Types",
   "home.contentTypeBuilder.description": "Créez, éditer vos modèles.",
   "home.emptyContentType.title": "Il n'y a pas de model disponible",
@@ -110,6 +113,8 @@
   "popUpForm.attributes.json.description": "Données au format JSON",
   "popUpForm.attributes.media.description": "Images, vidéos, PDFs et autres fichiers",
   "popUpForm.attributes.relation.description": "Pointe vers un autre Modèle",
+  "popUpForm.attributes.password.description": "Mot de passe utilisateur...",
+  "popUpForm.attributes.email.description": "Email utilisateurs",
 
   "popUpForm.attributes.string.name": "Chaîne de caractères",
   "popUpForm.attributes.text.name": "Text",
@@ -119,6 +124,8 @@
   "popUpForm.attributes.json.name": "JSON",
   "popUpForm.attributes.media.name": "Media",
   "popUpForm.attributes.relation.name": "Relation",
+  "popUpForm.attributes.email.name": "Email",
+  "popUpForm.attributes.password.name": "Mot de passe",
   "popUpForm.create": "Ajouter un Nouveau",
   "popUpForm.edit": "Modifer",
   "popUpForm.field": "Champ",

@@ -530,6 +530,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const selectOptions = includes(this.props.hash, 'attributenumber') ? get(this.props.form, ['items', '1', 'items']) : this.props.selectOptions;
 
     if (includes(popUpFormType, 'relation')) {
+      const contentType = this.props.modelName.split('&source=');
+      const contentTypeIndex = contentType.length === 2 ? { name: contentType[0], source: contentType[1] } : { name: contentType[0] };
+
       return (
         <PopUpRelations
           isOpen={this.state.showModal}
@@ -537,7 +540,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           renderCustomPopUpHeader={renderCustomPopUpHeader}
           popUpTitle={popUpTitle}
           routePath={`${this.props.routePath}/${this.props.hash}`}
-          contentType={get(dropDownItems, [findIndex(dropDownItems, ['name', this.props.modelName])])}
+          contentType={get(dropDownItems, [findIndex(dropDownItems, contentTypeIndex)])}
           form={this.props.form}
           showRelation={includes(this.props.hash, 'defineRelation')}
           onChange={this.handleChange}

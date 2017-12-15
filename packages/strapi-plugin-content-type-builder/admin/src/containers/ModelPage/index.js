@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, isEmpty, size, replace, startCase, findIndex } from 'lodash';
+import { get, has, includes, isEmpty, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -199,7 +199,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleSubmit = () => {
-    this.props.submit(this.context);
+    this.props.submit(this.context, this.props.match.params.modelName);
   }
 
   toggleModal = () => {
@@ -228,7 +228,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const linkName = props.link.source ?  `${props.link.name}&source=${props.link.source}` : props.link.name;
     const temporary = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName || isEmpty(temporary) && props.link.source ? styles.leftMenuSpan : '';
-    const pluginSource = isEmpty(temporary) && props.link.source ? <span>(Plugin: {props.link.source})</span> : '';
+    const pluginSource = isEmpty(temporary) && props.link.source ? <FormattedMessage id="content-type-builder.from">{(message) => <span style={{ marginRight: '10px' }}>({message}: {props.link.source})</span>}</FormattedMessage>: '';
 
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
@@ -290,7 +290,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         renderCustomLi={this.renderCustomLi}
         onButtonClick={this.handleClickAddAttribute}
       />;
-
+    const icoType = includes(this.props.match.params.modelName, '&source=') ? '' : 'pencil';
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">
@@ -306,7 +306,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <ContentHeader
                   name={this.props.modelPage.model.name}
                   description={contentHeaderDescription}
-                  icoType="pencil"
+                  icoType={icoType}
                   editIcon
                   editPath={`${redirectRoute}/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::contentType::baseSettings`}
                   addButtons={addButtons}

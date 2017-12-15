@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, startCase } from 'lodash';
 import pluralize from 'pluralize';
 
@@ -25,13 +26,22 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleClick = (e) => {
+    const value = e.target.id.split('.');
     const target = {
       type: 'string',
-      value: e.target.id,
+      value: value[0],
       name: 'params.target',
     };
 
     this.props.onChange({ target });
+
+    this.props.onChange({
+      target: {
+        type: 'string',
+        value: value[1] !== 'undefined' ? value[1] : '',
+        name: 'params.pluginValue',
+      },
+    });
   }
 
   toggle = () => this.setState({ showMenu: !this.state.showMenu });
@@ -43,13 +53,30 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         </DropdownToggle>
         <DropdownMenu className={styles.dropDownContent}>
           {map(this.props.dropDownItems, (value, key) => {
-            const divStyle = get(this.props.header, 'name') === value.name ? { color: '#323740', fontWeight: 'bold'} : { color: 'rgba(50,55,64, 0.75)'};
+            const id = value.source ? `${value.name}.${value.source}` : `${value.name}. `;
+            let divStyle;
+
+            if (get(this.props.header, 'name') === value.name && !isEmpty(get(this.props.header,'source')) && value.source) {
+              divStyle = { color: '#323740', fontWeight: 'bold'};
+            } else if (value.source === get(this.props.header, 'source') && value.name === get(this.props.header, 'name')) {
+              divStyle = { color: '#323740', fontWeight: 'bold'};
+            } else {
+              divStyle = { color: 'rgba(50,55,64,0.75)' };
+            }
+
             return (
               <div style={{ height: '3.6rem'}} key={key}>
-                <DropdownItem onClick={this.handleClick} id={value.name}>
-                  <div style={divStyle} id={value.name}>
-                    <i className={`fa ${value.icon}`} style={divStyle} />
-                    {value.name}
+                <DropdownItem onClick={this.handleClick} id={id}>
+                  <div style={divStyle} id={`${value.name}.${value.source}`}>
+                    <i className={`fa ${value.icon}`} style={divStyle} id={id} />
+                    {value.name}&nbsp;
+                    {value.source ? (
+                      <FormattedMessage id="content-type-builder.from">
+                        {(message) => (
+                          <span style={{ fontStyle: 'italic' }} id={id}>({message}: {value.source})</span>
+                        )}
+                      </FormattedMessage>
+                    ) : ''}
                   </div>
                 </DropdownItem>
               </div>
@@ -100,7 +127,12 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
       <div className={styles.relationBox}>
         <div className={styles.headerContainer}>
           <i className={`fa ${get(this.props.header, 'icon')}`} />
-          {startCase(get(this.props.header, 'name'))}
+          {startCase(get(this.props.header, 'name'))}&nbsp;
+          <span style={{ fontStyle: 'italic', fontWeight: '500' }}>
+            {get(this.props.header, 'source') ? (
+              `(${get(this.props.header, 'source')})`
+            ): ''}
+          </span>
           {dropDown}
         </div>
         <div className={styles.inputContainer}>
