@@ -14,9 +14,11 @@ import IcoContainer from 'components/IcoContainer';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
+import IcoEmail from '../../assets/images/icon_email.png';
 import IcoImage from '../../assets/images/icon_image.png';
 import IcoNumber from '../../assets/images/icon_number.png';
 import IcoJson from '../../assets/images/icon_json.png';
+import IcoPassword from '../../assets/images/icon_password.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
@@ -38,9 +40,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'integer': IcoNumber,
       'float': IcoNumber,
       'decimal': IcoNumber,
-      // TODO
-      'email': IcoString,
-      'password': IcoString,
+      'email': IcoEmail,
+      'password': IcoPassword,
     };
     this.state = {
       showWarning: false,

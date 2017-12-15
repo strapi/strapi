@@ -84,6 +84,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
   render() {
     const navContainer = this.props.noNav ? '' : this.renderNavContainer();
+    const modalBodyStyle = this.props.renderModalBody ? { paddingTop: '2.3rem' } : {};
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
       : map(this.props.form.items, (item, key ) => this.renderInput(item, key));
 
@@ -108,7 +109,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             </div>
             {navContainer}
           </div>
-          <ModalBody className={styles.modalBody}>
+          <ModalBody className={styles.modalBody} style={modalBodyStyle}>
             <form onSubmit={this.props.onSubmit}>
               <div className="container-fluid">
                 <div className={`row ${this.props.renderModalBody ? 'justify-content-center' : ''}`}>
