@@ -111,42 +111,48 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
     </ModalBody>
   )
 
-  renderModalBodyRelations = () => (
-    <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
-      <RelationBox
-        tabIndex="1"
-        relationType={get(this.props.values, ['params', 'nature'])}
-        contentTypeTargetPlaceholder={get(this.props.values, ['params', 'target'])}
-        isFirstContentType
-        header={this.props.contentType}
-        input={get(this.props.form, ['items', '0'])}
-        value={get(this.props.values, 'name')}
-        onSubmit={this.props.onSubmit}
-        onChange={this.props.onChange}
-        didCheckErrors={this.props.didCheckErrors}
-        errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
-      />
-      <RelationNaturePicker
-        selectedIco={get(this.props.values, ['params', 'nature'])}
-        onChange={this.props.onChange}
-        contentTypeName={get(this.props.contentType, 'name')}
-        contentTypeTarget={get(this.props.values, ['params', 'target'])}
-      />
-      <RelationBox
-        tabIndex="2"
-        contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
-        relationType={get(this.props.values, ['params', 'nature'])}
-        onSubmit={this.props.onSubmit}
-        header={get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])])}
-        input={get(this.props.form, ['items', '1'])}
-        value={get(this.props.values, ['params', 'key'])}
-        onChange={this.props.onChange}
-        didCheckErrors={this.props.didCheckErrors}
-        errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : []}
-        dropDownItems={this.props.dropDownItems}
-      />
-    </ModalBody>
-  )
+  renderModalBodyRelations = () => {
+    const header = get(this.props.values, ['params', 'pluginValue']) ?
+      get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, {'name': get(this.props.values, ['params', 'target']), source: get(this.props.values, ['params', 'pluginValue']) })])
+      : get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])]);
+
+    return (
+      <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
+        <RelationBox
+          tabIndex="1"
+          relationType={get(this.props.values, ['params', 'nature'])}
+          contentTypeTargetPlaceholder={get(this.props.values, ['params', 'target'])}
+          isFirstContentType
+          header={this.props.contentType}
+          input={get(this.props.form, ['items', '0'])}
+          value={get(this.props.values, 'name')}
+          onSubmit={this.props.onSubmit}
+          onChange={this.props.onChange}
+          didCheckErrors={this.props.didCheckErrors}
+          errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
+        />
+        <RelationNaturePicker
+          selectedIco={get(this.props.values, ['params', 'nature'])}
+          onChange={this.props.onChange}
+          contentTypeName={get(this.props.contentType, 'name')}
+          contentTypeTarget={get(this.props.values, ['params', 'target'])}
+        />
+        <RelationBox
+          tabIndex="2"
+          contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
+          relationType={get(this.props.values, ['params', 'nature'])}
+          onSubmit={this.props.onSubmit}
+          header={header}
+          input={get(this.props.form, ['items', '1'])}
+          value={get(this.props.values, ['params', 'key'])}
+          onChange={this.props.onChange}
+          didCheckErrors={this.props.didCheckErrors}
+          errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : []}
+          dropDownItems={this.props.dropDownItems}
+        />
+      </ModalBody>
+    );
+  }
 
   render() {
     const loader = this.props.showLoader ?

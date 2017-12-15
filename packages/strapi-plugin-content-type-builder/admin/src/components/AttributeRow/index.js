@@ -71,12 +71,17 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
         <div>
           <FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" />
           &nbsp;
-          <span style={{ fontStyle: 'italic' }}>
-            {capitalize(this.props.row.params.target)}&nbsp;
-            {this.props.row.params.pluginValue ? (
-              `(Plugin: ${this.props.row.params.pluginValue})`
-            ) : ''}
-          </span>
+          <FormattedMessage id="content-type-builder.from">
+            {(message) => (
+              <span style={{ fontStyle: 'italic' }}>
+                {capitalize(this.props.row.params.target)}&nbsp;
+                {this.props.row.params.pluginValue ? (
+                  `(${message}: ${this.props.row.params.pluginValue})`
+                ) : ''}
+              </span>
+
+            )}
+          </FormattedMessage>
         </div>
       );
 

@@ -43,7 +43,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
   handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   render() {
-    const pluginSource = this.props.rowItem.source ? <span style={{ fontStyle: 'italic' }}>(Plugin: {this.props.rowItem.source})</span> : '';
+    const pluginSource = this.props.rowItem.source ? <FormattedMessage id="content-type-builder.from">{(message) =><span style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}>({message}: {this.props.rowItem.source})</span>}</FormattedMessage> : '';
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const description = isEmpty(this.props.rowItem.description) ? '-' :  this.props.rowItem.description;
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';

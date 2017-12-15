@@ -14,6 +14,7 @@
   "attribute.relation": "Relation",
 
   "contentType.temporaryDisplay": "(Not saved)",
+  "from": "from",
   "home.contentTypeBuilder.name": "Content Types",
   "home.contentTypeBuilder.description": "Create, update your own content types.",
   "home.emptyContentType.title": "There are no Content Types Available",

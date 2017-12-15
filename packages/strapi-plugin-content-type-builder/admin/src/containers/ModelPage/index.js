@@ -228,7 +228,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const linkName = props.link.source ?  `${props.link.name}&source=${props.link.source}` : props.link.name;
     const temporary = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName || isEmpty(temporary) && props.link.source ? styles.leftMenuSpan : '';
-    const pluginSource = isEmpty(temporary) && props.link.source ? <span>(Plugin: {props.link.source})</span> : '';
+    const pluginSource = isEmpty(temporary) && props.link.source ? <FormattedMessage id="content-type-builder.from">{(message) => <span style={{ marginRight: '10px' }}>({message}: {props.link.source})</span>}</FormattedMessage>: '';
 
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
