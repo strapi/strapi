@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get, has, isEmpty, size, replace, startCase, findIndex } from 'lodash';
+import { get, has, includes, isEmpty, size, replace, startCase, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -290,7 +290,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         renderCustomLi={this.renderCustomLi}
         onButtonClick={this.handleClickAddAttribute}
       />;
-
+    const icoType = includes(this.props.match.params.modelName, '&source=') ? '' : 'pencil';
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">
@@ -306,7 +306,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <ContentHeader
                   name={this.props.modelPage.model.name}
                   description={contentHeaderDescription}
-                  icoType="pencil"
+                  icoType={icoType}
                   editIcon
                   editPath={`${redirectRoute}/${this.props.match.params.modelName}#edit${this.props.match.params.modelName}::contentType::baseSettings`}
                   addButtons={addButtons}

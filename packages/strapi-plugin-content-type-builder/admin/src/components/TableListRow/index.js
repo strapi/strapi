@@ -47,7 +47,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     const temporary = this.props.rowItem.isTemporary ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
     const description = isEmpty(this.props.rowItem.description) ? '-' :  this.props.rowItem.description;
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
-    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: this.handleShowModalWarning }];
+    const icons = this.props.rowItem.source ? [] : [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: this.handleShowModalWarning }];
 
     return (
       <ListRow onClick={this.handleGoTo}>
