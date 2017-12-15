@@ -221,10 +221,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderCustomLi = (row, key) => <AttributeRow key={key} row={row} onEditAttribute={this.handleEditAttribute} onDelete={this.handleDelete} />
 
   renderCustomLink = (props, linkStyles) => {
-    if (props.link.name === 'button.contentType.add') return this.renderAddLink(props, linkStyles);
+    if (props.link.name === 'button.contentType.add') {
+      return this.renderAddLink(props, linkStyles);
+    }
 
-    const temporary = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
-    const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && props.link.name === this.props.match.params.modelName ? styles.leftMenuSpan : '';
+    const linkName = props.link.source ?  `${props.link.name}&source=${props.link.source}` : props.link.name;
+    const temporary = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName ? <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" /> : '';
+    const spanStyle = props.link.isTemporary || this.props.modelPage.showButtons && linkName === this.props.match.params.modelName || isEmpty(temporary) && props.link.source ? styles.leftMenuSpan : '';
+    const pluginSource = isEmpty(temporary) && props.link.source ? <span>(Plugin: {props.link.source})</span> : '';
 
     return (
       <li className={linkStyles.pluginLeftMenuLink}>
@@ -235,7 +239,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           <div className={styles.contentContainer}>
 
             <span className={spanStyle}>{startCase(props.link.name)}</span>
-            <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>{temporary}</span>
+            <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>{temporary}{pluginSource}</span>
           </div>
         </NavLink>
       </li>
