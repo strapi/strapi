@@ -6,6 +6,7 @@
 
 import { fromJS, List, Map } from 'immutable';
 import {
+  HIDE_LOGIN_ERRORS_INPUT,
   ON_CHANGE_INPUT,
   SET_ERRORS,
   SET_FORM,
@@ -17,12 +18,15 @@ const initialState = fromJS({
   didCheckErrors: false,
   formErrors: List([]),
   formType: 'login',
+  noErrorsDescription: false,
   modifiedData: Map({}),
   submitSuccess: false,
 });
 
 function authPageReducer(state = initialState, action) {
   switch (action.type) {
+    case HIDE_LOGIN_ERRORS_INPUT:
+      return state.set('noErrorsDescription', action.value);
     case ON_CHANGE_INPUT:
       return state
         .updateIn(['modifiedData', action.key], () => action.value);
@@ -34,11 +38,14 @@ function authPageReducer(state = initialState, action) {
     case SET_FORM:
       return state
         .set('formErrors', List([]))
+        .set('noErrorsDescription', false)
         .set('formType', action.formType)
         .set('submitSuccess', false)
         .set('modifiedData', Map(action.data));
     case SUBMIT_SUCCEEDED:
-      return state.set('submitSuccess', true);
+      return state
+        .set('noErrorsDescription', false)
+        .set('submitSuccess', true);
     default:
       return state;
   }

@@ -4,7 +4,7 @@ import auth from 'utils/auth';
 import request from 'utils/request';
 
 import { makeSelectFormType, makeSelectModifiedData } from './selectors';
-import { submitError, submitSucceeded } from './actions';
+import { hideLoginErrorsInput, submitError, submitSucceeded } from './actions';
 import { SUBMIT } from './constants';
 
 export function* submitForm(action) {
@@ -67,7 +67,8 @@ export function* submitForm(action) {
           formErrors = [{ name: 'email', errors }];
           break;
         case 'login':
-          formErrors = [{ name: 'identifier', errors }];
+          formErrors = [{ name: 'identifier', errors }, { name: 'password', errors }];
+          yield put(hideLoginErrorsInput(true));
           break;
         case 'reset-password':
           formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
