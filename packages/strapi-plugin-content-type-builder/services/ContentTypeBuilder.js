@@ -21,7 +21,7 @@ module.exports = {
     const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
       _.forEach(strapi.plugins[current].models, (model, name) => {
         acc.push({
-          icon: 'fa-diamond',
+          icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
           description: _.get(model, 'info.description', 'model.description.missing'),
           fields: _.keys(model.attributes).length,
@@ -39,7 +39,7 @@ module.exports = {
     name = _.toLower(name);
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
-    
+
     // const model = _.get(strapi.models, name);
 
     const attributes = [];
