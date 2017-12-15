@@ -50,11 +50,7 @@ module.exports = {
 
     await Service.generateAPI(name, description, connection, collectionName, []);
 
-    const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
-
-    if (!_.isEmpty(modelFilePathErrors)) {
-      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-    }
+    const modelFilePath = Service.getModelPath(name);
 
     try {
       const modelJSON = require(modelFilePath);
@@ -89,7 +85,7 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
+    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -103,11 +99,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
-    let [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
-
-    if (!_.isEmpty(modelFilePathErrors)) {
-      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-    }
+    let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
@@ -145,11 +137,7 @@ module.exports = {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
         }
 
-        [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
-
-        if (!_.isEmpty(modelFilePathErrors)) {
-          return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-        }
+        modelFilePath = Service.getModelPath(name, plugin);
       }
 
       try {

@@ -104,45 +104,19 @@ module.exports = {
     });
   },
 
-  getModelPath: model => {
-    model = _.toLower(model);
+  getModelPath: (model, plugin) => {
+    // Retrieve where is located the model.
+    const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
+      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), model.toLowerCase()))[0];
 
-    let searchFilePath;
-    const errors = [];
-    const searchFileName = `${model}.settings.json`;
-    const apiPath = path.join(strapi.config.appPath, 'api');
+    // Retrieve the filename of the model.
+    const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
+      .filter(x => x[0] !== '.')
+      .filter(x => x.split('.settings.json')[0].toLowerCase() === model.toLowerCase())[0];
 
-    try {
-      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
-
-      _.forEach(apis, api => {
-        const modelsPath = path.join(apiPath, api, 'models');
-
-        try {
-          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
-
-          const modelIndex = _.indexOf(_.map(models, model => _.toLower(model)), searchFileName);
-
-          if (modelIndex !== -1) searchFilePath = `${modelsPath}/${models[modelIndex]}`;
-        } catch (e) {
-          errors.push({
-            id: 'request.error.folder.read',
-            params: {
-              folderPath: modelsPath
-            }
-          });
-        }
-      });
-    } catch (e) {
-      errors.push({
-        id: 'request.error.folder.read',
-        params: {
-          folderPath: apiPath
-        }
-      });
-    }
-
-    return [searchFilePath, errors];
+    return plugin ?
+      path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
+      path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
   },
 
   formatAttributes: attributes => {
