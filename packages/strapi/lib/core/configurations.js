@@ -185,7 +185,9 @@ module.exports.app = async function() {
         }
 
         if (!this.plugins[key].models[index].globalId) {
-          this.plugins[key].models[index].globalId = upperFirst(camelCase(`${key}-${index}`));
+          this.plugins[key].models[index].globalId = this.models[index] ?
+            upperFirst(camelCase(`${key}-${index}`)):
+            upperFirst(camelCase(`${index}`));
         }
 
         sum[index] = this.plugins[key].models[index];

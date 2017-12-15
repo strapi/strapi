@@ -192,74 +192,64 @@ module.exports = {
   },
 
   clearRelations: model => {
-    model = _.toLower(model);
-
     const errors = [];
-    const apiPath = path.join(strapi.config.appPath, 'api');
+    const structure = {
+      models: strapi.models,
+      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
+        acc[current] = {
+          models: strapi.plugins[current].models
+        };
 
-    try {
-      const apis = fs.readdirSync(apiPath).filter(x => x[0] !== '.');
+        return acc;
+      }, {})
+    };
 
-      _.forEach(apis, api => {
-        const modelsPath = path.join(apiPath, api, 'models');
+    // Method to delete the association of the models.
+    const deleteAssociations = (models, plugin) => {
+      Object.keys(models).forEach(name => {
+        const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => association[association.type] === model);
 
-        try {
-          const models = fs.readdirSync(modelsPath).filter(x => x[0] !== '.');
+        if (!_.isEmpty(relationsToDelete)) {
+          // Retrieve where is located the model.
+          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
+            .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
 
-          _.forEach(models, modelPath => {
-            if (_.endsWith(modelPath, '.settings.json')) {
-              const modelObject = strapi.models[_.lowerCase(_.first(modelPath.split('.')))];
+          // Retrieve the filename of the model.
+          const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
+            .filter(x => x[0] !== '.')
+            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
 
-              const relationsToDelete = _.filter(_.get(modelObject, 'associations', []), association => {
-                return association[association.type] === model;
-              });
+          // Path to access to the model.
+          const pathToModel = path.join(strapi.config.appPath, 'api', target, 'models', filename);
 
-              const modelFilePath = path.join(modelsPath, modelPath);
+          // Require the model.
+          const modelJSON = require(pathToModel);
 
-              try {
-                const modelJSON = require(modelFilePath);
+          _.forEach(relationsToDelete, relation => {
+            modelJSON.attributes[relation.alias] = undefined;
+          });
 
-                _.forEach(relationsToDelete, relation => {
-                  modelJSON.attributes[relation.alias] = undefined;
-                });
-
-                try {
-                  fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
-                } catch (e) {
-                  errors.push({
-                    id: 'request.error.model.write',
-                    params: {
-                      filePath: modelFilePath
-                    }
-                  });
-                }
-              } catch (e) {
-                errors.push({
-                  id: 'request.error.model.read',
-                  params: {
-                    filePath: modelFilePath
-                  }
-                });
+          try {
+            fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
+          } catch (e) {
+            errors.push({
+              id: 'request.error.model.write',
+              params: {
+                filePath: pathToModel
               }
-            }
-          });
-        } catch (e) {
-          errors.push({
-            id: 'request.error.folder.read',
-            params: {
-              folderPath: modelsPath
-            }
-          });
+            });
+          }
         }
       });
-    } catch (e) {
-      errors.push({
-        id: 'request.error.folder.read',
-        params: {
-          folderPath: apiPath
-        }
-      });
-    }
+    };
+
+    // Update `./api` models.
+    deleteAssociations(structure.models);
+
+    // Object.keys(structure.plugins).forEach(name => {
+    //   // Update `./plugins/${name}` models.
+    //   deleteAssociations(structure.plugins[name].models, name);
+    // });
 
     return errors;
   },
@@ -284,10 +274,10 @@ module.exports = {
         // - Retrieve right relation in plugin case.
         const relationsToCreate = attributes.filter(attribute => {
           if (!plugin) {
-            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.plugin', false) === false;
+            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue', false) === false;
           }
 
-          return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.plugin', false) === true;
+          return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue', false) !== false;
         });
 
         if (!_.isEmpty(relationsToCreate)) {

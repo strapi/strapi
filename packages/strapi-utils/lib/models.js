@@ -73,138 +73,143 @@ module.exports = {
    */
 
   getNature: (association, key, models, currentModelName) => {
-    const types = {
-      current: '',
-      other: ''
-    };
+    try {
+      const types = {
+        current: '',
+        other: ''
+      };
 
-    if (_.isUndefined(models)) {
-      models = association.plugin ? strapi.plugins[association.plugin].models : strapi.models;
-    }
-
-    if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
-      const relatedAttribute = models[association.collection].attributes[association.via];
-
-      types.current = 'collection';
-
-      if (relatedAttribute.hasOwnProperty('collection') && relatedAttribute.hasOwnProperty('via')) {
-        types.other = 'collection';
-      } else if (relatedAttribute.hasOwnProperty('collection') && !relatedAttribute.hasOwnProperty('via')) {
-        types.other = 'collectionD';
-      } else if (relatedAttribute.hasOwnProperty('model')) {
-        types.other = 'model';
+      if (_.isUndefined(models)) {
+        models = association.plugin ? strapi.plugins[association.plugin].models : strapi.models;
       }
-    } else if (association.hasOwnProperty('via') && association.hasOwnProperty('model')) {
-      types.current = 'modelD';
 
-      // We have to find if they are a model linked to this key
-      _.forIn(_.omit(models, currentModelName || ''), model => {
-        _.forIn(model.attributes, attribute => {
-          if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection')) {
-            types.other = 'collection';
+      if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
+        const relatedAttribute = models[association.collection].attributes[association.via];
 
-            // Break loop
-            return false;
-          } else if (attribute.hasOwnProperty('model')) {
-            types.other = 'model';
+        types.current = 'collection';
 
-            // Break loop
-            return false;
-          }
-        });
-      });
-    } else if (association.hasOwnProperty('model')) {
-      types.current = 'model';
+        if (relatedAttribute.hasOwnProperty('collection') && relatedAttribute.hasOwnProperty('via')) {
+          types.other = 'collection';
+        } else if (relatedAttribute.hasOwnProperty('collection') && !relatedAttribute.hasOwnProperty('via')) {
+          types.other = 'collectionD';
+        } else if (relatedAttribute.hasOwnProperty('model')) {
+          types.other = 'model';
+        }
+      } else if (association.hasOwnProperty('via') && association.hasOwnProperty('model')) {
+        types.current = 'modelD';
 
-      // We have to find if they are a model linked to this key
-      _.forIn(models, model => {
-        _.forIn(model.attributes, attribute => {
-          if (attribute.hasOwnProperty('via') && attribute.via === key) {
-            if (attribute.hasOwnProperty('collection')) {
+        // We have to find if they are a model linked to this key
+        _.forIn(_.omit(models, currentModelName || ''), model => {
+          _.forIn(model.attributes, attribute => {
+            if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection')) {
               types.other = 'collection';
 
               // Break loop
               return false;
             } else if (attribute.hasOwnProperty('model')) {
-              types.other = 'modelD';
+              types.other = 'model';
 
               // Break loop
               return false;
             }
-          }
+          });
         });
-      });
-    } else if (association.hasOwnProperty('collection')) {
-      types.current = 'collectionD';
+      } else if (association.hasOwnProperty('model')) {
+        types.current = 'model';
 
-      // We have to find if they are a model linked to this key
-      _.forIn(models, model => {
-        _.forIn(model.attributes, attribute => {
-          if (attribute.hasOwnProperty('via') && attribute.via === key) {
-            if (attribute.hasOwnProperty('collection')) {
-              types.other = 'collection';
+        // We have to find if they are a model linked to this key
+        _.forIn(models, model => {
+          _.forIn(model.attributes, attribute => {
+            if (attribute.hasOwnProperty('via') && attribute.via === key) {
+              if (attribute.hasOwnProperty('collection')) {
+                types.other = 'collection';
 
-              // Break loop
-              return false;
-            } else if (attribute.hasOwnProperty('model')) {
-              types.other = 'modelD';
+                // Break loop
+                return false;
+              } else if (attribute.hasOwnProperty('model')) {
+                types.other = 'modelD';
 
-              // Break loop
-              return false;
+                // Break loop
+                return false;
+              }
             }
-          }
+          });
         });
-      });
-    }
+      } else if (association.hasOwnProperty('collection')) {
+        types.current = 'collectionD';
 
-    if (types.current === 'modelD' && types.other === 'model') {
-      return {
-        nature: 'oneToOne',
-        verbose: 'belongsTo'
-      };
-    } else if (types.current === 'model' && types.other === 'modelD') {
-      return {
-        nature: 'oneToOne',
-        verbose: 'hasOne'
-      };
-    } else if ((types.current === 'model' || types.current === 'modelD') && types.other === 'collection') {
-      return {
-        nature: 'manyToOne',
-        verbose: 'belongsTo'
-      };
-    } else if (types.current === 'modelD' && types.other === 'collection') {
-      return {
-        nature: 'oneToMany',
-        verbose: 'hasMany'
-      };
-    } else if (types.current === 'collection' && types.other === 'model') {
-      return {
-        nature: 'oneToMany',
-        verbose: 'hasMany'
-      };
-    } else if (types.current === 'collection' && types.other === 'collection') {
-      return {
-        nature: 'manyToMany',
-        verbose: 'belongsToMany'
-      };
-    } else if (types.current === 'collectionD' && types.other === 'collection' || types.current === 'collection' && types.other === 'collectionD') {
-      return {
-        nature: 'manyToMany',
-        verbose: 'belongsToMany'
-      };
-    } else if (types.current === 'collectionD' && types.other === '') {
-      return {
-        nature: 'manyWay',
-        verbose: 'belongsToMany'
-      };
-    } else if (types.current === 'model' && types.other === '') {
-      return {
-        nature: 'oneWay',
-        verbose: 'belongsTo'
-      };
-    }
+        // We have to find if they are a model linked to this key
+        _.forIn(models, model => {
+          _.forIn(model.attributes, attribute => {
+            if (attribute.hasOwnProperty('via') && attribute.via === key) {
+              if (attribute.hasOwnProperty('collection')) {
+                types.other = 'collection';
 
-    return undefined;
+                // Break loop
+                return false;
+              } else if (attribute.hasOwnProperty('model')) {
+                types.other = 'modelD';
+
+                // Break loop
+                return false;
+              }
+            }
+          });
+        });
+      }
+
+      if (types.current === 'modelD' && types.other === 'model') {
+        return {
+          nature: 'oneToOne',
+          verbose: 'belongsTo'
+        };
+      } else if (types.current === 'model' && types.other === 'modelD') {
+        return {
+          nature: 'oneToOne',
+          verbose: 'hasOne'
+        };
+      } else if ((types.current === 'model' || types.current === 'modelD') && types.other === 'collection') {
+        return {
+          nature: 'manyToOne',
+          verbose: 'belongsTo'
+        };
+      } else if (types.current === 'modelD' && types.other === 'collection') {
+        return {
+          nature: 'oneToMany',
+          verbose: 'hasMany'
+        };
+      } else if (types.current === 'collection' && types.other === 'model') {
+        return {
+          nature: 'oneToMany',
+          verbose: 'hasMany'
+        };
+      } else if (types.current === 'collection' && types.other === 'collection') {
+        return {
+          nature: 'manyToMany',
+          verbose: 'belongsToMany'
+        };
+      } else if (types.current === 'collectionD' && types.other === 'collection' || types.current === 'collection' && types.other === 'collectionD') {
+        return {
+          nature: 'manyToMany',
+          verbose: 'belongsToMany'
+        };
+      } else if (types.current === 'collectionD' && types.other === '') {
+        return {
+          nature: 'manyWay',
+          verbose: 'belongsToMany'
+        };
+      } else if (types.current === 'model' && types.other === '') {
+        return {
+          nature: 'oneWay',
+          verbose: 'belongsTo'
+        };
+      }
+
+      return undefined;
+    } catch (e) {
+      strapi.log.error(`Something went wrong in the model \`${_.upperFirst(currentModelName)}\` with the attribute \`${key}\``);
+      strapi.stop();
+    }
   },
 
   /**
