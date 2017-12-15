@@ -17,8 +17,11 @@ module.exports = {
    */
 
   find: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query)
-      .map(user => _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
+    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+    data.reduce((acc, user) => {
+      acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
+      return acc;
+    }, []);
 
     // Send 200 `ok`
     ctx.send(data);
@@ -71,6 +74,10 @@ module.exports = {
 
       if (_.get(ctx.request, 'body.password') === user.password) {
         delete ctx.request.body.password;
+      }
+
+      if (_.get(ctx.request, 'body.role', '').toString() === '0' && (!_.get(ctx.state, 'user.role') || _.get(ctx.state, 'user.role', '').toString() !== '0')) {
+        delete ctx.request.body.role;
       }
 
       const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
