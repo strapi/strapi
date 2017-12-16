@@ -17,6 +17,14 @@ import styles from './styles.scss';
 class Plugin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { collapse: false };
 
+  componentDidMount() {
+    // Open the application's permissions section if there are APIs
+    if (this.props.name === 'application' && !isEmpty(get(this.props.plugin, 'controllers'))) {
+      this.props.changePluginSelected('application');
+      this.setState({ collapse: !this.state.collapse });
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.pluginSelected !== this.props.pluginSelected && nextProps.pluginSelected !== this.props.name) {
       this.context.resetShouldDisplayPoliciesHint();
@@ -39,6 +47,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
   render() {
     const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
     const icon = get(this.context.plugins.toJS(), [this.props.name, 'icon']);
+    const emptyApplication = !isEmpty(get(this.props.plugin, 'controllers'));
 
     return (
       <div className={styles.plugin} style={divStyle}>
@@ -64,8 +73,9 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
               )}
             </div>
           </div>
-          <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}>
-          </div>
+          { emptyApplication ? (
+            <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}></div>
+          ) : '' }
         </div>
         <Collapse isOpen={this.state.collapse}>
           <div />

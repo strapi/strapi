@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  // exampleAction: async (ctx, next) {
+  // exampleAction: async (ctx, next) => {
   //   try {
   //     ctx.body = 'ok';
   //   } catch (err) {

@@ -5,6 +5,7 @@
  */
 
 import {
+  HIDE_LOGIN_ERRORS_INPUT,
   ON_CHANGE_INPUT,
   SET_ERRORS,
   SET_FORM,
@@ -12,6 +13,13 @@ import {
   SUBMIT_ERROR,
   SUBMIT_SUCCEEDED,
 } from './constants';
+
+export function hideLoginErrorsInput(value) {
+  return {
+    type: HIDE_LOGIN_ERRORS_INPUT,
+    value,
+  };
+}
 
 export function onChangeInput({ target }) {
   return {
@@ -77,9 +85,10 @@ export function setForm(formType, email) {
   };
 }
 
-export function submit() {
+export function submit(context) {
   return {
     type: SUBMIT,
+    context,
   };
 }
 

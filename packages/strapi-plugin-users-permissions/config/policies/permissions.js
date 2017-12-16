@@ -6,7 +6,14 @@ module.exports = async (ctx, next) => {
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
-      ctx.state.user = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
+      const tokenUser = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
+
+      ctx.state.user = await strapi.plugins['users-permissions'].services.user.fetch(_.pick(tokenUser, ['_id', 'id']));
+
+      if (!ctx.state.user) {
+        ctx.unauthorized('This user doesn\'t exit.');
+      }
+
       role = ctx.state.user.role;
 
       if (role.toString() === '0') {

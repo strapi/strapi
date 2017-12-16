@@ -226,6 +226,7 @@ module.exports = {
 
     try {
       fs.writeFileSync(roleConfigPath, stringify({ roles: data }, null, 2), 'utf8');
+      _.set(strapi.plugins['users-permissions'], 'config.roles', data);
     } catch(err) {
       strapi.log.error(err);
     }

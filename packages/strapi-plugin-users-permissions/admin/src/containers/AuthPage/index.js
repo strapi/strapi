@@ -25,6 +25,7 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
 import {
+  hideLoginErrorsInput,
   onChangeInput,
   setErrors,
   setForm,
@@ -47,6 +48,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     if (this.props.match.params.authType !== nextProps.match.params.authType) {
       const params = nextProps.location.search ? replace(nextProps.location.search, '?code=', '') : nextProps.match.params.id;
       this.props.setForm(nextProps.match.params.authType, params);
+      this.props.hideLoginErrorsInput(false);
     }
 
     if (nextProps.submitSuccess) {
@@ -85,7 +87,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     this.props.setErrors(formErrors);
 
     if (isEmpty(formErrors)) {
-      this.props.submit();
+      this.props.submit(this.context);
     }
   }
 
@@ -140,7 +142,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     const headerDescription = this.props.match.params.authType === 'register' ?
       <FormattedMessage id="users-permissions.Auth.header.register.description" />
       : <span />;
-
+    
     return (
       <div className={styles.authPage}>
         <div className={styles.wrapper}>
@@ -158,6 +160,11 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
           <div className={styles.formContainer} style={divStyle}>
             <form onSubmit={this.handleSubmit}>
               <div className="container-fluid">
+                {this.props.noErrorsDescription && !isEmpty(get(this.props.formErrors, ['0', 'errors', '0', 'id']))? (
+                  <div className={styles.errorsContainer}>
+                    <FormattedMessage id={get(this.props.formErrors, ['0', 'errors', '0', 'id'])} />
+                  </div>
+                ): ''}
                 <div className="row" style={{ textAlign: 'start' }}>
                   {map(inputs, (input, key) => (
                     <Input
@@ -173,6 +180,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
                       type={get(input, 'type')}
                       validations={{ required: true }}
                       value={get(this.props.modifiedData, get(input, 'name'))}
+                      noErrorsDescription={this.props.noErrorsDescription}
                     />
                   ))}
                   {this.renderButton()}
@@ -190,13 +198,19 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
   }
 }
 
+AuthPage.contextTypes = {
+  updatePlugin: PropTypes.func,
+};
+
 AuthPage.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array.isRequired,
+  hideLoginErrorsInput: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
+  noErrorsDescription: PropTypes.bool.isRequired,
   onChangeInput: PropTypes.func.isRequired,
   setErrors: PropTypes.func.isRequired,
   setForm: PropTypes.func.isRequired,
@@ -209,6 +223,7 @@ const mapStateToProps = makeSelectAuthPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      hideLoginErrorsInput,
       onChangeInput,
       setErrors,
       setForm,
