@@ -8,35 +8,31 @@
     "username": {
       "type": "string",
       "minLength": 3,
-      "unique": true
+      "unique": true,
+      "configurable": false
     },
     "email": {
       "type": "email",
       "minLength": 6,
-      "unique": true
+      "unique": true,
+      "configurable": false
     },
     "provider": {
-      "type": "string"
+      "type": "string",
+      "configurable": false
     },
     "password": {
       "type": "password",
-      "minLength": 6
+      "minLength": 6,
+      "configurable": false
     },
     "resetPasswordToken": {
-      "type": "string"
+      "type": "string",
+      "configurable": false
     },
     "role": {
-      "type": "integer"
-    },
-    "posts": {
-      "collection": "post",
-      "via": "authors"
-    },
-    "children": {
-      "collection": "user",
-      "via": "children",
-      "dominant": true,
-      "plugin": "users-permissions"
+      "type": "integer",
+      "configurable": false
     }
   },
   "connection": "default"

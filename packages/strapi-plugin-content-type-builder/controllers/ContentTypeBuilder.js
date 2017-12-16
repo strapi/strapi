@@ -40,7 +40,7 @@ module.exports = {
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
 
-    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name, plugin);
 
     if (!_.isEmpty(attributesErrors)) {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
@@ -95,7 +95,7 @@ module.exports = {
     if (plugin && !strapi.plugins[_.toLower(plugin)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.plugin.name' }] }]);
     if (plugin && !strapi.plugins[_.toLower(plugin)].models[_.toLower(model)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.model.unknow' }] }]);
 
-    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name.toLowerCase(), plugin);
 
     if (!_.isEmpty(attributesErrors)) {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);

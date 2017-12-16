@@ -225,43 +225,48 @@ module.exports = {
    */
 
   defineAssociations: function (model, definition, association, key) {
-    // Initialize associations object
-    if (definition.associations === undefined) {
-      definition.associations = [];
-    }
+    try {
+      // Initialize associations object
+      if (definition.associations === undefined) {
+        definition.associations = [];
+      }
 
-    // Exclude non-relational attribute
-    if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model')) {
-      return undefined;
-    }
+      // Exclude non-relational attribute
+      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model')) {
+        return undefined;
+      }
 
-    // Get relation nature
-    const infos = this.getNature(association, key, undefined, model.toLowerCase());
-    const details = _.get(strapi.models, `${association.model || association.collection}.attributes.${association.via}`, {});
+      // Get relation nature
+      const infos = this.getNature(association, key, undefined, model.toLowerCase());
+      const details = _.get(strapi.models, `${association.model || association.collection}.attributes.${association.via}`, {});
 
-    // Build associations object
-    if (association.hasOwnProperty('collection')) {
-      definition.associations.push({
-        alias: key,
-        type: 'collection',
-        collection: association.collection,
-        via: association.via || undefined,
-        nature: infos.nature,
-        autoPopulate: _.get(association, 'autoPopulate', true),
-        dominant: details.dominant !== true,
-        plugin: association.plugin || undefined,
-      });
-    } else if (association.hasOwnProperty('model')) {
-      definition.associations.push({
-        alias: key,
-        type: 'model',
-        model: association.model,
-        via: association.via || undefined,
-        nature: infos.nature,
-        autoPopulate: _.get(association, 'autoPopulate', true),
-        dominant: details.dominant !== true,
-        plugin: association.plugin || undefined,
-      });
+      // Build associations object
+      if (association.hasOwnProperty('collection')) {
+        definition.associations.push({
+          alias: key,
+          type: 'collection',
+          collection: association.collection,
+          via: association.via || undefined,
+          nature: infos.nature,
+          autoPopulate: _.get(association, 'autoPopulate', true),
+          dominant: details.dominant !== true,
+          plugin: association.plugin || undefined,
+        });
+      } else if (association.hasOwnProperty('model')) {
+        definition.associations.push({
+          alias: key,
+          type: 'model',
+          model: association.model,
+          via: association.via || undefined,
+          nature: infos.nature,
+          autoPopulate: _.get(association, 'autoPopulate', true),
+          dominant: details.dominant !== true,
+          plugin: association.plugin || undefined,
+        });
+      }
+    } catch (e) {
+      strapi.log.error(`Something went wrong in the model \`${_.upperFirst(model)}\` with the attribute \`${key}\``);
+      strapi.stop();
     }
   },
 

@@ -118,11 +118,26 @@ module.exports = {
       path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
   },
 
-  formatAttributes: attributes => {
+  formatAttributes: (attributes, name, plugin) => {
     const errors = [];
     const attrs = {};
 
-    _.forEach(attributes, attribute => {
+    const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
+      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
+
+    const model = plugin ? strapi.plugins[target].models[name] : strapi.api[target].models[name];
+
+    // Only select configurable attributes.
+    const attributesConfigurable = attributes.filter(attribute => _.get(model.attributes, [attribute.name, 'configurable'], true) !== false);
+    const attributesNotConfigurable = Object.keys(model.attributes)
+      .filter(attribute => _.get(model.attributes, [attribute, 'configurable'], true) === false)
+      .reduce((acc, attribute) => {
+        acc[attribute] = model.attributes[attribute];
+
+        return acc;
+      }, {});
+
+    _.forEach(attributesConfigurable, attribute => {
       if (_.has(attribute, 'params.type')) {
         attrs[attribute.name] = attribute.params;
       } else if (_.has(attribute, 'params.target')) {
@@ -162,7 +177,9 @@ module.exports = {
       }
     });
 
-    return [attrs, errors];
+    Object.assign(attributesNotConfigurable, attrs);
+
+    return [attributesNotConfigurable, errors];
   },
 
   clearRelations: (model, source) => {
