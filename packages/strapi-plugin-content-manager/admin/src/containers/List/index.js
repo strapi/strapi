@@ -91,6 +91,7 @@ export class List extends React.Component {
   init(props) {
     const source = getQueryParameters(props.location.search, 'source');
     const slug = props.match.params.slug;
+
     // Set current model name
     this.props.setCurrentModelName(slug.toLowerCase());
 
@@ -99,8 +100,8 @@ export class List extends React.Component {
       getQueryParameters('sort')) || 'id';
 
     if (!isEmpty(props.location.search)) {
-      this.props.changePage(toInteger(getQueryParameters('page')), source);
-      this.props.changeLimit(toInteger(getQueryParameters('limit')), source);
+      this.props.changePage(toInteger(getQueryParameters(props.location.search, 'page')), source);
+      this.props.changeLimit(toInteger(getQueryParameters(props.location.search, 'limit')), source);
     }
 
     this.props.changeSort(sort, source);
@@ -193,7 +194,7 @@ export class List extends React.Component {
         history={this.props.history}
         primaryKey={currentModel.primaryKey || 'id'}
         handleDelete={this.toggleModalWarning}
-        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}/?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}&source=${source}`}
+        redirectUrl={`?redirectUrl=/plugins/content-manager/${this.props.currentModelName.toLowerCase()}?page=${this.props.currentPage}&limit=${this.props.limit}&sort=${this.props.sort}&source=${source}`}
       />
     );
 
