@@ -22,16 +22,11 @@ import { makeSelectPluginToDownload } from './selectors';
 export function* pluginDownload() {
   try {
     const pluginToDownload = yield select(makeSelectPluginToDownload());
+    const response = yield call(request, '/admin/plugins/install', { method: 'POST', body: { plugin: pluginToDownload }});
 
-    console.log(pluginToDownload);
-
-    yield new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    yield put(downloadPluginSucceeded());
+    if (response.ok) {
+      yield put(downloadPluginSucceeded());
+    }
   } catch(err) {
     yield put(downloadPluginError());
   }
