@@ -74,8 +74,6 @@ module.exports = {
   },
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
-    description = _.replace(description, /\"/g, '\\"');
-
     const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-mongoose').split('-')[1];
 
     return new Promise((resolve, reject) => {
@@ -85,7 +83,7 @@ module.exports = {
         rootPath: strapi.config.appPath,
         args: {
           api: name,
-          description,
+          description: _.replace(description, /\"/g, '\\"'),
           attributes,
           connection,
           collectionName: !_.isEmpty(collectionName) ? collectionName : undefined,
@@ -97,8 +95,8 @@ module.exports = {
         success: () => {
           resolve();
         },
-        error: () => {
-          reject();
+        error: (err) => {
+          reject(err);
         }
       });
     });
@@ -106,8 +104,9 @@ module.exports = {
 
   getModelPath: (model, plugin) => {
     // Retrieve where is located the model.
+    // Note: The target is not found when we are creating a new API. That's why, we are returning the lowercased model.
     const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), model.toLowerCase()))[0];
+      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), model.toLowerCase()))[0] || model.toLowerCase();
 
     // Retrieve the filename of the model.
     const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
@@ -148,6 +147,7 @@ module.exports = {
 
         attr.via = relation.key;
         attr.dominant = relation.dominant;
+        attr.plugin = relation.pluginValue;
 
         attrs[attribute.name] = attr;
       }
@@ -165,7 +165,7 @@ module.exports = {
     return [attrs, errors];
   },
 
-  clearRelations: model => {
+  clearRelations: (model, source) => {
     const errors = [];
     const structure = {
       models: strapi.models,
@@ -181,7 +181,13 @@ module.exports = {
     // Method to delete the association of the models.
     const deleteAssociations = (models, plugin) => {
       Object.keys(models).forEach(name => {
-        const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => association[association.type] === model);
+        const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => {
+          if (source) {
+            return association[association.type] === model && association.plugin === source;
+          }
+
+          return association[association.type] === model;
+        });
 
         if (!_.isEmpty(relationsToDelete)) {
           // Retrieve where is located the model.
@@ -194,7 +200,9 @@ module.exports = {
             .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
 
           // Path to access to the model.
-          const pathToModel = path.join(strapi.config.appPath, 'api', target, 'models', filename);
+          const pathToModel = plugin ?
+            path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
+            path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
 
           // Require the model.
           const modelJSON = require(pathToModel);
@@ -220,15 +228,15 @@ module.exports = {
     // Update `./api` models.
     deleteAssociations(structure.models);
 
-    // Object.keys(structure.plugins).forEach(name => {
-    //   // Update `./plugins/${name}` models.
-    //   deleteAssociations(structure.plugins[name].models, name);
-    // });
+    Object.keys(structure.plugins).forEach(name => {
+      // Update `./plugins/${name}` models.
+      deleteAssociations(structure.plugins[name].models, name);
+    });
 
     return errors;
   },
 
-  createRelations: (model, attributes) => {
+  createRelations: (model, attributes, source) => {
     const errors = [];
     const structure = {
       models: strapi.models,
@@ -244,14 +252,12 @@ module.exports = {
     // Method to update the model
     const update = (models, plugin) => {
       Object.keys(models).forEach(name => {
-        // TODO:
-        // - Retrieve right relation in plugin case.
         const relationsToCreate = attributes.filter(attribute => {
-          if (!plugin) {
-            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue', false) === false;
+          if (plugin) {
+            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue') === plugin;
           }
 
-          return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue', false) !== false;
+          return _.get(attribute, 'params.target') === name && _.isEmpty(_.get(attribute, 'params.pluginValue', ''));
         });
 
         if (!_.isEmpty(relationsToCreate)) {
@@ -264,15 +270,15 @@ module.exports = {
             .filter(x => x[0] !== '.')
             .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
 
-          const pathToModel = path.join(strapi.config.appPath, 'api', target, 'models', filename);
+          // Path to access to the model.
+          const pathToModel = plugin ?
+            path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
+            path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
 
           const modelJSON = require(pathToModel);
 
           _.forEach(relationsToCreate, ({ name, params }) => {
-            const attr = {
-              columnName: params.targetColumnName,
-              plugin: params.pluginValue
-            };
+            const attr = {};
 
             switch (params.nature) {
               case 'oneToOne':
@@ -287,6 +293,8 @@ module.exports = {
             }
 
             attr.via = name;
+            attr.columnName = params.targetColumnName;
+            attr.plugin = source;
 
             modelJSON.attributes[params.key] = attr;
 
@@ -308,10 +316,10 @@ module.exports = {
     // Update `./api` models.
     update(structure.models);
 
-    // Object.keys(structure.plugins).forEach(name => {
-    //   // Update `./plugins/${name}` models.
-    //   update(structure.plugins[name].models, name);
-    // });
+    Object.keys(structure.plugins).forEach(name => {
+      // Update `./plugins/${name}` models.
+      update(structure.plugins[name].models, name);
+    });
 
     return errors;
   },

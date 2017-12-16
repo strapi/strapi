@@ -28,5 +28,6 @@
     "role": {
       "type": "integer"
     }
-  }
+  },
+  "connection": "default"
 }

@@ -33,7 +33,7 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
+    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -50,20 +50,20 @@ module.exports = {
 
     await Service.generateAPI(name, description, connection, collectionName, []);
 
-    const modelFilePath = Service.getModelPath(name);
+    const modelFilePath = Service.getModelPath(name, plugin);
 
     try {
-      const modelJSON = require(modelFilePath);
+      const modelJSON = _.cloneDeep(require(modelFilePath));
 
       modelJSON.attributes = formatedAttributes;
 
-      const clearRelationsErrors = Service.clearRelations(name);
+      const clearRelationsErrors = Service.clearRelations(name, plugin);
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, attributes, plugin);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -92,6 +92,8 @@ module.exports = {
     if (strapi.models[_.toLower(name)] && name !== model) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!strapi.models[_.toLower(model)]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
+    if (plugin && !strapi.plugins[_.toLower(plugin)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.plugin.name' }] }]);
+    if (plugin && !strapi.plugins[_.toLower(plugin)].models[_.toLower(model)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.model.unknow' }] }]);
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
 
@@ -108,7 +110,7 @@ module.exports = {
     }
 
     try {
-      const modelJSON = require(modelFilePath);
+      const modelJSON = _.cloneDeep(require(modelFilePath));
 
       modelJSON.attributes = formatedAttributes;
       modelJSON.info = {
@@ -118,13 +120,13 @@ module.exports = {
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
 
-      const clearRelationsErrors = Service.clearRelations(model);
+      const clearRelationsErrors = Service.clearRelations(model, plugin);
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, attributes, plugin);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
