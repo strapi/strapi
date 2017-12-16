@@ -11,10 +11,32 @@ import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { map } from 'lodash';
 import cn from 'classnames';
 
-import StarsContainer from 'components/StarsContainer';
+import Official from 'components/Official';
+// import StarsContainer from 'components/StarsContainer';
+
+// Icons
+import IconAuth from 'assets/icons/icon_auth-permissions.svg';
+import IconCM from 'assets/icons/icon_content-manager.svg';
+import IconCTB from 'assets/icons/icon_content-type-builder.svg';
+import IconSM from 'assets/icons/icon_settings-manager.svg';
+
 import styles from './styles.scss';
 
 class InstallPluginPopup extends React.Component {
+  getPluginICon = () => {
+    switch (this.props.plugin.id) {
+      case 'content-manager':
+        return IconCM;
+      case 'content-type-builder':
+        return IconCTB;
+      case 'settings-manager':
+        return IconSM;
+      case 'users-permissions':
+        return IconAuth;
+      default:
+    }
+  }
+
   handleClick = () => {
     this.props.history.push({ pathname: this.props.history.location.pathname });
     this.context.downloadPlugin(this.props.plugin.id);
@@ -57,15 +79,18 @@ class InstallPluginPopup extends React.Component {
           <div className={styles.wrapper}>
 
             <div className={styles.headerWrapper}>
-              <div className={styles.logo} style={{ backgroundImage: `url(${this.props.plugin.logo})`}} />
+              <div className={styles.logo}><img src={this.getPluginICon()} alt="icon" /></div>
               <div className={styles.headerInfo}>
                 <div className={styles.name}>{this.props.plugin.name}</div>
                 <div className={styles.ratings}>
+                  {/*}
                   <StarsContainer ratings={this.props.plugin.ratings} />
                   <div>
                     <span style={{ fontWeight: '600', color: '#333740', fontSize: '12px'}}>{this.props.plugin.ratings}</span>
                     <span style={{ fontWeight: '500', color: '#666666', fontSize: '11px' }}>/5</span>
                   </div>
+                  */}
+                  <Official style={{ marginTop: '0' }} />
                 </div>
                 <div className={styles.headerDescription}>
                   <FormattedMessage id={this.props.plugin.description} />

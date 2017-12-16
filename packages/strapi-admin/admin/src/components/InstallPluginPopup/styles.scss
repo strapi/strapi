@@ -78,6 +78,13 @@
   border: 1px solid #E8EEFC;
   border-radius: 3px;
   background-size: contain;
+  line-height: 144px;
+  text-align: center;
+  > img {
+    min-width: 72px;
+    // max-height: 72px;
+
+  }
 }
 
 .modalHeader {

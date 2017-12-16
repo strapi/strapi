@@ -44,6 +44,8 @@
   "app.components.NotFoundPage.description": "Page introuvable",
   "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
 
+  "app.components.Official": "Officiel",
+
   "app.components.PluginCard.compatible": "Compatble avec votre app",
   "app.components.PluginCard.compatibleCommunity": "Compatble avec la communauté",
   "app.components.PluginCard.Button.label.download": "Télécharger",

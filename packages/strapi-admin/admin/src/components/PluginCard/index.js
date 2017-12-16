@@ -13,7 +13,15 @@ import { FormattedMessage } from 'react-intl';
 // Temporary picture
 import Button from 'components/Button';
 import InstallPluginPopup from 'components/InstallPluginPopup';
-import StarsContainer from 'components/StarsContainer';
+import Official from 'components/Official';
+// import StarsContainer from 'components/StarsContainer';
+
+// Icons
+import IconAuth from 'assets/icons/icon_auth-permissions.svg';
+import IconCM from 'assets/icons/icon_content-manager.svg';
+import IconCTB from 'assets/icons/icon_content-type-builder.svg';
+import IconSM from 'assets/icons/icon_settings-manager.svg';
+
 import styles from './styles.scss';
 import Screenshot from './screenshot.png';
 
@@ -34,6 +42,20 @@ class PluginCard extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.setBoostrapCol);
+  }
+
+  getPluginICon = () => {
+    switch (this.props.plugin.id) {
+      case 'content-manager':
+        return IconCM;
+      case 'content-type-builder':
+        return IconCTB;
+      case 'settings-manager':
+        return IconSM;
+      case 'users-permissions':
+        return IconAuth;
+      default:
+    }
   }
 
   setBoostrapCol = () => {
@@ -73,12 +95,21 @@ class PluginCard extends React.Component {
     if (this.props.showSupportUsButton) {
       buttonLabel = 'app.components.PluginCard.Button.label.support';
     }
+    
+    const pluginIcon = this.props.plugin.id !== 'email' ? (
+      <div className={styles.frame}>
+        <span className={styles.helper} />
+        <img src={this.getPluginICon()} alt="icon" />
+      </div>
+    ) : (
+      <div className={styles.iconContainer}><i className={`fa fa-${this.props.plugin.icon}`} /></div>
+    );
 
     return (
       <div className={cn(this.state.boostrapCol, styles.pluginCard)} onClick={this.handleClick}>
         <div className={styles.wrapper}>
           <div className={styles.cardTitle}>
-            <div><i className={`fa fa-${this.props.plugin.icon}`} /></div>
+            {pluginIcon}
             <div>{this.props.plugin.name}</div>
           </div>
           <div className={styles.cardDescription}>
@@ -97,11 +128,13 @@ class PluginCard extends React.Component {
           </div>
           <div className={styles.cardFooter}>
             <div className={styles.ratings}>
-              <StarsContainer ratings={this.props.plugin.ratings} />
+              {/*<StarsContainer ratings={this.props.plugin.ratings} />
               <div>
                 <span style={{ fontWeight: '600', color: '#333740' }}>{this.props.plugin.ratings}</span>
                 <span style={{ fontWeight: '500', color: '#666666' }}>/5</span>
               </div>
+              */}
+              <Official />
             </div>
             <div>
               <Button

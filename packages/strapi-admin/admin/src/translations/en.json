@@ -44,6 +44,8 @@
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.NotFoundPage.back": "Back to homepage",
 
+  "app.components.Official": "Official",
+
   "app.components.PluginCard.compatible": "Compatible with your app",
   "app.components.PluginCard.compatibleCommunity": "Compatible with the community",
   "app.components.PluginCard.Button.label.download": "Download",
