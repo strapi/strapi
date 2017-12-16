@@ -27,6 +27,16 @@
     },
     "role": {
       "type": "integer"
+    },
+    "posts": {
+      "collection": "post",
+      "via": "authors"
+    },
+    "children": {
+      "collection": "user",
+      "via": "children",
+      "dominant": true,
+      "plugin": "users-permissions"
     }
   },
   "connection": "default"

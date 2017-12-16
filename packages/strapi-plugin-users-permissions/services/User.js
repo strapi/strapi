@@ -69,7 +69,7 @@ module.exports = {
    */
 
   fetch: (params) => {
-    return strapi.query('user', 'users-permissions').findOne(_.pick(params, '_id'));
+    return strapi.query('user', 'users-permissions').findOne(_.pick(params, ['_id', 'id']));
   },
 
   /**

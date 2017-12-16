@@ -65,11 +65,8 @@ $RECYCLE.BIN/
 # Logs and databases
 ############################
 
-.tmp
 *.log
 *.sql
-*.sqlite
-*.sqlite3
 
 
 ############################
@@ -91,7 +88,6 @@ lcov.info
 pids
 logs
 results
-build
 node_modules
 .node_history
 
@@ -100,5 +96,6 @@ node_modules
 # Tests
 ############################
 
+test
 testApp
 coverage
