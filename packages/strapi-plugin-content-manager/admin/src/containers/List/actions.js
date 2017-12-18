@@ -46,7 +46,7 @@ export function changeSort(sort, source) {
   };
 }
 
-export function descreaseCount() {
+export function decreaseCount() {
   return {
     type: DECREASE_COUNT,
   };
