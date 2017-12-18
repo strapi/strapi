@@ -57,7 +57,7 @@ export function* editContentType(action) {
       strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
     }
   } catch(error) {
-    strapi.notification.error(error);
+    strapi.notification.error(get(error, ['response', 'payload', 'message'], 'notification.error'));
   }
 }
 

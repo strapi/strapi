@@ -1,5 +1,4 @@
 .attributeRow { /* stylelint-disable */
-  cursor: pointer;
   min-height: 5.3rem;
   margin-top: 0!important;
   list-style: none;
@@ -10,9 +9,14 @@
     border-bottom: none;
   }
 
+}
+
+.editable {
   &:hover {
     background-color: #F7F8F8;
   }
+  
+  cursor: pointer;
 }
 
 .flex {
