@@ -88,7 +88,6 @@ module.exports = function(strapi) {
             GLOBALS[definition.globalId] = {};
 
             // Add some informations about ORM & client connection & tableName
-            definition.collectionName = _.isEmpty(definition.collectionName) ? definition.globalName.toLowerCase() : definition.collectionName;
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
 

@@ -119,6 +119,10 @@ module.exports.app = async function() {
           this.api[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
         }
 
+        if (!this.api[key].models[index].collectionName) {
+          this.api[key].models[index].collectionName = (`${index}`).toLowerCase();
+        }
+
         acc[index] = this.api[key].models[index];
       }
       return acc;
@@ -188,6 +192,12 @@ module.exports.app = async function() {
           this.plugins[key].models[index].globalId = this.models[index] ?
             upperFirst(camelCase(`${key}-${index}`)):
             upperFirst(camelCase(`${index}`));
+        }
+
+        if (!this.plugins[key].models[index].collectionName) {
+          this.plugins[key].models[index].collectionName = this.models[index] ?
+            (`${key}_${index}`).toLowerCase():
+            (`${index}`).toLowerCase();
         }
 
         sum[index] = this.plugins[key].models[index];

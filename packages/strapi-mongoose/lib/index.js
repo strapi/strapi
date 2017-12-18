@@ -133,9 +133,9 @@ module.exports = function (strapi) {
                   });
 
                   if (!plugin) {
-                    global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.globalName.toLowerCase());
+                    global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.collectionName);
                   } else {
-                    instance.model(definition.globalName, collection.schema, definition.globalName.toLowerCase());
+                    instance.model(definition.globalName, collection.schema, definition.collectionName);
                   }
 
                   // Expose ORM functions through the `target` object.
