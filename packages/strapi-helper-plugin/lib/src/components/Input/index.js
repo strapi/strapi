@@ -165,6 +165,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           value={value}
           dateFormat='YYYY-MM-DD'
           timeFormat='HH:mm:ss'
+          tabIndex={this.props.tabIndex}
           utc={true}
           inputProps={{
             placeholder: this.props.placeholder,
@@ -214,6 +215,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                 disabled={this.props.disabled}
                 type="email"
                 autoFocus={this.props.autoFocus}
+                tabIndex={this.props.tabIndex}
               />
             )}
           </FormattedMessage>
@@ -244,6 +246,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
           autoComplete="off"
           disabled={this.props.disabled}
           autoFocus={this.props.autoFocus}
+          tabIndex={this.props.tabIndex}
         />
       )}
     </FormattedMessage>
@@ -278,6 +281,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               disabled={this.props.disabled}
               type={type}
               autoFocus={this.props.autoFocus}
+              tabIndex={this.props.tabIndex}
             />
           )}
         </FormattedMessage>
@@ -366,6 +370,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
                 disabled={this.props.disabled}
                 type="text"
                 autoFocus={this.props.autoFocus}
+                tabIndex={this.props.tabIndex}
               />
             )}
           </FormattedMessage>
@@ -406,6 +411,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
               placeholder={placeholder}
               disabled={this.props.disabled}
               autoFocus={this.props.autoFocus}
+              tabIndex={this.props.tabIndex}
             />
           )}
         </FormattedMessage>
@@ -467,6 +473,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         placeholder={placeholder}
         disabled={this.props.disabled}
         autoFocus={this.props.autoFocus}
+        tabIndex={this.props.tabIndex}
       />;
 
     const link = !isEmpty(this.props.linkContent) ? <a href={this.props.linkContent.link} target="_blank"><FormattedMessage id={this.props.linkContent.description} /></a> : '';
@@ -616,6 +623,7 @@ Input.propTypes = {
   search: PropTypes.bool,
   selectOptions: PropTypes.array,
   selectOptionsFetchSucceeded: PropTypes.bool,
+  tabIndex: PropTypes.string,
   title: PropTypes.string,
   type: PropTypes.string.isRequired,
   validations: PropTypes.object.isRequired,
@@ -644,6 +652,7 @@ Input.defaultProps = {
   search: false,
   selectOptions: [],
   selectOptionsFetchSucceeded: false,
+  tabIndex: '0',
   value: ''
 };
 
