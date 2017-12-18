@@ -57,7 +57,7 @@ class EditForm extends React.Component {
     const displayedFields = merge(get(currentLayout), omit(currentSchema.fields, 'id'));
 
     // List fields inputs
-    const fields = Object.keys(displayedFields).map(attr => {
+    const fields = Object.keys(displayedFields).map((attr, key) => {
       const details = displayedFields[attr];
       const errorIndex = findIndex(this.props.formErrors, ['name', attr]);
       const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
@@ -74,6 +74,7 @@ class EditForm extends React.Component {
 
       return (
         <Input
+          autoFocus={key === 0}
           key={attr}
           type={get(layout, 'type', this.getInputType(details.type))}
           label={get(layout, 'label') || details.label || ''}

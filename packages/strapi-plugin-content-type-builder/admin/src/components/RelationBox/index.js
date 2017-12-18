@@ -119,6 +119,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
         errors={this.props.errors}
         didCheckErrors={this.props.didCheckErrors}
         pluginID="content-type-builder"
+        autoFocus={this.props.autoFocus}
       />;
 
     const dropDown = !isEmpty(this.props.dropDownItems) ? this.renderDropdownMenu() : '';
@@ -150,6 +151,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
 }
 
 RelationBox.propTypes = {
+  autoFocus: PropTypes.bool,
   contentTypeTargetPlaceholder: PropTypes.string,
   didCheckErrors: PropTypes.bool.isRequired,
   dropDownItems: PropTypes.array,
@@ -165,6 +167,7 @@ RelationBox.propTypes = {
 };
 
 RelationBox.defaultProps = {
+  autoFocus: false,
   contentTypeTargetPlaceholder: '',
   dropDownItems: [],
   errors: [],

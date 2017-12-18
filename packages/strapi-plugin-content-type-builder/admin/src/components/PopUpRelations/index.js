@@ -119,6 +119,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
     return (
       <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
         <RelationBox
+          autoFocus
           tabIndex="1"
           relationType={get(this.props.values, ['params', 'nature'])}
           contentTypeTargetPlaceholder={get(this.props.values, ['params', 'target'])}
@@ -161,7 +162,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 
     const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
     const handleToggle = this.props.toggle;
-  
+
     return (
       <div className={styles.popUpRelations}>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
