@@ -22,6 +22,7 @@ import {
   CHANGE_PAGE,
   CHANGE_SORT,
   CHANGE_LIMIT,
+  DECREASE_COUNT,
 } from './constants';
 
 const initialState = fromJS({
@@ -41,6 +42,8 @@ const initialState = fromJS({
 
 function listReducer(state = initialState, action) {
   switch (action.type) {
+    case DECREASE_COUNT:
+      return state.update('count', (value) => value - 1);
     case SET_CURRENT_MODEL_NAME:
       return state
         .set('currentModelName', action.modelName)

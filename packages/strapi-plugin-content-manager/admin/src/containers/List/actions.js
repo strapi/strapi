@@ -14,6 +14,7 @@ import {
   CHANGE_LIMIT,
   CHANGE_PAGE,
   CHANGE_SORT,
+  DECREASE_COUNT,
   LOAD_COUNT,
   LOAD_RECORDS,
   LOADED_COUNT,
@@ -42,6 +43,12 @@ export function changeSort(sort, source) {
     type: CHANGE_SORT,
     sort,
     source,
+  };
+}
+
+export function decreaseCount() {
+  return {
+    type: DECREASE_COUNT,
   };
 }
 
