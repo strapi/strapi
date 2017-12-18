@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { get, isEmpty, map, mapKeys, isObject, reject, includes } from 'lodash';
+import { get, isEmpty, map, mapKeys, isObject, reject, includes, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import DateTime from 'react-datetime';
 import DateTimeStyle from 'react-datetime/css/react-datetime.css';
@@ -159,7 +159,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.inputDate} ${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
         </label>
         <DateTime
           value={value}
@@ -262,7 +262,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
         </label>
         <FormattedMessage id={this.props.placeholder || this.props.label} values={this.props.labelValues}>
           {(placeholder) => (
@@ -348,7 +348,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.input} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
         </label>
         <div className={`input-group ${styles.inputSearch}`} style={{ marginBottom: '1rem'}}>
           <span className={`input-group-addon ${styles.addonSearch}`} />
@@ -391,7 +391,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     return (
       <div className={`${styles.inputTextArea} ${this.props.customBootstrapClass || 'col-md-6'} ${requiredClass}`}>
         <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} />
+          <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
         </label>
         <FormattedMessage id={this.props.placeholder || this.props.label}>
           {(placeholder) => (
@@ -448,7 +448,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     const handleBlur = this.props.onBlur || this.handleBlur;
     const placeholder = this.props.placeholder || this.props.label;
     const label = this.props.label ?
-      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} defaultMessage={this.props.label} /></label>
+      <label htmlFor={this.props.label}><FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} /></label>
         : <label htmlFor={this.props.label} />;
 
     const requiredClass = get(this.props.validations, 'required') && this.props.addRequiredInputDesign ?
