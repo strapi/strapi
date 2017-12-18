@@ -147,7 +147,8 @@ export function* submitChanges(action) {
     }
 
   } catch(error) {
-    strapi.notification.error(error);
+    strapi.notification.error(get(error, ['response', 'payload', 'message'], 'notification.error'));
+    yield put(unsetButtonLoader());
   }
 }
 

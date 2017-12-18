@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { capitalize } from 'lodash';
+import { capitalize, has } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
 import IcoContainer from 'components/IcoContainer';
@@ -66,6 +66,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
   }
 
   render() {
+    const isNotEditable = has(this.props.row.params, 'configurable') && !this.props.row.params.configurable;
     const relationType = this.props.row.params.type ?
       <FormattedMessage id={`content-type-builder.attribute.${this.props.row.params.type}`} />
       : (
@@ -87,10 +88,16 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       );
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
-    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
-
+    const icons = isNotEditable ? [{ icoType: 'lock' }] : [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
+    const editableStyle = isNotEditable ? '' : styles.editable;
+    
     return (
-      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.handleEdit}>
+      <li
+        className={`${styles.attributeRow} ${editableStyle} ${relationStyle}`}
+        onClick={() => {
+          isNotEditable ? () => {} : this.handleEdit();
+        }}
+      >
         <div className={styles.flex}>
           <div className={styles.nameContainer}>
             {this.renderAttributesBox()}
