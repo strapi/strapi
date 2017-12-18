@@ -123,14 +123,14 @@ module.exports = {
     const attrs = {};
 
     const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
+      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0] || name.toLowerCase();
 
-    const model = plugin ? strapi.plugins[target].models[name] : strapi.api[target].models[name];
+    const model = (plugin ? _.get(strapi.plugins, [target, 'models', name]) : _.get(strapi.api, [target, 'models', name])) || {};
 
     // Only select configurable attributes.
-    const attributesConfigurable = attributes.filter(attribute => _.get(model.attributes, [attribute.name, 'configurable'], true) !== false);
-    const attributesNotConfigurable = Object.keys(model.attributes)
-      .filter(attribute => _.get(model.attributes, [attribute, 'configurable'], true) === false)
+    const attributesConfigurable = attributes.filter(attribute => _.get(model, ['attributes', attribute.name, 'configurable'], true) !== false);
+    const attributesNotConfigurable = Object.keys(model.attributes || {})
+      .filter(attribute => _.get(model, ['attributes', attribute, 'configurable'], true) === false)
       .reduce((acc, attribute) => {
         acc[attribute] = model.attributes[attribute];
 
