@@ -20,7 +20,8 @@
     "pretest": "npm run lint",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo Tests are not implemented.",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "setup": "npm install && cd ./node_modules/strapi-helper-plugin && npm install"
   },
   "devDependencies": {
     "sanitize.css": "^4.1.0",
