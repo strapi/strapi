@@ -88,6 +88,7 @@ module.exports = function (strapi) {
                   const preLifecycle = {
                     validate: 'beforeCreate',
                     findOneAndRemove: 'beforeDestroy',
+                    remove: 'beforeDestroy',
                     update: 'beforeUpdate',
                     find: 'beforeFetchAll',
                     findOne: 'beforeFetch',
@@ -105,6 +106,7 @@ module.exports = function (strapi) {
                   const postLifecycle = {
                     validate: 'afterCreate',
                     findOneAndRemove: 'afterDestroy',
+                    remove: 'afterDestroy',
                     update: 'afterUpdate',
                     find: 'afterFetchAll',
                     findOne: 'afterFetch',
