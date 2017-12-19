@@ -59,6 +59,7 @@
     "strapi-generate-admin": "3.0.0-alpha.7.2",
     "strapi-generate-api": "3.0.0-alpha.7.2",
     "strapi-generate-new": "3.0.0-alpha.7.2",
+    "strapi-generate-plugin": "3.0.0-alpha.7.2",
     "strapi-generate-policy": "3.0.0-alpha.7.2",
     "strapi-generate-service": "3.0.0-alpha.7.2",
     "strapi-utils": "3.0.0-alpha.7.2"

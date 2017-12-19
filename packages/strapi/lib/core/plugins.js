@@ -84,7 +84,7 @@ module.exports = function() {
               fs.unlinkSync(buildPath);
             }
 
-            if (err.code === 'ENOENT') {
+            if (err && err.code === 'ENOENT') {
               try {
                 fs.accessSync(path.resolve(buildPath, '..', '..'));
               } catch (err) {
