@@ -10,13 +10,14 @@ const exec = require('child_process').execSync;
 module.exports = {
   installPlugin: async ctx => {
     try {
-      const { plugin } = ctx.request.body;
+      const { plugin, port } = ctx.request.body;
       const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
 
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-      exec(`node ${strapiBin} install ${plugin}`);
+      
+      exec(`node ${strapiBin} install ${plugin} ${port === '4000' ? '--dev' : ''}`);
 
       ctx.send({ ok: true });
 

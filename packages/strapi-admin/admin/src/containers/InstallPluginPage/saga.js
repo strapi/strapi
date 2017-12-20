@@ -22,10 +22,23 @@ import { makeSelectPluginToDownload } from './selectors';
 export function* pluginDownload() {
   try {
     const pluginToDownload = yield select(makeSelectPluginToDownload());
-    const response = yield call(request, '/admin/plugins/install', { method: 'POST', body: { plugin: pluginToDownload }});
+    const opts = {
+      method: 'POST',
+      body: {
+        plugin: pluginToDownload,
+        port: window.location.port,
+      },
+    };
+    const response = yield call(request, '/admin/plugins/install', opts, true);
 
     if (response.ok) {
+      yield new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 2500);
+      });
       yield put(downloadPluginSucceeded());
+      window.location.reload();
     }
   } catch(err) {
     yield put(downloadPluginError());
@@ -34,7 +47,13 @@ export function* pluginDownload() {
 
 export function* pluginsGet() {
   try {
-    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', { method: 'GET' });
+    const opts = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
     const supportUs = {
       description: 'app.components.InstallPluginPage.plugin.support-us.description',
       id: 'support-us',
