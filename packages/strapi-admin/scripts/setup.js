@@ -30,7 +30,9 @@ shell.ls('* -d', plugins).forEach(function (plugin) {
     silent: true
   });
 
-   sa
+  if (build.stderr) {
+    console.error(build.stderr);
+  }
 
   shell.echo('');
 });
