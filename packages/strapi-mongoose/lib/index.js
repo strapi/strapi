@@ -352,7 +352,7 @@ module.exports = function (strapi) {
           break;
         case '_sort':
           result.key = `sort`;
-          result.value = (value === 'desc') ? '-' : '';
+          result.value = (_.toLower(value) === 'desc') ? '-' : '';
           result.value += key;
           break;
         case '_start':
