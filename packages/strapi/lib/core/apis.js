@@ -22,7 +22,7 @@ module.exports = function() {
     }),
     new Promise((resolve, reject) => {
       // Load configurations.
-      glob('./admin/!(config|node_modules)/*.*(js|json)', {
+      glob('./admin/!(config|node_modules|scripts)/*.*(js|json)', {
         cwd: this.config.appPath
       }, (err, files) => {
         if (err) {
