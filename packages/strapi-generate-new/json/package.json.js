@@ -24,7 +24,7 @@ module.exports = scope => {
     'description': 'A Strapi application.',
     'main': './server.js',
     'scripts': {
-      'setup': 'npm install --ignore-scripts && cd admin && npm run setup' // Ready to deploy setup
+      'setup': 'npm install --ignore-scripts && cd admin && npm run setup', // Ready to deploy setup
       'start': 'node server.js',
       'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
       'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js',

@@ -77,7 +77,7 @@ module.exports = function (plugin, cliArguments) {
           fs.accessSync(path.join(pluginPath, '.gitignore'))
         } catch (err) {
           if (err.code === 'ENOENT') {
-            fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-generate-plugin', 'files', '.gitignore'), path.join(pluginPath, '.gitignore'));
+            fs.copySync(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-plugin', 'templates', 'gitignore'), path.join(pluginPath, '.gitignore'));
           }
         }
 
