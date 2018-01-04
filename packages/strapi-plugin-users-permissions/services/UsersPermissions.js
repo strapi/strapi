@@ -238,7 +238,7 @@ module.exports = {
     if (Model.orm === 'bookshelf') {
       const tableName = Model.collectionName;
 
-      let queu = new Promise((resolve, reject) => {
+      let queue = new Promise((resolve, reject) => {
         strapi.connections[Model.connection].schema.hasTable(tableName)
         .then(exist => {
           if (!exist) {
@@ -268,7 +268,7 @@ CREATE TABLE "${tableName}" (
         });
       });
 
-      queu = queu.then(() => {
+      queue = queue.then(() => {
         const attributes = _.cloneDeep(Model.attributes);
         attributes.id = {
           type: 'integer'
