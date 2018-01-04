@@ -4,7 +4,7 @@
 
 ## How to create a policy?
 
-There is several ways to create a policy.
+There are several ways to create a policy.
  - Using the CLI `strapi generate:policy isAuthenticated`. Read the [CLI documentation](../cli/CLI.md) for more information.
  - Manually create a JavaScript file named `isAuthenticated.js` in `./config/policies/`.
 
@@ -20,7 +20,7 @@ module.exports = async (ctx, next) => {
 };
 ```
 
-In this example, we are verifying that a session is open. If it is the case, we are calling the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
+In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
 
 > Note: You can access to any controllers, services or models thanks to the global variable `strapi` in a policy.
 
@@ -82,7 +82,7 @@ The policy `isAuthenticated` located in `./plugins/auth/config/policies/isAuthen
 
 ### Scoped Policies
 
-The scoped policies can only be associated to the routes defining in the API where they have been declared.
+The scoped policies can only be associated to the routes defined in the API where they have been declared.
 
 **Path —** `./api/car/config/policies/isAdmin.js`.
 ```js
