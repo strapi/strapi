@@ -1,5 +1,6 @@
 {
-  "plugin.description": "Visualisez, modifiez et supprimez les données de votre base de données.",
+  "plugin.description.short": "Visualisez, modifiez et supprimez les données de votre base de données.",
+  "plugin.description.long": "Visualisez, modifiez et supprimez les données de votre base de données.",
   "containers.Home.pluginHeaderTitle": "Type de contenu",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",

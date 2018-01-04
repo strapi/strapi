@@ -1,5 +1,6 @@
 {
-  "plugin.description": "Modelize the data structure of you API.",
+  "plugin.description.short": "Modelize the data structure of you API.",
+  "plugin.description.long": "Modelize the data structure of you API. Create new fields and relations in a minute. The files are automatically created and updated in your project.",
   "attribute.string": "String",
   "attribute.text": "Text",
   "attribute.boolean": "Boolean",

@@ -35,7 +35,7 @@ class Row extends React.Component {
       <ListRow>
         <div className={cn("col-md-11", styles.nameWrapper)}>
           <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
-            <i className={`fa fa-${this.props.plugin.icon}`} />
+            <img src={`${this.props.plugin.logo}?sanitize=true`} alt="icon" />
           </div>
           <div className={styles.pluginContent}>
             <span>{this.props.plugin.name} —&nbsp;</span>

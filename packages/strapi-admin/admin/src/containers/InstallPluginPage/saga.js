@@ -53,9 +53,13 @@ export function* pluginsGet() {
     };
     const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
     const supportUs = {
-      description: 'app.components.InstallPluginPage.plugin.support-us.description',
+      description: {
+        short: 'app.components.InstallPluginPage.plugin.support-us.description',
+        long: 'app.components.InstallPluginPage.plugin.support-us.description',
+      },
       id: 'support-us',
       icon: '',
+      logo: '',
       name: 'buy a t-shirt',
       price: 30,
       ratings: 5,

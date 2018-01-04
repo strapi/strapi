@@ -24,6 +24,7 @@
 }
 
 .cardFooter {
+  cursor: initial;
   display: flex;
   justify-content: space-between;
   height: 54px;
@@ -31,13 +32,17 @@
   margin-right: -1.5rem;
   padding: 1.5rem 1.5rem 0 1.5rem;
   background-color: #FAFAFB;
+
+  &>div:first-of-type {
+    margin-top: 3px;
+  }
 }
 
 .cardPrice {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   padding-top: 2rem;
   > div:first-child {
     > i {

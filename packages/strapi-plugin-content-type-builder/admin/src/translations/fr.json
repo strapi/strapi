@@ -1,5 +1,6 @@
 {
-  "plugin.description": "Modelisez la structure de données de votre API.",
+  "plugin.description.short": "Modelisez la structure de données de votre API.",
+  "plugin.description.long": "Modelisez la structure de données de votre API. Créer des nouveaux champs et relations en un instant. Les fichiers se créent et se mettent à jour automatiquement.",
   "attribute.string": "Chaîne de caractères",
   "attribute.text": "Text",
   "attribute.boolean": "Booléen",

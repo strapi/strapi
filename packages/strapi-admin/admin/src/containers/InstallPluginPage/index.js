@@ -89,6 +89,14 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
                 plugin={plugin}
                 showSupportUsButton={plugin.id === 'support-us'}
                 isAlreadyInstalled={!isUndefined(get(this.context.plugins.toJS(), plugin.id))}
+                downloadPlugin={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (plugin.id !== 'support-us') {
+                    this.props.downloadPlugin(plugin.id);
+                  }
+                }}
               />
             ))}
           </div>

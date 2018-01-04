@@ -1,5 +1,5 @@
+import { get } from 'lodash';
 import { fork, call, put, select, takeLatest } from 'redux-saga/effects';
-
 import { pluginDeleted } from 'containers/App/actions';
 import auth from 'utils/auth';
 import request from 'utils/request';
@@ -32,13 +32,30 @@ export function* deletePlugin() {
 
 export function* pluginsGet() {
   try {
+    // Fetch plugins.
     const response = yield call(request, '/admin/plugins', { method: 'GET' });
+
+    const opts = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // Fetch plugins informations.
+    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+
+    // Add logo URL to object.
+    Object.keys(response.plugins).map(name => {
+      response.plugins[name].logo = get(availablePlugins.find(plugin => plugin.id === name), 'logo', '');
+    });
 
     yield put(getPluginsSucceeded(response));
   } catch(err) {
     strapi.notification.error('notification.error');
   }
 }
+
 // Individual exports for testing
 export default function* defaultSaga() {
   yield fork(takeLatest, ON_DELETE_PLUGIN_CONFIRM, deletePlugin);

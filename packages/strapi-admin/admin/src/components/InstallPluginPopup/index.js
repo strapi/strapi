@@ -14,29 +14,9 @@ import cn from 'classnames';
 import Official from 'components/Official';
 // import StarsContainer from 'components/StarsContainer';
 
-// Icons
-import IconAuth from 'assets/icons/icon_auth-permissions.svg';
-import IconCM from 'assets/icons/icon_content-manager.svg';
-import IconCTB from 'assets/icons/icon_content-type-builder.svg';
-import IconSM from 'assets/icons/icon_settings-manager.svg';
-
 import styles from './styles.scss';
 
 class InstallPluginPopup extends React.Component {
-  getPluginICon = () => {
-    switch (this.props.plugin.id) {
-      case 'content-manager':
-        return IconCM;
-      case 'content-type-builder':
-        return IconCTB;
-      case 'settings-manager':
-        return IconSM;
-      case 'users-permissions':
-        return IconAuth;
-      default:
-    }
-  }
-
   handleClick = () => {
     this.props.history.push({ pathname: this.props.history.location.pathname });
     this.context.downloadPlugin(this.props.plugin.id);
@@ -79,7 +59,7 @@ class InstallPluginPopup extends React.Component {
           <div className={styles.wrapper}>
 
             <div className={styles.headerWrapper}>
-              <div className={styles.logo}><img src={this.getPluginICon()} alt="icon" /></div>
+              <div className={styles.logo}><img src={`${this.props.plugin.logo}?sanitize=true`} alt="icon" /></div>
               <div className={styles.headerInfo}>
                 <div className={styles.name}>{this.props.plugin.name}</div>
                 <div className={styles.ratings}>
@@ -93,7 +73,7 @@ class InstallPluginPopup extends React.Component {
                   <Official style={{ marginTop: '0' }} />
                 </div>
                 <div className={styles.headerDescription}>
-                  <FormattedMessage id={this.props.plugin.description} />
+                  <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} />
                 </div>
                 <div className={styles.headerButtonContainer}>
                   <div>
@@ -153,6 +133,10 @@ InstallPluginPopup.contextTypes = {
 };
 
 InstallPluginPopup.propTypes = {
+  description: PropTypes.shape({
+    long: PropTypes.string,
+    short: PropTypes.string,
+  }).isRequired,
   history: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   plugin: PropTypes.object.isRequired,
