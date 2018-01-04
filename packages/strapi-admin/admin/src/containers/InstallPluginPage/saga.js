@@ -32,13 +32,11 @@ export function* pluginDownload() {
     const response = yield call(request, '/admin/plugins/install', opts, true);
 
     if (response.ok) {
-      yield new Promise(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 2500);
-      });
       yield put(downloadPluginSucceeded());
-      window.location.reload();
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   } catch(err) {
     yield put(downloadPluginError());
