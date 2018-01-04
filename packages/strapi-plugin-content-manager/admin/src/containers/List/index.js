@@ -75,6 +75,8 @@ export class List extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.source = getQueryParameters(nextProps.location.search, 'source');
+
     const locationChanged = nextProps.location.pathname !== this.props.location.pathname;
 
     if (locationChanged) {

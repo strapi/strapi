@@ -38,10 +38,9 @@ module.exports = function (strapi) {
      */
 
     initialize: cb => {
-      let globalName;
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
-        const {host, port, username, password, database} = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
@@ -65,12 +64,6 @@ module.exports = function (strapi) {
 
         // Handle success
         instance.connection.on('open', () => {
-          // Select models concerned by this connection
-          let models = _.pickBy(strapi.models, { connection: connectionName });
-          if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
-            _.assign(models, _.pickBy(strapi.models, (model) => model.connection === undefined));
-          }
-
           const mountModels = (models, target, plugin = false) => {
             if (!target) return;
 
@@ -141,11 +134,10 @@ module.exports = function (strapi) {
                     virtuals: true
                   });
 
-
                   if (!plugin) {
-                    global[definition.globalName] = instance.model(definition.globalName, collection.schema);
+                    global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.collectionName);
                   } else {
-                    instance.model(definition.globalName, collection.schema);
+                    instance.model(definition.globalName, collection.schema, definition.collectionName);
                   }
 
                   // Expose ORM functions through the `target` object.
@@ -166,10 +158,6 @@ module.exports = function (strapi) {
 
             // Parse every registered model.
             _.forEach(models, (definition, model) => {
-              if (plugin) {
-                definition.globalId = _.upperFirst(_.camelCase(_.get(strapi.config.hook.settings.mongoose.collections, mongooseUtils.toCollectionName(model)) ? `${plugin}-${model}` : model));
-              }
-
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
               // Make sure the model has a connection.
@@ -227,22 +215,24 @@ module.exports = function (strapi) {
                   definition.loadedModel[name].type = utils(instance).convertType(details.type);
                 }
 
-                let FK;
-
                 switch (verbose) {
-                  case 'hasOne':
+                  case 'hasOne': {
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
+
                     definition.loadedModel[name] = {
                       type: instance.Schema.Types.ObjectId,
-                      ref: _.capitalize(details.model)
+                      ref
                     };
                     break;
-                  case 'hasMany':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'hasMany': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     if (FK) {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(details.collection),
+                        ref,
                         via: FK.via,
                         justOne: false
                       };
@@ -252,17 +242,19 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = [{
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.collection)
+                        ref
                       }];
                     }
                     break;
-                  case 'belongsTo':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'belongsTo': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
                     if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(details.model),
+                        ref,
                         via: FK.via,
                         justOne: true
                       };
@@ -272,19 +264,21 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = {
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.model)
+                        ref
                       };
                     }
 
                     break;
-                  case 'belongsToMany':
-                    FK = _.find(definition.associations, {alias: name});
+                  }
+                  case 'belongsToMany': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     // One-side of the relationship has to be a virtual field to be bidirectional.
                     if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                       definition.loadedModel[name] = {
                         type: 'virtual',
-                        ref: _.capitalize(FK.collection),
+                        ref,
                         via: FK.via
                       };
 
@@ -293,10 +287,11 @@ module.exports = function (strapi) {
                     } else {
                       definition.loadedModel[name] = [{
                         type: instance.Schema.Types.ObjectId,
-                        ref: _.capitalize(details.collection)
+                        ref
                       }];
                     }
                     break;
+                  }
                   default:
                     break;
                 }
@@ -306,15 +301,12 @@ module.exports = function (strapi) {
             });
           };
 
-          mountModels(models, strapi.models);
+          // Mount `./api` models.
+          mountModels(_.pickBy(strapi.models, { connection: connectionName }), strapi.models);
 
+          // Mount `./plugins` models.
           _.forEach(strapi.plugins, (plugin, name) => {
-            models = _.pickBy(strapi.plugins[name].models, { connection: connectionName })
-            if (connectionName === strapi.config.currentEnvironment.database.defaultConnection) {
-              _.assign(models, _.pickBy(strapi.plugins[name].models, (model) => model.connection === undefined));
-            }
-
-            mountModels(models, plugin.models, name);
+            mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
           });
 
           cb();
@@ -418,7 +410,7 @@ module.exports = function (strapi) {
                     .findOne({ id : recordId })
                     .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
                     .then(record => {
-                      if (record && _.isObject(record[details.via])) {
+                      if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
                         return this.manageRelations(details.model || details.collection, {
                           id: record[details.via][Model.primaryKey] || record[details.via].id,
                           values: {

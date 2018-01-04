@@ -7,16 +7,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { capitalize } from 'lodash';
+import { capitalize, has } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
 import IcoContainer from 'components/IcoContainer';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
+import IcoEmail from '../../assets/images/icon_email.png';
 import IcoImage from '../../assets/images/icon_image.png';
 import IcoNumber from '../../assets/images/icon_number.png';
 import IcoJson from '../../assets/images/icon_json.png';
+import IcoPassword from '../../assets/images/icon_password.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
@@ -38,6 +40,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'integer': IcoNumber,
       'float': IcoNumber,
       'decimal': IcoNumber,
+      'email': IcoEmail,
+      'password': IcoPassword,
     };
     this.state = {
       showWarning: false,
@@ -62,15 +66,38 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
   }
 
   render() {
+    const isNotEditable = has(this.props.row.params, 'configurable') && !this.props.row.params.configurable;
     const relationType = this.props.row.params.type ?
       <FormattedMessage id={`content-type-builder.attribute.${this.props.row.params.type}`} />
-      : <div><FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" /> <span style={{ fontStyle: 'italic' }}>{capitalize(this.props.row.params.target)}</span></div>;
+      : (
+        <div>
+          <FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" />
+          &nbsp;
+          <FormattedMessage id="content-type-builder.from">
+            {(message) => (
+              <span style={{ fontStyle: 'italic' }}>
+                {capitalize(this.props.row.params.target)}&nbsp;
+                {this.props.row.params.pluginValue ? (
+                  `(${message}: ${this.props.row.params.pluginValue})`
+                ) : ''}
+              </span>
+
+            )}
+          </FormattedMessage>
+        </div>
+      );
 
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
-    const icons = [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
-
+    const icons = isNotEditable ? [{ icoType: 'lock' }] : [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
+    const editableStyle = isNotEditable ? '' : styles.editable;
+    
     return (
-      <li className={`${styles.attributeRow} ${relationStyle}`} onClick={this.handleEdit}>
+      <li
+        className={`${styles.attributeRow} ${editableStyle} ${relationStyle}`}
+        onClick={() => {
+          isNotEditable ? () => {} : this.handleEdit();
+        }}
+      >
         <div className={styles.flex}>
           <div className={styles.nameContainer}>
             {this.renderAttributesBox()}
