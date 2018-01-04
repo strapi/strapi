@@ -215,7 +215,7 @@ module.exports = function (strapi) {
 
                 switch (verbose) {
                   case 'hasOne': {
-                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.model}`)) : _.capitalize(details.model);
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
                     definition.loadedModel[name] = {
                       type: instance.Schema.Types.ObjectId,
@@ -225,7 +225,7 @@ module.exports = function (strapi) {
                   }
                   case 'hasMany': {
                     const FK = _.find(definition.associations, {alias: name});
-                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.collection}`)) : _.capitalize(details.collection);
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     if (FK) {
                       definition.loadedModel[name] = {
@@ -247,7 +247,7 @@ module.exports = function (strapi) {
                   }
                   case 'belongsTo': {
                     const FK = _.find(definition.associations, {alias: name});
-                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.model}`)) : _.capitalize(details.model);
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
                     if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
                       definition.loadedModel[name] = {
@@ -270,7 +270,7 @@ module.exports = function (strapi) {
                   }
                   case 'belongsToMany': {
                     const FK = _.find(definition.associations, {alias: name});
-                    const ref = details.plugin ? _.upperFirst(_.camelCase(`${details.plugin}-${details.collection}`)) : _.capitalize(details.collection);
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     // One-side of the relationship has to be a virtual field to be bidirectional.
                     if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {

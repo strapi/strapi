@@ -28,25 +28,33 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
 
   componentDidMount() {
     if (!isEmpty(this.props.dropDownItems) && !this.props.isEditting) {
-      const target = {
-        name: 'params.target',
-        type: 'string',
-        value: get(this.props.dropDownItems[0], 'name'),
-      };
-
-      this.props.onChange({ target });
+      this.init(this.props);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (isEmpty(this.props.dropDownItems) && !isEmpty(nextProps.dropDownItems) && !this.props.isEditting) {
-      const target = {
-        name: 'params.target',
-        type: 'string',
-        value: get(nextProps.dropDownItems[0], 'name'),
-      };
+      this.init(nextProps);
+    }
+  }
 
-      this.props.onChange({ target });
+  init = (props) => {
+    const target = {
+      name: 'params.target',
+      type: 'string',
+      value: get(props.dropDownItems[0], 'name'),
+    };
+
+    this.props.onChange({ target });
+
+    if (get(props.dropDownItems[0], 'source')) {
+      this.props.onChange({
+        target: {
+          type: 'string',
+          name: 'params.pluginValue',
+          value: get(props.dropDownItems[0], 'source'),
+        },
+      });
     }
   }
 

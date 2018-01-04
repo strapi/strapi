@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { startsWith } from 'lodash';
+import { startsWith, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -17,6 +17,10 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
     // We need to create our own active url checker,
     // because of the two levels router.
     const isLinkActive = startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
+    const plugin = this.props.source !== 'content-manager' && this.props.source !== '' ?
+      (<div className={styles.plugin}>
+        <span>{upperFirst(this.props.source.split('-').join(' '))}</span>
+      </div>) : '';
 
     return (
       <li className={styles.item}>
@@ -32,11 +36,12 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
             id={this.props.label}
             defaultMessage='{label}'
             values={{
-              label: `${this.props.label} ${this.props.source !== 'content-manager' ? '⬖' : ''}`,
+              label: `${this.props.label}`,
             }}
             className={styles.linkLabel}
           />
         </Link>
+        {plugin}
       </li>
     );
   }
