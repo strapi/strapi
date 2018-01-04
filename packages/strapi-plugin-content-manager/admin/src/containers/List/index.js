@@ -224,7 +224,7 @@ export class List extends React.Component {
               id: pluginHeaderTitle,
             }}
             description={{
-              id: 'content-manager.containers.List.pluginHeaderDescription',
+              id: this.props.count > 1 ? 'content-manager.containers.List.pluginHeaderDescription' : 'content-manager.containers.List.pluginHeaderDescription.singular',
               values: {
                 label: this.props.count,
               },

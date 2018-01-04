@@ -148,7 +148,7 @@ const registerPlugin = (plugin) => {
   merge(translationMessages, plugin.translationMessages);
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
-  const shouldAllowRegister = isPluginAllowedToRegister(plugin);
+  const shouldAllowRegister = isPluginAllowedToRegister(plugin) !== null;
 
   switch (true) {
     // Execute bootstrap function and check if plugin can be rendered

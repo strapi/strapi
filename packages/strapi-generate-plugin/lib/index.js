@@ -16,11 +16,12 @@ const routesJSON = require('../json/routes.json.js');
  */
 
 module.exports = {
-  templatesDirectory: () => {
-    return path.resolve(__dirname, '..', 'templates');
-  },
+  templatesDirectory: path.resolve(__dirname, '..', 'templates'),
   before: require('./before'),
   targets: {
+    'plugins/:humanizeId/.gitignore': {
+      copy: 'gitignore'
+    },
 
     // Use the default `controller` file as a template for
     // every generated controller.

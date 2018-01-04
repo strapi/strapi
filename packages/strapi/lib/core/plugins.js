@@ -84,12 +84,24 @@ module.exports = function() {
               fs.unlinkSync(buildPath);
             }
 
+            if (err && err.code === 'ENOENT') {
+              try {
+                fs.accessSync(path.resolve(buildPath, '..', '..'));
+              } catch (err) {
+                if (err && err.code !== 'ENOENT') {
+                  return reject(err);
+                }
+
+                fs.mkdirSync(path.resolve(buildPath, '..', '..'));
+              }
+            }
+
             // Create `./config` folder
             try {
               fs.accessSync(path.resolve(buildPath, '..'));
             } catch (err) {
               if (err && err.code !== 'ENOENT') {
-                reject(err);
+                return reject(err);
               }
 
               fs.mkdirSync(path.resolve(buildPath, '..'));
