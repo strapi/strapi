@@ -233,7 +233,11 @@ function parseTarget(target, scope, cb) {
     // try requiring `strapi-generate-<module>` to get the core generator.
     if (!subGenerator && !module.match(/^strapi-generate-/)) {
       try {
-        subGenerator = require(path.resolve(process.mainModule.paths[1], 'strapi-generate-' + module));
+        if (process.mainModule.filename.indexOf('yarn') !== -1) {
+          subGenerator = require(path.resolve(process.mainModule.paths[2], 'strapi-generate-' + module));
+        } else {
+          subGenerator = require(path.resolve(process.mainModule.paths[1], 'strapi-generate-' + module));
+        }
       } catch (e1) {
         requireError = e1;
       }
