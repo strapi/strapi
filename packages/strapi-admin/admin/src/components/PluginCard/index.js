@@ -83,7 +83,7 @@ class PluginCard extends React.Component {
     const pluginIcon = this.props.plugin.id !== 'email' ? (
       <div className={styles.frame}>
         <span className={styles.helper} />
-        <img src={`${this.props.plugin.logo}?sanitize=true`} alt="icon" />
+        <img src={`${this.props.plugin.logo}`} alt="icon" />
       </div>
     ) : (
       <div className={styles.iconContainer}><i className={`fa fa-${this.props.plugin.icon}`} /></div>
@@ -97,7 +97,7 @@ class PluginCard extends React.Component {
             <div>{this.props.plugin.name}</div>
           </div>
           <div className={styles.cardDescription}>
-            <FormattedMessage id={this.props.plugin.description.short} />
+            {this.props.plugin.description.short}
             &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
           </div>
           <div className={styles.cardScreenshot} style={{ backgroundImage: `url(${Screenshot})` }}>
@@ -124,7 +124,7 @@ class PluginCard extends React.Component {
               <Button
                 className={cn(buttonClass, styles.button)}
                 label={buttonLabel}
-                onClick={this.props.handleDownloadPlugin}
+                onClick={this.handleDownloadPlugin}
               />
               <a
                 href="mailto:hi@strapi.io?subject=I'd like to support Strapi"
@@ -162,7 +162,6 @@ PluginCard.defaultProps = {
 
 PluginCard.propTypes = {
   downloadPlugin: PropTypes.func.isRequired,
-  handleDownloadPlugin: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   isAlreadyInstalled: PropTypes.bool,
   plugin: PropTypes.object,

@@ -53,7 +53,7 @@ const apiUrl = `${strapi.backendURL}/${pluginId}`;
 const router = strapi.router;
 
 // Create redux store with Strapi admin history
-const store = configureStore({}, strapi.router);
+const store = configureStore({}, strapi.router, pluginName);
 
 // Define the plugin root component
 function Comp(props) {

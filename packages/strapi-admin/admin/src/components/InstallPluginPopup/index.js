@@ -59,7 +59,7 @@ class InstallPluginPopup extends React.Component {
           <div className={styles.wrapper}>
 
             <div className={styles.headerWrapper}>
-              <div className={styles.logo}><img src={`${this.props.plugin.logo}?sanitize=true`} alt="icon" /></div>
+              <div className={styles.logo}><img src={`${this.props.plugin.logo}`} alt="icon" /></div>
               <div className={styles.headerInfo}>
                 <div className={styles.name}>{this.props.plugin.name}</div>
                 <div className={styles.ratings}>
@@ -73,7 +73,7 @@ class InstallPluginPopup extends React.Component {
                   <Official style={{ marginTop: '0' }} />
                 </div>
                 <div className={styles.headerDescription}>
-                  <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} />
+                  {this.props.plugin.description.short}
                 </div>
                 <div className={styles.headerButtonContainer}>
                   <div>
@@ -120,7 +120,7 @@ class InstallPluginPopup extends React.Component {
             })}
           </div>
           <div className={styles.pluginDescription}>
-            {this.props.plugin.longDescription}
+            {this.props.plugin.description.long || this.props.plugin.description.short}
           </div>
         </ModalBody>
       </Modal>
@@ -132,11 +132,17 @@ InstallPluginPopup.contextTypes = {
   downloadPlugin: PropTypes.func.isRequired,
 };
 
+InstallPluginPopup.defaultProps = {
+  description: {
+    short: 'No description available',
+  },
+};
+
 InstallPluginPopup.propTypes = {
   description: PropTypes.shape({
     long: PropTypes.string,
     short: PropTypes.string,
-  }).isRequired,
+  }),
   history: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   plugin: PropTypes.object.isRequired,

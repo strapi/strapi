@@ -11,6 +11,7 @@ import {
 
 import request from 'utils/request';
 
+import { selectLocale } from '../LanguageProvider/selectors';
 import {
   downloadPluginError,
   downloadPluginSucceeded,
@@ -18,6 +19,7 @@ import {
 } from './actions';
 import { DOWNLOAD_PLUGIN, GET_PLUGINS } from './constants';
 import { makeSelectPluginToDownload } from './selectors';
+
 
 export function* pluginDownload() {
   try {
@@ -45,13 +47,23 @@ export function* pluginDownload() {
 
 export function* pluginsGet() {
   try {
+    // Get current locale.
+    const locale = yield select(selectLocale());
+
     const opts = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      params: {
+        lang: locale,
+      },
     };
+
+    // Retrieve plugins list.
     const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+
+    // Add support us card to the plugins list.
     const supportUs = {
       description: {
         short: 'app.components.InstallPluginPage.plugin.support-us.description',

@@ -4,6 +4,7 @@ import { pluginDeleted } from 'containers/App/actions';
 import auth from 'utils/auth';
 import request from 'utils/request';
 
+import { selectLocale } from '../LanguageProvider/selectors';
 import { deletePluginSucceeded, getPluginsSucceeded } from './actions';
 import { GET_PLUGINS, ON_DELETE_PLUGIN_CONFIRM } from './constants';
 import { makeSelectPluginToDelete } from './selectors';
@@ -34,11 +35,15 @@ export function* pluginsGet() {
   try {
     // Fetch plugins.
     const response = yield call(request, '/admin/plugins', { method: 'GET' });
+    const locale = yield select(selectLocale());
 
     const opts = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+      },
+      params: {
+        lang: locale,
       },
     };
 
