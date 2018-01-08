@@ -11,7 +11,14 @@ const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 const isAdmin = process.env.IS_ADMIN === 'true';
 
-const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+const appPath = (() => {
+  if (process.env.APP_PATH) {
+    return process.env.APP_PATH;
+  }
+
+  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+})();
+const adminPath = path.resolve(appPath, 'admin');
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 
 if (!isSetup) {
@@ -83,7 +90,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.join(process.env.PWD, 'admin', 'build')
+    path: path.join(adminPath, 'admin', 'build')
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -111,13 +118,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [path.join(process.env.PWD, 'admin', 'src')]
+      include: [path.join(adminPath, 'admin', 'src')]
         .concat(plugins.src.reduce((acc, current) => {
           acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
           return acc;
         }, []))
-        .concat([path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
+        .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,

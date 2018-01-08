@@ -18,7 +18,13 @@ const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+const appPath = (() => {
+  if (process.env.APP_PATH) {
+    return process.env.APP_PATH;
+  }
+
+  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+})();
 
 // Necessary configuration file to ensure that plugins will be loaded.
 const pluginsToInitialize = (() => {
@@ -71,7 +77,7 @@ if (!isSetup) {
   Object.assign(settings, {
     path: pathAccess[0] === '/' ? pathAccess.substring(1) : pathAccess,
     folder: _.get(server, 'admin.build.plugins.folder', 'plugins'),
-    host: _.get(server, 'admin.build.host', 'http://localhost:1337')
+    host:_.get(server, 'admin.build.host', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${path}`);
   });
 }
 
@@ -114,7 +120,7 @@ const main = (() => {
     return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
   }
 
-  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+  return path.join(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 })();
 
 module.exports = require('./webpack.base.babel')({
