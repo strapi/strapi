@@ -44,9 +44,15 @@ module.exports = function() {
               }
             });
 
-            // Remove previous
-            $('body').attr('front', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
-            $('body').attr('back', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`);
+            // Remove previous and use build configurations.
+            if (this.config.environment === 'production') {
+              $('body').removeAttr('front');
+              $('body').removeAttr('back');
+            } else {
+              // Update attribute with the current server configurations.
+              $('body').attr('front', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
+              $('body').attr('back', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`);
+            }
 
             fs.writeFile(sourcePath, $.html(), (err) => {
               if (err) {

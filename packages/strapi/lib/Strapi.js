@@ -24,7 +24,7 @@ class Strapi extends EventEmitter {
   constructor() {
     super();
 
-    this.setMaxListeners(15);
+    this.setMaxListeners(100);
 
     this.reload = this.reload();
 
