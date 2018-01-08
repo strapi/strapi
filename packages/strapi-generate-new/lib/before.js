@@ -49,154 +49,181 @@ module.exports = (scope, cb) => {
   }
 
   logger.info('Let\s configurate the connection to your database:');
-  let formSteps = new Promise(resolve => {
-    inquirer
-    .prompt([
-      {
-        type: 'list',
-        prefix: '',
-        name: 'client',
-        message: 'Choose your database:',
-        choices: [
-          {
-            name: 'MongoDB (highly recommended)',
-            value: {
-              database: 'mongo',
-              connector: 'strapi-mongoose'
-            }
-          },
-          {
-            name: 'Postgres',
-            value: {
-              database: 'postgres',
-              connector: 'strapi-bookshelf',
-              module: 'pg'
-            }
-          },
-          {
-            name: 'MySQL',
-            value: {
-              database: 'mysql',
-              connector: 'strapi-bookshelf',
-              module: 'mysql'
-            }
-          },
-          {
-            name: 'Sqlite3',
-            value: {
-              database: 'sqlite3',
-              connector: 'strapi-bookshelf',
-              module: 'sqlite3'
-            }
-          },
-          {
-            name: 'Redis',
-            value: {
-              database: 'redis',
-              connector: 'strapi-redis'
-            }
-          }
-        ]
-      }
-    ])
-    .then(answers => {
-      scope.client = answers.client;
-      scope.database = {
-        connector: answers.client.connector,
-        settings: {
-          client: answers.client.database
-        },
-        options: {}
-      };
 
-      resolve();
-    });
-  });
-
-  formSteps = formSteps.then(() => {
-    const asyncFn = [
-      new Promise(resolve => {
-        inquirer
-        .prompt([
-          {
-            type: 'input',
-            prefix: '',
-            name: 'name',
-            message: 'Database name:',
-            default: 'strapi'
-          },
-          {
-            type: 'input',
-            prefix: '',
-            name: 'host',
-            message: 'Host:',
-            default: 'localhost'
-          },
-          {
-            type: 'input',
-            prefix: '',
-            name: 'port',
-            message: 'Port:',
-            default: (answers) => {
-              const ports = {
-                mongo: 27017,
-                postgres: 5432,
-                mysql: 3306,
-                sqlite3: 1433,
-                redis: 6379
-              };
-
-              return ports[scope.client.database];
+  const connectionValidation = () => {
+    let formSteps = new Promise(resolve => {
+      inquirer
+      .prompt([
+        {
+          type: 'list',
+          prefix: '',
+          name: 'client',
+          message: 'Choose your database:',
+          choices: [
+            {
+              name: 'MongoDB (highly recommended)',
+              value: {
+                database: 'mongo',
+                connector: 'strapi-mongoose'
+              }
+            },
+            {
+              name: 'Postgres',
+              value: {
+                database: 'postgres',
+                connector: 'strapi-bookshelf',
+                module: 'pg'
+              }
+            },
+            {
+              name: 'MySQL',
+              value: {
+                database: 'mysql',
+                connector: 'strapi-bookshelf',
+                module: 'mysql'
+              }
+            },
+            {
+              name: 'Sqlite3',
+              value: {
+                database: 'sqlite3',
+                connector: 'strapi-bookshelf',
+                module: 'sqlite3'
+              }
+            },
+            {
+              name: 'Redis',
+              value: {
+                database: 'redis',
+                connector: 'strapi-redis'
+              }
             }
-          },
-          {
-            type: 'input',
-            prefix: '',
-            name: 'username',
-            message: 'Username:'
-          },
-          {
-            type: 'input',
-            prefix: '',
-            name: 'password',
-            message: 'Password:'
-          }
-        ])
-        .then(answers => {
-          scope.database.host = answers.host;
-          scope.database.port = answers.port;
-          scope.database.database = answers.name;
-          scope.database.username = answers.username;
-          scope.database.password = answers.password;
-
-          resolve();
-        });
-      }),
-      new Promise(resolve => {
-        let cmd = `npm install --prefix ${scope.rootPath}_ ${scope.client.connector}@alpha`;
-        if (scope.client.module) {
-          cmd += ` ${scope.client.module}`;
+          ]
         }
+      ])
+      .then(answers => {
+        scope.client = answers.client;
+        scope.database = {
+          connector: answers.client.connector,
+          settings: {
+            client: answers.client.database
+          },
+          options: {}
+        };
 
-        exec(cmd, () => {
+        resolve();
+      });
+    });
+
+    formSteps = formSteps.then(() => {
+      const asyncFn = [
+        new Promise(resolve => {
+          inquirer
+          .prompt([
+            {
+              type: 'input',
+              prefix: '',
+              name: 'name',
+              message: 'Database name:',
+              default: 'strapi'
+            },
+            {
+              type: 'input',
+              prefix: '',
+              name: 'host',
+              message: 'Host:',
+              default: 'localhost'
+            },
+            {
+              type: 'input',
+              prefix: '',
+              name: 'port',
+              message: 'Port:',
+              default: (answers) => {
+                const ports = {
+                  mongo: 27017,
+                  postgres: 5432,
+                  mysql: 3306,
+                  sqlite3: 1433,
+                  redis: 6379
+                };
+
+                return ports[scope.client.database];
+              }
+            },
+            {
+              type: 'input',
+              prefix: '',
+              name: 'username',
+              message: 'Username:'
+            },
+            {
+              type: 'input',
+              prefix: '',
+              name: 'password',
+              message: 'Password:'
+            }
+          ])
+          .then(answers => {
+            scope.database.host = answers.host;
+            scope.database.port = answers.port;
+            scope.database.database = answers.name;
+            scope.database.username = answers.username;
+            scope.database.password = answers.password;
+
+            resolve();
+          });
+        }),
+        new Promise(resolve => {
+          let cmd = `npm install --prefix ${scope.rootPath}_ ${scope.client.connector}@alpha`;
           if (scope.client.module) {
-            const lock = require(`${scope.rootPath}_/package-lock.json`);
-            scope.client.version = lock.dependencies[scope.client.module].version;
+            cmd += ` ${scope.client.module}`;
           }
 
-          resolve();
-        });
-      }),
-    ];
+          exec(cmd, () => {
+            if (scope.client.module) {
+              const lock = require(`${scope.rootPath}_/node_modules/${scope.client.module}/package.json`);
+              scope.client.version = lock.version;
+            }
 
-    Promise.all(asyncFn)
-    .then(() => {
-      execSync(`rm -r ${scope.rootPath}_`);
+            resolve();
+          });
+        })
+      ];
 
-      logger.info('Copying the dashboard...');
+      Promise.all(asyncFn)
+      .then(() => {
+        if (scope.client.connector === 'strapi-bookshelf') {
+          const knex  = require(`${scope.rootPath}_/node_modules/knex`)({
+            client: scope.client.module,
+            connection: scope.database
+          });
 
-      // Trigger callback with no error to proceed.
-      cb.success();
+          knex.raw('select 1+1 as result').then(() => {
+            console.log('Database connection is a success!');
+            knex.destroy();
+            execSync(`rm -r ${scope.rootPath}_`);
+
+            logger.info('Copying the dashboard...');
+
+            // Trigger callback with no error to proceed.
+            cb.success();
+          })
+          .catch(() => {
+            console.log('Database connection failed!');
+            connectionValidation();
+          });
+        } else {
+          execSync(`rm -r ${scope.rootPath}_`);
+
+          logger.info('Copying the dashboard...');
+
+          // Trigger callback with no error to proceed.
+          cb.success();
+        }
+      });
     });
-  });
+  };
+
+  connectionValidation();
 };
