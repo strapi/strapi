@@ -131,9 +131,11 @@ export class Edit extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
+        const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
+
         router.push({
-          pathname: replace(this.props.location.search, '?redirectUrl=', ''),
-          search: `?source=${this.source}`,
+          pathname: redirectUrl.split('?')[0],
+          search: redirectUrl.split('?')[1],
         });
       } else {
         router.push({
@@ -151,7 +153,7 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
+    const currentSchema = this.source !== 'content-manager' ? get(this.props.schema, ['plugins', this.source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
 
     let formattedValue = e.target.value;
 

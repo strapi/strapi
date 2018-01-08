@@ -11,9 +11,9 @@ module.exports = {
         qb.orderBy(params.sort);
       }
 
-      qb.offset(params.skip);
+      qb.offset(_.toNumber(params.skip));
 
-      qb.limit(params.limit);
+      qb.limit(_.toNumber(params.limit));
     }).fetchAll({
       withRelated: this.associations.map(x => x.alias)
     });
@@ -80,12 +80,11 @@ module.exports = {
           case 'oneToOne':
             if (response[current] !== params.values[current]) {
               const value = _.isNull(params.values[current]) ? response[current] : params.values;
-
               const recordId = _.isNull(params.values[current]) ? value[this.primaryKey] || value.id || value._id : value[current];
 
               if (response[current] && _.isObject(response[current]) && response[current][this.primaryKey] !== value[current]) {
                 virtualFields.push(
-                  strapi.query(details.collection || details.model).update({
+                  strapi.query(details.collection || details.model, details.plugin).update({
                     id: response[current][this.primaryKey],
                     values: {
                       [details.via]: null
@@ -97,9 +96,9 @@ module.exports = {
 
               // Remove previous relationship asynchronously if it exists.
               virtualFields.push(
-                strapi.query(details.model || details.collection).findOne({ id : recordId })
+                strapi.query(details.model || details.collection, details.plugin).findOne({ id : recordId })
                   .then(record => {
-                    if (record && _.isObject(record[details.via])) {
+                    if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
                       return module.exports.update.call(this, {
                         id: record[details.via][this.primaryKey] || record[details.via].id,
                         values: {
@@ -115,7 +114,7 @@ module.exports = {
 
               // Update the record on the other side.
               // When params.values[current] is null this means that we are removing the relation.
-              virtualFields.push(strapi.query(details.model || details.collection).update({
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).update({
                 id: recordId,
                 values: {
                   [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
@@ -147,7 +146,7 @@ module.exports = {
               toAdd.forEach(value => {
                 value[details.via] = params.values[this.primaryKey] || params[this.primaryKey];
 
-                virtualFields.push(strapi.query(details.model || details.collection).addRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
@@ -157,7 +156,7 @@ module.exports = {
               toRemove.forEach(value => {
                 value[details.via] = null;
 
-                virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: association.nature === 'manyToMany' ? params.values : value,
                   foreignKey: current
@@ -212,6 +211,7 @@ module.exports = {
     switch (association.nature) {
       case 'oneToOne':
       case 'oneToMany':
+      case 'manyToOne':
         return module.exports.update.call(this, params);
       case 'manyToMany':
         return this.forge({
@@ -234,6 +234,7 @@ module.exports = {
     switch (association.nature) {
       case 'oneToOne':
       case 'oneToMany':
+      case 'manyToOne':
         return module.exports.update.call(this, params);
       case 'manyToMany':
         return this.forge({

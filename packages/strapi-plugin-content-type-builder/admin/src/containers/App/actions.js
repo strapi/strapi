@@ -65,7 +65,7 @@ export function modelsFetch() {
 export function modelsFetchSucceeded(models) {
   const modelNumber = size(models.models) > 1 ? 'plural' : 'singular';
 
-  const sections = storeData.getMenu() || map(models.models, (model) => ({icon: 'fa-caret-square-o-right', name: model.name }));
+  const sections = storeData.getMenu() || map(models.models, (model) => ({icon: 'fa-caret-square-o-right', name: model.name, source: model.source }));
 
   if (!storeData.getMenu()){
     sections.push({ icon: 'fa-plus', name: 'button.contentType.add' });

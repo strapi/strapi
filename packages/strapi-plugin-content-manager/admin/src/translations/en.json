@@ -10,6 +10,7 @@
   "containers.Edit.returnList": "Return to list",
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.pluginHeaderDescription": "{label} entries found",
+  "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 
@@ -38,7 +39,7 @@
   "error.validation.minSupMax": "Can't be superior",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
-  
+
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",
 

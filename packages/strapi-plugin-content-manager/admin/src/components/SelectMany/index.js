@@ -27,6 +27,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
   getOptions = (query) => {
     const params = {
       limit: 20,
+      source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary

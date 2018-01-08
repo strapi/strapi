@@ -36,7 +36,7 @@ module.exports = {
     } catch (e) {
       // Collection undefined try to get the collection based on collectionIdentity
       if (typeof strapi !== 'undefined') {
-        collection = _.get(strapi.bookshelf.collections, collectionIdentity);
+        collection = _.get(strapi, `bookshelf.collections.${collectionIdentity}`);
       }
 
       // Impossible to match collectionIdentity before, try to use idAttribute
