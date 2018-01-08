@@ -215,7 +215,7 @@ module.exports = (scope, cb) => {
           });
 
           knex.raw('select 1+1 as result').then(() => {
-            console.log('Database connection is a success!');
+            logger.info('Database connection is a success!');
             knex.destroy();
             execSync(`rm -r ${scope.rootPath}_`);
 
@@ -225,8 +225,30 @@ module.exports = (scope, cb) => {
             cb.success();
           })
           .catch(() => {
-            console.log('Database connection failed!');
+            logger.warn('Database connection failed!');
             connectionValidation();
+          });
+        } else if (scope.client.connector === 'strapi-mongoose') {
+          const Mongoose = require(`${scope.rootPath}_/node_modules/mongoose`);
+
+          Mongoose.connect(`mongodb://${ (scope.database.username && scope.database.password) ? `${scope.database.username}:${scope.database.password}@` : '' }${scope.database.host}:${scope.database.port}/${scope.database.database}`, {
+            useMongoClient: true
+          }, function (err) {
+            if (err) {
+              logger.warn('Database connection failed!');
+              return connectionValidation();
+            }
+
+            logger.info('Database connection is a success!');
+
+            Mongoose.connection.close();
+
+            execSync(`rm -r ${scope.rootPath}_`);
+
+            logger.info('Copying the dashboard...');
+
+            // Trigger callback with no error to proceed.
+            cb.success();
           });
         } else {
           execSync(`rm -r ${scope.rootPath}_`);
