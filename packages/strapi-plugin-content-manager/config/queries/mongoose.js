@@ -58,6 +58,10 @@ module.exports = {
         acc[current] = params.values[current];
       } else {
         switch (association.nature) {
+          case 'oneWay':
+            acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
+
+            break;
           case 'oneToOne':
             if (response[current] !== params.values[current]) {
               const value = _.isNull(params.values[current]) ? response[current] : params.values;
