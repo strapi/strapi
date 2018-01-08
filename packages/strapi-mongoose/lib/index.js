@@ -44,13 +44,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
-          instance.connect(`mongodb://${host}:${port}/${database}`, {
-            useMongoClient: true
-          });
+          instance.connect(`mongodb://${host}:${port}/${database}`);
         } else {
-          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
-            useMongoClient: true
-          });
+          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`);
         }
 
         // Handle error
