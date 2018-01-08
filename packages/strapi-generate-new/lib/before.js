@@ -50,8 +50,51 @@ module.exports = (scope, cb) => {
 
   logger.info('Let\s configurate the connection to your database:');
 
+  scope.database = {};
+
   const connectionValidation = () => {
     let formSteps = new Promise(resolve => {
+      const databaseChoises = [
+        {
+          name: 'MongoDB (highly recommended)',
+          value: {
+            database: 'mongo',
+            connector: 'strapi-mongoose'
+          }
+        },
+        {
+          name: 'Postgres',
+          value: {
+            database: 'postgres',
+            connector: 'strapi-bookshelf',
+            module: 'pg'
+          }
+        },
+        {
+          name: 'MySQL',
+          value: {
+            database: 'mysql',
+            connector: 'strapi-bookshelf',
+            module: 'mysql'
+          }
+        },
+        {
+          name: 'Sqlite3',
+          value: {
+            database: 'sqlite3',
+            connector: 'strapi-bookshelf',
+            module: 'sqlite3'
+          }
+        },
+        {
+          name: 'Redis',
+          value: {
+            database: 'redis',
+            connector: 'strapi-redis'
+          }
+        }
+      ];
+
       inquirer
       .prompt([
         {
@@ -59,57 +102,23 @@ module.exports = (scope, cb) => {
           prefix: '',
           name: 'client',
           message: 'Choose your database:',
-          choices: [
-            {
-              name: 'MongoDB (highly recommended)',
-              value: {
-                database: 'mongo',
-                connector: 'strapi-mongoose'
-              }
-            },
-            {
-              name: 'Postgres',
-              value: {
-                database: 'postgres',
-                connector: 'strapi-bookshelf',
-                module: 'pg'
-              }
-            },
-            {
-              name: 'MySQL',
-              value: {
-                database: 'mysql',
-                connector: 'strapi-bookshelf',
-                module: 'mysql'
-              }
-            },
-            {
-              name: 'Sqlite3',
-              value: {
-                database: 'sqlite3',
-                connector: 'strapi-bookshelf',
-                module: 'sqlite3'
-              }
-            },
-            {
-              name: 'Redis',
-              value: {
-                database: 'redis',
-                connector: 'strapi-redis'
-              }
+          choices: databaseChoises,
+          default: () => {
+            if (scope.client) {
+              return _.findIndex(databaseChoises, { value: _.omit(scope.client, ['version'])});
             }
-          ]
+          }
         }
       ])
       .then(answers => {
         scope.client = answers.client;
-        scope.database = {
+        _.assign(scope.database, {
           connector: answers.client.connector,
           settings: {
             client: answers.client.database
           },
           options: {}
-        };
+        });
 
         resolve();
       });
@@ -125,14 +134,14 @@ module.exports = (scope, cb) => {
               prefix: '',
               name: 'name',
               message: 'Database name:',
-              default: 'strapi'
+              default: _.get(scope.database, 'database', 'strapi')
             },
             {
               type: 'input',
               prefix: '',
               name: 'host',
               message: 'Host:',
-              default: 'localhost'
+              default: _.get(scope.database, 'host', 'localhost')
             },
             {
               type: 'input',
@@ -140,6 +149,10 @@ module.exports = (scope, cb) => {
               name: 'port',
               message: 'Port:',
               default: (answers) => {
+                if (_.get(scope.database, 'port')) {
+                  return scope.database.port;
+                }
+
                 const ports = {
                   mongo: 27017,
                   postgres: 5432,
@@ -155,13 +168,15 @@ module.exports = (scope, cb) => {
               type: 'input',
               prefix: '',
               name: 'username',
-              message: 'Username:'
+              message: 'Username:',
+              default: _.get(scope.database, 'username', undefined)
             },
             {
               type: 'input',
               prefix: '',
               name: 'password',
-              message: 'Password:'
+              message: 'Password:',
+              default: _.get(scope.database, 'password', undefined)
             }
           ])
           .then(answers => {
