@@ -250,6 +250,33 @@ module.exports = (scope, cb) => {
             // Trigger callback with no error to proceed.
             cb.success();
           });
+        } else if (scope.client.connector === 'strapi-redis') {
+          const Redis = require(`${scope.rootPath}_/node_modules/ioredis`);
+          const redis = new Redis({
+            port: scope.database.port,
+            host: scope.database.host,
+            password: scope.database.password,
+            db: scope.database.database
+          });
+
+          redis.connect((err) => {
+            if (err) {
+              logger.warn('Database connection failed!');
+              redis.disconnect();
+              return connectionValidation();
+            }
+
+            logger.info('Database connection is a success!');
+
+            redis.disconnect();
+
+            execSync(`rm -r ${scope.rootPath}_`);
+
+            logger.info('Copying the dashboard...');
+
+            // Trigger callback with no error to proceed.
+            cb.success();
+          });
         } else {
           execSync(`rm -r ${scope.rootPath}_`);
 
