@@ -95,6 +95,9 @@ module.exports = strapi => {
             charset: _.get(connection.settings, 'charset'),
             schema: _.get(connection.settings, 'schema') || 'public',
             port: _.get(connection.settings, 'port'),
+            socket: _.get(connection.settings, 'socketPath'),
+            ssl: _.get(connection.settings, 'ssl') || false
+
           },
           debug: _.get(connection.options, 'debug') || false,
           acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),

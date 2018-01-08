@@ -1,6 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   capitalize,
+  cloneDeep,
   forEach,
   get,
   includes,
@@ -35,6 +36,7 @@ import { makeSelectModel } from './selectors';
 
 export function* getTableExistance() {
   try {
+    // TODO check table existance for plugin model
     const model = yield select(makeSelectModel());
     const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
     const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
@@ -49,9 +51,15 @@ export function* getTableExistance() {
 
 export function* fetchModel(action) {
   try {
-    const requestUrl = `/content-type-builder/models/${action.modelName}`;
+    const requestUrl = `/content-type-builder/models/${action.modelName.split('&source=')[0]}`;
+    const params = {};
+    const source = action.modelName.split('&source=')[1];
 
-    const data = yield call(request, requestUrl, { method: 'GET' });
+    if (source) {
+      params.source = source;
+    }
+
+    const data = yield call(request, requestUrl, { method: 'GET', params });
 
     yield put(modelFetchSucceeded(data));
 
@@ -68,8 +76,8 @@ export function* submitChanges(action) {
     yield put(setButtonLoader());
 
     const modelName = get(storeData.getContentType(), 'name');
-
-    const body = yield select(makeSelectModel());
+    const data = yield select(makeSelectModel());
+    const body = cloneDeep(data);
 
     map(body.attributes, (attribute, index) => {
       // Remove the connection key from attributes
@@ -82,10 +90,14 @@ export function* submitChanges(action) {
           delete body.attributes[index].params.dominant;
         }
 
-        if (includes(key, 'Value')) {
+        if (includes(key, 'Value') && key !== 'pluginValue') {
           // Remove and set needed keys for params
           set(body.attributes[index].params, replace(key, 'Value', ''), value);
           unset(body.attributes[index].params, key);
+        }
+
+        if (key === 'pluginValue' && value) {
+          set(body.attributes[index].params, 'plugin', true);
         }
 
         if (!value) {
@@ -94,6 +106,11 @@ export function* submitChanges(action) {
         }
       });
     });
+    const pluginModel = action.modelName.split('&source=')[1];
+
+    if (pluginModel) {
+      set(body, 'plugin', pluginModel);
+    }
 
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
@@ -130,7 +147,8 @@ export function* submitChanges(action) {
     }
 
   } catch(error) {
-    strapi.notification.error(error);
+    strapi.notification.error(get(error, ['response', 'payload', 'message'], 'notification.error'));
+    yield put(unsetButtonLoader());
   }
 }
 

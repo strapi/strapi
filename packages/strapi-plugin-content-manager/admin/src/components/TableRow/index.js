@@ -28,12 +28,12 @@ class TableRow extends React.Component {
    * @param value {*}      Value stored in database
    * @returns {*}
    */
-  getDisplayedValue(type, value) {
+  getDisplayedValue(type, value, name) {
     switch (type.toLowerCase()) {
       case 'string':
       case 'text':
       case 'email':
-        return value && !isEmpty(value.toString()) ? value.toString() : '-';
+        return (value && !isEmpty(value.toString())) || name === 'id' ? value.toString() : '-';
       case 'float':
       case 'integer':
       case 'biginteger':
@@ -71,7 +71,8 @@ class TableRow extends React.Component {
           <div className={styles.truncated}>
             {this.getDisplayedValue(
               header.type,
-              this.props.record[header.name]
+              this.props.record[header.name],
+              header.name,
             )}
           </div>
         </div>
