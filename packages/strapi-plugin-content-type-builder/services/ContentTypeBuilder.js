@@ -51,7 +51,7 @@ module.exports = {
         params.target = relation.model || relation.collection;
         params.key = relation.via;
         params.nature = relation.nature;
-        params.targetColumnName = _.get(strapi.models[params.target].attributes[params.key], 'columnName', '');
+        params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
       }
 
       attributes.push({
