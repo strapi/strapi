@@ -8,7 +8,7 @@ const watcher = (label, cmd, withSuccess = true) => {
   }
 
   const data = shell.exec(cmd, {
-    silent: true
+    silent: false
   });
 
   if (data.stderr && data.code !== 0) {
@@ -46,7 +46,8 @@ shell.cd('../strapi-admin');
 watcher('', 'npm install ../strapi-helper-plugin');
 watcher('', 'npm install ../strapi-utils');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-admin...', 'npm link', false);
+watcher('Linking strapi-admin...', 'npm install --no-optional', false);
+watcher('', 'npm link', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-generate-admin');

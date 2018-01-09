@@ -26,11 +26,6 @@ const $body = document.getElementsByTagName('body')[0];
 const devFrontURL = $body.getAttribute('front') ? window.location.origin + $body.getAttribute('front').replace(/\/$/, '') : null;
 const devBackendURL = $body.getAttribute('back') ? window.location.origin + $body.getAttribute('back').replace(/\/$/, '') : null;
 
-console.log("Remote URL", remoteURL);
-console.log("Backend URL", backendURL);
-console.log("DevFront URL", devFrontURL);
-console.log("DevBackend URL", devBackendURL);
-
 $body.removeAttribute('front');
 $body.removeAttribute('back');
 
