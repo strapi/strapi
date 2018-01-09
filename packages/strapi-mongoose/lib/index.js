@@ -251,7 +251,7 @@ module.exports = function (strapi) {
                     const FK = _.find(definition.associations, {alias: name});
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
-                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
+                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne' && FK.nature !== 'oneWay') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
                         ref,
