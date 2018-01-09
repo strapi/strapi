@@ -50,8 +50,8 @@ module.exports = function() {
               $('body').removeAttr('back');
             } else {
               // Update attribute with the current server configurations.
-              $('body').attr('front', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
-              $('body').attr('back', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`);
+              $('body').attr('front', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
+              $('body').attr('back', `/`);
             }
 
             fs.writeFile(sourcePath, $.html(), (err) => {

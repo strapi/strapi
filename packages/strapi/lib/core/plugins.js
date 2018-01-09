@@ -23,10 +23,10 @@ module.exports = function() {
           if (_.isString(folder)) {
             const cleanFolder = folder[0] === '/' ? folder.substring(1) : folder;
 
-            return `${this.config.environments[current].server.admin.build.host}/${cleanFolder}/${name}/main.js`;
+            return `/${cleanFolder}/${name}/main.js`;
           }
 
-          return `${this.config.environments[current].server.admin.build.host}/${name}/main.js`;
+          return `/${name}/main.js`;
         }
         case 'custom':
           if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
@@ -36,7 +36,7 @@ module.exports = function() {
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
         case 'origin':
         default:
-          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${name}/main.js`;
+          return `/${folder}/${name}/main.js`;
       }
     };
 
