@@ -35,6 +35,7 @@ class EditFormRelations extends React.Component { // eslint-disable-line react/p
     const relations = map(currentSchema.relations, (relation, i) => {
 
       switch (relation.nature) {
+        case 'oneWay':
         case 'oneToOne':
         case 'manyToOne':
           if (relation.dominant) {
