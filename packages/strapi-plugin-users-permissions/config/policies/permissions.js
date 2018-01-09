@@ -10,17 +10,18 @@ module.exports = async (ctx, next) => {
 
       ctx.state.user = await strapi.plugins['users-permissions'].services.user.fetch(_.pick(tokenUser, ['_id', 'id']));
 
-      if (!ctx.state.user) {
-        ctx.unauthorized('This user doesn\'t exit.');
-      }
-
-      role = ctx.state.user.role;
-
-      if (role.toString() === '0') {
-        return await next();
-      }
     } catch (err) {
       return ctx.unauthorized(err);
+    }
+
+    if (!ctx.state.user) {
+      ctx.unauthorized('This user doesn\'t exit.');
+    }
+
+    role = ctx.state.user.role;
+
+    if (role.toString() === '0') {
+      return await next();
     }
   }
 
