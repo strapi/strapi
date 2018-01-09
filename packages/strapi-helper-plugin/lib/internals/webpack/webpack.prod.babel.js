@@ -25,11 +25,18 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
+const adminPath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD, '..');
+  }
+
+  return path.resolve(appPath, 'admin');
+})();
 
 // Necessary configuration file to ensure that plugins will be loaded.
 const pluginsToInitialize = (() => {
   try {
-    return require(path.resolve(appPath, 'admin', 'src', 'config', 'plugins.json'));
+    return require(path.resolve(adminPath, 'admin', 'src', 'config', 'plugins.json'));
   } catch (e) {
     return [];
   }
@@ -59,27 +66,6 @@ const plugins = [
   new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   // new BundleAnalyzerPlugin(),
 ];
-
-// Default configurations.
-const settings = {
-  path: 'admin',
-  folder: 'plugins',
-  host: 'http://localhost:1337'
-};
-
-if (!isSetup) {
-  // Load server configurations.
-  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
-
-  const server = require(serverConfig);
-  const pathAccess =  _.get(server, 'admin.path', 'admin');
-
-  Object.assign(settings, {
-    path: pathAccess[0] === '/' ? pathAccess.substring(1) : pathAccess,
-    folder: _.get(server, 'admin.build.plugins.folder', 'plugins'),
-    host:_.get(server, 'admin.build.host', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${path}`);
-  });
-}
 
 // Build the `index.html file`
 if (isAdmin) {
@@ -120,7 +106,7 @@ const main = (() => {
     return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
   }
 
-  return path.join(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 })();
 
 module.exports = require('./webpack.base.babel')({

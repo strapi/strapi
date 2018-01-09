@@ -18,8 +18,14 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
-const adminPath = path.resolve(appPath, 'admin');
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const adminPath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD);
+  }
+
+  return path.resolve(appPath, 'admin');
+})();
 
 if (!isSetup) {
   try {
@@ -30,7 +36,9 @@ if (!isSetup) {
     strapi.log.level = 'silent';
 
     (async () => {
-      await strapi.load();
+      await strapi.load({
+        environment: process.env.NODE_ENV
+      });
     })();
   } catch (e) {
     console.log(e);
@@ -40,8 +48,8 @@ if (!isSetup) {
 
 // Define remote and backend URLs.
 const URLs = {
-  host: null,
-  backend: null
+  host: '/admin',
+  backend: '/'
 };
 
 if (isAdmin && !isSetup) {
@@ -53,8 +61,13 @@ if (isAdmin && !isSetup) {
     const path = _.get(server, 'admin.path', '/admin');
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
-      URLs.host = _.get(server, 'admin.build.host', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${path}`);
-      URLs.backend = _.get(server, 'admin.build.backend', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`);
+      if (_.get(server, 'admin.build.host')) {
+        URLs.host = `${_.get(server, 'admin.build.host').replace(/\/$/, '')}`;
+      } else {
+        URLs.host = _.get(server, 'admin.path', '/admin');
+      }
+
+      URLs.backend = _.get(server, 'admin.build.backend', `/`);
     }
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`)

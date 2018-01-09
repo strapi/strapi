@@ -7,13 +7,29 @@
 
 /* eslint-disable */
 // Retrieve remote and backend URLs.
-const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin' : process.env.REMOTE_URL || 'http://localhost:1337/admin';
-const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
+const remoteURL = (() => {
+  if (window.location.port === '4000') {
+    return 'http://localhost:4000/admin';
+  }
+
+  // Relative URL (ex: /dashboard)
+  if (process.env.REMOTE_URL[0] === '/' && process.env.REMOTE_URL.length > 1) {
+    return (window.location.origin + process.env.REMOTE_URL).replace(/\/$/, '');
+  }
+
+  return process.env.REMOTE_URL.replace(/\/$/, '');
+})();
+const backendURL = (process.env.BACKEND_URL === '/' ? window.location.origin : process.env.BACKEND_URL);
 
 // Retrieve development URL to avoid to re-build.
 const $body = document.getElementsByTagName('body')[0];
-const devFrontURL = $body.getAttribute('front');
-const devBackendURL = $body.getAttribute('back');
+const devFrontURL = $body.getAttribute('front') ? window.location.origin + $body.getAttribute('front').replace(/\/$/, '') : null;
+const devBackendURL = $body.getAttribute('back') ? window.location.origin + $body.getAttribute('back').replace(/\/$/, '') : null;
+
+console.log("Remote URL", remoteURL);
+console.log("Backend URL", backendURL);
+console.log("DevFront URL", devFrontURL);
+console.log("DevBackend URL", devBackendURL);
 
 $body.removeAttribute('front');
 $body.removeAttribute('back');
@@ -51,11 +67,11 @@ const plugins = (() => {
 /* eslint-enable */
 
 // Create redux store with history
-const initialState = {};
+const basename = (devFrontURL || remoteURL).replace(window.location.origin, '');
 const history = createHistory({
-  basename: (devFrontURL || remoteURL).replace(window.location.origin, ''),
+  basename,
 });
-const store = configureStore(initialState, history);
+const store = configureStore({}, history);
 
 const render = (translatedMessages) => {
   ReactDOM.render(
@@ -124,7 +140,7 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = plugin.source[process.env.NODE_ENV];
+        script.src = `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/');
         $body.appendChild(script);
       });
     })

@@ -4,37 +4,48 @@ const _ = require('lodash');
 
 shell.echo('');
 shell.echo('🕓  The setup process can take few minutes.');
-shell.echo('📦  Installing admin packages...');
+shell.echo('');
+shell.echo(`🔸  Administration Panel`);
+shell.echo('📦  Installing packages...');
 
 const pwd = shell.pwd();
 
 const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
 const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
 
-shell.rm('-rf', path.resolve(pwd.stdout, 'package-lock.json'));
+// Remove package-lock.json.
+shell.rm('-rf', path.resolve(appPath, 'package-lock.json'));
+shell.rm('-rf', path.resolve(appPath, 'admin', 'package-lock.json'));
 
-shell.exec(`cd ${path.resolve(pwd.stdout)} && npm install`, {
+// Install the project dependencies.
+shell.exec(`cd ${appPath} && npm install --ignore-scripts`, {
+  silent: true
+});
+
+// Install the administration dependencies.
+shell.exec(`cd ${path.resolve(appPath, 'admin')} && npm install`, {
   silent: true
 });
 
 if (isDevelopmentMode) {
-  shell.exec(`cd ${path.resolve(pwd.stdout)} && npm link strapi-helper-plugin && npm link strapi-utils`, {
+  shell.exec(`cd ${path.resolve(appPath, 'admin')} && npm link strapi-helper-plugin && npm link strapi-utils`, {
     silent: true
   });
 } else {
-  shell.exec(`cd ${path.resolve(pwd.stdout, 'node_modules', 'strapi-helper-plugin')} && npm install`, {
+  shell.exec(`cd ${path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin')} && npm install`, {
     silent: true
   });
 }
 
 shell.echo('🏗  Building...');
 
-const build = shell.exec(`cd ${path.resolve(pwd.stdout)} && APP_PATH=${appPath} npm run build `, {
-  silent: true
+const build = shell.exec(`cd ${path.resolve(appPath, 'admin')} && APP_PATH=${appPath} npm run build `, {
+  silent: false
 });
 
 if (build.stderr && build.code !== 0) {
   console.error(build.stderr);
+  process.exit(1);
 }
 
 shell.echo('✅  Success');
@@ -53,12 +64,13 @@ shell.ls('* -d', plugins).forEach(function (plugin) {
   });
   shell.echo('🏗  Building...');
 
-  const build = shell.exec(`cd ${path.resolve(plugins, plugin)} && npm run build`, {
+  const build = shell.exec(`cd ${path.resolve(plugins, plugin)} &&  APP_PATH=${appPath} npm run build`, {
     silent: true
   });
 
   if (build.stderr && build.code !== 0) {
     console.error(build.stderr);
+    process.exit(1);
   }
 
   shell.echo('✅  Success');

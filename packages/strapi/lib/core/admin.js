@@ -9,7 +9,9 @@ const cheerio = require('cheerio')
 module.exports = function() {
   return new Promise((resolve, reject) => {
     try {
-      if (this.config.environment === 'test') {
+      const environment = this.config.environment;
+
+      if (environment === 'test') {
         return resolve();
       }
 
@@ -40,12 +42,16 @@ module.exports = function() {
               if ($(this).attr('src')) {
                 const parse = path.parse($(this).attr('src'));
 
-                $(this).attr('src', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}/${parse.base}`);
+                if (environment === 'production') {
+                  $(this).attr('src', `/${parse.base}`);
+                } else {
+                  $(this).attr('src', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}/${parse.base}`);
+                }
               }
             });
 
             // Remove previous and use build configurations.
-            if (this.config.environment === 'production') {
+            if (environment === 'production') {
               $('body').removeAttr('front');
               $('body').removeAttr('back');
             } else {
