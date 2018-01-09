@@ -111,51 +111,72 @@ This will replace the folder's content located at `./admin/admin/build`. Visit h
 
 ## Deployment
 
-There is three cases to deploy the administration panel:
-1. On the same server as the API.
-2. Without the plugins on another server (AWS S3, Azure, etc) as the API.
-3. With the plugins on different servers as the API.
+The administration is nothing more than a React front-end application calling an API. The front-end and the back-end are independent and can be deployed on different servers which brings us to different scenarios:
 
-Let's dive into the build configurations. The file should look like this:
+1. Deploy the entire project on the same server.
+2. Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
+3. Deploy the administration panel and the plugins on another server than the API.
+
+Let's dive into the build configurations for each case.
+
+#### Deploy the entire project on the same server.
+
+You don't need to touch anything in your configuration file. This is the default behaviour and the build configurations will be automatically set. The server will start on the defined port and the administration panel will be accessible through http://yourdomain.com:1337/dashboard.
+
+You might want to change the path to access to the administration panel. Here the required configurations to change the path:
 
 **Path —** `./config/environment/**/server.json`.
-```json
+```js
 {
+  "host": "localhost",
+  "port": 1337,
+  "autoReload": {
+    "enabled": false
+  },
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "path": "/dashboard" // We change the path to access to the admin (highly recommended for security reasons).
+  }
+}
+```
+
+**You have to rebuild the administration panel to make this work.** Please follow the [step #2 of the deployment guide](../guides/deployment.md).
+
+#### Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
+
+It's very common to deploy the front-end and the back-end on different servers. Here the required configurations to handle this case:
+
+**Path —** `./config/environment/**/server.json`.
+```js
+{
+  "host": "localhost",
+  "port": 1337,
+  "autoReload": {
+    "enabled": false
+  },
+  "cron": {
+    "enabled": false
+  },
   "admin": {
     "build": {
-      "host": "https://admin.myapp.com",
-      "backend": "https://api.myapp.com:8080",
+      "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
+      "backend": "https://yourbackend.com",
       "plugins": {
-        "source":  "host",
-        "folder": "/plugins"
+        "source":  "origin" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/admin/content-manager/main.js).
       }
     }
   }
 }
 ```
 
-#### On the same server as the API
+The administration URL will be https://yourfrontend.com/dashboard and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/admin/content-manager/main.js`.
 
-You don't need to touch anything in your configuration file. This is the default behaviour and the build configurations will be automatically set.
+> Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `https://yourbackend.com/admin/**/main.js`
 
-#### Without the plugins on another server
 
-**Path —** `./config/environment/**/server.json`.
-```json
-{
-  "admin": {
-    "build": {
-      "host": "https://admin.myapp.com",
-      "backend": "https://api.myapp.com:8080",
-      "plugins": {
-        "source":  "origin"
-      }
-    }
-  }
-}
-```
-
-The administration URL will be https://admin.myapp.com and every request from the panel will hit the backend at https://api.myapp.com:8080. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://api.myapp.com:8080/admin/content-manager/main.js`.
+The DOM should look like this:
 
 **Path —** `./admin/admin/build/index.html`.
 ```html
@@ -163,38 +184,46 @@ The administration URL will be https://admin.myapp.com and every request from th
   <head></head>
   <body>
     <div id="app"></div>
-    <script type="text/javascript" src="https://admin.myapp.com/admin/vendor.dll.js"></script>
-    <script type="text/javascript" src="https://admin.myapp.com/admin/main.js"></script>
-    <script src="https://api.myapp.com:8080/admin/content-manager/main.js"></script>
-    <script src="https://api.myapp.com:8080/admin/settings-manager/main.js"></script>
-    <script src="https://api.myapp.com:8080/admin/content-type-builder/main.js"></script>
+    <script type="text/javascript" src="/dashboard/vendor.dll.js"></script>
+    <script type="text/javascript" src="/dashboard/main.js"></script>
+    <script src="https://yourbackend.com/admin/content-manager/main.js"></script>
+    <script src="https://yourbackend.com/admin/settings-manager/main.js"></script>
+    <script src="https://yourbackend.com/admin/content-type-builder/main.js"></script>
   </body>
 </html>
 ```
 
 > Note: The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
 
-#### With the plugins on another server
+#### Deploy the administration panel and the plugins on another server than the API
 
 In this case, we suppose that you decided to put your administration and the plugins on the same server but on a different server as the API.
 
 **Path —** `./config/environment/**/server.json`.
-```json
+```js
 {
+  "host": "localhost",
+  "port": 1337,
+  "autoReload": {
+    "enabled": false
+  },
+  "cron": {
+    "enabled": false
+  },
   "admin": {
     "build": {
-      "host": "https://admin.myapp.com",
-      "backend": "https://api.myapp.com:8080",
+      "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
+      "backend": "https://yourbackend.com",
       "plugins": {
-        "source":  "host",
-        "folder": "plugins"
+        "source":  "host" // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
+        "folder": "/plugins"
       }
     }
   }
 }
 ```
 
-The administration URL will be https://admin.myapp.com and every request from the panel will hit the backend at https://api.myapp.com:8080. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `https://admin.myapp.com/plugins/content-manager/main.js`.
+The administration URL will be https://yourfrontend.com/dashboard and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `https://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
 
 We also added a `folder` setting to separate the plugins from the administration build. In your server, the files structure should look like this:
 ```
@@ -233,11 +262,11 @@ The generated `index.html` will look like this:
   <head></head>
   <body>
     <div id="app"></div>
-    <script type="text/javascript" src="https://admin.myapp.com/admin/vendor.dll.js"></script>
-    <script type="text/javascript" src="https://admin.myapp.com/admin/main.js"></script>
-    <script src="https://admin.myapp.com/plugins/content-manager/main.js"></script>
-    <script src="https://admin.myapp.com/plugins/settings-manager/main.js"></script>
-    <script src="https://admin.myapp.com/plugins/content-type-builder/main.js"></script>
+    <script type="text/javascript" src="/dashboard/vendor.dll.js"></script>
+    <script type="text/javascript" src="/dashboard/main.js"></script>
+    <script src="/dashboard/plugins/content-manager/main.js"></script>
+    <script src="/dashboard/plugins/settings-manager/main.js"></script>
+    <script src="/dashboard/plugins/content-type-builder/main.js"></script>
   </body>
 </html>
 ```

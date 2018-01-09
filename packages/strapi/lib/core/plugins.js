@@ -35,8 +35,9 @@ module.exports = function() {
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
         case 'origin':
+          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${name}/main.js`;
         default:
-          return `/${folder}/${name}/main.js`;
+          return `/${name}/main.js`;
       }
     };
 
@@ -111,7 +112,7 @@ module.exports = function() {
             const data =  Object.keys(this.plugins).map(name => ({
               id: name,
               source: Object.keys(this.config.environments).reduce((acc, current) => {
-                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'origin');
+                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
 
                 if (_.isString(source)) {
                   acc[current] = configuratePlugin(acc, current, source, name);

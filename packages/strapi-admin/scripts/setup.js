@@ -51,28 +51,30 @@ if (build.stderr && build.code !== 0) {
 shell.echo('✅  Success');
 shell.echo('');
 
-const plugins = path.resolve(appPath, 'plugins');
+if (process.env.npm_config_plugins === 'true') {
+  const plugins = path.resolve(appPath, 'plugins');
 
-shell.ls('* -d', plugins).forEach(function (plugin) {
-  shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
-  shell.echo('📦  Installing packages...');
-  shell.exec(`cd ${path.resolve(plugins, plugin)} && npm install`, {
-    silent: true
+  shell.ls('* -d', plugins).forEach(function (plugin) {
+    shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
+    shell.echo('📦  Installing packages...');
+    shell.exec(`cd ${path.resolve(plugins, plugin)} && npm install`, {
+      silent: true
+    });
+    shell.exec(`cd ${path.resolve(plugins, plugin, 'node_modules', 'strapi-helper-plugin')} && npm install`, {
+      silent: true
+    });
+    shell.echo('🏗  Building...');
+
+    const build = shell.exec(`cd ${path.resolve(plugins, plugin)} &&  APP_PATH=${appPath} npm run build`, {
+      silent: true
+    });
+
+    if (build.stderr && build.code !== 0) {
+      console.error(build.stderr);
+      process.exit(1);
+    }
+
+    shell.echo('✅  Success');
+    shell.echo('');
   });
-  shell.exec(`cd ${path.resolve(plugins, plugin, 'node_modules', 'strapi-helper-plugin')} && npm install`, {
-    silent: true
-  });
-  shell.echo('🏗  Building...');
-
-  const build = shell.exec(`cd ${path.resolve(plugins, plugin)} &&  APP_PATH=${appPath} npm run build`, {
-    silent: true
-  });
-
-  if (build.stderr && build.code !== 0) {
-    console.error(build.stderr);
-    process.exit(1);
-  }
-
-  shell.echo('✅  Success');
-  shell.echo('');
-});
+}

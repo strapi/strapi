@@ -140,7 +140,10 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/');
+        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
+          `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
+          plugin.source[process.env.NODE_ENV]; // absolute
+
         $body.appendChild(script);
       });
     })

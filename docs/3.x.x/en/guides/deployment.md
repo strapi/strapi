@@ -13,16 +13,16 @@ Update the `production` settings with the IP and domain name where the project w
     "enabled": false
   },
   "admin": {
-    "build": {
-      "path": "/dashboard" // We highly recommend to change the default `/admin` path for security reasons.
-    }
+    "path": "/dashboard" // We highly recommend to change the default `/admin` path for security reasons.
   }
 }
 ```
 
-#### #2 - Setup
+**⚠️  If you changed the path to access to the administration, the step #2 is required.**
 
-Run this following command to install the dependencies and build the project.
+#### #2 - Setup (optional)
+
+Run this following command to install the dependencies and build the project with your custom configurations.
 
 ```bash
 cd /path/to/the/project
@@ -43,4 +43,4 @@ NODE_ENV=production npm start
 
 ### Advanced configurations
 
-If you want to host the administration on another server than the API, [please take a look at this dedicated section](advanced/customize-admin.md#deployment).
+If you want to host the administration on another server than the API, [please take a look at this dedicated section](../advanced/customize-admin.md#deployment).
