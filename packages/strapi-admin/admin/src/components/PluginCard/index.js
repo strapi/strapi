@@ -7,19 +7,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { isEmpty, map, times } from 'lodash';
+import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 // Temporary picture
 import Button from 'components/Button';
-import FakeScreenShot from './screenshot.png';
+import InstallPluginPopup from 'components/InstallPluginPopup';
+import Official from 'components/Official';
+// import StarsContainer from 'components/StarsContainer';
+
 import styles from './styles.scss';
+import Screenshot from './screenshot.png';
 
 class PluginCard extends React.Component {
-  state = { isOpen: false };
+  state = { isOpen: false, boostrapCol: 'col-lg-4' };
 
   componentDidMount() {
     this.shouldOpenModal(this.props);
+    window.addEventListener('resize', this.setBoostrapCol);
+    this.setBoostrapCol();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -28,14 +34,44 @@ class PluginCard extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.setBoostrapCol);
+  }
+
+  setBoostrapCol = () => {
+    let boostrapCol = 'col-lg-4';
+
+    if (window.innerWidth > 1680) {
+      boostrapCol = 'col-lg-3';
+    }
+
+    if (window.innerWidth > 2300) {
+      boostrapCol = 'col-lg-2';
+    }
+
+    this.setState({ boostrapCol });
+  }
+
+  handleClick = () => {
+    if (this.props.plugin.id !== 'support-us') {
+      this.props.history.push({
+        pathname: this.props.history.location.pathname,
+        hash: `${this.props.plugin.id}::description`,
+      });
+    } else {
+      this.aTag.click();
+    }
+  }
+
+  handleDownloadPlugin = () => {
+    this.props.downloadPlugin();
+  }
+
   shouldOpenModal = (props) => {
     this.setState({ isOpen: !isEmpty(props.history.location.hash) });
   }
 
   render() {
-    const stars = Math.round(this.props.plugin.ratings);
-    const coloredStars = times(stars, String);
-    const emptyStars = times(5 - stars, String);
     const buttonClass = !this.props.isAlreadyInstalled || this.props.showSupportUsButton ? styles.primary : styles.secondary;
 
     let buttonLabel = this.props.isAlreadyInstalled ? 'app.components.PluginCard.Button.label.install' : 'app.components.PluginCard.Button.label.download';
@@ -44,49 +80,73 @@ class PluginCard extends React.Component {
       buttonLabel = 'app.components.PluginCard.Button.label.support';
     }
 
+    const pluginIcon = this.props.plugin.id !== 'email' ? (
+      <div className={styles.frame}>
+        <span className={styles.helper} />
+        <img src={`${this.props.plugin.logo}`} alt="icon" />
+      </div>
+    ) : (
+      <div className={styles.iconContainer}><i className={`fa fa-${this.props.plugin.icon}`} /></div>
+    );
+
+    const descriptions = {
+      short: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.short} /> : this.props.plugin.description.short,
+      long: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} /> : this.props.plugin.description.long || this.props.plugin.description.short,
+    };
+
     return (
-      <div className={cn('col-md-4', styles.pluginCard)}>
+      <div className={cn(this.state.boostrapCol, styles.pluginCard)} onClick={this.handleClick}>
         <div className={styles.wrapper}>
           <div className={styles.cardTitle}>
-            <div><i className={`fa fa-${this.props.plugin.icon}`} /></div>
+            {pluginIcon}
             <div>{this.props.plugin.name}</div>
           </div>
           <div className={styles.cardDescription}>
-            <FormattedMessage id={this.props.plugin.description} />
+            {descriptions.short}
+            &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
           </div>
-          <div className={styles.cardScreenshot}>
-            <img src={FakeScreenShot} alt='plugin screenshot' />
+          <div className={styles.cardScreenshot} style={{ backgroundImage: `url(${Screenshot})` }}>
+
           </div>
           <div className={styles.cardPrice}>
             <div>
               <i className={`fa fa-${this.props.plugin.isCompatible ? 'check' : 'times'}`} />
               <FormattedMessage id={`app.components.PluginCard.compatible${this.props.plugin.id === 'support-us' ? 'Community' : ''}`} />
             </div>
-            <div>{this.props.plugin.price !== 0 ? `${this.props.plugin.price}€` : <FormattedMessage id="app.components.PluginCard.price.free" />}</div>
+            <div>{this.props.plugin.price !== 0 ? `${this.props.plugin.price}€` : ''}</div>
           </div>
-          <div className={styles.cardFooter}>
+          <div className={styles.cardFooter} onClick={e => e.stopPropagation()}>
             <div className={styles.ratings}>
-              <div className={styles.starsContainer}>
-                <div>
-                  {map(coloredStars, star => <i key={star} className=" fa fa-star" />)}
-                </div>
-                <div>
-                  {map(emptyStars, s => <i key={s} className="fa fa-star" />)}
-                </div>
-              </div>
+              {/*<StarsContainer ratings={this.props.plugin.ratings} />
               <div>
                 <span style={{ fontWeight: '600', color: '#333740' }}>{this.props.plugin.ratings}</span>
                 <span style={{ fontWeight: '500', color: '#666666' }}>/5</span>
               </div>
+              */}
+              <Official />
             </div>
             <div>
               <Button
                 className={cn(buttonClass, styles.button)}
                 label={buttonLabel}
+                onClick={this.handleDownloadPlugin}
               />
+              <a
+                href="mailto:hi@strapi.io?subject=I'd like to support Strapi"
+                style={{ display: 'none' }}
+                ref={(a) => { this.aTag = a; }}
+              >
+                &nbsp;
+              </a>
             </div>
           </div>
         </div>
+        <InstallPluginPopup
+          history={this.props.history}
+          isAlreadyInstalled={this.props.isAlreadyInstalled}
+          isOpen={!isEmpty(this.props.history.location.hash) && replace(this.props.history.location.hash.split('::')[0], '#', '') === this.props.plugin.id}
+          plugin={this.props.plugin}
+        />
       </div>
     );
   }
@@ -97,7 +157,6 @@ PluginCard.defaultProps = {
   plugin: {
     description: '',
     id: '',
-    icon: '',
     name: '',
     price: 0,
     ratings: 5,
@@ -106,6 +165,7 @@ PluginCard.defaultProps = {
 };
 
 PluginCard.propTypes = {
+  downloadPlugin: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   isAlreadyInstalled: PropTypes.bool,
   plugin: PropTypes.object,

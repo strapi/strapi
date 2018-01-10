@@ -60,7 +60,9 @@ module.exports = {
 
   getPermissions: async (ctx) => {
     try {
-      const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions();
+      const { lang } = ctx.query;
+      const plugins = await strapi.plugins['users-permissions'].services.userspermissions.getPlugins(lang);
+      const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions(plugins);
       ctx.send({ permissions });
     } catch(err) {
       ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
@@ -75,7 +77,9 @@ module.exports = {
 
   getRole: async (ctx) => {
     const { id } = ctx.params;
-    const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id);
+    const { lang } = ctx.query;
+    const plugins = await strapi.plugins['users-permissions'].services.userspermissions.getPlugins(lang);
+    const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id, plugins);
 
     if (_.isEmpty(role)) {
       return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
