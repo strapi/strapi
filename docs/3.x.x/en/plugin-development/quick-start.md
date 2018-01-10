@@ -21,9 +21,7 @@ Create a development project
 
 To generate a new plugin **run the following commands:**
 1. In your project folder `cd myDevelopmentProject && strapi generate:plugin my-plugin`.
-2. Make sure that the `strapi-helper-plugin` is linked to your plugin
-  - In the folder where strapi is cloned `cd pathToStrapiRepo/strapi/packages/strapi-helper-plugin && npm link`.
-  - In your project folder `cd pathToMyProject/myDevelopmentProject/plugins/my-plugin && npm link strapi-helper-plugin`.
+2. Link the `strapi-helper-plugin` dependency in your project folder `cd pathToMyProject/myDevelopmentProject/plugins/my-plugin && npm link strapi-helper-plugin`.
 3. Start the server in the admin folder `cd pathToMyProject/myDevelopmentProject/admin && npm start` and go to the following url [http://localhost:4000/admin](http://localhost:4000/admin).
 4. In a new terminal window open at the root of your project launch your Strapi server `strapi start`.
 

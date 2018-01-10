@@ -159,7 +159,7 @@ export class Edit extends React.Component {
 
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
       formattedValue = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
-    } else if (['float', 'integer', 'bigint'].indexOf(currentSchema.fields[e.target.name].type) !== -1) {
+    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(currentSchema.fields[e.target.name].type) !== -1) {
       formattedValue = toNumber(e.target.value);
     }
 
