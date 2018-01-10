@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, has, includes, isEmpty, map, toLower, upperFirst } from 'lodash';
+import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -77,7 +77,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     return (
       <div className={cn(styles.inputSearch, 'col-md-6')}>
         <label htmlFor={this.props.name}>
-          <FormattedMessage id={this.props.label} values={upperFirst(this.props.labelValues)} />
+          <FormattedMessage id={this.props.label} values={this.props.labelValues} />
         </label>
         <div className={cn('input-group')}>
           <span className={cn('input-group-addon', styles.addon)} />
