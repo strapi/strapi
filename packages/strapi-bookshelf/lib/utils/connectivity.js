@@ -9,11 +9,13 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, success, error) => {
   const knex  = require(`${scope.rootPath}_/node_modules/knex`)({
     client: scope.client.module,
-    connection: scope.database
+    connection: Object.assign(scope.database, {
+      user: scope.database.username
+    })
   });
 
   knex.raw('select 1+1 as result').then(() => {
-    logger.info('Database connection is a success!');
+    logger.info('The app has been connected to the database successfully');
     knex.destroy();
     execSync(`rm -r ${scope.rootPath}_`);
 
@@ -22,7 +24,7 @@ module.exports = (scope, success, error) => {
     success();
   })
   .catch(() => {
-    logger.warn('Database connection failed!');
+    logger.warn('Database connection has failed! Make sure your database is running.');
     error();
   });
 };

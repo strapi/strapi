@@ -19,11 +19,11 @@ module.exports = (scope, success, error) => {
     redis.disconnect();
 
     if (err) {
-      logger.warn('Database connection failed!');
+      logger.warn('Database connection has failed! Make sure your database is running.');
       return error();
     }
 
-    logger.info('Database connection is a success!');
+    logger.info('The app has been connected to the database successfully!');
 
     execSync(`rm -r ${scope.rootPath}_`);
 

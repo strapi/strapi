@@ -53,7 +53,7 @@ module.exports = (scope, cb) => {
   scope.database = {};
 
   const connectionValidation = () => {
-    const databaseChoises = [
+    const databaseChoices = [
       {
         name: 'MongoDB (highly recommended)',
         value: {
@@ -100,11 +100,11 @@ module.exports = (scope, cb) => {
         type: 'list',
         prefix: '',
         name: 'client',
-        message: 'Choose your database:',
-        choices: databaseChoises,
+        message: 'Choose your main database:',
+        choices: databaseChoices,
         default: () => {
           if (scope.client) {
-            return _.findIndex(databaseChoises, { value: _.omit(scope.client, ['version'])});
+            return _.findIndex(databaseChoices, { value: _.omit(scope.client, ['version'])});
           }
         }
       }
