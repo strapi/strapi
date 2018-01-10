@@ -28,7 +28,6 @@ module.exports = {
   },
 
   /**
-}
    * Retrieve a user record.
    *
    * @return {Object}
