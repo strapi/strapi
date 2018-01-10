@@ -30,12 +30,14 @@
 * [Routing](guides/routing.md)
 * [Services](guides/services.md)
 
-### Plugins
-* [Quick start](plugins/quick-start.md)
-* [Development](plugins/development.md)
-* [Helpers](plugins/utils.md)
-* [UI Components](plugins/ui-components.md)
-* [Advanced usage](plugins/advanced.md)
+### Plugin Development
+* [Quick start](plugin-development/quick-start.md)
+* [Plugin Folders and Files Architecture](plugin-development/plugin-architecture.md)
+* [Back-end Development](plugin-development/backend-development.md)
+* [Front-end Development](plugin-development/frontend-development.md)
+* [Front-end Use Cases](plugin-development/frontend-use-cases.md)
+* [Front-end Helpers](plugin-development/utils.md)
+* [Front-end UI Components](plugin-development/ui-components.md)
 
 ### Advanced Usage
 * [Admin panel](advanced/customize-admin.md)

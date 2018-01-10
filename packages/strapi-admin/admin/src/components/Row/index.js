@@ -13,6 +13,10 @@ import { FormattedMessage } from 'react-intl';
 import Ico from 'components/Ico';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
+import IconAuth from 'assets/icons/icon_auth-permissions.svg';
+import IconCtb from 'assets/icons/icon_content-type-builder.svg';
+import IconCm from 'assets/icons/icon_content-manager.svg';
+import IconSettings from 'assets/icons/icon_settings-manager.svg';
 
 import styles from './styles.scss';
 
@@ -30,13 +34,35 @@ class Row extends React.Component {
     this.props.onDeleteClick(e);
   }
 
+  renderImg = () => {
+    switch (this.props.plugin.name) {
+      case 'Auth & Permissions':
+        return <img src={IconAuth} alt="logo" />;
+      case 'Content Manager':
+        return <img src={IconCm} alt="logo" />;
+      case 'Settings Manager':
+        return <img src={IconSettings} alt="logo" />;
+      case 'Content Type Builder':
+        return <img src={IconCtb} alt="logo" />;
+      default:
+    }
+  }
+
   render() {
+    const pluginIcon = this.props.plugin.name !== 'Email' ? (
+      <div className={styles.frame} style={{ marginRight: '30px' }}>
+        <span className={styles.helper} />{this.renderImg()}
+      </div>
+    ) : (
+      <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
+        <i className={`fa fa-${this.props.plugin.icon}`} />
+      </div>
+    );
+
     return (
       <ListRow>
         <div className={cn("col-md-11", styles.nameWrapper)}>
-          <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
-            <i className={`fa fa-${this.props.plugin.icon}`} />
-          </div>
+          {pluginIcon}
           <div className={styles.pluginContent}>
             <span>{this.props.plugin.name} —&nbsp;</span>
             <FormattedMessage id={this.props.plugin.description} />

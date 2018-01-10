@@ -9,7 +9,7 @@ A request helper is available to handle all requests inside a plugin.
 It takes three arguments:
 - `requestUrl`: The url we want to fetch.
 - `options`: Please refer to this [documentation](https://github.com/github/fetch).
-- `true`: This third argument is optional. If true is passed the response will be sent only if the server has restarted check out the [example](#example-with-server-autoReload-watcher).
+- `true`: This third argument is optional. If true is passed the response will be sent only if the server has restarted check out the [example](#example-with-server-autoreload-watcher).
 
 ### Usage
 
