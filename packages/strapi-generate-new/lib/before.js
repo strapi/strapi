@@ -53,78 +53,72 @@ module.exports = (scope, cb) => {
   scope.database = {};
 
   const connectionValidation = () => {
-    let formSteps = new Promise(resolve => {
-      const databaseChoises = [
-        {
-          name: 'MongoDB (highly recommended)',
-          value: {
-            database: 'mongo',
-            connector: 'strapi-mongoose'
-          }
-        },
-        {
-          name: 'Postgres',
-          value: {
-            database: 'postgres',
-            connector: 'strapi-bookshelf',
-            module: 'pg'
-          }
-        },
-        {
-          name: 'MySQL',
-          value: {
-            database: 'mysql',
-            connector: 'strapi-bookshelf',
-            module: 'mysql'
-          }
-        },
-        {
-          name: 'Sqlite3',
-          value: {
-            database: 'sqlite3',
-            connector: 'strapi-bookshelf',
-            module: 'sqlite3'
-          }
-        },
-        {
-          name: 'Redis',
-          value: {
-            database: 'redis',
-            connector: 'strapi-redis'
+    const databaseChoises = [
+      {
+        name: 'MongoDB (highly recommended)',
+        value: {
+          database: 'mongo',
+          connector: 'strapi-mongoose'
+        }
+      },
+      {
+        name: 'Postgres',
+        value: {
+          database: 'postgres',
+          connector: 'strapi-bookshelf',
+          module: 'pg'
+        }
+      },
+      {
+        name: 'MySQL',
+        value: {
+          database: 'mysql',
+          connector: 'strapi-bookshelf',
+          module: 'mysql'
+        }
+      },
+      {
+        name: 'Sqlite3',
+        value: {
+          database: 'sqlite3',
+          connector: 'strapi-bookshelf',
+          module: 'sqlite3'
+        }
+      },
+      {
+        name: 'Redis',
+        value: {
+          database: 'redis',
+          connector: 'strapi-redis'
+        }
+      }
+    ];
+
+    inquirer
+    .prompt([
+      {
+        type: 'list',
+        prefix: '',
+        name: 'client',
+        message: 'Choose your database:',
+        choices: databaseChoises,
+        default: () => {
+          if (scope.client) {
+            return _.findIndex(databaseChoises, { value: _.omit(scope.client, ['version'])});
           }
         }
-      ];
-
-      inquirer
-      .prompt([
-        {
-          type: 'list',
-          prefix: '',
-          name: 'client',
-          message: 'Choose your database:',
-          choices: databaseChoises,
-          default: () => {
-            if (scope.client) {
-              return _.findIndex(databaseChoises, { value: _.omit(scope.client, ['version'])});
-            }
-          }
-        }
-      ])
-      .then(answers => {
-        scope.client = answers.client;
-        _.assign(scope.database, {
-          connector: answers.client.connector,
-          settings: {
-            client: answers.client.database
-          },
-          options: {}
-        });
-
-        resolve();
+      }
+    ])
+    .then(answers => {
+      scope.client = answers.client;
+      _.assign(scope.database, {
+        connector: answers.client.connector,
+        settings: {
+          client: answers.client.database
+        },
+        options: {}
       });
-    });
 
-    formSteps = formSteps.then(() => {
       const asyncFn = [
         new Promise(resolve => {
           inquirer
@@ -185,6 +179,8 @@ module.exports = (scope, cb) => {
             scope.database.database = answers.name;
             scope.database.username = answers.username;
             scope.database.password = answers.password;
+
+            logger.info('Testing database connection...');
 
             resolve();
           });
