@@ -170,7 +170,7 @@ strapi generate:plugin <name>
   Example: `strapi generate:plugin user` will create the plugin at `./plugins/user`.
 
 
-Please refer to the [plugins documentation](../plugins/development.md) to know more.
+Please refer to the [plugin develoment documentation](../plugin-development/quick-start.md) to know more.
 
 ***
 
@@ -198,7 +198,7 @@ options: [--dev]
 
 > **Note: You have to restart the server to load the plugin into your project.**
 
-Please refer to the [plugins documentation](../plugins/quick-start.md) to know more.
+Please refer to the [plugins documentation](../plugin-development/quick-start.md) to know more.
 
 ***
 
@@ -215,7 +215,7 @@ strapi uninstall <name>
   Example: `strapi uninstall content-type-builder` will remove the folder at `./plugins/content-type-builder`.
 
 
-Please refer to the [plugins documentation](../plugins/quick-start.md) to know more.
+Please refer to the [plugins documentation](../plugin-development/quick-start.md) to know more.
 
 ***
 

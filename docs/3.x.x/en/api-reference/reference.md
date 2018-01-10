@@ -77,7 +77,7 @@ Returns an object of plugins available in the project. Each plugin object contai
 
 ## strapi.query
 
-Returns a function that will returns the available queries for this model. This feature is only available inside the plugin's files (controllers, services, custom functions). For more details, see the [ORM queries section](../plugins/development.md#ORM queries).
+Returns a function that will returns the available queries for this model. This feature is only available inside the plugin's files (controllers, services, custom functions). For more details, see the [ORM queries section](../plugin-development/backend-development.md#ORM queries).
 
 ## strapi.reload
 
