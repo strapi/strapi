@@ -25,7 +25,7 @@ import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage';
-// import InstallPluginPage from 'containers/InstallPluginPage';
+import InstallPluginPage from 'containers/InstallPluginPage';
 import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage';
 import Logout from 'components/Logout';
@@ -123,7 +123,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/install-plugin" component={ComingSoonPage} exact />
+              <Route path="/install-plugin" component={InstallPluginPage} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />

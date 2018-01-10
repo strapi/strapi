@@ -45,7 +45,13 @@ export function* fetchUser(action) {
 
 export function* permissionsGet() {
   try {
-    const response = yield call(request, '/users-permissions/permissions', { method: 'GET' });
+    const response = yield call(request, '/users-permissions/permissions', {
+      method: 'GET',
+      params: {
+        lang: strapi.currentLanguage,
+      },
+    });
+
     yield put(getPermissionsSucceeded(response));
   } catch(err) {
     strapi.notification.error('users-permissions.EditPage.notification.permissions.error');
@@ -68,7 +74,12 @@ export function* policiesGet() {
 
 export function* roleGet(action) {
   try {
-    const role = yield call(request, `/users-permissions/roles/${action.id}`, { method: 'GET' });
+    const role = yield call(request, `/users-permissions/roles/${action.id}`, {
+      method: 'GET',
+      params: {
+        lang: strapi.currentLanguage,
+      },
+    });
 
     yield put(getRoleSucceeded(role));
   } catch(err) {

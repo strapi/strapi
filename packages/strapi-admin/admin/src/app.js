@@ -215,6 +215,7 @@ window.strapi = Object.assign(window.strapi || {}, {
   }),
   router: history,
   languages,
+  currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
 });
 
 const dispatch = store.dispatch;

@@ -6,11 +6,6 @@ import { createSelector } from 'reselect';
 const selectEditPageDomain = () => (state) => state.get('editPage');
 
 /**
- * Other specific selectors
- */
-
-
-/**
  * Default selector used by EditPage
  */
 

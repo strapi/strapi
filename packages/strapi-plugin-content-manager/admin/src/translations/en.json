@@ -1,5 +1,6 @@
 {
-  "plugin.description": "Quick way to see, edit and delete the data in your database.",
+  "plugin.description.short": "Quick way to see, edit and delete the data in your database.",
+  "plugin.description.long": "Quick way to see, edit and delete the data in your database.",
   "containers.Home.pluginHeaderTitle": "Content Manager",
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",

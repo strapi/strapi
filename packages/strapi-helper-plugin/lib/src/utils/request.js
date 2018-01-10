@@ -78,38 +78,38 @@ function serverRestartWatcher(response) {
  *
  * @return {object}           The response data
  */
- export default function request(url, options = {}, shouldWatchServerRestart = false) {
-   // Set headers
-   options.headers = Object.assign({
-     'Content-Type': 'application/json',
-   }, options.headers, {
-     'X-Forwarded-Host': 'strapi',
-   });
+export default function request(url, options = {}, shouldWatchServerRestart = false) {
+ // Set headers
+  if (!options.headers) {
+    options.headers = Object.assign({
+      'Content-Type': 'application/json',
+    }, options.headers, {
+      'X-Forwarded-Host': 'strapi',
+    });
+  }
 
-   const token = auth.getToken();
+  const token = auth.getToken();
 
-   if (token) {
-     options.headers = Object.assign({
-       'Authorization': `Bearer ${token}`,
-     }, options.headers);
-   }
+  if (token) {
+    options.headers = Object.assign({
+      'Authorization': `Bearer ${token}`,
+    }, options.headers);
+  }
 
-   // Add parameters to url
-   url = _.startsWith(url, '/')
-     ? `${strapi.backendURL}${url}`
-     : url;
+  // Add parameters to url
+  url = _.startsWith(url, '/') ? `${strapi.backendURL}${url}` : url;
 
-   if (options && options.params) {
-     const params = formatQueryParams(options.params);
-     url = `${url}?${params}`;
-   }
+  if (options && options.params) {
+    const params = formatQueryParams(options.params);
+    url = `${url}?${params}`;
+  }
 
-   // Stringify body object
-   if (options && options.body) {
-     options.body = JSON.stringify(options.body);
-   }
+  // Stringify body object
+  if (options && options.body) {
+    options.body = JSON.stringify(options.body);
+  }
 
-   return fetch(url, options)
+  return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)
     .then((response) => {
@@ -118,5 +118,5 @@ function serverRestartWatcher(response) {
       }
 
       return response;
-    });
- }
+  });
+}

@@ -1,5 +1,6 @@
 {
-  "plugin.description": "Configurez votre projet en quelques secondes.",
+  "plugin.description.short": "Configurez votre projet en quelques secondes.",
+  "plugin.description.long": "Configurez votre projet en quelques secondes.",
   "menu.section.global-settings": "Configuration générale",
   "menu.item.application": "Application",
   "menu.item.languages": "Langages",
