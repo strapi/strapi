@@ -174,11 +174,11 @@ module.exports = (scope, cb) => {
             }
           ])
           .then(answers => {
-            scope.database.host = answers.host;
-            scope.database.port = answers.port;
-            scope.database.database = answers.name;
-            scope.database.username = answers.username;
-            scope.database.password = answers.password;
+            scope.database.settings.host = answers.host;
+            scope.database.settings.port = answers.port;
+            scope.database.settings.database = answers.name;
+            scope.database.settings.username = answers.username;
+            scope.database.settings.password = answers.password;
 
             logger.info('Testing database connection...');
 
@@ -204,78 +204,13 @@ module.exports = (scope, cb) => {
 
       Promise.all(asyncFn)
       .then(() => {
-        if (scope.client.connector === 'strapi-bookshelf') {
-          const knex  = require(`${scope.rootPath}_/node_modules/knex`)({
-            client: scope.client.module,
-            connection: scope.database
-          });
-
-          knex.raw('select 1+1 as result').then(() => {
-            logger.info('Database connection is a success!');
-            knex.destroy();
-            execSync(`rm -r ${scope.rootPath}_`);
-
-            logger.info('Copying the dashboard...');
-
-            // Trigger callback with no error to proceed.
-            cb.success();
-          })
-          .catch(() => {
-            logger.warn('Database connection failed!');
-            connectionValidation();
-          });
-        } else if (scope.client.connector === 'strapi-mongoose') {
-          const Mongoose = require(`${scope.rootPath}_/node_modules/mongoose`);
-
-          Mongoose.connect(`mongodb://${ (scope.database.username && scope.database.password) ? `${scope.database.username}:${scope.database.password}@` : '' }${scope.database.host}:${scope.database.port}/${scope.database.database}`, function (err) {
-            if (err) {
-              logger.warn('Database connection failed!');
-              return connectionValidation();
-            }
-
-            logger.info('Database connection is a success!');
-
-            Mongoose.connection.close();
-
-            execSync(`rm -r ${scope.rootPath}_`);
-
-            logger.info('Copying the dashboard...');
-
-            // Trigger callback with no error to proceed.
-            cb.success();
-          });
-        } else if (scope.client.connector === 'strapi-redis') {
-          const Redis = require(`${scope.rootPath}_/node_modules/ioredis`);
-          const redis = new Redis({
-            port: scope.database.port,
-            host: scope.database.host,
-            password: scope.database.password,
-            db: scope.database.database
-          });
-
-          redis.connect((err) => {
-            redis.disconnect();
-
-            if (err) {
-              logger.warn('Database connection failed!');
-              return connectionValidation();
-            }
-
-            logger.info('Database connection is a success!');
-
-            execSync(`rm -r ${scope.rootPath}_`);
-
-            logger.info('Copying the dashboard...');
-
-            // Trigger callback with no error to proceed.
-            cb.success();
-          });
-        } else {
+        try {
+          require(`${scope.rootPath}_/node_modules/${scope.client.connector}/utils/connectivity.js`)(scope, cb.success, connectionValidation);
+        } catch(err) {
           execSync(`rm -r ${scope.rootPath}_`);
 
           logger.info('Copying the dashboard...');
 
-          // Trigger callback with no error to proceed.
           cb.success();
         }
       });
