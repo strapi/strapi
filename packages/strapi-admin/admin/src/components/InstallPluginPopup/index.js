@@ -52,6 +52,11 @@ class InstallPluginPopup extends React.Component {
   ];
 
   render() {
+    const descriptions = {
+      short: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.short} /> : this.props.plugin.description.short,
+      long: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} /> : this.props.plugin.description.long || this.props.plugin.description.short,
+    };
+
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.toggle} className={styles.modalPosition}>
         <ModalHeader toggle={this.toggle} className={styles.modalHeader} />
@@ -73,7 +78,7 @@ class InstallPluginPopup extends React.Component {
                   <Official style={{ marginTop: '0' }} />
                 </div>
                 <div className={styles.headerDescription}>
-                  {this.props.plugin.description.short}
+                  {descriptions.short}
                 </div>
                 <div className={styles.headerButtonContainer}>
                   <div>
@@ -120,7 +125,7 @@ class InstallPluginPopup extends React.Component {
             })}
           </div>
           <div className={styles.pluginDescription}>
-            {this.props.plugin.description.long || this.props.plugin.description.short}
+            {descriptions.long}
           </div>
         </ModalBody>
       </Modal>
@@ -134,7 +139,7 @@ InstallPluginPopup.contextTypes = {
 
 InstallPluginPopup.defaultProps = {
   description: {
-    short: 'No description available',
+    short: 'app.Components.InstallPluginPopup.noDescription',
   },
 };
 

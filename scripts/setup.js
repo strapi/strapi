@@ -41,7 +41,7 @@ shell.exec('npm install ../strapi-utils');
 shell.exec('npm link');
 
 shell.cd('../strapi');
-shell.exec('npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
+shell.exec('npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 shell.exec('npm link');
 
 shell.cd('../strapi-plugin-email');

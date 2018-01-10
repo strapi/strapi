@@ -89,6 +89,11 @@ class PluginCard extends React.Component {
       <div className={styles.iconContainer}><i className={`fa fa-${this.props.plugin.icon}`} /></div>
     );
 
+    const descriptions = {
+      short: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.short} /> : this.props.plugin.description.short,
+      long: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} /> : this.props.plugin.description.long || this.props.plugin.description.short,
+    };
+
     return (
       <div className={cn(this.state.boostrapCol, styles.pluginCard)} onClick={this.handleClick}>
         <div className={styles.wrapper}>
@@ -97,7 +102,7 @@ class PluginCard extends React.Component {
             <div>{this.props.plugin.name}</div>
           </div>
           <div className={styles.cardDescription}>
-            {this.props.plugin.description.short}
+            {descriptions.short}
             &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
           </div>
           <div className={styles.cardScreenshot} style={{ backgroundImage: `url(${Screenshot})` }}>
@@ -152,7 +157,6 @@ PluginCard.defaultProps = {
   plugin: {
     description: '',
     id: '',
-    icon: '',
     name: '',
     price: 0,
     ratings: 5,

@@ -16,8 +16,10 @@
 * [Table of contents](concepts/concepts.md)
 
 ### Guides
+* [Authentification](guides/authentification.md)
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
+* [Deployment](guides/deployment.md)
 * [Filters](guides/filters.md)
 * [Internationalization](guides/i18n.md)
 * [Models](guides/models.md)
@@ -27,7 +29,6 @@
 * [Responses](guides/responses.md)
 * [Routing](guides/routing.md)
 * [Services](guides/services.md)
-* [Authentification](guides/authentification.md)
 
 ### Plugins
 * [Quick start](plugins/quick-start.md)

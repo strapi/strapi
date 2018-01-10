@@ -23,6 +23,7 @@
   "app.components.InstallPluginPopup.navLink.avis": "avis",
   "app.components.InstallPluginPopup.navLink.faq": "faq",
   "app.components.InstallPluginPopup.navLink.changelog": "changelog",
+  "app.components.InstallPluginPopup.noDescription": "No description available",
 
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",

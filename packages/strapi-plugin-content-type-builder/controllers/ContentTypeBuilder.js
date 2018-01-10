@@ -13,13 +13,19 @@ module.exports = {
 
   getModel: async ctx => {
     const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
+    const { source } = ctx.request.query;
+
     let { model } = ctx.params;
 
     model = _.toLower(model);
 
-    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (!source && !_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
-    ctx.send({ model: Service.getModel(model) });
+    if (source && !_.get(strapi.plugins, [source, 'models', model])) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    }
+
+    ctx.send({ model: Service.getModel(model, source) });
   },
 
   getConnections: async ctx => {
@@ -27,14 +33,14 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
+    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
 
-    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name, plugin);
 
     if (!_.isEmpty(attributesErrors)) {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
@@ -44,24 +50,20 @@ module.exports = {
 
     await Service.generateAPI(name, description, connection, collectionName, []);
 
-    const [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
-
-    if (!_.isEmpty(modelFilePathErrors)) {
-      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-    }
+    const modelFilePath = Service.getModelPath(name, plugin);
 
     try {
-      const modelJSON = require(modelFilePath);
+      const modelJSON = _.cloneDeep(require(modelFilePath));
 
       modelJSON.attributes = formatedAttributes;
 
-      const clearRelationsErrors = Service.clearRelations(name);
+      const clearRelationsErrors = Service.clearRelations(name, plugin);
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, attributes, plugin);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -83,25 +85,23 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
+    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[_.toLower(name)] && name !== model) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!strapi.models[_.toLower(model)]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
+    if (plugin && !strapi.plugins[_.toLower(plugin)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.plugin.name' }] }]);
+    if (plugin && !strapi.plugins[_.toLower(plugin)].models[_.toLower(model)]) return ctx.badRequest(null, [{ message: [{ id: 'request.error.model.unknow' }] }]);
 
-    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes);
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name.toLowerCase(), plugin);
 
     if (!_.isEmpty(attributesErrors)) {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
-    let [modelFilePath, modelFilePathErrors] = Service.getModelPath(model);
-
-    if (!_.isEmpty(modelFilePathErrors)) {
-      return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-    }
+    let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
@@ -110,7 +110,7 @@ module.exports = {
     }
 
     try {
-      const modelJSON = require(modelFilePath);
+      const modelJSON = _.cloneDeep(require(modelFilePath));
 
       modelJSON.attributes = formatedAttributes;
       modelJSON.info = {
@@ -120,13 +120,13 @@ module.exports = {
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
 
-      const clearRelationsErrors = Service.clearRelations(model);
+      const clearRelationsErrors = Service.clearRelations(model, plugin);
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, attributes, plugin);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -139,11 +139,7 @@ module.exports = {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
         }
 
-        [modelFilePath, modelFilePathErrors] = Service.getModelPath(name);
-
-        if (!_.isEmpty(modelFilePathErrors)) {
-          return ctx.badRequest(null, [{ messages: modelFilePathErrors }]);
-        }
+        modelFilePath = Service.getModelPath(name, plugin);
       }
 
       try {

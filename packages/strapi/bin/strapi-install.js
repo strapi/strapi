@@ -71,6 +71,20 @@ module.exports = function (plugin, cliArguments) {
         // Move the plugin from the `node_modules` folder to the `./plugins` folder.
         fs.copySync(`${pluginPath}/node_modules/${pluginID}`, pluginPath);
 
+        // Copy .gitignore because the file is ignored during `npm publish`
+        // and we need it to build the plugin.
+        try {
+          fs.accessSync(path.join(pluginPath, '.gitignore'))
+        } catch (err) {
+          if (err.code === 'ENOENT') {
+            if (process.mainModule.filename.indexOf('yarn') !== -1) {
+              fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-generate-plugin', 'templates', 'gitignore'), path.join(pluginPath, '.gitignore'));
+            } else {
+              fs.copySync(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-plugin', 'templates', 'gitignore'), path.join(pluginPath, '.gitignore'));
+            }
+          }
+        }
+
         // Success.
         logger.info('The plugin has been successfully installed.');
         process.exit(0);

@@ -58,6 +58,10 @@ module.exports = {
         acc[current] = params.values[current];
       } else {
         switch (association.nature) {
+          case 'oneWay':
+            acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
+
+            break;
           case 'oneToOne':
             if (response[current] !== params.values[current]) {
               const value = _.isNull(params.values[current]) ? response[current] : params.values;
@@ -66,7 +70,7 @@ module.exports = {
 
               if (response[current] && _.isObject(response[current]) && response[current][this.primaryKey] !== value[current]) {
                 virtualFields.push(
-                  strapi.query(details.collection || details.model).update({
+                  strapi.query(details.collection || details.model, details.plugin).update({
                     id: response[current][this.primaryKey],
                     values: {
                       [details.via]: null
@@ -78,7 +82,7 @@ module.exports = {
 
               // Remove previous relationship asynchronously if it exists.
               virtualFields.push(
-                strapi.query(details.model || details.collection).findOne({ id : recordId })
+                strapi.query(details.model || details.collection, details.plugin).findOne({ id : recordId })
                   .then(record => {
                     if (record && _.isObject(record[details.via])) {
                       return module.exports.update.call(this, {
@@ -96,7 +100,7 @@ module.exports = {
 
               // Update the record on the other side.
               // When params.values[current] is null this means that we are removing the relation.
-              virtualFields.push(strapi.query(details.model || details.collection).update({
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).update({
                 id: recordId,
                 values: {
                   [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
@@ -127,14 +131,16 @@ module.exports = {
               // Push the work into the flow process.
               toAdd.forEach(value => {
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey] || params[this.primaryKey])) {
-                  value[details.via] = (value[details.via] || []).concat([(params.values[this.primaryKey] || params[this.primaryKey])]).filter(x => {
-                    return x !== null && x !== undefined;
-                  });
+                  value[details.via] = (value[details.via] || [])
+                    .concat([(params.values[this.primaryKey] || params[this.primaryKey])])
+                    .filter(x => {
+                      return x !== null && x !== undefined;
+                    });
                 } else {
                   value[details.via] = params[this.primaryKey] || params.id;
                 }
 
-                virtualFields.push(strapi.query(details.model || details.collection).addRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: value,
                   foreignKey: current
@@ -148,7 +154,7 @@ module.exports = {
                   value[details.via] = null;
                 }
 
-                virtualFields.push(strapi.query(details.model || details.collection).removeRelation({
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
                   values: value,
                   foreignKey: current

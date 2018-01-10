@@ -131,9 +131,11 @@ export class Edit extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editSuccess !== nextProps.editSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
+        const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
+
         router.push({
-          pathname: replace(this.props.location.search, '?redirectUrl=', ''),
-          search: `?source=${this.source}`,
+          pathname: redirectUrl.split('?')[0],
+          search: redirectUrl.split('?')[1],
         });
       } else {
         router.push({
@@ -151,13 +153,13 @@ export class Edit extends React.Component {
   }
 
   handleChange = (e) => {
-    const currentSchema = get(this.props.schema, [this.props.currentModelName]) || get(this.props.schema, ['plugins', this.source, this.props.currentModelName]);
+    const currentSchema = this.source !== 'content-manager' ? get(this.props.schema, ['plugins', this.source, this.props.currentModelName]) : get(this.props.schema, [this.props.currentModelName]);
 
     let formattedValue = e.target.value;
 
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
       formattedValue = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
-    } else if (['float', 'integer', 'bigint'].indexOf(currentSchema.fields[e.target.name].type) !== -1) {
+    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(currentSchema.fields[e.target.name].type) !== -1) {
       formattedValue = toNumber(e.target.value);
     }
 

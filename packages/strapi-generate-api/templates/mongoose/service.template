@@ -37,7 +37,7 @@ module.exports = {
 
   fetch: (params) => {
     return <%= globalID %>
-      .findOne(_.pick(params, _.keys(<%= globalID %>.schema.path)))
+      .findOne(_.pick(params, _.keys(<%= globalID %>.schema.paths)))
       .populate(_.keys(_.groupBy(_.reject(strapi.models.<%= id %>.associations, {autoPopulate: false}), 'alias')).join(' '));
   },
 

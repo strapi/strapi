@@ -27,8 +27,10 @@ module.exports = function() {
 
         // Try to access to path.
         fs.access(sourcePath, err => {
-          if (err) {
+          if (err && err.code !== 'ENOENT') {
             return reject(err);
+          } else if (err && err.code === 'ENOENT') {
+            return resolve();
           }
 
           fs.readFile(sourcePath, (err, html) => {

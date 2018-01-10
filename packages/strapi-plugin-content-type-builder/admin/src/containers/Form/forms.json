@@ -76,6 +76,14 @@
         "description": "content-type-builder.popUpForm.attributes.json.description"
       },
       {
+        "type": "email",
+        "description": "content-type-builder.popUpForm.attributes.email.description"
+      },
+      {
+        "type": "password",
+        "description": "content-type-builder.popUpForm.attributes.password.description"
+      },
+      {
         "type": "relation",
         "description": "content-type-builder.popUpForm.attributes.relation.description"
       }
@@ -272,6 +280,142 @@
             "value": false,
             "validations": {},
             "inputDescription": "content-type-builder.form.attribute.item.uniqueField.description"
+          },
+          {
+            "label": "content-type-builder.form.attribute.item.minimumLength",
+            "name": "params.minLength",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "label": "",
+                "name": "params.minLengthValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          },
+          {
+            "label": "content-type-builder.form.attribute.item.maximumLength",
+            "name": "params.maxLength",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "label": "",
+                "name": "params.maxLengthValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "email": {
+      "baseSettings": {
+        "items": [
+          {
+            "label": "content-type-builder.form.attribute.item.string.name",
+            "name": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "content-type-builder.form.attribute.item.settings.name",
+            "label": "content-type-builder.form.attribute.item.requiredField",
+            "name": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "content-type-builder.form.attribute.item.requiredField.description"
+          },
+          {
+            "label": "content-type-builder.form.attribute.item.uniqueField",
+            "name": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "content-type-builder.form.attribute.item.uniqueField.description"
+          },
+          {
+            "label": "content-type-builder.form.attribute.item.minimumLength",
+            "name": "params.minLength",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "label": "",
+                "name": "params.minLengthValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          },
+          {
+            "label": "content-type-builder.form.attribute.item.maximumLength",
+            "name": "params.maxLength",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "items": [
+              {
+                "label": "",
+                "name": "params.maxLengthValue",
+                "value": "",
+                "type": "number",
+                "validations": {
+                  "required": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "password": {
+      "baseSettings": {
+        "items": [
+          {
+            "label": "content-type-builder.form.attribute.item.string.name",
+            "name": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": "content-type-builder.form.attribute.item.settings.name",
+            "label": "content-type-builder.form.attribute.item.requiredField",
+            "name": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": "content-type-builder.form.attribute.item.requiredField.description"
           },
           {
             "label": "content-type-builder.form.attribute.item.minimumLength",

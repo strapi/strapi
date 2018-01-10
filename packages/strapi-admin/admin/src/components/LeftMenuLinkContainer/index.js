@@ -40,8 +40,8 @@ function LeftMenuLinkContainer({ plugins }) {
     <div key={j}>
       <p className={styles.title}>{pluginsSections[current].name}</p>
       <ul className={styles.list}>
-        {sortBy(pluginsSections[current].links, 'label').map(link =>
-          <LeftMenuLink key={link.label} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} source={link.source} />
+        {sortBy(pluginsSections[current].links, 'label').map((link, i) =>
+          <LeftMenuLink key={`${i}-${link.label}`} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} source={link.source} />
         )}
       </ul>
     </div>

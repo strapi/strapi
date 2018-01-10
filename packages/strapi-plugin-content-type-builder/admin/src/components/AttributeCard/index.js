@@ -10,8 +10,10 @@ import { FormattedMessage } from 'react-intl';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
+import IcoEmail from '../../assets/images/icon_email.png';
 import IcoImage from '../../assets/images/icon_image.png';
 import IcoJson from '../../assets/images/icon_json.png';
+import IcoPassword from '../../assets/images/icon_password.png';
 import IcoNumber from '../../assets/images/icon_number.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
@@ -23,9 +25,11 @@ import styles from './styles.scss';
 const asset = {
   'boolean': IcoBoolean,
   'date': IcoDate,
+  'email': IcoEmail,
   'media': IcoImage,
   'number': IcoNumber,
   'json': IcoJson,
+  'password': IcoPassword,
   'relation': IcoRelation,
   'string': IcoString,
   'text': IcoText,

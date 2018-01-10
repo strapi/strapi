@@ -13,6 +13,10 @@ import { FormattedMessage } from 'react-intl';
 import Ico from 'components/Ico';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
+import IconAuth from 'assets/icons/icon_auth-permissions.svg';
+import IconCtb from 'assets/icons/icon_content-type-builder.svg';
+import IconCm from 'assets/icons/icon_content-manager.svg';
+import IconSettings from 'assets/icons/icon_settings-manager.svg';
 
 import styles from './styles.scss';
 
@@ -28,6 +32,20 @@ class Row extends React.Component {
   handleClick = (e) => {
     this.setState({ showModal: !this.state.showModal });
     this.props.onDeleteClick(e);
+  }
+
+  renderImg = () => {
+    switch (this.props.plugin.name) {
+      case 'Auth & Permissions':
+        return <img src={IconAuth} alt="logo" />;
+      case 'Content Manager':
+        return <img src={IconCm} alt="logo" />;
+      case 'Settings Manager':
+        return <img src={IconSettings} alt="logo" />;
+      case 'Content Type Builder':
+        return <img src={IconCtb} alt="logo" />;
+      default:
+    }
   }
 
   render() {

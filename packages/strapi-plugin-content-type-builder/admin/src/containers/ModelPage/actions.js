@@ -155,10 +155,11 @@ export function setButtonLoader() {
   };
 }
 
-export function submit(context) {
+export function submit(context, modelName) {
   return {
     type: SUBMIT,
     context,
+    modelName,
   };
 }
 

@@ -11,6 +11,7 @@
   "containers.Edit.returnList": "Return to list",
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.pluginHeaderDescription": "{label} entries found",
+  "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 

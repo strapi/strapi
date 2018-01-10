@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.7.2",
+  "version": "3.0.0-alpha.7.3",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -20,12 +20,14 @@
     "pretest": "npm run lint",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo Tests are not implemented.",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "setup": "npm install && node ./scripts/setup.js"
   },
   "devDependencies": {
     "sanitize.css": "^4.1.0",
-    "strapi-helper-plugin": "3.0.0-alpha.7.2",
-    "strapi-utils": "3.0.0-alpha.7.2"
+    "shelljs": "^0.7.8",
+    "strapi-helper-plugin": "3.0.0-alpha.7.3",
+    "strapi-utils": "3.0.0-alpha.7.3"
   },
   "author": {
     "name": "Strapi",

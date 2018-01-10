@@ -50,7 +50,7 @@ module.exports = {
         process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
         {},
         function (err, user) {
-          if (err || !user || !user.id) {
+          if (err || !user || !_.get(user, 'id', '').toString()) {
             return reject('Invalid token.');
           }
           resolve(user);

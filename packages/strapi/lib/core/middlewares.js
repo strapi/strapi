@@ -101,7 +101,7 @@ module.exports = function() {
       const cwd = path.resolve(this.config.appPath, 'plugins');
 
       glob(
-        './**/middlewares/*/*(index|defaults).*(js|json)',
+        './*/middlewares/*/*(index|defaults).*(js|json)',
         {
           cwd
         },

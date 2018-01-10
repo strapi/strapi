@@ -5,6 +5,8 @@ import request from 'utils/request';
 import cleanData from 'utils/cleanData';
 import { router } from 'app';
 
+import { decreaseCount } from 'containers/List/actions';
+
 import {
   recordLoaded,
   recordEdited,
@@ -113,6 +115,7 @@ export function* deleteRecord({ id, modelName, source }) {
       });
 
       yield put(recordDeleted(id));
+      yield put(decreaseCount());
       strapi.notification.success('content-manager.success.record.delete');
 
       // Redirect to the list page.

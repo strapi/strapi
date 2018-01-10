@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
-import { map, isArray, isNull, isUndefined } from 'lodash';
+import { map, isArray, isNull, isUndefined, isFunction, get } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -27,6 +27,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
   getOptions = (query) => {
     const params = {
       limit: 20,
+      source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary
@@ -83,8 +84,8 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           loadOptions={this.getOptions}
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {
-            value: value.toJS(),
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, value.toJS()).mainField || value.toJS().id,
+            value: isFunction(value.toJS) ? value.toJS() : value,
+            label: templateObject({ mainField: this.props.relation.displayedAttribute }, isFunction(value.toJS) ? value.toJS() : value).mainField || (isFunction(value.toJS) ? get(value.toJS(), 'id') : get(value, 'id')),
           }}
         />
       </div>
