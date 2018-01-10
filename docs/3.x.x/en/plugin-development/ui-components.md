@@ -84,9 +84,9 @@ export default Foo;
 
 ## ExtendComponent
 
-ExtendComponent allows a plugin to injectDesign into another one.
+ExtendComponent allows a plugin to inject components into another one.
 
-> Refer to the advanced plugin [documentation](./advanced.md#inject-design) to see how to use it.
+> Refer to the use cases [documentation](./frontend-use-cases.md#inject-design) to see how to use it.
 
 ***
 
