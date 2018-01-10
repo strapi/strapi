@@ -1,4 +1,4 @@
-# Front-End Use Cases
+# Front-end Use Cases
 
 This section gives use cases examples on front-end plugin development.
 

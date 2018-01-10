@@ -1,6 +1,6 @@
-# Back-End Development
+# Back-end Development
 
-This section explains how the 'backend part' of your plugin works.
+This section explains how the 'back-end part' of your plugin works.
 
 ## Routes
 

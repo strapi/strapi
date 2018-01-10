@@ -1,4 +1,4 @@
-# Front-End Development
+# Front-end Development
 
 This section explains how to create your plugin interface in the admin panel. Refer to the Plugin Development [Quick Start Section](./quick-start.md) to start the project in development mode.
 
@@ -43,7 +43,7 @@ class App extends React.Component {
 
 // ...
 ```
-See the [Front-End Use Cases](./frontend-use-cases.md#handle-user-navigation) for more informations.
+See the [Front-end Use Cases](./frontend-use-cases.md#handle-user-navigation) for more informations.
 
 ## Data flow
 
