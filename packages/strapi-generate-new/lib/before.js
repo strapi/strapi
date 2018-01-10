@@ -186,14 +186,14 @@ module.exports = (scope, cb) => {
           });
         }),
         new Promise(resolve => {
-          let cmd = `npm install --prefix ${scope.rootPath}_ ${scope.client.connector}@alpha`;
+          let cmd = `npm install --prefix ${scope.rootPath} ${scope.client.connector}@alpha`;
           if (scope.client.module) {
             cmd += ` ${scope.client.module}`;
           }
 
           exec(cmd, () => {
             if (scope.client.module) {
-              const lock = require(`${scope.rootPath}_/node_modules/${scope.client.module}/package.json`);
+              const lock = require(`${scope.rootPath}/node_modules/${scope.client.module}/package.json`);
               scope.client.version = lock.version;
             }
 
@@ -205,9 +205,9 @@ module.exports = (scope, cb) => {
       Promise.all(asyncFn)
       .then(() => {
         try {
-          require(`${scope.rootPath}_/node_modules/${scope.client.connector}/utils/connectivity.js`)(scope, cb.success, connectionValidation);
+          require(`${scope.rootPath}/node_modules/${scope.client.connector}/lib/utils/connectivity.js`)(scope, cb.success, connectionValidation);
         } catch(err) {
-          execSync(`rm -r ${scope.rootPath}_`);
+          execSync(`rm -r ${scope.rootPath}`);
 
           logger.info('Copying the dashboard...');
 
