@@ -43,11 +43,10 @@ shell.cd('../strapi-helper-plugin');
 watcher('Linking strapi-helper-plugin...', 'npm link');
 
 shell.cd('../strapi-admin');
-watcher('', 'npm install ../strapi-helper-plugin');
-watcher('', 'npm install ../strapi-utils');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-utils --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-admin...', 'npm install --no-optional', false);
-watcher('', 'npm link', false);
+watcher('Linking strapi-admin', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-generate-admin');
@@ -67,35 +66,35 @@ watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-g
 watcher('Linking strapi...', 'npm link');
 
 shell.cd('../strapi-plugin-email');
-watcher('', 'npm install ../strapi-helper-plugin');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-plugin-email...', 'npm link', false);
+watcher('Linking strapi-plugin-email...', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-users-permissions');
-watcher('', 'npm install ../strapi-helper-plugin');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-plugin-users-permissions...', 'npm link', false);
+watcher('Linking strapi-plugin-users-permissions...', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-content-manager');
-watcher('', 'npm install ../strapi-helper-plugin');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-plugin-content-manager...', 'npm link', false);
+watcher('Linking strapi-plugin-content-manager...', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-settings-manager');
-watcher('', 'npm install ../strapi-helper-plugin');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-plugin-settings-manager...', 'npm link', false);
+watcher('Linking strapi-plugin-settings-manager...', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-content-type-builder');
-watcher('', 'npm install ../strapi-helper-plugin');
-watcher('', 'npm install ../strapi-generate');
-watcher('', 'npm install ../strapi-generate-api');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-generate --no-optional');
+watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('Linking strapi-plugin-content-type-builder...', 'npm link', false);
+watcher('Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 
 // Log installation duration.
