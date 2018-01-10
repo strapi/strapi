@@ -227,9 +227,7 @@ module.exports = (scope, cb) => {
         } else if (scope.client.connector === 'strapi-mongoose') {
           const Mongoose = require(`${scope.rootPath}_/node_modules/mongoose`);
 
-          Mongoose.connect(`mongodb://${ (scope.database.username && scope.database.password) ? `${scope.database.username}:${scope.database.password}@` : '' }${scope.database.host}:${scope.database.port}/${scope.database.database}`, {
-            useMongoClient: true
-          }, function (err) {
+          Mongoose.connect(`mongodb://${ (scope.database.username && scope.database.password) ? `${scope.database.username}:${scope.database.password}@` : '' }${scope.database.host}:${scope.database.port}/${scope.database.database}`, function (err) {
             if (err) {
               logger.warn('Database connection failed!');
               return connectionValidation();
@@ -256,15 +254,14 @@ module.exports = (scope, cb) => {
           });
 
           redis.connect((err) => {
+            redis.disconnect();
+
             if (err) {
               logger.warn('Database connection failed!');
-              redis.disconnect();
               return connectionValidation();
             }
 
             logger.info('Database connection is a success!');
-
-            redis.disconnect();
 
             execSync(`rm -r ${scope.rootPath}_`);
 
