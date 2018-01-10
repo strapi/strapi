@@ -208,7 +208,7 @@ A plugin is like a sub-app fully independent. It has its own business logic with
 
 The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. Also, it uses [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
-> Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styles) for detailed informations.
+> Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
 
 ***
 
