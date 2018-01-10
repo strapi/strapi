@@ -15,7 +15,7 @@ module.exports = async (ctx, next) => {
     }
 
     if (!ctx.state.user) {
-      ctx.unauthorized('This user doesn\'t exit.');
+      return ctx.unauthorized('This user doesn\'t exit.');
     }
 
     role = ctx.state.user.role;
