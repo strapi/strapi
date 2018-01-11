@@ -235,93 +235,87 @@ module.exports = {
   syncSchema: (cb) => {
     const Model = strapi.plugins['users-permissions'].models.user;
 
-    if (Model.orm === 'bookshelf') {
-      const tableName = Model.collectionName;
+    if (Model.orm !== 'bookshelf') {
+      return cb();
+    }
 
-      let queue = new Promise((resolve, reject) => {
-        strapi.connections[Model.connection].schema.hasTable(tableName)
-        .then(exist => {
-          if (!exist) {
-            strapi.log.warn(`
+    const tableName = Model.collectionName;
+
+    new Promise((resolve, reject) => {
+      strapi.connections[Model.connection].schema.hasTable(tableName)
+      .then(exist => {
+        if (!exist) {
+          strapi.log.warn(`
 ⚠️  TABLE \`${tableName}\` DOESN'T EXIST
 
 1️⃣  EXECUTE THE FOLLOWING SQL QUERY
 
 CREATE TABLE "${tableName}" (
-    id integer NOT NULL,
-    username text,
-    email text,
-    role text,
-    "resetPasswordToken" text,
-    password text,
-    updated_at timestamp with time zone,
-    created_at timestamp with time zone
+  id integer NOT NULL,
+  username text,
+  email text,
+  role text,
+  "resetPasswordToken" text,
+  password text,
+  updated_at timestamp with time zone,
+  created_at timestamp with time zone
 );
 
 2️⃣  RESTART YOUR SERVER
-            `);
+          `);
 
-            strapi.stop();
-          }
+          strapi.stop();
+        }
 
-          resolve();
-        });
+        resolve();
       });
+    })
+    .then(() => {
+      const attributes = _.cloneDeep(Model.attributes);
+      attributes.id = {
+        type: 'integer'
+      };
+      attributes.updated_at = attributes.created_at = {
+        type: 'timestamp with time zone'
+      };
 
-      queue = queue.then(() => {
-        const attributes = _.cloneDeep(Model.attributes);
-        attributes.id = {
-          type: 'integer'
-        };
-        attributes.updated_at = attributes.created_at = {
-          type: 'timestamp with time zone'
-        };
+      let commands = '';
 
-        let commands = '';
-
-        const columnExist = (description, attribute) => {
-          return new Promise((resolve, reject) => {
-            strapi.connections[Model.connection].schema.hasColumn(tableName, attribute)
-            .then(exist => {
-              if (!exist) {
-                if (description.type === 'string') {
-                  description.type = 'text';
-                }
-
-                commands += `\r\nALTER TABLE "${tableName}" ADD "${attribute}" ${description.type};`;
+      const columnExist = (description, attribute) => {
+        return new Promise((resolve, reject) => {
+          strapi.connections[Model.connection].schema.hasColumn(tableName, attribute)
+          .then(exist => {
+            if (!exist) {
+              if (description.type === 'string') {
+                description.type = 'text';
               }
 
-              resolve();
-            });
+              commands += `\r\nALTER TABLE "${tableName}" ADD "${attribute}" ${description.type};`;
+            }
+
+            resolve();
           });
-        };
-
-        const testsColumns = [];
-
-        _.forEach(attributes, (description, attribute) => {
-          testsColumns.push(columnExist(description, attribute));
         });
+      };
 
-        Promise.all(testsColumns)
-        .then(() => {
-          if (!_.isEmpty(commands)) {
-            strapi.log.warn(`
+      const testsColumns = Object.entries(attributes).map(([attribute, description]) => columnExist(description, attribute));
+      Promise.all(testsColumns)
+      .then(() => {
+        if (!_.isEmpty(commands)) {
+          strapi.log.warn(`
 ⚠️  TABLE \`${tableName}\` HAS MISSING COLUMNS
 
 1️⃣  EXECUTE THE FOLLOWING SQL QUERIES
 ${commands}
 
 2️⃣  RESTART YOUR SERVER
-            `);
+          `);
 
-            strapi.stop();
-          }
+          strapi.stop();
+        }
 
-          cb();
-        });
+        cb();
       });
-    } else {
-      cb();
-    }
+    });
   }
 };
