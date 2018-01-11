@@ -4,7 +4,8 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const URL = require('url');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
@@ -41,12 +42,9 @@ module.exports = function() {
             $('script').each(function(i, elem) {
               if ($(this).attr('src')) {
                 const parse = path.parse($(this).attr('src'));
+                const url = URL.parse(_.get(strapi.config.currentEnvironment.server, 'admin.build.host', _.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')));
 
-                if (environment === 'production') {
-                  $(this).attr('src', `/${parse.base}`);
-                } else {
-                  $(this).attr('src', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}/${parse.base}`);
-                }
+                $(this).attr('src', `${url.pathname.replace(/\/$/, '')}/${parse.base}`);
               }
             });
 
