@@ -53,7 +53,7 @@ These configurations are accessible through `strapi.config.backendURL` and `stra
 
 ## Language
 
-As described in the [i18n documentation](../plugins/development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
+As described in the [i18n documentation](../plugin-development/frontend-development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
 
 **Path —** `./config/language.json`.
 ```json

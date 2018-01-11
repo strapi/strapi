@@ -108,7 +108,8 @@
   "notification.info.emailSent": "L'email a été envoyé",
   "notification.success.delete": "L'élément a bien été supprimé",
 
-  "plugin.description": "Protegez votre API avec un système d'authentification complet",
+  "plugin.description.short": "Protégez votre API avec un système d'authentification complet basé sur JWT",
+  "plugin.description.long": "Protégez votre API avec un système d'authentification complet basé sur JWT (JSON Web Token). Ce plugin ajoute aussi une stratégie ACL (Access Control Layer) qui vous permet de gérer les permissions entre les groupes d'utilisateurs.",
 
   "Plugin.permissions.application.description": "Définissez les actions autorisées dans votre projet.",
   "Plugin.permissions.plugins.description": "Définissez les actions autorisées dans le {name} plugin.",

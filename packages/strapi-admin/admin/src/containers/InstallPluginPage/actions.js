@@ -5,10 +5,32 @@
  */
 
 import {
+  DOWNLOAD_PLUGIN,
+  DOWNLOAD_PLUGIN_ERROR,
+  DOWNLOAD_PLUGIN_SUCCEEDED,
   GET_PLUGINS,
   GET_PLUGINS_SUCCEEDED,
   ON_CHANGE,
 } from './constants';
+
+export function downloadPlugin(pluginToDownload) {
+  return {
+    type: DOWNLOAD_PLUGIN,
+    pluginToDownload,
+  };
+}
+
+export function downloadPluginError() {
+  return {
+    type: DOWNLOAD_PLUGIN_ERROR,
+  };
+}
+
+export function downloadPluginSucceeded() {
+  return {
+    type: DOWNLOAD_PLUGIN_SUCCEEDED,
+  };
+}
 
 export function getPlugins() {
   return {

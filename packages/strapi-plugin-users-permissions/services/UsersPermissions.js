@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path');
 const stringify = JSON.stringify;
 const _ = require('lodash');
+const request = require('request');
 
 /**
  * UsersPermissions.js service
@@ -40,7 +41,25 @@ module.exports = {
     });
   },
 
-  getActions: () => {
+  getPlugins: (plugin, lang = 'en') => {
+    return new Promise((resolve, reject) => {
+      request({
+        uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
+        json: true,
+        headers: {
+          'cache-control': 'max-age=3600'
+        }
+      }, (err, response, body) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve(body);
+      });
+    });
+  },
+
+  getActions: (plugins = []) => {
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
         acc[key] = { enabled: false, policy: '' };
@@ -60,7 +79,7 @@ module.exports = {
 
         return obj;
 
-      }, { controllers: {} });
+      }, { controllers: {}, information: plugins.find(plugin => plugin.id === key) || {} });
 
       return acc;
     }, {});
@@ -74,9 +93,16 @@ module.exports = {
     return _.merge(permissions, pluginsPermissions);;
   },
 
-  getRole: async (roleId) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles
+  getRole: async (roleId, plugins) => {
+    const appRoles = strapi.plugins['users-permissions'].config.roles;
+
     appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
+
+    Object.keys(appRoles[roleId].permissions)
+      .filter(name => name !== 'application')
+      .map(name => {
+        appRoles[roleId].permissions[name].information = plugins.find(plugin => plugin.id === name) || {};
+      });
 
     return appRoles[roleId];
   },

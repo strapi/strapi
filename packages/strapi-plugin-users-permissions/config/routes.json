@@ -146,6 +146,15 @@
     },
     {
       "method": "GET",
+      "path": "/user/me",
+      "handler": "User.me",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "GET",
       "path": "/user/:_id",
       "handler": "User.findOne",
       "config": {

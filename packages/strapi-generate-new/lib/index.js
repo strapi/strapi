@@ -9,6 +9,7 @@ const path = require('path');
 
 // Local dependencies.
 const packageJSON = require('../json/package.json.js');
+const database = require('../json/database.json.js');
 
 /**
  * Copy required files for the generated application
@@ -27,6 +28,10 @@ module.exports = {
     // Main package.
     'package.json': {
       jsonfile: packageJSON
+    },
+
+    'config/environments/development/database.json': {
+      jsonfile: database
     },
 
     // Copy dot files.

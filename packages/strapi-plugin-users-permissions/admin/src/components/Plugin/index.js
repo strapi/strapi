@@ -55,7 +55,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
           <div>
             { icon ? (
               <div className={styles.iconContainer}>
-                <i className={`fa fa-${icon}`} />
+                <img src={this.props.plugin.information.logo} alt="icon" />
               </div>
             ) : ''}
             <div className={styles.name}>{this.props.name}</div>
@@ -107,6 +107,7 @@ Plugin.defaultProps = {
   plugin: {
     description: 'users-permissions.Plugin.permissions.description.empty',
     controllers: {},
+    information: {},
   },
 };
 
@@ -115,6 +116,9 @@ Plugin.propTypes = {
   name: PropTypes.string,
   plugin: PropTypes.shape({
     description: PropTypes.string,
+    information: PropTypes.shape({
+      logo: PropTypes.string.isRequired,
+    }).isRequired,
   }),
   pluginSelected: PropTypes.string.isRequired,
 };
