@@ -44,13 +44,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         if (_.isEmpty(username) || _.isEmpty(password)) {
-          instance.connect(`mongodb://${host}:${port}/${database}`, {
-            useMongoClient: true
-          });
+          instance.connect(`mongodb://${host}:${port}/${database}`);
         } else {
-          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
-            useMongoClient: true
-          });
+          instance.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`);
         }
 
         // Handle error
@@ -251,7 +247,7 @@ module.exports = function (strapi) {
                     const FK = _.find(definition.associations, {alias: name});
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
-                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne') {
+                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne' && FK.nature !== 'oneWay') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
                         ref,
