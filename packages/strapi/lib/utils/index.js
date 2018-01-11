@@ -13,7 +13,7 @@ module.exports = {
   loadFile: function(url) {
     try {
       // Clear cache.
-      delete require.cache[path.resolve(this.config.appPath, url)];
+      delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];
       // Require without cache.
       return require(path.resolve(this.config.appPath, url));
     } catch (e) {

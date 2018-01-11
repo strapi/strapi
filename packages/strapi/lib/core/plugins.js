@@ -35,7 +35,9 @@ module.exports = function() {
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
         case 'origin':
-          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${name}/main.js`;
+          const backend = _.get(this.config.environments[current], 'server.admin.build.backend', `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}`).replace(/\/$/, '');
+
+          return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;
         default:
           return `/${name}/main.js`;
       }
