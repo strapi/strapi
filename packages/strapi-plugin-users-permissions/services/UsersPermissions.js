@@ -169,9 +169,10 @@ module.exports = {
               const isCallback = actionName === 'callback' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
               const isRegister = actionName === 'register' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
               const isPassword = actionName === 'forgotPassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-              const isNewPassword = actionName === 'changePassword-password' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
+              const isNewPassword = actionName === 'changePassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
               const isInit = actionName === 'init' && controllerName === 'userspermissions';
-              const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword;
+              const isMe = actionName === 'me' && controllerName === 'user' && pluginName === 'users-permissions';
+              const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword || isMe;
 
               _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
             }
