@@ -84,9 +84,9 @@ export default Foo;
 
 ## ExtendComponent
 
-ExtendComponent allows a plugin to injectDesign into another one.
+ExtendComponent allows a plugin to inject components into another one.
 
-> Refer to the advanced plugin [documentation](./advanced.md#inject-design) to see how to use it.
+> Refer to the use cases [documentation](./frontend-use-cases.md#inject-design) to see how to use it.
 
 ***
 
@@ -324,6 +324,171 @@ class FooPage extends React.Component {
 // ...
 
 export default FooPage;
+```
+
+***
+
+## OverlayBlocker
+
+The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors.
+
+### Usage
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| children | node | no | Anything that is wrapped inside the OverlayBlocker |
+| isOpen | bool | no | If set to `true` it will display the component |
+
+### Example
+
+In this example we'll have a button that when clicked it will display the OverlayBlocker for 5 seconds thus 'freezes' the admin so the user can't navigate (it simulates a very long server restart).
+
+**Path -** `./plugins/my-plugin/admin/src/containers/FooPage/constants.js`.
+```js
+export const ON_BUTTON_CLICK = 'MyPlugin/FooPage/ON_BUTTON_CLICK';
+export const RESET_SHOW_OVERLAY_PROP = 'MyPlugin/FooPage/RESET_SHOW_OVERLAY_PROP';
+```
+
+**Path -** `./plugins/my-plugin/admin/src/containers/FooPage/actions.js`.
+```js
+import { ON_BUTTON_CLICK, RESET_SHOW_OVERLAY_PROP } from './constants';
+
+export function onButtonClick() {
+  return {
+    type: ON_BUTTON_CLICK,
+  };
+}
+
+export function resetShowOverlayProp() {
+  return {
+    type: RESET_SHOW_OVERLAY_PROP,
+  };
+}
+```
+
+**Path -** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { bindActionCreators, compose } from 'redux';
+
+// Design
+import Button from 'components/Button';
+import OverlayBlocker from 'components/OverlayBlocker';
+
+// Utils
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
+
+// Actions
+import { onButtonClick } from './actions';
+
+// Reducer
+import reducer from './reducer';
+
+// Saga
+import saga from './saga';
+
+// Selectors (see the documentation to see how to use selectors)
+import makeSelectFooPage from './selectors';
+
+
+export class FooPage extends React.Component {
+  render() {
+    return (
+      <div>
+        <OverlayBlocker isOpen={this.props.showOverlayBlocker}>
+          <div style={{ width: '100px', height: '100px', backgroundColor: '#fff' }}>
+            <h4>The app is now blocked for 5 seconds</h4>
+          </div>
+        </Overlay>
+        <Button onClick={this.props.onButtonClick} primary>Click me</Button>
+      </div>
+    );
+  }
+}
+
+FooPage.propTypes = {
+  onButtonClick: PropTypes.func.isRequired,
+  showOverlayBlocker: PropTypes.bool.isRequired,
+};
+
+const mapStateToProps = makeSelectFooPage();
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      onButtonClick,
+    },
+    dispatch,
+  );
+}
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'fooPage', reducer });
+const withSaga = injectSaga({ key: 'fooPage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(FooPage);
+
+```
+**Path -** `./plugins/my-plugin/admin/src/containers/FooPage/reducer.js`.
+```js
+import { fromJS } from 'immutable';
+import { ON_BUTTON_CLICK, RESET_SHOW_OVERLAY_PROP } from './constants';
+
+const initialState = fromJS({
+  showOverlayBlocker: false,
+});
+
+function fooPageReducer(state = initialState, action) {
+  switch (action.type) {
+    case ON_BUTTON_CLICK:
+      return state.set('showOverlayBlocker', true);
+    case RESET_SHOW_OVERLAY_PROP:
+      return state.set('showOverlayBlocker', false);
+    default:
+      return state;
+  }
+}
+
+export default fooPageReducer;
+```
+
+**Path -** `./plugins/my-plugin/admin/src/containers/FooPage/saga.js`.
+```js
+import {
+  fork,
+  put,
+  takeLatest,
+} from 'redux-saga/effects';
+
+import { resetShowOverlayProp } from './actions';
+
+import { ON_BUTTON_CLICK } from './constants';
+
+export function* buttonClicked() {
+  try {
+    // Start the timer
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+
+    yield put(resetShowOverlayProp());
+  } catch(err) {
+    yield put(resetShowOverlayProp());
+  }
+}
+
+export default function* defaultSaga() {
+  yield fork(takeLatest, ON_BUTTON_CLICK, buttonClicked);
+}
 ```
 
 ***

@@ -49,20 +49,12 @@ class Row extends React.Component {
   }
 
   render() {
-    const pluginIcon = this.props.plugin.name !== 'Email' ? (
-      <div className={styles.frame} style={{ marginRight: '30px' }}>
-        <span className={styles.helper} />{this.renderImg()}
-      </div>
-    ) : (
-      <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
-        <i className={`fa fa-${this.props.plugin.icon}`} />
-      </div>
-    );
-
     return (
       <ListRow>
         <div className={cn("col-md-11", styles.nameWrapper)}>
-          {pluginIcon}
+          <div className={styles.icoContainer} style={{ marginRight: '30px' }}>
+            <img src={`${this.props.plugin.logo}`} alt="icon" />
+          </div>
           <div className={styles.pluginContent}>
             <span>{this.props.plugin.name} —&nbsp;</span>
             <FormattedMessage id={this.props.plugin.description} />

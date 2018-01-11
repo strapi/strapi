@@ -2,6 +2,9 @@
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
   "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
 
+  "app.components.DownloadInfo.download": "Download in progress...",
+  "app.components.DownloadInfo.text": "It can take a minute. Thanks for your patience.",
+
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.description.part1": "We are happy to have you as one of our users!",
   "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dreamed app.",
@@ -14,6 +17,13 @@
   "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
   "app.components.InstallPluginPage.InputSearch.label": " ",
   "app.components.InstallPluginPage.InputSearch.placeholder": "Search a plugin... (ex: authentication)",
+  "app.components.InstallPluginPopup.downloads": "download",
+  "app.components.InstallPluginPopup.navLink.description": "Description",
+  "app.components.InstallPluginPopup.navLink.screenshots": "Screenshots",
+  "app.components.InstallPluginPopup.navLink.avis": "avis",
+  "app.components.InstallPluginPopup.navLink.faq": "faq",
+  "app.components.InstallPluginPopup.navLink.changelog": "changelog",
+  "app.components.InstallPluginPopup.noDescription": "No description available",
 
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
   "app.components.LeftMenuLinkContainer.configuration": "Configuration",
@@ -35,12 +45,15 @@
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.NotFoundPage.back": "Back to homepage",
 
+  "app.components.Official": "Official",
+
   "app.components.PluginCard.compatible": "Compatible with your app",
   "app.components.PluginCard.compatibleCommunity": "Compatible with the community",
   "app.components.PluginCard.Button.label.download": "Download",
   "app.components.PluginCard.Button.label.install": "Already installed",
   "app.components.PluginCard.Button.label.support": "Support us",
   "app.components.PluginCard.price.free": "Free",
+  "app.components.PluginCard.more-details": "More details",
 
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",

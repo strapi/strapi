@@ -1,3 +1,4 @@
 {
-  "plugin.description": "Send emails"
+  "plugin.description.short": "Send emails",
+  "plugin.description.long": "Send emails"
 }

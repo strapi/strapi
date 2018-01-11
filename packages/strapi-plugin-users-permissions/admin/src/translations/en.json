@@ -108,7 +108,8 @@
   "notification.info.emailSent": "The email has been sent",
   "notification.success.delete": "The item has been deleted",
 
-  "plugin.description": "Protect your API with a full-authentication process",
+  "plugin.description.short": "Protect your API with a full-authentication process based on JWT",
+  "plugin.description.long": "Protect your API with a full-authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
 
   "Plugin.permissions.application.description": "Define the allowed actions in your project.",
   "Plugin.permissions.plugins.description": "Define the allowed actions in the {name} plugin.",
