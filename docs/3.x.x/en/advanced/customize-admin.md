@@ -215,7 +215,7 @@ In this case, we suppose that you decided to put your administration and the plu
       "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
       "backend": "https://yourbackend.com",
       "plugins": {
-        "source":  "host" // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
+        "source":  "host", // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
         "folder": "/plugins"
       }
     }
