@@ -2,6 +2,63 @@
 
 Strapi provides helpers so you don't have to develop again and again the same generic functions.
 
+## Auth
+
+`auth.js` lets you get, set and delete data in either the browser's `localStorage` or `sessionStorage`.
+
+### Methods
+
+| Name | Description |
+| ---- | ––––––––––– |
+| clear(key) | Remove the data in either `localStorage` or `sessionStorage` |
+| clearAppStorage() | Remove all data from both storage |
+| clearToken() | Remove the user's `jwt Token` in the appropriate browser's storage |
+| clearUserInfo() | Remove the user's info from storage |
+| get(key) | Get the item in the browser's storage |
+| getToken() | Get the user's `jwtToken` |
+| getUserInfo() | Get the user's infos |
+| set(value, key) | Set an item in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
+| setToken(value) | Set the user's `jwtToken` in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
+| setUserInfo(value) | Set the user's info in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
+
+
+```js
+import auth from 'utils/auth';
+
+// ...
+//
+auth.setToken('12345', true); // This will set 1234 in the browser's localStorage associated with the key: jwtToken
+```
+
+## Colors
+
+This function allows to darken a color.
+
+### Usage
+
+```js
+import { darken } from 'utils/colors';
+
+const linkColor = darken('#f5f5f5', 1.5); // Will darken #F5F5F5 by 1.5% which gives #f2f2f2.
+```
+
+## Get URL Query Parameters
+
+The helpers allows to retrieve the query parameters in the URL
+
+### Example
+
+```js
+import getQueryParameters from 'utils/getQueryParameters';
+
+const URL = '/create?source=users-permissions';
+const source = getQueryParameters(URL, 'source');
+
+console.log(source); // users-permissions
+
+```
+
+
 ## Request helper
 
 A request helper is available to handle all requests inside a plugin.
