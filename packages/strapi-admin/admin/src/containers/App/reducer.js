@@ -3,7 +3,7 @@ import {
   UPDATE_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
-  SET_HAS_USERS_PLUGIN,
+  UNSET_HAS_USERS_PLUGIN,
 } from './constants';
 
 const initialState = fromJS({
@@ -19,7 +19,7 @@ function appReducer(state = initialState, action) {
       return state.setIn(['plugins', action.pluginId, action.updatedKey], fromJS(action.updatedValue));
     case PLUGIN_DELETED:
       return state.deleteIn(['plugins', action.plugin]);
-    case SET_HAS_USERS_PLUGIN:
+    case UNSET_HAS_USERS_PLUGIN:
       return state.set('hasUserPlugin', false);
     default:
       return state;

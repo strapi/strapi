@@ -40,7 +40,8 @@ module.exports = scope => {
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-mongoose': getDependencyVersion(cliPkg, 'strapi')
+      [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
+      [scope.client.module]: scope.client.version
     },
     'author': {
       'name': scope.author || 'A Strapi developer',
