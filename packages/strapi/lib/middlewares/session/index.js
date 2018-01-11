@@ -45,9 +45,7 @@ module.exports = strapi => {
             );
 
             strapi.app.use(
-              strapi.koaMiddlewares.convert(
-                strapi.koaMiddlewares.session(options, strapi.app)
-              )
+              strapi.koaMiddlewares.session(options, strapi.app)
             );
             strapi.app.use((ctx, next) => {
               ctx.state = ctx.state || {};
@@ -71,9 +69,7 @@ module.exports = strapi => {
           );
 
           strapi.app.use(
-            strapi.koaMiddlewares.convert(
-              strapi.koaMiddlewares.session(options, strapi.app)
-            )
+            strapi.koaMiddlewares.session(options, strapi.app)
           );
           strapi.app.use((ctx, next) => {
             ctx.state = ctx.state || {};
