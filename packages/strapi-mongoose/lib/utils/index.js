@@ -5,10 +5,13 @@
  */
 
 module.exports = mongoose => {
-  require('mongoose-double')(mongoose);
   require('mongoose-float').loadType(mongoose);
 
   const SchemaTypes = mongoose.Schema.Types;
+
+  SchemaTypes.Decimal.prototype.cast = function (value) {
+    return value.toString();
+  };
 
   return {
     convertType: mongooseType => {
@@ -22,9 +25,9 @@ module.exports = mongoose => {
         case 'biginteger':
           return 'Number';
         case 'float':
-          return SchemaTypes.Float;
+          return 'Float';
         case 'decimal':
-          return SchemaTypes.Double;
+          return 'Decimal';
         case 'date':
         case 'time':
         case 'datetime':

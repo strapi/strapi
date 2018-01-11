@@ -35,6 +35,8 @@ function languageProviderReducer(state = initialState, action) {
     case CHANGE_LOCALE:
       // Set user language in local storage.
       window.localStorage.setItem(localStorageKey, action.locale);
+      strapi.currentLanguage = action.locale;
+      
       return state
         .set('locale', action.locale);
     default:

@@ -1,3 +1,7 @@
+# Front-end Use Cases
+
+This section gives use cases examples on front-end plugin development.
+
 # Plugin advanced usage
 
 This section contains advanced resources to develop plugins.
@@ -321,8 +325,6 @@ Just by doing so, the `another-plugin` will add a `Button` which toggles the `lo
 
 ## Routeless container store injection
 
-See the basic container's store injection [documentation](./development.md#using-redux-sagas).
-
 If you have a container which can be a child of several other containers (i.e. it doesn't have a route); you'll have to inject it directly in the `./plugins/my-plugin/admin/src/containers/App/index.js` file as follows :
 
 **Path —** `./plugins/my-plugin/admin/src/containers/App/index.js`.
@@ -383,7 +385,7 @@ export default compose(
 
 ***
 
-## Execute a logic before mounting
+## Execute logic before mounting the plugin
 
 You can execute a business logic before your plugin is being mounted.
 
@@ -416,7 +418,7 @@ export default bootstrap;
 
 ***
 
-## Prevent rendering
+## Prevent plugin rendering
 
 You can prevent your plugin from being rendered if some conditions aren't met.
 

@@ -10,7 +10,7 @@ import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}, history) {
+export default function configureStore(initialState = {}, history, name) {
   // Create the store with two middlewares
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
@@ -33,6 +33,7 @@ export default function configureStore(initialState = {}, history) {
         // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
         // Prevent recomputing reducers for `replaceReducer`
         shouldHotReload: false,
+        name: `Plugin - ${name}`,
       })
       : compose;
   /* eslint-enable */

@@ -29,8 +29,8 @@ Get to know more about Strapi and how it works.
 **[Guides](configurations/configurations.md)**<br />
 Get familiar with Strapi. Discover concrete examples on how to develop the features you need.
 
-**[Plugins](plugins/development.md)**<br />
-Understand how to install plugins and develop your owns.
+**[Plugin Development](plugin-development/quick-start.md)**<br />
+Understand how to develop your own plugin.
 
 **[API Reference](api-reference/reference.md)**<br />
 Learn about Strapi's API, the `strapi` object that is available in your backend.

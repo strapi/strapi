@@ -51,7 +51,7 @@ module.exports = {
         params.target = relation.model || relation.collection;
         params.key = relation.via;
         params.nature = relation.nature;
-        params.targetColumnName = _.get(strapi.models[params.target].attributes[params.key], 'columnName', '');
+        params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
       }
 
       attributes.push({
@@ -106,7 +106,7 @@ module.exports = {
     // Retrieve where is located the model.
     // Note: The target is not found when we are creating a new API. That's why, we are returning the lowercased model.
     const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), model.toLowerCase()))[0] || model.toLowerCase();
+      .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), model.toLowerCase()))[0] || model.toLowerCase();
 
     // Retrieve the filename of the model.
     const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
@@ -123,7 +123,7 @@ module.exports = {
     const attrs = {};
 
     const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0] || name.toLowerCase();
+      .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0] || name.toLowerCase();
 
     const model = (plugin ? _.get(strapi.plugins, [target, 'models', name]) : _.get(strapi.api, [target, 'models', name])) || {};
 
@@ -209,7 +209,7 @@ module.exports = {
         if (!_.isEmpty(relationsToDelete)) {
           // Retrieve where is located the model.
           const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-            .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
+            .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0];
 
           // Retrieve the filename of the model.
           const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
@@ -280,7 +280,7 @@ module.exports = {
         if (!_.isEmpty(relationsToCreate)) {
           // Retrieve where is located the model.
           const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-            .filter(x => _.includes(Object.keys((plugin ? strapi.plugins : strapi.api)[x].models), name))[0];
+            .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0];
 
           // Retrieve the filename of the model.
           const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
