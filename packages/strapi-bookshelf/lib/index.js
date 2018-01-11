@@ -457,7 +457,7 @@ module.exports = function(strapi) {
           result.value = parseFloat(value);
           break;
         default:
-          result = undefined;
+          return undefined;
       }
 
       return result;
@@ -622,7 +622,7 @@ module.exports = function(strapi) {
       switch (association.nature) {
         case 'oneToOne':
         case 'oneToMany':
-          return this.manageRelations(model, params)
+          return this.manageRelations(model, params);
         case 'manyToMany':
           return Model.forge({
             [Model.primaryKey]: parseFloat(params[Model.primaryKey])
@@ -645,7 +645,7 @@ module.exports = function(strapi) {
       switch (association.nature) {
         case 'oneToOne':
         case 'oneToMany':
-          return this.manageRelations(model, params)
+          return this.manageRelations(model, params);
         case 'manyToMany':
           return Model.forge({
             [Model.primaryKey]: parseFloat(params[Model.primaryKey])
