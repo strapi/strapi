@@ -1,20 +1,30 @@
 .button {
   height: 26px;
   min-width: 89px !important;
+  padding-top: 2px;
   padding-left: 15px;
   padding-right: 15px;
+  border-radius: 2px !important;
   font-size: 13px;
+  font-weight: 500 !important;
+  cursor: pointer;
 }
 
 .cardDescription {
   height: 54px;
-  margin-bottom: 19px;
-  padding-top: 10px;
-  font-size: 12px;
+  margin-top: 27px;
+  margin-bottom: 9px;
+  font-size: 13px;
   font-weight: 400;
+
+  > span:last-child {
+    color: #1C5DE7;
+  }
+  -webkit-font-smoothing: antialiased;
 }
 
 .cardFooter {
+  cursor: initial;
   display: flex;
   justify-content: space-between;
   height: 54px;
@@ -22,14 +32,18 @@
   margin-right: -1.5rem;
   padding: 1.5rem 1.5rem 0 1.5rem;
   background-color: #FAFAFB;
+
+  &>div:first-of-type {
+    margin-top: 3px;
+  }
 }
 
 .cardPrice {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 2.7rem;
-  padding-top: 1.8rem;
+  margin-bottom: 10px;
+  padding-top: 2rem;
   > div:first-child {
     > i {
       margin-right: 10px;
@@ -48,9 +62,9 @@
 }
 
 .cardScreenshot {
-  > img {
-    width: 100%;
-  }
+  height: 78px;
+  border-radius: 2px;
+  background-size: cover;
 }
 
 .cardTitle {
@@ -58,20 +72,46 @@
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  line-height: 36px;
+  letter-spacing: 0.5px;
   > div:first-child {
-    height: 36px;
-    width: 70px;
     margin-right: 14px;
-    border: 1px solid #E8EEFC;
-    border-radius: 3px;
-    text-align: center;
-    font-size: 20px;
   }
 
   > div:last-child {
     height: 36px;
+    line-height: 36px;
   }
+}
+
+.frame {
+  width: 70px;
+  height: 36px;
+  margin: auto 0;
+  text-align: center;
+  border: 1px solid #E8EEFC;
+  border-radius: 3px;
+  white-space: nowrap;
+  > img {
+    max-height: 36px;
+    vertical-align: middle;
+  }
+}
+
+.iconContainer {
+  height: 36px;
+  width: 70px;
+  margin-right: 14px;
+  border: 1px solid #E8EEFC;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 20px;
+}
+
+
+.helper {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
 }
 
 .pluginCard {
@@ -89,12 +129,14 @@
 }
 
 .ratings {
-  display: flex;
-
-  > div:last-child {
-    padding-top: 1px;
-    font-style: italic;
-  }
+  // display: flex;
+  // padding-top: 1px;
+  // TODO uncomment when ratings
+  // > div:last-child {
+  //   padding-top: 4px;
+  //   font-size: 12px;
+  //   font-style: italic;
+  // }
 }
 
 .secondary {
@@ -119,9 +161,10 @@
 }
 
 .wrapper {
-  height: 320px;
+  min-height: 320px;
   margin-bottom: 4rem;
   padding: 1.2rem 1.5rem;
+  padding-bottom: 0;
   background-color: #fff;
   box-shadow: 0 2px 4px #E3E9F3;
   -webkit-font-smoothing: antialiased;

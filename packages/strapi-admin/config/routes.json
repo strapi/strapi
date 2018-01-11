@@ -9,6 +9,14 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/plugins/install",
+      "handler": "Admin.installPlugin",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "DELETE",
       "path": "/plugins/uninstall/:plugin",
       "handler": "Admin.uninstallPlugin",

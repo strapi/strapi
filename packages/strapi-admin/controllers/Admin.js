@@ -8,6 +8,26 @@ const exec = require('child_process').execSync;
  */
 
 module.exports = {
+  installPlugin: async ctx => {
+    try {
+      const { plugin, port } = ctx.request.body;
+      const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
+
+      strapi.reload.isWatching = false;
+
+      strapi.log.info(`Installing ${plugin}...`);
+      
+      exec(`node ${strapiBin} install ${plugin} ${port === '4000' ? '--dev' : ''}`);
+
+      ctx.send({ ok: true });
+
+      strapi.reload();
+    } catch(err) {
+      strapi.reload.isWatching = true;
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
   plugins: async ctx => {
     try {
       const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
