@@ -23,9 +23,11 @@
     "prepublishOnly": "npm run build",
     "setup": "node ./scripts/setup.js"
   },
+  "dependencies": {
+    "shelljs": "^0.7.8"
+  },
   "devDependencies": {
     "sanitize.css": "^4.1.0",
-    "shelljs": "^0.7.8",
     "strapi-helper-plugin": "3.0.0-alpha.7.3",
     "strapi-utils": "3.0.0-alpha.7.3"
   },
