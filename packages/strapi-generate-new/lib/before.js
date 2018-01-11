@@ -205,7 +205,7 @@ module.exports = (scope, cb) => {
       Promise.all(asyncFn)
       .then(() => {
         try {
-          require(`${scope.rootPath}/node_modules/${scope.client.connector}/lib/utils/connectivity.js`)(scope, cb.success, connectionValidation);
+          require(path.resolve(`${scope.rootPath}/node_modules/${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
           execSync(`rm -r ${scope.rootPath}`);
 
