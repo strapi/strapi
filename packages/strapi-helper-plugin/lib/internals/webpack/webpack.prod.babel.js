@@ -69,8 +69,7 @@ const plugins = [
 
 let publicPath;
 
-// Build the `index.html file`
-if (isAdmin) {
+if (isAdmin && !isSetup) {
   // Load server configuration.
   const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
 
@@ -87,7 +86,10 @@ if (isAdmin) {
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`);
   }
+}
 
+// Build the `index.html file`
+if (isAdmin) {
   plugins.push(new HtmlWebpackPlugin({
     template: 'admin/src/index.html',
     minify: {
