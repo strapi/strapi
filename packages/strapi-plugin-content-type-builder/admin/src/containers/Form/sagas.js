@@ -3,6 +3,8 @@ import { capitalize, findIndex, get, isEmpty, sortBy } from 'lodash';
 import { takeLatest, call, put, fork, select } from 'redux-saga/effects';
 import request from 'utils/request';
 
+import { freezeApp, unfreezeApp } from 'containers/App/actions';
+
 import {
   connectionsFetchSucceeded,
   contentTypeActionSucceeded,
@@ -25,6 +27,7 @@ import {
 export function* editContentType(action) {
   try {
     const initialContentType = yield select(makeSelectInitialDataEdit());
+    yield put(freezeApp());
     const requestUrl = `/content-type-builder/models/${initialContentType.name}`;
     const body = yield select(makeSelectModifiedDataEdit());
     const opts = {
@@ -55,8 +58,10 @@ export function* editContentType(action) {
         action.context.updatePlugin('content-manager', 'leftMenuSections', leftMenuContentTypes);
       }
       strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
+      yield put(unfreezeApp());
     }
   } catch(error) {
+    yield put(unfreezeApp());
     strapi.notification.error(get(error, ['response', 'payload', 'message'], 'notification.error'));
   }
 }
