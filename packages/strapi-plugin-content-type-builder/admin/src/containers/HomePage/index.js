@@ -13,7 +13,7 @@ import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
 import { router } from 'app';
 
-import { makeSelectLoading, makeSelectMenu, makeSelectModels, makeSelectToggleDeleteWarning } from 'containers/App/selectors';
+import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
 import { deleteContentType } from 'containers/App/actions';
 
 import Form from 'containers/Form';
@@ -71,7 +71,6 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         onButtonClick={this.handleButtonClick}
         onHandleDelete={this.handleDelete}
         rowItems={this.props.models}
-        toggleDeleteWarning={this.props.toggleDeleteWarning}
       />
     );
   }
@@ -122,7 +121,6 @@ HomePage.propTypes =  {
     PropTypes.object,
     PropTypes.array,
   ]).isRequired,
-  toggleDeleteWarning: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -130,7 +128,6 @@ const mapStateToProps = createStructuredSelector({
   modelsLoading: makeSelectLoading(),
   models: makeSelectModels(),
   menu: makeSelectMenu(),
-  toggleDeleteWarning: makeSelectToggleDeleteWarning(),
 });
 
 function mapDispatchToProps(dispatch) {

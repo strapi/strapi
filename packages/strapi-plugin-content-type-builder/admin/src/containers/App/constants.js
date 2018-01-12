@@ -5,9 +5,10 @@
  */
 
 export const DELETE_CONTENT_TYPE = 'ContentTypeBuilder/App/DELETE_CONTENT_TYPE';
+export const FREEZE_APP = 'ContentTypeBuilder/App/FREEZE_APP';
 export const MODELS_FETCH = 'ContentTypeBuilder/App/MODELS_FETCH';
 export const MODELS_FETCH_SUCCEEDED = 'ContentTypeBuilder/App/MODELS_FETCH_SUCCEEDED';
 export const STORE_TEMPORARY_MENU = 'ContentTypeBuilder/App/STORE_TEMPORARY_MENU';
 export const TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED = 'ContentTypeBuilder/App/TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED';
 export const TEMPORARY_CONTENT_TYPE_POSTED = 'ContentTypeBuilder/App/TEMPORARY_CONTENT_TYPE_POSTED';
-export const TOGGLE_DELETE_WARNING = 'ContentTypeBuilder/App/TOGGLE_DELETE_WARNING';
+export const UNFREEZE_APP = 'ContentTypeBuilder/App/UNFREEZE_APP';

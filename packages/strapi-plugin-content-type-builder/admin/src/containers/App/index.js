@@ -23,6 +23,7 @@ import formReducer from 'containers/Form/reducer';
 // Design
 import OverlayBlocker from 'components/OverlayBlocker';
 
+// Other containers actions
 import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
 
 // Utils
@@ -32,6 +33,7 @@ import { storeData } from '../../utils/storeData';
 
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
+import { makeSelectBlockApp } from './selectors';
 import saga from './sagas';
 
 /* eslint-disable consistent-return */
@@ -55,7 +57,7 @@ class App extends React.Component {
   render() {
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        <OverlayBlocker isOpen />
+        <OverlayBlocker isOpen={this.props.blockApp} />
         <Switch>
           <Route exact path="/plugins/content-type-builder" component={HomePage} />
           <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
@@ -73,6 +75,7 @@ App.contextTypes = {
 };
 
 App.propTypes = {
+  blockApp: PropTypes.bool.isRequired,
   modelsFetch: PropTypes.func.isRequired,
   shouldRefetchContentType: PropTypes.bool,
 };
@@ -91,6 +94,7 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
+  blockApp: makeSelectBlockApp(),
   shouldRefetchContentType: makeSelectShouldRefetchContentType(),
 });
 

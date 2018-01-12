@@ -8,20 +8,21 @@ import { fromJS, List } from 'immutable';
 import { findIndex, size } from 'lodash';
 import {
   DELETE_CONTENT_TYPE,
+  FREEZE_APP,
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
   TEMPORARY_CONTENT_TYPE_POSTED,
   TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
-  TOGGLE_DELETE_WARNING,
+  UNFREEZE_APP,
 } from './constants';
 
 /* eslint-disable new-cap */
 const initialState = fromJS({
+  blockApp: false,
   loading: true,
   menu: List(),
   models: List(),
-  toggleDeleteWarning: false,
 });
 
 function appReducer(state = initialState, action) {
@@ -30,6 +31,8 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['menu', '0', 'items'], (list) => list.splice(findIndex(state.getIn(['menu', '0', 'items']).toJS(), ['name', action.itemToDelete]), 1))
         .update('models', (array) => array.splice(findIndex(state.get('models').toJS(), ['name', action.itemToDelete]), 1));
+    case FREEZE_APP:
+      return state.set('blockApp', true);
     case MODELS_FETCH:
       return state.set('loading', true);
     case MODELS_FETCH_SUCCEEDED:
@@ -60,8 +63,8 @@ function appReducer(state = initialState, action) {
         .updateIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2], () => newData)
         .updateIn(['models', size(state.get('models').toJS()) - 1], () => newModel);
     }
-    case TOGGLE_DELETE_WARNING:
-      return state.update('toggleDeleteWarning', (v) => !v);
+    case UNFREEZE_APP:
+      return state.set('blockApp', false);
     default:
       return state;
   }

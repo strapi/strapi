@@ -49,7 +49,6 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                     key={key}
                     onDelete={this.props.onHandleDelete}
                     rowItem={rowItem}
-                    toggleDeleteWarning={this.props.toggleDeleteWarning}
                   />
                 ))}
               </ul>
@@ -68,7 +67,6 @@ TableList.propTypes = {
   onHandleDelete: PropTypes.func.isRequired,
   rowItems: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,
-  toggleDeleteWarning: PropTypes.bool.isRequired,
 };
 
 export default TableList;
