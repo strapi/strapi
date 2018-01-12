@@ -30,7 +30,7 @@ $.ajax({
 
 This route lets you log your users in  by getting an authentication token.
 
-#### Usage
+#### Local
 
 - The `identifier` param can either be an email or a username.
 
@@ -51,6 +51,32 @@ $.ajax({
     console.log('An error occurred:', error);
   }
 });
+```
+
+## Providers
+
+Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
+providers to enable authentication in your application. By default,
+Strapi comes with four providers:
+- Facebook
+- Google
+- Github
+- Linkedin2 (Oauth2 Provider for Linkedin)
+
+To use the providers authentication, set your credentials in
+`./plugins/users-permissions/config/environments/development/grant.json`.
+
+Redirect your user to: `GET /connect/:provider`. eg: `GET /connect/facebook`
+
+After his approval, he will be redirected to `/auth/:provider/callback`. The `jwt` and `user` data will be available in the body response.
+
+Response payload:
+
+```js
+{
+  "user": {},
+  "jwt": ""
+}
 ```
 
 ## Use your token to be identify as user.
