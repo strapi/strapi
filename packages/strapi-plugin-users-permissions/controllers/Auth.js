@@ -32,10 +32,11 @@ module.exports = {
       const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
+      const identifier = params.identifier.toLowerCase();
       if (isEmail) {
-        query.email = params.identifier;
+        query.email = identifier;
       } else {
-        query.username = params.identifier;
+        query.username = identifier;
       }
 
       // Check if the user exists.
