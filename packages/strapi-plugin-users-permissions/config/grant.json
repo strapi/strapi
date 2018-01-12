@@ -1,0 +1,27 @@
+{
+  "grant": {
+    "facebook": {
+      "key": "",
+      "secret": "",
+      "callback": "/auth/facebook/callback",
+      "scope": ["email"]
+    },
+    "google": {
+      "key": "",
+      "secret": "",
+      "callback": "/auth/google/callback",
+      "scope": ["email"]
+    },
+    "github": {
+      "key": "",
+      "secret": "",
+      "callback": "/auth/github/callback"
+    },
+    "linkedin2": {
+      "key": "",
+      "secret": "",
+      "callback": "/auth/linkedin2/callback",
+      "custom_params": {"state": ""}
+    }
+  }
+}

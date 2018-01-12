@@ -1,3 +1,10 @@
+'use strict';
+
+/**
+ * Module dependencies
+ */
+
+// Public node modules.
 const _ = require('lodash');
 
 module.exports = strapi => {

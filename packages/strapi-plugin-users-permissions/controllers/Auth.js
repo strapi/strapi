@@ -62,9 +62,12 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const user = await strapi.api.user.services.grant.connect(provider, access_token);
+      const user = await strapi.plugins['users-permissions'].services.providers.connect(provider, access_token);
 
-      ctx.redirect(strapi.config.frontendUrl || strapi.config.url + '?jwt=' + strapi.api.user.services.jwt.issue(user) + '&user=' + JSON.stringify(user));
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
+      });
     }
   },
 
