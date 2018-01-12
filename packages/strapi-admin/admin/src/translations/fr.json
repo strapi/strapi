@@ -58,6 +58,9 @@
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
 
+  "components.OverlayBlocker.title": "Le serveur est en train de redémarrer",
+  "components.OverlayBlocker.description": "Vous utilisez une fonctionnalité qui nécessite le redémarrage du server. Merci d'attendre que celui redémarré.",
+
   "components.ErrorBoundary.title": "Une erreur est survenue...",
 
   "components.ProductionBlocker.header": "Ce plugin est disponible uniquement en développement.",

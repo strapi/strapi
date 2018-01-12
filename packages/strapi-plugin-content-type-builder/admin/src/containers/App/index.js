@@ -20,6 +20,9 @@ import NotFoundPage from 'containers/NotFoundPage';
 import formSaga from 'containers/Form/sagas';
 import formReducer from 'containers/Form/reducer';
 
+// Design
+import OverlayBlocker from 'components/OverlayBlocker';
+
 import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
 
 // Utils
@@ -52,6 +55,7 @@ class App extends React.Component {
   render() {
     return (
       <div className={`${pluginId} ${styles.app}`}>
+        <OverlayBlocker isOpen />
         <Switch>
           <Route exact path="/plugins/content-type-builder" component={HomePage} />
           <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
