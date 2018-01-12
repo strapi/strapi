@@ -48,8 +48,7 @@ function checkTokenValidity(response) {
     return fetch(`${strapi.backendURL}/user/me`, options)
     .then(resp => {
       if (response.status === 401) {
-        const { origin } = window.location;
-        window.location = `${origin}/admin/plugins/users-permissions/auth/login`;
+        window.location = `${strapi.remoteURL}/plugins/users-permissions/auth/login`;
 
         auth.clearAppStorage();
       }
