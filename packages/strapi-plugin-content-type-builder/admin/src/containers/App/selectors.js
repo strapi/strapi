@@ -21,6 +21,11 @@ const makeSelectMenu = () => createSelector(
   (globalSate) => globalSate.get('menu').toJS(),
 );
 
+const makeSelectToggleDeleteWarning = () => createSelector(
+  selectGlobalDomain(),
+  (globalSate) => globalSate.get('toggleDeleteWarning'),
+);
+
 const selectLocationState = () => {
   let prevRoutingState;
   let prevRoutingStateJS;
@@ -41,6 +46,7 @@ const selectLocationState = () => {
 export {
   selectLocationState,
   makeSelectLoading,
-  makeSelectModels,
   makeSelectMenu,
+  makeSelectModels,
+  makeSelectToggleDeleteWarning,
 };

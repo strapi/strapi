@@ -13,6 +13,7 @@ import {
   STORE_TEMPORARY_MENU,
   TEMPORARY_CONTENT_TYPE_POSTED,
   TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
+  TOGGLE_DELETE_WARNING,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -20,6 +21,7 @@ const initialState = fromJS({
   loading: true,
   menu: List(),
   models: List(),
+  toggleDeleteWarning: false,
 });
 
 function appReducer(state = initialState, action) {
@@ -58,6 +60,8 @@ function appReducer(state = initialState, action) {
         .updateIn(['menu', '0', 'items', size(state.getIn(['menu', '0', 'items']).toJS()) -2], () => newData)
         .updateIn(['models', size(state.get('models').toJS()) - 1], () => newModel);
     }
+    case TOGGLE_DELETE_WARNING:
+      return state.update('toggleDeleteWarning', (v) => !v);
     default:
       return state;
   }

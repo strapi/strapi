@@ -18,6 +18,7 @@ import {
   STORE_TEMPORARY_MENU,
   TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
   TEMPORARY_CONTENT_TYPE_POSTED,
+  TOGGLE_DELETE_WARNING,
 } from './constants';
 
 export function deleteContentType(itemToDelete, context) {
@@ -117,5 +118,11 @@ export function temporaryContentTypePosted(fieldNumber) {
   return {
     type: TEMPORARY_CONTENT_TYPE_POSTED,
     fieldNumber,
+  };
+}
+
+export function toggleDeleteWarning() {
+  return {
+    type: TOGGLE_DELETE_WARNING,
   };
 }

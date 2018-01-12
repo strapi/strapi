@@ -1,22 +1,22 @@
 import { takeLatest, call, put, fork } from 'redux-saga/effects';
 import request from 'utils/request';
 import { DELETE_CONTENT_TYPE, MODELS_FETCH } from './constants';
-import { modelsFetchSucceeded } from './actions';
+import { modelsFetchSucceeded, toggleDeleteWarning } from './actions';
 
 export function* deleteContentType(action) {
   try {
     if (action.sendRequest) {
       const requestUrl = `/content-type-builder/models/${action.itemToDelete}`;
+      const response = yield call(request, requestUrl, { method: 'DELETE' }, true);
 
-      yield call(request, requestUrl, { method: 'DELETE' });
-
-      if (action.updateLeftMenu) {
+      if (response.ok && action.updateLeftMenu) {
         action.updatePlugin('content-manager', 'leftMenuSections', action.leftMenuContentTypes);
+        yield put(toggleDeleteWarning());
+        strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
       }
-      strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
     }
-
   } catch(error) {
+    yield put(toggleDeleteWarning());
     strapi.notification.error('content-type-builder.notification.error.message');
   }
 }

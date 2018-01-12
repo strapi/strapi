@@ -23,6 +23,12 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.toggleDeleteWarning !== this.props.toggleDeleteWarning) {
+      this.setState({ showWarning: false });
+    }
+  }
+
   handleEdit = () => {
     router.push(`/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`);
   }
@@ -31,7 +37,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
     e.preventDefault();
     e.stopPropagation();
     this.props.onDelete(this.props.rowItem.name);
-    this.setState({ showWarning: false });
+    // this.setState({ showWarning: false });
   }
 
   handleGoTo = () => {
@@ -73,6 +79,7 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
 TableListRow.propTypes = {
   onDelete: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,
+  toggleDeleteWarning: PropTypes.bool.isRequired,
 };
 
 export default TableListRow;
