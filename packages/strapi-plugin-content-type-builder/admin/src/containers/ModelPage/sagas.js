@@ -18,7 +18,7 @@ import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/ef
 
 import request from 'utils/request';
 
-import { temporaryContentTypePosted } from 'containers/App/actions';
+import { freezeApp, temporaryContentTypePosted, unfreezeApp } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
@@ -74,6 +74,7 @@ export function* submitChanges(action) {
   try {
     // Show button loader
     yield put(setButtonLoader());
+    yield put(freezeApp());
 
     const modelName = get(storeData.getContentType(), 'name');
     const data = yield select(makeSelectModel());
@@ -140,10 +141,11 @@ export function* submitChanges(action) {
       }
 
       yield put(submitActionSucceeded());
-
       yield put(resetShowButtonsProps());
       // Remove loader
       yield put(unsetButtonLoader());
+      // Unfreeze app
+      yield put(unfreezeApp());
     }
 
   } catch(error) {
