@@ -49,7 +49,8 @@ if (!isSetup) {
 // Define remote and backend URLs.
 const URLs = {
   host: '/admin',
-  backend: '/'
+  backend: '/',
+  publicPath: null
 };
 
 if (isAdmin && !isSetup) {
@@ -58,11 +59,15 @@ if (isAdmin && !isSetup) {
 
   try {
     const server = require(serverConfig);
-    const path = _.get(server, 'admin.path', '/admin');
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
-      URLs.host = _.get(server, 'admin.path', '/admin');
+      if (_.get(server, 'admin.build.host')) {
+        URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
+      } else {
+        URLs.host = _.get(server, 'admin.path', '/admin');
+      }
 
+      URLs.publicPath = URLs.host;
       URLs.backend = _.get(server, 'admin.build.backend', `/`);
     }
   } catch (e) {

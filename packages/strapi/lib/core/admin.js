@@ -42,7 +42,7 @@ module.exports = function() {
             $('script').each(function(i, elem) {
               if ($(this).attr('src')) {
                 const parse = path.parse($(this).attr('src'));
-                const url = URL.parse(_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin'));
+                const url = URL.parse(_.get(strapi.config.currentEnvironment.server, 'admin.build.host', _.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')));
 
                 $(this).attr('src', `${url.pathname.replace(/\/$/, '')}/${parse.base}`);
               }

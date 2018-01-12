@@ -9,24 +9,26 @@ module.exports = function() {
   return new Promise((resolve, reject) => {
     const folder = ((url = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin')) =>
       url[0] === '/' ? url.substring(1) : url
-    )();
+    )().replace(/\/$/, '') ;
 
     const configuratePlugin = (acc, current, source, name) => {
       switch (source) {
         case 'host': {
-          // if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
-          //   throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
-          // }
+          const host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+
+          if (!host) {
+            throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
+          }
 
           const folder = _.get(this.config.environments[current].server, 'admin.build.plugins.folder', null);
 
           if (_.isString(folder)) {
             const cleanFolder = folder[0] === '/' ? folder.substring(1) : folder;
 
-            return `/${cleanFolder}/${name}/main.js`;
+            return `/${host}/${cleanFolder}/${name}/main.js`.replace('//', '/');
           }
 
-          return `/${name}/main.js`;
+          return `/${host}/${name}/main.js`.replace('//', '/');
         }
         case 'custom':
           if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
@@ -34,7 +36,7 @@ module.exports = function() {
           }
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
-        case 'origin':
+        case 'backend':
           const backend = _.get(this.config.environments[current], 'server.admin.build.backend', `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}`).replace(/\/$/, '');
 
           return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;

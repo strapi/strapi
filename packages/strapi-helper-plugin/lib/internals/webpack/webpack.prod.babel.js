@@ -67,8 +67,27 @@ const plugins = [
   // new BundleAnalyzerPlugin(),
 ];
 
+let publicPath;
+
 // Build the `index.html file`
 if (isAdmin) {
+  // Load server configuration.
+  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+
+  try {
+    const server = require(serverConfig);
+
+    if (process.env.PWD.indexOf('/admin') !== -1) {
+      if (_.get(server, 'admin.build.host')) {
+        publicPath = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
+      } else {
+        publicPath = _.get(server, 'admin.path', '/admin');
+      }
+    }
+  } catch (e) {
+    throw new Error(`Impossible to access to ${serverConfig}`);
+  }
+
   plugins.push(new HtmlWebpackPlugin({
     template: 'admin/src/index.html',
     minify: {
@@ -118,7 +137,8 @@ module.exports = require('./webpack.base.babel')({
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
   output: {
     filename: '[name].js',
-    chunkFilename: '[name].[chunkhash].chunk.js'
+    chunkFilename: '[name].[chunkhash].chunk.js',
+    publicPath,
   },
 
   // In production, we minify our CSS with cssnano
