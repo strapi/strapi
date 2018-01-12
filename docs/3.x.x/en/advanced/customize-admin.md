@@ -162,10 +162,10 @@ It's very common to deploy the front-end and the back-end on different servers. 
   "admin": {
     "path": "/dashboard",
     "build": {
-      "host": "https//yourfrontend.com",  // Note: The administration will be accessible from the root of the domain (ex: https//yourfrontend.com)
-      "backend": "https://yourbackend.com",
+      "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: https//yourfrontend.com/)
+      "backend": "http://yourbackend.com",
       "plugins": {
-        "source":  "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/admin/content-manager/main.js).
+        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/admin/content-manager/main.js).
       }
     }
   }

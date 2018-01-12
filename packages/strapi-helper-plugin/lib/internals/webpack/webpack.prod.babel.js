@@ -2,6 +2,8 @@
 const _ = require('lodash');
 const path = require('path');
 
+const base = require('./webpack.base.babel');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const cssnext = require('postcss-cssnext');
@@ -10,7 +12,7 @@ const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
-const WriteJsonPlugin = require('write-json-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
@@ -31,15 +33,6 @@ const adminPath = (() => {
   }
 
   return path.resolve(appPath, 'admin');
-})();
-
-// Necessary configuration file to ensure that plugins will be loaded.
-const pluginsToInitialize = (() => {
-  try {
-    return require(path.resolve(adminPath, 'admin', 'src', 'config', 'plugins.json'));
-  } catch (e) {
-    return [];
-  }
 })();
 
 const plugins = [
@@ -112,12 +105,20 @@ if (isAdmin) {
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
   }));
-  plugins.push(new WriteJsonPlugin({
-      object: pluginsToInitialize,
-      path: 'config',
-      // default output is timestamp.json
-      filename: 'plugins.json',
-  }));
+
+  // Necessary configuration file to ensure that plugins will be loaded.
+  const pluginsToInitialize = (() => {
+    try {
+      return require(path.resolve(adminPath, 'admin', 'src', 'config', 'plugins.json'));
+    } catch (e) {
+      return [];
+    }
+  })();
+  plugins.push(new CopyWebpackPlugin([{
+    from: 'config/plugins.json',
+    context: path.resolve(adminPath, 'admin', 'src'),
+    to: 'config/plugins.json'
+  }]));
 }
 
 const main = (() => {
@@ -130,7 +131,7 @@ const main = (() => {
   return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 })();
 
-module.exports = require('./webpack.base.babel')({
+module.exports = base({
   // In production, we skip all hot-reloading stuff
   entry: {
     main

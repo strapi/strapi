@@ -8,7 +8,7 @@ const watcher = (label, cmd, withSuccess = true) => {
   }
 
   const data = shell.exec(cmd, {
-    silent: false
+    silent: true
   });
 
   if (data.stderr && data.code !== 0) {
