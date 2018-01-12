@@ -29,35 +29,36 @@ module.exports = cb => {
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.grant')) {
     try {
-      const jwtSecret = uuid();
-      fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'grant.json'), JSON.stringify({
-        grant: {
-          facebook: {
-            key: '',
-            secret: '',
-            callback: '/auth/facebook/callback',
-            scope: ['email']
-          },
-          google: {
-            key: '',
-            secret: '',
-            callback: '/auth/google/callback',
-            scope: ['email']
-          },
-          github: {
-            key: '',
-            secret: '',
-            callback: '/auth/github/callback'
-          },
-          linkedin2: {
-            key: '',
-            secret: '',
-            callback: '/auth/linkedin2/callback',
-            custom_params: {
-              'state': ''
-            }
+      const grant = {
+        facebook: {
+          key: '',
+          secret: '',
+          callback: '/auth/facebook/callback',
+          scope: ['email']
+        },
+        google: {
+          key: '',
+          secret: '',
+          callback: '/auth/google/callback',
+          scope: ['email']
+        },
+        github: {
+          key: '',
+          secret: '',
+          callback: '/auth/github/callback'
+        },
+        linkedin2: {
+          key: '',
+          secret: '',
+          callback: '/auth/linkedin2/callback',
+          custom_params: {
+            'state': ''
           }
         }
+      };
+
+      fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'grant.json'), JSON.stringify({
+        grant
       }, null, 2), 'utf8');
 
        _.set(strapi.plugins['users-permissions'], 'config.grant', grant);
