@@ -160,8 +160,8 @@ It's very common to deploy the front-end and the back-end on different servers. 
     "enabled": false
   },
   "admin": {
+    "path": "/", // Note: The administration will be accessible from the root of the domain (ex: https//yourfrontend.com)
     "build": {
-      "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
       "backend": "https://yourbackend.com",
       "plugins": {
         "source":  "origin" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/admin/content-manager/main.js).
@@ -171,7 +171,7 @@ It's very common to deploy the front-end and the back-end on different servers. 
 }
 ```
 
-The administration URL will be https://yourfrontend.com/dashboard and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/admin/content-manager/main.js`.
+The administration URL will be https://yourfrontend.com and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/admin/content-manager/main.js`.
 
 > Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `https://yourbackend.com/admin/**/main.js`
 
@@ -211,11 +211,11 @@ In this case, we suppose that you decided to put your administration and the plu
     "enabled": false
   },
   "admin": {
+    "path": "/"
     "build": {
-      "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
       "backend": "https://yourbackend.com",
       "plugins": {
-        "source":  "host", // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
+        "source":  "host", // What does it mean? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
         "folder": "/plugins"
       }
     }
@@ -223,7 +223,7 @@ In this case, we suppose that you decided to put your administration and the plu
 }
 ```
 
-The administration URL will be https://yourfrontend.com/dashboard and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `https://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
+The administration URL will be https://yourfrontend.com and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `https://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
 
 We also added a `folder` setting to separate the plugins from the administration build. In your server, the files structure should look like this:
 ```

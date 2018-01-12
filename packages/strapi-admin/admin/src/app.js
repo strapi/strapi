@@ -13,7 +13,7 @@ const remoteURL = (() => {
   }
 
   // Relative URL (ex: /dashboard)
-  if (process.env.REMOTE_URL[0] === '/' && process.env.REMOTE_URL.length > 1) {
+  if (process.env.REMOTE_URL[0] === '/') {
     return (window.location.origin + process.env.REMOTE_URL).replace(/\/$/, '');
   }
 

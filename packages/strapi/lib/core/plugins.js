@@ -14,9 +14,9 @@ module.exports = function() {
     const configuratePlugin = (acc, current, source, name) => {
       switch (source) {
         case 'host': {
-          if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
-            throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
-          }
+          // if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
+          //   throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
+          // }
 
           const folder = _.get(this.config.environments[current].server, 'admin.build.plugins.folder', null);
 

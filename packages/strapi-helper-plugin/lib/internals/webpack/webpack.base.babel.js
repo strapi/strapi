@@ -61,11 +61,7 @@ if (isAdmin && !isSetup) {
     const path = _.get(server, 'admin.path', '/admin');
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
-      if (_.get(server, 'admin.build.host')) {
-        URLs.host = `${_.get(server, 'admin.build.host').replace(/\/$/, '')}`;
-      } else {
-        URLs.host = _.get(server, 'admin.path', '/admin');
-      }
+      URLs.host = _.get(server, 'admin.path', '/admin');
 
       URLs.backend = _.get(server, 'admin.build.backend', `/`);
     }
