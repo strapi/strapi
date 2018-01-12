@@ -39,7 +39,7 @@ class OverlayBlocker extends React.Component {
             <FormattedMessage id="components.OverlayBlocker.description" />
           </p>
           <div className={styles.buttonContainer}>
-            <a className={cn(styles.primary, 'btn')} href="http://strapi.io" target="_blank">Read the documentation</a>
+            <a className={cn(styles.primary, 'btn')} href="https://strapi.io/documentation/configurations/configurations.html#server" target="_blank">Read the documentation</a>
           </div>
         </div>
       </div>
