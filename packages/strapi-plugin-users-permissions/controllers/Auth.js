@@ -169,7 +169,7 @@ module.exports = {
       params.role = '1';
     }
 
-    params.identifier = values.identifier.toLowerCase();
+    params.identifier = params.identifier.toLowerCase();
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
     try {
