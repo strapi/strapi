@@ -64,6 +64,10 @@ module.exports = {
       // Connect the user thanks to the third-party provider.
       const user = await strapi.plugins['users-permissions'].services.providers.connect(provider, access_token);
 
+      if (!strapi.plugins['users-permissions'].config.advanced.allow_register && !user) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is actualy not available.');
+      }
+
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
@@ -147,6 +151,10 @@ module.exports = {
   },
 
   register: async (ctx) => {
+    if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is actualy not available.');
+    }
+
     const params = _.assign(ctx.request.body, {
       provider: 'local'
     });

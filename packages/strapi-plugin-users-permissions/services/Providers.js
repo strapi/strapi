@@ -61,6 +61,10 @@ exports.connect = (provider, access_token) => {
           } else {
             strapi.query('user', 'users-permissions').findOne({email: profile.email})
             .then(user => {
+              if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+                return resolve(false);
+              }
+
               if (!user) {
                 // Create the new user.
                 const params = _.assign(profile, {

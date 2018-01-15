@@ -126,6 +126,8 @@
   "Email.template.reset_password": "",
   "Email.template.success_register": "",
 
+  "Auth.advanced.allow_register": "",
+
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",
   "popUpForm.header.add.providers": "Ajouter un Nouveau Provider",
