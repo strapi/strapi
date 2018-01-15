@@ -12,9 +12,6 @@ module.exports = {
       email: {
         className: 'col-md-6'
       },
-      username: {
-        className: 'col-md-6'
-      },
       provider: {
         className: 'd-none'
       },
