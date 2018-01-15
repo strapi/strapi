@@ -33,7 +33,7 @@ export function* dataDelete() {
       const id = dataToDelete.id;
       const requestURL = `/users-permissions/${endPointAPI}/${id}`;
       // TODO watchServerRestart
-      const response = yield call(request, requestURL, { method: 'DELETE' });
+      const response = yield call(request, requestURL, { method: 'DELETE' }, true);
 
       if (response.ok) {
         yield put(deleteDataSucceeded(indexDataToDelete));
