@@ -127,6 +127,23 @@ module.exports = cb => {
     }
   }
 
+  if (!_.get(strapi.plugins['users-permissions'], 'config.advanced')) {
+    try {
+      const advanced = {
+        unique_email: true,
+        allow_register: true
+      };
+
+      fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'advanced.json'), JSON.stringify({
+        advanced
+      }, null, 2), 'utf8');
+
+       _.set(strapi.plugins['users-permissions'], 'config.advanced', advanced);
+    } catch(err) {
+      strapi.log.error(err);
+    }
+  }
+
   strapi.plugins['users-permissions'].services.userspermissions.syncSchema(() => {
     strapi.plugins['users-permissions'].services.userspermissions.updatePermissions(cb);
   });
