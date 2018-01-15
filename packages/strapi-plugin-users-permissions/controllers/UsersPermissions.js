@@ -166,5 +166,23 @@ module.exports = {
     }, null, 2), 'utf8');
 
     return ctx.send({ ok: true });
+  },
+
+  getAdvancedSettings: async (ctx) => {
+    ctx.send(strapi.plugins['users-permissions'].config.advanced);
+  },
+
+  updateAdvancedSettings: async (ctx) => {
+    if (_.isEmpty(ctx.request.body)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
+    }
+
+    strapi.plugins['users-permissions'].config.advanced = ctx.request.body;
+
+    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'advanced.json'), JSON.stringify({
+      email: strapi.plugins['users-permissions'].config.advanced
+    }, null, 2), 'utf8');
+
+    return ctx.send({ ok: true });
   }
 };

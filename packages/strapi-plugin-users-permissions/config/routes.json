@@ -80,6 +80,22 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/advanced",
+      "handler": "UsersPermissions.getAdvancedSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/advanced",
+      "handler": "UsersPermissions.updateAdvancedSettings",
+      "config": {
+        "policies": []
+      }
+    },
 
 
     {
