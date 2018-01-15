@@ -72,6 +72,14 @@
         "policies": []
       }
     },
+    {
+      "method": "PUT",
+      "path": "/email-template",
+      "handler": "UsersPermissions.updateEmailTemplate",
+      "config": {
+        "policies": []
+      }
+    },
 
 
     {

@@ -6,6 +6,9 @@
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
 
+const path = require('path');
+const fs = require('fs');
+
 const _ = require('lodash');
 
 module.exports = {
@@ -149,5 +152,19 @@ module.exports = {
 
   getEmailTemplate: async (ctx) => {
     ctx.send(strapi.plugins['users-permissions'].config.email);
+  },
+
+  updateEmailTemplate: async (ctx) => {
+    if (_.isEmpty(ctx.request.body)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
+    }
+
+    strapi.plugins['users-permissions'].config.email = ctx.request.body;
+
+    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'email.json'), JSON.stringify({
+      email: strapi.plugins['users-permissions'].config.email
+    }, null, 2), 'utf8');
+
+    return ctx.send({ ok: true });
   }
 };
