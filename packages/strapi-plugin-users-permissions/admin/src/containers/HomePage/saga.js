@@ -1,6 +1,9 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { findIndex } from 'lodash';
 import { takeLatest, put, fork, take, cancel, select, call } from 'redux-saga/effects';
+
+import { freezeApp, unfreezeApp } from 'containers/App/actions';
+
 import request from 'utils/request';
 
 import {
@@ -8,6 +11,7 @@ import {
   fetchDataSucceeded,
   setForm,
 } from './actions';
+
 import {
   DELETE_DATA,
   FETCH_DATA,
@@ -30,17 +34,19 @@ export function* dataDelete() {
     const endPointAPI = yield select(makeSelectDeleteEndPoint());
 
     if (indexDataToDelete !== -1) {
+      yield put(freezeApp());
       const id = dataToDelete.id;
       const requestURL = `/users-permissions/${endPointAPI}/${id}`;
-      // TODO watchServerRestart
       const response = yield call(request, requestURL, { method: 'DELETE' }, true);
 
       if (response.ok) {
         yield put(deleteDataSucceeded(indexDataToDelete));
+        yield put(unfreezeApp());
         strapi.notification.success('users-permissions.notification.success.delete');
       }
     }
   } catch(err) {
+    yield put(unfreezeApp());
     strapi.notification.error('users-permissions.notification.error.delete');
   }
 }
