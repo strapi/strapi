@@ -40,7 +40,7 @@ if (isDevelopmentMode) {
 shell.echo('🏗  Building...');
 
 const build = shell.exec(`cd ${path.resolve(appPath, 'admin')} && APP_PATH=${appPath} npm run build`, {
-  silent: true
+  silent: false
 });
 
 if (build.stderr && build.code !== 0) {

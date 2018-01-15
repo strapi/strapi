@@ -165,14 +165,14 @@ It's very common to deploy the front-end and the back-end on different servers. 
       "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: https//yourfrontend.com/)
       "backend": "http://yourbackend.com",
       "plugins": {
-        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/admin/content-manager/main.js).
+        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/dashboard/content-manager/main.js).
       }
     }
   }
 }
 ```
 
-The administration URL will be https://yourfrontend.com and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/admin/content-manager/main.js`.
+The administration URL will be https://yourfrontend.com and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/dashboard/content-manager/main.js`.
 
 > Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `https://yourbackend.com/admin/**/main.js`
 
@@ -185,11 +185,11 @@ The DOM should look like this:
   <head></head>
   <body>
     <div id="app"></div>
-    <script type="text/javascript" src="/dashboard/vendor.dll.js"></script>
-    <script type="text/javascript" src="/dashboard/main.js"></script>
-    <script src="https://yourbackend.com/admin/content-manager/main.js"></script>
-    <script src="https://yourbackend.com/admin/settings-manager/main.js"></script>
-    <script src="https://yourbackend.com/admin/content-type-builder/main.js"></script>
+    <script type="text/javascript" src="/vendor.dll.js"></script>
+    <script type="text/javascript" src="/main.js"></script>
+    <script src="https://yourbackend.com/dashboard/content-manager/main.js"></script>
+    <script src="https://yourbackend.com/dashboard/settings-manager/main.js"></script>
+    <script src="https://yourbackend.com/dashboard/content-type-builder/main.js"></script>
   </body>
 </html>
 ```

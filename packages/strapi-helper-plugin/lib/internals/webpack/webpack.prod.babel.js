@@ -131,11 +131,11 @@ module.exports = base({
   },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
-  output: {
+  output: _.omitBy({
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
     publicPath,
-  },
+  }, _.isUndefined),
 
   // In production, we minify our CSS with cssnano
   postcssPlugins: [
