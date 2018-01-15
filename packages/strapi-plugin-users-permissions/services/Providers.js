@@ -44,7 +44,7 @@ const linkedin = new Purest({
 exports.connect = (provider, access_token) => {
   return new Promise((resolve, reject) => {
     if (!access_token) {
-      reject({
+      reject(null, {
         message: 'No access_token.'
       });
     } else {
@@ -62,10 +62,18 @@ exports.connect = (provider, access_token) => {
             strapi.query('user', 'users-permissions').findOne({email: profile.email})
             .then(user => {
               if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
-                return resolve(false);
+                return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
               }
 
-              if (!user) {
+              if (user && user.provider === provider) {
+                return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+              }
+
+              if (user && user.provider !== provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+                return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+              }
+
+              if (!user || _.get(user, 'provider') !== provider) {
                 // Create the new user.
                 const params = _.assign(profile, {
                   provider: provider
@@ -73,17 +81,17 @@ exports.connect = (provider, access_token) => {
 
                 strapi.query('user', 'users-permissions').create(params)
                 .then(user => {
-                  resolve(user);
+                  resolve([user, null]);
                 })
                 .catch(err => {
-                  reject(err);
+                  reject([null, err]);
                 });
               } else {
-                resolve(user);
+                resolve([user, null]);
               }
             })
             .catch(err => {
-              reject(err);
+              reject([null, err]);
             });
           }
         }

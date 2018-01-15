@@ -62,10 +62,10 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const user = await strapi.plugins['users-permissions'].services.providers.connect(provider, access_token);
+      const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, access_token);
 
-      if (!strapi.plugins['users-permissions'].config.advanced.allow_register && !user) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is actualy not available.');
+      if (error) {
+        return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
       }
 
       ctx.send({
@@ -181,6 +181,18 @@ module.exports = {
     }
 
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+    const user = await strapi.query('user', 'users-permissions').findOne({
+      email: params.email
+    });
+
+    if (user && user.provider === params.provider) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+    }
+
+    if (user && user.provider !== params.provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+    }
 
     try {
       const user = await strapi.query('user', 'users-permissions').create(params);
