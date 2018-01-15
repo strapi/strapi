@@ -21,7 +21,7 @@ module.exports = cb => {
         jwtSecret
       }, null, 2), 'utf8');
 
-       _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
+      _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
     } catch(err) {
       strapi.log.error(err);
     }
@@ -62,6 +62,63 @@ module.exports = cb => {
       }, null, 2), 'utf8');
 
        _.set(strapi.plugins['users-permissions'], 'config.grant', grant);
+    } catch(err) {
+      strapi.log.error(err);
+    }
+  }
+
+  if (!_.get(strapi.plugins['users-permissions'], 'config.email')) {
+    try {
+      const email = {
+        'validation_email': {
+          enable: true,
+          display: 'Email.template.validation_email',
+          icon: 'envelope',
+          options: {
+            from: {
+              email: '',
+              name: ''
+            },
+            respond: '',
+            object: '',
+            message: ''
+          }
+        },
+        'reset_password': {
+          enable: true,
+          display: 'Email.template.reset_password',
+          icon: 'refresh',
+          options: {
+            from: {
+              email: '',
+              name: ''
+            },
+            respond: '',
+            object: '',
+            message: ''
+          }
+        },
+        'success_register': {
+          enable: true,
+          display: 'Email.template.success_register',
+          icon: 'check',
+          options: {
+            from: {
+              email: '',
+              name: ''
+            },
+            respond: '',
+            object: '',
+            message: ''
+          }
+        }
+      };
+
+      fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'email.json'), JSON.stringify({
+        email
+      }, null, 2), 'utf8');
+
+       _.set(strapi.plugins['users-permissions'], 'config.email', email);
     } catch(err) {
       strapi.log.error(err);
     }

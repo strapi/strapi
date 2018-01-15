@@ -122,6 +122,10 @@
   "Policies.header.hint": "Sélectionnez les actions de l'application ou d'un plugin et cliquer sur l'icon de paramètres pour voir les routes associées à cette action",
   "Policies.header.title": "Paramètres avancés",
 
+  "Email.template.validation_email": "",
+  "Email.template.reset_password": "",
+  "Email.template.success_register": "",
+
   "popUpForm.button.cancel": "Annuler",
   "popUpForm.button.save": "Sauvegarder",
   "popUpForm.header.add.providers": "Ajouter un Nouveau Provider",
