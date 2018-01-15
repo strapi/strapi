@@ -17,6 +17,7 @@ module.exports = {
       // Default values.
       options = _.isObject(options) ? options : {};
       options.from = options.from || '"Administration Panel" <no-reply@strapi.io>';
+      options.replyTo = options.replyTo || '"Administration Panel" <no-reply@strapi.io>';
       options.text = options.text || options.html;
       options.html = options.html || options.text;
 
@@ -24,6 +25,7 @@ module.exports = {
       sendmail({
         from: options.from,
         to: options.to,
+        replyTo: options.replyTo,
         subject: options.subject,
         text: options.text,
         html: options.html

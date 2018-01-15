@@ -117,21 +117,22 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    // Send an email to the user.
-    const template = `
-      <p>We heard that you lost your password. Sorry about that!</p>
+    const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
 
-      <p>But don’t worry! You can use the following link to reset your password:</p>
-
-      <p>${url}?code=${resetPasswordToken}</p>
-
-      <p>Thanks.</p>
-    `;
+    const compiled = _.template(settings.message);
+    const template = compiled({
+      url,
+      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken']),
+      token: resetPasswordToken
+    });
 
     try {
+      // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
         to: user.email,
-        subject: '­Reset password 🔑 ',
+        from: (settings.from.email || settings.from.email) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
+        replyTo: settings.respond,
+        subject: settings.object,
         text: template,
         html: template
       });

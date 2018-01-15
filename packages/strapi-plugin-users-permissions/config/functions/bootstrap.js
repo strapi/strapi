@@ -71,7 +71,6 @@ module.exports = cb => {
     try {
       const email = {
         'validation_email': {
-          enabled: true,
           display: 'Email.template.validation_email',
           icon: 'envelope',
           options: {
@@ -85,7 +84,6 @@ module.exports = cb => {
           }
         },
         'reset_password': {
-          enabled: true,
           display: 'Email.template.reset_password',
           icon: 'refresh',
           options: {
@@ -94,12 +92,17 @@ module.exports = cb => {
               name: ''
             },
             respond: '',
-            object: '',
-            message: ''
+            object: '­Reset password 🔑 ',
+            message: `<p>We heard that you lost your password. Sorry about that!</p>
+
+            <p>But don’t worry! You can use the following link to reset your password:</p>
+
+            <p><%= url %>?code=<%= token %></p>
+
+            <p>Thanks.</p>`
           }
         },
         'success_register': {
-          enabled: true,
           display: 'Email.template.success_register',
           icon: 'check',
           options: {
