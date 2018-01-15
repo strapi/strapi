@@ -71,7 +71,7 @@ module.exports = cb => {
     try {
       const email = {
         'validation_email': {
-          enable: true,
+          enabled: true,
           display: 'Email.template.validation_email',
           icon: 'envelope',
           options: {
@@ -85,7 +85,7 @@ module.exports = cb => {
           }
         },
         'reset_password': {
-          enable: true,
+          enabled: true,
           display: 'Email.template.reset_password',
           icon: 'refresh',
           options: {
@@ -99,7 +99,7 @@ module.exports = cb => {
           }
         },
         'success_register': {
-          enable: true,
+          enabled: true,
           display: 'Email.template.success_register',
           icon: 'check',
           options: {

@@ -145,5 +145,9 @@ module.exports = {
     } catch(error) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
+  },
+
+  getEmailTemplate: async (ctx) => {
+    ctx.send(strapi.plugins['users-permissions'].config.email);
   }
 };

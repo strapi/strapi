@@ -64,6 +64,15 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/email-template",
+      "handler": "UsersPermissions.getEmailTemplate",
+      "config": {
+        "policies": []
+      }
+    },
+
 
     {
       "method": "POST",
