@@ -79,6 +79,13 @@ if (isAdmin && !isSetup) {
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`);
   }
+
+  // Note: Travis failed with it.
+  plugins.push(new CopyWebpackPlugin([{
+    from: 'config/plugins.json',
+    context: path.resolve(adminPath, 'admin', 'src'),
+    to: 'config/plugins.json'
+  }]));
 }
 
 // Build the `index.html file`
@@ -105,20 +112,6 @@ if (isAdmin) {
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
   }));
-
-  // Necessary configuration file to ensure that plugins will be loaded.
-  const pluginsToInitialize = (() => {
-    try {
-      return require(path.resolve(adminPath, 'admin', 'src', 'config', 'plugins.json'));
-    } catch (e) {
-      return [];
-    }
-  })();
-  plugins.push(new CopyWebpackPlugin([{
-    from: 'config/plugins.json',
-    context: path.resolve(adminPath, 'admin', 'src'),
-    to: 'config/plugins.json'
-  }]));
 }
 
 const main = (() => {
