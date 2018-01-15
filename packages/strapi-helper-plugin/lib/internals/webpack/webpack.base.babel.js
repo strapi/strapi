@@ -50,7 +50,8 @@ if (!isSetup) {
 const URLs = {
   host: '/admin',
   backend: '/',
-  publicPath: null
+  publicPath: null,
+  mode: 'host'
 };
 
 if (isAdmin && !isSetup) {
@@ -69,6 +70,10 @@ if (isAdmin && !isSetup) {
 
       URLs.publicPath = URLs.host;
       URLs.backend = _.get(server, 'admin.build.backend', `/`);
+
+      if (_.get(server, 'admin.build.plugins.source') === 'backend') {
+        URLs.mode = 'backend';
+      }
     }
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`)
@@ -226,6 +231,7 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         REMOTE_URL: JSON.stringify(URLs.host),
         BACKEND_URL: JSON.stringify(URLs.backend),
+        MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
       },
     }),
     new webpack.NamedModulesPlugin()

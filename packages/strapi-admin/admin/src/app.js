@@ -204,6 +204,7 @@ const displayNotification = (message, status) => {
 window.strapi = Object.assign(window.strapi || {}, {
   remoteURL: devFrontURL || remoteURL,
   backendURL: devBackendURL || backendURL,
+  mode: process.env.MODE || 'host',
   registerPlugin,
   notification: {
     success: (message) => {
