@@ -8,6 +8,9 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
+
+import { freezeApp, unfreezeApp } from 'containers/App/actions';
+
 import request from 'utils/request';
 
 import {
@@ -89,6 +92,8 @@ export function* roleGet(action) {
 
 export function* submit() {
   try {
+    yield put(freezeApp());
+
     const actionType = yield select(makeSelectActionType());
     const body = yield select(makeSelectModifiedData());
     const roleId = yield select(makeSelectRoleId());
@@ -101,10 +106,12 @@ export function* submit() {
     const response = yield call(request, requestURL, opts, true);
 
     if (response.ok) {
+      yield put(unfreezeApp());
       yield put(submitSucceeded());
     }
   } catch(error) {
     console.log(error);
+    yield put(unfreezeApp());
   }
 }
 
