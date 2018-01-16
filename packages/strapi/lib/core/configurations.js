@@ -189,15 +189,11 @@ module.exports.app = async function() {
         }
 
         if (!this.plugins[key].models[index].globalId) {
-          this.plugins[key].models[index].globalId = this.models[index] ?
-            upperFirst(camelCase(`${key}-${index}`)):
-            upperFirst(camelCase(`${index}`));
+          this.plugins[key].models[index].globalId = upperFirst(camelCase(`${key}-${index}`));
         }
 
         if (!this.plugins[key].models[index].collectionName) {
-          this.plugins[key].models[index].collectionName = this.models[index] ?
-            (`${key}_${index}`).toLowerCase():
-            (`${index}`).toLowerCase();
+          this.plugins[key].models[index].collectionName = `${key}_${index}`.toLowerCase();
         }
 
         sum[index] = this.plugins[key].models[index];
