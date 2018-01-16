@@ -18,9 +18,13 @@ function parseJSON(response) {
  *
  * @return {object|undefined} Returns either the response, or throws an error
  */
-function checkStatus(response) {
+function checkStatus(response, checkToken = true) {
   if (response.status >= 200 && response.status < 300) {
     return response;
+  }
+
+  if (response.status === 401 && auth.getToken() && checkToken) {
+    return checkTokenValidity(response);
   }
 
   return parseJSON(response).then(responseFormatted => {
@@ -29,6 +33,29 @@ function checkStatus(response) {
     error.response.payload = responseFormatted;
     throw error;
   });
+}
+
+function checkTokenValidity(response) {
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${auth.getToken()}`,
+    },
+  };
+
+  if (auth.getToken()) {
+    return fetch(`${strapi.backendURL}/user/me`, options)
+    .then(resp => {
+      if (response.status === 401) {
+        window.location = `${strapi.remoteURL}/plugins/users-permissions/auth/login`;
+
+        auth.clearAppStorage();
+      }
+
+      return checkStatus(response, false);
+    });
+  }
 }
 
 /**

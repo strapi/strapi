@@ -46,7 +46,7 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import { pluginLoaded, updatePlugin, setHasUserPlugin } from 'containers/App/actions';
+import { pluginLoaded, updatePlugin, unsetHasUserPlugin } from 'containers/App/actions';
 import auth from 'utils/auth';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
@@ -111,7 +111,7 @@ if (window.location.port !== '4000') {
     })
     .then(plugins => {
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        store.dispatch(setHasUserPlugin());
+        store.dispatch(unsetHasUserPlugin());
       }
 
       (plugins || []).forEach(plugin => {
@@ -146,7 +146,7 @@ if (window.location.port !== '4000') {
       console.log(err);
     });
 } else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(setHasUserPlugin());
+  store.dispatch(unsetHasUserPlugin());
 }
 
 // const isPluginAllowedToRegister = (plugin) => true;
