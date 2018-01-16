@@ -63,8 +63,8 @@ class PluginCard extends React.Component {
     }
   }
 
-  handleDownloadPlugin = () => {
-    this.props.downloadPlugin();
+  handleDownloadPlugin = (e) => {
+    this.props.downloadPlugin(e);
   }
 
   shouldOpenModal = (props) => {
