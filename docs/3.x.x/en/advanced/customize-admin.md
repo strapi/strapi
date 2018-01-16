@@ -162,19 +162,19 @@ It's very common to deploy the front-end and the back-end on different servers. 
   "admin": {
     "path": "/dashboard",
     "build": {
-      "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: https//yourfrontend.com/)
+      "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
       "backend": "http://yourbackend.com",
       "plugins": {
-        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: https://yourbackend.com/dashboard/content-manager/main.js).
+        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: http://yourbackend.com/dashboard/content-manager/main.js).
       }
     }
   }
 }
 ```
 
-The administration URL will be https://yourfrontend.com and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `https://yourbackend.com/dashboard/content-manager/main.js`.
+The administration URL will be http://yourfrontend.com and every request from the panel will hit the backend at http://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `http://yourbackend.com/dashboard/content-manager/main.js`.
 
-> Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `https://yourbackend.com/admin/**/main.js`
+> Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `http://yourbackend.com/admin/**/main.js`
 
 
 The DOM should look like this:
@@ -187,9 +187,9 @@ The DOM should look like this:
     <div id="app"></div>
     <script type="text/javascript" src="/vendor.dll.js"></script>
     <script type="text/javascript" src="/main.js"></script>
-    <script src="https://yourbackend.com/dashboard/content-manager/main.js"></script>
-    <script src="https://yourbackend.com/dashboard/settings-manager/main.js"></script>
-    <script src="https://yourbackend.com/dashboard/content-type-builder/main.js"></script>
+    <script src="http://yourbackend.com/dashboard/content-manager/main.js"></script>
+    <script src="http://yourbackend.com/dashboard/settings-manager/main.js"></script>
+    <script src="http://yourbackend.com/dashboard/content-type-builder/main.js"></script>
   </body>
 </html>
 ```
@@ -213,10 +213,10 @@ In this case, we suppose that you decided to put your administration and the plu
   },
   "admin": {
     "build": {
-      "host": "https://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
-      "backend": "https://yourbackend.com",
+      "host": "http://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
+      "backend": "http://yourbackend.com",
       "plugins": {
-        "source":  "host", // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: https://yourfrontend.com/dashboard/plugins/content-manager/main.js).
+        "source":  "host", // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: http://yourfrontend.com/dashboard/plugins/content-manager/main.js).
         "folder": "/plugins"
       }
     }
@@ -224,7 +224,7 @@ In this case, we suppose that you decided to put your administration and the plu
 }
 ```
 
-The administration URL will be https://yourfrontend.com/dashboard and every request from the panel will hit the backend at https://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `https://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
+The administration URL will be http://yourfrontend.com/dashboard and every request from the panel will hit the backend at http://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `http://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
 
 We also added a `folder` setting to separate the plugins from the administration build. In your server, the files structure should look like this:
 ```
