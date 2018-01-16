@@ -11,8 +11,21 @@ const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 const isAdmin = process.env.IS_ADMIN === 'true';
 
-const appPath = isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+const appPath = (() => {
+  if (process.env.APP_PATH) {
+    return process.env.APP_PATH;
+  }
+
+  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+})();
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const adminPath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD);
+  }
+
+  return path.resolve(appPath, 'admin');
+})();
 
 if (!isSetup) {
   try {
@@ -23,7 +36,9 @@ if (!isSetup) {
     strapi.log.level = 'silent';
 
     (async () => {
-      await strapi.load();
+      await strapi.load({
+        environment: process.env.NODE_ENV
+      });
     })();
   } catch (e) {
     console.log(e);
@@ -33,8 +48,10 @@ if (!isSetup) {
 
 // Define remote and backend URLs.
 const URLs = {
-  host: null,
-  backend: null
+  host: '/admin',
+  backend: '/',
+  publicPath: null,
+  mode: 'host'
 };
 
 if (isAdmin && !isSetup) {
@@ -43,11 +60,20 @@ if (isAdmin && !isSetup) {
 
   try {
     const server = require(serverConfig);
-    const path = _.get(server, 'admin.path', '/admin');
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
-      URLs.host = _.get(server, 'admin.build.host', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}${path}`);
-      URLs.backend = _.get(server, 'admin.build.backend', `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`);
+      if (_.get(server, 'admin.build.host')) {
+        URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
+      } else {
+        URLs.host = _.get(server, 'admin.path', '/admin');
+      }
+
+      URLs.publicPath = URLs.host;
+      URLs.backend = _.get(server, 'admin.build.backend', `/`);
+
+      if (_.get(server, 'admin.build.plugins.source') === 'backend') {
+        URLs.mode = 'backend';
+      }
     }
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`)
@@ -83,7 +109,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.join(process.env.PWD, 'admin', 'build')
+    path: path.join(adminPath, 'admin', 'build')
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -111,13 +137,13 @@ module.exports = (options) => ({
           },
         },
       },
-      include: [path.join(process.env.PWD, 'admin', 'src')]
+      include: [path.join(adminPath, 'admin', 'src')]
         .concat(plugins.src.reduce((acc, current) => {
           acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
           return acc;
         }, []))
-        .concat([path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
+        .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
@@ -205,6 +231,7 @@ module.exports = (options) => ({
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         REMOTE_URL: JSON.stringify(URLs.host),
         BACKEND_URL: JSON.stringify(URLs.backend),
+        MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
       },
     }),
     new webpack.NamedModulesPlugin()

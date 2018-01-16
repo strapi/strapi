@@ -9,12 +9,14 @@ module.exports = function() {
   return new Promise((resolve, reject) => {
     const folder = ((url = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin')) =>
       url[0] === '/' ? url.substring(1) : url
-    )();
+    )().replace(/\/$/, '') ;
 
     const configuratePlugin = (acc, current, source, name) => {
       switch (source) {
         case 'host': {
-          if (!_.get(this.config.environments[current].server, 'admin.build.host')) {
+          const host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+
+          if (!host) {
             throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
           }
 
@@ -23,10 +25,10 @@ module.exports = function() {
           if (_.isString(folder)) {
             const cleanFolder = folder[0] === '/' ? folder.substring(1) : folder;
 
-            return `${this.config.environments[current].server.admin.build.host}/${cleanFolder}/${name}/main.js`;
+            return `/${host}/${cleanFolder}/${name}/main.js`.replace('//', '/');
           }
 
-          return `${this.config.environments[current].server.admin.build.host}/${name}/main.js`;
+          return `/${host}/${name}/main.js`.replace('//', '/');
         }
         case 'custom':
           if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
@@ -34,9 +36,12 @@ module.exports = function() {
           }
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
-        case 'origin':
+        case 'backend':
+          const backend = _.get(this.config.environments[current], 'server.admin.build.backend', `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}`).replace(/\/$/, '');
+
+          return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;
         default:
-          return `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}/${folder}/${name}/main.js`;
+          return `/${name}/main.js`;
       }
     };
 
@@ -111,7 +116,7 @@ module.exports = function() {
             const data =  Object.keys(this.plugins).map(name => ({
               id: name,
               source: Object.keys(this.config.environments).reduce((acc, current) => {
-                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'origin');
+                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
 
                 if (_.isString(source)) {
                   acc[current] = configuratePlugin(acc, current, source, name);
