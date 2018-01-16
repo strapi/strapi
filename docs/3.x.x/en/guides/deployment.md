@@ -29,7 +29,7 @@ cd /path/to/the/project
 npm run setup
 ```
 
-> Note: To display the build logs use the --verbose option `npm run setup --verbose`.
+> Note: To display the build logs use the --debug option `npm run setup --debug`.
 
 #### #3 - Launch the server
 
