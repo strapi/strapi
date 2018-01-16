@@ -29,7 +29,7 @@ cd /path/to/the/project
 npm run setup
 ```
 
-> Note: The `build` folders are ignored (.gitignore). If you're cloning your git repository on your server, you need to run this command on your server.
+> Note: To display the build logs use the --verbose option `npm run setup --verbose`.
 
 #### #3 - Launch the server
 

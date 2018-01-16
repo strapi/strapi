@@ -10,6 +10,7 @@ shell.echo('📦  Installing packages...');
 
 const pwd = shell.pwd();
 
+const silent = !(process.env.npm_config_verbose === 'true');
 const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
 const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
 
@@ -19,28 +20,28 @@ shell.rm('-rf', path.resolve(appPath, 'admin', 'package-lock.json'));
 
 // Install the project dependencies.
 shell.exec(`cd ${appPath} && npm install --ignore-scripts`, {
-  silent: true
+  silent
 });
 
 // Install the administration dependencies.
 shell.exec(`cd ${path.resolve(appPath, 'admin')} && npm install`, {
-  silent: true
+  silent
 });
 
 if (isDevelopmentMode) {
   shell.exec(`cd ${path.resolve(appPath, 'admin')} && npm link strapi-helper-plugin && npm link strapi-utils`, {
-    silent: true
+    silent
   });
 } else {
   shell.exec(`cd ${path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin')} && npm install`, {
-    silent: true
+    silent
   });
 }
 
 shell.echo('🏗  Building...');
 
 const build = shell.exec(`cd ${path.resolve(appPath, 'admin')} && APP_PATH=${appPath} npm run build`, {
-  silent: false
+  silent
 });
 
 if (build.stderr && build.code !== 0) {
@@ -58,15 +59,15 @@ if (process.env.npm_config_plugins === 'true') {
     shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
     shell.echo('📦  Installing packages...');
     shell.exec(`cd ${path.resolve(plugins, plugin)} && npm install`, {
-      silent: true
+      silent
     });
     shell.exec(`cd ${path.resolve(plugins, plugin, 'node_modules', 'strapi-helper-plugin')} && npm install`, {
-      silent: true
+      silent
     });
     shell.echo('🏗  Building...');
 
     const build = shell.exec(`cd ${path.resolve(plugins, plugin)} &&  APP_PATH=${appPath} npm run build`, {
-      silent: true
+      silent
     });
 
     if (build.stderr && build.code !== 0) {

@@ -6,29 +6,6 @@
  */
 
 /* eslint-disable */
-// Retrieve remote and backend URLs.
-const remoteURL = (() => {
-  if (window.location.port === '4000') {
-    return 'http://localhost:4000/admin';
-  }
-
-  // Relative URL (ex: /dashboard)
-  if (process.env.REMOTE_URL[0] === '/') {
-    return (window.location.origin + process.env.REMOTE_URL).replace(/\/$/, '');
-  }
-
-  return process.env.REMOTE_URL.replace(/\/$/, '');
-})();
-const backendURL = (process.env.BACKEND_URL === '/' ? window.location.origin : process.env.BACKEND_URL);
-
-// Retrieve development URL to avoid to re-build.
-const $body = document.getElementsByTagName('body')[0];
-const devFrontURL = $body.getAttribute('front') ? window.location.origin + $body.getAttribute('front').replace(/\/$/, '') : null;
-const devBackendURL = $body.getAttribute('back') ? window.location.origin + $body.getAttribute('back').replace(/\/$/, '') : null;
-
-$body.removeAttribute('front');
-$body.removeAttribute('back');
-
 import './public-path';
 import 'babel-polyfill';
 
@@ -62,7 +39,7 @@ const plugins = (() => {
 /* eslint-enable */
 
 // Create redux store with history
-const basename = (devFrontURL || remoteURL).replace(window.location.origin, '');
+const basename = strapi.remoteURL.replace(window.location.origin, '');
 const history = createHistory({
   basename,
 });
@@ -105,7 +82,7 @@ window.onload = function onLoad() {
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
-  fetch(`${devFrontURL || remoteURL}/config/plugins.json`)
+  fetch(`${strapi.remoteURL}/config/plugins.json`)
     .then(response => {
       return response.json();
     })
@@ -114,12 +91,14 @@ if (window.location.port !== '4000') {
         store.dispatch(unsetHasUserPlugin());
       }
 
+      const $body = document.getElementsByTagName('body')[0];
+
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.onerror = function (oError) {
           const source = new URL(oError.target.src);
-          const url = new URL(`${devFrontURL || remoteURL}`);
+          const url = new URL(`${strapi.remoteURL}`);
 
           if (!source || !url) {
             throw new Error(`Impossible to load: ${oError.target.src}`);
@@ -202,8 +181,6 @@ const displayNotification = (message, status) => {
  */
 
 window.strapi = Object.assign(window.strapi || {}, {
-  remoteURL: devFrontURL || remoteURL,
-  backendURL: devBackendURL || backendURL,
   mode: process.env.MODE || 'host',
   registerPlugin,
   notification: {
