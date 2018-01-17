@@ -10,8 +10,8 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, success, error) => {
   const knex  = require(path.resolve(`${scope.rootPath}/node_modules/knex`))({
     client: scope.client.module,
-    connection: Object.assign(scope.database, {
-      user: scope.database.username
+    connection: Object.assign(scope.database.settings, {
+      user: scope.database.settings.username
     })
   });
 
