@@ -118,7 +118,7 @@ module.exports = {
     const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
-      role.nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id || roles[i]._id });
+      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id || roles[i]._id });
     }
 
     return roles;
