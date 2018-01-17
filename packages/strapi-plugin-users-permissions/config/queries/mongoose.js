@@ -1,21 +1,22 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params) {
+  find: async function (params = {}, populate) {
     return this
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip))
-      .populate(this.associations.map(x => x.alias).join(' '));
+      .populate(populate || this.associations.map(x => x.alias).join(' '))
+      .lean();
   },
 
-  count: async function (params) {
+  count: async function (params = {}) {
     return Number(await this
-      .count());
+      .count(params));
   },
 
-  findOne: async function (params) {
+  findOne: async function (params, populate) {
     if (!params[this.primaryKey] && params.id) {
       params[this.primaryKey] = params.id;
       delete params.id;
@@ -25,12 +26,12 @@ module.exports = {
 
     return this
       .findOne(params)
-      .populate(this.associations.map(x => x.alias).join(' '));
+      .populate(populate || this.associations.map(x => x.alias).join(' '));
   },
 
   create: async function (params) {
     return this.create(Object.keys(params).reduce((acc, current) => {
-      if (_.get(this._attributes, [current, 'type'])) {
+      if (_.get(this._attributes, [current, 'type']) || _.get(this._attributes, [current, 'model'])) {
         acc[current] = params[current];
       }
 
@@ -87,5 +88,20 @@ module.exports = {
         }
       }
     ]);
+  },
+
+  createRole: async function (params) {
+    return this.
+      create(params);
+  },
+
+  addPermission: async function (params) {
+    return this
+      .create(params);
+  },
+
+  removePermission: async function (params) {
+    return this
+      .remove(params);
   }
 };

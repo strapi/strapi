@@ -90,10 +90,12 @@ module.exports = {
 
   getRoles: async (ctx) => {
     try {
+      console.log("coucou");
       const roles = await strapi.plugins['users-permissions'].services.userspermissions.getRoles();
 
       ctx.send({ roles });
     } catch(err) {
+      console.log(err);
       ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
     }
   },
@@ -118,7 +120,7 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    const hasAdmin = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
+    const hasAdmin = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { type: 'guest' }));
 
     ctx.send({ hasAdmin: hasAdmin.length > 0 });
   },

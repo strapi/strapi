@@ -1,0 +1,34 @@
+{
+  "connection": "default",
+  "info": {
+    "name": "permission",
+    "description": ""
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "controller": {
+      "type": "string",
+      "required": true
+    },
+    "action": {
+      "type": "string",
+      "required": true
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true
+    },
+    "policy": {
+      "type": "json",
+      "required": true
+    },
+    "role": {
+      "model": "role",
+      "via": "permissions",
+      "plugin": "users-permissions"
+    }
+  }
+}

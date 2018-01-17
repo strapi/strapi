@@ -27,10 +27,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
   // Roles that can't be deleted && modified
   // Don't delete this line
-  protectedRoleIDs = ['0'];
+  protectedRoleIDs = ['root'];
 
   // Roles that can't be deleted;
-  undeletableIDs = ['1'];
+  undeletableIDs = ['guest'];
 
   generateContent = () => {
     let icons = [
@@ -46,11 +46,11 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
     switch (this.props.settingType) {
       case 'roles':
-        if (includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
+        if (includes(this.protectedRoleIDs, get(this.props.item, 'type').toString())) {
           icons = [];
         }
 
-        if (includes(this.undeletableIDs, get(this.props.item, 'id').toString())) {
+        if (includes(this.undeletableIDs, get(this.props.item, 'type').toString())) {
           icons = [{ icoType: 'pencil', onClick: this.handleClick }];
         }
 
@@ -135,7 +135,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
   handleClick = () => {
     switch (this.props.settingType) {
       case 'roles': {
-        if (!includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
+        if (!includes(this.protectedRoleIDs, get(this.props.item, 'type').toString())) {
           return router.push(`${router.location.pathname}/edit/${this.props.item.id}`);
         }
         return;

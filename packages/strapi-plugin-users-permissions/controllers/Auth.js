@@ -159,15 +159,18 @@ module.exports = {
     }
 
     // First, check if the user is the first one to register as admin.
-    const adminUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
+    const hasAdmin = await strapi.query('user', 'users-permissions').count(strapi.utils.models.convertParams('user', { type: 'root' }));
 
     // Check if the user is the first to register
-    if (adminUsers.length === 0) {
-      params.role = '0';
-    } else {
-      params.role = '1';
+    const role = hasAdmin < 1 ?
+      await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []):
+      await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+
+    if (!role) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
     }
 
+    params.role = role._id || role.id;
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
     try {
