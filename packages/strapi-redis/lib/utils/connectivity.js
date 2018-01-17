@@ -12,7 +12,7 @@ module.exports = (scope, success, error) => {
   const redis = new Redis({
     port: scope.database.settings.port,
     host: scope.database.settings.host,
-    password: scope.databasesettings.password,
+    password: scope.database.settings.password,
     db: scope.database.settings.database
   });
 
