@@ -1,5 +1,6 @@
 import 'whatwg-fetch';
 import auth from 'utils/auth';
+import { freezeApp, unfreezeApp } from 'actions/overlayBlocker';
 /**
  * Parses the JSON returned by a network request
  *
@@ -86,6 +87,7 @@ function serverRestartWatcher(response) {
       }
     })
       .then(() => {
+        unfreezeApp();
         resolve(response);
       })
       .catch(err => {
@@ -141,6 +143,7 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
     .then(parseJSON)
     .then((response) => {
       if (shouldWatchServerRestart) {
+        freezeApp();
         return serverRestartWatcher(response);
       }
 

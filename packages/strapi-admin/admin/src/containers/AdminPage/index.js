@@ -17,7 +17,7 @@ import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
 
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
-import { selectHasUserPlugin, selectPlugins } from 'containers/App/selectors';
+import { selectHasUserPlugin, selectPlugins, makeSelectShowGlobalAppBlocker } from 'containers/App/selectors';
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
 // Design
@@ -108,7 +108,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-
+    console.log('showGlobalAppBlocker', this.props.showGlobalAppBlocker);
+    
     return (
       <div className={styles.adminPage}>
         {leftMenu}
@@ -154,12 +155,14 @@ AdminPage.propTypes = {
   location: PropTypes.object.isRequired,
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
+  showGlobalAppBlocker: PropTypes.bool.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
   hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
+  showGlobalAppBlocker: makeSelectShowGlobalAppBlocker(),
 });
 
 function mapDispatchToProps(dispatch) {
