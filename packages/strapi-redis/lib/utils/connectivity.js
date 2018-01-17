@@ -10,10 +10,10 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, success, error) => {
   const Redis = require(`${scope.rootPath}/node_modules/ioredis`);
   const redis = new Redis({
-    port: scope.database.port,
-    host: scope.database.host,
-    password: scope.database.password,
-    db: scope.database.database
+    port: scope.database.settings.port,
+    host: scope.database.settings.host,
+    password: scope.databasesettings.password,
+    db: scope.database.settings.database
   });
 
   redis.connect((err) => {
