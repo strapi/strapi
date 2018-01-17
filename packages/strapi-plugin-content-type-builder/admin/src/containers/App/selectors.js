@@ -6,11 +6,6 @@ import { createSelector } from 'reselect';
 
 const selectGlobalDomain = () => state => state.get('global');
 
-const makeSelectBlockApp = () => createSelector(
-  selectGlobalDomain(),
-  (globalSate) => globalSate.get('blockApp'),
-);
-
 const makeSelectLoading = () => createSelector(
   selectGlobalDomain(),
   (globalSate) => globalSate.get('loading'),
@@ -45,7 +40,6 @@ const selectLocationState = () => {
 
 export {
   selectLocationState,
-  makeSelectBlockApp,
   makeSelectLoading,
   makeSelectMenu,
   makeSelectModels,

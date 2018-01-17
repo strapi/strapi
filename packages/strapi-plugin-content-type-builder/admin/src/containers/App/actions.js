@@ -13,13 +13,11 @@ import { storeData } from '../../utils/storeData';
 
 import {
   DELETE_CONTENT_TYPE,
-  FREEZE_APP,
   MODELS_FETCH,
   MODELS_FETCH_SUCCEEDED,
   STORE_TEMPORARY_MENU,
   TEMPORARY_CONTENT_TYPE_FIELDS_UPDATED,
   TEMPORARY_CONTENT_TYPE_POSTED,
-  UNFREEZE_APP,
 } from './constants';
 
 export function deleteContentType(itemToDelete, context) {
@@ -55,12 +53,6 @@ export function deleteContentType(itemToDelete, context) {
     leftMenuContentTypes,
     updateLeftMenu,
     updatePlugin: context.updatePlugin,
-  };
-}
-
-export function freezeApp() {
-  return {
-    type: FREEZE_APP,
   };
 }
 
@@ -125,11 +117,5 @@ export function temporaryContentTypePosted(fieldNumber) {
   return {
     type: TEMPORARY_CONTENT_TYPE_POSTED,
     fieldNumber,
-  };
-}
-
-export function unfreezeApp() {
-  return {
-    type: UNFREEZE_APP,
   };
 }
