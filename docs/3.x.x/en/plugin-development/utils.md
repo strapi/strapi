@@ -9,7 +9,7 @@ Strapi provides helpers so you don't have to develop again and again the same ge
 ### Methods
 
 | Name | Description |
-| ---- | ––––––––––– |
+| ---- | ----------- |
 | clear(key) | Remove the data in either `localStorage` or `sessionStorage` |
 | clearAppStorage() | Remove all data from both storage |
 | clearToken() | Remove the user's `jwt Token` in the appropriate browser's storage |
@@ -17,9 +17,9 @@ Strapi provides helpers so you don't have to develop again and again the same ge
 | get(key) | Get the item in the browser's storage |
 | getToken() | Get the user's `jwtToken` |
 | getUserInfo() | Get the user's infos |
-| set(value, key) | Set an item in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
-| setToken(value) | Set the user's `jwtToken` in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
-| setUserInfo(value) | Set the user's info in the `sessionStorage`. If `true` is passed a 3rd parameter it sets the value in the `localStorage` |
+| set(value, key, isLocalStorage) | Set an item in the `sessionStorage`. If `true` is passed as the 3rd parameter it sets the value in the `localStorage` |
+| setToken(value, isLocalStorage) | Set the user's `jwtToken` in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage` |
+| setUserInfo(value, isLocalStorage) | Set the user's info in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage` |
 
 
 ```js
@@ -44,7 +44,7 @@ const linkColor = darken('#f5f5f5', 1.5); // Will darken #F5F5F5 by 1.5% which g
 
 ## Get URL Query Parameters
 
-The helpers allows to retrieve the query parameters in the URL
+The helpers allows to retrieve the query parameters in the URL.
 
 ### Example
 
@@ -425,7 +425,6 @@ function* defaultSaga() {
 export default defaultSaga;
 ```
 
-***
 ***
 
 ### Example with server autoReload watcher
