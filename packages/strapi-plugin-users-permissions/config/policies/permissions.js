@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 module.exports = async (ctx, next) => {
   let role;
 
@@ -7,7 +5,7 @@ module.exports = async (ctx, next) => {
     try {
       const token = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
 
-      ctx.state.user = await strapi.query('user', 'users-permissions').findOne(_.pick(token, ['_id', 'id']), ['role'])
+      ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id } = token, ['role'])
     } catch (err) {
       return ctx.unauthorized(err);
     }
@@ -29,7 +27,6 @@ module.exports = async (ctx, next) => {
   }
 
   const route = ctx.request.route;
-
   const permission = await strapi.query('permission', 'users-permissions').findOne({
     role: role._id || role.id,
     type: route.plugin || 'application',
@@ -46,8 +43,6 @@ module.exports = async (ctx, next) => {
   if (permission.policy) {
     await strapi.plugins['users-permissions'].config.policies[permission.policy](ctx, next);
   }
-
-  console.log("OKAY");
 
   // Execute the action.
   await next();

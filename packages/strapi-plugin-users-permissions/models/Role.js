@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Lifecycle callbacks for the `User` model.
+ * Lifecycle callbacks for the `Role` model.
  */
 
 module.exports = {
