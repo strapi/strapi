@@ -364,19 +364,18 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   }
 };
 
-  /**
+/**
  * Allow dynamic config values through
  * the native ES6 template string function.
  */
+const regex = /\$\{[^()]*\}/g;
 const templateConfigurations = function (obj) {
   // Allow values which looks like such as
   // an ES6 literal string without parenthesis inside (aka function call).
-  const regex = /\$\{[^()]*\}/g;
-
   return Object.keys(obj).reduce((acc, key) => {
-    if (isPlainObject(obj[key])) {
+    if (isPlainObject(obj[key]) && !isString(obj[key])) {
       acc[key] = templateConfigurations(obj[key]);
-    } else if (isString(obj[key]) && regex.test(obj[key])) {
+    } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
       acc[key] = eval('`' + obj[key] + '`');
     } else {
       acc[key] = obj[key];
