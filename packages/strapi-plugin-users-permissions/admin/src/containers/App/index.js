@@ -20,9 +20,6 @@ import AuthPage from 'containers/AuthPage';
 import EditPage from 'containers/EditPage';
 import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';
-import OverlayBlocker from 'components/OverlayBlocker';
-
-import { makeSelectBlockApp } from './selectors';
 
 class App extends React.Component {
   componentDidMount() {
@@ -40,7 +37,6 @@ class App extends React.Component {
   render() {
     return (
       <div className={pluginId}>
-        <OverlayBlocker isOpen={this.props.blockApp} />
         <Switch>
           <Route path={`/plugins/${pluginId}/auth/:authType/:id?`} component={AuthPage} exact />
           <Route path={`/plugins/${pluginId}/:settingType/:actionType/:id?`} component={EditPage} exact />
@@ -59,7 +55,6 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  blockApp: PropTypes.bool.isRequired,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
 };
@@ -71,9 +66,7 @@ export function mapDispatchToProps(dispatch) {
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  blockApp: makeSelectBlockApp(),
-});
+const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

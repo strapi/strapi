@@ -24,9 +24,15 @@ const makeSelectShowGlobalAppBlocker = () => createSelector(
   (appState) => appState.get('showGlobalAppBlocker'),
 );
 
+const makeSelectBlockApp = () => createSelector(
+  selectApp(),
+  (appState) => appState.get('blockApp'),
+);
+
 export {
   selectApp,
   selectHasUserPlugin,
   selectPlugins,
+  makeSelectBlockApp,
   makeSelectShowGlobalAppBlocker,
 };

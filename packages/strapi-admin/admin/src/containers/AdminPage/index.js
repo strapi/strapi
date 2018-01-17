@@ -17,7 +17,13 @@ import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
 
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
-import { selectHasUserPlugin, selectPlugins, makeSelectShowGlobalAppBlocker } from 'containers/App/selectors';
+import {
+  makeSelectBlockApp,
+  makeSelectShowGlobalAppBlocker,
+  selectHasUserPlugin,
+  selectPlugins,
+} from 'containers/App/selectors';
+
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
 // Design
@@ -30,6 +36,7 @@ import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage';
 import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage';
+import OverlayBlocker from 'components/OverlayBlocker';
 import PluginPage from 'containers/PluginPage';
 
 import auth from 'utils/auth';
@@ -108,8 +115,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-    console.log('showGlobalAppBlocker', this.props.showGlobalAppBlocker);
-    
+
     return (
       <div className={styles.adminPage}>
         {leftMenu}
@@ -131,6 +137,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
             </Switch>
           </Content>
         </div>
+        <OverlayBlocker isOpen={this.props.blockApp && this.props.showGlobalAppBlocker} />
       </div>
     );
   }
@@ -150,6 +157,7 @@ AdminPage.defaultProps = {
 };
 
 AdminPage.propTypes = {
+  blockApp: PropTypes.bool.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -160,6 +168,7 @@ AdminPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
+  blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
   showGlobalAppBlocker: makeSelectShowGlobalAppBlocker(),
