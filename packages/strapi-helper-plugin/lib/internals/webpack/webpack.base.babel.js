@@ -74,6 +74,10 @@ if (isAdmin && !isSetup) {
       if (_.get(server, 'admin.build.plugins.source') === 'backend') {
         URLs.mode = 'backend';
       }
+
+      if (process.env.npm_lifecycle_event === 'start') {
+        URLs.backend = `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
+      }
     }
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`)

@@ -1,9 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-
 import { forEach, set, map, replace } from 'lodash';
 import { call, take, put, fork, cancel, select, takeLatest } from 'redux-saga/effects';
-
-import { freezeApp, unfreezeApp } from 'containers/App/actions';
 import request from 'utils/request';
 
 // selectors
@@ -40,8 +37,6 @@ import {
 
 export function* editDatabase(action) {
   try {
-    yield put(freezeApp());
-
     const body = {};
 
     forEach(action.data, (value, key) => {
@@ -58,13 +53,11 @@ export function* editDatabase(action) {
 
     if (resp.ok) {
       strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
-      yield put(unfreezeApp());
       yield put(databaseActionSucceeded());
     }
   } catch(error) {
     const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
 
-    yield put(unfreezeApp());
     yield put(databaseActionError(formErrors));
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -72,18 +65,15 @@ export function* editDatabase(action) {
 
 export function* deleteDatabase(action) {
   try {
-    yield put(freezeApp());
     const opts = { method: 'DELETE' };
     const requestUrl = `/settings-manager/configurations/databases/${action.databaseToDelete}/${action.endPoint}`;
 
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      yield put(unfreezeApp());
       strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
     }
   } catch(error) {
-    yield put(unfreezeApp());
     yield put(databaseActionError([]));
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -91,20 +81,16 @@ export function* deleteDatabase(action) {
 
 export function* deleteLanguage(action) {
   try {
-    yield put(freezeApp());
     const opts = {
       method: 'DELETE',
     };
     const requestUrl = `/settings-manager/configurations/languages/${action.languageToDelete}`;
-
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      yield put(unfreezeApp());
       strapi.notification.success('settings-manager.strapi.notification.success.languageDelete');
     }
   } catch(error) {
-    yield put(unfreezeApp());
     yield put(languageActionError());
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -163,10 +149,7 @@ export function* fetchLanguages() {
 
 export function* postLanguage() {
   try {
-    yield put(freezeApp());
-
     const newLanguage = yield select(makeSelectModifiedData());
-
     const body = {
       name: newLanguage['language.defaultLocale'],
     };
@@ -175,16 +158,13 @@ export function* postLanguage() {
       method: 'POST',
     };
     const requestUrl = '/settings-manager/configurations/languages';
-
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
       yield put(languageActionSucceeded());
-      yield put(unfreezeApp());
       strapi.notification.success('settings-manager.strapi.notification.success.languageAdd');
     }
   } catch(error) {
-    yield put(unfreezeApp());
     yield put(languageActionError());
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -192,7 +172,6 @@ export function* postLanguage() {
 
 export function* postDatabase(action) {
   try {
-    yield put(freezeApp());
     const body = {};
 
     forEach(action.data, (value, key) => {
@@ -204,11 +183,9 @@ export function* postDatabase(action) {
       body,
     };
     const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
-
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
-      yield put(unfreezeApp());
       yield put(databaseActionSucceeded());
       strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
     }
@@ -221,14 +198,12 @@ export function* postDatabase(action) {
     });
 
     yield put(databaseActionError(formErrors));
-
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
 export function* settingsEdit(action) {
   try {
-    yield put(freezeApp());
     // Show button loader
     yield put(setLoader());
 
@@ -242,13 +217,10 @@ export function* settingsEdit(action) {
     if (resp.ok) {
       yield put(editSettingsSucceeded());
       yield put(unsetLoader());
-      yield put(unfreezeApp());
-
       strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
     }
   } catch(error) {
     yield put(unsetLoader());
-    yield put(unfreezeApp());
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
@@ -259,7 +231,6 @@ export function* fetchSpecificDatabase(action) {
       method: 'GET',
     };
     const requestUrl = `/settings-manager/configurations/databases/${action.databaseName}/${action.endPoint}`;
-
     const data = yield call(request, requestUrl, opts);
 
     yield put(specificDatabaseFetchSucceeded(data));

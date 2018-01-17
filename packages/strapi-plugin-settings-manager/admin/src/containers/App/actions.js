@@ -7,10 +7,8 @@
 import {
   ENVIRONMENTS_FETCH,
   ENVIRONMENTS_FETCH_SUCCEEDED,
-  FREEZE_APP,
   MENU_FETCH_SUCCEEDED,
   MENU_FETCH,
-  UNFREEZE_APP,
 } from './constants';
 
 export function environmentsFetch() {
@@ -26,12 +24,6 @@ export function environmentsFetchSucceeded(environments) {
   };
 }
 
-export function freezeApp() {
-  return {
-    type: FREEZE_APP,
-  };
-}
-
 export function fetchMenuSucceeded(menu) {
   return {
     type: MENU_FETCH_SUCCEEDED,
@@ -42,11 +34,5 @@ export function fetchMenuSucceeded(menu) {
 export function menuFetch() {
   return {
     type: MENU_FETCH,
-  };
-}
-
-export function unfreezeApp() {
-  return {
-    type: UNFREEZE_APP,
   };
 }

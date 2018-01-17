@@ -22,11 +22,6 @@ const selectLocationState = () => {
   };
 };
 
-const makeSelectBlockApp = () => createSelector(
-  selectGlobalDomain(),
-  (globalSate) => globalSate.get('blockApp'),
-);
-
 const makeSelectSections = () => createSelector(
   selectGlobalDomain(),
   (globalSate) => globalSate.get('sections').toJS(),
@@ -43,7 +38,6 @@ const makeSelectLoading = () => createSelector(
 );
 
 export {
-  makeSelectBlockApp,
   makeSelectEnvironments,
   makeSelectLoading,
   makeSelectSections,

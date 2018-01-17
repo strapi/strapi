@@ -19,10 +19,9 @@ import { pluginId } from 'app';
 import injectSaga from 'utils/injectSaga';
 
 import HomePage from 'containers/HomePage';
-import OverlayBlocker from 'components/OverlayBlocker';
 
 import { menuFetch, environmentsFetch } from './actions';
-import { makeSelectBlockApp, makeSelectLoading, makeSelectSections } from './selectors';
+import { makeSelectLoading, makeSelectSections } from './selectors';
 import styles from './styles.scss';
 
 import saga from './sagas';
@@ -57,7 +56,6 @@ class App extends React.Component {
   render() {
     return (
       <div className={`${pluginId} ${styles.app}`}>
-        <OverlayBlocker isOpen={this.props.blockApp} />
         <Switch>
           <Route path="/plugins/settings-manager/:slug/:env" component={HomePage} />
           <Route path="/plugins/settings-manager/:slug" component={HomePage} />
@@ -73,7 +71,6 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  blockApp: PropTypes.bool.isRequired,
   environmentsFetch: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   menuFetch: PropTypes.func.isRequired,
@@ -91,7 +88,6 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({
-  blockApp: makeSelectBlockApp(),
   loading: makeSelectLoading(),
   sections: makeSelectSections(),
 });
