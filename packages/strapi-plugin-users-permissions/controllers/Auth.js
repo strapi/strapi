@@ -123,11 +123,16 @@ module.exports = {
 
     const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
 
-    const compiled = _.template(settings.message);
-    const template = compiled({
+    const compiledMessage = _.template(settings.message);
+    const message = compiledMessage({
       url,
       user: _.omit(user.toJSON(), ['password', 'resetPasswordToken']),
       token: resetPasswordToken
+    });
+
+    const compiledObject = _.template(settings.object);
+    const object = compiledObject({
+      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
     });
 
     try {
@@ -136,9 +141,9 @@ module.exports = {
         to: user.email,
         from: (settings.from.email || settings.from.email) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
         replyTo: settings.respond,
-        subject: settings.object,
-        text: template,
-        html: template
+        subject: object,
+        text: message,
+        html: message
       });
     } catch (err) {
       return ctx.badRequest(null, err);
