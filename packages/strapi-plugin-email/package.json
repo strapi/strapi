@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.7.3",
+  "version": "3.0.0-alpha.8",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -27,7 +27,7 @@
     "sendmail": "^1.2.0"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.7.3"
+    "strapi-helper-plugin": "3.0.0-alpha.8"
   },
   "author": {
     "name": "A Strapi developer",

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-users-permissions",
-  "version": "3.0.0-alpha.7.3",
+  "version": "3.0.0-alpha.8",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Auth & Permissions",
@@ -34,7 +34,7 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.7.3"
+    "strapi-helper-plugin": "3.0.0-alpha.8"
   },
   "author": {
     "name": "Strapi team",
