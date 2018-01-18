@@ -158,8 +158,9 @@ const mountMiddlewares = function (files, cwd) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
-        const name = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
-          .split('/')[1];
+        const folders = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
+          .split('/');
+        const name = folders[folders.length - 2];
 
         this.middleware[name] = this.middleware[name] || {
           loaded: false
