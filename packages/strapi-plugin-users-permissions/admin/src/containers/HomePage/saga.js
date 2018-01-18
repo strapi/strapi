@@ -56,9 +56,11 @@ export function* dataFetch(action) {
     if (action.endPoint === 'advanced') {
       yield put(setForm(response));
     } else {
-      yield put(fetchDataSucceeded(response[action.endPoint]));
+      const data = response[action.endPoint] || response;
+      yield put(fetchDataSucceeded(data));
     }
   } catch(err) {
+    console.log(err);
     strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }

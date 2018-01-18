@@ -4,7 +4,7 @@
  *
  */
 import { Map } from 'immutable';
-
+import { isArray } from 'lodash';
 import {
   CANCEL_CHANGES,
   DELETE_DATA,
@@ -46,6 +46,20 @@ export function fetchData(endPoint) {
 }
 
 export function fetchDataSucceeded(data) {
+  if (!isArray(data)) {
+    const list = Object.keys(data).reduce((acc, current) => {
+      const obj = Object.assign({ name: current}, data[current]);
+      acc.push(obj);
+
+      return acc;
+    }, []);
+
+    return {
+      type: FETCH_DATA_SUCCEEDED,
+      data: list,
+    };
+  }
+
   return {
     type: FETCH_DATA_SUCCEEDED,
     data,

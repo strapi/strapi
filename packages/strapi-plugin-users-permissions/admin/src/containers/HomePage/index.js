@@ -114,7 +114,7 @@ export class HomePage extends React.Component {
     const { modifiedData, initialData, match } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
-    const noButtonList = match.params.settingType === 'email-templates';
+    const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
     const component = match.params.settingType === 'advanced' ?
       <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
         <List

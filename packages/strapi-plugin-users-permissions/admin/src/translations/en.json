@@ -124,9 +124,9 @@
   "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
   "Policies.header.title": "Advanced settings",
 
-  "Email.template.validation_email": "",
-  "Email.template.reset_password": "",
-  "Email.template.success_register": "",
+  "Email.template.validation_email": "Email address validation",
+  "Email.template.reset_password": "Reset password",
+  "Email.template.success_register": "Successfull registration",
 
   "Auth.advanced.allow_register": "",
 

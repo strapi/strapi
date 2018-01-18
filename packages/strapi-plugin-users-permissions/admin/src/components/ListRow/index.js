@@ -7,6 +7,7 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { get, includes } from 'lodash';
 import { router } from 'app';
 
@@ -14,6 +15,7 @@ import { router } from 'app';
 import IcoContainer from 'components/IcoContainer';
 import PopUpWarning from 'components/PopUpWarning';
 
+import en from 'translations/en.json';
 import styles from './styles.scss';
 
 class ListRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -108,10 +110,12 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
             <div className="col-md-4">
               <div className={styles.flex}>
                 <div>
-                  <i className={`fa fa-${this.props.item.ico}`} />
+                  <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
                 <div>
-                  {this.props.item.name}
+                  {this.props.item.display && en[this.props.item.display] ? (
+                    <FormattedMessage id={`users-permissions.${this.props.item.display}`} />
+                  ): this.props.item.name}
                 </div>
               </div>
             </div>
@@ -127,6 +131,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
   }
 
   handleClick = () => {
+    // TODO open modal and pass data
     switch (this.props.settingType) {
       case 'roles': {
         if (!includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
@@ -168,6 +173,7 @@ ListRow.defaultProps = {
     name: 'Owner',
     description: 'Rule them all. This role can\'t be deleted',
     nb_users: 1,
+    icon: 'envelope',
   },
   settingType: 'roles',
 };

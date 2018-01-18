@@ -24,10 +24,10 @@ const links = [
   //   name: 'users-permissions.HeaderNav.link.providers',
   //   to: '/plugins/users-permissions/providers',
   // },
-  // {
-  //   name: 'users-permissions.HeaderNav.link.emailTemplates',
-  //   to: '/plugins/users-permissions/email-templates',
-  // },
+  {
+    name: 'users-permissions.HeaderNav.link.emailTemplates',
+    to: '/plugins/users-permissions/email-templates',
+  },
   {
     name: 'users-permissions.HeaderNav.link.advancedSettings',
     to: '/plugins/users-permissions/advanced',
