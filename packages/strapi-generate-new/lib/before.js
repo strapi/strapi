@@ -207,7 +207,11 @@ module.exports = (scope, cb) => {
         try {
           require(path.resolve(`${scope.rootPath}/node_modules/${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
-          execSync(`rm -r ${scope.rootPath}`);
+          if(/^win/.test(process.platform)){
+            execSync(`rmdir ${scope.rootPath} /s /q`);
+          } else {
+            execSync(`rm -r ${scope.rootPath}`);
+          }
 
           logger.info('Copying the dashboard...');
 
