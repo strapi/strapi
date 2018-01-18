@@ -36,4 +36,3 @@ Understand how to develop your own plugin.
 Learn about Strapi's API, the `strapi` object that is available in your backend.
 
 **[Migration guide](migration/migration-guide.md)**<br />
-Migrate from v1 to v3@alpha.8.
