@@ -13,6 +13,11 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { get, isUndefined, map } from 'lodash';
 
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+} from 'actions/overlayBlocker';
+
 // Design
 // import Input from 'components/Input';
 import DownloadInfo from 'components/DownloadInfo';
@@ -43,10 +48,18 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   );
 
   componentDidMount() {
+    // Disable the AdminPage OverlayBlocker in order to give it a custom design (children)
+    this.props.disableGlobalOverlayBlocker();
+
     // Don't fetch the available plugins if it has already been done
     if (!this.props.didFetchPlugins) {
       this.props.getPlugins();
     }
+  }
+
+  componentWillUnmount() {
+    // Enable the AdminPage OverlayBlocker so it is displayed when the server is restarting
+    this.props.enableGlobalOverlayBlocker();
   }
 
   render() {
@@ -118,7 +131,9 @@ InstallPluginPage.propTypes = {
   availablePlugins: PropTypes.array.isRequired,
   blockApp: PropTypes.bool.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
+  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
+  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   // onChange: PropTypes.func.isRequired,
@@ -130,7 +145,9 @@ const mapStateToProps = makeSelectInstallPluginPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      disableGlobalOverlayBlocker,
       downloadPlugin,
+      enableGlobalOverlayBlocker,
       getPlugins,
       onChange,
     },

@@ -41,6 +41,6 @@ const selectLocationState = () => {
 export {
   selectLocationState,
   makeSelectLoading,
-  makeSelectModels,
   makeSelectMenu,
+  makeSelectModels,
 };

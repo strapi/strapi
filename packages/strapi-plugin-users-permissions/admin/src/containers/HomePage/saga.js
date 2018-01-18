@@ -1,6 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { findIndex } from 'lodash';
 import { takeLatest, put, fork, take, cancel, select, call } from 'redux-saga/effects';
+
 import request from 'utils/request';
 
 import {
@@ -8,6 +9,7 @@ import {
   fetchDataSucceeded,
   setForm,
 } from './actions';
+
 import {
   DELETE_DATA,
   FETCH_DATA,
@@ -32,8 +34,7 @@ export function* dataDelete() {
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
       const requestURL = `/users-permissions/${endPointAPI}/${id}`;
-      // TODO watchServerRestart
-      const response = yield call(request, requestURL, { method: 'DELETE' });
+      const response = yield call(request, requestURL, { method: 'DELETE' }, true);
 
       if (response.ok) {
         yield put(deleteDataSucceeded(indexDataToDelete));

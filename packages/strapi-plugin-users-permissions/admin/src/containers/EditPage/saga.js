@@ -8,6 +8,7 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
+
 import request from 'utils/request';
 
 import {
@@ -98,7 +99,7 @@ export function* submit() {
     };
 
     const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
-    const response = yield call(request, requestURL, opts);
+    const response = yield call(request, requestURL, opts, true);
 
     if (response.ok) {
       yield put(submitSucceeded());

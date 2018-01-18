@@ -37,7 +37,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
         }
 
         return (
-          <ErrorBoundary key={plugin.id}>            
+          <ErrorBoundary key={plugin.id}>
             <Elem {...this.props} {...blockerComponentProps} />
           </ErrorBoundary>
         );

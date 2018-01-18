@@ -76,8 +76,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     if (this.props.updatedContentType !== nextProps.updatedContentType) {
       if (this.state.contentTypeTemporary && storeData.getContentType()) {
         this.props.modelFetchSucceeded({ model: storeData.getContentType() });
-      } else {
-        this.fetchModel(nextProps);
       }
     }
 
@@ -86,24 +84,24 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     }
   }
 
-  componentWillUpdate(nextProps) {
-    if (!isEmpty(nextProps.menu)) {
-      const allowedPaths = nextProps.menu.reduce((acc, current) => {
-        const models = current.items.reduce((acc, current) => {
-          acc.push(current.name);
-
-          return acc;
-        }, []);
-        return acc.concat(models);
-      }, []);
-
-      const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName.split('&')[0]).length === 0;
-
-      if (shouldRedirect) {
-        this.props.history.push('/404');
-      }
-    }
-  }
+  // componentWillUpdate(nextProps) {
+  //   if (!isEmpty(nextProps.menu)) {
+  //     const allowedPaths = nextProps.menu.reduce((acc, current) => {
+  //       const models = current.items.reduce((acc, current) => {
+  //         acc.push(current.name);
+  //
+  //         return acc;
+  //       }, []);
+  //       return acc.concat(models);
+  //     }, []);
+  //
+  //     const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName.split('&')[0]).length === 0;
+  //
+  //     if (shouldRedirect) {
+  //       this.props.history.push('/404');
+  //     }
+  //   }
+  // }
 
   componentDidUpdate(prevProps) {
     if (prevProps.match.params.modelName !== this.props.match.params.modelName) {
@@ -347,7 +345,7 @@ ModelPage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   checkIfTableExists: PropTypes.func.isRequired,
   deleteAttribute: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired,
+  // history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   menu: PropTypes.array.isRequired,
