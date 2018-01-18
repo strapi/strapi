@@ -51,7 +51,7 @@ export class HomePage extends React.Component {
   }
 
   componentWillUpdate(nextProps) {
-    const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced-settings'];
+    const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect = allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
 
     if (shouldRedirect) {
@@ -109,10 +109,10 @@ export class HomePage extends React.Component {
   ];
 
   render() {
-    const headerActions = this.props.match.params.settingType === 'advanced-settings' && this.props.showButtons ?
+    const headerActions = this.props.match.params.settingType === 'advanced' && this.props.showButtons ?
       this.pluginHeaderActions : [];
     const noButtonList = this.props.match.params.settingType === 'email-templates';
-    const component = this.props.match.params.settingType === 'advanced-settings' ?
+    const component = this.props.match.params.settingType === 'advanced' ?
       <EditForm onChange={this.props.onChange} values={this.props.modifiedData} /> : (
         <List
           data={this.props.data}
