@@ -278,14 +278,15 @@ module.exports = {
 1️⃣  EXECUTE THE FOLLOWING SQL QUERY
 
 CREATE TABLE "${tableName}" (
-  id integer NOT NULL,
+  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   username text,
   email text,
+  provider text,
   role text,
-  "resetPasswordToken" text,
+  ${Model.client === 'pg' ? '"resetPasswordToken"' : 'resetPasswordToken'} text,
   password text,
-  updated_at timestamp with time zone,
-  created_at timestamp with time zone
+  updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+  created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
 );
 
 2️⃣  RESTART YOUR SERVER
@@ -300,10 +301,10 @@ CREATE TABLE "${tableName}" (
     .then(() => {
       const attributes = _.cloneDeep(Model.attributes);
       attributes.id = {
-        type: 'integer'
+        type: Model.client === 'pg' ? 'integer' : 'int'
       };
       attributes.updated_at = attributes.created_at = {
-        type: 'timestamp with time zone'
+        type: Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'
       };
 
       let commands = '';
@@ -317,7 +318,7 @@ CREATE TABLE "${tableName}" (
                 description.type = 'text';
               }
 
-              commands += `\r\nALTER TABLE "${tableName}" ADD "${attribute}" ${description.type};`;
+              commands += `\r\nALTER TABLE "${tableName}" ADD ${Model.client === 'pg' ? `"${attribute}"` : `${attribute}`} ${description.type};`;
             }
 
             resolve();

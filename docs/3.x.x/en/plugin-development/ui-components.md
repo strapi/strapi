@@ -330,7 +330,7 @@ export default FooPage;
 
 ## OverlayBlocker
 
-The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors. This component is automatically displayed when the server needs to restart. You need to disable in order to override the current design.
+The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors. This component is automatically displayed when the server needs to restart. You need to disable it in order to override the current design (once disabled it won't show on the other plugins so it's really important to enable it back when the component is unmounting).
 
 ### Usage
 
@@ -341,7 +341,7 @@ The OverlayBlocker is a React component that is very useful to block user intera
 
 ### Example
 
-In this example we'll have a button that when clicked it will display the OverlayBlocker for 5 seconds thus 'freezes' the admin so the user can't navigate (it simulates a very long server restart).
+In this example we'll have a button that when clicked will display the OverlayBlocker for 5 seconds thus 'freezes' the admin so the user can't navigate (it simulates a very long server restart).
 
 **Path -** `./plugins/my-plugin/admin/src/containers/FooPage/constants.js`.
 ```js

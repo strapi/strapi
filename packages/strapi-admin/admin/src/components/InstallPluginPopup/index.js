@@ -19,7 +19,10 @@ import styles from './styles.scss';
 class InstallPluginPopup extends React.Component {
   handleClick = () => {
     this.props.history.push({ pathname: this.props.history.location.pathname });
-    this.context.downloadPlugin(this.props.plugin.id);
+
+    if (!this.props.isAlreadyInstalled) {
+      this.context.downloadPlugin(this.props.plugin.id);
+    }
   }
 
   toggle = () => {
@@ -56,6 +59,7 @@ class InstallPluginPopup extends React.Component {
       short: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.short} /> : this.props.plugin.description.short,
       long: this.props.plugin.id === 'support-us' ? <FormattedMessage id={this.props.plugin.description.long || this.props.plugin.description.short} /> : this.props.plugin.description.long || this.props.plugin.description.short,
     };
+    const buttonName = this.props.isAlreadyInstalled ? 'app.components.PluginCard.Button.label.install' : 'app.components.InstallPluginPopup.downloads';
 
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.toggle} className={styles.modalPosition}>
@@ -93,7 +97,7 @@ class InstallPluginPopup extends React.Component {
                     </div>
                     <div className={styles.buttonWrapper} onClick={this.handleClick}>
                       <div>
-                        <FormattedMessage id="app.components.InstallPluginPopup.downloads" />
+                        <FormattedMessage id={buttonName} />
                       </div>
                       {/* Uncomment whebn prices are running}
                       <div>{this.props.plugin.price}&nbsp;€</div>
@@ -149,6 +153,7 @@ InstallPluginPopup.propTypes = {
     short: PropTypes.string,
   }),
   history: PropTypes.object.isRequired,
+  isAlreadyInstalled: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
   plugin: PropTypes.object.isRequired,
 };
