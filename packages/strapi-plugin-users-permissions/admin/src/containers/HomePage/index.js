@@ -35,6 +35,7 @@ import {
   deleteData,
   fetchData,
   onChange,
+  submit,
 } from './actions';
 
 import reducer from './reducer';
@@ -104,17 +105,17 @@ export class HomePage extends React.Component {
     {
       kind: 'primary',
       label: 'users-permissions.EditPage.submit',
-      onClick: () => {},
+      onClick: () => this.props.submit(this.props.match.params.settingType),
       type: 'submit',
     },
   ];
 
   render() {
-    const { modifiedData, initialData } = this.props;
-    const headerActions = this.props.match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
+    const { modifiedData, initialData, match } = this.props;
+    const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
-    const noButtonList = this.props.match.params.settingType === 'email-templates';
-    const component = this.props.match.params.settingType === 'advanced' ?
+    const noButtonList = match.params.settingType === 'email-templates';
+    const component = match.params.settingType === 'advanced' ?
       <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
         <List
           data={this.props.data}
@@ -131,6 +132,7 @@ export class HomePage extends React.Component {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            this.props.submit(match.params.settingType);
           }}
         >
           <div className={cn('container-fluid', styles.containerFluid)}>
@@ -171,6 +173,7 @@ HomePage.propTypes = {
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
 
@@ -181,6 +184,7 @@ function mapDispatchToProps(dispatch) {
       deleteData,
       fetchData,
       onChange,
+      submit,
     },
     dispatch,
   );

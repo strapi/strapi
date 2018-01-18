@@ -34,10 +34,15 @@ const makeSelectDeleteEndPoint = () => createSelector(
   (substate) => substate.get('deleteEndPoint'),
 );
 
-export default selectHomePage;
+const makeSelectModifiedData = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
+);
 
+export default selectHomePage;
 export {
   makeSelectAllData,
   makeSelectDataToDelete,
   makeSelectDeleteEndPoint,
+  makeSelectModifiedData,
 };

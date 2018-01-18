@@ -13,6 +13,7 @@ import {
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
   SET_FORM,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
@@ -46,6 +47,9 @@ function homePageReducer(state = initialState, action) {
       return state
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SUBMIT_SUCCEEDED:
+      return state
+        .update('initialData', () => state.get('modifiedData'));
     default:
       return state;
   }

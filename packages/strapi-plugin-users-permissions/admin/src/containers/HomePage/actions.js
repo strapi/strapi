@@ -13,6 +13,8 @@ import {
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
   SET_FORM,
+  SUBMIT,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 export function cancelChanges() {
@@ -63,6 +65,19 @@ export function setForm(data) {
   return {
     type: SET_FORM,
     form: Map(data),
+  };
+}
+
+export function submit(endPoint) {
+  return {
+    type: SUBMIT,
+    endPoint,
+  };
+}
+
+export function submitSucceeded() {
+  return {
+    type: SUBMIT_SUCCEEDED,
   };
 }
 

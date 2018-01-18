@@ -8,11 +8,13 @@ import {
   deleteDataSucceeded,
   fetchDataSucceeded,
   setForm,
+  submitSucceeded,
 } from './actions';
 
 import {
   DELETE_DATA,
   FETCH_DATA,
+  SUBMIT,
 } from './constants';
 
 // TODO uncomment to test design providers and so on...
@@ -22,6 +24,7 @@ import {
   makeSelectAllData,
   makeSelectDataToDelete,
   makeSelectDeleteEndPoint,
+  makeSelectModifiedData,
 } from './selectors';
 
 export function* dataDelete() {
@@ -60,11 +63,26 @@ export function* dataFetch(action) {
   }
 }
 
+export function* submitData(action) {
+  try {
+    const body = yield select(makeSelectModifiedData());
+    const opts = { method: 'PUT', body };
+    const response = yield call(request, `/users-permissions/${action.endPoint}`, opts, true);
+
+    if (response.ok) {
+      yield put(submitSucceeded());
+    }
+  } catch(error) {
+    strapi.notification.error('notification.error');
+  }
+}
 // Individual exports for testing
 export function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, FETCH_DATA, dataFetch);
 
   yield fork(takeLatest, DELETE_DATA, dataDelete);
+  yield fork(takeLatest, SUBMIT, submitData);
+
   yield take(LOCATION_CHANGE);
   yield cancel(loadDataWatcher);
 }

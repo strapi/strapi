@@ -174,13 +174,15 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.plugins['users-permissions'].config.email = ctx.request.body;
+    strapi.reload.isWatching = false;
 
     fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'email.json'), JSON.stringify({
-      email: strapi.plugins['users-permissions'].config.email
+      email: ctx.request.body
     }, null, 2), 'utf8');
 
-    return ctx.send({ ok: true });
+    ctx.send({ ok: true });
+
+    strapi.reload();
   },
 
   getAdvancedSettings: async (ctx) => {
@@ -192,12 +194,14 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.plugins['users-permissions'].config.advanced = ctx.request.body;
+    strapi.reload.isWatching = false;
 
     fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'advanced.json'), JSON.stringify({
-      email: strapi.plugins['users-permissions'].config.advanced
+      advanced: ctx.request.body
     }, null, 2), 'utf8');
 
-    return ctx.send({ ok: true });
+    ctx.send({ ok: true });
+
+    strapi.reload();
   }
 };

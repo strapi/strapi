@@ -11,3 +11,5 @@ export const FETCH_DATA = 'UsersPermissions/HomePage/FETCH_DATA';
 export const FETCH_DATA_SUCCEEDED = 'UsersPermissions/HomePage/FETCH_DATA_SUCCEEDED';
 export const ON_CHANGE = 'UsersPermissions/HomePage/ON_CHANGE';
 export const SET_FORM = 'UsersPermissions/HomePage/SET_FORM';
+export const SUBMIT = 'UsersPermissions/HomePage/SUBMIT';
+export const SUBMIT_SUCCEEDED = 'UsersPermissions/HomePage/SUBMIT_SUCCEEDED';
