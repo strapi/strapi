@@ -41,7 +41,7 @@ This is the production-ready version of Strapi (v1). You should also consider th
 npm install strapi -g
 ```
 
-Read the [Getting started](https://strapi.io/documentation/getting-started/quick-start.html) page to create your first project using Strapi.
+Read the [Getting started](https://strapi.io/getting-started) page to create your first project using Strapi.
 
 ## Features
 
