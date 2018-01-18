@@ -42,7 +42,7 @@ function homePageReducer(state = initialState, action) {
       return state.set('data', List(action.data));
     case ON_CHANGE:
       return state
-        .updateIn(['modifiedData', action.key], () => action.value);
+        .updateIn(action.keys, () => action.value);
     case SET_FORM:
       return state
         .set('initialData', action.form)

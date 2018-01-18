@@ -129,12 +129,7 @@ export class HomePage extends React.Component {
 
     return (
       <div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            this.props.submit(match.params.settingType);
-          }}
-        >
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               title={{ id: 'users-permissions.HomePage.header.title' }}

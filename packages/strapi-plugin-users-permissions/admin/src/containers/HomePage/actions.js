@@ -55,7 +55,7 @@ export function fetchDataSucceeded(data) {
 export function onChange({ target }) {
   return {
     type: ON_CHANGE,
-    key: target.name,
+    keys: ['modifiedData'].concat(target.name.split('.')),
     value: target.value,
   };
 }
