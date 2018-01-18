@@ -20,6 +20,7 @@ import NotFoundPage from 'containers/NotFoundPage';
 import formSaga from 'containers/Form/sagas';
 import formReducer from 'containers/Form/reducer';
 
+// Other containers actions
 import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
 
 // Utils

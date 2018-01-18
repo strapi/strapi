@@ -254,6 +254,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       this.props.contentTypeCreate(contentType);
     }
 
+    this.setState({ showModal: false });
     return this.props.contentTypeEdit(this.context);
   }
 

@@ -140,7 +140,6 @@ export function* submitChanges(action) {
       }
 
       yield put(submitActionSucceeded());
-
       yield put(resetShowButtonsProps());
       // Remove loader
       yield put(unsetButtonLoader());
