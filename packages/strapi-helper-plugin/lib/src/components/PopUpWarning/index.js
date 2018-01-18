@@ -57,9 +57,8 @@ function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarn
         <ModalHeader toggle={toggleModal} className={styles.header}>
           <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </ModalHeader>
-        <div className={styles.bordered} />
-        <ModalBody>
-          <div className={styles.modalDangerBodyContainer}>
+        <ModalBody className={styles.modalBody}>
+          <div className={styles.modalBodyContainer}>
             <img src={icons[popUpWarningType]} alt="icon" />
             <FormattedMessage id={content.message || 'components.popUpWarning.message'}>
               {(message) => (
