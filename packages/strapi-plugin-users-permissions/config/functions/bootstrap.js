@@ -30,24 +30,31 @@ module.exports = cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.grant')) {
     try {
       const grant = {
+        local: {
+          enabled: true
+        },
         facebook: {
+          enabled: false,
           key: '',
           secret: '',
           callback: '/auth/facebook/callback',
           scope: ['email']
         },
         google: {
+          enabled: false,
           key: '',
           secret: '',
           callback: '/auth/google/callback',
           scope: ['email']
         },
         github: {
+          enabled: false,
           key: '',
           secret: '',
           callback: '/auth/github/callback'
         },
         linkedin2: {
+          enabled: false,
           key: '',
           secret: '',
           callback: '/auth/linkedin2/callback',
