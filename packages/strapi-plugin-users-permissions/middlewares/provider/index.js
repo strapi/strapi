@@ -25,6 +25,21 @@ module.exports = strapi => {
 
       const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
 
+      strapi.app.use(async (ctx, next) => {
+        if (_.startsWith(ctx.request.url, '/connect') && ctx.request.method === 'GET') {
+          const provider = _.last(ctx.request.url.split('/'));
+          const config = strapi.plugins['users-permissions'].config.grant[provider];
+
+          if (_.get(config, 'enabled')) {
+            await next();
+          } else {
+            return ctx.badRequest(null, 'This provider is disabled.');
+          }
+        } else {
+          await next();
+        }
+      });
+
       strapi.app.use(mount(grant));
 
       cb();
