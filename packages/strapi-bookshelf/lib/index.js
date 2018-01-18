@@ -74,6 +74,10 @@ module.exports = function(strapi) {
         const models = _.pickBy(strapi.models, { connection: connectionName });
         // Will call the done() method when every models will be loaded.
         const loadedHook = _.after(_.size(models), done);
+        
+        if (_.isEmpty(models)) {
+          done();
+        }
 
         const mountModels = (models, target, plugin = false) => {
           // Parse every registered model.
