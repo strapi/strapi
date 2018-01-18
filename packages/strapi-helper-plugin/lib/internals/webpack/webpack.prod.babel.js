@@ -35,7 +35,13 @@ const adminPath = (() => {
   return path.resolve(appPath, 'admin');
 })();
 
-const rootAdminpath = isSetup ? path.resolve(appPath, 'packages', 'strapi-admin') : path.resolve(appPath, 'admin');
+const rootAdminpath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+  }
+
+  return path.resolve(appPath, 'admin');
+})();
 
 const plugins = [
   new webpack.DllReferencePlugin({
@@ -78,13 +84,6 @@ if (isAdmin && !isSetup) {
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`);
   }
-
-  // Note: Travis failed with it.
-  plugins.push(new CopyWebpackPlugin([{
-    from: 'config/plugins.json',
-    context: path.resolve(adminPath, 'admin', 'src'),
-    to: 'config/plugins.json'
-  }]));
 }
 
 // Build the `index.html file`
@@ -111,6 +110,11 @@ if (isAdmin) {
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
   }));
+  plugins.push(new CopyWebpackPlugin([{
+    from: 'config/plugins.json',
+    context: path.resolve(adminPath, 'admin', 'src'),
+    to: 'config/plugins.json'
+  }]));
 }
 
 const main = (() => {

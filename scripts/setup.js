@@ -47,6 +47,10 @@ shell.cd('../strapi-admin');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 watcher('', 'npm install ../strapi-utils --no-optional');
 shell.rm('-f', 'package-lock.json');
+// Without this line Travis failed.
+if (process.env.npm_config_travis === 'true') {
+  watcher('', 'cd admin && mkdir build && cd build && mkdir config && cd ../../', false);
+}
 watcher('Linking strapi-admin', 'npm link --no-optional', false);
 watcher('Building...', 'npm run build');
 

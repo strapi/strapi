@@ -21,7 +21,13 @@ const appPath = (() => {
 })();
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 
-const rootAdminpath = isSetup ? path.resolve(appPath, 'packages', 'strapi-admin') : path.resolve(appPath, 'admin');
+const rootAdminpath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+  }
+
+  return path.resolve(appPath, 'admin');
+})();
 
 module.exports = {
   context: appPath,
