@@ -53,3 +53,4 @@
 
 ### Migration
 * [Migrating from v1 to v3](migration/migration-guide.md)
+* [Migrating from 3.0.0-alpha.7.4 to 3.0.0-alpha.8](migration/migration-guide-alpha-7-4-to-alpha-8.md)
