@@ -6,6 +6,7 @@
 import { Map } from 'immutable';
 
 import {
+  CANCEL_CHANGES,
   DELETE_DATA,
   DELETE_DATA_SUCCEEDED,
   FETCH_DATA,
@@ -13,6 +14,12 @@ import {
   ON_CHANGE,
   SET_FORM,
 } from './constants';
+
+export function cancelChanges() {
+  return {
+    type: CANCEL_CHANGES,
+  };
+}
 
 export function deleteData(dataToDelete, deleteEndPoint) {
   return {
@@ -51,43 +58,43 @@ export function onChange({ target }) {
   };
 }
 
-export function setForm(formType) {
-  const form = generateForm(formType);
+export function setForm(data) {
+  // const form = generateForm(formType);
   return {
     type: SET_FORM,
-    form,
+    form: Map(data),
   };
 }
 
 // Utils
 
-function generateForm(formType) {
-  let form = Map({});
-  switch (formType) {
-    case 'providers':
-      form = Map({
-        provider: 'Facebook',
-        enabled: false,
-      });
-      break;
-    case 'email-templates':
-      form = Map({
-        shipperName: '',
-        shipperEmail: '',
-        responseEmail: '',
-        emailObject: '',
-        message: '',
-      });
-      break;
-    case 'advanced-settings':
-      form = Map({
-        uniqueAccount: false,
-        subscriptions: '100',
-        durations: '24',
-      });
-      break;
-    default:
-  }
-
-  return form;
-}
+// function generateForm(formType) {
+//   let form = Map({});
+//   switch (formType) {
+//     case 'providers':
+//       form = Map({
+//         provider: 'Facebook',
+//         enabled: false,
+//       });
+//       break;
+//     case 'email-templates':
+//       form = Map({
+//         shipperName: '',
+//         shipperEmail: '',
+//         responseEmail: '',
+//         emailObject: '',
+//         message: '',
+//       });
+//       break;
+//     case 'advanced-settings':
+//       form = Map({
+//         uniqueAccount: false,
+//         subscriptions: '100',
+//         durations: '24',
+//       });
+//       break;
+//     default:
+//   }
+//
+//   return form;
+// }

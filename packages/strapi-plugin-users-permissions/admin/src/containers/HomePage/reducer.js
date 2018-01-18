@@ -7,6 +7,7 @@
 import { fromJS, List, Map } from 'immutable';
 
 import {
+  CANCEL_CHANGES,
   DELETE_DATA,
   DELETE_DATA_SUCCEEDED,
   FETCH_DATA_SUCCEEDED,
@@ -20,11 +21,13 @@ const initialState = fromJS({
   deleteEndPoint: '',
   initialData: Map({}),
   modifiedData: Map({}),
-  showButtons: false,
 });
 
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
+    case CANCEL_CHANGES:
+      return state
+        .update('modifiedData', () => state.get('initialData'));
     case DELETE_DATA:
       return state
         .set('dataToDelete', Map(action.dataToDelete))
@@ -38,8 +41,7 @@ function homePageReducer(state = initialState, action) {
       return state.set('data', List(action.data));
     case ON_CHANGE:
       return state
-        .updateIn(['modifiedData', action.key], () => action.value)
-        .set('showButtons', true);
+        .updateIn(['modifiedData', action.key], () => action.value);
     case SET_FORM:
       return state
         .set('initialData', action.form)

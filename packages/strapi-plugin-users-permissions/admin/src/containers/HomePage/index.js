@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { clone, includes, isEmpty, replace } from 'lodash';
+import { clone, includes, isEqual, isEmpty, replace } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
@@ -31,6 +31,7 @@ import styles from './styles.scss';
 
 // Actions
 import {
+  cancelChanges,
   deleteData,
   fetchData,
   onChange,
@@ -97,7 +98,7 @@ export class HomePage extends React.Component {
     {
       label: 'users-permissions.EditPage.cancel',
       kind: 'secondary',
-      onClick: () => {},
+      onClick: () => this.props.cancelChanges(),
       type: 'button',
     },
     {
@@ -109,11 +110,12 @@ export class HomePage extends React.Component {
   ];
 
   render() {
-    const headerActions = this.props.match.params.settingType === 'advanced' && this.props.showButtons ?
+    const { modifiedData, initialData } = this.props;
+    const headerActions = this.props.match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = this.props.match.params.settingType === 'email-templates';
     const component = this.props.match.params.settingType === 'advanced' ?
-      <EditForm onChange={this.props.onChange} values={this.props.modifiedData} /> : (
+      <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
         <List
           data={this.props.data}
           deleteData={this.props.deleteData}
@@ -148,7 +150,7 @@ export class HomePage extends React.Component {
               e.preventDefault();
             }}
             settingType={hashArray[1]}
-            values={this.props.modifiedData}
+            values={modifiedData}
           />
         </form>
       </div>
@@ -159,21 +161,23 @@ export class HomePage extends React.Component {
 HomePage.defaultProps = {};
 
 HomePage.propTypes = {
+  cancelChanges: PropTypes.func.isRequired,
   data: PropTypes.array.isRequired,
   deleteData: PropTypes.func.isRequired,
   fetchData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  initialData: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  showButtons: PropTypes.bool.isRequired,
 };
 
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelChanges,
       deleteData,
       fetchData,
       onChange,

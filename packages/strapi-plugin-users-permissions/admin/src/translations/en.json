@@ -59,8 +59,10 @@
   "EditForm.inputSelect.durations.label": "Duration",
   "EditForm.inputSelect.durations.description": "Number of hours during the user can't subscribe.",
 
-  "EditForm.inputToggle.label": "One account per email addres",
-  "EditForm.inputToggle.description": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+  "EditForm.inputToggle.label.email": "One account per email addres",
+  "EditForm.inputToggle.label.sign-up": "Enable sign-up",
+  "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+  "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
 
   "EditPage.cancel": "Cancel",
   "EditPage.submit": "Save",

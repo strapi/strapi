@@ -50,12 +50,11 @@ export function* dataFetch(action) {
   try {
     const response = yield call(request, `/users-permissions/${action.endPoint}`, { method: 'GET' });
 
-    yield put(fetchDataSucceeded(response[action.endPoint]));
-    // To test other views
-    // const response = data[action.endPoint];
-    // yield put(fetchDataSucceeded(response));
-
-    yield put(setForm(action.endPoint));
+    if (action.endPoint === 'advanced') {
+      yield put(setForm(response));
+    } else {
+      yield put(fetchDataSucceeded(response[action.endPoint]));
+    }
   } catch(err) {
     strapi.notification.error('users-permissions.notification.error.fetch');
   }
