@@ -23,7 +23,7 @@ module.exports = {
     } else if (params.id) {
       delete params.id;
     }
-
+    
     return this
       .findOne(params)
       .populate(populate || this.associations.map(x => x.alias).join(' '));

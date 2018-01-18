@@ -3,9 +3,9 @@ module.exports = async (ctx, next) => {
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
-      const token = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
+      const { _id, id } = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
 
-      ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id } = token, ['role'])
+      ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id }, ['role']);
     } catch (err) {
       return ctx.unauthorized(err);
     }

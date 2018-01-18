@@ -39,7 +39,7 @@ module.exports = {
     if (!user) {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
-    
+
     const data = _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']);
 
     // Send 200 `ok`
