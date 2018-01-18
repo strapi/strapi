@@ -1,7 +1,7 @@
 {
   "cors": {
     "enabled": false,
-    "origin": true,
+    "origin": "*",
     "expose": [
       "WWW-Authenticate",
       "Server-Authorization"
@@ -14,7 +14,8 @@
       "PUT",
       "PATCH",
       "DELETE",
-      "HEAD"
+      "HEAD",
+      "OPTIONS"
     ],
     "headers": [
       "Content-Type",

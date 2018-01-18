@@ -63,8 +63,14 @@ class PluginCard extends React.Component {
     }
   }
 
-  handleDownloadPlugin = () => {
-    this.props.downloadPlugin();
+  handleDownloadPlugin = (e) => {
+    if (!this.props.isAlreadyInstalled && this.props.plugin.id !== 'support-us') {
+      this.props.downloadPlugin(e);
+    } else if (this.props.plugin.id === 'support-us') {
+      this.aTag.click();
+    } else {
+      this.props.history.push('/list-plugins');
+    }
   }
 
   shouldOpenModal = (props) => {
@@ -132,9 +138,10 @@ class PluginCard extends React.Component {
                 onClick={this.handleDownloadPlugin}
               />
               <a
-                href="mailto:hi@strapi.io?subject=I'd like to support Strapi"
+                href="https://strapi.io/shop"
                 style={{ display: 'none' }}
                 ref={(a) => { this.aTag = a; }}
+                target="_blank"
               >
                 &nbsp;
               </a>

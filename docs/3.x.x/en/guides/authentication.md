@@ -1,4 +1,4 @@
-# Authentification
+# Authentication
 
 ## Register a new user.
 
@@ -79,7 +79,7 @@ Response payload:
 }
 ```
 
-## Use your token to be identify as user.
+## Use your token to be identified as a user.
 
 By default, each API request is identified as `guest` role (see permissions of `guest`'s role in your admin dashboard). To make a request as a user, you have to set the `Authorization` token in your request headers. You receive a 401 error if you are not authorized to make this request or if your authorization header is not correct.
 

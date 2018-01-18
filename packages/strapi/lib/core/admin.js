@@ -4,12 +4,15 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const URL = require('url');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
     try {
-      if (this.config.environment === 'test') {
+      const environment = this.config.environment;
+
+      if (environment === 'test') {
         return resolve();
       }
 
@@ -39,14 +42,21 @@ module.exports = function() {
             $('script').each(function(i, elem) {
               if ($(this).attr('src')) {
                 const parse = path.parse($(this).attr('src'));
+                const url = URL.parse(_.get(strapi.config.currentEnvironment.server, 'admin.build.host', _.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')));
 
-                $(this).attr('src', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}/${parse.base}`);
+                $(this).attr('src', `${url.pathname.replace(/\/$/, '')}/${parse.base}`);
               }
             });
 
-            // Remove previous
-            $('body').attr('front', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
-            $('body').attr('back', `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`);
+            // Remove previous and use build configurations.
+            if (environment === 'production') {
+              $('body').removeAttr('front');
+              $('body').removeAttr('back');
+            } else {
+              // Update attribute with the current server configurations.
+              $('body').attr('front', `${_.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')}`);
+              $('body').attr('back', `/`);
+            }
 
             fs.writeFile(sourcePath, $.html(), (err) => {
               if (err) {

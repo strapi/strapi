@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.7.3",
+  "version": "3.0.0-alpha.8",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 8.0.0",
@@ -46,6 +46,7 @@
     "bootstrap": "^4.0.0-alpha.6",
     "chalk": "^2.1.0",
     "classnames": "^2.2.5",
+    "copy-webpack-plugin": "^4.3.1",
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.5",
     "eslint": "^4.4.1",
@@ -108,7 +109,6 @@
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-middleware": "^1.12.0",
     "webpack-hot-middleware": "^2.18.2",
-    "whatwg-fetch": "^2.0.3",
-    "write-json-webpack-plugin": "^1.0.2"
+    "whatwg-fetch": "^2.0.3"
   }
 }

@@ -39,7 +39,9 @@ module.exports = {
   issue: (payload) => {
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret'
+      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret', {
+        expiresIn: '30d'
+      }
     );
   },
 

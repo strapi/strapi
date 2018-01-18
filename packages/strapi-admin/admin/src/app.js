@@ -6,18 +6,6 @@
  */
 
 /* eslint-disable */
-// Retrieve remote and backend URLs.
-const remoteURL = window.location.port === '4000' ? 'http://localhost:4000/admin' : process.env.REMOTE_URL || 'http://localhost:1337/admin';
-const backendURL = process.env.BACKEND_URL || 'http://localhost:1337';
-
-// Retrieve development URL to avoid to re-build.
-const $body = document.getElementsByTagName('body')[0];
-const devFrontURL = $body.getAttribute('front');
-const devBackendURL = $body.getAttribute('back');
-
-$body.removeAttribute('front');
-$body.removeAttribute('back');
-
 import './public-path';
 import 'babel-polyfill';
 
@@ -35,7 +23,7 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import { pluginLoaded, updatePlugin, setHasUserPlugin } from 'containers/App/actions';
+import { pluginLoaded, updatePlugin, unsetHasUserPlugin } from 'containers/App/actions';
 import auth from 'utils/auth';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
@@ -51,11 +39,11 @@ const plugins = (() => {
 /* eslint-enable */
 
 // Create redux store with history
-const initialState = {};
+const basename = strapi.remoteURL.replace(window.location.origin, '');
 const history = createHistory({
-  basename: (devFrontURL || remoteURL).replace(window.location.origin, ''),
+  basename,
 });
-const store = configureStore(initialState, history);
+const store = configureStore({}, history);
 
 const render = (translatedMessages) => {
   ReactDOM.render(
@@ -94,21 +82,23 @@ window.onload = function onLoad() {
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
-  fetch(`${devFrontURL || remoteURL}/config/plugins.json`)
+  fetch(`${strapi.remoteURL}/config/plugins.json`)
     .then(response => {
       return response.json();
     })
     .then(plugins => {
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        store.dispatch(setHasUserPlugin());
+        store.dispatch(unsetHasUserPlugin());
       }
+
+      const $body = document.getElementsByTagName('body')[0];
 
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.onerror = function (oError) {
           const source = new URL(oError.target.src);
-          const url = new URL(`${devFrontURL || remoteURL}`);
+          const url = new URL(`${strapi.remoteURL}`);
 
           if (!source || !url) {
             throw new Error(`Impossible to load: ${oError.target.src}`);
@@ -124,7 +114,10 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = plugin.source[process.env.NODE_ENV];
+        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
+          `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
+          plugin.source[process.env.NODE_ENV]; // absolute
+
         $body.appendChild(script);
       });
     })
@@ -132,7 +125,7 @@ if (window.location.port !== '4000') {
       console.log(err);
     });
 } else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(setHasUserPlugin());
+  store.dispatch(unsetHasUserPlugin());
 }
 
 // const isPluginAllowedToRegister = (plugin) => true;
@@ -188,8 +181,7 @@ const displayNotification = (message, status) => {
  */
 
 window.strapi = Object.assign(window.strapi || {}, {
-  remoteURL: devFrontURL || remoteURL,
-  backendURL: devBackendURL || backendURL,
+  mode: process.env.MODE || 'host',
   registerPlugin,
   notification: {
     success: (message) => {
