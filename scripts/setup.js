@@ -1,6 +1,7 @@
 const shell = require('shelljs');
 
 // Store installation start date.
+const silent = process.env.npm_config_debug !== 'true';
 const installationStartDate = new Date();
 const watcher = (label, cmd, withSuccess = true) => {
   if (label.length > 0) {
@@ -8,7 +9,7 @@ const watcher = (label, cmd, withSuccess = true) => {
   }
 
   const data = shell.exec(cmd, {
-    silent: true
+    silent
   });
 
   if (data.stderr && data.code !== 0) {

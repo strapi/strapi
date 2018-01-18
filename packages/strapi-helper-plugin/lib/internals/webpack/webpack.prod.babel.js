@@ -35,12 +35,11 @@ const adminPath = (() => {
   return path.resolve(appPath, 'admin');
 })();
 
+const rootAdminpath = isSetup ? path.resolve(appPath, 'packages', 'strapi-admin') : path.resolve(appPath, 'admin');
+
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(isSetup ?
-      path.join(__dirname, 'manifest.json'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')
-    ),
+    manifest: require(path.resolve(rootAdminpath, 'admin', 'build', 'config', 'manifest.json'))
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({

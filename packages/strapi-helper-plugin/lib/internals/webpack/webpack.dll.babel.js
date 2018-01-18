@@ -21,6 +21,8 @@ const appPath = (() => {
 })();
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 
+const rootAdminpath = isSetup ? path.resolve(appPath, 'packages', 'strapi-admin') : path.resolve(appPath, 'admin');
+
 module.exports = {
   context: appPath,
   entry: {
@@ -40,9 +42,7 @@ module.exports = {
   plugins: [
     new webpack.DllPlugin({
       name: '[name]_lib',
-      path: isSetup ?
-        path.join(__dirname, 'manifest.json'):
-        path.join(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json'),
+      path: path.resolve(rootAdminpath, 'admin', 'build', 'config', 'manifest.json'),
     })
   ],
   resolve: {
