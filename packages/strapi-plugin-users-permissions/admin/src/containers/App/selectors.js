@@ -5,5 +5,3 @@
  */
 
 // const selectGlobalDomain = () => state => state.get('global');
-
-export {};

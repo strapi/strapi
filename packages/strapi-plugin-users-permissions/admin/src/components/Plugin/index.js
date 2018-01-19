@@ -117,7 +117,7 @@ Plugin.propTypes = {
   plugin: PropTypes.shape({
     description: PropTypes.string,
     information: PropTypes.shape({
-      logo: PropTypes.string.isRequired,
+      logo: PropTypes.string,
     }),
   }),
   pluginSelected: PropTypes.string.isRequired,
