@@ -330,7 +330,7 @@ export default FooPage;
 
 ## OverlayBlocker
 
-The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors.
+The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors. This component is automatically displayed when the server needs to restart. You need to disable it in order to override the current design (once disabled it won't show on the other plugins so it's really important to enable it back when the component is unmounting).
 
 ### Usage
 
@@ -341,7 +341,7 @@ The OverlayBlocker is a React component that is very useful to block user intera
 
 ### Example
 
-In this example we'll have a button that when clicked it will display the OverlayBlocker for 5 seconds thus 'freezes' the admin so the user can't navigate (it simulates a very long server restart).
+In this example we'll have a button that when clicked will display the OverlayBlocker for 5 seconds thus 'freezes' the admin so the user can't navigate (it simulates a very long server restart).
 
 **Path -** `./plugins/my-plugin/admin/src/containers/FooPage/constants.js`.
 ```js
@@ -373,6 +373,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 
+// Actions required for disabling and enabling the OverlayBlocker
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+} from 'actions/overlayBlocker';
+
 // Design
 import Button from 'components/Button';
 import OverlayBlocker from 'components/OverlayBlocker';
@@ -395,6 +401,16 @@ import makeSelectFooPage from './selectors';
 
 
 export class FooPage extends React.Component {
+  componentDidMount() {
+    // Disable the AdminPage OverlayBlocker in order to give it a custom design (children)
+    this.props.disableGlobalOverlayBlocker();
+  }
+
+  componentWillUnmount() {
+    // Enable the AdminPage OverlayBlocker so it is displayed when the server is restarting in the other plugins
+    this.props.enableGlobalOverlayBlocker();
+  }
+
   render() {
     return (
       <div>
@@ -410,6 +426,8 @@ export class FooPage extends React.Component {
 }
 
 FooPage.propTypes = {
+  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   onButtonClick: PropTypes.func.isRequired,
   showOverlayBlocker: PropTypes.bool.isRequired,
 };
@@ -419,6 +437,8 @@ const mapStateToProps = makeSelectFooPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      disableGlobalOverlayBlocker,
+      enableGlobalOverlayBlocker,
       onButtonClick,
     },
     dispatch,
