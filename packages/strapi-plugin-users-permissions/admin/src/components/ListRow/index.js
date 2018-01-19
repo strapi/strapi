@@ -34,10 +34,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         icoType: 'pencil',
         onClick: this.handleClick,
       },
-      {
-        icoType: 'trash',
-        onClick: () => { this.setState({ showModalDelete: true }); },
-      },
+      // {
+      //   icoType: 'trash',
+      //   onClick: () => { this.setState({ showModalDelete: true }); },
+      // },
     ];
 
     switch (this.props.settingType) {
@@ -77,7 +77,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
             <div className="col-md-4">
               <div className={styles.flex}>
                 <div>
-                  <i className={`fa fa-${this.props.item.ico}`} />
+                  <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
                 <div>
                   {this.props.item.name}

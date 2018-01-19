@@ -8,7 +8,7 @@ import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { get, isObject, includes, map, take, takeRight } from 'lodash';
+import { capitalize, get, isArray, isObject, includes, map, tail, take, takeRight } from 'lodash';
 
 // Translations
 import en from 'translations/en.json';
@@ -18,6 +18,13 @@ import Input from 'components/Input';
 import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  state = { enabled: false };
+
+  handleChange = (e) => {
+    this.setState({ enabled: e.target.value });
+    this.props.onChange(e);
+  }
+
   renderButton = () => {
     if (this.props.showLoader) {
       return (
@@ -37,49 +44,55 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderForm = () => {
-    const { dataToEdit, values }  = this.props;
+    const { dataToEdit, settingType, values }  = this.props;
+    const form = Object.keys(values.options || values || {}).reduce((acc, current) => {
+      const path = settingType === 'email-templates' ? ['options', current] : [ current ];
+      const name = settingType === 'email-templates' ? 'options.' : '';
 
-    if (this.props.settingType === 'providers') {
-      return (
-        <div className="row">
-          <Input
-            autoFocus
-            label="users-permissions.PopUpForm.inputSelect.providers.label"
-            name="provider"
-            onChange={this.props.onChange}
-            selectOptions={[{ value: 'Email'}, { value: 'Facebook' }, { value: 'Google' }]}
-            type="select"
-            validations={{ required: true }}
-            value={get(this.props.values, 'provider')}
-          />
-          <div className="col-md-6" />
-          <Input
-            inputDescription="users-permissions.PopUpForm.inputToggle.providers.description"
-            label="users-permissions.PopUpForm.inputToggle.providers.label"
-            name="enabled"
-            onChange={this.props.onChange}
-            type="toggle"
-            validations={{}}
-            value={get(this.props.values, 'enabled')}
-          />
-        </div>
-      );
-    }
-
-    const form = Object.keys(values.options || {}).reduce((acc, current) => {
-      if (isObject(get(values, ['options', current]))) {
-        return Object.keys(get(values, ['options', current], {}))
+      if (isObject(get(values, path)) && !isArray(get(values, path))) {
+        return Object.keys(get(values, path, {}))
           .reduce((acc, curr) => {
-            acc.push(`options.${current}.${curr}`);
+            acc.push(`${name}${current}.${curr}`);
 
             return acc;
           }, []).concat(acc);
-      } else {
-        acc.push(`options.${current}`);
+      } else if (current !== 'icon' && current !== 'scope'){
+        acc.push(`${name}${current}`);
       }
 
       return acc;
     }, []);
+
+    if (settingType === 'providers') {
+      return (
+        <div className="row">
+          <Input
+            inputDescription="users-permissions.PopUpForm.Providers.enabled.description"
+            label="users-permissions.PopUpForm.Providers.enabled.label"
+            name={`${dataToEdit}.enabled`}
+            onChange={this.handleChange}
+            type="toggle"
+            validations={{}}
+            value={get(this.props.values, 'enabled', this.state.enabled)}
+          />
+          <div className={styles.separator} />
+          {map(tail(form), (value, key) => (
+            <Input
+              autoFocus={key === 0}
+              disabled={key === form.length - 2}
+              key={value}
+              customBootstrapClass="col-md-12"
+              label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') ? `${dataToEdit}.callback` : value}.label`}
+              name={`${dataToEdit}.${value}`}
+              onChange={this.props.onChange}
+              type="text"
+              value={includes(value, 'callback') ? `${strapi.backendURL}${get(values, value)}` : get(values, value)}
+              validations={{}}
+            />
+          ))}
+        </div>
+      );
+    }
 
     return (
       <div className="row">
@@ -115,12 +128,13 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   render() {
-    const { actionType, dataToEdit, display, settingType } = this.props.values;
+    const { display } = this.props.values;
+    const { actionType, dataToEdit, settingType } = this.props;
 
     let header = <span>{dataToEdit}</span>;
 
     if (actionType) {
-      header = <FormattedMessage id={`users-permissions.PopUpForm.header.${actionType}.${settingType}`} />;
+      header = <FormattedMessage id={`users-permissions.PopUpForm.header.${actionType}.${settingType}`} values={{ provider: <i>{capitalize(dataToEdit)}</i> }} />;
     }
 
     if (display && en[display]) {
