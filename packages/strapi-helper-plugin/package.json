@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.7.3",
+  "version": "3.0.0-alpha.8.3",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 8.0.0",
@@ -21,9 +21,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "cross-env IS_HELPER=true ./node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config ./lib/internals/eslint/eslint-config.js .",
-    "pretest": "npm run lint",
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo Tests are not implemented."
+    "test": "npm run lint"
   },
   "pre-commit": [
     "lint:admin"

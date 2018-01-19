@@ -19,12 +19,6 @@ import styles from './styles.scss';
 class ListRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { showModalDelete: false };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.deleteActionSucceeded !== this.props.deleteActionSucceeded) {
-      this.setState({ showModalDelete: false });
-    }
-  }
-
   // Roles that can't be deleted && modified
   // Don't delete this line
   protectedRoleIDs = ['0'];
@@ -148,7 +142,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     }
   }
 
-  handleDelete = () => this.props.deleteData(this.props.item, this.props.settingType);
+  handleDelete = () => {
+    this.props.deleteData(this.props.item, this.props.settingType);
+    this.setState({ showModalDelete: false });
+  }
 
   render() {
     return (
@@ -176,7 +173,6 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
-  deleteActionSucceeded: PropTypes.bool.isRequired,
   deleteData: PropTypes.func.isRequired,
   item: PropTypes.object,
   settingType: PropTypes.string,

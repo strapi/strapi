@@ -25,10 +25,13 @@ module.exports = async (ctx, next) => {
     }
   }
 
-  const permission = _.get(strapi.plugins['users-permissions'].config, ['roles', role.toString(), 'permissions', route.plugin || 'application', 'controllers', route.controller, route.action]);
+  const actions = _.get(strapi.plugins['users-permissions'].config, ['roles', role.toString(), 'permissions', route.plugin || 'application', 'controllers', route.controller], {});
+  const permission = _.find(actions, (config, name) => {
+    return name.toLowerCase() === route.action.toLowerCase();
+  });
 
   if (!permission) {
-    return await next();
+    return ctx.unauthorized('Access restricted for this action.');
   }
 
   if (permission.enabled && permission.policy) {

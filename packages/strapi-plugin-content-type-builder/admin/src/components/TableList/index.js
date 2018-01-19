@@ -45,7 +45,11 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                   </div>
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
-                  <TableListRow key={key} rowItem={rowItem} onDelete={this.props.onHandleDelete} />
+                  <TableListRow
+                    key={key}
+                    onDelete={this.props.onHandleDelete}
+                    rowItem={rowItem}
+                  />
                 ))}
               </ul>
             </div>
