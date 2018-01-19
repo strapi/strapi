@@ -160,6 +160,8 @@ export class HomePage extends React.Component {
             onChange={this.props.onChange}
             onSubmit={(e) => {
               e.preventDefault();
+              this.setState({ showModalEdit: false });
+              this.props.submit(match.params.settingType);
             }}
             settingType={match.params.settingType}
             values={modifiedData[dataToEdit] || {}}

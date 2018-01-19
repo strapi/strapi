@@ -23,8 +23,8 @@ const initialState = fromJS({
   dataToDelete: Map({}),
   dataToEdit: '',
   deleteEndPoint: '',
-  initialData: Map({}),
-  modifiedData: Map({}),
+  initialData: fromJS({}),
+  modifiedData: fromJS({}),
 });
 
 function homePageReducer(state = initialState, action) {
@@ -55,7 +55,9 @@ function homePageReducer(state = initialState, action) {
         .set('initialData', action.form)
         .set('modifiedData', action.form);
     case SUBMIT_SUCCEEDED:
-      return state.update('initialData', () => state.get('modifiedData'));
+      return state
+        .update('dataToEdit', () => '')
+        .update('initialData', () => state.get('modifiedData'));
     case UNSET_DATA_TO_EDIT:
       return state
         .update('dataToEdit', () => '')

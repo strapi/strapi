@@ -66,7 +66,7 @@ export function fetchDataSucceeded(data) {
   return {
     type: FETCH_DATA_SUCCEEDED,
     data,
-    modifiedData: Map({}),
+    modifiedData: fromJS({}),
   };
 }
 
@@ -89,7 +89,7 @@ export function setForm(data) {
   // const form = generateForm(formType);
   return {
     type: SET_FORM,
-    form: Map(data),
+    form: fromJS(data),
   };
 }
 
