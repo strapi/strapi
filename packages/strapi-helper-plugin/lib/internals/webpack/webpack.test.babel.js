@@ -24,7 +24,7 @@ module.exports = {
     // Some libraries don't like being run through babel.
     // If they gripe, put them here.
     noParse: [
-      /build/
+      /build/,
       /node_modules(\\|\/)sinon/,
       /node_modules(\\|\/)acorn/,
     ],
