@@ -16,14 +16,14 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      _.defaultsDeep(strapi.plugins['users-permissions'].config.grant, {
+      const grantConfig = Object.assign(_.clone(_.get(strapi.plugins['users-permissions'].config, 'grant', {})), {
         server: {
           protocol: 'http',
           host: 'localhost:1337'
         }
       });
 
-      const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
+      const grant = new Grant(grantConfig);
 
       strapi.app.use(async (ctx, next) => {
         if (_.startsWith(ctx.request.url, '/connect') && ctx.request.method === 'GET') {

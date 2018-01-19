@@ -97,6 +97,15 @@
       }
     },
 
+    {
+      "method": "GET",
+      "path": "/providers",
+      "handler": "UsersPermissions.getProviders",
+      "config": {
+        "policies": []
+      }
+    },
+
 
     {
       "method": "POST",

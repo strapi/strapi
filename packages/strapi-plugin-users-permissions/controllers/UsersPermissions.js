@@ -203,5 +203,9 @@ module.exports = {
     ctx.send({ ok: true });
 
     strapi.reload();
+  },
+
+  getProviders: async (ctx) => {
+    ctx.send(strapi.plugins['users-permissions'].config.grant);
   }
 };

@@ -16,7 +16,7 @@ module.exports = {
     const access_token = ctx.query.access_token;
 
     if (provider === 'local') {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled') && !ctx.request.admin) {
+      if (!_.get(strapi.plugins['users-permissions'].config.grant['email'], 'enabled') && !ctx.request.admin) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
