@@ -13,6 +13,7 @@ const execSync = require('child_process').execSync;
 const _ = require('lodash');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
+const shell = require('shelljs');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -207,14 +208,8 @@ module.exports = (scope, cb) => {
         try {
           require(path.resolve(`${scope.rootPath}/node_modules/${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
-          if(/^win/.test(process.platform)){
-            execSync(`rmdir ${scope.rootPath} /s /q`);
-          } else {
-            execSync(`rm -r ${scope.rootPath}`);
-          }
-
+          shell.rm('-r', scope.rootPath);
           logger.info('Copying the dashboard...');
-
           cb.success();
         }
       });
