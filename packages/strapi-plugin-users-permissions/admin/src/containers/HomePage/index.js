@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { clone, includes, isEqual, isEmpty, replace } from 'lodash';
+import { clone, includes, isEqual, isEmpty } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
@@ -35,7 +35,9 @@ import {
   deleteData,
   fetchData,
   onChange,
+  setDataToEdit,
   submit,
+  unsetDataToEdit,
 } from './actions';
 
 import reducer from './reducer';
@@ -44,12 +46,25 @@ import saga from './saga';
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component {
-  state = { mapKey: {} };
+  state = { mapKey: {}, showModalEdit: false };
+
+  getChildContext = () => (
+    {
+      setDataToEdit: this.props.setDataToEdit,
+      unsetDataToEdit: this.props.unsetDataToEdit,
+    }
+  );
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
     document.addEventListener('keydown', this.handleKeyBoardShortCut);
     document.addEventListener('keyup', this.handleKeyBoardShortCut);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.dataToEdit !== this.props.dataToEdit) {
+      this.setState({ showModalEdit: !isEmpty(nextProps.dataToEdit) });
+    }
   }
 
   componentWillUpdate(nextProps) {
@@ -111,7 +126,7 @@ export class HomePage extends React.Component {
   ];
 
   render() {
-    const { modifiedData, initialData, match } = this.props;
+    const { modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
@@ -122,10 +137,9 @@ export class HomePage extends React.Component {
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
-          settingType={this.props.match.params.settingType}
+          settingType={match.params.settingType}
         />
       );
-    const hashArray = replace(this.props.location.hash, '#', '').split('::');
 
     return (
       <div>
@@ -140,14 +154,15 @@ export class HomePage extends React.Component {
             {component}
           </div>
           <PopUpForm
-            actionType={hashArray[0]}
-            isOpen={!isEmpty(this.props.location.hash)}
+            actionType={'edit'}
+            isOpen={this.state.showModalEdit}
+            dataToEdit={dataToEdit}
             onChange={this.props.onChange}
             onSubmit={(e) => {
               e.preventDefault();
             }}
-            settingType={hashArray[1]}
-            values={modifiedData}
+            settingType={match.params.settingType}
+            values={modifiedData[dataToEdit] || {}}
           />
         </form>
       </div>
@@ -155,11 +170,17 @@ export class HomePage extends React.Component {
   }
 }
 
+HomePage.childContextTypes = {
+  setDataToEdit: PropTypes.func,
+  unsetDataToEdit: PropTypes.func,
+};
+
 HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   data: PropTypes.array.isRequired,
+  dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
   fetchData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -168,7 +189,9 @@ HomePage.propTypes = {
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  setDataToEdit: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
+  unsetDataToEdit: PropTypes.func.isRequired,
 };
 
 
@@ -179,7 +202,9 @@ function mapDispatchToProps(dispatch) {
       deleteData,
       fetchData,
       onChange,
+      setDataToEdit,
       submit,
+      unsetDataToEdit,
     },
     dispatch,
   );

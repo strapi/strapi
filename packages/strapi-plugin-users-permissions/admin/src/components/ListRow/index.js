@@ -141,7 +141,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
       }
       case 'providers':
       case 'email-templates':
-        return router.push(`${router.location.pathname}#edit::${this.props.settingType}::${this.props.item.id}`);
+        return this.context.setDataToEdit(this.props.item.name);
       default:
         return;
     }
@@ -167,6 +167,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
     );
   }
 }
+
+ListRow.contextTypes = {
+  setDataToEdit: PropTypes.func.isRequired,
+};
 
 ListRow.defaultProps = {
   item: {

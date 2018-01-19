@@ -3,7 +3,7 @@
  * HomePage actions
  *
  */
-import { Map } from 'immutable';
+import { fromJS } from 'immutable';
 import { isArray } from 'lodash';
 import {
   CANCEL_CHANGES,
@@ -12,9 +12,11 @@ import {
   FETCH_DATA,
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
+  SET_DATA_TO_EDIT,
   SET_FORM,
   SUBMIT,
   SUBMIT_SUCCEEDED,
+  UNSET_DATA_TO_EDIT,
 } from './constants';
 
 export function cancelChanges() {
@@ -57,12 +59,14 @@ export function fetchDataSucceeded(data) {
     return {
       type: FETCH_DATA_SUCCEEDED,
       data: list,
+      modifiedData: fromJS(data),
     };
   }
 
   return {
     type: FETCH_DATA_SUCCEEDED,
     data,
+    modifiedData: Map({}),
   };
 }
 
@@ -71,6 +75,13 @@ export function onChange({ target }) {
     type: ON_CHANGE,
     keys: ['modifiedData'].concat(target.name.split('.')),
     value: target.value,
+  };
+}
+
+export function setDataToEdit(dataToEdit) {
+  return {
+    type: SET_DATA_TO_EDIT,
+    dataToEdit,
   };
 }
 
@@ -92,6 +103,12 @@ export function submit(endPoint) {
 export function submitSucceeded() {
   return {
     type: SUBMIT_SUCCEEDED,
+  };
+}
+
+export function unsetDataToEdit() {
+  return {
+    type: UNSET_DATA_TO_EDIT,
   };
 }
 

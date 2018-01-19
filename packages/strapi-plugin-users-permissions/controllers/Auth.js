@@ -144,7 +144,7 @@ module.exports = {
       await strapi.plugins['email'].services.email.send({
         to: user.email,
         from: (settings.from.email || settings.from.email) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
-        replyTo: settings.respond,
+        replyTo: settings.response_email,
         subject: object,
         text: message,
         html: message

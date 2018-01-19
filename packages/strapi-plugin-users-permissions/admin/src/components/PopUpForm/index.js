@@ -8,16 +8,16 @@ import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { router } from 'app';
+import { get, isObject, includes, map, take, takeRight } from 'lodash';
+
+// Translations
+import en from 'translations/en.json';
 
 import Input from 'components/Input';
 
 import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  toggleModal = () => router.push(router.location.pathname);
-
   renderButton = () => {
     if (this.props.showLoader) {
       return (
@@ -37,6 +37,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderForm = () => {
+    const { dataToEdit, values }  = this.props;
+
     if (this.props.settingType === 'providers') {
       return (
         <div className="row">
@@ -64,71 +66,74 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       );
     }
 
+    const form = Object.keys(values.options || {}).reduce((acc, current) => {
+      if (isObject(get(values, ['options', current]))) {
+        return Object.keys(get(values, ['options', current], {}))
+          .reduce((acc, curr) => {
+            acc.push(`options.${current}.${curr}`);
+
+            return acc;
+          }, []).concat(acc);
+      } else {
+        acc.push(`options.${current}`);
+      }
+
+      return acc;
+    }, []);
+
     return (
       <div className="row">
-        <Input
-          autoFocus
-          label="users-permissions.PopUpForm.inputText.shipperName.label"
-          name="shipperName"
-          onChange={this.props.onChange}
-          value={get(this.props.values, 'shipperName')}
-          placeholder="users-permissions.PopUpForm.inputText.shipperName.placeholder"
-          type="text"
-          validations={{}}
-        />
-        <Input
-          label="users-permissions.PopUpForm.inputEmail.shipperEmail.label"
-          name="shipperEmail"
-          onChange={this.props.onChange}
-          placeholder="users-permissions.PopUpForm.inputEmail.placeholder"
-          type="email"
-          validations={{ required: true }}
-          value={get(this.props.values, 'shipperEmail')}
-        />
-        <Input
-          label="users-permissions.PopUpForm.inputEmail.responseEmail.label"
-          name="responseEmail"
-          onChange={this.props.onChange}
-          placeholder="users-permissions.PopUpForm.inputEmail.placeholder"
-          type="email"
-          validations={{}}
-          value={get(this.props.values, 'responseEmail')}
-        />
+        {map(take(form, 3), (value, key) => (
+          <Input
+            autoFocus={key === 0}
+            key={value}
+            label={`users-permissions.PopUpForm.Email.${value}.label`}
+            name={`${dataToEdit}.${value}`}
+            onChange={this.props.onChange}
+            placeholder={`users-permissions.PopUpForm.Email.${value}.placeholder`}
+            type={includes(value, 'email') ? 'email' : 'text'}
+            value={get(values, value)}
+            validations={{}}
+          />
+        ))}
         <div className="col-md-6" />
-        <Input
-          customBootstrapClass="col-md-12"
-          label="users-permissions.PopUpForm.inputText.emailObject.label"
-          name="emailObject"
-          onChange={this.props.onChange}
-          placeholder="users-permissions.PopUpForm.inputText.emailObject.placeholder"
-          type="text"
-          validations={{}}
-          value={get(this.props.values, 'emailObject')}
-        />
-        <Input
-          customBootstrapClass="col-md-12"
-          label="users-permissions.PopUpForm.inputTextArea.message.label"
-          name="message"
-          onChange={this.props.onChange}
-          placeholder="users-permissions.PopUpForm.inputTextArea.message.placeholder"
-          type="textarea"
-          validations={{}}
-          value={get(this.props.values, 'message')}
-        />
+        {map(takeRight(form, 2), (value) => (
+          <Input
+            key={value}
+            customBootstrapClass="col-md-12"
+            label={`users-permissions.PopUpForm.Email.${value}.label`}
+            name={`${dataToEdit}.${value}`}
+            onChange={this.props.onChange}
+            placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
+            type={includes(value, 'object') ? 'text' : 'textarea'}
+            validations={{}}
+            value={get(values, value)}
+          />
+        ))}
       </div>
     );
   }
 
   render() {
+    const { actionType, dataToEdit, display, settingType } = this.props.values;
+
+    let header = <span>{dataToEdit}</span>;
+
+    if (actionType) {
+      header = <FormattedMessage id={`users-permissions.PopUpForm.header.${actionType}.${settingType}`} />;
+    }
+
+    if (display && en[display]) {
+      header = <FormattedMessage id={`users-permissions.${display}`} />;
+    }
+
     return (
       <div className={styles.popUpForm}>
-        <Modal isOpen={this.props.isOpen} toggle={this.toggleModal} className={`${styles.modalPosition}`}>
-          <ModalHeader toggle={this.toggleModal} className={styles.modalHeader} />
+        <Modal isOpen={this.props.isOpen} toggle={this.context.unsetDataToEdit} className={`${styles.modalPosition}`}>
+          <ModalHeader toggle={this.context.unsetDataToEdit} className={styles.modalHeader} />
           <div className={styles.headerContainer}>
             <div>
-              {this.props.actionType ? (
-                <FormattedMessage id={`users-permissions.PopUpForm.header.${this.props.actionType}.${this.props.settingType}`} />
-              ) : <div />}
+              {header}
             </div>
           </div>
           <form onSubmit={this.props.onSubmit}>
@@ -138,7 +143,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               </div>
             </ModalBody>
             <ModalFooter className={styles.modalFooter}>
-              <Button onClick={() => router.push(router.location.pathname)} className={styles.secondary}>
+              <Button onClick={() => this.context.unsetDataToEdit()} className={styles.secondary}>
                 <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
               </Button>
               {this.renderButton()}
@@ -150,6 +155,10 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 }
 
+PopUpForm.contextTypes = {
+  unsetDataToEdit: PropTypes.func.isRequired,
+};
+
 PopUpForm.defaultProps = {
   settingType: 'providers',
   showLoader: false,
@@ -157,6 +166,7 @@ PopUpForm.defaultProps = {
 
 PopUpForm.propTypes = {
   actionType: PropTypes.string.isRequired,
+  dataToEdit: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
