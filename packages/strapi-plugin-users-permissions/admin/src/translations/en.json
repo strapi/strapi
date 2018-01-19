@@ -160,5 +160,7 @@
   "PopUpForm.Providers.google.callback.label": "The redirect URL to add in your  Google application configurations",
   "PopUpForm.Providers.github.callback.label": "The redirect URL to add in your  GitHub application configurations",
   "PopUpForm.Providers.linkedin2.callback.label": "The redirect URL to add in your  Linkedin application configurations",
-  "PopUpForm.Providers.callback.placeholder": "TEXT"
+  "PopUpForm.Providers.callback.placeholder": "TEXT",
+  "PopUpForm.Email.email_templates.inputDescription": "Don't know to set variables",
+  "PopUpForm.Email.link.documentation": "check out our documentation"
 }

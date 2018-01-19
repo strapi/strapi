@@ -116,6 +116,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             customBootstrapClass="col-md-12"
             label={`users-permissions.PopUpForm.Email.${value}.label`}
             name={`${dataToEdit}.${value}`}
+            inputDescription={includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : ''}
+            linkContent={includes(value, 'object') ? { link: 'https://strapi.io/documentation/plugin-development/ui-components.html', description: 'users-permissions.PopUpForm.Email.link.documentation' } : {}}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}
