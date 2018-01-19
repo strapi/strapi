@@ -16,7 +16,7 @@
 * [Table of contents](concepts/concepts.md)
 
 ### Guides
-* [Authentification](guides/authentification.md)
+* [Authentication](guides/authentication.md)
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
 * [Deployment](guides/deployment.md)
