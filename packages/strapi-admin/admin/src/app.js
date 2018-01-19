@@ -23,7 +23,14 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 import App from 'containers/App';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import { pluginLoaded, updatePlugin, unsetHasUserPlugin } from 'containers/App/actions';
+import {
+  freezeApp,
+  pluginLoaded,
+  unfreezeApp,
+  unsetHasUserPlugin,
+  updatePlugin,
+} from 'containers/App/actions';
+
 import auth from 'utils/auth';
 import configureStore from './store';
 import { translationMessages, languages } from './i18n';
@@ -175,6 +182,13 @@ const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
 };
 
+const lockApp = () => {
+  store.dispatch(freezeApp());
+};
+
+const unlockApp = () => {
+  store.dispatch(unfreezeApp());
+};
 
 /**
  * Public Strapi object exposed to the `window` object
@@ -208,6 +222,8 @@ window.strapi = Object.assign(window.strapi || {}, {
   router: history,
   languages,
   currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
+  lockApp,
+  unlockApp,
 });
 
 const dispatch = store.dispatch;

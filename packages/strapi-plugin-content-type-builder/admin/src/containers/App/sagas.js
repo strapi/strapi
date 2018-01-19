@@ -7,15 +7,13 @@ export function* deleteContentType(action) {
   try {
     if (action.sendRequest) {
       const requestUrl = `/content-type-builder/models/${action.itemToDelete}`;
+      const response = yield call(request, requestUrl, { method: 'DELETE' }, true);
 
-      yield call(request, requestUrl, { method: 'DELETE' });
-
-      if (action.updateLeftMenu) {
+      if (response.ok && action.updateLeftMenu) {
         action.updatePlugin('content-manager', 'leftMenuSections', action.leftMenuContentTypes);
+        strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
       }
-      strapi.notification.success('content-type-builder.notification.success.contentTypeDeleted');
     }
-
   } catch(error) {
     strapi.notification.error('content-type-builder.notification.error.message');
   }
