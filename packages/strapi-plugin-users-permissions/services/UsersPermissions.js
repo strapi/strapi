@@ -101,24 +101,28 @@ module.exports = {
   },
 
   getRole: async (roleId, plugins) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles;
+    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleId }, ['users', 'permissions']);
 
-    appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
+    if (!role) {
+      throw new Error('Cannot found this role');
+    }
 
-    Object.keys(appRoles[roleId].permissions)
-      .filter(name => name !== 'application')
-      .map(name => {
-        appRoles[roleId].permissions[name].information = plugins.find(plugin => plugin.id === name) || {};
+    // Add `information` key.
+    role.permissions
+      .filter(permission => permission.type !== 'application')
+      .map((permission, index) => {
+        role.permissions[index].information = plugins.find(plugin => plugin.id === permission.type) || {};
       });
 
-    return appRoles[roleId];
+    return role;
   },
 
   getRoles: async () => {
     const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
-      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id || roles[i]._id });
+      roles[i].id = roles[i].id || roles[i]._id;
+      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id });
     }
 
     return roles;
