@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.8.2",
   "description": "Generate a new Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -18,7 +18,7 @@
     "get-installed-path": "^3.0.1",
     "inquirer": "^4.0.2",
     "lodash": "^4.17.4",
-    "strapi-utils": "3.0.0-alpha.8",
+    "strapi-utils": "3.0.0-alpha.8.2",
     "uuid": "^3.1.0"
   },
   "scripts": {
