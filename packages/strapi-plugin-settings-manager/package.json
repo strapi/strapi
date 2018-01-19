@@ -40,6 +40,10 @@
       "url": "http://strapi.io"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
   "engines": {
     "node": ">= 8.0.0",
     "npm": ">= 3.0.0"

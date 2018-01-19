@@ -2,27 +2,6 @@
   "name": "strapi-plugin-content-manager",
   "version": "3.0.0-alpha.8",
   "description": "A powerful UI to easily manage your data.",
-  "engines": {
-    "node": ">= 8.0.0",
-    "npm": ">= 5.3.0"
-  },
-  "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
-  },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
-  },
-  "license": "MIT",
   "strapi": {
     "name": "Content Manager",
     "icon": "plug",
@@ -47,5 +26,26 @@
   "devDependencies": {
     "react-select": "^1.0.0-rc.5",
     "strapi-helper-plugin": "3.0.0-alpha.8"
-  }
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT"
 }

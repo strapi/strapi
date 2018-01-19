@@ -41,6 +41,10 @@
       "url": ""
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
   "engines": {
     "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
