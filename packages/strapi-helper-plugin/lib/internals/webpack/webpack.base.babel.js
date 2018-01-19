@@ -20,11 +20,11 @@ const appPath = (() => {
 })();
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const adminPath = (() => {
-  if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD);
+  if (isAdmin && isSetup) {
+    return path.resolve(appPath, 'strapi-admin');
   }
 
-  return path.resolve(appPath, 'admin');
+  return path.resolve(process.env.PWD);
 })();
 
 if (!isSetup) {
