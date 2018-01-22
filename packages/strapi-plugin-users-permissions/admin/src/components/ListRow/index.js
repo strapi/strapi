@@ -85,7 +85,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
               </div>
             </div>
             <div className="col-md-6" style={{ fontWeight: '500' }}>
-              {this.props.item.enabled ? (
+              {get(this.props.values, [get(this.props.item, 'name'), 'enabled']) ? (
                 <span style={{ color: '#5A9E06' }}>Enabled</span>
               ) : (
                 <span style={{ color: '#F64D0A' }}>Disabled</span>
@@ -131,7 +131,6 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
   }
 
   handleClick = () => {
-    // TODO open modal and pass data
     switch (this.props.settingType) {
       case 'roles': {
         if (!includes(this.protectedRoleIDs, get(this.props.item, 'id').toString())) {
@@ -186,6 +185,7 @@ ListRow.propTypes = {
   deleteData: PropTypes.func.isRequired,
   item: PropTypes.object,
   settingType: PropTypes.string,
+  values: PropTypes.object.isRequired,
 };
 
 export default ListRow;

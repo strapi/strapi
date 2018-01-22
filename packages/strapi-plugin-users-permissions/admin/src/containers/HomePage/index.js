@@ -138,6 +138,7 @@ export class HomePage extends React.Component {
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
           settingType={match.params.settingType}
+          values={modifiedData}
         />
       );
 
