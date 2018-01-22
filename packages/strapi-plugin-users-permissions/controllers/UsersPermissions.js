@@ -128,10 +128,15 @@ module.exports = {
     return ctx.send(data);
   },
 
-  updateRole: async (ctx) => {
-    const roleId = ctx.params.role;
-    // Prevent from updating the Administrator role
-    if (roleId === '0') {
+  updateRole: async function (ctx) {
+    // Fetch root role.
+    const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' });
+
+    const roleID = ctx.params.role;
+    const rootID = root.id || root._id;
+
+    // Prevent from updating the root role.
+    if (roleID === rootID) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
     }
 
@@ -140,7 +145,8 @@ module.exports = {
     }
 
     try {
-      await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleId, ctx.request.body);
+      await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleID, ctx.request.body);
+
       ctx.send({ ok: true });
     } catch(error) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);

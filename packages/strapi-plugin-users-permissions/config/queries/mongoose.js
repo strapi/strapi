@@ -46,10 +46,20 @@ module.exports = {
     });
   },
 
-  update: async function (params) {
-    return this.update({
-      [this.primaryKey]: params[this.primaryKey] || params.id
-    }, params, {
+  update: async function (search, params) {
+    if (!params) {
+      search = params;
+    }
+
+    const primaryKey = params[this.primaryKey] || params.id;
+
+    if (primaryKey) {
+      search = {
+        [this.primaryKey]: params[this.primaryKey] || params.id
+      }
+    }
+
+    return this.update(search, params, {
       strict: false
     })
     .catch((error) => {
