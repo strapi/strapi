@@ -96,11 +96,19 @@
         "policies": []
       }
     },
-
     {
       "method": "GET",
       "path": "/providers",
       "handler": "UsersPermissions.getProviders",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "PUT",
+      "path": "/providers",
+      "handler": "UsersPermissions.updateProviders",
       "config": {
         "policies": []
       }

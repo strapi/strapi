@@ -207,5 +207,22 @@ module.exports = {
 
   getProviders: async (ctx) => {
     ctx.send(strapi.plugins['users-permissions'].config.grant);
+  },
+
+  updateProviders: async (ctx) => {
+    if (_.isEmpty(ctx.request.body)) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
+    }
+
+    strapi.reload.isWatching = false;
+
+    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'grant.json'), JSON.stringify({
+      grant: ctx.request.body
+    }, null, 2), 'utf8');
+
+
+    ctx.send({ ok: true });
+
+    strapi.reload();
   }
 };
