@@ -8,3 +8,4 @@ package-lock.json
 .DS_Store
 npm-debug.log
 .idea
+manifest.json
