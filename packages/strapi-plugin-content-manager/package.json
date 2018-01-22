@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "react-select": "^1.0.0-rc.5",
-    "strapi-helper-plugin": "3.0.0-alpha.8"
+    "strapi-helper-plugin": "3.0.0-alpha.8.3"
   },
   "author": {
     "name": "Strapi team",
