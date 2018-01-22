@@ -194,7 +194,7 @@ module.exports = (scope, cb) => {
 
           exec(cmd, () => {
             if (scope.client.module) {
-              const lock =require(path.join(`${scope.rootPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+              const lock = require(path.join(`${scope.rootPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
               scope.client.version = lock.version;
             }
 
