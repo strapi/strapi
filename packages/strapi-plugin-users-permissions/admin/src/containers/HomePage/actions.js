@@ -87,7 +87,6 @@ export function setDataToEdit(dataToEdit) {
 }
 
 export function setForm(data) {
-  // const form = generateForm(formType);
   return {
     type: SET_FORM,
     form: fromJS(data),
@@ -119,36 +118,3 @@ export function unsetDataToEdit() {
     type: UNSET_DATA_TO_EDIT,
   };
 }
-
-// Utils
-
-// function generateForm(formType) {
-//   let form = Map({});
-//   switch (formType) {
-//     case 'providers':
-//       form = Map({
-//         provider: 'Facebook',
-//         enabled: false,
-//       });
-//       break;
-//     case 'email-templates':
-//       form = Map({
-//         shipperName: '',
-//         shipperEmail: '',
-//         responseEmail: '',
-//         emailObject: '',
-//         message: '',
-//       });
-//       break;
-//     case 'advanced-settings':
-//       form = Map({
-//         uniqueAccount: false,
-//         subscriptions: '100',
-//         durations: '24',
-//       });
-//       break;
-//     default:
-//   }
-//
-//   return form;
-// }

@@ -25,24 +25,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     this.props.onChange(e);
   }
 
-  renderButton = () => {
-    // if (this.props.showLoader) {
-    //   return (
-    //     <Button onClick={() => {}} type="submit" className={styles.primary} disabled>
-    //       <p className={styles.saving}>
-    //         <span>.</span><span>.</span><span>.</span>
-    //       </p>
-    //     </Button>
-    //   );
-    // }
-
-    return (
-      <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
-        <FormattedMessage id="users-permissions.PopUpForm.button.save" />
-      </Button>
-    );
-  }
-
   renderForm = () => {
     const { dataToEdit, settingType, values }  = this.props;
     const form = Object.keys(values.options || values || {}).reduce((acc, current) => {
@@ -75,7 +57,10 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             validations={{}}
             value={get(this.props.values, 'enabled', this.state.enabled)}
           />
-          <div className={styles.separator} />
+          {form.length > 1 ? (
+            <div className={styles.separator} />
+
+          ) : ''}
           {map(tail(form), (value, key) => (
             <Input
               autoFocus={key === 0}
@@ -168,7 +153,9 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               <Button onClick={() => this.context.unsetDataToEdit()} className={styles.secondary}>
                 <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
               </Button>
-              {this.renderButton()}
+              <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
+                <FormattedMessage id="users-permissions.PopUpForm.button.save" />
+              </Button>
             </ModalFooter>
           </form>
         </Modal>
