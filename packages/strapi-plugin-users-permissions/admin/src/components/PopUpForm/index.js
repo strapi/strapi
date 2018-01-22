@@ -102,13 +102,15 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <Input
             autoFocus={key === 0}
             key={value}
+            didCheckErrors={this.props.didCheckErrors}
+            errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
             label={`users-permissions.PopUpForm.Email.${value}.label`}
             name={`${dataToEdit}.${value}`}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${value}.placeholder`}
             type={includes(value, 'email') ? 'email' : 'text'}
             value={get(values, value)}
-            validations={{}}
+            validations={value !== 'options.response_email' ? { required: true } : {}}
           />
         ))}
         <div className="col-md-6" />
@@ -116,6 +118,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <Input
             key={value}
             customBootstrapClass="col-md-12"
+            didCheckErrors={this.props.didCheckErrors}
+            errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
             label={`users-permissions.PopUpForm.Email.${value}.label`}
             name={`${dataToEdit}.${value}`}
             inputDescription={includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : ''}
@@ -123,7 +127,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}
-            validations={{}}
+            validations={{ required: true }}
             value={get(values, value)}
           />
         ))}
