@@ -14,6 +14,7 @@ import {
   ON_CHANGE,
   SET_DATA_TO_EDIT,
   SET_FORM,
+  SET_FORM_ERRORS,
   SUBMIT_SUCCEEDED,
   UNSET_DATA_TO_EDIT,
 } from './constants';
@@ -23,6 +24,8 @@ const initialState = fromJS({
   dataToDelete: Map({}),
   dataToEdit: '',
   deleteEndPoint: '',
+  didCheckErrors: false,
+  formErrors: List([]),
   initialData: fromJS({}),
   modifiedData: fromJS({}),
 });
@@ -30,7 +33,9 @@ const initialState = fromJS({
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
     case CANCEL_CHANGES:
-      return state.update('modifiedData', () => state.get('initialData'));
+      return state
+        .set('formErrors', List([]))
+        .update('modifiedData', () => state.get('initialData'));
     case DELETE_DATA:
       return state
         .set('dataToDelete', Map(action.dataToDelete))
@@ -52,14 +57,21 @@ function homePageReducer(state = initialState, action) {
       return state.update('dataToEdit', () => action.dataToEdit);
     case SET_FORM:
       return state
+        .set('formErrors', List([]))
         .set('initialData', action.form)
         .set('modifiedData', action.form);
+    case SET_FORM_ERRORS:
+      return state
+        .update('didCheckErrors', (v) => v = !v)
+        .set('formErrors', List(action.formErrors));
     case SUBMIT_SUCCEEDED:
       return state
+        .set('formErrors', List([]))
         .update('dataToEdit', () => '')
         .update('initialData', () => state.get('modifiedData'));
     case UNSET_DATA_TO_EDIT:
       return state
+        .set('formErrors', List([]))
         .update('dataToEdit', () => '')
         .update('modifiedData', () => state.get('initialData'));
     default:

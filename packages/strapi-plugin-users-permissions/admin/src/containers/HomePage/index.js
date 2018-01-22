@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { clone, includes, isEqual, isEmpty } from 'lodash';
+import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
@@ -36,12 +36,15 @@ import {
   fetchData,
   onChange,
   setDataToEdit,
+  setFormErrors,
   submit,
   unsetDataToEdit,
 } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
+
+import checkFormValidity from './checkFormValidity';
 
 const keyBoardShortCuts = [18, 78];
 
@@ -103,10 +106,29 @@ export class HomePage extends React.Component {
   }
 
   handleButtonClick = () => {
+    // TODO change open modal URL
     if (this.props.match.params.settingType === 'roles') {
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
+    }
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const modifiedObject = get(this.props.modifiedData, this.props.dataToEdit);
+    const initObject = get(this.props.initialData, this.props.dataToEdit);
+    const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject);
+
+    if (isEqual(initObject, modifiedObject)) {
+      return this.props.unsetDataToEdit();
+    }
+
+    if (isEmpty(formErrors)) {
+      this.setState({ showModalEdit: false });
+      this.props.submit(this.props.match.params.settingType);
+    } else {
+      this.props.setFormErrors(formErrors);
     }
   }
 
@@ -126,7 +148,7 @@ export class HomePage extends React.Component {
   ];
 
   render() {
-    const { modifiedData, initialData, match, dataToEdit } = this.props;
+    const { didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
@@ -158,12 +180,10 @@ export class HomePage extends React.Component {
             actionType={'edit'}
             isOpen={this.state.showModalEdit}
             dataToEdit={dataToEdit}
+            didCheckErrors={didCheckErrors}
+            formErrors={formErrors}
             onChange={this.props.onChange}
-            onSubmit={(e) => {
-              e.preventDefault();
-              this.setState({ showModalEdit: false });
-              this.props.submit(match.params.settingType);
-            }}
+            onSubmit={this.handleSubmit}
             settingType={match.params.settingType}
             values={modifiedData[dataToEdit] || {}}
           />
@@ -185,7 +205,9 @@ HomePage.propTypes = {
   data: PropTypes.array.isRequired,
   dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
   fetchData: PropTypes.func.isRequired,
+  formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -193,6 +215,7 @@ HomePage.propTypes = {
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   setDataToEdit: PropTypes.func.isRequired,
+  setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
   unsetDataToEdit: PropTypes.func.isRequired,
 };
@@ -206,6 +229,7 @@ function mapDispatchToProps(dispatch) {
       fetchData,
       onChange,
       setDataToEdit,
+      setFormErrors,
       submit,
       unsetDataToEdit,
     },

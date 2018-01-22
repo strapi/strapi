@@ -14,6 +14,7 @@ import {
   ON_CHANGE,
   SET_DATA_TO_EDIT,
   SET_FORM,
+  SET_FORM_ERRORS,
   SUBMIT,
   SUBMIT_SUCCEEDED,
   UNSET_DATA_TO_EDIT,
@@ -90,6 +91,13 @@ export function setForm(data) {
   return {
     type: SET_FORM,
     form: fromJS(data),
+  };
+}
+
+export function setFormErrors(formErrors) {
+  return {
+    type: SET_FORM_ERRORS,
+    formErrors,
   };
 }
 

@@ -8,7 +8,7 @@ import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { capitalize, get, isArray, isObject, includes, map, tail, take, takeRight } from 'lodash';
+import { capitalize, get, findIndex, isArray, isObject, includes, map, tail, take, takeRight } from 'lodash';
 
 // Translations
 import en from 'translations/en.json';
@@ -26,15 +26,15 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   renderButton = () => {
-    if (this.props.showLoader) {
-      return (
-        <Button onClick={() => {}} type="submit" className={styles.primary} disabled>
-          <p className={styles.saving}>
-            <span>.</span><span>.</span><span>.</span>
-          </p>
-        </Button>
-      );
-    }
+    // if (this.props.showLoader) {
+    //   return (
+    //     <Button onClick={() => {}} type="submit" className={styles.primary} disabled>
+    //       <p className={styles.saving}>
+    //         <span>.</span><span>.</span><span>.</span>
+    //       </p>
+    //     </Button>
+    //   );
+    // }
 
     return (
       <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
@@ -79,15 +79,17 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           {map(tail(form), (value, key) => (
             <Input
               autoFocus={key === 0}
-              disabled={key === form.length - 2}
-              key={value}
               customBootstrapClass="col-md-12"
+              didCheckErrors={this.props.didCheckErrors}
+              disabled={key === form.length - 2}
+              errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
+              key={value}
               label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') ? `${dataToEdit}.callback` : value}.label`}
               name={`${dataToEdit}.${value}`}
               onChange={this.props.onChange}
               type="text"
               value={includes(value, 'callback') ? `${strapi.backendURL}${get(values, value)}` : get(values, value)}
-              validations={{}}
+              validations={{ required: true }}
             />
           ))}
         </div>
@@ -177,17 +179,19 @@ PopUpForm.contextTypes = {
 
 PopUpForm.defaultProps = {
   settingType: 'providers',
-  showLoader: false,
+  // showLoader: false,
 };
 
 PopUpForm.propTypes = {
   actionType: PropTypes.string.isRequired,
   dataToEdit: PropTypes.string.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   settingType: PropTypes.string,
-  showLoader: PropTypes.bool,
+  // showLoader: PropTypes.bool,
   values: PropTypes.object.isRequired,
 };
 
