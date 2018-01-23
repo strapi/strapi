@@ -15,6 +15,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const appPath = (() => {
   if (process.env.APP_PATH) {
     return process.env.APP_PATH;
@@ -22,7 +23,13 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+
+const rootAdminpath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+  }
+  return path.resolve(appPath, 'admin');
+})();
 
 // Load plugins into the same build in development mode.
 const plugins = {
