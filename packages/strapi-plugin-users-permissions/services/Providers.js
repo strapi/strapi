@@ -69,7 +69,7 @@ exports.connect = (provider, query) => {
               }
 
               if (user && user.provider === provider) {
-                return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+                return resolve([user, null]);
               }
 
               if (user && user.provider !== provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {

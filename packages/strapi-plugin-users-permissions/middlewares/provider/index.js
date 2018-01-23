@@ -26,7 +26,7 @@ module.exports = strapi => {
 
       strapi.app.use(async (ctx, next) => {
         if (_.startsWith(ctx.request.url, '/connect') && ctx.request.method === 'GET') {
-          const provider = _.last(ctx.request.url.split('/'));
+          const provider = ctx.request.url.split('/')[2];
           const config = strapi.plugins['users-permissions'].config.grant[provider];
 
           if (_.get(config, 'enabled')) {
