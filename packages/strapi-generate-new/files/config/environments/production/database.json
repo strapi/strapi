@@ -8,8 +8,8 @@
         "host": "${process.env.DATABASE_HOST || 'localhost'}",
         "port": "${process.env.DATABASE_PORT || 27017}",
         "database": "${process.env.DATABASE_NAME || 'production'}",
-        "username": "",
-        "password": ""
+        "username": "${process.env.DATABASE_USERNAME || ''}",
+        "password": "${process.env.DATABASE_PASSWORD || ''}"
       },
       "options": {}
     }
