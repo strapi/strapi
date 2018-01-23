@@ -73,7 +73,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               name={`${dataToEdit}.${value}`}
               onChange={this.props.onChange}
               type="text"
-              value={includes(value, 'callback') ? `${strapi.backendURL}${get(values, value)}` : get(values, value)}
+              value={includes(value, 'callback') || includes(value, 'redirect_uri') ? `${strapi.backendURL}${get(values, value)}` : get(values, value)}
               validations={{ required: true }}
             />
           ))}
