@@ -277,16 +277,16 @@ module.exports = {
 
 1️⃣  EXECUTE THE FOLLOWING SQL QUERY
 
-CREATE TABLE "${tableName}" (
-  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  username text,
-  email text,
-  provider text,
-  role text,
-  ${Model.client === 'pg' ? '"resetPasswordToken"' : 'resetPasswordToken'} text,
-  password text,
-  updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+CREATE TABLE \`${tableName}\` (
+  \`id\` ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+  \`username\`  text,
+  \`email\`  text,
+  \`provider\`  text,
+  \`role\`  text,
+  ${Model.client === 'pg' ? '`resetPasswordToken`' : '`resetPasswordToken`'} text,
+  \`password\`  text,
+  \`updated_at\`  ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+  \`created_at\`  ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
 );
 
 2️⃣  RESTART YOUR SERVER
@@ -318,7 +318,7 @@ CREATE TABLE "${tableName}" (
                 description.type = 'text';
               }
 
-              commands += `\r\nALTER TABLE "${tableName}" ADD ${Model.client === 'pg' ? `"${attribute}"` : `${attribute}`} ${description.type};`;
+              commands += `\r\nALTER TABLE \`${tableName}\` ADD ${Model.client === 'pg' ? `"${attribute}"` : `${attribute}`} ${description.type};`;
             }
 
             resolve();
