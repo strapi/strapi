@@ -9,11 +9,14 @@ const logger = require('strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
   const Mongoose = require(path.resolve(`${scope.rootPath}/node_modules/mongoose`));
-
+  
+  const { username, password } = scope.database.settings
   const connectOptions = {}
-  if (scope.database.settings.username && scope.database.settings.password) {
-    connectOptions.user = scope.database.settings.username
-    connectOptions.pass = scope.database.settings.password
+  if (username) {
+    connectOptions.user = username
+    if (password) {
+      connectOptions.pass = password
+    }
   }
   Mongoose.connect(`mongodb://${scope.database.settings.host}:${scope.database.settings.port}/${scope.database.settings.database}`, connectOptions, function (err) {
     if (err) {
