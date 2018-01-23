@@ -5,12 +5,25 @@
 .icoContainer {
   width: 70px;
   height: 36px;
+  position: relative;
   margin: auto 0;
-  line-height: 36px;
   text-align: center;
   border: 1px solid rgba(28,93,231,0.1);
   border-radius: 3px;
   font-size: 20px;
+
+  > img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
 }
 
 .pluginContent {
