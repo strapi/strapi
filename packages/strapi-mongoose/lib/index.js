@@ -46,9 +46,9 @@ module.exports = function (strapi) {
         const connectOptions = {}
         if (!_.isEmpty(username)) {
           connectOptions.user = username
-        }
-        if (!_.isEmpty(password)) {
-          connectOptions.pass = password
+          if (!_.isEmpty(password)) {
+            connectOptions.pass = password
+          }
         }
         instance.connect(`mongodb://${host}:${port}/${database}`, connectOptions);
 
