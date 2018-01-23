@@ -43,14 +43,14 @@ module.exports = function (strapi) {
         const { host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
-        if (_.isEmpty(username) || _.isEmpty(password)) {
-          instance.connect(`mongodb://${host}:${port}/${database}`);
-        } else {
-          instance.connect(`mongodb://${host}:${port}/${database}`, {
-            user: username,
-            pass: password
-          });
+        const connectOptions = {}
+        if (!_.isEmpty(username)) {
+          connectOptions.user = username
         }
+        if (!_.isEmpty(password)) {
+          connectOptions.pass = password
+        }
+        instance.connect(`mongodb://${host}:${port}/${database}`, connectOptions);
 
         // Handle error
         instance.connection.on('error', error => {
