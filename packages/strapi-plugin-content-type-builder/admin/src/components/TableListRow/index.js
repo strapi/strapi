@@ -53,7 +53,11 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
       <ListRow onClick={this.handleGoTo}>
         <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
         <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)} &nbsp;{pluginSource}</span> {temporary}</div>
-        <div className="col-md-5 text-center">{description}</div>
+        <div className={`col-md-5 text-center ${styles.descriptionContainer}`}>
+          <div>
+            {description}
+          </div>
+        </div>
         <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
         <div className="col-md-1">
           <IcoContainer icons={icons} />
