@@ -116,7 +116,6 @@ export class HomePage extends React.Component {
       <EditForm onChange={this.props.onChange} values={this.props.modifiedData} /> : (
         <List
           data={this.props.data}
-          deleteActionSucceeded={this.props.deleteActionSucceeded}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
@@ -161,7 +160,6 @@ HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   data: PropTypes.array.isRequired,
-  deleteActionSucceeded: PropTypes.bool.isRequired,
   deleteData: PropTypes.func.isRequired,
   fetchData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,

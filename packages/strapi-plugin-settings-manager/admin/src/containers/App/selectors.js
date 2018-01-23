@@ -37,5 +37,10 @@ const makeSelectLoading = () => createSelector(
   (globalSate) => globalSate.get('loading'),
 );
 
-export { selectLocationState, makeSelectSections, makeSelectEnvironments, makeSelectLoading };
+export {
+  makeSelectEnvironments,
+  makeSelectLoading,
+  makeSelectSections,
+  selectLocationState,
+};
 export default selectGlobalDomain;

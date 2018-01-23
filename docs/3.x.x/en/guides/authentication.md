@@ -11,7 +11,7 @@ $.ajax({
   type: 'POST',
   url: 'http://localhost:1337/auth/local/register',
   data: {
-    username: 'Strapi user'
+    username: 'Strapi user',
     email: 'user@strapi.io',
     password: 'strapiPassword'
   },
@@ -117,7 +117,7 @@ $.ajax({
   type: 'POST',
   url: 'http://localhost:1337/auth/forgot-password',
   data: {
-    email: 'user@strapi.io'
+    email: 'user@strapi.io',
     url: 'http://mon-site.com/rest-password'
   },
   done: function() {
@@ -144,8 +144,8 @@ $.ajax({
   type: 'POST',
   url: 'http://localhost:1337/auth/reset-password',
   data: {
-    code: 'privateCode'
-    password: 'myNewPassword'
+    code: 'privateCode',
+    password: 'myNewPassword',
     passwordConfirmation: 'myNewPassword'
   },
   done: function() {

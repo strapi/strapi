@@ -17,7 +17,6 @@ import {
 const initialState = fromJS({
   data: List([]),
   dataToDelete: Map({}),
-  deleteActionSucceeded: false,
   deleteEndPoint: '',
   initialData: Map({}),
   modifiedData: Map({}),
@@ -34,8 +33,7 @@ function homePageReducer(state = initialState, action) {
       return state
         .update('data', list => list.splice(action.indexDataToDelete, 1))
         .set('deleteEndPoint', '')
-        .set('dataToDelete', Map({}))
-        .set('deleteActionSucceeded', !state.get('deleteActionSucceeded'));
+        .set('dataToDelete', Map({}));
     case FETCH_DATA_SUCCEEDED:
       return state.set('data', List(action.data));
     case ON_CHANGE:

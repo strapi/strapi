@@ -60,6 +60,9 @@
 
   "components.ErrorBoundary.title": "Something wen't wrong...",
 
+  "components.OverlayBlocker.title": "Waiting for restart...",
+  "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
+
   "components.ProductionBlocker.header": "This plugin is only available in development.",
   "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments.",
 
