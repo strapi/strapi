@@ -27,6 +27,8 @@ import {
   SET_ERRORS,
   SET_LOADER,
   UNSET_LOADER,
+  FREEZE_APP,
+  UNFREEZE_APP,
 } from './constants';
 
 /* eslint-disable new-cap */
@@ -47,6 +49,7 @@ const initialState = fromJS({
   formErrors: [],
   error: false,
   showLoader: false,
+  blockApp: false,
 });
 /* eslint-disable no-case-declarations */
 
@@ -149,6 +152,10 @@ function homePageReducer(state = initialState, action) {
       return state.set('showLoader', true);
     case UNSET_LOADER:
       return state.set('showLoader', false);
+    case FREEZE_APP:
+      return state.set('blockApp', true);
+    case UNFREEZE_APP:
+      return state.set('blockApp', false);
     default:
       return state;
   }

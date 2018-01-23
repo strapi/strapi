@@ -373,12 +373,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 
-// Actions required for disabling and enabling the OverlayBlocker
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-
 // Design
 import Button from 'components/Button';
 import OverlayBlocker from 'components/OverlayBlocker';
@@ -403,12 +397,12 @@ import makeSelectFooPage from './selectors';
 export class FooPage extends React.Component {
   componentDidMount() {
     // Disable the AdminPage OverlayBlocker in order to give it a custom design (children)
-    this.props.disableGlobalOverlayBlocker();
+    this.context.disableGlobalOverlayBlocker();
   }
 
   componentWillUnmount() {
     // Enable the AdminPage OverlayBlocker so it is displayed when the server is restarting in the other plugins
-    this.props.enableGlobalOverlayBlocker();
+    this.context.enableGlobalOverlayBlocker();
   }
 
   render() {
@@ -425,9 +419,13 @@ export class FooPage extends React.Component {
   }
 }
 
-FooPage.propTypes = {
+// Use context to disable or enable the OverlayBlocker
+FooPage.contextTypes = {
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+};
+
+FooPage.propTypes = {
   onButtonClick: PropTypes.func.isRequired,
   showOverlayBlocker: PropTypes.bool.isRequired,
 };
@@ -437,8 +435,6 @@ const mapStateToProps = makeSelectFooPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      disableGlobalOverlayBlocker,
-      enableGlobalOverlayBlocker,
       onButtonClick,
     },
     dispatch,

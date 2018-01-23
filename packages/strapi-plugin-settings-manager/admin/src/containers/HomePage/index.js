@@ -39,6 +39,8 @@ import RowDatabase from 'components/RowDatabase';
 import SelectOptionLanguage from 'components/SelectOptionLanguage';
 import RowLanguage from 'components/RowLanguage';
 import PluginLeftMenu from 'components/PluginLeftMenu';
+import OverlayBlocker from 'components/OverlayBlocker';
+import DownloadDb from 'components/DownloadDb';
 
 // App selectors
 import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
@@ -103,11 +105,21 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     } else {
       router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug']) || 'application'}`);
     }
+
+    if (this.props.match.params.slug === 'databases') {
+      this.context.disableGlobalOverlayBlocker();
+    }
   }
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
     if (this.props.match.params.slug !== nextProps.match.params.slug && nextProps.match.params.slug) {
+      if (nextProps.match.params.slug === 'databases') {
+        this.context.disableGlobalOverlayBlocker();
+      } else {
+        this.context.enableGlobalOverlayBlocker();
+      }
+
       if (nextProps.match.params.slug) {
         // get data from api if params slug updated
         this.handleFetch(nextProps);
@@ -131,9 +143,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
-  // componentWillUnmount() {
-  //
-  // }
+  componentWillUnmount() {
+    this.context.enableGlobalOverlayBlocker();
+  }
 
   /* eslint-disable react/sort-comp */
   /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -295,8 +307,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = (dbName) => {
+    this.context.enableGlobalOverlayBlocker();
     strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
-    this.props.databaseDelete(dbName, this.props.match.params.env);
+    this.props.databaseDelete(dbName, this.props.match.params.env, this.context);
   }
 
   // function used for react-select option
@@ -489,6 +502,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   render() {
     return (
       <div className="container-fluid">
+        <OverlayBlocker isOpen={this.props.home.blockApp}>
+          <DownloadDb />
+        </OverlayBlocker>
         <div className="row">
           <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.env} />
           <div className={`${styles.home} col-md-9`}>
@@ -540,6 +556,11 @@ function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
+
+HomePage.contextTypes = {
+  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,

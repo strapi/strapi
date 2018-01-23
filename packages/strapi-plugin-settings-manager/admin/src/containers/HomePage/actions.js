@@ -36,6 +36,8 @@ import {
   SET_ERRORS,
   SET_LOADER,
   UNSET_LOADER,
+  FREEZE_APP,
+  UNFREEZE_APP,
 } from './constants';
 
 export function defaultAction() {
@@ -251,11 +253,12 @@ export function databaseActionError(formErrors) {
   };
 }
 
-export function databaseDelete(databaseToDelete, endPoint) {
+export function databaseDelete(databaseToDelete, endPoint, context) {
   return {
     type: DATABASE_DELETE,
     databaseToDelete,
     endPoint,
+    context,
   };
 }
 
@@ -313,5 +316,17 @@ export function setLoader() {
 export function unsetLoader() {
   return {
     type: UNSET_LOADER,
+  };
+}
+
+export function freezeApp() {
+  return {
+    type: FREEZE_APP,
+  };
+}
+
+export function unfreezeApp() {
+  return {
+    type: UNFREEZE_APP,
   };
 }

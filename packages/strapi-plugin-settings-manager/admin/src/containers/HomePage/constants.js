@@ -33,3 +33,5 @@ export const EMPTY_DB_MODIFIED_DATA = 'SettingsManager/HomePage/EMPTY_DB_MODIFIE
 export const SET_ERRORS = 'SettingsManager/HomePage/SET_ERRORS';
 export const SET_LOADER = 'SettingsManager/HomePage/SET_LOADER';
 export const UNSET_LOADER = 'SettingsManager/HomePage/UNSET_LOADER';
+export const FREEZE_APP = 'SettingsManager/HomePage/FREEZE_APP';
+export const UNFREEZE_APP = 'SettingsManager/HomePage/UNFREEZE_APP';

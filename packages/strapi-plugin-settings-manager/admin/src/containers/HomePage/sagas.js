@@ -23,6 +23,7 @@ import {
   configFetchSucceded,
   databasesFetchSucceeded,
   editSettingsSucceeded,
+  freezeApp,
   languagesFetchSucceeded,
   languageActionError,
   languageActionSucceeded,
@@ -31,12 +32,14 @@ import {
   databaseActionError,
   unsetLoader,
   setLoader,
+  unfreezeApp,
 } from './actions';
 
 /* eslint-disable no-template-curly-in-string */
 
 export function* editDatabase(action) {
   try {
+    yield put(freezeApp());
     const body = {};
 
     forEach(action.data, (value, key) => {
@@ -52,10 +55,12 @@ export function* editDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      yield put(unfreezeApp());
       strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
       yield put(databaseActionSucceeded());
     }
   } catch(error) {
+    yield put(unfreezeApp());
     const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
 
     yield put(databaseActionError(formErrors));
@@ -71,9 +76,11 @@ export function* deleteDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      yield call(action.context.disableGlobalOverlayBlocker);
       strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
     }
   } catch(error) {
+    yield call(action.context.disableGlobalOverlayBlocker);
     yield put(databaseActionError([]));
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -172,6 +179,7 @@ export function* postLanguage() {
 
 export function* postDatabase(action) {
   try {
+    yield put(freezeApp());
     const body = {};
 
     forEach(action.data, (value, key) => {
@@ -186,10 +194,12 @@ export function* postDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      yield put(unfreezeApp());
       yield put(databaseActionSucceeded());
       strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
     }
   } catch(error) {
+    yield put(unfreezeApp());
     const formErrors = map(error.response.payload.message, (err) => {
       const target = err.target ? replace(err.target, err.target.split('.')[2], '${name}') : 'database.connections.${name}.name';
       return (
