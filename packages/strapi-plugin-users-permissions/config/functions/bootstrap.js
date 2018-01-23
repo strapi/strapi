@@ -55,17 +55,18 @@ module.exports = cb => {
           icon: 'github',
           key: '',
           secret: '',
-          callback: '/auth/github/callback'
+          redirect_uri: '/auth/google/callback',
+          scope: [
+            'user',
+            'user:email'
+          ]
         },
-        linkedin2: {
+        twitter: {
           enabled: false,
           icon: 'linkedin',
           key: '',
           secret: '',
-          callback: '/auth/linkedin2/callback',
-          custom_params: {
-            'state': ''
-          }
+          callback: '/auth/twitter/callback'
         }
       };
 
