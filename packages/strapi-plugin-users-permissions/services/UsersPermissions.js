@@ -12,32 +12,71 @@ const request = require('request');
  */
 
 module.exports = {
-  createRole: (role) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles;
-    const highestId = Math.max(...Object.keys(appRoles).map(Number)) + 1;
-    const newRole = _.pick(role, ['name', 'description', 'permissions']);
+  createRole: async (params) => {
+    if (!strapi.plugins['content-manager']) {
+      return new Error('This feature requires to install the Content Manager plugin');
+    }
 
-    _.set(appRoles, highestId.toString(), newRole);
+    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions']));
 
-    _.forEach(role.users, (user) => {
-      module.exports.updateUserRole(user, highestId);
-    });
+    const arrayOfPromises = Object.keys(params.permissions).reduce((acc, type) => {
+      Object.keys(params.permissions[type].controllers).forEach(controller => {
+        Object.keys(params.permissions[type].controllers[controller]).forEach(action => {
+          acc.push(strapi.query('permission', 'users-permissions').addPermission({
+            role: role._id || role.id,
+            type,
+            controller,
+            action,
+            ...params.permissions[type].controllers[controller][action]
+          }));
+        });
+      });
 
-    module.exports.writePermissions(appRoles);
+      return acc;
+    }, []);
+
+    // Use Content Manager business logic to handle relation.
+    arrayOfPromises.push(strapi.plugins['content-manager'].services['contentmanager'].edit({
+      id: role._id || role.id,
+      model: 'role'
+    }, {
+      users: params.users
+    }, 'users-permissions'));
+
+    return await Promise.all(arrayOfPromises);
   },
 
-  deleteRole: async (roleId) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles
+  deleteRole: async (roleID, guestID) => {
+    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
-    module.exports.writePermissions(_.omit(appRoles, [roleId]));
+    if (!role) {
+      throw new Error('Cannot found this role');
+    }
 
-    const users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
-      role: roleId
+    // Move users to guest role.
+    const arrayOfPromises = role.users.reduce((acc, user) => {
+      acc.push(strapi.query('user', 'users-permissions').update({
+        id: user._id || user.id
+      }, {
+        role: guestID
+      }))
+
+      return acc;
+    }, []);
+
+    // Remove permissions related to this role.
+    role.permissions.forEach(permission => {
+      arrayOfPromises.push(strapi.query('permission', 'users-permissions').delete({
+        id: permission._id || permission.id
+      }));
+    })
+
+    // Delete the role.
+    arrayOfPromises.push(strapi.query('role', 'users-permissions').delete({
+      id: roleID
     }));
 
-    _.forEach(users, (user) => {
-      module.exports.updateUserRole(user, '1');
-    });
+    return await Promise.all(arrayOfPromises);
   },
 
   getPlugins: (plugin, lang = 'en') => {
@@ -100,8 +139,8 @@ module.exports = {
     return _.merge(permissions, pluginsPermissions);;
   },
 
-  getRole: async (roleId, plugins) => {
-    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleId }, ['users', 'permissions']);
+  getRole: async (roleID, plugins) => {
+    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
       throw new Error('Cannot found this role');
@@ -244,12 +283,12 @@ module.exports = {
 
     // Create two first default roles.
     await Promise.all([
-      strapi.query('role', 'users-permissions').createRole({
+      strapi.query('role', 'users-permissions').create({
         name: 'Administrator',
         description: 'These users have all access in the project.',
         type: 'root'
       }),
-      strapi.query('role', 'users-permissions').createRole({
+      strapi.query('role', 'users-permissions').create({
         name: 'Guest',
         description: 'Default role given to unauthenticated user.',
         type: 'guest'
@@ -260,8 +299,9 @@ module.exports = {
   },
 
   updateRole: async function (roleID, body) {
-    const [role, guest] = await Promise.all([
+    const [role, root, guest] = await Promise.all([
       this.getRole(roleID, []),
+      strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []),
       strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, [])
     ]);
 
@@ -286,21 +326,26 @@ module.exports = {
     }, []);
 
     // Add user to this role.
-    _.differenceBy(body.users, role.users, role._id ? '_id' : 'id').forEach(user => {
-      arrayOfPromises.push(this.updateUserRole(user, roleID));
-    })
+    _.differenceBy(body.users, role.users, role._id ? '_id' : 'id')
+      .filter(user => user.role !== `${root._id || root.id}`.toString())
+      .forEach(user => {
+        arrayOfPromises.push(this.updateUserRole(user, roleID));
+      })
 
     // Remove user to this role and link him to guest.
-    _.differenceBy(role.users, body.users, role._id ? '_id' : 'id').forEach(user => {
-      arrayOfPromises.push(this.updateUserRole(user, guest._id || guest.id));
-    });
+    _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
+      .filter(user => user.role !== `${root._id || root.id}`.toString())
+      .forEach(user => {
+        arrayOfPromises.push(this.updateUserRole(user, guest._id || guest.id));
+      });
 
     return Promise.all(arrayOfPromises);
   },
 
   updateUserRole: async (user, role) => {
-    strapi.query('user', 'users-permissions').update({
-      _id: user._id || user.id,
+    return strapi.query('user', 'users-permissions').update({
+      id: user._id || user.id
+    }, {
       role: role.toString()
     });
   },
@@ -309,100 +354,187 @@ module.exports = {
     const actionsPath = path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'actions.json');
 
     try {
+      // Stop auto reload.
+      strapi.reload.isReloading = false;
       // Rewrite actions.json file.
       fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
       // Set value to AST to avoid restart.
-      _.set(strapi.plugins['users-permissions'], 'config.roles', data);
+      _.set(strapi.plugins['users-permissions'], 'config.actions', data);
+      // Restart to watch files.
+      strapi.reload.isReloading = true;
     } catch(err) {
       strapi.log.error(err);
     }
   },
 
-  syncSchema: (cb) => {
-    const Model = strapi.plugins['users-permissions'].models.user;
-
-    if (Model.orm !== 'bookshelf') {
+  syncSchema: async (cb) => {
+    if (strapi.plugins['users-permissions'].models.user.orm !== 'bookshelf') {
       return cb();
     }
 
-    const tableName = Model.collectionName;
+    // Extract necessary information from plugin's models.
+    const {
+      user: { collectionName: userTableName, connection: userConnection, client: userClient },
+      role: { collectionName: roleTableName, connection: roleConnection, client: roleClient },
+      permission: { collectionName: permissionTableName, connection: permissionConnection, client: permissionClient }
+    } = strapi.plugins['users-permissions'].models;
 
-    new Promise((resolve, reject) => {
-      strapi.connections[Model.connection].schema.hasTable(tableName)
-      .then(exist => {
-        if (!exist) {
-          strapi.log.warn(`
-⚠️  TABLE \`${tableName}\` DOESN'T EXIST
+    const details = {
+      user: {
+        tableName: userTableName,
+        connection: userConnection,
+        client: userClient
+      },
+      role: {
+        tableName: roleTableName,
+        connection: roleConnection,
+        client: roleClient
+      },
+      permission: {
+        tableName: permissionTableName,
+        connection: permissionConnection,
+        client: permissionClient
+      }
+    };
 
-1️⃣  EXECUTE THE FOLLOWING SQL QUERY
+    // Check if the tables are existing.
+    const hasTables = await Promise.all(Object.keys(details).map(name =>
+      strapi.connections[details[name].connection].schema.hasTable(details[name].tableName)
+    ));
 
-CREATE TABLE "${tableName}" (
-  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+    const missingTables = [];
+    const tablesToCreate = [];
+
+    for (let index = 0; index < hasTables.length; ++index) {
+      const hasTable = hasTables[index];
+      const currentModel = Object.keys(details)[index];
+
+      if (!hasTable) {
+        missingTables.push(`
+⚠️  TABLE \`${details[currentModel].tableName}\` DOESN'T EXIST`);
+
+        switch (currentModel) {
+          case 'user':
+            tablesToCreate.push(`
+
+CREATE TABLE \`${details[currentModel].tableName}\` (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   username text,
   email text,
   provider text,
   role text,
-  ${Model.client === 'pg' ? '"resetPasswordToken"' : 'resetPasswordToken'} text,
+  ${details[currentModel].client === 'pg' ? '\`resetPasswordToken\`' : 'resetPasswordToken'} text,
   password text,
-  updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-);
+  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+);`);
+            break;
+          case 'role':
+            tablesToCreate.push(`
 
-2️⃣  RESTART YOUR SERVER
-          `);
+CREATE TABLE \`${details[currentModel].tableName}\` (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+  name text,
+  description text,
+  type text
+);`);
+            break;
+          case 'permission':
+            tablesToCreate.push(`
 
-          strapi.stop();
+CREATE TABLE \`${details[currentModel].tableName}\` (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+  type text,
+  controller text,
+  action text,
+  enabled boolean,
+  policy text
+);`);
+            break;
+          default:
+
         }
+      }
+    }
 
-        resolve();
-      });
-    })
-    .then(() => {
-      const attributes = _.cloneDeep(Model.attributes);
-      attributes.id = {
-        type: Model.client === 'pg' ? 'integer' : 'int'
+    if (!_.isEmpty(tablesToCreate)) {
+      tablesToCreate.unshift(`
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERY`);
+
+      tablesToCreate.push(`
+
+2️⃣  RESTART YOUR SERVER`)
+      strapi.log.warn(missingTables.concat(tablesToCreate).join(''));
+
+      // Stop the server.
+      strapi.stop();
+    }
+
+    const missingColumns = [];
+    const tablesToAlter = [];
+
+    for (let index = 0; index < hasTables.length; ++index) {
+      const currentModel = Object.keys(details)[index];
+      const attributes = {
+        id: {
+          type: details[currentModel].client === 'pg' ? 'integer' : 'int'
+        },
+        ..._.cloneDeep(strapi.plugins['users-permissions'].models[currentModel].attributes)
       };
-      attributes.updated_at = attributes.created_at = {
-        type: Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'
-      };
 
-      let commands = '';
-
-      const columnExist = (description, attribute) => {
-        return new Promise((resolve, reject) => {
-          strapi.connections[Model.connection].schema.hasColumn(tableName, attribute)
-          .then(exist => {
-            if (!exist) {
-              if (description.type === 'string') {
-                description.type = 'text';
-              }
-
-              commands += `\r\nALTER TABLE "${tableName}" ADD ${Model.client === 'pg' ? `"${attribute}"` : `${attribute}`} ${description.type};`;
-            }
-
-            resolve();
-          });
+      // Add created_at and updated_at attributes for the model User.
+      if (currentModel === 'user') {
+        Object.assign(attributes, {
+          created_at: {
+            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
+          },
+          updated_at: {
+            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
+          }
         });
-      };
+      }
 
-      const testsColumns = Object.entries(attributes).map(([attribute, description]) => columnExist(description, attribute));
-      Promise.all(testsColumns)
-      .then(() => {
-        if (!_.isEmpty(commands)) {
-          strapi.log.warn(`
-⚠️  TABLE \`${tableName}\` HAS MISSING COLUMNS
+      const columns = Object.keys(attributes);
 
-1️⃣  EXECUTE THE FOLLOWING SQL QUERIES
-${commands}
+      // Check if there are the required attributes.
+      const hasColumns = await Promise.all(columns.map(attribute =>
+        strapi.connections[details[currentModel].connection].schema.hasColumn(details[currentModel].tableName, attribute)
+      ));
 
-2️⃣  RESTART YOUR SERVER
-          `);
+      hasColumns.forEach((hasColumn, index) => {
+        const currentColumn = columns[index];
+        const attribute = attributes[currentColumn];
 
-          strapi.stop();
+        if (!hasColumn && !attribute.collection) {
+          const currentType = attribute.type || attribute.model;
+          const type = currentType === 'string' ? 'text' : currentType;
+
+          missingColumns.push(`
+⚠️  TABLE \`${details[currentModel].tableName}\` HAS MISSING COLUMNS`);
+
+          tablesToAlter.push(`
+
+ALTER TABLE \`${details[currentModel].tableName}\` ADD ${details[currentModel].client === 'pg' ? `\`${currentColumn}\`` : `${currentColumn}`} ${type};`);
         }
-
-        cb();
       });
-    });
+    }
+
+    if (!_.isEmpty(tablesToAlter)) {
+      tablesToAlter.unshift(`
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERIES`);
+
+      tablesToAlter.push(`
+
+2️⃣  RESTART YOUR SERVER`)
+      strapi.log.warn(missingColumns.concat(tablesToAlter).join(''));
+
+      // Stop the server.
+      return strapi.stop();
+    }
+
+    cb();
   }
 };

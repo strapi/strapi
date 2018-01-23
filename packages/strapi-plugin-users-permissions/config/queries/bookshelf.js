@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params) {
-    return this.query(function(qb) {
+    const records = this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
         qb.where(key, where[0].symbol, where[0].value);
       });
@@ -17,6 +17,8 @@ module.exports = {
     }).fetchAll({
       withRelated: _.keys(_.groupBy(_.reject(this.associations, {autoPopulate: false}), 'alias'))
     });
+
+    return records ? records.toJSON() : records;
   },
 
   count: async function (params) {
@@ -60,15 +62,20 @@ module.exports = {
     });
   },
 
-  update: async function (params) {
-    if (_.get(params, '_id')) {
-      params.id = params._id;
-      delete params._id;
+  update: async function (search, params = {}) {
+    if (_.isEmpty(params)) {
+      params = search;
     }
 
-    return this.forge({
-      [this.primaryKey]: params[this.primaryKey]
-    })
+    const primaryKey = search[this.primaryKey] || search.id;
+
+    if (primaryKey) {
+      search = {
+        [this.primaryKey]: primaryKey
+      }
+    }
+
+    return this.forge(search)
     .save(params, {
       patch: true
     })
@@ -98,15 +105,17 @@ module.exports = {
       .fetchAll();
   },
 
-  countByRoles: async function () {
-    const result = await strapi.connections[this.connection].raw(`SELECT COUNT("id") AS total, "role" FROM "${strapi.plugins['users-permissions'].models.user.collectionName}" GROUP BY "role";`);
-    return result.rows.reduce((acc, current) => {
-      acc.push({
-        _id: parseFloat(current.role),
-        total: parseFloat(current.total)
-      });
+  addPermission: async function (params) {
+    return this
+      .forge()
+      .save(params);
+  },
 
-      return acc;
-    }, []);
+  removePermission: async function (params) {
+    return this
+      .forge({
+        [this.primaryKey]: params[this.primaryKey] || params.id
+      })
+      .destroy();
   }
 };

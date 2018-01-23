@@ -22,6 +22,7 @@ module.exports = {
 
     try {
       await strapi.plugins['users-permissions'].services.userspermissions.createRole(ctx.request.body);
+
       ctx.send({ ok: true });
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
@@ -36,25 +37,36 @@ module.exports = {
     }
 
     // TODO handle dynamic
-    return ctx.send({ ok: true });
+    ctx.send({ ok: true });
   },
 
   deleteRole: async ctx => {
-    const { role } = ctx.params;
+    // Fetch root and guest role.
+    const [root, guest] = await Promise.all([
+      strapi.query('role', 'users-permissions').findOne({ type: 'root' }),
+      strapi.query('role', 'users-permissions').findOne({ type: 'guest' })
+    ]);
 
-    if (!role) {
+    const rootID = root.id || root._id;
+    const guestID = guest.id || guest._id;
+
+    const roleID = ctx.params.role;
+
+    if (!roleID) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
 
-    if (role === '0' || role === '1') {
+    // Prevent from removing the root role.
+    if (roleID.toString() === rootID.toString() || roleID.toString() === guestID.toString()) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
     }
 
     try {
-      await strapi.plugins['users-permissions'].services.userspermissions.deleteRole(role);
-      return ctx.send({ ok: true });
+      await strapi.plugins['users-permissions'].services.userspermissions.deleteRole(roleID, guestID);
+
+      ctx.send({ ok: true });
     } catch(err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
   },
 
@@ -63,6 +75,7 @@ module.exports = {
       const { lang } = ctx.query;
       const plugins = await strapi.plugins['users-permissions'].services.userspermissions.getPlugins(lang);
       const permissions = await strapi.plugins['users-permissions'].services.userspermissions.getActions(plugins);
+
       ctx.send({ permissions });
     } catch(err) {
       ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
@@ -70,7 +83,7 @@ module.exports = {
   },
 
   getPolicies: async (ctx) => {
-    return ctx.send({
+    ctx.send({
       policies: _.without(_.keys(strapi.plugins['users-permissions'].config.policies), 'permissions')
     });
   },
@@ -85,7 +98,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
     }
 
-    return ctx.send({ role });
+    ctx.send({ role });
   },
 
   getRoles: async (ctx) => {
@@ -125,7 +138,8 @@ module.exports = {
 
   searchUsers: async (ctx) => {
     const data = await strapi.query('user', 'users-permissions').search(ctx.params);
-    return ctx.send(data);
+
+    ctx.send(data);
   },
 
   updateRole: async function (ctx) {

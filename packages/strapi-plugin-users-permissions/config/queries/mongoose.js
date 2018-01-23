@@ -46,16 +46,16 @@ module.exports = {
     });
   },
 
-  update: async function (search, params) {
-    if (!params) {
-      search = params;
+  update: async function (search, params = {}) {
+    if (_.isEmpty(params)) {
+      params = search;
     }
 
-    const primaryKey = params[this.primaryKey] || params.id;
+    const primaryKey = search[this.primaryKey] || search.id;
 
     if (primaryKey) {
       search = {
-        [this.primaryKey]: params[this.primaryKey] || params.id
+        [this.primaryKey]: primaryKey
       }
     }
 
@@ -88,22 +88,6 @@ module.exports = {
           { email: re }
         ]
       });
-  },
-
-  countByRoles: async function () {
-    return this.aggregate([
-      {
-        $group: {
-          _id: "$role",
-          total: {$sum: 1}
-        }
-      }
-    ]);
-  },
-
-  createRole: async function (params) {
-    return this.
-      create(params);
   },
 
   addPermission: async function (params) {
