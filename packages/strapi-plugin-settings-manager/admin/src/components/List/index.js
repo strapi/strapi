@@ -54,7 +54,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.setState({ loader: true});
+    this.setState({ modal: false });
     this.props.handleListPopUpSubmit(e);
   }
 
