@@ -8,6 +8,7 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
+const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
   callback: async (ctx) => {
@@ -29,14 +30,13 @@ module.exports = {
       const query = {};
 
       // Check if the provided identifier is an email or not.
-      const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
+      const isEmail = emailRegExp.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
-      const identifier = params.identifier.toLowerCase();
       if (isEmail) {
-        query.email = identifier;
+        query.email = params.identifier.toLowerCase();
       } else {
-        query.username = identifier;
+        query.username = params.identifier;
       }
 
       // Check if the user exists.
@@ -169,7 +169,11 @@ module.exports = {
       params.role = '1';
     }
 
-    params.identifier = params.identifier.toLowerCase();
+    // Check if the provided identifier is an email or not.
+    const isEmail = emailRegExp.test(params.identifier);
+    if (isEmail) {
+      params.identifier = params.identifier.toLowerCase();
+    }
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
     try {
