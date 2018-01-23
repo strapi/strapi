@@ -158,13 +158,14 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password cannot contain more than three times the symbol `$`.');
     }
 
+    // Retrieve root role.
+    const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+
     // First, check if the user is the first one to register as admin.
-    const hasAdmin = await strapi.query('user', 'users-permissions').count(strapi.utils.models.convertParams('user', { type: 'root' }));
+    const hasAdmin = root.users.length > 0;
 
     // Check if the user is the first to register
-    const role = hasAdmin < 1 ?
-      await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []):
-      await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
 
     if (!role) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
@@ -180,7 +181,6 @@ module.exports = {
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
-
     } catch(err) {
       const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
 

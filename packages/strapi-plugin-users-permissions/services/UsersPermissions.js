@@ -17,7 +17,7 @@ module.exports = {
       return new Error('This feature requires to install the Content Manager plugin');
     }
 
-    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions']));
+    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions', 'type']));
 
     const arrayOfPromises = Object.keys(params.permissions).reduce((acc, type) => {
       Object.keys(params.permissions[type].controllers).forEach(controller => {
@@ -51,6 +51,10 @@ module.exports = {
 
     if (!role) {
       throw new Error('Cannot found this role');
+    }
+
+    if (role.type === 'root') {
+      return new Error(`You cannot delete the root admin role.`);
     }
 
     // Move users to guest role.
@@ -149,7 +153,7 @@ module.exports = {
     // Group by `type`.
     role.permissions = role.permissions.reduce((acc, permission) => {
       _.set(acc, `${permission.type}.controllers.${permission.controller}.${permission.action}`, {
-        enabled: permission.enabled,
+        enabled: _.toNumber(permission.enabled) == true,
         policy: permission.policy
       });
 
@@ -338,6 +342,7 @@ module.exports = {
       .forEach(user => {
         arrayOfPromises.push(this.updateUserRole(user, guest._id || guest.id));
       });
+
 
     return Promise.all(arrayOfPromises);
   },

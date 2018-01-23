@@ -17,11 +17,12 @@ module.exports = {
   },
 
   findOne: async function (params, populate) {
-    if (!params[this.primaryKey] && params.id) {
-      params[this.primaryKey] = params.id;
-      delete params.id;
-    } else if (params.id) {
-      delete params.id;
+    const primaryKey = params[this.primaryKey] || params.id;
+
+    if (primaryKey) {
+      params = {
+        [this.primaryKey]: primaryKey
+      }
     }
 
     return this
