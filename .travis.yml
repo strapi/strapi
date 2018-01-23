@@ -17,7 +17,7 @@ before_install:
   - rm -rf node_modules/
 
 install:
-  - npm run setup
+  - npm run setup --debug
 
 script:
   - npm run doc

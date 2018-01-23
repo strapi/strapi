@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.8.3",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -17,16 +17,15 @@
     "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
     "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
-    "pretest": "npm run lint",
+    "lint": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo Tests are not implemented.",
+    "test": "npm run lint",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "flag-icon-css": "^2.8.0",
     "react-select": "^1.0.0-rc.5",
-    "strapi-helper-plugin": "3.0.0-alpha.8"
+    "strapi-helper-plugin": "3.0.0-alpha.8.3"
   },
   "author": {
     "name": "Strapi team",
@@ -40,6 +39,10 @@
       "url": "http://strapi.io"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
   "engines": {
     "node": ">= 8.0.0",
     "npm": ">= 3.0.0"
