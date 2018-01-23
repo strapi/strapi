@@ -35,12 +35,16 @@ const adminPath = (() => {
   return path.resolve(appPath, 'admin');
 })();
 
+const rootAdminpath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+  }
+  return path.resolve(appPath, 'admin');
+})();
+
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(isSetup ?
-      path.join(__dirname, 'manifest.json'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'manifest.json')
-    ),
+    manifest: require(path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json'))
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
@@ -79,13 +83,6 @@ if (isAdmin && !isSetup) {
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`);
   }
-
-  // Note: Travis failed with it.
-  plugins.push(new CopyWebpackPlugin([{
-    from: 'config/plugins.json',
-    context: path.resolve(adminPath, 'admin', 'src'),
-    to: 'config/plugins.json'
-  }]));
 }
 
 // Build the `index.html file`
@@ -112,6 +109,11 @@ if (isAdmin) {
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js')
   }));
+  plugins.push(new CopyWebpackPlugin([{
+    from: 'config/plugins.json',
+    context: path.resolve(adminPath, 'admin', 'src'),
+    to: 'config/plugins.json'
+  }]));
 }
 
 const main = (() => {
@@ -167,30 +169,14 @@ module.exports = base({
 
   alias: {
     moment: 'moment/moment.js',
-    'babel-polyfill': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'babel-polyfill'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
-    'lodash': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+    'babel-polyfill': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
+    'lodash': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   devtool: 'cheap-module-source-map',

@@ -13,7 +13,6 @@ module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
-    const access_token = ctx.query.access_token;
 
     if (provider === 'local') {
       if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled') && !ctx.request.admin) {
@@ -66,7 +65,7 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, access_token);
+      const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
 
       if (error) {
         return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);

@@ -155,7 +155,7 @@ Here's an example of stream error handling without automatically destroying the 
 const PassThrough = require('stream').PassThrough;
 
 app.use(async ctx => {
-ctx.body = someHTTPStream.on('error', ctx.onerror).pipe(PassThrough());
+  ctx.body = someHTTPStream.on('error', ctx.onerror).pipe(PassThrough());
 });
 ```
 
@@ -192,8 +192,8 @@ Set several response header `fields` with an object:
 
 ```js
 ctx.set({
-'Etag': '1234',
-'Last-Modified': date
+  'Etag': '1234',
+  'Last-Modified': date
 });
 ```
 
@@ -247,7 +247,7 @@ let body = ctx.body;
 if (!body || body.pipe) return;
 
 if (Buffer.isBuffer(body)) body = body.toString();
-ctx.body = minify(body);
+  ctx.body = minify(body);
 });
 ```
 
@@ -468,7 +468,7 @@ Here's an example of stream error handling without automatically destroying the 
 const PassThrough = require('stream').PassThrough;
 
 app.use(async ctx => {
-ctx.body = someHTTPStream.on('error', ctx.onerror).pipe(PassThrough());
+  ctx.body = someHTTPStream.on('error', ctx.onerror).pipe(PassThrough());
 });
 ```
 
@@ -505,8 +505,8 @@ Set several response header `fields` with an object:
 
 ```js
 ctx.set({
-'Etag': '1234',
-'Last-Modified': date
+  'Etag': '1234',
+  'Last-Modified': date
 });
 ```
 
@@ -560,7 +560,7 @@ let body = ctx.body;
 if (!body || body.pipe) return;
 
 if (Buffer.isBuffer(body)) body = body.toString();
-ctx.body = minify(body);
+  ctx.body = minify(body);
 });
 ```
 
@@ -693,9 +693,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 400,
-    "error": "Bad Request",
-    "message": "invalid query"
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "invalid query"
 }
 ```
 
@@ -723,9 +723,9 @@ Generates the following response:
 
 ```json
 "payload": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "invalid password"
+  "statusCode": 401,
+  "error": "Unauthorized",
+  "message": "invalid password"
 },
 "headers" {}
 ```
@@ -738,12 +738,12 @@ Generates the following response:
 
 ```json
 "payload": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "invalid password",
-    "attributes": {
-        "error": "invalid password"
-    }
+  "statusCode": 401,
+  "error": "Unauthorized",
+  "message": "invalid password",
+  "attributes": {
+    "error": "invalid password"
+  }
 },
 "headers" {
   "WWW-Authenticate": "sample error=\"invalid password\""
@@ -758,9 +758,9 @@ Generates the following response:
 
 ```json
 "payload": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "attributes": "VGhpcyBpcyBhIHRlc3QgdG9rZW4="
+  "statusCode": 401,
+  "error": "Unauthorized",
+  "attributes": "VGhpcyBpcyBhIHRlc3QgdG9rZW4="
 },
 "headers" {
   "WWW-Authenticate": "Negotiate VGhpcyBpcyBhIHRlc3QgdG9rZW4="
@@ -775,15 +775,15 @@ Generates the following response:
 
 ```json
 "payload": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "invalid password",
-    "attributes": {
-        "error": "invalid password",
-        "ttl": 0,
-        "cache": "",
-        "foo": "bar"
-    }
+  "statusCode": 401,
+  "error": "Unauthorized",
+  "message": "invalid password",
+  "attributes": {
+    "error": "invalid password",
+    "ttl": 0,
+    "cache": "",
+    "foo": "bar"
+  }
 },
 "headers" {
   "WWW-Authenticate": "sample ttl=\"0\", cache=\"\", foo=\"bar\", error=\"invalid password\""
@@ -804,9 +804,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 402,
-    "error": "Payment Required",
-    "message": "bandwidth used"
+  "statusCode": 402,
+  "error": "Payment Required",
+  "message": "bandwidth used"
 }
 ```
 
@@ -824,9 +824,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 403,
-    "error": "Forbidden",
-    "message": "try again some time"
+  "statusCode": 403,
+  "error": "Forbidden",
+  "message": "try again some time"
 }
 ```
 
@@ -844,9 +844,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 404,
-    "error": "Not Found",
-    "message": "missing"
+  "statusCode": 404,
+  "error": "Not Found",
+  "message": "missing"
 }
 ```
 
@@ -865,9 +865,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 405,
-    "error": "Method Not Allowed",
-    "message": "that method is not allowed"
+  "statusCode": 405,
+  "error": "Method Not Allowed",
+  "message": "that method is not allowed"
 }
 ```
 
@@ -885,9 +885,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 406,
-    "error": "Not Acceptable",
-    "message": "unacceptable"
+  "statusCode": 406,
+  "error": "Not Acceptable",
+  "message": "unacceptable"
 }
 ```
 
@@ -905,9 +905,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 407,
-    "error": "Proxy Authentication Required",
-    "message": "auth missing"
+  "statusCode": 407,
+  "error": "Proxy Authentication Required",
+  "message": "auth missing"
 }
 ```
 
@@ -925,9 +925,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 408,
-    "error": "Request Time-out",
-    "message": "timed out"
+  "statusCode": 408,
+  "error": "Request Time-out",
+  "message": "timed out"
 }
 ```
 
@@ -945,9 +945,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 409,
-    "error": "Conflict",
-    "message": "there was a conflict"
+  "statusCode": 409,
+  "error": "Conflict",
+  "message": "there was a conflict"
 }
 ```
 
@@ -965,9 +965,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 410,
-    "error": "Gone",
-    "message": "it is gone"
+  "statusCode": 410,
+  "error": "Gone",
+  "message": "it is gone"
 }
 ```
 
@@ -985,9 +985,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 411,
-    "error": "Length Required",
-    "message": "length needed"
+  "statusCode": 411,
+  "error": "Length Required",
+  "message": "length needed"
 }
 ```
 
@@ -1005,8 +1005,8 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 412,
-    "error": "Precondition Failed"
+  "statusCode": 412,
+  "error": "Precondition Failed"
 }
 ```
 
@@ -1024,9 +1024,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 413,
-    "error": "Request Entity Too Large",
-    "message": "too big"
+  "statusCode": 413,
+  "error": "Request Entity Too Large",
+  "message": "too big"
 }
 ```
 
@@ -1044,9 +1044,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 414,
-    "error": "Request-URI Too Large",
-    "message": "uri is too long"
+  "statusCode": 414,
+  "error": "Request-URI Too Large",
+  "message": "uri is too long"
 }
 ```
 
@@ -1064,9 +1064,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 415,
-    "error": "Unsupported Media Type",
-    "message": "that media is not supported"
+  "statusCode": 415,
+  "error": "Unsupported Media Type",
+  "message": "that media is not supported"
 }
 ```
 
@@ -1084,8 +1084,8 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 416,
-    "error": "Requested Range Not Satisfiable"
+  "statusCode": 416,
+  "error": "Requested Range Not Satisfiable"
 }
 ```
 
@@ -1103,9 +1103,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 417,
-    "error": "Expectation Failed",
-    "message": "expected this to work"
+  "statusCode": 417,
+  "error": "Expectation Failed",
+  "message": "expected this to work"
 }
 ```
 
@@ -1123,9 +1123,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 418,
-    "error": "I'm a Teapot",
-    "message": "Sorry, no coffee..."
+  "statusCode": 418,
+  "error": "I'm a Teapot",
+  "message": "Sorry, no coffee..."
 }
 ```
 
@@ -1143,9 +1143,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 422,
-    "error": "Unprocessable Entity",
-    "message": "your data is bad and you should feel bad"
+  "statusCode": 422,
+  "error": "Unprocessable Entity",
+  "message": "your data is bad and you should feel bad"
 }
 ```
 
@@ -1163,9 +1163,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 423,
-    "error": "Locked",
-    "message": "this resource has been locked"
+  "statusCode": 423,
+  "error": "Locked",
+  "message": "this resource has been locked"
 }
 ```
 
@@ -1183,9 +1183,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 428,
-    "error": "Precondition Required",
-    "message": "you must supply an If-Match header"
+  "statusCode": 428,
+  "error": "Precondition Required",
+  "message": "you must supply an If-Match header"
 }
 ```
 
@@ -1203,9 +1203,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 429,
-    "error": "Too Many Requests",
-    "message": "you have exceeded your request limit"
+  "statusCode": 429,
+  "error": "Too Many Requests",
+  "message": "you have exceeded your request limit"
 }
 ```
 
@@ -1223,9 +1223,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 451,
-    "error": "Unavailable For Legal Reasons",
-    "message": "you are not permitted to view this resource for legal reasons"
+  "statusCode": 451,
+  "error": "Unavailable For Legal Reasons",
+  "message": "you are not permitted to view this resource for legal reasons"
 }
 ```
 
@@ -1247,9 +1247,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 500,
-    "error": "Internal Server Error",
-    "message": "An internal server error occurred"
+  "statusCode": 500,
+  "error": "Internal Server Error",
+  "message": "An internal server error occurred"
 }
 ```
 
@@ -1267,9 +1267,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 501,
-    "error": "Not Implemented",
-    "message": "method not implemented"
+  "statusCode": 501,
+  "error": "Not Implemented",
+  "message": "method not implemented"
 }
 ```
 
@@ -1287,9 +1287,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 502,
-    "error": "Bad Gateway",
-    "message": "that is a bad gateway"
+  "statusCode": 502,
+  "error": "Bad Gateway",
+  "message": "that is a bad gateway"
 }
 ```
 
@@ -1307,9 +1307,9 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 503,
-    "error": "Service Unavailable",
-    "message": "unavailable"
+  "statusCode": 503,
+  "error": "Service Unavailable",
+  "message": "unavailable"
 }
 ```
 
@@ -1327,7 +1327,7 @@ Generates the following response payload:
 
 ```json
 {
-    "statusCode": 504,
-    "error": "Gateway Time-out"
+  "statusCode": 504,
+  "error": "Gateway Time-out"
 }
 ```

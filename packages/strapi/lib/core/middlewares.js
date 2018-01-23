@@ -110,7 +110,7 @@ module.exports = function() {
             return reject(err);
           }
 
-          mountMiddlewares.call(this, files, cwd)(resolve, reject);
+          mountMiddlewares.call(this, files, cwd, true)(resolve, reject);
         }
       );
     })
@@ -154,13 +154,13 @@ const requireMiddlewares = function (files, cwd) {
     );
 };
 
-const mountMiddlewares = function (files, cwd) {
+const mountMiddlewares = function (files, cwd, isPlugin) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
         const folders = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
           .split('/');
-        const name = folders[folders.length - 2];
+        const name = isPlugin ? folders[folders.length - 2] : folders[1];
 
         this.middleware[name] = this.middleware[name] || {
           loaded: false

@@ -51,16 +51,21 @@ module.exports = cb => {
           enabled: false,
           key: '',
           secret: '',
-          callback: '/auth/github/callback'
+          redirect_uri: '/auth/google/callback',
+          scope: [
+            'user',
+            'user:email'
+          ]
         },
+<<<<<<< HEAD
         linkedin2: {
           enabled: false,
+=======
+        twitter: {
+>>>>>>> eb1d1645fd14de170fb55d6ca4c570eb9c82733c
           key: '',
           secret: '',
-          callback: '/auth/linkedin2/callback',
-          custom_params: {
-            'state': ''
-          }
+          callback: '/auth/twitter/callback'
         }
       };
 

@@ -137,8 +137,8 @@ For example "color=blue&size=small":
 
 ```js
 {
-color: 'blue',
-size: 'small'
+  color: 'blue',
+  size: 'small'
 }
 ```
 
@@ -163,8 +163,8 @@ ctx.set('ETag', '123');
 
 // cache is ok
 if (ctx.fresh) {
-ctx.status = 304;
-return;
+  ctx.status = 304;
+  return;
 }
 
 // cache is stale
@@ -238,7 +238,7 @@ only images are sent to a given route:
 if (ctx.is('image/*')) {
 // process
 } else {
-ctx.throw(415, 'images only!');
+  ctx.throw(415, 'images only!');
 }
 ```
 
@@ -300,10 +300,10 @@ or use a switch:
 
 ```js
 switch (ctx.accepts('json', 'html', 'text')) {
-case 'json': break;
-case 'html': break;
-case 'text': break;
-default: ctx.throw(406, 'json, html, or text only');
+  case 'json': break;
+  case 'html': break;
+  case 'text': break;
+  default: ctx.throw(406, 'json, html, or text only');
 }
 ```
 
