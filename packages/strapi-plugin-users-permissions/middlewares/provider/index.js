@@ -7,7 +7,6 @@
 // Public node modules.
 const _ = require('lodash');
 const Grant = require('grant-koa');
-const mount = require('koa-mount');
 
 module.exports = strapi => {
   return {
@@ -25,7 +24,7 @@ module.exports = strapi => {
 
       const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
 
-      strapi.app.use(mount(grant));
+      strapi.app.use(strapi.koaMiddlewares.compose(grant.middleware));
 
       cb();
     }

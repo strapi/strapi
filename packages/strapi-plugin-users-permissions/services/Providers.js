@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const request = require('request');
 
 // Purest strategies.
 const Purest = require('purest');
@@ -27,8 +28,8 @@ const google = new Purest({
   provider: 'google'
 });
 
-const linkedin = new Purest({
-  provider: 'linkedin'
+const twitter = new Purest({
+  provider: 'twitter'
 });
 
 /**
@@ -41,7 +42,9 @@ const linkedin = new Purest({
  * @return  {*}
  */
 
-exports.connect = (provider, access_token) => {
+exports.connect = (provider, query) => {
+  const access_token = query.access_token || query.code || query.oauth_token;
+
   return new Promise((resolve, reject) => {
     if (!access_token) {
       reject({
@@ -49,7 +52,7 @@ exports.connect = (provider, access_token) => {
       });
     } else {
       // Get the profile.
-      getProfile(provider, access_token, (err, profile) => {
+      getProfile(provider, query, (err, profile) => {
         if (err) {
           reject(err);
         } else {
@@ -95,8 +98,9 @@ exports.connect = (provider, access_token) => {
  * @param {Function} callback
  */
 
-const getProfile = (provider, access_token, callback) => {
-  let fields;
+const getProfile = (provider, query, callback) => {
+  const access_token = query.access_token || query.code || query.oauth_token;
+
   switch (provider) {
     case 'facebook':
       facebook.query().get('me?fields=name,email').auth(access_token).request((err, res, body) => {
@@ -123,28 +127,34 @@ const getProfile = (provider, access_token, callback) => {
       });
       break;
     case 'github':
-      github.query().get('user').auth(access_token).request((err, res, body) => {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, {
-            username: body.login,
-            email: body.email
-          });
+      request.post({
+        url: 'https://github.com/login/oauth/access_token',
+        form: {
+          client_id: strapi.plugins['users-permissions'].config.grant.github.key,
+          client_secret: strapi.plugins['users-permissions'].config.grant.github.secret,
+          code: access_token
         }
+      }, (err, res, body) => {
+        github.query().get('user').auth(body.split('&')[0].split('=')[1]).request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.login,
+              email: body.email
+            });
+          }
+        });
       });
       break;
-    case 'linkedin2':
-      fields = [
-        'public-profile-url', 'email-address'
-      ];
-      linkedin.query().select('people/~:(' + fields.join() + ')?format=json').auth(access_token).request((err, res, body) => {
+    case 'twitter':
+      twitter.query().get('account/verify_credentials').auth(access_token, query.access_secret).qs({screen_name: query['raw[screen_name]']}).qs({include_email: 'true'}).request((err, res, body) => {
         if (err) {
           callback(err);
         } else {
           callback(null, {
-            username: substr(body.publicProfileUrl.lastIndexOf('/') + 1),
-            email: body.emailAddress
+            username: body.screen_name,
+            email: body.email
           });
         }
       });
