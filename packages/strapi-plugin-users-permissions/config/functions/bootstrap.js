@@ -57,12 +57,8 @@ module.exports = cb => {
             'user:email'
           ]
         },
-<<<<<<< HEAD
-        linkedin2: {
-          enabled: false,
-=======
         twitter: {
->>>>>>> eb1d1645fd14de170fb55d6ca4c570eb9c82733c
+          enabled: false,
           key: '',
           secret: '',
           callback: '/auth/twitter/callback'
