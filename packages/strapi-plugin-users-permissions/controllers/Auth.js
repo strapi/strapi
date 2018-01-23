@@ -13,7 +13,6 @@ module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
-    const access_token = ctx.query.access_token;
 
     if (provider === 'local') {
       // The identifier is required.
@@ -62,9 +61,12 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const user = await strapi.api.user.services.grant.connect(provider, access_token);
+      const user = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
 
-      ctx.redirect(strapi.config.frontendUrl || strapi.config.url + '?jwt=' + strapi.api.user.services.jwt.issue(user) + '&user=' + JSON.stringify(user));
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
+      });
     }
   },
 
