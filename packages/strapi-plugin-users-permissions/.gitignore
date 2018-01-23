@@ -5,6 +5,7 @@ node_modules
 stats.json
 roles.json
 jwt.json
+grant.json
 
 # Cruft
 .DS_Store

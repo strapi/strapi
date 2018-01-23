@@ -1,6 +1,6 @@
 {
   "session": {
-    "enabled": false,
+    "enabled": true,
     "client": "cookie",
     "key": "strapi.sid",
     "prefix": "strapi:sess:",
