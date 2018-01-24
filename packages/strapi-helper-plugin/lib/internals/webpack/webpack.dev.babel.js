@@ -15,6 +15,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
+const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const appPath = (() => {
   if (process.env.APP_PATH) {
     return process.env.APP_PATH;
@@ -22,7 +23,13 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+
+const rootAdminpath = (() => {
+  if (isSetup) {
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+  }
+  return path.resolve(appPath, 'admin');
+})();
 
 // Load plugins into the same build in development mode.
 const plugins = {
@@ -117,30 +124,14 @@ module.exports = require('./webpack.base.babel')({
   ],
   alias: {
     moment: 'moment/moment.js',
-    'babel-polyfill': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'babel-polyfill'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
-    'lodash': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'lodash'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'immutable'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-intl'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-dom'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'react-transition-group'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': isSetup ?
-      path.resolve(__dirname, '..', '..', '..', 'node_modules', 'reactstrap'):
-      path.resolve(appPath, 'admin', 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+    'babel-polyfill': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
+    'lodash': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    'immutable': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
+    'react-intl': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
+    'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
+    'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
+    'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
   },
 
   // Emit a source map for easier debugging

@@ -17,7 +17,13 @@ import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
 
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
-import { selectHasUserPlugin, selectPlugins } from 'containers/App/selectors';
+import {
+  makeSelectBlockApp,
+  makeSelectShowGlobalAppBlocker,
+  selectHasUserPlugin,
+  selectPlugins,
+} from 'containers/App/selectors';
+
 import { hideNotification } from 'containers/NotificationProvider/actions';
 
 // Design
@@ -30,6 +36,7 @@ import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage';
 import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage';
+import OverlayBlocker from 'components/OverlayBlocker';
 import PluginPage from 'containers/PluginPage';
 
 import auth from 'utils/auth';
@@ -130,6 +137,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
             </Switch>
           </Content>
         </div>
+        <OverlayBlocker isOpen={this.props.blockApp && this.props.showGlobalAppBlocker} />
       </div>
     );
   }
@@ -149,17 +157,21 @@ AdminPage.defaultProps = {
 };
 
 AdminPage.propTypes = {
+  blockApp: PropTypes.bool.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
+  showGlobalAppBlocker: PropTypes.bool.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
+  blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
+  showGlobalAppBlocker: makeSelectShowGlobalAppBlocker(),
 });
 
 function mapDispatchToProps(dispatch) {

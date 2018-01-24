@@ -8,12 +8,12 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
+const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
-    const access_token = ctx.query.access_token;
 
     if (provider === 'local') {
       // The identifier is required.
@@ -29,11 +29,11 @@ module.exports = {
       const query = {};
 
       // Check if the provided identifier is an email or not.
-      const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(params.identifier);
+      const isEmail = emailRegExp.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
       if (isEmail) {
-        query.email = params.identifier;
+        query.email = params.identifier.toLowerCase();
       } else {
         query.username = params.identifier;
       }
@@ -66,9 +66,12 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const user = await strapi.api.user.services.grant.connect(provider, access_token);
+      const user = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
 
-      ctx.redirect(strapi.config.frontendUrl || strapi.config.url + '?jwt=' + strapi.api.user.services.jwt.issue(user) + '&user=' + JSON.stringify(user));
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
+      });
     }
   },
 
@@ -173,6 +176,13 @@ module.exports = {
 
     if (!role) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
+    }
+
+    // Check if the provided identifier is an email or not.
+    const isEmail = emailRegExp.test(params.identifier);
+
+    if (isEmail) {
+      params.identifier = params.identifier.toLowerCase();
     }
 
     params.role = role._id || role.id;

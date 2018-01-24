@@ -26,8 +26,7 @@
     "password": {
       "type": "password",
       "minLength": 6,
-      "configurable": false,
-      "required": true
+      "configurable": false
     },
     "resetPasswordToken": {
       "type": "string",

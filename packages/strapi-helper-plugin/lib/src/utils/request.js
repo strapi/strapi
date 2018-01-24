@@ -1,5 +1,6 @@
 import 'whatwg-fetch';
 import auth from 'utils/auth';
+
 /**
  * Parses the JSON returned by a network request
  *
@@ -86,6 +87,8 @@ function serverRestartWatcher(response) {
       }
     })
       .then(() => {
+        // Hide the global OverlayBlocker
+        strapi.unlockApp();
         resolve(response);
       })
       .catch(err => {
@@ -141,6 +144,8 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
     .then(parseJSON)
     .then((response) => {
       if (shouldWatchServerRestart) {
+        // Display the global OverlayBlocker
+        strapi.lockApp();
         return serverRestartWatcher(response);
       }
 

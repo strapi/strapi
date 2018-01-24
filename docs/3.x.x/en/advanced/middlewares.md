@@ -176,7 +176,7 @@ The `gzip` middleware will be loaded after the `p3p` middleware. All the others 
       ],
       "order": [],
       "after": [
-        "parser"
+        "parser",
         "router"
       ]
     }
@@ -216,7 +216,7 @@ We assume that we set the `./config/middleware.json` file like this:
         "gzip"
       ],
       "after": [
-        "parser"
+        "parser",
         "router"
       ]
     }
