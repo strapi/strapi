@@ -79,7 +79,8 @@ exports.connect = (provider, query) => {
               if (!user || _.get(user, 'provider') !== provider) {
                 // Create the new user.
                 const params = _.assign(profile, {
-                  provider: provider
+                  provider: provider,
+                  role: '1'
                 });
 
                 strapi.query('user', 'users-permissions').create(params)
