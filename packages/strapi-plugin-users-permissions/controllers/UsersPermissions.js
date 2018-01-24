@@ -20,14 +20,10 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
     try {
       await strapi.plugins['users-permissions'].services.userspermissions.createRole(ctx.request.body);
 
       ctx.send({ ok: true });
-
-      strapi.reload();
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
