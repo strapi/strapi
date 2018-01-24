@@ -40,12 +40,10 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: cb => {
+    initialize: async cb => {
       const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-bookshelf' });
 
-      const done = _.after(_.size(connections), cb);
-
-      _.forEach(connections, (connection, connectionName) => {
+      await _.forEach(connections, (connection, connectionName) => {
         // Apply defaults
         _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
 
@@ -68,15 +66,6 @@ module.exports = function(strapi) {
         if (_.get(connection, 'options.plugins', true) !== false) {
           ORM.plugin('visibility');
           ORM.plugin('pagination');
-        }
-
-        // Select models concerned by this connection
-        const models = _.pickBy(strapi.models, { connection: connectionName });
-        // Will call the done() method when every models will be loaded.
-        const loadedHook = _.after(_.size(models), done);
-        
-        if (_.isEmpty(models)) {
-          done();
         }
 
         const mountModels = (models, target, plugin = false) => {
@@ -209,7 +198,6 @@ module.exports = function(strapi) {
                 // Push attributes to be aware of model schema.
                 target[model]._attributes = definition.attributes;
 
-                loadedHook();
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -399,6 +387,8 @@ module.exports = function(strapi) {
           mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
         });
       });
+
+      cb();
     },
 
     getQueryParams: (value, type, key) => {
