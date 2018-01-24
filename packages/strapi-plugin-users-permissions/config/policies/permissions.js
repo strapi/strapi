@@ -41,7 +41,7 @@ module.exports = async (ctx, next) => {
 
   // Execute the policies.
   if (permission.policy) {
-    await strapi.plugins['users-permissions'].config.policies[permission.policy](ctx, next);
+    return await strapi.plugins['users-permissions'].config.policies[permission.policy](ctx, next);
   }
 
   // Execute the action.
