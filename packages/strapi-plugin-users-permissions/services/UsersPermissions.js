@@ -241,7 +241,8 @@ module.exports = {
         const isNewPassword = obj.action === 'changePassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe;
+        const isReload = obj.action === 'autoReload';
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload;
 
         return Object.assign(obj, { enabled, policy: '' });
       };
