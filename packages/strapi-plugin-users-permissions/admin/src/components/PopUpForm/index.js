@@ -33,6 +33,20 @@ import styles from './styles.scss';
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
 
+  getRedirectURIProviderConf = () => {
+    switch (this.props.dataToEdit) {
+      case 'facebook':
+        return `${strapi.backendURL}/connect/facebook/callback`;
+      case 'github':
+        return get(this.props.values, 'redirect_uri', '');
+      default: {
+        const value = get(this.props.values, 'callback', '');
+
+        return startsWith(value, 'http') ? value : `${strapi.backendURL}${value}`;
+      }
+    }
+  }
+
   generateRedirectURL = (url) => {
     return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing ? url : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
   }
@@ -97,7 +111,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               didCheckErrors={this.props.didCheckErrors}
               errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
               key={value}
-              label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') ? `${dataToEdit}.callback` : value}.label`}
+              label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') || includes(value, 'redirect_uri') ? 'redirectURL.front-end' : value}.label`}
               name={`${dataToEdit}.${value}`}
               onFocus={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleFocus : () => {}}
               onBlur={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleBlur : false}
@@ -107,6 +121,18 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               validations={{ required: true }}
             />
           ))}
+          { dataToEdit !== 'email' ? (
+            <Input
+              customBootstrapClass="col-md-12"
+              disabled
+              label={`users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL`}
+              name="noName"
+              type="text"
+              onChange={() => {}}
+              value={this.getRedirectURIProviderConf()}
+              validations={{}}
+            />
+          ) : ''}
         </div>
       );
     }

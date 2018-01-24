@@ -156,11 +156,16 @@
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
-  "PopUpForm.Providers.facebook.callback.label": "The redirect URL to add in your  Facebook application configurations",
-  "PopUpForm.Providers.google.callback.label": "The redirect URL to add in your  Google application configurations",
-  "PopUpForm.Providers.redirect_uri.label": "The redirect URL to add in your  GitHub application configurations",
-  "PopUpForm.Providers.linkedin2.callback.label": "The redirect URL to add in your  Linkedin application configurations",
-  "PopUpForm.Providers.twitter.callback.label": "The redirect URL to add in your  Twitter application configurations",
+  "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
+
+  
+
+  "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your  Facebook application configurations",
+  "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your  Google application configurations",
+  "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your  GitHub application configurations",
+  "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your  Linkedin application configurations",
+  "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your  Twitter application configurations",
+
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Email.email_templates.inputDescription": "Don't know to set variables",
   "PopUpForm.Email.link.documentation": "check out our documentation"
