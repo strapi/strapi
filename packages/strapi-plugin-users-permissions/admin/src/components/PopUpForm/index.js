@@ -8,7 +8,20 @@ import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { capitalize, get, findIndex, isArray, isObject, includes, map, tail, take, takeRight } from 'lodash';
+import {
+  capitalize,
+  get,
+  findIndex,
+  isArray,
+  isEmpty,
+  isObject,
+  includes,
+  map,
+  startsWith,
+  tail,
+  take,
+  takeRight,
+} from 'lodash';
 
 // Translations
 import en from 'translations/en.json';
@@ -18,12 +31,28 @@ import Input from 'components/Input';
 import styles from './styles.scss';
 
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { enabled: false };
+  state = { enabled: false, isEditing: false };
+
+  generateRedirectURL = (url) => {
+    return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing ? url : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
+  }
 
   handleChange = (e) => {
     this.setState({ enabled: e.target.value });
     this.props.onChange(e);
   }
+
+  handleBlur = (e) => {
+    this.setState({ isEditing: false });
+
+    if (isEmpty(e.target.value)) {
+      const { name, type } = e.target;
+      const target = Object.assign({ name, type }, { value: `/auth/${this.props.dataToEdit}/callback` });
+      this.props.onChange({ target });
+    }
+  }
+
+  handleFocus = () => this.setState({ isEditing: true });
 
   renderForm = () => {
     const { dataToEdit, settingType, values }  = this.props;
@@ -66,14 +95,15 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               autoFocus={key === 0}
               customBootstrapClass="col-md-12"
               didCheckErrors={this.props.didCheckErrors}
-              disabled={key === form.length - 2}
               errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
               key={value}
               label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') ? `${dataToEdit}.callback` : value}.label`}
               name={`${dataToEdit}.${value}`}
+              onFocus={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleFocus : () => {}}
+              onBlur={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleBlur : false}
               onChange={this.props.onChange}
               type="text"
-              value={includes(value, 'callback') || includes(value, 'redirect_uri') ? `${strapi.backendURL}${get(values, value)}` : get(values, value)}
+              value={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.generateRedirectURL(get(values, value)) : get(values, value)}
               validations={{ required: true }}
             />
           ))}
