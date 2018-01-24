@@ -25,7 +25,7 @@ module.exports = async (ctx, next) => {
   if (!role) {
     role = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
   }
-
+  
   const route = ctx.request.route;
   const permission = await strapi.query('permission', 'users-permissions').findOne({
     role: role._id || role.id,
