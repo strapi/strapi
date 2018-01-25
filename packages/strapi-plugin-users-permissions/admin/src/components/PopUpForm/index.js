@@ -37,6 +37,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     switch (this.props.dataToEdit) {
       case 'facebook':
         return `${strapi.backendURL}/connect/facebook/callback`;
+      case 'google':
+        return `${strapi.backendURL}/connect/google/callback`;
       case 'github':
         return get(this.props.values, 'redirect_uri', '');
       default: {
