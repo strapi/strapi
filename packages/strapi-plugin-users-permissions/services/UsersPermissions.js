@@ -104,7 +104,9 @@ module.exports = {
   getActions: (plugins = [], withInfo = true) => {
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
-        acc[key] = { enabled: false, policy: '' };
+        if (_.isFunction(data[key])) {
+          acc[key] = { enabled: false, policy: '' };
+        }
 
         return acc;
     }, {}));
@@ -200,6 +202,7 @@ module.exports = {
       Object.keys(strapi.api[api].controllers)
         .map(controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
+            .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
             .map(action => `application.${controller}.${action}`);
 
           acc = acc.concat(actions);
@@ -213,6 +216,7 @@ module.exports = {
       Object.keys(strapi.plugins[plugin].controllers)
         .map(controller => {
           const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
+            .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
             .map(action => `${plugin}.${controller}.${action}`);
 
           acc = acc.concat(actions);
