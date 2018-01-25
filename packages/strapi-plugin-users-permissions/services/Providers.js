@@ -47,47 +47,54 @@ exports.connect = (provider, query) => {
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
-      reject({
+      return reject(null, {
         message: 'No access_token.'
       });
-    } else {
-      // Get the profile.
-      getProfile(provider, query, (err, profile) => {
-        if (err) {
-          reject(err);
-        } else {
-          // We need at least the mail.
-          if (!profile.email) {
-            reject({
-              message: 'Email was not available.'
-            });
-          } else {
-            strapi.query('user', 'users-permissions').findOne({email: profile.email})
-            .then(user => {
-              if (!user) {
-                // Create the new user.
-                const params = _.assign(profile, {
-                  provider: provider
-                });
-
-                strapi.query('user', 'users-permissions').create(params)
-                .then(user => {
-                  resolve(user);
-                })
-                .catch(err => {
-                  reject(err);
-                });
-              } else {
-                resolve(user);
-              }
-            })
-            .catch(err => {
-              reject(err);
-            });
-          }
-        }
-      });
     }
+
+    // Get the profile.
+    getProfile(provider, query, async (err, profile) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // We need at least the mail.
+      if (!profile.email) {
+        return reject([{
+          message: 'Email was not available.'
+        }, null]);
+      } 
+      
+      try {
+        const user = await strapi.query('user', 'users-permissions').findOne({email: profile.email});
+
+        if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+          return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
+        }
+
+        if (user && user.provider === provider) {
+          return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+        }
+
+        if (user && user.provider !== provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+          return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+        }
+
+        if (!user || _.get(user, 'provider') !== provider) {
+          // Create the new user.
+          const params = _.assign(profile, {
+            provider: provider
+          });
+
+          const createdUser = await strapi.query('user', 'users-permissions').create(params);
+
+          return resolve([createdUser, null]);
+        }
+        resolve([user, null]);
+      } catch (err) {
+        reject([null, err]);
+      }
+    });
   });
 };
 
