@@ -77,6 +77,10 @@ export class HomePage extends React.Component {
     if (shouldRedirect) {
       this.props.history.push('/404');
     }
+
+    if (nextProps.didDeleteData !== this.props.didDeleteData) {
+      this.props.fetchData(nextProps.match.params.settingType);
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -206,6 +210,7 @@ HomePage.propTypes = {
   dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
   didCheckErrors: PropTypes.bool.isRequired,
+  didDeleteData: PropTypes.bool.isRequired,
   fetchData: PropTypes.func.isRequired,
   formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,

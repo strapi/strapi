@@ -22,14 +22,6 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    if (!values.provider) {
-      values.provider = 'local';
-    }
-
-    if (!values.role) {
-      values.role = '1';
-    }
-
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
       return await strapi.plugins['content-manager'].services['contentmanager'].add({

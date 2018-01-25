@@ -24,10 +24,10 @@ const initialState = fromJS({
   dataToDelete: Map({}),
   dataToEdit: '',
   deleteEndPoint: '',
-  didCheckErrors: false,
-  formErrors: List([]),
-  initialData: fromJS({}),
-  modifiedData: fromJS({}),
+  initialData: Map({}),
+  modifiedData: Map({}),
+  showButtons: false,
+  didDeleteData: false,
 });
 
 function homePageReducer(state = initialState, action) {
@@ -44,7 +44,8 @@ function homePageReducer(state = initialState, action) {
       return state
         .update('data', list => list.splice(action.indexDataToDelete, 1))
         .set('deleteEndPoint', '')
-        .set('dataToDelete', Map({}));
+        .set('dataToDelete', Map({}))
+        .update('didDeleteData', (v) => !v);
     case FETCH_DATA_SUCCEEDED:
       return state
         .set('data', List(action.data))

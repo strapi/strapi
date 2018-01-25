@@ -122,6 +122,7 @@ module.exports = {
               const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()
               );
+
               // Records to remove in the relation.
               const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()

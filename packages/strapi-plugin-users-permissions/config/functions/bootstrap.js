@@ -17,6 +17,7 @@ module.exports = cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     try {
       const jwtSecret = uuid();
+
       fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'jwt.json'), JSON.stringify({
         jwtSecret
       }, null, 2), 'utf8');
@@ -158,6 +159,6 @@ module.exports = cb => {
   }
 
   strapi.plugins['users-permissions'].services.userspermissions.syncSchema(() => {
-    strapi.plugins['users-permissions'].services.userspermissions.updatePermissions(cb);
+    strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
   });
 };

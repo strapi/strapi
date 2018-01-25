@@ -11,9 +11,13 @@ module.exports = {
         qb.orderBy(params.sort);
       }
 
-      qb.offset(_.toNumber(params.skip));
+      if (params.skip) {
+        qb.offset(_.toNumber(params.skip));
+      }
 
-      qb.limit(_.toNumber(params.limit));
+      if (params.limit) {
+        qb.limit(_.toNumber(params.limit));
+      }
     }).fetchAll({
       withRelated: this.associations.map(x => x.alias)
     });
@@ -39,14 +43,14 @@ module.exports = {
 
   create: async function (params) {
     const entry = await this
-      .forge()
-      .save(Object.keys(params.values).reduce((acc, current) => {
+      .forge(Object.keys(params.values).reduce((acc, current) => {
       if (this._attributes[current].type) {
         acc[current] = params.values[current];
       }
 
       return acc;
     }, {}))
+      .save()
     .catch((err) => {
       if (err.detail) {
         const field = _.last(_.words(err.detail.split('=')[0]));
