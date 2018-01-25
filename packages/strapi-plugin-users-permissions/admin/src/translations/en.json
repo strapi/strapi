@@ -122,6 +122,12 @@
   "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
   "Policies.header.title": "Advanced settings",
 
+  "Email.template.validation_email": "",
+  "Email.template.reset_password": "",
+  "Email.template.success_register": "",
+
+  "Auth.advanced.allow_register": "",
+
   "PopUpForm.button.cancel": "Cancel",
   "PopUpForm.button.save": "Save",
   "PopUpForm.header.add.providers": "Add New Provider",

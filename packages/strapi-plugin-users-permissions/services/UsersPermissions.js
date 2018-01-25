@@ -544,5 +544,10 @@ ALTER TABLE ${quote}${details[currentModel].tableName}${quote} ADD ${details[cur
     }
 
     cb();
+  },
+
+  template: (layout, data) => {
+    const compiledObject = _.template(layout);
+    return compiledObject(data);
   }
 };

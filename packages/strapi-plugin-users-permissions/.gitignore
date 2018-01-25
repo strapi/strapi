@@ -5,6 +5,7 @@ node_modules
 jwt.json
 grant.json
 actions.json
+email.json
 
 # Cruft
 .DS_Store

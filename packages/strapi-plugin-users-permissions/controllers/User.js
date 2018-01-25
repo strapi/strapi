@@ -98,6 +98,16 @@ module.exports = {
         delete ctx.request.body.role;
       }
 
+      if (ctx.request.body.email && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+        const user = await strapi.query('user', 'users-permissions').findOne({
+          email: ctx.request.body.email
+        });
+
+        if (user.id !== ctx.params.id) {
+          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+        }
+      }
+
       const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
 
       // Send 200 `ok`
