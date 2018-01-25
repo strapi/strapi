@@ -1,9 +1,10 @@
 .logout {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   min-width: 19rem;
   -webkit-font-smoothing: antialiased;
+  z-index: 999;
   > div {
     height: 6rem;
     width: 100%;
