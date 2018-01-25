@@ -34,10 +34,10 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         icoType: 'pencil',
         onClick: this.handleClick,
       },
-      // {
-      //   icoType: 'trash',
-      //   onClick: () => { this.setState({ showModalDelete: true }); },
-      // },
+      {
+        icoType: 'trash',
+        onClick: () => { this.setState({ showModalDelete: true }); },
+      },
     ];
 
     switch (this.props.settingType) {
@@ -72,6 +72,8 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
           </div>
         );
       case 'providers':
+        icons.pop(); // Remove the icon-trash
+
         return (
           <div className={cn('row', styles.wrapper)}>
             <div className="col-md-4">
@@ -98,12 +100,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         );
 
       case 'email-templates':
-        icons = [
-          {
-            icoType: 'pencil',
-            onClick: this.handleClick,
-          },
-        ];
+        icons.pop();
 
         return (
           <div className={cn('row', styles.wrapper)}>
