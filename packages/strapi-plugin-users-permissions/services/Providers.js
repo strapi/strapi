@@ -115,7 +115,7 @@ const getProfile = (provider, query, callback) => {
           callback(err);
         } else {
           callback(null, {
-            username: body.displayName,
+            username: body.displayName || body.emails[0].value,
             email: body.emails[0].value
           });
         }
