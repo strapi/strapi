@@ -208,7 +208,7 @@ module.exports = function (strapi) {
                 const verbose = _.get(utilsModels.getNature(details, name, undefined, model.toLowerCase()), 'verbose') || '';
 
                 // Build associations key
-                utilsModels.defineAssociations(model, definition, details, name);
+                utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
 
                 if (_.isEmpty(verbose)) {
                   definition.loadedModel[name].type = utils(instance).convertType(details.type);

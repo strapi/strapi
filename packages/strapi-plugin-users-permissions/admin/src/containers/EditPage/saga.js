@@ -99,7 +99,7 @@ export function* submit() {
     };
 
     const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
-    const response = yield call(request, requestURL, opts, true);
+    const response = yield call(request, requestURL, opts);
 
     if (response.ok) {
       yield put(submitSucceeded());

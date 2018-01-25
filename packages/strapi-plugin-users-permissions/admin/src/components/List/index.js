@@ -48,7 +48,7 @@ const generateListTitle = (data, settingType) => {
   }
 };
 
-function List({ data, deleteData, noButton, onButtonClick, settingType }) {
+function List({ data, deleteData, noButton, onButtonClick, settingType, values }) {
   return (
     <div className={styles.list}>
       <div className={styles.flex}>
@@ -73,6 +73,7 @@ function List({ data, deleteData, noButton, onButtonClick, settingType }) {
               item={item}
               key={item.name}
               settingType={settingType}
+              values={values}
             />
           ))}
         </ul>
@@ -92,6 +93,7 @@ List.propTypes = {
   noButton: PropTypes.bool,
   onButtonClick: PropTypes.func,
   settingType: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired,
 };
 
 export default List;

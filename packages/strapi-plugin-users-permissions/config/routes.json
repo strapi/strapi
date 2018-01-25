@@ -66,7 +66,7 @@
     },
     {
       "method": "GET",
-      "path": "/email-template",
+      "path": "/email-templates",
       "handler": "UsersPermissions.getEmailTemplate",
       "config": {
         "policies": []
@@ -74,7 +74,7 @@
     },
     {
       "method": "PUT",
-      "path": "/email-template",
+      "path": "/email-templates",
       "handler": "UsersPermissions.updateEmailTemplate",
       "config": {
         "policies": []
@@ -92,6 +92,23 @@
       "method": "PUT",
       "path": "/advanced",
       "handler": "UsersPermissions.updateAdvancedSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "handler": "UsersPermissions.getProviders",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "PUT",
+      "path": "/providers",
+      "handler": "UsersPermissions.updateProviders",
       "config": {
         "policies": []
       }

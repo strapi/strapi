@@ -8,11 +8,13 @@ import {
   deleteDataSucceeded,
   fetchDataSucceeded,
   setForm,
+  submitSucceeded,
 } from './actions';
 
 import {
   DELETE_DATA,
   FETCH_DATA,
+  SUBMIT,
 } from './constants';
 
 // TODO uncomment to test design providers and so on...
@@ -22,6 +24,7 @@ import {
   makeSelectAllData,
   makeSelectDataToDelete,
   makeSelectDeleteEndPoint,
+  makeSelectModifiedData,
 } from './selectors';
 
 export function* dataDelete() {
@@ -34,7 +37,7 @@ export function* dataDelete() {
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
       const requestURL = `/users-permissions/${endPointAPI}/${id}`;
-      const response = yield call(request, requestURL, { method: 'DELETE' }, true);
+      const response = yield call(request, requestURL, { method: 'DELETE' });
 
       if (response.ok) {
         yield put(deleteDataSucceeded(indexDataToDelete));
@@ -50,22 +53,36 @@ export function* dataFetch(action) {
   try {
     const response = yield call(request, `/users-permissions/${action.endPoint}`, { method: 'GET' });
 
-    yield put(fetchDataSucceeded(response[action.endPoint]));
-    // To test other views
-    // const response = data[action.endPoint];
-    // yield put(fetchDataSucceeded(response));
-
-    yield put(setForm(action.endPoint));
+    if (action.endPoint === 'advanced') {
+      yield put(setForm(response));
+    } else {
+      const data = response[action.endPoint] || response;
+      yield put(fetchDataSucceeded(data));
+    }
   } catch(err) {
+    console.log(err);
     strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }
 
+export function* submitData(action) {
+  try {
+    const body = yield select(makeSelectModifiedData());
+    const opts = { method: 'PUT', body };
+
+    yield call(request, `/users-permissions/${action.endPoint}`, opts, true);
+    yield put(submitSucceeded());
+  } catch(error) {
+    strapi.notification.error('notification.error');
+  }
+}
 // Individual exports for testing
 export function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, FETCH_DATA, dataFetch);
 
   yield fork(takeLatest, DELETE_DATA, dataDelete);
+  yield fork(takeLatest, SUBMIT, submitData);
+
   yield take(LOCATION_CHANGE);
   yield cancel(loadDataWatcher);
 }
