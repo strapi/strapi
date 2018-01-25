@@ -8,6 +8,7 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
+const Grant = require('grant-koa');
 
 module.exports = {
   callback: async (ctx) => {
@@ -105,6 +106,26 @@ module.exports = {
     } else {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }] : 'Incorrect params provided.');
     }
+  },
+
+  connect: async (ctx, next) => {
+    _.defaultsDeep(strapi.plugins['users-permissions'].config.grant, {
+      server: {
+        protocol: 'http',
+        host: 'localhost:1337'
+      }
+    });
+
+    const provider = ctx.request.url.split('/')[2];
+    const config = strapi.plugins['users-permissions'].config.grant[provider];
+
+    if (!_.get(config, 'enabled')) {
+      return ctx.badRequest(null, 'This provider is disabled.');
+    }
+
+    const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
+
+    return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
   },
 
   forgotPassword: async (ctx) => {

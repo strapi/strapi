@@ -132,6 +132,15 @@
     },
 
     {
+      "method": "GET",
+      "path": "/connect/*",
+      "handler": "Auth.connect",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
+    {
       "method": "POST",
       "path": "/auth/local",
       "handler": "Auth.callback",
