@@ -44,10 +44,14 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.query('user', 'users-permissions').findOne(query);
+      const user = await strapi.query('user', 'users-permissions').findOne(query, ['role']);
 
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
+      }
+
+      if (user.role.type !== 'root' && ctx.request.admin) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.noAdminAccess' }] }] : `You're not an administrator.`);
       }
 
       // The user never registered with the `local` provider.
@@ -198,21 +202,27 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password cannot contain more than three times the symbol `$`.');
     }
 
+    // Retrieve root role.
+    const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+
     // First, check if the user is the first one to register as admin.
-    const adminUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: '0' }));
+    const hasAdmin = root.users.length > 0;
 
     // Check if the user is the first to register
-    if (adminUsers.length === 0) {
-      params.role = '0';
-    } else {
-      params.role = '1';
+    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+
+    if (!role) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
     }
 
     // Check if the provided identifier is an email or not.
     const isEmail = emailRegExp.test(params.identifier);
+
     if (isEmail) {
       params.identifier = params.identifier.toLowerCase();
     }
+
+    params.role = role._id || role.id;
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
     const user = await strapi.query('user', 'users-permissions').findOne({
@@ -234,7 +244,6 @@ module.exports = {
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
-
     } catch(err) {
       const adminError = _.includes(err.message, 'username') ? 'Auth.form.error.username.taken' : 'Auth.form.error.email.taken';
 

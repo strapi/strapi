@@ -5,6 +5,7 @@
   "Auth.form.button.reset-password": "Change password",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
+  "Auth.form.error.noAdminAccess": "You can't access to the administration panel.",
 
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.label.success": "Email sent with success to",

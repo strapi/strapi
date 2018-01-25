@@ -227,7 +227,7 @@ module.exports = function(strapi) {
 
               // Build associations key
               utilsModels.defineAssociations(
-                definition.globalName,
+                model.toLowerCase(),
                 definition,
                 details,
                 name

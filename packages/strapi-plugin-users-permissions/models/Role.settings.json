@@ -1,0 +1,31 @@
+{
+  "connection": "default",
+  "info": {
+    "name": "role",
+    "description": ""
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "unique": true
+    },
+    "users": {
+      "collection": "user",
+      "via": "role",
+      "plugin": "users-permissions"
+    },
+    "permissions": {
+      "collection": "permission",
+      "via": "role",
+      "plugin": "users-permissions"
+    }
+  }
+}
