@@ -6,6 +6,8 @@ stats.json
 roles.json
 jwt.json
 grant.json
+advanced.json
+email.json
 
 # Cruft
 .DS_Store
