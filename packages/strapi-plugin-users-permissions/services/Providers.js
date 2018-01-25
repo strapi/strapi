@@ -52,18 +52,19 @@ exports.connect = (provider, query) => {
       });
     } else {
       // Get the profile.
-      getProfile(provider, query, (err, profile) => {
+      getProfile(provider, query, async (err, profile) => {
         if (err) {
           reject(err);
         } else {
           // We need at least the mail.
           if (!profile.email) {
-            reject({
+            reject([{
               message: 'Email was not available.'
-            });
+            }, null]);
           } else {
-            strapi.query('user', 'users-permissions').findOne({email: profile.email})
-            .then(user => {
+            try {
+              const user = await strapi.query('user', 'users-permissions').findOne({email: profile.email});
+
               if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
                 return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
               }
@@ -82,20 +83,15 @@ exports.connect = (provider, query) => {
                   provider: provider
                 });
 
-                strapi.query('user', 'users-permissions').create(params)
-                .then(user => {
-                  resolve([user, null]);
-                })
-                .catch(err => {
-                  reject([null, err]);
-                });
+                const createdUser = await strapi.query('user', 'users-permissions').create(params);
+
+                resolve([createdUser, null]);
               } else {
                 resolve([user, null]);
               }
-            })
-            .catch(err => {
+            } catch (err) {
               reject([null, err]);
-            });
+            }
           }
         }
       });
