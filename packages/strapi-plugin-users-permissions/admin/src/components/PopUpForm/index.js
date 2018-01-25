@@ -92,7 +92,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     if (settingType === 'providers') {
       return (
-        <div className="row">
+        <div className={`row ${styles.providerDisabled}`}>
           <Input
             inputDescription="users-permissions.PopUpForm.Providers.enabled.description"
             label="users-permissions.PopUpForm.Providers.enabled.label"
@@ -123,7 +123,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               validations={{ required: true }}
             />
           ))}
-          { dataToEdit !== 'email' ? (
+          { dataToEdit !== 'email' && (
             <Input
               customBootstrapClass="col-md-12"
               disabled
@@ -134,7 +134,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               value={this.getRedirectURIProviderConf()}
               validations={{}}
             />
-          ) : ''}
+          )}
         </div>
       );
     }
