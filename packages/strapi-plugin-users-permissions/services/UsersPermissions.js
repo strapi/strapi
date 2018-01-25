@@ -236,13 +236,14 @@ module.exports = {
 
       const defaultPolicy = (obj, role) => {
         const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
         const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isPassword = obj.action === 'forgotPassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isNewPassword = obj.action === 'changePassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoReload';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload;
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect;
 
         return Object.assign(obj, { enabled, policy: '' });
       };
