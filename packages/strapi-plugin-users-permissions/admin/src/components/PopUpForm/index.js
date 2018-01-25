@@ -33,7 +33,7 @@ import styles from './styles.scss';
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
 
-  getRedirectURIProviderConf = () => {
+  getRedirectURIProviderConf = () => { // NOTE: Still testings providers so the switch statement is likely to change
     switch (this.props.dataToEdit) {
       case 'facebook':
         return `${strapi.backendURL}/connect/facebook/callback`;
