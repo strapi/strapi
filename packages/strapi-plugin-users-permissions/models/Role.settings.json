@@ -8,24 +8,29 @@
     "name": {
       "type": "string",
       "minLength": 3,
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "configurable": false
     },
     "type": {
       "type": "string",
-      "unique": true
+      "unique": true,
+      "configurable": false
     },
     "users": {
       "collection": "user",
       "via": "role",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "configurable": false
     },
     "permissions": {
       "collection": "permission",
       "via": "role",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "configurable": false
     }
   }
 }
