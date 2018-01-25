@@ -414,6 +414,7 @@ module.exports = {
     for (let index = 0; index < hasTables.length; ++index) {
       const hasTable = hasTables[index];
       const currentModel = Object.keys(details)[index];
+      const quote = details[currentModel].client === 'pg' ? '"' : '`';
 
       if (!hasTable) {
         missingTables.push(`
@@ -423,13 +424,13 @@ module.exports = {
           case 'user':
             tablesToCreate.push(`
 
-CREATE TABLE \`${details[currentModel].tableName}\` (
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
   id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   username text,
   email text,
   provider text,
-  role text,
-  ${details[currentModel].client === 'pg' ? '\`resetPasswordToken\`' : 'resetPasswordToken'} text,
+  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+  ${quote}resetPasswordToken${quote} text,
   password text,
   updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
   created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
@@ -438,7 +439,7 @@ CREATE TABLE \`${details[currentModel].tableName}\` (
           case 'role':
             tablesToCreate.push(`
 
-CREATE TABLE \`${details[currentModel].tableName}\` (
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
   id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   name text,
   description text,
@@ -448,7 +449,7 @@ CREATE TABLE \`${details[currentModel].tableName}\` (
           case 'permission':
             tablesToCreate.push(`
 
-CREATE TABLE \`${details[currentModel].tableName}\` (
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
   id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
   type text,
@@ -483,6 +484,7 @@ CREATE TABLE \`${details[currentModel].tableName}\` (
 
     for (let index = 0; index < hasTables.length; ++index) {
       const currentModel = Object.keys(details)[index];
+      const quote = details[currentModel].client === 'pg' ? '"' : '`';
       const attributes = {
         id: {
           type: details[currentModel].client === 'pg' ? 'integer' : 'int'
@@ -514,7 +516,7 @@ CREATE TABLE \`${details[currentModel].tableName}\` (
         const attribute = attributes[currentColumn];
 
         if (!hasColumn && !attribute.collection) {
-          const currentType = attribute.type || attribute.model;
+          const currentType = attribute.model ? 'integer' : attribute.type;
           const type = currentType === 'string' ? 'text' : currentType;
 
           missingColumns.push(`
@@ -522,7 +524,7 @@ CREATE TABLE \`${details[currentModel].tableName}\` (
 
           tablesToAlter.push(`
 
-ALTER TABLE \`${details[currentModel].tableName}\` ADD ${details[currentModel].client === 'pg' ? `\`${currentColumn}\`` : `${currentColumn}`} ${type};`);
+ALTER TABLE ${quote}${details[currentModel].tableName}${quote} ADD ${details[currentModel].client === 'pg' ? `${quote}${currentColumn}${quote}` : `${currentColumn}`} ${type};`);
         }
       });
     }
