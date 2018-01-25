@@ -345,5 +345,10 @@ ${commands}
         cb();
       });
     });
+  },
+
+  template: (layout, data) => {
+    const compiledObject = _.template(layout);
+    return compiledObject(data);
   }
 };
