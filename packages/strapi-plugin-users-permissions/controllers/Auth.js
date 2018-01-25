@@ -71,9 +71,14 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
+      let user, error;
       try {
-        const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
+        [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
       } catch([user, error]) {
+        return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
+      }
+
+      if (!user) {
         return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
       }
 
