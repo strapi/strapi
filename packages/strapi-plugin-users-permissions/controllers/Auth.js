@@ -126,27 +126,25 @@ module.exports = {
 
     const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
 
-    const compiledMessage = _.template(settings.message);
-    const message = compiledMessage({
+    settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       url,
-      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken']),
+      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider']),
       token: resetPasswordToken
     });
 
-    const compiledObject = _.template(settings.object);
-    const object = compiledObject({
-      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken'])
+    settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
+      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider'])
     });
 
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
         to: user.email,
-        from: (settings.from.email || settings.from.email) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
+        from: (settings.from.email || settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
         replyTo: settings.respond,
-        subject: object,
-        text: message,
-        html: message
+        subject: settings.object,
+        text: settings.message,
+        html: settings.message
       });
     } catch (err) {
       return ctx.badRequest(null, err);
