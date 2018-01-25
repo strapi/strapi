@@ -36,8 +36,6 @@ import {
   SET_ERRORS,
   SET_LOADER,
   UNSET_LOADER,
-  FREEZE_APP,
-  UNFREEZE_APP,
 } from './constants';
 
 export function defaultAction() {
@@ -316,17 +314,5 @@ export function setLoader() {
 export function unsetLoader() {
   return {
     type: UNSET_LOADER,
-  };
-}
-
-export function freezeApp() {
-  return {
-    type: FREEZE_APP,
-  };
-}
-
-export function unfreezeApp() {
-  return {
-    type: UNFREEZE_APP,
   };
 }
