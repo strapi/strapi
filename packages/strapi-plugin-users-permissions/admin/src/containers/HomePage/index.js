@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { clone, includes, isEmpty, replace } from 'lodash';
+import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
 // Design
 import EditForm from 'components/EditForm';
@@ -31,18 +31,32 @@ import styles from './styles.scss';
 
 // Actions
 import {
+  cancelChanges,
   deleteData,
   fetchData,
   onChange,
+  setDataToEdit,
+  setFormErrors,
+  submit,
+  unsetDataToEdit,
 } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
 
+import checkFormValidity from './checkFormValidity';
+
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component {
-  state = { mapKey: {} };
+  state = { mapKey: {}, showModalEdit: false };
+
+  getChildContext = () => (
+    {
+      setDataToEdit: this.props.setDataToEdit,
+      unsetDataToEdit: this.props.unsetDataToEdit,
+    }
+  );
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
@@ -50,8 +64,14 @@ export class HomePage extends React.Component {
     document.addEventListener('keyup', this.handleKeyBoardShortCut);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.dataToEdit !== this.props.dataToEdit) {
+      this.setState({ showModalEdit: !isEmpty(nextProps.dataToEdit) });
+    }
+  }
+
   componentWillUpdate(nextProps) {
-    const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced-settings'];
+    const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect = allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
 
     if (shouldRedirect) {
@@ -90,6 +110,7 @@ export class HomePage extends React.Component {
   }
 
   handleButtonClick = () => {
+    // TODO change open modal URL
     if (this.props.match.params.settingType === 'roles') {
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
@@ -97,44 +118,59 @@ export class HomePage extends React.Component {
     }
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const modifiedObject = get(this.props.modifiedData, this.props.dataToEdit);
+    const initObject = get(this.props.initialData, this.props.dataToEdit);
+    const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject);
+
+    if (isEqual(initObject, modifiedObject)) {
+      return this.props.unsetDataToEdit();
+    }
+
+    if (isEmpty(formErrors)) {
+      this.setState({ showModalEdit: false });
+      this.props.submit(this.props.match.params.settingType);
+    } else {
+      this.props.setFormErrors(formErrors);
+    }
+  }
+
   pluginHeaderActions = [
     {
       label: 'users-permissions.EditPage.cancel',
       kind: 'secondary',
-      onClick: () => {},
+      onClick: () => this.props.cancelChanges(),
       type: 'button',
     },
     {
       kind: 'primary',
       label: 'users-permissions.EditPage.submit',
-      onClick: () => {},
+      onClick: () => this.props.submit(this.props.match.params.settingType),
       type: 'submit',
     },
   ];
 
   render() {
-    const headerActions = this.props.match.params.settingType === 'advanced-settings' && this.props.showButtons ?
+    const { didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
+    const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
-    const noButtonList = this.props.match.params.settingType === 'email-templates';
-    const component = this.props.match.params.settingType === 'advanced-settings' ?
-      <EditForm onChange={this.props.onChange} values={this.props.modifiedData} /> : (
+    const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
+    const component = match.params.settingType === 'advanced' ?
+      <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
         <List
           data={this.props.data}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
-          settingType={this.props.match.params.settingType}
+          settingType={match.params.settingType}
+          values={modifiedData}
         />
       );
-    const hashArray = replace(this.props.location.hash, '#', '').split('::');
 
     return (
       <div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               title={{ id: 'users-permissions.HomePage.header.title' }}
@@ -145,14 +181,15 @@ export class HomePage extends React.Component {
             {component}
           </div>
           <PopUpForm
-            actionType={hashArray[0]}
-            isOpen={!isEmpty(this.props.location.hash)}
+            actionType={'edit'}
+            isOpen={this.state.showModalEdit}
+            dataToEdit={dataToEdit}
+            didCheckErrors={didCheckErrors}
+            formErrors={formErrors}
             onChange={this.props.onChange}
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-            settingType={hashArray[1]}
-            values={this.props.modifiedData}
+            onSubmit={this.handleSubmit}
+            settingType={match.params.settingType}
+            values={modifiedData[dataToEdit] || {}}
           />
         </form>
       </div>
@@ -160,28 +197,46 @@ export class HomePage extends React.Component {
   }
 }
 
+HomePage.childContextTypes = {
+  setDataToEdit: PropTypes.func,
+  unsetDataToEdit: PropTypes.func,
+};
+
 HomePage.defaultProps = {};
 
 HomePage.propTypes = {
+  cancelChanges: PropTypes.func.isRequired,
   data: PropTypes.array.isRequired,
+  dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
+  didCheckErrors: PropTypes.bool.isRequired,
   didDeleteData: PropTypes.bool.isRequired,
   fetchData: PropTypes.func.isRequired,
+  formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
+  initialData: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  showButtons: PropTypes.bool.isRequired,
+  setDataToEdit: PropTypes.func.isRequired,
+  setFormErrors: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
+  unsetDataToEdit: PropTypes.func.isRequired,
 };
 
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelChanges,
       deleteData,
       fetchData,
       onChange,
+      setDataToEdit,
+      setFormErrors,
+      submit,
+      unsetDataToEdit,
     },
     dispatch,
   );

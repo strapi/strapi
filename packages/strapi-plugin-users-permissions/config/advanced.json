@@ -1,0 +1,6 @@
+{
+  "advanced": {
+    "unique_email": true,
+    "allow_register": true
+  }
+}

@@ -17,7 +17,7 @@ module.exports = {
     const params = ctx.request.body;
 
     if (provider === 'local') {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled') && !ctx.request.admin) {
+      if (!_.get(strapi.plugins['users-permissions'].config.grant['email'], 'enabled') && !ctx.request.admin) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -71,9 +71,9 @@ module.exports = {
       }
     } else {
       // Connect the user thanks to the third-party provider.
-      const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
-
-      if (error) {
+      try {
+        const [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(provider, ctx.query);
+      } catch([user, error]) {
         return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
       }
 
@@ -167,7 +167,7 @@ module.exports = {
       await strapi.plugins['email'].services.email.send({
         to: user.email,
         from: (settings.from.email || settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
-        replyTo: settings.respond,
+        replyTo: settings.response_email,
         subject: settings.object,
         text: settings.message,
         html: settings.message

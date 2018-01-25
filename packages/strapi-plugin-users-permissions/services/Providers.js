@@ -63,8 +63,8 @@ exports.connect = (provider, query) => {
         return reject([{
           message: 'Email was not available.'
         }, null]);
-      } 
-      
+      }
+
       try {
         const user = await strapi.query('user', 'users-permissions').findOne({email: profile.email});
 
@@ -83,7 +83,8 @@ exports.connect = (provider, query) => {
         if (!user || _.get(user, 'provider') !== provider) {
           // Create the new user.
           const params = _.assign(profile, {
-            provider: provider
+            provider: provider,
+            role: '1'
           });
 
           const createdUser = await strapi.query('user', 'users-permissions').create(params);

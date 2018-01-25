@@ -106,3 +106,15 @@
 
   }
 }
+
+.descriptionContainer {
+  > div {
+    display: block;
+    padding-left: 15px;
+    padding-right: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}

@@ -31,11 +31,13 @@ module.exports = cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.grant')) {
     try {
       const grant = {
-        local: {
-          enabled: true
+        email: {
+          enabled: true,
+          icon: 'envelope'
         },
         facebook: {
           enabled: false,
+          icon: 'facebook-official',
           key: '',
           secret: '',
           callback: '/auth/facebook/callback',
@@ -43,6 +45,7 @@ module.exports = cb => {
         },
         google: {
           enabled: false,
+          icon: 'google',
           key: '',
           secret: '',
           callback: '/auth/google/callback',
@@ -50,9 +53,10 @@ module.exports = cb => {
         },
         github: {
           enabled: false,
+          icon: 'github',
           key: '',
           secret: '',
-          redirect_uri: '/auth/google/callback',
+          redirect_uri: '/auth/github/callback',
           scope: [
             'user',
             'user:email'
@@ -60,6 +64,7 @@ module.exports = cb => {
         },
         twitter: {
           enabled: false,
+          icon: 'twitter',
           key: '',
           secret: '',
           callback: '/auth/twitter/callback'
@@ -84,10 +89,10 @@ module.exports = cb => {
           icon: 'envelope',
           options: {
             from: {
-              email: '',
-              name: ''
+              name: 'Administration Panel',
+              email: 'no-reply@strapi.io'
             },
-            respond: '',
+            response_email: '',
             object: '',
             message: ''
           }
@@ -97,10 +102,10 @@ module.exports = cb => {
           icon: 'refresh',
           options: {
             from: {
-              email: '',
-              name: ''
+              name: 'Administration Panel',
+              email: 'no-reply@strapi.io'
             },
-            respond: '',
+            response_email: '',
             object: '­Reset password 🔑 ',
             message: `<p>We heard that you lost your password. Sorry about that!</p>
 
@@ -116,10 +121,10 @@ module.exports = cb => {
           icon: 'check',
           options: {
             from: {
-              email: '',
-              name: ''
+              name: 'Administration Panel',
+              email: 'no-reply@strapi.io'
             },
-            respond: '',
+            response_email: '',
             object: '',
             message: ''
           }
