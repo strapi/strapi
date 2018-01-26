@@ -189,7 +189,7 @@ module.exports = {
 
   register: async (ctx) => {
     if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is actualy not available.');
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 
     const params = _.assign(ctx.request.body, {

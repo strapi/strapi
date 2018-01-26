@@ -51,8 +51,11 @@ class TableListRow extends React.Component { // eslint-disable-line react/prefer
 
     return (
       <ListRow onClick={this.handleGoTo}>
-        <div className="col-md-1"><i className={`fa ${this.props.rowItem.icon}`} /></div>
-        <div className={`col-md-3 ${styles.italic} ${styles.nameContainer}`}><span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)} &nbsp;{pluginSource}</span> {temporary}</div>
+        <div className={`col-md-4 ${styles.italic} ${styles.nameContainer}`}>
+          <i className={`fa ${this.props.rowItem.icon}`} />
+          <span style={{ width: spanStyle }}>{startCase(this.props.rowItem.name)} &nbsp;{pluginSource}</span>
+          &nbsp;{temporary}
+        </div>
         <div className={`col-md-5 text-center ${styles.descriptionContainer}`}>
           <div>
             {description}

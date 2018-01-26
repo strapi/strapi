@@ -1,4 +1,6 @@
 {
+  "components.DownloadDb.download": "Installation in progess...",
+  "components.DownloadDb.text": "It can take a minute or so. Thanks for your patience.",
   "plugin.description.short": "Configure your project in seconds",
   "plugin.description.long": "Configure your project in seconds",
   "menu.section.global-settings": "Global settings",

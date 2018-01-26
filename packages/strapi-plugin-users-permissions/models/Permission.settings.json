@@ -7,28 +7,34 @@
   "attributes": {
     "type": {
       "type": "string",
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "controller": {
       "type": "string",
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "action": {
       "type": "string",
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "enabled": {
       "type": "boolean",
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "policy": {
       "type": "json",
-      "required": true
+      "required": true,
+      "configurable": false
     },
     "role": {
       "model": "role",
       "via": "permissions",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "configurable": false
     }
   }
 }

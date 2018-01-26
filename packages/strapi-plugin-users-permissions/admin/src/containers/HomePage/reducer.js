@@ -24,6 +24,8 @@ const initialState = fromJS({
   dataToDelete: Map({}),
   dataToEdit: '',
   deleteEndPoint: '',
+  didCheckErrors: false,
+  formErrors: List([]),
   initialData: Map({}),
   modifiedData: Map({}),
   showButtons: false,
