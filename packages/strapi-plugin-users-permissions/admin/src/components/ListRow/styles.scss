@@ -25,11 +25,18 @@
   padding-left: 7px;
   font-weight: 600;
   text-transform: capitalize;
+  > div:first-child {
+    padding-top: 2px;
+    > i {
+      font-size: 20px;
+    }
+  }
   > div:last-child {
     width: 80%;
     margin-left: 52px;
     padding-left: 7px;
     text-align: left;
+    font-weight: 500 !important;
   }
 }
 
