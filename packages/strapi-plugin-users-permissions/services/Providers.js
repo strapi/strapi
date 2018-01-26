@@ -60,10 +60,13 @@ exports.connect = (provider, query) => {
         }
 
         if (!user || _.get(user, 'provider') !== provider) {
+          // Retrieve role `guest`.
+          const guest = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+
           // Create the new user.
           const params = _.assign(profile, {
             provider: provider,
-            role: '1'
+            role: guest._id || guest.id
           });
 
           const createdUser = await strapi.query('user', 'users-permissions').create(params);

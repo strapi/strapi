@@ -70,6 +70,14 @@ module.exports = {
    */
 
   create: async (ctx) => {
+    if (strapi.plugins['users-permissions'].config.advanced.unique_email && ctx.request.body.email) {
+      const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
+
+      if (user) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+      }
+    }
+
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
       // Send 201 `created`
@@ -88,6 +96,14 @@ module.exports = {
 
   update: async (ctx, next) => {
     try {
+      if (strapi.plugins['users-permissions'].config.advanced.unique_email && ctx.request.body.email) {
+        const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
+
+        if (user) {
+          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+        }
+      }
+
       const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
 
       if (_.get(ctx.request, 'body.password') === user.password) {
