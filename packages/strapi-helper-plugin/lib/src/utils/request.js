@@ -150,5 +150,5 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
       }
 
       return response;
-  });
+    });
 }
