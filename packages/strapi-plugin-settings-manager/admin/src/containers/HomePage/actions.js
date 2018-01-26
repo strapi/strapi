@@ -251,11 +251,12 @@ export function databaseActionError(formErrors) {
   };
 }
 
-export function databaseDelete(databaseToDelete, endPoint) {
+export function databaseDelete(databaseToDelete, endPoint, context) {
   return {
     type: DATABASE_DELETE,
     databaseToDelete,
     endPoint,
+    context,
   };
 }
 

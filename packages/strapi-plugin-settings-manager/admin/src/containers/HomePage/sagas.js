@@ -71,9 +71,11 @@ export function* deleteDatabase(action) {
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      yield call(action.context.disableGlobalOverlayBlocker);
       strapi.notification.success('settings-manager.strapi.notification.success.databaseDeleted');
     }
   } catch(error) {
+    yield call(action.context.disableGlobalOverlayBlocker);
     yield put(databaseActionError([]));
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
@@ -216,12 +218,12 @@ export function* settingsEdit(action) {
 
     if (resp.ok) {
       yield put(editSettingsSucceeded());
-      yield put(unsetLoader());
       strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
     }
   } catch(error) {
-    yield put(unsetLoader());
     strapi.notification.error('settings-manager.strapi.notification.error');
+  } finally {
+    yield put(unsetLoader());
   }
 }
 
