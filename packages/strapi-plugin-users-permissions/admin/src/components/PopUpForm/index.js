@@ -33,6 +33,14 @@ import styles from './styles.scss';
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
 
+  componentWillReceiveProps(nextProps) {
+    const { values } = nextProps;
+
+    if (get(values, 'enabled') && get(values, 'enabled') !== get(this.props.values, 'enabled')) {
+      this.setState({ enabled: get(values, 'enabled') });
+    }
+  }
+
   getRedirectURIProviderConf = () => { // NOTE: Still testings providers so the switch statement is likely to change
     switch (this.props.dataToEdit) {
       case 'facebook':
@@ -102,10 +110,9 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             validations={{}}
             value={get(this.props.values, 'enabled', this.state.enabled)}
           />
-          {form.length > 1 ? (
-            <div className={styles.separator} />
+        
+          {form.length > 1 && <div className={styles.separator} /> }
 
-          ) : ''}
           {map(tail(form), (value, key) => (
             <Input
               autoFocus={key === 0}
