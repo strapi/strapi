@@ -84,19 +84,6 @@ module.exports = cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.email')) {
     try {
       const email = {
-        'validation_email': {
-          display: 'Email.template.validation_email',
-          icon: 'envelope',
-          options: {
-            from: {
-              name: 'Administration Panel',
-              email: 'no-reply@strapi.io'
-            },
-            response_email: '',
-            object: '',
-            message: ''
-          }
-        },
         'reset_password': {
           display: 'Email.template.reset_password',
           icon: 'refresh',
@@ -111,22 +98,9 @@ module.exports = cb => {
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
 
-<p><%= url %>?code=<%= token %></p>
+<p><%= URL %>?code=<%= TOKEN %></p>
 
 <p>Thanks.</p>`
-          }
-        },
-        'success_register': {
-          display: 'Email.template.success_register',
-          icon: 'check',
-          options: {
-            from: {
-              name: 'Administration Panel',
-              email: 'no-reply@strapi.io'
-            },
-            response_email: '',
-            object: '',
-            message: ''
           }
         }
       };
