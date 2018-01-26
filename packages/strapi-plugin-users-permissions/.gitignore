@@ -6,6 +6,7 @@ jwt.json
 grant.json
 actions.json
 email.json
+advanced.json
 
 # Cruft
 .DS_Store

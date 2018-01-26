@@ -16,12 +16,12 @@
     > div {
       line-height: 5.2rem;
     }
-      > div:nth-child(2) {
-        >div:first-child {
-          min-height: 1.8rem;
-          background: #ffffff;
-        }
+    > div:nth-child(2) {
+      >div:first-child {
+        min-height: 1.8rem;
+        background: #ffffff;
       }
+    }
   }
 }
 
@@ -47,4 +47,10 @@
 .wrapper {
   margin: 0 -15px;
   padding: 0;
+}
+
+.pluginsGradient {
+  > div:first-child {
+    background: linear-gradient(315deg, rgba(255,255,255,0) 0%, rgba(227, 233, 243, 0.54) 100%) !important;
+  }
 }
