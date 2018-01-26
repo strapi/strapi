@@ -26,7 +26,7 @@ module.exports = {
             role: role._id || role.id,
             type,
             controller,
-            action,
+            action: action.toLowerCase(),
             ...params.permissions[type].controllers[controller][action]
           }));
         });
@@ -203,7 +203,7 @@ module.exports = {
         .map(controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
             .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
-            .map(action => `application.${controller}.${action}`);
+            .map(action => `application.${controller}.${action.toLowerCase()}`);
 
           acc = acc.concat(actions);
       });
@@ -217,7 +217,7 @@ module.exports = {
         .map(controller => {
           const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
             .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
-            .map(action => `${plugin}.${controller}.${action}`);
+            .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
 
           acc = acc.concat(actions);
       });
@@ -242,11 +242,11 @@ module.exports = {
         const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
         const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isPassword = obj.action === 'forgotPassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isNewPassword = obj.action === 'changePassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
-        const isReload = obj.action === 'autoReload';
+        const isReload = obj.action === 'autoreload';
         const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect;
 
         return Object.assign(obj, { enabled, policy: '' });
@@ -326,7 +326,7 @@ module.exports = {
               role: roleID,
               type,
               controller,
-              action
+              action: action.toLowerCase()
             }, bodyAction));
           }
         });

@@ -73,9 +73,7 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
               )}
             </div>
           </div>
-          { emptyApplication ? (
-            <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}></div>
-          ) : '' }
+          { emptyApplication && <div className={this.state.collapse ? styles.chevronUp : styles.chevronDown}></div> }
         </div>
         <Collapse isOpen={this.state.collapse}>
           <div />

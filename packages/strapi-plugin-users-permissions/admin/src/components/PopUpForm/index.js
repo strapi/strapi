@@ -33,10 +33,20 @@ import styles from './styles.scss';
 class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
 
+  componentWillReceiveProps(nextProps) {
+    const { values } = nextProps;
+
+    if (get(values, 'enabled') && get(values, 'enabled') !== get(this.props.values, 'enabled')) {
+      this.setState({ enabled: get(values, 'enabled') });
+    }
+  }
+
   getRedirectURIProviderConf = () => { // NOTE: Still testings providers so the switch statement is likely to change
     switch (this.props.dataToEdit) {
       case 'facebook':
         return `${strapi.backendURL}/connect/facebook/callback`;
+      case 'google':
+        return `${strapi.backendURL}/connect/google/callback`;
       case 'github':
         return get(this.props.values, 'redirect_uri', '');
       default: {
@@ -90,7 +100,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     if (settingType === 'providers') {
       return (
-        <div className="row">
+        <div className={`row ${styles.providerDisabled}`}>
           <Input
             inputDescription="users-permissions.PopUpForm.Providers.enabled.description"
             label="users-permissions.PopUpForm.Providers.enabled.label"
@@ -100,10 +110,9 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             validations={{}}
             value={get(this.props.values, 'enabled', this.state.enabled)}
           />
-          {form.length > 1 ? (
-            <div className={styles.separator} />
+        
+          {form.length > 1 && <div className={styles.separator} /> }
 
-          ) : ''}
           {map(tail(form), (value, key) => (
             <Input
               autoFocus={key === 0}
@@ -121,7 +130,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               validations={{ required: true }}
             />
           ))}
-          { dataToEdit !== 'email' ? (
+          { dataToEdit !== 'email' && (
             <Input
               customBootstrapClass="col-md-12"
               disabled
@@ -132,7 +141,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               value={this.getRedirectURIProviderConf()}
               validations={{}}
             />
-          ) : ''}
+          )}
         </div>
       );
     }

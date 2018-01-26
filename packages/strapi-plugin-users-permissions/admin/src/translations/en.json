@@ -159,7 +159,7 @@
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
 
-  
+
 
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your  Facebook application configurations",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your  Google application configurations",
@@ -169,5 +169,5 @@
 
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Email.email_templates.inputDescription": "Don't know to set variables",
-  "PopUpForm.Email.link.documentation": "check out our documentation"
+  "PopUpForm.Email.link.documentation": "check out our documentation."
 }
