@@ -1,3 +1,0 @@
-# Templating emails
-
-Documentation in progress....
