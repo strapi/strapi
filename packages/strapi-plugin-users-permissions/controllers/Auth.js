@@ -158,13 +158,13 @@ module.exports = {
     const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
-      url,
-      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider']),
-      token: resetPasswordToken
+      URL: url,
+      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider']),
+      TOKEN: resetPasswordToken
     });
 
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
-      user: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider'])
+      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider'])
     });
 
     try {
@@ -189,7 +189,7 @@ module.exports = {
 
   register: async (ctx) => {
     if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is actualy not available.');
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 
     const params = _.assign(ctx.request.body, {

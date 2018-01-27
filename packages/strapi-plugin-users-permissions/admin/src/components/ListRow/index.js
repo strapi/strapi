@@ -51,7 +51,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         }
 
         return (
-          <div className={cn('row', styles.wrapper)}>
+          <div className={cn('row', styles.wrapper)} style={{ paddingLeft: '20px'}}>
             <div className="col-md-2">
               <b>{this.props.item.name}</b>
             </div>
