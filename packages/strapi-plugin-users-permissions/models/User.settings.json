@@ -36,13 +36,6 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
-    },
-    "ddddd": {
-      "type": "string"
-    },
-    "mlkml": {
-      "type": "string"
     }
-  },
-  "collectionName": "users-permissions_user"
+  }
 }

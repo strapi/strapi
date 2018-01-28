@@ -23,7 +23,8 @@
     "users": {
       "collection": "user",
       "via": "role",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "configurable": false
     },
     "permissions": {
       "collection": "permission",
