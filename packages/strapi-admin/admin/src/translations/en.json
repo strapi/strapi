@@ -94,5 +94,6 @@
   "Content Type Builder": "Content Type Builder",
   "Settings Manager": "Settings Manager",
   "Email": "Email",
-  "Password": "Password"
+  "Password": "Password",
+  "request.error.model.unknow": "This model doesn't exist"
 }
