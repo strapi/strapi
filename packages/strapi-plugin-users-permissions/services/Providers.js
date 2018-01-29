@@ -45,35 +45,34 @@ exports.connect = (provider, query) => {
       }
 
       try {
-        const user = await strapi.query('user', 'users-permissions').findOne({email: profile.email});
+        const users = await strapi.query('user', 'users-permissions').find({
+          email: profile.email
+        });
 
-        if (!user && !strapi.plugins['users-permissions'].config.advanced.allow_register) {
+        if (_.isEmpty(_.find(users, {provider})) && !strapi.plugins['users-permissions'].config.advanced.allow_register) {
           return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
         }
 
-        if (user && user.provider === provider) {
+        if (!_.isEmpty(_.find(users, {provider}))) {
           return resolve([user, null]);
         }
 
-        if (user && user.provider !== provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+        if (!_.isEmpty(_.find(users, user => user.provider !== provider)) && strapi.plugins['users-permissions'].config.advanced.unique_email) {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
-        if (!user || _.get(user, 'provider') !== provider) {
-          // Retrieve role `guest`.
-          const guest = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+        // Retrieve role `guest`.
+        const guest = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
 
-          // Create the new user.
-          const params = _.assign(profile, {
-            provider: provider,
-            role: guest._id || guest.id
-          });
+        // Create the new user.
+        const params = _.assign(profile, {
+          provider: provider,
+          role: guest._id || guest.id
+        });
 
-          const createdUser = await strapi.query('user', 'users-permissions').create(params);
+        const createdUser = await strapi.query('user', 'users-permissions').create(params);
 
-          return resolve([createdUser, null]);
-        }
-        resolve([user, null]);
+        return resolve([createdUser, null]);
       } catch (err) {
         reject([null, err]);
       }
