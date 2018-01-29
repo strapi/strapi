@@ -8,7 +8,7 @@ import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, includes } from 'lodash';
+import { capitalize, get, includes } from 'lodash';
 import { router } from 'app';
 
 // Design
@@ -82,7 +82,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
                   <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
                 <div>
-                  {this.props.item.name}
+                  {capitalize(this.props.item.name)}
                 </div>
               </div>
             </div>

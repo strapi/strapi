@@ -59,7 +59,7 @@
   "EditForm.inputSelect.durations.label": "Duration",
   "EditForm.inputSelect.durations.description": "Nombre d'heure pendant lesquelles un utilisateur ne peut souscrire.",
 
-  "EditForm.inputToggle.label": "Un compte par adresse email",
+  "EditForm.inputToggle.label.email": "Un compte par adresse email",
   "EditForm.inputToggle.label.sign-up": "Activer l'inscription",
   "EditForm.inputToggle.description.email": "Interdire l'utilisateur de créer de multiple comptes avec la même adresse email avec des providers différents",
   "EditForm.inputToggle.description.sign-up": "Quand l'inscription est désactivée (OFF), aucun utilisateur ne peut s'inscrire qu'importe le provider",

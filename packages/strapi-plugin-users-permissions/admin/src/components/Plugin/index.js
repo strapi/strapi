@@ -49,6 +49,10 @@ class Plugin extends React.Component { // eslint-disable-line react/prefer-state
     const icon = get(this.context.plugins.toJS(), [this.props.name, 'icon']);
     const emptyApplication = !isEmpty(get(this.props.plugin, 'controllers'));
 
+    if (!emptyApplication) {
+      return <div />;
+    }
+
     return (
       <div className={styles.plugin} style={divStyle}>
         <div className={styles.banner} onClick={this.handleClick}>
