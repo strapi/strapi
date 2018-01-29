@@ -99,6 +99,6 @@
   "Provider": "Provider",
   "ResetPasswordToken": "ResetPasswordToken",
   "Role": "Rôle",
-  "New entry": "New Entry",
+  "New entry": "Nouvelle entrée",
   "request.error.model.unknow": "Le model n'existe pas"
 }

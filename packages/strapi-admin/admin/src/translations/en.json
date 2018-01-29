@@ -95,5 +95,10 @@
   "Settings Manager": "Settings Manager",
   "Email": "Email",
   "Password": "Password",
+  "Username": "Username",
+  "Provider": "Provider",
+  "ResetPasswordToken": "Reset Password Token",
+  "Role": "Role",
+  "New entry": "New entry",
   "request.error.model.unknow": "This model doesn't exist"
 }
