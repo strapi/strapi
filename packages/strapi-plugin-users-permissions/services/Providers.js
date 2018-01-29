@@ -47,7 +47,7 @@ exports.connect = (provider, query) => {
       try {
         const user = await strapi.query('user', 'users-permissions').findOne({email: profile.email});
 
-        if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+        if (!user && !strapi.plugins['users-permissions'].config.advanced.allow_register) {
           return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
         }
 

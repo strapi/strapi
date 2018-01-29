@@ -70,6 +70,10 @@ module.exports = {
         });
       }
     } else {
+      if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled')) {
+        return ctx.badRequest(null, 'This provider is disabled.');
+      }
+
       // Connect the user thanks to the third-party provider.
       let user, error;
       try {
