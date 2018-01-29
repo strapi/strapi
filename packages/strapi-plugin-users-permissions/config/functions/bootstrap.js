@@ -96,11 +96,11 @@ module.exports = cb => {
             object: '­Reset password 🔑 ',
             message: `<p>We heard that you lost your password. Sorry about that!</p>
 
-            <p>But don’t worry! You can use the following link to reset your password:</p>
+<p>But don’t worry! You can use the following link to reset your password:</p>
 
-            <p><%= URL %>?code=<%= TOKEN %></p>
+<p><%= URL %>?code=<%= TOKEN %></p>
 
-            <p>Thanks.</p>`
+<p>Thanks.</p>`
           }
         }
       };
