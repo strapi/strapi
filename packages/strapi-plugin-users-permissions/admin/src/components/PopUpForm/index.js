@@ -110,7 +110,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             validations={{}}
             value={get(this.props.values, 'enabled', this.state.enabled)}
           />
-        
+
           {form.length > 1 && <div className={styles.separator} /> }
 
           {map(tail(form), (value, key) => (
@@ -173,7 +173,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             label={`users-permissions.PopUpForm.Email.${value}.label`}
             name={`${dataToEdit}.${value}`}
             inputDescription={includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : ''}
-            linkContent={includes(value, 'object') ? { link: 'https://strapi.io/documentation/plugin-development/ui-components.html', description: 'users-permissions.PopUpForm.Email.link.documentation' } : {}}
+            linkContent={includes(value, 'object') ? { link: 'https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md', description: 'users-permissions.PopUpForm.Email.link.documentation' } : {}}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}

@@ -156,3 +156,7 @@ $.ajax({
   }
 });
 ```
+
+## Email templates
+
+[See the documentation on GitHub](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md)
