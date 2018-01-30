@@ -1,0 +1,53 @@
+{
+  "plugin.description.short": "Un modo veloce per vedere, modifica e cancellare i dati nel tuo database.",
+  "plugin.description.long": "Un modo veloce per vedere, modifica e cancellare i dati nel tuo database.",
+  "containers.Home.pluginHeaderTitle": "Gestione Modelli",
+  "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
+  "containers.Home.pluginHeaderDescription": "Gestisci i tuoi record attraverso una potentissima e bellissima interfaccia.",
+  "containers.Edit.submit": "Salva",
+  "containers.Edit.editing": "In modifica...",
+  "containers.Edit.delete": "Elimina",
+  "containers.Edit.cancel": "Cancella",
+  "containers.Edit.returnList": "Ritorna alla lista",
+  "containers.List.addAnEntry": "Aggiungi {entity}",
+  "containers.List.pluginHeaderDescription": "{label} elementi trovati",
+  "containers.List.pluginHeaderDescription.singular": "{label} elemento trovato",
+  "components.LimitSelect.itemsPerPage": "Elementi per pagina",
+  "containers.List.errorFetchRecords": "Errore",
+
+  "emptyAttributes.title": "Non ci sono ancora campi.",
+  "emptyAttributes.description": "Add your first field to your Content Type",
+  "emptyAttributes.button": "Go to content type builder",
+
+  "error.schema.generation": "An error occurred during schema generation.",
+  "error.records.count": "An error occurred during count records fetch.",
+  "error.records.fetch": "An error occurred during records fetch.",
+  "error.record.fetch": "An error occurred during record fetch.",
+  "error.record.create": "An error occurred during record creation.",
+  "error.record.update": "An error occurred during record update.",
+  "error.record.delete": "An error occurred during record deletion.",
+  "error.model.fetch": "An error occurred during models config fetch.",
+  "error.validation.required": "This value input is required.",
+  "error.validation.regex": "The value not match the regex.",
+  "error.validation.max": "The value is too high.",
+  "error.validation.min": "The value is too low.",
+  "error.validation.maxLength": "The value is too long.",
+  "error.validation.minLength": "The value is too short.",
+  "error.contentTypeName.taken": "This name already exists",
+  "error.attribute.taken": "This field name already exists",
+  "error.attribute.key.taken": "This value already exists",
+  "error.attribute.sameKeyAndName": "Can't be equals",
+  "error.validation.minSupMax": "Can't be superior",
+
+  "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
+
+  "success.record.delete": "Eliminato",
+  "success.record.save": "Salvato",
+
+  "pageNotFound": "Pagina non trovata",
+
+  "popUpWarning.button.cancel": "Cancella",
+  "popUpWarning.button.confirm": "Conferma",
+  "popUpWarning.title": "Conferma per favore",
+  "popUpWarning.bodyMessage.contentType.delete": "Sei sicuro di voler eliminare questo elemento?"
+}

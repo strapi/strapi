@@ -1,0 +1,173 @@
+{
+  "Auth.form.button.register-success": "Invia ancora",
+  "Auth.form.button.forgot-password.success": "Invia ancora",
+  "Auth.form.button.forgot-password": "Invia email",
+  "Auth.form.button.reset-password": "Cambia password",
+  "Auth.form.button.login": "Accedi",
+  "Auth.form.button.register": "Ready to start",
+  "Auth.form.error.noAdminAccess": "You can't access to the administration panel.",
+
+  "Auth.form.forgot-password.email.label": "Inserisci il tuo indirizzo email",
+  "Auth.form.forgot-password.email.label.success": "Email inviata con successo a",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.header.register.description": "To finish setup and secure your app, please create the first user (root admin) by filling informations below.",
+  "Auth.form.header.login": "strapi",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "Benvenuto!",
+  "Auth.form.header.register-success": "strapi",
+
+  "Auth.form.login.password.label": "Password",
+  "Auth.form.login.rememberMe.label": "Ricordami",
+  "Auth.form.login.username.label": "Username",
+  "Auth.form.login.username.placeholder": "Arthur Dent",
+
+  "Auth.form.register.email.label": "Email",
+  "Auth.form.register.email.placeholder": "arthur@example.com",
+  "Auth.form.register.username.label": "Username",
+  "Auth.form.register.username.placeholder": "Arthur Dent",
+  "Auth.form.register.password.label": "Password",
+  "Auth.form.register.confirmPassword.label": "Conferma password",
+
+  "Auth.form.register-success.email.label": "Email inviata correttamente a",
+  "Auth.form.register-success.email.placeholder": "arthur@example.com",
+
+  "Auth.form.error.email.provide": "Please provide your username or your e-mail.",
+  "Auth.form.error.email.invalid": "This e-mail is invalid.",
+  "Auth.form.error.password.provide": "Please provide your password.",
+  "Auth.form.error.invalid": "Identifier or password invalid.",
+  "Auth.form.error.password.local": "This user never set a local password, please login thanks to the provider used during account creation.",
+  "Auth.form.error.password.format": "Your password can not contain more than three times the symbol `$`.",
+  "Auth.form.error.user.not-exist": "This email does not exist.",
+  "Auth.form.error.code.provide": "Incorrect code provided.",
+  "Auth.form.error.password.matching": "Passwords do not match.",
+  "Auth.form.error.params.provide": "Incorrect params provided.",
+  "Auth.form.error.username.taken": "Username is already taken",
+  "Auth.form.error.email.taken": "Email is already taken",
+
+  "Auth.link.forgot-password": "Hai dimenticato la password?",
+  "Auth.link.ready": "Ready to sign-in?",
+
+  "BoundRoute.title": "Bound route to",
+
+  "components.Input.error.password.noMatch": "Password don't match",
+
+  "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Seleziona tutti",
+
+  "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
+  "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
+  "EditForm.inputSelect.durations.label": "Duration",
+  "EditForm.inputSelect.durations.description": "Number of hours during the user can't subscribe.",
+
+  "EditForm.inputToggle.label.email": "Un solo account per indirizzo email",
+  "EditForm.inputToggle.label.sign-up": "Abiliti registrazioni",
+  "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+  "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
+
+  "EditPage.cancel": "Annulla",
+  "EditPage.submit": "Salva",
+  "EditPage.form.roles": "Roles details",
+  "EditPage.form.roles.label.description": "Descrizione",
+  "EditPage.form.roles.label.name": "Name",
+  "EditPage.form.roles.label.users": "Users associated with this role ({number})",
+  "EditPage.form.roles.name.error": "This value input is required.",
+  "EditPage.header.title": "{name} ",
+  "EditPage.header.title.create": "Create a new role",
+  "EditPage.header.description": "{description} ",
+  "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "An error occurred while fetching permissions",
+  "EditPage.notification.policies.error": "An error occurred while fetching policies",
+  "EditPage.notification.role.error": "An error occurred while fetching the role",
+
+  "HeaderNav.link.advancedSettings": "Impostazioni avanzate",
+  "HeaderNav.link.emailTemplates": "Template Email",
+  "HeaderNav.link.providers": "Provider",
+  "HeaderNav.link.roles": "Ruoli",
+
+  "HomePage.header.title": "Autorizzazioni & Permessi",
+  "HomePage.header.description": "Define the roles and permissions for every one of them",
+
+  "InputSearch.placeholder": "Cerca utente",
+
+  "List.button.roles": "Aggiungi nuovo ruolo",
+  "List.button.providers": "Aggiungi nuovo provider",
+
+  "List.title.emailTemplates.singular": "{number} template email disponibile",
+  "List.title.emailTemplates.plural": "{number} template email disponibili",
+
+  "List.title.providers.disabled.singular": "{number} è disabilitato",
+  "List.title.providers.disabled.plural": "{number} sono disabilitati",
+  "List.title.providers.enabled.singular": "{number} provider è abilitato e",
+  "List.title.providers.enabled.plural": "{number} providers sono abilitati e",
+
+  "List.title.roles.singular": "{number} ruolo è abilitato",
+  "List.title.roles.plural": "{number} ruoli sono abilitati",
+
+  "notification.error.delete": "An error occurred while trying to delete the item",
+  "notification.error.fetch": "An error occurred while trying to fetch data",
+  "notification.error.fetchUser": "An error occurred while trying to fetch users",
+  "notification.info.emailSent": "The email has been sent",
+  "notification.success.delete": "The item has been deleted",
+
+  "plugin.description.short": "Protect your API with a full-authentication process based on JWT",
+  "plugin.description.long": "Protect your API with a full-authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
+
+  "Plugin.permissions.application.description": "Define the allowed actions in your project.",
+  "Plugin.permissions.plugins.description": "Define the allowed actions in the {name} plugin.",
+
+  "Plugins.header.title": "Permessi",
+  "Plugins.header.description": "Only actions bound by a route are listed below.",
+
+  "Policies.InputSelect.empty": "None",
+  "Policies.InputSelect.label": "Allow to perform this action for:",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
+  "Policies.header.title": "Advanced settings",
+
+  "Email.template.validation_email": "Validazione indirizzo email",
+  "Email.template.reset_password": "Reset password",
+  "Email.template.success_register": "Successfull registration",
+
+  "Auth.advanced.allow_register": "",
+
+  "PopUpForm.button.cancel": "Annulla",
+  "PopUpForm.button.save": "Salva",
+  "PopUpForm.header.add.providers": "Add New Provider",
+  "PopUpForm.header.edit.email-templates": "Edit Email Templates",
+  "PopUpForm.header.edit.providers": "Edit {provider} Provider",
+  "PopUpForm.inputSelect.providers.label": "Choose the provider",
+  "PopUpForm.Email.options.from.name.label": "Shipper name",
+  "PopUpForm.Email.options.from.email.label": "Shipper email",
+  "PopUpForm.Email.options.response_email.label": "Response email",
+  "PopUpForm.Email.options.object.label": "Object",
+  "PopUpForm.Email.options.message.label": "Message",
+  "PopUpForm.Email.validation_email.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.reset_password.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.success_register.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.reset_password.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.success_register.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.options.from.email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.from.name.placeholder": "John Doe",
+  "PopUpForm.Providers.enabled.label": "Enable",
+  "PopUpForm.Providers.enabled.description": "If disabled, the users won't be able to use this provider.",
+  "PopUpForm.Providers.key.label": "Client ID",
+  "PopUpForm.Providers.key.placeholder": "TEXT",
+  "PopUpForm.Providers.secret.label": "Client Secret",
+  "PopUpForm.Providers.secret.placeholder": "TEXT",
+  "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
+
+
+
+  "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your  Facebook application configurations",
+  "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your  Google application configurations",
+  "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your  GitHub application configurations",
+  "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your  Linkedin application configurations",
+  "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your  Twitter application configurations",
+
+  "PopUpForm.Providers.callback.placeholder": "TEXT",
+  "PopUpForm.Email.email_templates.inputDescription": "Don't know how to set variables",
+  "PopUpForm.Email.link.documentation": "check out our documentation."
+}

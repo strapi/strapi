@@ -1,0 +1,104 @@
+{
+  "app.components.ComingSoonPage.comingSoon": "Disponibile a breve",
+  "app.components.ComingSoonPage.featuresNotAvailable": "Questa funzionalità è attualmente in sviluppo.",
+
+  "app.components.DownloadInfo.download": "Download in corso...",
+  "app.components.DownloadInfo.text": "It can take a minute. Thanks for your patience.",
+
+  "app.components.HomePage.welcome": "Benvenuto!",
+  "app.components.HomePage.description.part1": "Siamo felici di averti come uno dei nostri utenti!",
+  "app.components.HomePage.description.part2": "Ora sei un membro della nostra comunità che ti aiuterà a costruire la tua app dei sogni.",
+  "app.components.HomePage.button": "Crea il tuo primo Modello",
+  "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
+
+  "app.components.InstallPluginPage.helmet": "Install plugins",
+  "app.components.InstallPluginPage.title": "Installa nuovi plugin",
+  "app.components.InstallPluginPage.description": "Estendi la tua app senza sforzi",
+  "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
+  "app.components.InstallPluginPage.InputSearch.label": " ",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Search a plugin... (ex: authentication)",
+  "app.components.InstallPluginPopup.downloads": "download",
+  "app.components.InstallPluginPopup.navLink.description": "Descrizione",
+  "app.components.InstallPluginPopup.navLink.screenshots": "Screenshots",
+  "app.components.InstallPluginPopup.navLink.avis": "avis",
+  "app.components.InstallPluginPopup.navLink.faq": "faq",
+  "app.components.InstallPluginPopup.navLink.changelog": "changelog",
+  "app.components.InstallPluginPopup.noDescription": "Nessuna descrizione disponibile",
+
+  "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
+  "app.components.LeftMenuLinkContainer.configuration": "Configurazione",
+  "app.components.LeftMenuLinkContainer.general": "Generale",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Installa nuovo plugin",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Elenca plugin",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Nessun plugin installato",
+  "app.components.LeftMenuLinkContainer.plugins": "Plugin",
+
+  "app.components.ListPluginsPage.helmet.title": "List plugins",
+  "app.components.ListPluginsPage.title": "Plugins",
+  "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",
+  "app.components.listPluginsPage.deletePlugin.error": "An error occurred during the plugin uninstallation",
+  "app.components.listPlugins.title.singular": "{number} plugin is installed",
+  "app.components.listPlugins.title.plural": "{number} plugins are installed",
+  "app.components.listPlugins.title.none": "No plugin is installed",
+  "app.components.listPlugins.button": "Add New Plugin",
+
+  "app.components.NotFoundPage.description": "Non trovato",
+  "app.components.NotFoundPage.back": "Torna alla pagina iniziale",
+
+  "app.components.Official": "Official",
+
+  "app.components.PluginCard.compatible": "Compatibile con la tua app",
+  "app.components.PluginCard.compatibleCommunity": "Compatibile con la comunità",
+  "app.components.PluginCard.Button.label.download": "Download",
+  "app.components.PluginCard.Button.label.install": "Già installato",
+  "app.components.PluginCard.Button.label.support": "Supportaci",
+  "app.components.PluginCard.price.free": "Gratis",
+  "app.components.PluginCard.more-details": "Più dettagli",
+
+  "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
+  "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
+
+  "components.ErrorBoundary.title": "Qualcosa è andato storto...",
+
+  "components.OverlayBlocker.title": "Aspettando il riavvio...",
+  "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
+
+  "components.ProductionBlocker.header": "This plugin is only available in development.",
+  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments.",
+
+  "components.popUpWarning.button.cancel": "Annulla",
+  "components.popUpWarning.button.confirm": "Conferma",
+  "components.popUpWarning.title": "Conferma per favore",
+  "components.popUpWarning.message": "Sei sicuto di volerlo eliminare?",
+
+  "components.Input.error.validation.email": "Non è un indirizzo email valido.",
+  "components.Input.error.validation.required": "Questo campo è richiesto.",
+  "components.Input.error.validation.regex": "Il valore inserito non è validato all'espressione regolare.",
+  "components.Input.error.validation.max": "Il valore inserito è troppo alto.",
+  "components.Input.error.validation.min": "Il valore inserito è troppo basso.",
+  "components.Input.error.validation.maxLength": "Il valore inserito è troppo lungo.",
+  "components.Input.error.validation.minLength": "Il valore inserito è troppo corto.",
+  "components.Input.error.contentTypeName.taken": "Questo nome esiste già.",
+  "components.Input.error.attribute.taken": "Il nome di questo campo è già utilizzato.",
+  "components.Input.error.attribute.key.taken": "Questo valore esiste già.",
+  "components.Input.error.attribute.sameKeyAndName": "Non possono essere uguali.",
+  "components.Input.error.validation.minSupMax": "Non può essere maggiore.",
+  "components.Input.error.custom-error": "{errorMessage} ",
+
+  "components.ListRow.empty": "Non ci sono dati da mostrare.",
+
+  "notification.error": "Si è verificato un errore.",
+
+  "Auth & Permissions": "Autorizzazioni e Permessi",
+  "Content Manager": "Gestione Contenuti",
+  "Content Type Builder": "Gestione Modelli",
+  "Settings Manager": "Gestione Configurazione",
+  "Email": "Email",
+  "Password": "Password",
+  "Username": "Username",
+  "Provider": "Provider",
+  "ResetPasswordToken": "Token di Reset Password",
+  "Role": "Ruolo",
+  "New entry": "Nuovo",
+  "request.error.model.unknow": "Questo modello non esiste."
+}
