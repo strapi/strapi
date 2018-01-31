@@ -40,10 +40,10 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: async cb => {
+    initialize: cb => {
       const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-bookshelf' });
 
-      await _.forEach(connections, (connection, connectionName) => {
+      _.forEach(connections, (connection, connectionName) => {
         // Apply defaults
         _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
 
