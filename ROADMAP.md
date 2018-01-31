@@ -88,21 +88,21 @@ _Reorganize the mono-repository. The rule to follow is to only have hooks withou
 - ~~Improve generated APIs (especially the relation part)~~.
 
 `strapi@alpha.8` *(expected release date: 22/12/2017)*:
-- [Admin] Install plugins directly from the interface.
-- Ask database settings during the project creation.
-- Ping database before generating the project.
-- Allow associations between app's models and plugins' models.
+- ~~[Admin] Install plugins directly from the interface~~.
+- ~~Ask database settings during the project creation~~.
+- ~~Ping database before generating the project~~.
+- ~~Allow associations between app's models and plugins' models~~.
 
 `strapi@alpha.9` *(expected release date: 12/01/2018)*:
-- [Plugin - Users & Permissions] Integrate providers authentication, email templates and advanced settings.
+- ~~[Plugin] Analytics (homepage only)~~.
+- ~~[Plugin - Users & Permissions] Integrate providers authentication, email templates and advanced settings~~.
 
-`strapi@alpha.10` *(expected release date: 29/01/2018)*:
-- [Plugin] Analytics.
+`strapi@alpha.10` *(expected release date: 15/02/2018)*:
+- [Framework] New core API to manage settings in database.
+- [Admin] Refactor the Input component to make it more extensible.
 
-`strapi@alpha.11` *(expected release date: 12/02/2018)*:
+`strapi@alpha.11` *(expected release date: 02/03/2018)*:
 - [Plugin] Upload.
-- Re-design & improve the DX of the validations layer.
 
-`strapi@alpha.12` *(expected release date: 02/03/2018)*:
-- [Plugin] Media Library.
+`strapi@alpha.12` *(expected release date: 19/03/2018)*:
 - [Plugin] GraphQL.
