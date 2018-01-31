@@ -1,5 +1,5 @@
 {
-  "collectionName": "",
+  "connection": "default",
   "info": {
     "name": "user",
     "description": ""
@@ -15,7 +15,6 @@
     "email": {
       "type": "email",
       "minLength": 6,
-      "unique": true,
       "configurable": false,
       "required": true
     },
@@ -33,9 +32,10 @@
       "configurable": false
     },
     "role": {
-      "type": "integer",
+      "model": "role",
+      "via": "users",
+      "plugin": "users-permissions",
       "configurable": false
     }
-  },
-  "connection": "default"
+  }
 }

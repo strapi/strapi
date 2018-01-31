@@ -53,7 +53,7 @@
   border-bottom: 1px solid #F6F6F6;
   position: relative;
   > button {
-    margin-right: -1.5rem;
+    margin-right: -2.5rem !important;
     color: #C3C5C8;
     opacity: 1;
     font-size: 1.8rem;
@@ -163,4 +163,23 @@
   border: 0.1rem solid #F64D0A;
   position: relative;
   border-radius: 3px;
+}
+
+.separator {
+  width: 100%;
+  margin: 14px 15px 20px 15px;
+  border-bottom: 2px solid #F6F6F6;
+}
+
+
+.providerDisabled {
+  > div {
+    &:last-child {
+      > input {
+        &:disabled {
+          background-color: #FAFAFB !important;
+        }
+      }
+    }
+  }
 }

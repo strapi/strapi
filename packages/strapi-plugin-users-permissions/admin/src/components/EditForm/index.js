@@ -18,16 +18,17 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
       <div className={styles.editForm}>
         <div className="row">
           <Input
-            label="users-permissions.EditForm.inputToggle.label"
-            inputDescription="users-permissions.EditForm.inputToggle.description"
-            name="uniqueAccount"
+            label="users-permissions.EditForm.inputToggle.label.email"
+            inputDescription="users-permissions.EditForm.inputToggle.description.email"
+            name="unique_email"
             onChange={this.props.onChange}
             type="toggle"
-            value={get(this.props.values, 'uniqueAccount')}
+            value={get(this.props.values, 'unique_email')}
             validations={{}}
           />
         </div>
         <div className={styles.separator} />
+        {/*}
         <div className="row">
           <Input
             customBootstrapClass="col-md-3"
@@ -51,8 +52,20 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             value={get(this.props.values, 'durations')}
           />
         </div>
+        <div className={styles.separator} />
+        */}
+        <div className="row">
+          <Input
+            label="users-permissions.EditForm.inputToggle.label.sign-up"
+            inputDescription="users-permissions.EditForm.inputToggle.description.sign-up"
+            name="allow_register"
+            onChange={this.props.onChange}
+            type="toggle"
+            value={get(this.props.values, 'allow_register')}
+            validations={{}}
+          />
+        </div>
       </div>
-
     );
   }
 }

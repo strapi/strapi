@@ -31,7 +31,8 @@ module.exports = {
       return acc;
     }, {}))
     .catch((err) => {
-      const field = _.last(_.words(err.message.split('_')[0]));
+      const message = err.message.split('index:');
+      const field = _.words(_.last(message).split('_')[0]);
       const error = { message: `This ${field} is already taken`, field };
 
       throw error;
@@ -122,6 +123,7 @@ module.exports = {
               const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()
               );
+
               // Records to remove in the relation.
               const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()

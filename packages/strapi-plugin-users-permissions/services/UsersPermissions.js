@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const path = require('path');
-const stringify = JSON.stringify;
 const _ = require('lodash');
 const request = require('request');
 
@@ -13,32 +12,75 @@ const request = require('request');
  */
 
 module.exports = {
-  createRole: (role) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles;
-    const highestId = Math.max(...Object.keys(appRoles).map(Number)) + 1;
-    const newRole = _.pick(role, ['name', 'description', 'permissions']);
+  createRole: async (params) => {
+    if (!strapi.plugins['content-manager']) {
+      return new Error('This feature requires to install the Content Manager plugin');
+    }
 
-    _.set(appRoles, highestId.toString(), newRole);
+    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions', 'type']));
 
-    _.forEach(role.users, (user) => {
-      module.exports.updateUserRole(user, highestId);
-    });
+    const arrayOfPromises = Object.keys(params.permissions).reduce((acc, type) => {
+      Object.keys(params.permissions[type].controllers).forEach(controller => {
+        Object.keys(params.permissions[type].controllers[controller]).forEach(action => {
+          acc.push(strapi.query('permission', 'users-permissions').addPermission({
+            role: role._id || role.id,
+            type,
+            controller,
+            action: action.toLowerCase(),
+            ...params.permissions[type].controllers[controller][action]
+          }));
+        });
+      });
 
-    module.exports.writePermissions(appRoles);
+      return acc;
+    }, []);
+
+    // Use Content Manager business logic to handle relation.
+    arrayOfPromises.push(strapi.plugins['content-manager'].services['contentmanager'].edit({
+      id: role._id || role.id,
+      model: 'role'
+    }, {
+      users: params.users
+    }, 'users-permissions'));
+
+    return await Promise.all(arrayOfPromises);
   },
 
-  deleteRole: async (roleId) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles
+  deleteRole: async (roleID, guestID) => {
+    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
-    module.exports.writePermissions(_.omit(appRoles, [roleId]));
+    if (!role) {
+      throw new Error('Cannot found this role');
+    }
 
-    const users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
-      role: roleId
+    if (role.type === 'root') {
+      return new Error(`You cannot delete the root admin role.`);
+    }
+
+    // Move users to guest role.
+    const arrayOfPromises = role.users.reduce((acc, user) => {
+      acc.push(strapi.query('user', 'users-permissions').update({
+        id: user._id || user.id
+      }, {
+        role: guestID
+      }))
+
+      return acc;
+    }, []);
+
+    // Remove permissions related to this role.
+    role.permissions.forEach(permission => {
+      arrayOfPromises.push(strapi.query('permission', 'users-permissions').delete({
+        id: permission._id || permission.id
+      }));
+    })
+
+    // Delete the role.
+    arrayOfPromises.push(strapi.query('role', 'users-permissions').delete({
+      id: roleID
     }));
 
-    _.forEach(users, (user) => {
-      module.exports.updateUserRole(user, '1');
-    });
+    return await Promise.all(arrayOfPromises);
   },
 
   getPlugins: (plugin, lang = 'en') => {
@@ -59,10 +101,12 @@ module.exports = {
     });
   },
 
-  getActions: (plugins = []) => {
+  getActions: (plugins = [], withInfo = true) => {
     const generateActions = (data) => (
       Object.keys(data).reduce((acc, key) => {
-        acc[key] = { enabled: false, policy: '' };
+        if (_.isFunction(data[key])) {
+          acc[key] = { enabled: false, policy: '' };
+        }
 
         return acc;
     }, {}));
@@ -74,12 +118,20 @@ module.exports = {
     }, { controllers: {} });
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce((acc, key) => {
+      const initialState = {
+        controllers: {}
+      };
+
+      if (withInfo) {
+        initialState.information = plugins.find(plugin => plugin.id === key) || {};
+      }
+
       acc[key] = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
         obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
 
         return obj;
 
-      }, { controllers: {}, information: plugins.find(plugin => plugin.id === key) || {} });
+      }, initialState);
 
       return acc;
     }, {});
@@ -93,126 +145,137 @@ module.exports = {
     return _.merge(permissions, pluginsPermissions);;
   },
 
-  getRole: async (roleId, plugins) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles;
+  getRole: async (roleID, plugins) => {
+    const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
-    appRoles[roleId].users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', { role: roleId }));
+    if (!role) {
+      throw new Error('Cannot found this role');
+    }
 
-    Object.keys(appRoles[roleId].permissions)
-      .filter(name => name !== 'application')
-      .map(name => {
-        appRoles[roleId].permissions[name].information = plugins.find(plugin => plugin.id === name) || {};
+    // Group by `type`.
+    role.permissions = role.permissions.reduce((acc, permission) => {
+      _.set(acc, `${permission.type}.controllers.${permission.controller}.${permission.action}`, {
+        enabled: _.toNumber(permission.enabled) == true,
+        policy: permission.policy
       });
 
-    return appRoles[roleId];
+      if (permission.type !== 'application' && !acc[permission.type].information) {
+        acc[permission.type].information = plugins.find(plugin => plugin.id === permission.type) || {};
+      }
+
+      return acc;
+    }, {});
+
+    return role;
   },
 
   getRoles: async () => {
-    const roles = strapi.plugins['users-permissions'].config.roles;
-    const usersCount = await strapi.query('user', 'users-permissions').countByRoles();
-    const formattedRoles = Object.keys(roles).reduce((acc, key) => {
-      const role = _.pick(roles[key], ['name', 'description']);
+    const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
 
-      _.set(role, 'id', key);
-      _.set(role, 'nb_users', _.get(_.find(usersCount, { _id: parseFloat(key) }), 'total', 0));
-      acc.push(role);
+    for (let i = 0; i < roles.length; ++i) {
+      roles[i].id = roles[i].id || roles[i]._id;
+      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id });
+    }
 
-      return acc;
-    }, []);
-
-    return formattedRoles;
+    return roles;
   },
 
   getRoutes: async () => {
-    const apiRoutes = strapi.api ? Object.keys(strapi.api).reduce((acc, current) => {
+    const routes = Object.keys(strapi.api || {}).reduce((acc, current) => {
       return acc.concat(strapi.api[current].config.routes);
-    }, []) : [];
+    }, []);
 
-    const pluginsRoutes = Object.keys(strapi.plugins).reduce((acc, current) => {
+    const pluginsRoutes = Object.keys(strapi.plugins || {}).reduce((acc, current) => {
       acc[current] = strapi.plugins[current].config.routes;
 
       return acc;
     }, []);
 
-    return _.merge({ application: apiRoutes}, pluginsRoutes);
+    return _.merge({ application: routes }, pluginsRoutes);
   },
 
-  getRoleConfigPath: () => (
-    path.join(
-      strapi.config.appPath,
-      'plugins',
-      'users-permissions',
-      'config',
-      'roles.json',
-    )
-  ),
+  updatePermissions: async function (cb) {
+    const actions = strapi.plugins['users-permissions'].config.actions || [];
 
-  updateData: (data, diff = 'unset') => {
-    const dataToCompare = strapi.plugins['users-permissions'].services.userspermissions.getActions();
+    // Aggregate first level actions.
+    const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
+      Object.keys(strapi.api[api].controllers)
+        .map(controller => {
+          const actions = Object.keys(strapi.api[api].controllers[controller])
+            .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
+            .map(action => `application.${controller}.${action.toLowerCase()}`);
 
-    _.forEach(data, (roleData, roleId) => {
-      const obj = diff === 'unset' ? roleData.permissions : dataToCompare;
-
-      _.forEach(obj, (pluginData, pluginName) => {
-        _.forEach(pluginData.controllers, (controllerActions, controllerName) => {
-          _.forEach(controllerActions, (actionData, actionName) => {
-            if (diff === 'unset') {
-              if (!_.get(dataToCompare, [pluginName, 'controllers', controllerName])) {
-                _.unset(data, [roleId, 'permissions',  pluginName, 'controllers', controllerName]);
-                return;
-              }
-
-              if (!_.get(dataToCompare, [pluginName, 'controllers', controllerName, actionName])) {
-                _.unset(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName]);
-              }
-            } else if (!_.get(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName])) {
-              const isCallback = actionName === 'callback' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-              const isRegister = actionName === 'register' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-              const isPassword = actionName === 'forgotPassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-              const isNewPassword = actionName === 'changePassword' && controllerName === 'auth' && pluginName === 'users-permissions' && roleId === '1';
-              const isInit = actionName === 'init' && controllerName === 'userspermissions';
-              const isMe = actionName === 'me' && controllerName === 'user' && pluginName === 'users-permissions';
-              const enabled = isCallback || isRegister || roleId === '0' || isInit || isPassword || isNewPassword || isMe;
-
-              _.set(data, [roleId, 'permissions', pluginName, 'controllers', controllerName, actionName], { enabled, policy: '' })
-            }
-          });
-        });
+          acc = acc.concat(actions);
       });
-    });
 
-    return data;
-  },
+      return acc;
+    }, []);
 
-  updatePermissions: async (cb) => {
-    const appActions = module.exports.getActions();
-    const writePermissions = module.exports.writePermissions;
-    const currentRoles = strapi.plugins['users-permissions'].config.roles || {
-      '0': {
-        description: '',
-        name: 'Administrator',
-        permissions: {
-          application: {
-            controllers: {},
-          },
-        },
-      },
-      '1': {
-        description: '',
-        name: 'Guest',
-        permissions: {
-          application: {
-            controllers: {},
-          },
-        },
-      },
-    };
+    // Aggregate plugins' actions.
+    const pluginsActions = Object.keys(strapi.plugins).reduce((acc, plugin) => {
+      Object.keys(strapi.plugins[plugin].controllers)
+        .map(controller => {
+          const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
+            .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
+            .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
 
-    const remove = await module.exports.updateData(_.cloneDeep(currentRoles));
-    const added = await module.exports.updateData(_.cloneDeep(remove), 'set');
+          acc = acc.concat(actions);
+      });
 
-    if (!_.isEqual(currentRoles, added)) {
-      writePermissions(added);
+      return acc;
+    }, []);
+
+    // Merge array into one.
+    const currentActions = appActions.concat(pluginsActions);
+    // Count permissions available.
+    const permissions = await strapi.query('permission', 'users-permissions').count();
+
+    // Compare to know if actions have been added or removed from controllers.
+    if (!_.isEqual(actions, currentActions) || permissions < 1) {
+      const splitted = (str) => {
+        const [type, controller, action] = str.split('.');
+
+        return { type, controller, action };
+      };
+
+      const defaultPolicy = (obj, role) => {
+        const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
+        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
+        const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
+        const isReload = obj.action === 'autoreload';
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect;
+
+        return Object.assign(obj, { enabled, policy: '' });
+      };
+
+      // Retrieve roles
+      const roles = await strapi.query('role', 'users-permissions').find();
+
+      // We have to know the difference to add or remove
+      // the permissions entries in the database.
+      const toRemove = _.difference(actions, currentActions).map(splitted);
+      const toAdd = (permissions < 1 ? currentActions : _.difference(currentActions, actions))
+          .map(splitted);
+
+      // Execute request to update entries in database for each role.
+      await Promise.all(
+        roles.map(role =>
+          Promise.all(
+            toAdd
+              .map(action => defaultPolicy(action, role))
+              .map(action => strapi.query('permission', 'users-permissions')
+                .addPermission(Object.assign(action, { role: role.id || role._id }))
+              )
+          )
+        ),
+        Promise.all(toRemove.map(action => strapi.query('permission', 'users-permissions').removePermission(action)))
+      );
+
+      this.writeActions(currentActions);
     }
 
     if (cb) {
@@ -220,130 +283,276 @@ module.exports = {
     }
   },
 
-  updateRole: async (roleId, body) => {
-    const appRoles = strapi.plugins['users-permissions'].config.roles
-    const updatedRole = _.pick(body, ['name', 'description', 'permissions']);
-    _.set(appRoles, [roleId], updatedRole);
+  initialize: async function (cb) {
+    const roles = await strapi.query('role', 'users-permissions').count();
 
-    module.exports.writePermissions(appRoles);
+    // It's has been already initialized.
+    if (roles > 0) {
+      return await this.updatePermissions(cb);
+    }
 
-    const currentUsers = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
-      role: roleId
-    }));
-    const userToAdd = _.differenceBy(body.users, currentUsers.toJSON ? currentUsers.toJSON() : currentUsers, 'id');
-    const userToRemove = _.differenceBy(currentUsers.toJSON ? currentUsers.toJSON() : currentUsers, body.users, 'id');
+    // Create two first default roles.
+    await Promise.all([
+      strapi.query('role', 'users-permissions').create({
+        name: 'Administrator',
+        description: 'These users have all access in the project.',
+        type: 'root'
+      }),
+      strapi.query('role', 'users-permissions').create({
+        name: 'Guest',
+        description: 'Default role given to unauthenticated user.',
+        type: 'guest'
+      }),
+    ]);
 
-    _.forEach(userToAdd, (user) => {
-      module.exports.updateUserRole(user, roleId);
-    });
-    _.forEach(userToRemove, (user) => {
-      module.exports.updateUserRole(user, '1');
-    });
+    await this.updatePermissions(cb);
+  },
+
+  updateRole: async function (roleID, body) {
+    const [role, root, guest] = await Promise.all([
+      this.getRole(roleID, []),
+      strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []),
+      strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, [])
+    ]);
+
+    const arrayOfPromises = Object.keys(body.permissions).reduce((acc, type) => {
+      Object.keys(body.permissions[type].controllers).forEach(controller => {
+        Object.keys(body.permissions[type].controllers[controller]).forEach(action => {
+          const bodyAction = body.permissions[type].controllers[controller][action];
+          const currentAction = _.get(role.permissions, `${type}.controllers.${controller}.${action}`, {});
+
+          if (_.differenceWith([bodyAction], [currentAction]).length > 0) {
+            acc.push(strapi.query('permission', 'users-permissions').update({
+              role: roleID,
+              type,
+              controller,
+              action: action.toLowerCase()
+            }, bodyAction));
+          }
+        });
+      });
+
+      return acc;
+    }, []);
+
+    // Add user to this role.
+    _.differenceBy(body.users, role.users, role._id ? '_id' : 'id')
+      .filter(user => user.role !== `${root._id || root.id}`.toString())
+      .forEach(user => {
+        arrayOfPromises.push(this.updateUserRole(user, roleID));
+      })
+
+    // Remove user to this role and link him to guest.
+    _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
+      .filter(user => user.role !== `${root._id || root.id}`.toString())
+      .forEach(user => {
+        arrayOfPromises.push(this.updateUserRole(user, guest._id || guest.id));
+      });
+
+
+    return Promise.all(arrayOfPromises);
   },
 
   updateUserRole: async (user, role) => {
-    strapi.query('user', 'users-permissions').update({
-      _id: user._id || user.id,
+    return strapi.query('user', 'users-permissions').update({
+      id: user._id || user.id
+    }, {
       role: role.toString()
     });
   },
 
-  writePermissions: (data) => {
-    const roleConfigPath = module.exports.getRoleConfigPath();
+  writeActions: (data) => {
+    const actionsPath = path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'actions.json');
 
     try {
-      fs.writeFileSync(roleConfigPath, stringify({ roles: data }, null, 2), 'utf8');
-      _.set(strapi.plugins['users-permissions'], 'config.roles', data);
+      // Stop auto reload.
+      strapi.reload.isReloading = false;
+      // Rewrite actions.json file.
+      fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
+      // Set value to AST to avoid restart.
+      _.set(strapi.plugins['users-permissions'], 'config.actions', data);
+      // Restart to watch files.
+      strapi.reload.isReloading = true;
     } catch(err) {
       strapi.log.error(err);
     }
   },
 
-  syncSchema: (cb) => {
-    const Model = strapi.plugins['users-permissions'].models.user;
-
-    if (Model.orm !== 'bookshelf') {
+  syncSchema: async (cb) => {
+    if (strapi.plugins['users-permissions'].models.user.orm !== 'bookshelf') {
       return cb();
     }
 
-    const tableName = Model.collectionName;
+    // Extract necessary information from plugin's models.
+    const {
+      user: { collectionName: userTableName, connection: userConnection, client: userClient },
+      role: { collectionName: roleTableName, connection: roleConnection, client: roleClient },
+      permission: { collectionName: permissionTableName, connection: permissionConnection, client: permissionClient }
+    } = strapi.plugins['users-permissions'].models;
 
-    new Promise((resolve, reject) => {
-      strapi.connections[Model.connection].schema.hasTable(tableName)
-      .then(exist => {
-        if (!exist) {
-          strapi.log.warn(`
-⚠️  TABLE \`${tableName}\` DOESN'T EXIST
+    const details = {
+      user: {
+        tableName: userTableName,
+        connection: userConnection,
+        client: userClient
+      },
+      role: {
+        tableName: roleTableName,
+        connection: roleConnection,
+        client: roleClient
+      },
+      permission: {
+        tableName: permissionTableName,
+        connection: permissionConnection,
+        client: permissionClient
+      }
+    };
 
-1️⃣  EXECUTE THE FOLLOWING SQL QUERY
+    // Check if the tables are existing.
+    const hasTables = await Promise.all(Object.keys(details).map(name =>
+      strapi.connections[details[name].connection].schema.hasTable(details[name].tableName)
+    ));
 
-CREATE TABLE "${tableName}" (
-  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+    const missingTables = [];
+    const tablesToCreate = [];
+
+    for (let index = 0; index < hasTables.length; ++index) {
+      const hasTable = hasTables[index];
+      const currentModel = Object.keys(details)[index];
+      const quote = details[currentModel].client === 'pg' ? '"' : '`';
+
+      if (!hasTable) {
+        missingTables.push(`
+⚠️  TABLE \`${details[currentModel].tableName}\` DOESN'T EXIST`);
+
+        switch (currentModel) {
+          case 'user':
+            tablesToCreate.push(`
+
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
   username text,
   email text,
   provider text,
-  role text,
-  ${Model.client === 'pg' ? '"resetPasswordToken"' : 'resetPasswordToken'} text,
+  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+  ${quote}resetPasswordToken${quote} text,
   password text,
-  updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-);
+  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+);`);
+            break;
+          case 'role':
+            tablesToCreate.push(`
 
-2️⃣  RESTART YOUR SERVER
-          `);
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+  name text,
+  description text,
+  type text
+);`);
+            break;
+          case 'permission':
+            tablesToCreate.push(`
 
-          strapi.stop();
+CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+  type text,
+  controller text,
+  action text,
+  enabled boolean,
+  policy text
+);`);
+            break;
+          default:
+
         }
+      }
+    }
 
-        resolve();
-      });
-    })
-    .then(() => {
-      const attributes = _.cloneDeep(Model.attributes);
-      attributes.id = {
-        type: Model.client === 'pg' ? 'integer' : 'int'
+    if (!_.isEmpty(tablesToCreate)) {
+      tablesToCreate.unshift(`
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERY`);
+
+      tablesToCreate.push(`
+
+2️⃣  RESTART YOUR SERVER`)
+      strapi.log.warn(missingTables.concat(tablesToCreate).join(''));
+
+      // Stop the server.
+      strapi.stop();
+    }
+
+    const missingColumns = [];
+    const tablesToAlter = [];
+
+    for (let index = 0; index < hasTables.length; ++index) {
+      const currentModel = Object.keys(details)[index];
+      const quote = details[currentModel].client === 'pg' ? '"' : '`';
+      const attributes = {
+        id: {
+          type: details[currentModel].client === 'pg' ? 'integer' : 'int'
+        },
+        ..._.cloneDeep(strapi.plugins['users-permissions'].models[currentModel].attributes)
       };
-      attributes.updated_at = attributes.created_at = {
-        type: Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'
-      };
 
-      let commands = '';
-
-      const columnExist = (description, attribute) => {
-        return new Promise((resolve, reject) => {
-          strapi.connections[Model.connection].schema.hasColumn(tableName, attribute)
-          .then(exist => {
-            if (!exist) {
-              if (description.type === 'string') {
-                description.type = 'text';
-              }
-
-              commands += `\r\nALTER TABLE "${tableName}" ADD ${Model.client === 'pg' ? `"${attribute}"` : `${attribute}`} ${description.type};`;
-            }
-
-            resolve();
-          });
+      // Add created_at and updated_at attributes for the model User.
+      if (currentModel === 'user') {
+        Object.assign(attributes, {
+          created_at: {
+            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
+          },
+          updated_at: {
+            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
+          }
         });
-      };
+      }
 
-      const testsColumns = Object.entries(attributes).map(([attribute, description]) => columnExist(description, attribute));
-      Promise.all(testsColumns)
-      .then(() => {
-        if (!_.isEmpty(commands)) {
-          strapi.log.warn(`
-⚠️  TABLE \`${tableName}\` HAS MISSING COLUMNS
+      const columns = Object.keys(attributes);
 
-1️⃣  EXECUTE THE FOLLOWING SQL QUERIES
-${commands}
+      // Check if there are the required attributes.
+      const hasColumns = await Promise.all(columns.map(attribute =>
+        strapi.connections[details[currentModel].connection].schema.hasColumn(details[currentModel].tableName, attribute)
+      ));
 
-2️⃣  RESTART YOUR SERVER
-          `);
+      hasColumns.forEach((hasColumn, index) => {
+        const currentColumn = columns[index];
+        const attribute = attributes[currentColumn];
 
-          strapi.stop();
+        if (!hasColumn && !attribute.collection) {
+          const currentType = attribute.model ? 'integer' : attribute.type;
+          const type = currentType === 'string' ? 'text' : currentType;
+
+          missingColumns.push(`
+⚠️  TABLE \`${details[currentModel].tableName}\` HAS MISSING COLUMNS`);
+
+          tablesToAlter.push(`
+
+ALTER TABLE ${quote}${details[currentModel].tableName}${quote} ADD ${details[currentModel].client === 'pg' ? `${quote}${currentColumn}${quote}` : `${currentColumn}`} ${type};`);
         }
-
-        cb();
       });
-    });
+    }
+
+    if (!_.isEmpty(tablesToAlter)) {
+      tablesToAlter.unshift(`
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERIES`);
+
+      tablesToAlter.push(`
+
+2️⃣  RESTART YOUR SERVER`)
+      strapi.log.warn(missingColumns.concat(tablesToAlter).join(''));
+
+      // Stop the server.
+      return strapi.stop();
+    }
+
+    cb();
+  },
+
+  template: (layout, data) => {
+    const compiledObject = _.template(layout);
+    return compiledObject(data);
   }
 };

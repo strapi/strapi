@@ -64,6 +64,56 @@
         "policies": []
       }
     },
+    {
+      "method": "GET",
+      "path": "/email-templates",
+      "handler": "UsersPermissions.getEmailTemplate",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/email-templates",
+      "handler": "UsersPermissions.updateEmailTemplate",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/advanced",
+      "handler": "UsersPermissions.getAdvancedSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/advanced",
+      "handler": "UsersPermissions.updateAdvancedSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "handler": "UsersPermissions.getProviders",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "PUT",
+      "path": "/providers",
+      "handler": "UsersPermissions.updateProviders",
+      "config": {
+        "policies": []
+      }
+    },
+
 
     {
       "method": "POST",
@@ -98,6 +148,15 @@
       }
     },
 
+    {
+      "method": "GET",
+      "path": "/connect/*",
+      "handler": "Auth.connect",
+      "config": {
+        "policies": [],
+        "prefix": ""
+      }
+    },
     {
       "method": "POST",
       "path": "/auth/local",

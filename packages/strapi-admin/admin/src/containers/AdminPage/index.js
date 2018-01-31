@@ -16,6 +16,12 @@ import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
 
+// Actions required for disabling and enabling the OverlayBlocker
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+} from 'actions/overlayBlocker';
+
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import {
   makeSelectBlockApp,
@@ -48,6 +54,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   getChildContext = () => (
     {
+      disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+      enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
       plugins: this.props.plugins,
       updatePlugin: this.props.updatePlugin,
     }
@@ -144,6 +152,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 }
 
 AdminPage.childContextTypes = {
+  disableGlobalOverlayBlocker: PropTypes.func,
+  enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };
@@ -158,6 +168,8 @@ AdminPage.defaultProps = {
 
 AdminPage.propTypes = {
   blockApp: PropTypes.bool.isRequired,
+  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -176,9 +188,11 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
+    disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
+    enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
-    updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
     pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
+    updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
     dispatch,
   };
 }

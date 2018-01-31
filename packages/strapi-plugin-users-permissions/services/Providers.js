@@ -11,27 +11,6 @@ const request = require('request');
 // Purest strategies.
 const Purest = require('purest');
 
-const facebook = new Purest({
-  provider: 'facebook'
-});
-
-const github = new Purest({
-  provider: 'github',
-  defaults: {
-    headers: {
-      'user-agent': 'strapi'
-    }
-  }
-});
-
-const google = new Purest({
-  provider: 'google'
-});
-
-const twitter = new Purest({
-  provider: 'twitter'
-});
-
 /**
  * Connect thanks to a third-party provider.
  *
@@ -47,47 +26,57 @@ exports.connect = (provider, query) => {
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
-      reject({
+      return reject(null, {
         message: 'No access_token.'
       });
-    } else {
-      // Get the profile.
-      getProfile(provider, query, (err, profile) => {
-        if (err) {
-          reject(err);
-        } else {
-          // We need at least the mail.
-          if (!profile.email) {
-            reject({
-              message: 'Email was not available.'
-            });
-          } else {
-            strapi.query('user', 'users-permissions').findOne({email: profile.email})
-            .then(user => {
-              if (!user) {
-                // Create the new user.
-                const params = _.assign(profile, {
-                  provider: provider
-                });
-
-                strapi.query('user', 'users-permissions').create(params)
-                .then(user => {
-                  resolve(user);
-                })
-                .catch(err => {
-                  reject(err);
-                });
-              } else {
-                resolve(user);
-              }
-            })
-            .catch(err => {
-              reject(err);
-            });
-          }
-        }
-      });
     }
+
+    // Get the profile.
+    getProfile(provider, query, async (err, profile) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // We need at least the mail.
+      if (!profile.email) {
+        return reject([{
+          message: 'Email was not available.'
+        }, null]);
+      }
+
+      try {
+        const users = await strapi.query('user', 'users-permissions').find({
+          email: profile.email
+        });
+
+        if (_.isEmpty(_.find(users, {provider})) && !strapi.plugins['users-permissions'].config.advanced.allow_register) {
+          return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
+        }
+
+        if (!_.isEmpty(_.find(users, {provider}))) {
+          return resolve([user, null]);
+        }
+
+        if (!_.isEmpty(_.find(users, user => user.provider !== provider)) && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+          return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
+        }
+
+        // Retrieve role `guest`.
+        const guest = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+
+        // Create the new user.
+        const params = _.assign(profile, {
+          provider: provider,
+          role: guest._id || guest.id
+        });
+
+        const createdUser = await strapi.query('user', 'users-permissions').create(params);
+
+        return resolve([createdUser, null]);
+      } catch (err) {
+        reject([null, err]);
+      }
+    });
   });
 };
 
@@ -103,6 +92,10 @@ const getProfile = (provider, query, callback) => {
 
   switch (provider) {
     case 'facebook':
+      const facebook = new Purest({
+        provider: 'facebook'
+      });
+
       facebook.query().get('me?fields=name,email').auth(access_token).request((err, res, body) => {
         if (err) {
           callback(err);
@@ -115,18 +108,31 @@ const getProfile = (provider, query, callback) => {
       });
       break;
     case 'google':
+      const google = new Purest({
+        provider: 'google'
+      });
+
       google.query('plus').get('people/me').auth(access_token).request((err, res, body) => {
         if (err) {
           callback(err);
         } else {
           callback(null, {
-            username: body.displayName,
+            username: body.displayName || body.emails[0].value,
             email: body.emails[0].value
           });
         }
       });
       break;
     case 'github':
+      const github = new Purest({
+        provider: 'github',
+        defaults: {
+          headers: {
+            'user-agent': 'strapi'
+          }
+        }
+      });
+
       request.post({
         url: 'https://github.com/login/oauth/access_token',
         form: {
@@ -148,7 +154,13 @@ const getProfile = (provider, query, callback) => {
       });
       break;
     case 'twitter':
-      twitter.query().get('account/verify_credentials').auth(access_token, query.access_secret).qs({screen_name: query['raw[screen_name]']}).qs({include_email: 'true'}).request((err, res, body) => {
+      const twitter = new Purest({
+        provider: 'twitter',
+        key: strapi.plugins['users-permissions'].config.grant.twitter.key,
+        secret: strapi.plugins['users-permissions'].config.grant.twitter.secret
+      });
+
+      twitter.query().get('account/verify_credentials').auth(access_token, query.access_secret).qs({screen_name: query['raw[screen_name]'], include_email: 'true'}).request((err, res, body) => {
         if (err) {
           callback(err);
         } else {

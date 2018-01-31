@@ -17,7 +17,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { map, isEmpty } from 'lodash';
+import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -37,16 +37,6 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.error !== this.props.error && isEmpty(nextProps.formErrors)) {
-      this.setState({ modal: false, loader: false });
-    }
-
-    if (!isEmpty(nextProps.formErrors)) {
-      this.setState({ loader: false });
-    }
-  }
-
   toggle = () => {
     if (this.props.actionBeforeOpenPopUp && !this.state.modal) this.props.actionBeforeOpenPopUp();
     this.setState({ modal: !this.state.modal });
@@ -54,7 +44,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.setState({ loader: true});
+    this.setState({ modal: false });
     this.props.handleListPopUpSubmit(e);
   }
 

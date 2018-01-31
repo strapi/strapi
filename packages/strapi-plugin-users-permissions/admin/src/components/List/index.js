@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { map, size } from 'lodash';
+import { map, omitBy, size } from 'lodash';
 
 // Design
 import Button from 'components/Button';
@@ -48,7 +48,9 @@ const generateListTitle = (data, settingType) => {
   }
 };
 
-function List({ data, deleteData, noButton, onButtonClick, settingType }) {
+function List({ data, deleteData, noButton, onButtonClick, settingType, values }) {
+  const object = omitBy(data, (v) => v.name === 'server'); // Remove the server key when displaying providers
+
   return (
     <div className={styles.list}>
       <div className={styles.flex}>
@@ -67,12 +69,13 @@ function List({ data, deleteData, noButton, onButtonClick, settingType }) {
       </div>
       <div className={styles.ulContainer}>
         <ul className={noButton ? styles.listPadded : ''}>
-          {map(data, item => (
+          {map(object, item => (
             <ListRow
               deleteData={deleteData}
               item={item}
               key={item.name}
               settingType={settingType}
+              values={values}
             />
           ))}
         </ul>
@@ -92,6 +95,7 @@ List.propTypes = {
   noButton: PropTypes.bool,
   onButtonClick: PropTypes.func,
   settingType: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired,
 };
 
 export default List;

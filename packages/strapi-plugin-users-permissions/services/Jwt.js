@@ -9,6 +9,8 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
+const defaultJwtOptions = { expiresIn: '30d' };
+
 module.exports = {
   getToken: function (ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
@@ -36,12 +38,12 @@ module.exports = {
     return this.verify(token);
   },
 
-  issue: (payload) => {
+  issue: (payload, jwtOptions = {}) => {
+    _.defaults(jwtOptions, defaultJwtOptions);
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret', {
-        expiresIn: '30d'
-      }
+      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
+      jwtOptions,
     );
   },
 
@@ -51,10 +53,17 @@ module.exports = {
         token,
         process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
         {},
-        function (err, user) {
-          if (err || !user || !_.get(user, 'id', '').toString()) {
+        function (err, user = {}) {
+          if (err) {
             return reject('Invalid token.');
           }
+
+          const { _id, id } = user;
+
+          if ((id || _id) === undefined) {
+            return reject('Invalid token #2.');
+          }
+
           resolve(user);
         }
       );

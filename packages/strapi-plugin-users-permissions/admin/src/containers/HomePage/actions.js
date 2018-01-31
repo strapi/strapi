@@ -3,16 +3,28 @@
  * HomePage actions
  *
  */
-import { Map } from 'immutable';
-
+import { fromJS } from 'immutable';
+import { isArray } from 'lodash';
 import {
+  CANCEL_CHANGES,
   DELETE_DATA,
   DELETE_DATA_SUCCEEDED,
   FETCH_DATA,
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
+  SET_DATA_TO_EDIT,
   SET_FORM,
+  SET_FORM_ERRORS,
+  SUBMIT,
+  SUBMIT_SUCCEEDED,
+  UNSET_DATA_TO_EDIT,
 } from './constants';
+
+export function cancelChanges() {
+  return {
+    type: CANCEL_CHANGES,
+  };
+}
 
 export function deleteData(dataToDelete, deleteEndPoint) {
   return {
@@ -37,57 +49,72 @@ export function fetchData(endPoint) {
 }
 
 export function fetchDataSucceeded(data) {
+  if (!isArray(data)) {
+    const list = Object.keys(data).reduce((acc, current) => {
+      const obj = Object.assign({ name: current}, data[current]);
+      acc.push(obj);
+
+      return acc;
+    }, []);
+
+    return {
+      type: FETCH_DATA_SUCCEEDED,
+      data: list,
+      modifiedData: fromJS(data),
+    };
+  }
+
   return {
     type: FETCH_DATA_SUCCEEDED,
     data,
+    modifiedData: fromJS({}),
   };
 }
 
 export function onChange({ target }) {
   return {
     type: ON_CHANGE,
-    key: target.name,
+    keys: ['modifiedData'].concat(target.name.split('.')),
     value: target.value,
   };
 }
 
-export function setForm(formType) {
-  const form = generateForm(formType);
+export function setDataToEdit(dataToEdit) {
   return {
-    type: SET_FORM,
-    form,
+    type: SET_DATA_TO_EDIT,
+    dataToEdit,
   };
 }
 
-// Utils
+export function setForm(data) {
+  return {
+    type: SET_FORM,
+    form: fromJS(data),
+  };
+}
 
-function generateForm(formType) {
-  let form = Map({});
-  switch (formType) {
-    case 'providers':
-      form = Map({
-        provider: 'Facebook',
-        enabled: false,
-      });
-      break;
-    case 'email-templates':
-      form = Map({
-        shipperName: '',
-        shipperEmail: '',
-        responseEmail: '',
-        emailObject: '',
-        message: '',
-      });
-      break;
-    case 'advanced-settings':
-      form = Map({
-        uniqueAccount: false,
-        subscriptions: '100',
-        durations: '24',
-      });
-      break;
-    default:
-  }
+export function setFormErrors(formErrors) {
+  return {
+    type: SET_FORM_ERRORS,
+    formErrors,
+  };
+}
 
-  return form;
+export function submit(endPoint) {
+  return {
+    type: SUBMIT,
+    endPoint,
+  };
+}
+
+export function submitSucceeded() {
+  return {
+    type: SUBMIT_SUCCEEDED,
+  };
+}
+
+export function unsetDataToEdit() {
+  return {
+    type: UNSET_DATA_TO_EDIT,
+  };
 }

@@ -1,0 +1,40 @@
+{
+  "connection": "default",
+  "info": {
+    "name": "permission",
+    "description": ""
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "controller": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "action": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "configurable": false
+    },
+    "policy": {
+      "type": "json",
+      "required": true,
+      "configurable": false
+    },
+    "role": {
+      "model": "role",
+      "via": "permissions",
+      "plugin": "users-permissions",
+      "configurable": false
+    }
+  }
+}

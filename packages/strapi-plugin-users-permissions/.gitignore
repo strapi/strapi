@@ -2,10 +2,11 @@
 coverage
 build
 node_modules
-stats.json
-roles.json
 jwt.json
 grant.json
+actions.json
+email.json
+advanced.json
 
 # Cruft
 .DS_Store

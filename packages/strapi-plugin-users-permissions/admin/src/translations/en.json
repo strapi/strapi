@@ -5,6 +5,7 @@
   "Auth.form.button.reset-password": "Change password",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
+  "Auth.form.error.noAdminAccess": "You can't access to the administration panel.",
 
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.label.success": "Email sent with success to",
@@ -59,8 +60,10 @@
   "EditForm.inputSelect.durations.label": "Duration",
   "EditForm.inputSelect.durations.description": "Number of hours during the user can't subscribe.",
 
-  "EditForm.inputToggle.label": "One account per email addres",
-  "EditForm.inputToggle.description": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+  "EditForm.inputToggle.label.email": "One account per email address",
+  "EditForm.inputToggle.label.sign-up": "Enable sign-up",
+  "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
+  "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
 
   "EditPage.cancel": "Cancel",
   "EditPage.submit": "Save",
@@ -122,21 +125,49 @@
   "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
   "Policies.header.title": "Advanced settings",
 
+  "Email.template.validation_email": "Email address validation",
+  "Email.template.reset_password": "Reset password",
+  "Email.template.success_register": "Successfull registration",
+
+  "Auth.advanced.allow_register": "",
+
   "PopUpForm.button.cancel": "Cancel",
   "PopUpForm.button.save": "Save",
   "PopUpForm.header.add.providers": "Add New Provider",
   "PopUpForm.header.edit.email-templates": "Edit Email Templates",
-  "PopUpForm.header.edit.providers": "Edit Provider",
+  "PopUpForm.header.edit.providers": "Edit {provider} Provider",
   "PopUpForm.inputSelect.providers.label": "Choose the provider",
-  "PopUpForm.inputToggle.providers.label": "Enable",
-  "PopUpForm.inputToggle.providers.description": "If disabled, the users won't be able to use this provider.",
-  "PopUpForm.inputText.shipperName.label": "Shipper name",
-  "PopUpForm.inputEmail.shipperEmail.label": "Shipper email",
-  "PopUpForm.inputEmail.responseEmail.label": "Response email",
-  "PopUpForm.inputText.emailObject.label": "Object",
-  "PopUpForm.inputText.emailObject.placeholder": "Please confirm your email address for %APP_NAME%",
-  "PopUpForm.inputTextArea.message.label": "Message",
-  "PopUpForm.inputTextArea.message.placeholder": "<p>Please click on this link to validate your account</p>",
-  "PopUpForm.inputEmail.placeholder": "johndoe@gmail.com",
-  "PopUpForm.inputText.shipperName.placeholder": "John Doe"
+  "PopUpForm.Email.options.from.name.label": "Shipper name",
+  "PopUpForm.Email.options.from.email.label": "Shipper email",
+  "PopUpForm.Email.options.response_email.label": "Response email",
+  "PopUpForm.Email.options.object.label": "Object",
+  "PopUpForm.Email.options.message.label": "Message",
+  "PopUpForm.Email.validation_email.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.reset_password.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.success_register.options.object.placeholder": "Please confirm your email address for %APP_NAME%",
+  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.reset_password.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.success_register.options.message.placeholder": "<p>Please click on this link to validate your account</p>",
+  "PopUpForm.Email.options.from.email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.from.name.placeholder": "John Doe",
+  "PopUpForm.Providers.enabled.label": "Enable",
+  "PopUpForm.Providers.enabled.description": "If disabled, the users won't be able to use this provider.",
+  "PopUpForm.Providers.key.label": "Client ID",
+  "PopUpForm.Providers.key.placeholder": "TEXT",
+  "PopUpForm.Providers.secret.label": "Client Secret",
+  "PopUpForm.Providers.secret.placeholder": "TEXT",
+  "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
+
+
+
+  "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your  Facebook application configurations",
+  "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your  Google application configurations",
+  "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your  GitHub application configurations",
+  "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your  Linkedin application configurations",
+  "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your  Twitter application configurations",
+
+  "PopUpForm.Providers.callback.placeholder": "TEXT",
+  "PopUpForm.Email.email_templates.inputDescription": "Don't know how to set variables",
+  "PopUpForm.Email.link.documentation": "check out our documentation."
 }

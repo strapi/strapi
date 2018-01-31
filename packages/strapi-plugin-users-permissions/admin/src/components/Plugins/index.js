@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { map } from 'lodash';
+import { has, map } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import Plugin from 'components/Plugin';
@@ -30,7 +30,7 @@ class Plugins extends React.Component {
               <FormattedMessage id="users-permissions.Plugins.header.description" />
             </div>
           </div>
-          <div className={styles.pluginsContainer}>
+          <div className={cn(styles.pluginsContainer, !has(this.props.plugins, 'application') && styles.pluginsGradient)}>
             {map(Object.keys(this.props.plugins).sort(), (plugin) => (
               <Plugin
                 changePluginSelected={this.changePluginSelected}

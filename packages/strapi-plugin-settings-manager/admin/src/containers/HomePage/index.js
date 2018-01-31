@@ -291,8 +291,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = (dbName) => {
+    this.context.enableGlobalOverlayBlocker();
     strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
-    this.props.databaseDelete(dbName, this.props.match.params.env);
+    this.props.databaseDelete(dbName, this.props.match.params.env, this.context);
   }
 
   // function used for react-select option
