@@ -17,7 +17,7 @@ module.exports = {
     const params = ctx.request.body;
 
     if (provider === 'local') {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant['email'], 'enabled') && !ctx.request.admin) {
+      if (!_.get(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'), 'email.enabled') && !ctx.request.admin) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -70,7 +70,7 @@ module.exports = {
         });
       }
     } else {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled')) {
+      if (!_.get(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'), [provider, 'enabled'])) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -123,7 +123,9 @@ module.exports = {
   },
 
   connect: async (ctx, next) => {
-    _.defaultsDeep(strapi.plugins['users-permissions'].config.grant, {
+    const grantConfig = await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions');
+
+    _.defaultsDeep(grantConfig, {
       server: {
         protocol: 'http',
         host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
@@ -131,13 +133,13 @@ module.exports = {
     });
 
     const provider = ctx.request.url.split('/')[2];
-    const config = strapi.plugins['users-permissions'].config.grant[provider];
+    const config = grantConfig[provider];
 
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
-    const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
+    const grant = new Grant(grantConfig);
 
     return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
   },
@@ -192,7 +194,8 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+    console.log(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions'));
+    if (!(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')).allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 

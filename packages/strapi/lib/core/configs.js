@@ -54,12 +54,28 @@ module.exports = function() {
     this.config.set = async (key, value, environment = strapi.config.environment, type, name) => {
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
-      await strapi.models['strapi-configs'].create({
+      const data = await strapi.models['strapi-configs'].findOne({
         key: `${prefix}_${key}`,
-        value: JSON.stringify(value) || value.toString(),
-        environment,
-        type: (typeof value).toString()
+        environment
       });
+
+      if (data) {
+        await strapi.models['strapi-configs'].update({ _id: data._id }, {
+          key: `${prefix}_${key}`,
+          value: JSON.stringify(value) || value.toString(),
+          environment,
+          type: (typeof value).toString()
+        }, {
+          strict: false
+        });
+      } else {
+        await strapi.models['strapi-configs'].create({
+          key: `${prefix}_${key}`,
+          value: JSON.stringify(value) || value.toString(),
+          environment,
+          type: (typeof value).toString()
+        });
+      }
     };
 
     resolve();

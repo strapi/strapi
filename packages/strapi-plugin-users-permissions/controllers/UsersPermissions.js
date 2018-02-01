@@ -171,7 +171,7 @@ module.exports = {
   },
 
   getEmailTemplate: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.email);
+    ctx.send(await strapi.config.get('email', strapi.config.environment, 'plugin', 'users-permissions'));
   },
 
   updateEmailTemplate: async (ctx) => {
@@ -179,19 +179,13 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'email.json'), JSON.stringify({
-      email: ctx.request.body
-    }, null, 2), 'utf8');
+    await strapi.config.set('email', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions')
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   getAdvancedSettings: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.advanced);
+    ctx.send(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions'));
   },
 
   updateAdvancedSettings: async (ctx) => {
@@ -199,19 +193,13 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'advanced.json'), JSON.stringify({
-      advanced: ctx.request.body
-    }, null, 2), 'utf8');
+    await strapi.config.set('advanced', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions');
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   getProviders: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.grant);
+    ctx.send(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'));
   },
 
   updateProviders: async (ctx) => {
@@ -219,15 +207,8 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'grant.json'), JSON.stringify({
-      grant: ctx.request.body
-    }, null, 2), 'utf8');
-
+    await strapi.config.set('grant', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions');
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   }
 };
