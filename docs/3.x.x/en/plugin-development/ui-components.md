@@ -423,6 +423,27 @@ InputText Component
 
 ***
 
+## InputNumber
+
+InputNumber component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
 ## Label
 
 Label component that integrates FormattedMessage if needed
