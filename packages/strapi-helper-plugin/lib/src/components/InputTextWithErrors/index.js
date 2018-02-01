@@ -6,6 +6,7 @@ import cn from 'classnames';
 // Design
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
+import InputErrors from 'components/InputErrors';
 import InputText from 'components/InputText';
 
 import styles from './styles.scss';
@@ -49,7 +50,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 
   render() {
-    const { autoFocus, inputClassName, name, onChange, onFocus, placeholder, value } = this.props;
+    const { autoFocus, errorsClassName, errorsStyle, inputClassName, inputStyle, name, onChange, onFocus, placeholder, value } = this.props;
     const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     return (
@@ -69,9 +70,11 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
           onChange={onChange}
           onFocus={onFocus}
           placeholder={placeholder}
+          style={inputStyle}
           value={value}
         />
         <InputDescription message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription} />
+        <InputErrors className={errorsClassName} style={errorsStyle} errors={this.state.errors} />
       </div>
     );
   }
@@ -119,7 +122,10 @@ InputTextWithErrors.defaultProps = {
   onBlur: false,
   onFocus: () => {},
   errors: [],
+  errorsClassName: '',
+  errorsStyle: {},
   inputClassName: '',
+  inputStyle: {},
   placeholder: 'app.utils.placeholder.defaultMessage',
   validations: {},
 };
@@ -131,7 +137,10 @@ InputTextWithErrors.propTypes = {
   ]),
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
+  errorsClassName: PropTypes.string,
+  errorsStyle: PropTypes.object,
   inputClassName: PropTypes.string,
+  inputStyle: PropTypes.object,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
@@ -139,7 +148,7 @@ InputTextWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired
+  value: PropTypes.string.isRequired,
 };
 
 export default InputTextWithErrors;
