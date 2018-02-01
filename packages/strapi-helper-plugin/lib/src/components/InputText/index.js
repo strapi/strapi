@@ -15,7 +15,7 @@ function InputText(props) {
           className={cn(
             styles.input,
             'form-control',
-            !props.deactivateErrorHighlight && !isEmpty(props.errors) && 'is-invalid',
+            !props.deactivateErrorHighlight && props.error && 'is-invalid',
             !isEmpty(props.className) && props.className,
           )}
           disabled={props.disabled}
@@ -40,7 +40,7 @@ InputText.defaultProps = {
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
-  errors: [],
+  error: false,
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -53,7 +53,7 @@ InputText.propTypes = {
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
-  errors: PropTypes.array,
+  errors: PropTypes.bool,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,

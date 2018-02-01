@@ -50,31 +50,67 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
   }
 
   render() {
-    const { autoFocus, errorsClassName, errorsStyle, inputClassName, inputStyle, name, onChange, onFocus, placeholder, value } = this.props;
+    const {
+      autoFocus,
+      deactivateErrorHighlight,
+      disabled,
+      errorsClassName,
+      errorsStyle,
+      inputClassName,
+      inputDescriptionClassName,
+      inputDescriptionStyle,
+      inputStyle,
+      labelClassName,
+      labelStyle,
+      name,
+      onChange,
+      onFocus,
+      placeholder,
+      style,
+      tabIndex,
+      value,
+    } = this.props;
     const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
-    
+
     return (
       <div className={cn(
           styles.container,
           this.props.customBootstrapClass || 'col-md-6',
-          this.props.className,
+          !isEmpty(this.props.className) && props.className,
         )}
+        style={style}
       >
-        <Label htmlFor={name} message={this.props.label && this.props.label.message || this.props.label} />
-        <InputNumber
+        <Label
+          className={labelClassName}
+          htmlFor={name}
+          message={this.props.label && this.props.label.message || this.props.label}
+          style={labelStyle}
+        />
+      <InputNumber
           autoFocus={autoFocus}
           className={inputClassName}
-          errors={this.state.errors}
+          disabled={disabled}
+          deactivateErrorHighlight={deactivateErrorHighlight}
+          error={!isEmpty(this.state.errors)}
           name={name}
           onBlur={handleBlur}
           onChange={onChange}
           onFocus={onFocus}
           placeholder={placeholder}
           style={inputStyle}
+          tabIndex={tabIndex}
           value={value}
         />
-        <InputDescription message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription} />
-        <InputErrors className={errorsClassName} style={errorsStyle} errors={this.state.errors} />
+        <InputDescription
+          className={inputDescriptionClassName}
+          message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription}
+          style={inputDescriptionStyle}
+        />
+        <InputErrors
+          className={errorsClassName}
+          errors={this.state.errors}
+          style={errorsStyle}
+        />
       </div>
     );
   }
@@ -124,41 +160,66 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
 }
 
 InputNumberWithErrors.defaultProps = {
+  autoFocus: false,
+  className: '',
   customBootstrapClass: false,
+  deactivateErrorHighlight: false,
   didCheckErrors: false,
+  disabled: false,
   onBlur: false,
   onFocus: () => {},
   errors: [],
   errorsClassName: '',
   errorsStyle: {},
   inputClassName: '',
+  inputDescription: '',
+  inputDescriptionClassName: '',
+  inputDescriptionStyle: {},
   inputStyle: {},
+  labelClassName: '',
+  labelStyle: {},
   placeholder: 'app.utils.placeholder.defaultMessage',
+  style: {},
+  tabIndex: '0',
   validations: {},
 };
 
 InputNumberWithErrors.propTypes = {
+  autoFocus: PropTypes.bool,
+  className: PropTypes.string,
   customBootstrapClass: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
   ]),
+  deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
+  disabled: PropTypes.bool,
   errors: PropTypes.array,
   errorsClassName: PropTypes.string,
   errorsStyle: PropTypes.object,
   inputClassName: PropTypes.string,
+  inputDescription: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object,
+  ]),
+  inputDescriptionClassName: PropTypes.string,
+  inputDescriptionStyle: PropTypes.object,
   inputStyle: PropTypes.object,
+  labelClassName: PropTypes.string,
+  labelStyle: PropTypes.object,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
   ]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
+  name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  style: PropTypes.object,
+  tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  value: PropTypes.string.isRequired,
 };
 
 export default InputNumberWithErrors;
