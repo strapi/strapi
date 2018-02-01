@@ -7,11 +7,11 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputText from 'components/InputText';
+import InputNumber from 'components/InputNumber';
 
 import styles from './styles.scss';
 
-class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputNumberWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -52,7 +52,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   render() {
     const { autoFocus, errorsClassName, errorsStyle, inputClassName, inputStyle, name, onChange, onFocus, placeholder, value } = this.props;
     const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
-
+    
     return (
       <div className={cn(
           styles.container,
@@ -61,7 +61,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
         )}
       >
         <Label htmlFor={name} message={this.props.label && this.props.label.message || this.props.label} />
-        <InputText
+        <InputNumber
           autoFocus={autoFocus}
           className={inputClassName}
           errors={this.state.errors}
@@ -85,20 +85,21 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
 
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
-        case 'maxLength': {
-          if (value.length > validationValue) {
-            errors.push({ id: 'components.Input.error.validation.maxLength' });
+        case 'max': {
+          if (parseInt(value, 10) > validationValue) {
+            errors.push({ id: 'components.Input.error.validation.max' });
           }
           break;
         }
-        case 'minLength': {
-          if (value.length < validationValue) {
-            errors.push({ id: 'components.Input.error.validation.minLength' });
+        case 'min': {
+          if (parseInt(value, 10) < validationValue) {
+            errors.push({ id: 'components.Input.error.validation.min' });
           }
           break;
         }
         case 'required': {
           if (value.length === 0) {
+            console.log('ok');
             errors.push({ id: 'components.Input.error.validation.required' });
           }
           break;
@@ -122,7 +123,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 }
 
-InputTextWithErrors.defaultProps = {
+InputNumberWithErrors.defaultProps = {
   customBootstrapClass: false,
   didCheckErrors: false,
   onBlur: false,
@@ -136,7 +137,7 @@ InputTextWithErrors.defaultProps = {
   validations: {},
 };
 
-InputTextWithErrors.propTypes = {
+InputNumberWithErrors.propTypes = {
   customBootstrapClass: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
@@ -154,7 +155,10 @@ InputTextWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
 };
 
-export default InputTextWithErrors;
+export default InputNumberWithErrors;

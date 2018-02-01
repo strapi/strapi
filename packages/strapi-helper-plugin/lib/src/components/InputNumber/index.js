@@ -61,7 +61,10 @@ InputNumber.propTypes = {
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]).isRequired,
 };
 
 export default InputNumber;
