@@ -328,6 +328,67 @@ export default FooPage;
 
 ***
 
+## Label
+
+Label component that integrates FormattedMessage if needed
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| children | node | no | Anything that is wrapped inside the Label |
+| className | string | no | custom className for the Label |
+| htmlFor | string | no | Represents the id of the element the label is bound to |
+| message | func or string or object | no | Define the content of the label |
+| style | object | no | Label style property |
+
+
+### Usage
+
+**Path -** `my-plugin/admin/src/translations.en.json`.
+
+```json
+{
+  "foo.label": "This is {bar} label",
+  "tel.label": "Enter your phone number"
+}
+```
+
+**Path -** `my-plugin/admin/src/components/Foo/index.js`;
+```js
+import React from 'react';
+import Label from 'components/Label';
+
+import styles from './styles.scss';
+
+export default function Foo(props) {
+  return (
+    <div>
+      {/* Example without i18n */}
+      <Label htmlFor="email" message="Enter your email" />
+      <input name="email" id="email" value={props.values.email} onChange={props.onChange} type="email" />
+
+      {/* Example using children className and style */}
+      <Label htmlFor="address" className={styles.labelEmail} style={{ marginTop: '10px' }} >Enter your address</Label>
+      <input name="address" value={props.values.address} onChange={props.onChange} type="text" />
+
+      {/* Example using a function */}
+      <Label htmlFor="name" message={() => <span>Enter your <b>name</b></span>} />
+      <input name="name" value={props.values.name} onChange={props.onChange} type="text" />
+
+      {/* Example using i18n only */}
+      <Label htmlFor="tel" message={{ id: 'my-plugin.tel.label' />
+      <input name="tel" value={props.values.tel} onChange={props.onChange} type="number" />
+
+      {/* Example using i18n and dynamic value */}
+      <Label htmlFor="foo" message={{ id: 'my-plugin.foo.label', params: { bar: 'baz' } }} />
+      <input name="foo" value={props.values.foo} onChange={props.onChange} type="text" />
+    </div>
+  );
+}
+```
+
+
+***
+
 ## OverlayBlocker
 
 The OverlayBlocker is a React component that is very useful to block user interactions when the strapi server is restarting in order to avoid front-end errors. This component is automatically displayed when the server needs to restart. You need to disable it in order to override the current design (once disabled it won't show on the other plugins so it's really important to enable it back when the component is unmounting).

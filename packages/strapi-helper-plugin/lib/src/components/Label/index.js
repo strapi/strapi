@@ -9,16 +9,16 @@ import styles from './styles.scss';
 function Label(props) {
   let content = props.children;
 
-  if (typeof(props.value) === 'string') {
-    content = props.value;
+  if (typeof(props.message) === 'string') {
+    content = props.message;
   }
 
-  if (isObject(props.value) && props.value.id) {
-    content = <FormattedMessage id={props.value.id} defaultMessage=" " values={props.value.params} />;
+  if (isObject(props.message) && props.message.id) {
+    content = <FormattedMessage id={props.message.id} defaultMessage=" " messages={props.message.params} />;
   }
 
-  if (isFunction(props.value)) {
-    content = props.value();
+  if (isFunction(props.message)) {
+    content = props.message();
   }
 
   return (
@@ -35,16 +35,16 @@ function Label(props) {
 Label.defaultProps = {
   children: '',
   className: '',
+  htmlFor: '',
+  message: '',
   style: {},
-  values: '',
 };
 
 Label.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  htmlFor: PropTypes.string.isRequired,
-  style: PropTypes.object,
-  values: PropTypes.oneOfType([
+  htmlFor: PropTypes.string,
+  message: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.string,
     PropTypes.shape({
@@ -52,6 +52,7 @@ Label.propTypes = {
       params: PropTypes.object,
     }),
   ]),
+  style: PropTypes.object,
 };
 
 export default Label;
