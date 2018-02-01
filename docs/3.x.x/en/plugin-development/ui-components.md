@@ -417,7 +417,7 @@ InputText Component
 | name | string | yes | The name of the input |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Input's style property |
-| tabIndex | string | Input's tabIndex |
+| tabIndex | string | no | Input's tabIndex |
 | value | string | yes | Input's value |
 
 
@@ -439,7 +439,7 @@ InputNumber component.
 | name | string | yes | The name of the input |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Input's style property |
-| tabIndex | string | Input's tabIndex |
+| tabIndex | string | no | Input's tabIndex |
 | value | string or number | yes | Input's value |
 
 ***
