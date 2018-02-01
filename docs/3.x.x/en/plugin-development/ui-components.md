@@ -328,6 +328,101 @@ export default FooPage;
 
 ***
 
+## InputDescription
+
+Component that allows to put a description under an input, it works with or without i18n
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| children | node | no | Anything that is wrapped inside the Description |
+| className | string | no | custom className for the Description |
+| message | func or string or object | no | Define the content of the Description |
+| style | object | no | Label style property |
+
+
+### Usage
+
+**Path -** `my-plugin/admin/src/translations.en.json`.
+
+```json
+{
+  "Email.inputDescription": "Don't know how to set variables, {documentationLink}",
+  "Tel.inputDescription": "Make sure to provide a phone number where you can be reached"
+}
+```
+**Path -** `my-plugin/admin/src/components/Foo/index.js`;
+
+```js
+import React from 'react';
+import InputText from 'components/InputText';
+import InputDescription from 'components/InputDescription';
+
+import styles from './styles.scss';
+
+function Foo({ onChange, value }) {
+  return (
+    <div className={`col-md-6 ${styles.inputContainer}`}>
+      <InputText name="tel" value={value} onChange={onChange} />
+      {/* Usage without i18n, custom className and style */}
+      <InputDescription
+        className={styles.inputDescription}
+        message="Make sure to provide a phone number where you can be reached"
+        style={{ paddingTop: '10px'}}
+      />
+
+      {/* Usage with function */}
+      <InputText name="email" value={value} onChange={onChange} />
+      <InputDescription
+        message={ () => <span>Don&#44;t know how to set variables, <a href="strapi.io" target="_blank">check out our doc!</a></span>}
+      />
+
+      {/* Usage with i18n and rich text formatting */}
+      <InputText name="email" value={value} onChange={onChange} />
+      <InputDescription
+        message={{
+          id: 'my-plugin.Email.inputDescription',
+          params: {
+            documentationLink: <a href="strapi.io" target="_blank">check out our doc!</a>
+          }
+        }}
+      />
+
+      {/* Usage with i18n only */}
+      <InputText name="tel" value={value} onChange={onChange} />
+      <InputDescription
+        message={{ id: 'my-plugin.Tel.inputDescription' }}
+      />
+    </div>
+  );
+}
+
+export default Foo;
+```
+
+***
+
+## InputText
+
+InputText Component
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | Input's tabIndex |
+| value | string | yes | Input's value |
+
+
+***
+
 ## Label
 
 Label component that integrates FormattedMessage if needed
@@ -353,6 +448,7 @@ Label component that integrates FormattedMessage if needed
 ```
 
 **Path -** `my-plugin/admin/src/components/Foo/index.js`;
+
 ```js
 import React from 'react';
 import Label from 'components/Label';

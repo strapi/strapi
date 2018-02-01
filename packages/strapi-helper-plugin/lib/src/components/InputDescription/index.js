@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { isFunction, isObject, upperFirst } from 'lodash';
+import { isEmpty, isFunction, isObject } from 'lodash';
 import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function Label(props) {
+function InputDescription(props) {
   let content = props.children;
 
   if (typeof(props.message) === 'string') {
@@ -20,33 +20,33 @@ function Label(props) {
   if (isFunction(props.message)) {
     content = props.message();
   }
-
   return (
-    <label
-      className={cn(styles.label, props.className)}
-      htmlFor={props.htmlFor}
+    <div className={cn(
+        styles.inputDescriptionContainer,
+        !isEmpty(props.className) && props.className
+      )}
       style={props.style}
     >
-      {content}
-    </label>
+      <small>
+        {content}
+      </small>
+    </div>
   );
 }
 
-Label.defaultProps = {
+InputDescription.defaultProps = {
   children: '',
   className: '',
-  htmlFor: '',
   message: '',
   style: {},
 };
 
-Label.propTypes = {
+InputDescription.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  htmlFor: PropTypes.string,
   message: PropTypes.oneOfType([
-    PropTypes.func,
     PropTypes.string,
+    PropTypes.func,
     PropTypes.shape({
       id: PropTypes.string,
       params: PropTypes.object,
@@ -55,4 +55,4 @@ Label.propTypes = {
   style: PropTypes.object,
 };
 
-export default Label;
+export default InputDescription;

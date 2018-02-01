@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { includes, isEmpty, mapKeys, reject } from 'lodash';
+import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
 import cn from 'classnames';
 
 // Design
 import Label from 'components/Label';
+import InputDescription from 'components/InputDescription';
 import InputText from 'components/InputText';
 
 import styles from './styles.scss';
@@ -48,7 +49,8 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 
   render() {
-    const { autoFocus, inputClassName, name, onChange, placeholder, value } = this.props;
+    const { autoFocus, inputClassName, name, onChange, onFocus, placeholder, value } = this.props;
+    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     return (
       <div className={cn(
@@ -63,11 +65,13 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
           className={inputClassName}
           errors={this.state.errors}
           name={name}
-          onBlur={this.handleBlur}
+          onBlur={handleBlur}
           onChange={onChange}
+          onFocus={onFocus}
           placeholder={placeholder}
           value={value}
         />
+        <InputDescription message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription} />
       </div>
     );
   }
@@ -112,6 +116,8 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
 InputTextWithErrors.defaultProps = {
   customBootstrapClass: false,
   didCheckErrors: false,
+  onBlur: false,
+  onFocus: () => {},
   errors: [],
   inputClassName: '',
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -126,6 +132,12 @@ InputTextWithErrors.propTypes = {
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
   inputClassName: PropTypes.string,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func,
   validations: PropTypes.object,
   value: PropTypes.string.isRequired
 };
