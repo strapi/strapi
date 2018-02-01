@@ -8,7 +8,7 @@ const path = require('path');
 const cluster = require('cluster');
 const { includes, get, assign, forEach } = require('lodash');
 const { logger, models } = require('strapi-utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin } = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, configs } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const { EventEmitter } = require('events');
@@ -178,6 +178,9 @@ class Strapi extends EventEmitter {
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
+
+    // Init core database configs manager
+    await configs.call(this);
 
     // Initialize hooks and middlewares.
     await Promise.all([
