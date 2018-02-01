@@ -6,7 +6,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function InputText(props) {
+function InputNumber(props) {
   return (
     <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
       {(message) => (
@@ -27,7 +27,7 @@ function InputText(props) {
           placeholder={message}
           style={props.style}
           tabIndex={props.tabIndex}
-          type="text"
+          type="number"
           value={props.value}
         />
       )}
@@ -35,7 +35,7 @@ function InputText(props) {
   )
 }
 
-InputText.defaultProps = {
+InputNumber.defaultProps = {
   autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
@@ -48,7 +48,7 @@ InputText.defaultProps = {
   tabIndex: '0',
 };
 
-InputText.propTypes = {
+InputNumber.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
@@ -64,4 +64,4 @@ InputText.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputText;
+export default InputNumber;
