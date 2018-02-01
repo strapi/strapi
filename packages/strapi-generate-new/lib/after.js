@@ -83,15 +83,33 @@ module.exports = (scope, cb) => {
   // Install default plugins and link dependencies.
   function pluginsInstallation() {
     // Define the list of default plugins.
-    const defaultPlugins = ['settings-manager', 'content-type-builder', 'content-manager', 'users-permissions', 'email'];
+    const defaultPlugins = [{
+      name: 'settings-manager',
+      core: true
+    }, {
+      name: 'content-type-builder',
+      core: true
+    }, {
+      name: 'content-manager',
+      core: true
+    }, {
+      name: 'users-permissions',
+      core: true
+    }, {
+      name: 'email',
+      core: true
+    }, {
+      name: 'analytics',
+      core: false
+    }];
 
     // Install each plugin.
     defaultPlugins.forEach(defaultPlugin => {
       try {
-        execSync(`node ${strapiBin} install ${defaultPlugin} ${scope.developerMode ? '--dev' : ''}`);
-        logger.info(`The plugin ${defaultPlugin} has been successfully installed.`);
+        execSync(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`);
+        logger.info(`The plugin ${defaultPlugin.name} has been successfully installed.`);
       } catch (error) {
-        logger.error(`An error occurred during ${defaultPlugin} plugin installation.`);
+        logger.error(`An error occurred during ${defaultPlugin.name} plugin installation.`);
         logger.error(error);
       }
     });
