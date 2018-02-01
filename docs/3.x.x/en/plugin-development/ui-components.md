@@ -364,23 +364,53 @@ export default function Foo(props) {
     <div>
       {/* Example without i18n */}
       <Label htmlFor="email" message="Enter your email" />
-      <input name="email" id="email" value={props.values.email} onChange={props.onChange} type="email" />
+      <input
+        id="email"
+        name="email"
+        onChange={props.onChange}
+        type="email"
+        value={props.values.email}
+      />
 
       {/* Example using children className and style */}
       <Label htmlFor="address" className={styles.labelEmail} style={{ marginTop: '10px' }} >Enter your address</Label>
-      <input name="address" value={props.values.address} onChange={props.onChange} type="text" />
+      <input
+        id="address"
+        name="address"
+        onChange={props.onChange}
+        type="text"
+        value={props.values.address}
+      />
 
       {/* Example using a function */}
       <Label htmlFor="name" message={() => <span>Enter your <b>name</b></span>} />
-      <input name="name" value={props.values.name} onChange={props.onChange} type="text" />
+      <input
+        id="name"
+        name="name"
+        onChange={props.onChange}
+        type="text"
+        value={props.values.name}
+      />
 
       {/* Example using i18n only */}
       <Label htmlFor="tel" message={{ id: 'my-plugin.tel.label' />
-      <input name="tel" value={props.values.tel} onChange={props.onChange} type="number" />
+      <input
+        id="tel"
+        name="tel"
+        onChange={props.onChange}
+        type="number"
+        value={props.values.tel}
+      />
 
       {/* Example using i18n and dynamic value */}
       <Label htmlFor="foo" message={{ id: 'my-plugin.foo.label', params: { bar: 'baz' } }} />
-      <input name="foo" value={props.values.foo} onChange={props.onChange} type="text" />
+      <input
+        id="foo"
+        name="foo"
+        type="text"
+        onChange={props.onChange}
+        value={props.values.foo}
+      />
     </div>
   );
 }

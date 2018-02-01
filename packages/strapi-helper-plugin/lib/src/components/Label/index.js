@@ -14,7 +14,7 @@ function Label(props) {
   }
 
   if (isObject(props.message) && props.message.id) {
-    content = <FormattedMessage id={props.message.id} defaultMessage=" " messages={props.message.params} />;
+    content = <FormattedMessage id={props.message.id} defaultMessage=" " values={props.message.params} />;
   }
 
   if (isFunction(props.message)) {
