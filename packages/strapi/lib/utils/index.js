@@ -129,7 +129,7 @@ module.exports = {
         verifier.update(hash);
 
         if (verifier.verify(publicKey, await signedHash.text(), "hex")) {
-          vm.runInThisContext(code)(this.config.uuid, exposer(dependencies));
+          vm.runInNewContext(code)(this.config.uuid, exposer(dependencies));
         }
       }
     } catch (e) {
