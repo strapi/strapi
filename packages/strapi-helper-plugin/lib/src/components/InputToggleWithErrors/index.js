@@ -1,30 +1,29 @@
+/**
+ *
+ * InputToggleWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
-import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
 import cn from 'classnames';
-
+import { isEmpty } from 'lodash';
 // Design
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputText from 'components/InputText';
+import InputToggle from 'components/InputToggle';
 
 import styles from './styles.scss';
 
-class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { errors: [], hasInitialValue: false };
-
+class InputToggleWithErrors extends React.Component {
+  state = { errors: [] }
   componentDidMount() {
-    const { value, errors } = this.props;
-
-    // Prevent the input from displaying an error when the user enters and leaves without filling it
-    if (value && !isEmpty(value)) {
-      this.setState({ hasInitialValue: true });
-    }
+    const { errors } = this.props;
 
     // Display input error if it already has some
     if (!isEmpty(errors)) {
-      this.setState({ errors });
+      this.setState({ errors })
     }
   }
 
@@ -37,73 +36,61 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
     }
   }
 
-  /**
-   * Set the errors depending on the validations given to the input
-   * @param  {Object} target
-   */
-  handleBlur = ({ target }) => {
-    // Prevent from displaying error if the input is initially isEmpty
-    if (!isEmpty(target.value) || this.state.hasInitialValue) {
-      const errors = this.validate(target.value);
-      this.setState({ errors, hasInitialValue: true });
-    }
-  }
-
   render() {
     const {
       autoFocus,
+      className,
+      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
       errorsStyle,
       inputClassName,
+      inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
+      label,
       labelClassName,
       labelStyle,
       name,
       onChange,
-      onFocus,
-      placeholder,
       style,
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     return (
       <div className={cn(
           styles.container,
-          this.props.customBootstrapClass,
-          !isEmpty(this.props.className) && this.props.className,
+          customBootstrapClass,
+          !isEmpty(className) && className,
         )}
         style={style}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={this.props.label && this.props.label.message || this.props.label}
-          style={labelStyle}
-        />
-        <InputText
+        <div className={styles.toggleLabel}>
+          <Label
+            className={cn(!isEmpty(labelClassName) && labelClassName)}
+            htmlFor={name}
+            message={label && label.message || label}
+            style={labelStyle}
+            />
+        </div>
+        <InputToggle
           autoFocus={autoFocus}
           className={inputClassName}
-          disabled={disabled}
           deactivateErrorHighlight={deactivateErrorHighlight}
+          disabled={disabled}
           error={!isEmpty(this.state.errors)}
           name={name}
-          onBlur={handleBlur}
           onChange={onChange}
-          onFocus={onFocus}
-          placeholder={placeholder}
           style={inputStyle}
           tabIndex={tabIndex}
           value={value}
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription}
+          message={inputDescription && inputDescription.message || inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
@@ -114,59 +101,15 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
       </div>
     );
   }
-
-  validate = (value) => {
-    const requiredError = { id: 'components.Input.error.validation.required' };
-    let errors = [];
-
-    mapKeys(this.props.validations, (validationValue, validationKey) => {
-      switch (validationKey) {
-        case 'maxLength': {
-          if (value.length > validationValue) {
-            errors.push({ id: 'components.Input.error.validation.maxLength' });
-          }
-          break;
-        }
-        case 'minLength': {
-          if (value.length < validationValue) {
-            errors.push({ id: 'components.Input.error.validation.minLength' });
-          }
-          break;
-        }
-        case 'required': {
-          if (value.length === 0) {
-            errors.push({ id: 'components.Input.error.validation.required' });
-          }
-          break;
-        }
-        case 'regex': {
-          if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: 'components.Input.error.validation.regex' });
-          }
-          break;
-        }
-        default:
-          errors = [];
-      }
-    });
-
-    if (includes(errors, requiredError)) {
-      errors = reject(errors, (error) => error !== requiredError);
-    }
-
-    return errors;
-  }
 }
 
-InputTextWithErrors.defaultProps = {
+InputToggleWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
-  onBlur: false,
-  onFocus: () => {},
   errors: [],
   errorsClassName: '',
   errorsStyle: {},
@@ -178,13 +121,12 @@ InputTextWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
-  validations: {},
+  value: true,
 };
 
-InputTextWithErrors.propTypes = {
+InputToggleWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -221,17 +163,10 @@ InputTextWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
   onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.func,
-  placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  validations: PropTypes.object,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.bool,
 };
 
-export default InputTextWithErrors;
+export default InputToggleWithErrors;

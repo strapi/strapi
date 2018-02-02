@@ -75,8 +75,8 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
     return (
       <div className={cn(
           styles.container,
-          this.props.customBootstrapClass || 'col-md-6',
-          !isEmpty(this.props.className) && props.className,
+          this.props.customBootstrapClass,
+          !isEmpty(this.props.className) && this.props.className,
         )}
         style={style}
       >
@@ -162,7 +162,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
 InputNumberWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: false,
+  customBootstrapClass: 'col-md-6',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
@@ -176,6 +176,7 @@ InputNumberWithErrors.defaultProps = {
   inputDescriptionClassName: '',
   inputDescriptionStyle: {},
   inputStyle: {},
+  label: '',
   labelClassName: '',
   labelStyle: {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -187,10 +188,7 @@ InputNumberWithErrors.defaultProps = {
 InputNumberWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
-  customBootstrapClass: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
+  customBootstrapClass: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
@@ -201,20 +199,35 @@ InputNumberWithErrors.propTypes = {
   inputDescription: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
-    PropTypes.object,
+    PropTypes.shape({
+      message: PropTypes.shape({
+        id: PropTypes.string,
+        params: PropTypes.object,
+      }),
+    }),
   ]),
   inputDescriptionClassName: PropTypes.string,
   inputDescriptionStyle: PropTypes.object,
   inputStyle: PropTypes.object,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.shape({
+      message: PropTypes.shape({
+        id: PropTypes.string,
+        params: PropTypes.object,
+      }),
+    }),
+  ]),
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
   ]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

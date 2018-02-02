@@ -37,7 +37,6 @@ class InputToggle extends React.Component {
           'btn-group',
           styles.inputToggleContainer,
           !isEmpty(className) && className,
-          disabled && styles.disabled,
           !deactivateErrorHighlight && error && styles.error,
         )}
         style={style}
@@ -79,7 +78,7 @@ InputToggle.defaultProps = {
 };
 
 InputToggle.propTypes = {
-  autoFocus: false,
+  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
