@@ -444,6 +444,25 @@ InputText Component
 
 ***
 
+## InputToggle
+
+Input type: 'toggle' component
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onChange | func | yes | Handler to modify the input's value |
+| name | string | yes | The name of the input |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | bool | yes | Input's value |
+
+***
+
 ## InputNumberWithErrors
 
 Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
@@ -551,6 +570,42 @@ Component integrates Label, InputText, InputDescription and InputErrors.
     }
   }
 ```
+
+***
+
+## InputToggleWithErrors
+
+Component integrates Label, InputToggle, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescription | string or object or func | no | Sets the input's description |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| label | string or func or object | no sets the input's label |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onChange | func | yes | Handler to modify the input's value |
+| name | string | yes | The name of the input |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
 
 ***
 
