@@ -86,7 +86,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
           message={this.props.label && this.props.label.message || this.props.label}
           style={labelStyle}
         />
-      <InputNumber
+        <InputNumber
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
