@@ -83,7 +83,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         <Label
           className={labelClassName}
           htmlFor={name}
-          message={this.props.label && this.props.label.message || this.props.label}
+          message={this.props.label}
           style={labelStyle}
         />
         <InputNumber
@@ -103,7 +103,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={this.props.inputDescription && this.props.inputDescription.message || this.props.inputDescription}
+          message={this.props.inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
@@ -200,10 +200,8 @@ InputNumberWithErrors.propTypes = {
     PropTypes.string,
     PropTypes.func,
     PropTypes.shape({
-      message: PropTypes.shape({
-        id: PropTypes.string,
-        params: PropTypes.object,
-      }),
+      id: PropTypes.string,
+      params: PropTypes.object,
     }),
   ]),
   inputDescriptionClassName: PropTypes.string,
@@ -213,10 +211,8 @@ InputNumberWithErrors.propTypes = {
     PropTypes.string,
     PropTypes.func,
     PropTypes.shape({
-      message: PropTypes.shape({
-        id: PropTypes.string,
-        params: PropTypes.object,
-      }),
+      id: PropTypes.string,
+      params: PropTypes.object,
     }),
   ]),
   labelClassName: PropTypes.string,

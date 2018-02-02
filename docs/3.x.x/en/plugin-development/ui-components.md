@@ -534,10 +534,8 @@ Component integrates Label, InputText, InputDescription and InputErrors.
     render() {
       const { didCheckErrors, errors, foo } = this.state;
       const inputDescription = {
-        message: {
-          id: 'my-plugin.inputFoo.description',
-          params: { bar: 'Something' }
-        }
+        id: 'my-plugin.inputFoo.description',
+        params: { bar: 'Something' },
       };
 
       // This can also works (it's the same behavior for the label)
@@ -555,10 +553,10 @@ Component integrates Label, InputText, InputDescription and InputErrors.
                 inputDescription={inputDescription}
                 name="foo"
                 onChange={this.handleChange}
-                label={{ message: {
+                label={{
                   id: 'my-plugin.inputFoo.label',
                   params: { name: <a href="strapi.io" target="_blank">Click me</a> }
-                }}}
+                }}
                 value={foo}
                 validations={{ required: true }}
               />

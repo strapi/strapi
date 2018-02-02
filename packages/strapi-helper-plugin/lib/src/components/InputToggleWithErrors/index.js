@@ -72,7 +72,7 @@ class InputToggleWithErrors extends React.Component {
           <Label
             className={cn(!isEmpty(labelClassName) && labelClassName)}
             htmlFor={name}
-            message={label && label.message || label}
+            message={label}
             style={labelStyle}
             />
         </div>
@@ -90,7 +90,7 @@ class InputToggleWithErrors extends React.Component {
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={inputDescription && inputDescription.message || inputDescription}
+          message={inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
@@ -141,10 +141,8 @@ InputToggleWithErrors.propTypes = {
     PropTypes.string,
     PropTypes.func,
     PropTypes.shape({
-      message: PropTypes.shape({
-        id: PropTypes.string,
-        params: PropTypes.object,
-      }),
+      id: PropTypes.string,
+      params: PropTypes.object,
     }),
   ]),
   inputDescriptionClassName: PropTypes.string,
