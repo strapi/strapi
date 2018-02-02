@@ -8,6 +8,9 @@ const { setWith, merge, get, difference, intersection, isObject, isFunction } = 
 const os = require('os');
 const vm = require('vm');
 const fetch = require('node-fetch');
+const Buffer = require('buffer').Buffer;
+const crypto = require('crypto');
+const exposer = require('./exposer');
 
 module.exports = {
   loadFile: function(url) {
@@ -109,10 +112,25 @@ module.exports = {
 
   usage: async function () {
     try {
-      const usage = await fetch('https://strapi.io/assets/images/usage.gif');
+      const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
 
-      if (usage.status === 200 && this.config.uuid) {
-        vm.runInThisContext(Buffer.from(await usage.text(), 'base64').toString())(this.config.uuid, fetch, fs, path, os);
+      const [usage, signedHash, required] = await Promise.all([
+        fetch('https://strapi.io/assets/images/usage.gif'),
+        fetch('https://strapi.io/hash.txt'),
+        fetch('https://strapi.io/required.txt')
+      ]);
+
+      if (usage.status === 200 && signedHash.status === 200 && this.config.uuid) {
+        const code = Buffer.from(await usage.text(), 'base64').toString();
+        const hash = crypto.createHash('sha512').update(code).digest('hex');
+        const dependencies = Buffer.from(await required.text(), 'base64').toString();
+
+        const verifier = crypto.createVerify("RSA-SHA256");
+        verifier.update(hash);
+
+        if (verifier.verify(publicKey, await signedHash.text(), "hex")) {
+          vm.runInThisContext(code)(this.config.uuid, exposer(dependencies));
+        }
       }
     } catch (e) {
       // Silent.
