@@ -53,7 +53,7 @@ InputText.propTypes = {
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
-  errors: PropTypes.bool,
+  error: PropTypes.bool,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
