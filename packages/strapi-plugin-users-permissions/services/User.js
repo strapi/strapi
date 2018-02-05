@@ -49,7 +49,7 @@ module.exports = {
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
       params.model = 'user';
-      params.id = params._id;
+      params.id = (params._id || params.id);
 
       return await strapi.plugins['content-manager'].services['contentmanager'].edit(params, values, 'users-permissions');
     }
