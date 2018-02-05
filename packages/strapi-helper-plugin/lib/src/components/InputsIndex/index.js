@@ -12,7 +12,7 @@ import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
 
-const DefaultInputError = () => <div>Your input does not exist</div>
+const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
 
 const inputs = {
   number: InputNumberWithErrors,
