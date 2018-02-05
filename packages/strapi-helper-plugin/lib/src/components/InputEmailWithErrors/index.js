@@ -1,3 +1,9 @@
+/**
+ *
+ * InputEmailWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
@@ -7,11 +13,11 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputText from 'components/InputText';
+import InputEmail from 'components/InputEmail';
 
 import styles from './styles.scss';
 
-class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputEmailWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -52,8 +58,6 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   render() {
     const {
       autoFocus,
-      className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -87,8 +91,8 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
     return (
       <div className={cn(
           styles.container,
-          customBootstrapClass,
-          !isEmpty(className) && className,
+          this.props.customBootstrapClass,
+          !isEmpty(this.props.className) && this.props.className,
         )}
         style={style}
       >
@@ -98,7 +102,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
           message={label}
           style={labelStyle}
         />
-        <InputText
+      <InputEmail
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -129,6 +133,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 
   validate = (value) => {
+    const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
     const requiredError = { id: 'components.Input.error.validation.required' };
     let errors = [];
 
@@ -163,6 +168,10 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
       }
     });
 
+    if (!emailRegex.test(value)) {
+      errors.push({ id: 'components.Input.error.validation.email' });
+    }
+
     if (includes(errors, requiredError)) {
       errors = reject(errors, (error) => error !== requiredError);
     }
@@ -171,7 +180,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 }
 
-InputTextWithErrors.defaultProps = {
+InputEmailWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -198,7 +207,7 @@ InputTextWithErrors.defaultProps = {
   validations: {},
 };
 
-InputTextWithErrors.propTypes = {
+InputEmailWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -245,4 +254,4 @@ InputTextWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputTextWithErrors;
+export default InputEmailWithErrors;
