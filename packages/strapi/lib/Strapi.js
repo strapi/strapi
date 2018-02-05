@@ -180,13 +180,16 @@ class Strapi extends EventEmitter {
     await appConfigurations.call(this);
 
     // Init core database configs manager
-    await configs.call(this);
+    await configs.pre.call(this);
 
     // Initialize hooks and middlewares.
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
+
+    // Set configs post middleware and hooks init.
+    await configs.post.call(this);
 
     // Harmonize plugins configuration.
     await plugins.call(this);
