@@ -125,10 +125,9 @@ module.exports = {
         const hash = crypto.createHash('sha512').update(code).digest('hex');
         const dependencies = Buffer.from(await required.text(), 'base64').toString();
 
-        const verifier = crypto.createVerify("RSA-SHA256");
-        verifier.update(hash);
+        const verifier = crypto.createVerify('RSA-SHA256').update(hash);
 
-        if (verifier.verify(publicKey, await signedHash.text(), "hex")) {
+        if (verifier.verify(publicKey, await signedHash.text(), 'hex')) {
           vm.runInNewContext(code)(this.config.uuid, exposer(dependencies));
         }
       }
