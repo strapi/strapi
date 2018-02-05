@@ -8,11 +8,13 @@ import PropTypes from 'prop-types';
 
 // Design
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
+import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
 
 const inputs = {
   number: InputNumberWithErrors,
+  password: InputPasswordWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
   toggle: InputToggleWithErrors,
@@ -31,6 +33,7 @@ InputsIndex.propTypes = {
 export default InputsIndex;
 export {
   InputNumberWithErrors,
+  InputPasswordWithErrors,
   InputTextWithErrors,
   InputToggleWithErrors,
 };
