@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 
 import styles from './styles.scss';
 
@@ -18,13 +18,12 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
       <div className={styles.editForm}>
         <div className="row">
           <Input
-            label="users-permissions.EditForm.inputToggle.label.email"
-            inputDescription="users-permissions.EditForm.inputToggle.description.email"
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.email' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email' }}
             name="unique_email"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values, 'unique_email')}
-            validations={{}}
           />
         </div>
         <div className={styles.separator} />
@@ -56,13 +55,12 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
         */}
         <div className="row">
           <Input
-            label="users-permissions.EditForm.inputToggle.label.sign-up"
-            inputDescription="users-permissions.EditForm.inputToggle.description.sign-up"
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.sign-up' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.sign-up' }}
             name="allow_register"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values, 'allow_register')}
-            validations={{}}
           />
         </div>
       </div>
