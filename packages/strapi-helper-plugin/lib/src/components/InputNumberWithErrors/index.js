@@ -135,7 +135,6 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         }
         case 'required': {
           if (value.length === 0) {
-            console.log('ok');
             errors.push({ id: 'components.Input.error.validation.required' });
           }
           break;

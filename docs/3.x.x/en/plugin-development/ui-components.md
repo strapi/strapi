@@ -673,7 +673,7 @@ export default function Foo(props) {
       />
 
       {/* Example using i18n only */}
-      <Label htmlFor="tel" message={{ id: 'my-plugin.tel.label' />
+      <Label htmlFor="tel" message={{ id: 'my-plugin.tel.label' }} />
       <input
         id="tel"
         name="tel"
