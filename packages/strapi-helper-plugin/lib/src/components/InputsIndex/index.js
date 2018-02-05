@@ -9,19 +9,23 @@ import PropTypes from 'prop-types';
 // Design
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
+import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
+
+const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
 
 const inputs = {
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
+  textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
 };
 
 function InputsIndex(props) {
-  const Input = inputs[props.type] || <div />;
+  const Input = inputs[props.type] ? inputs[props.type] : DefaultInputError;
 
   return <Input {...props} />;
 }
@@ -35,5 +39,6 @@ export {
   InputNumberWithErrors,
   InputPasswordWithErrors,
   InputTextWithErrors,
+  InputTextAreaWithErrors,
   InputToggleWithErrors,
 };

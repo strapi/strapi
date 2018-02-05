@@ -7,11 +7,11 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputNumber from 'components/InputNumber';
+import InputTextArea from 'components/InputTextArea';
 
 import styles from './styles.scss';
 
-class InputNumberWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputTextAreaWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -86,7 +86,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
           message={this.props.label}
           style={labelStyle}
         />
-        <InputNumber
+      <InputTextArea
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -121,15 +121,15 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
 
     mapKeys(this.props.validations, (validationValue, validationKey) => {
       switch (validationKey) {
-        case 'max': {
-          if (parseInt(value, 10) > validationValue) {
-            errors.push({ id: 'components.Input.error.validation.max' });
+        case 'maxLength': {
+          if (value.length > validationValue) {
+            errors.push({ id: 'components.Input.error.validation.maxLength' });
           }
           break;
         }
-        case 'min': {
-          if (parseInt(value, 10) < validationValue) {
-            errors.push({ id: 'components.Input.error.validation.min' });
+        case 'minLength': {
+          if (value.length < validationValue) {
+            errors.push({ id: 'components.Input.error.validation.minLength' });
           }
           break;
         }
@@ -158,7 +158,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
   }
 }
 
-InputNumberWithErrors.defaultProps = {
+InputTextAreaWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -184,7 +184,7 @@ InputNumberWithErrors.defaultProps = {
   validations: {},
 };
 
-InputNumberWithErrors.propTypes = {
+InputTextAreaWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -230,4 +230,4 @@ InputNumberWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputNumberWithErrors;
+export default InputTextAreaWithErrors;

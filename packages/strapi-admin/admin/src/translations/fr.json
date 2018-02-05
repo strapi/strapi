@@ -55,7 +55,7 @@
   "app.components.PluginCard.price.free": "Gratuit",
   "app.components.PluginCard.more-details": "Plus de détails",
 
-  "app.utils.placeholder.defaultMessage": " ",
+  "app.utils.placeholder.defaultMessage": "&nbsp;",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
