@@ -20,7 +20,6 @@ class InputEmail extends React.Component {
   }
 
   handleFocus = (e) => {
-    console.log('ok');
     this.setState({ isFocused: !this.state.isFocused });
     this.props.onFocus(e);
   }
