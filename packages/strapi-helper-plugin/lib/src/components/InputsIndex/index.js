@@ -5,8 +5,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 
 // Design
+import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
@@ -18,6 +20,7 @@ import InputToggleWithErrors from 'components/InputToggleWithErrors';
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
 
 const inputs = {
+  addon: InputAddonWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
@@ -29,12 +32,22 @@ const inputs = {
 };
 
 function InputsIndex(props) {
-  const Input = inputs[props.type] ? inputs[props.type] : DefaultInputError;
+  const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
+
+  const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} />;
 }
 
+InputsIndex.defaultProps = {
+  addon: false,
+}
+
 InputsIndex.propTypes = {
+  addon: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
   type: PropTypes.string.isRequired,
 };
 
