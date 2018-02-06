@@ -7,6 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 // Design
+import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
@@ -18,6 +19,7 @@ import InputToggleWithErrors from 'components/InputToggleWithErrors';
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
 
 const inputs = {
+  date: InputDateWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
@@ -40,6 +42,7 @@ InputsIndex.propTypes = {
 
 export default InputsIndex;
 export {
+  InputDateWithErrors,
   InputEmailWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
