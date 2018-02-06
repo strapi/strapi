@@ -5,10 +5,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 
 // Design
+import InputAddonWithErrors from 'components/InputAddonWithErrors';
+import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
+import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
+import InputSearchWithErrors from 'components/InputSearchWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
 import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
@@ -18,9 +23,13 @@ import InputToggleWithErrors from 'components/InputToggleWithErrors';
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
 
 const inputs = {
+  addon: InputAddonWithErrors,
+  checkbox: InputCheckboxWithErrors,
+  date: InputDateWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
+  search: InputSearchWithErrors,
   select: InputSelectWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
@@ -29,21 +38,34 @@ const inputs = {
 };
 
 function InputsIndex(props) {
-  const Input = inputs[props.type] ? inputs[props.type] : DefaultInputError;
-  const inputValue = props.value || '';
+  const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
+  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : props.value || '';
+  const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
 }
 
+InputsIndex.defaultProps = {
+  addon: false,
+}
+
 InputsIndex.propTypes = {
+  addon: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
   type: PropTypes.string.isRequired,
 };
 
 export default InputsIndex;
 export {
+  InputAddonWithErrors,
+  InputCheckboxWithErrors,
+  InputDateWithErrors,
   InputEmailWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
+  InputSearchWithErrors,
   InputSelectWithErrors,
   InputTextWithErrors,
   InputTextAreaWithErrors,
