@@ -3,10 +3,10 @@
 module.exports = {
   pre: function () {
     return new Promise((resolve, reject) => {
-      this.models['strapi-configs'] = {
+      this.models['core_store'] = {
         connection: 'default',
         info: {
-          name: 'strapi-configs',
+          name: 'core_store',
           description: ''
         },
         attributes: {
@@ -24,22 +24,22 @@ module.exports = {
           }
         },
         globalId: 'StrapiConfigs',
-        collectionName: 'strapi-configs'
+        collectionName: 'core_store'
       };
 
       this.config.get = async (key, environment = strapi.config.environment, type = 'core', name = '') => {
         const prefix = `${type}${name ? `_${name}` : ''}`;
 
-        const findAction = strapi.models['strapi-configs'].orm === 'mongoose' ? 'findOne' : 'forge';
+        const findAction = strapi.models['core_store'].orm === 'mongoose' ? 'findOne' : 'forge';
 
         const where = {
           key: `${prefix}_${key}`,
           environment
         };
 
-        let data = strapi.models['strapi-configs'].orm === 'mongoose'
-          ? await strapi.models['strapi-configs'].findOne(where)
-          : await strapi.models['strapi-configs'].forge(where).fetch().then(configs => configs.toJSON());
+        let data = strapi.models['core_store'].orm === 'mongoose'
+          ? await strapi.models['core_store'].findOne(where)
+          : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
 
         if (!data) {
           return null;
@@ -66,9 +66,9 @@ module.exports = {
           environment
         };
 
-        let data = strapi.models['strapi-configs'].orm === 'mongoose'
-          ? await strapi.models['strapi-configs'].findOne(where)
-          : await strapi.models['strapi-configs'].forge(where).fetch().then(configs => configs.toJSON());
+        let data = strapi.models['core_store'].orm === 'mongoose'
+          ? await strapi.models['core_store'].findOne(where)
+          : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
 
         if (data) {
           data = Object.assign(data, {
@@ -76,18 +76,18 @@ module.exports = {
             type: (typeof value).toString()
           });
 
-          strapi.models['strapi-configs'].orm === 'mongoose'
-            ? await strapi.models['strapi-configs'].update({ _id: data._id }, data, { strict: false })
-            : await strapi.models['strapi-configs'].forge({ id: data.id }).save(data, { patch: true });
+          strapi.models['core_store'].orm === 'mongoose'
+            ? await strapi.models['core_store'].update({ _id: data._id }, data, { strict: false })
+            : await strapi.models['core_store'].forge({ id: data.id }).save(data, { patch: true });
         } else {
           data = Object.assign(where, {
             value: JSON.stringify(value) || value.toString(),
             type: (typeof value).toString()
           });
 
-          strapi.models['strapi-configs'].orm === 'mongoose'
-            ? await strapi.models['strapi-configs'].create(data)
-            : await strapi.models['strapi-configs'].forge().save(data);
+          strapi.models['core_store'].orm === 'mongoose'
+            ? await strapi.models['core_store'].create(data)
+            : await strapi.models['core_store'].forge().save(data);
         }
       };
 
@@ -96,7 +96,7 @@ module.exports = {
   },
   post: function () {
     return new Promise(async (resolve, reject) => {
-      const Model = this.models['strapi-configs'];
+      const Model = this.models['core_store'];
 
       if (Model.orm !== 'bookshelf') {
         return resolve();
@@ -108,7 +108,7 @@ module.exports = {
         const quote = Model.client === 'pg' ? '"' : '`';
 
         console.log(`
-⚠️  TABLE \`strapi-configs\` DOESN'T EXIST
+⚠️  TABLE \`core_store\` DOESN'T EXIST
 
 CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
   id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,

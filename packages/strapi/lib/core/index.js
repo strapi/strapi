@@ -6,7 +6,7 @@ const middlewares = require('./middlewares');
 const hooks = require('./hooks');
 const plugins = require('./plugins');
 const admin = require('./admin');
-const configs = require('./configs');
+const store = require('./store');
 
 module.exports = {
   nestedConfigurations: nested,
@@ -16,5 +16,5 @@ module.exports = {
   hooks,
   plugins,
   admin,
-  configs
+  store
 };
