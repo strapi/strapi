@@ -403,6 +403,12 @@ export default Foo;
 
 ***
 
+## InputEmail
+
+Please refer to the [InputText documentation](#InputText);
+
+***
+
 ## InputNumber
 
 InputNumber component.
@@ -418,6 +424,30 @@ InputNumber component.
 | onFocus | func | no | Function executed when the user enters the input |
 | name | string | yes | The name of the input |
 | placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
+***
+
+## InputSelect
+
+InputSelect component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| selectOptions | array of objects | yes | Options for the select. |
 | style | object | no | Input's style property |
 | tabIndex | string | no | Input's tabIndex |
 | value | string or number | yes | Input's value |
@@ -487,7 +517,50 @@ Input type: 'toggle' component
 
 ***
 
+## InputEmailWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
 ## InputNumberWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputSelectWithErrors
+
+Component integrates Label, InputSelect, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| selectOptions | array of objects | yes | Options for the select. |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
+
+### Usage
 
 Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
 
@@ -518,6 +591,7 @@ Component integrates Label, InputText, InputDescription and InputErrors.
 | onChange | func | yes | Handler to modify the input's value |
 | onFocus | func | no | Function executed when the user enters the input |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |
@@ -618,8 +692,9 @@ Component integrates Label, InputToggle, InputDescription and InputErrors.
 | label | string or func or object | no sets the input's label |
 | labelClassName | string | no | Overrides the Label's className |
 | labelStyle | object | no | Overrides the Label's style |
-| onChange | func | yes | Handler to modify the input's value |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| onChange | func | yes | Handler to modify the input's value |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |
 | validations | object | no | Input's validations |
@@ -656,6 +731,7 @@ Component integrates Label, InputTextArea, InputDescription and InputErrors.
 | onChange | func | yes | Handler to modify the input's value |
 | onFocus | func | no | Function executed when the user enters the input |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |

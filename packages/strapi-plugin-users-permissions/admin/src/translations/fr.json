@@ -167,6 +167,6 @@
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "L'URL de redirection à ajouter dans les configurations Twitter de votre application",
 
   "PopUpForm.Providers.callback.placeholder": "TEXT",
-  "PopUpForm.Email.email_templates.inputDescription": "Regardez la documentation des variables",
+  "PopUpForm.Email.email_templates.inputDescription": "Regardez la documentation des variables, {link}",
   "PopUpForm.Email.link.documentation": "afin de templeter vos emails"
 }

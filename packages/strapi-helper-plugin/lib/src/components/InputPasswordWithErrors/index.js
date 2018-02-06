@@ -1,3 +1,9 @@
+/**
+ *
+ * InputPasswordWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
@@ -7,11 +13,11 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputText from 'components/InputText';
+import InputPassword from 'components/InputPassword';
 
 import styles from './styles.scss';
 
-class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputPasswordWithErrors extends React.Component {
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -52,23 +58,17 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   render() {
     const {
       autoFocus,
-      className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
       errorsStyle,
       inputClassName,
-      inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
-      label,
       labelClassName,
       labelStyle,
       name,
-      noErrorsDescription,
-      onBlur,
       onChange,
       onFocus,
       placeholder,
@@ -76,29 +76,23 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
-
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
-
-    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
-      spacer = <div />;
-    }
+    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     return (
       <div className={cn(
           styles.container,
-          customBootstrapClass,
-          !isEmpty(className) && className,
+          this.props.customBootstrapClass,
+          !isEmpty(this.props.className) && this.props.className,
         )}
         style={style}
       >
         <Label
           className={labelClassName}
           htmlFor={name}
-          message={label}
+          message={this.props.label}
           style={labelStyle}
         />
-        <InputText
+        <InputPassword
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -115,15 +109,14 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={inputDescription}
+          message={this.props.inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={this.state.errors}
           style={errorsStyle}
         />
-        {spacer}
       </div>
     );
   }
@@ -171,7 +164,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
   }
 }
 
-InputTextWithErrors.defaultProps = {
+InputPasswordWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -191,14 +184,14 @@ InputTextWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
   validations: {},
 };
 
-InputTextWithErrors.propTypes = {
+
+InputPasswordWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -231,7 +224,6 @@ InputTextWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
@@ -245,4 +237,4 @@ InputTextWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputTextWithErrors;
+export default InputPasswordWithErrors;
