@@ -26,7 +26,7 @@ import {
 // Translations
 import en from 'translations/en.json';
 
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 
 import styles from './styles.scss';
 
@@ -102,8 +102,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       return (
         <div className={`row ${styles.providerDisabled}`}>
           <Input
-            inputDescription="users-permissions.PopUpForm.Providers.enabled.description"
-            label="users-permissions.PopUpForm.Providers.enabled.label"
+            inputDescription={{ id: 'users-permissions.PopUpForm.Providers.enabled.description' }}
+            label={{ id: 'users-permissions.PopUpForm.Providers.enabled.label' }}
             name={`${dataToEdit}.enabled`}
             onChange={this.handleChange}
             type="toggle"
@@ -120,7 +120,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               didCheckErrors={this.props.didCheckErrors}
               errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
               key={value}
-              label={`users-permissions.PopUpForm.Providers.${ includes(value, 'callback') || includes(value, 'redirect_uri') ? 'redirectURL.front-end' : value}.label`}
+              label={{ id: `users-permissions.PopUpForm.Providers.${ includes(value, 'callback') || includes(value, 'redirect_uri') ? 'redirectURL.front-end' : value}.label` }}
               name={`${dataToEdit}.${value}`}
               onFocus={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleFocus : () => {}}
               onBlur={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleBlur : false}
@@ -134,7 +134,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             <Input
               customBootstrapClass="col-md-12"
               disabled
-              label={`users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL`}
+              label={{ id: `users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL` }}
               name="noName"
               type="text"
               onChange={() => {}}
@@ -146,6 +146,14 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
       );
     }
 
+    const params = {
+      link: (
+        <a href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md" target="_blank">
+          <FormattedMessage id="users-permissions.PopUpForm.Email.link.documentation" />
+        </a>
+      ),
+    };
+
     return (
       <div className="row">
         {map(take(form, 3), (value, key) => (
@@ -154,7 +162,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             key={value}
             didCheckErrors={this.props.didCheckErrors}
             errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
-            label={`users-permissions.PopUpForm.Email.${value}.label`}
+            label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${dataToEdit}.${value}`}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${value}.placeholder`}
@@ -170,15 +178,18 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             customBootstrapClass="col-md-12"
             didCheckErrors={this.props.didCheckErrors}
             errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
-            label={`users-permissions.PopUpForm.Email.${value}.label`}
+            label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${dataToEdit}.${value}`}
-            inputDescription={includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : ''}
-            linkContent={includes(value, 'object') ? { link: 'https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md', description: 'users-permissions.PopUpForm.Email.link.documentation' } : {}}
+            inputDescription={{
+              id: includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : '',
+              params,
+            }}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}
             validations={{ required: true }}
             value={get(values, value)}
+            inputStyle={!includes(value, 'object') ? { height: '16rem' } : {}}
           />
         ))}
       </div>
