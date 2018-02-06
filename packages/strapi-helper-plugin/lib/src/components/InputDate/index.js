@@ -1,6 +1,6 @@
 /**
  *
- * inputDate
+ * InputDate
  *
  */
 

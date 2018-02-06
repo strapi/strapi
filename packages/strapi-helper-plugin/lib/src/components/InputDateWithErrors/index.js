@@ -13,7 +13,7 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import Inputdate from 'components/Inputdate';
+  import InputDate from 'components/InputDate';
 
 import styles from './styles.scss';
 
@@ -104,7 +104,7 @@ class InputDateWithErrors extends React.Component { // eslint-disable-line react
          message={label}
          style={labelStyle}
        />
-      <Inputdate
+      <InputDate
          autoFocus={autoFocus}
          className={inputClassName}
          disabled={disabled}
