@@ -55,6 +55,9 @@
   "app.components.PluginCard.price.free": "Free",
   "app.components.PluginCard.more-details": "More details",
 
+  "app.utils.placeholder.defaultMessage": "\u0020",
+  "app.utils.SelectOption.defaultMessage": "\u0020",
+
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
 
