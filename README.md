@@ -4,7 +4,7 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
+    <a href="#backers" alt="sponsors on Open Collective"><img src="https://opencollective.com/strapi/backers/badge.svg" /></a> <a href="#sponsors" alt="Sponsors on Open Collective"><img src="https://opencollective.com/strapi/sponsors/badge.svg" /></a> <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Dependency Status" />
@@ -83,6 +83,36 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 ### Migration
 
 Follow our [migration guides](https://strapi.io/documentation/migration/migration-guide.html) on the website to keep your Strapi projects updated.
+
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="graphs/contributors"><img src="https://opencollective.com/strapi/contributors.svg?width=890" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/strapi#backer)]
+
+<a href="https://opencollective.com/strapi#backers" target="_blank"><img src="https://opencollective.com/strapi/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/strapi#sponsor)]
+
+<a href="https://opencollective.com/strapi/sponsor/0/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/1/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/2/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/3/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/4/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/5/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/6/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/7/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/8/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/strapi/sponsor/9/website" target="_blank"><img src="https://opencollective.com/strapi/sponsor/9/avatar.svg"></a>
+
+
 
 ## License
 
