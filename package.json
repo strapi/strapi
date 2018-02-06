@@ -24,7 +24,8 @@
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
     "setup": "npm run clean:all && npm install && node ./scripts/setup.js && npm run clean",
-    "test": "make test"
+    "test": "make test",
+    "postinstall": "opencollective postinstall"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -53,5 +54,13 @@
     "node": ">= 7.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "opencollective": "^1.0.3"
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/strapi",
+    "logo": "https://opencollective.com/strapi/logo.txt"
+  }
 }

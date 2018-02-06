@@ -14,3 +14,6 @@
 **If the current behavior is a bug, please provide the steps to reproduce the problem**
 
 **What is the expected behavior?**
+
+<!-- Love strapi? Please consider supporting our collective:
+👉  https://opencollective.com/strapi/donate -->
