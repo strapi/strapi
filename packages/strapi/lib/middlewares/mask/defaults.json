@@ -1,5 +1,5 @@
 {
-  "ip": {
+  "mask": {
     "enabled": false
   }
 }
