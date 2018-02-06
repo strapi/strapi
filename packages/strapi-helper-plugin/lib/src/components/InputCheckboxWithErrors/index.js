@@ -130,7 +130,7 @@ class InputCheckboxWithErrors extends React.Component {
 InputCheckboxWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-6',
+  customBootstrapClass: 'col-md-3',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
