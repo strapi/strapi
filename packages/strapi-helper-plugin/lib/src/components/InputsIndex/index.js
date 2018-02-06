@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 
 // Design
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
+import InputSelectWithErrors from 'components/InputSelectWithErrors';
 import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
@@ -18,6 +19,7 @@ const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does
 const inputs = {
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
+  select: InputSelectWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
   textarea: InputTextAreaWithErrors,
@@ -38,6 +40,7 @@ export default InputsIndex;
 export {
   InputNumberWithErrors,
   InputPasswordWithErrors,
+  InputSelectWithErrors,
   InputTextWithErrors,
   InputTextAreaWithErrors,
   InputToggleWithErrors,
