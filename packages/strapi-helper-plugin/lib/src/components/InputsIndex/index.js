@@ -9,8 +9,10 @@ import { isEmpty } from 'lodash';
 
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
+import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
+import InputSearchWithErrors from 'components/InputSearchWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
 import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
@@ -21,9 +23,11 @@ const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does
 
 const inputs = {
   addon: InputAddonWithErrors,
+  checkbox: InputCheckboxWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
+  search: InputSearchWithErrors,
   select: InputSelectWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
@@ -53,9 +57,12 @@ InputsIndex.propTypes = {
 
 export default InputsIndex;
 export {
+  InputAddonWithErrors,
+  InputCheckboxWithErrors,
   InputEmailWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
+  InputSearchWithErrors,
   InputSelectWithErrors,
   InputTextWithErrors,
   InputTextAreaWithErrors,
