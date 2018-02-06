@@ -1,6 +1,6 @@
 /**
  *
- * InputEmailWithErrors
+ * InputSelectWithErrors;
  *
  */
 
@@ -13,21 +13,15 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputEmail from 'components/InputEmail';
+import InputSelect from 'components/InputSelect'
 
-import styles from './styles.scss';
+import styles  from './styles.scss';
 
-class InputEmailWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { errors: [], hasInitialValue: false };
+class InputSelectWithErrors extends React.Component {
+  state = { errors: [] };
 
   componentDidMount() {
-    const { value, errors } = this.props;
-
-    // Prevent the input from displaying an error when the user enters and leaves without filling it
-    if (value && !isEmpty(value)) {
-      this.setState({ hasInitialValue: true });
-    }
-
+    const { errors } = this.props;
     // Display input error if it already has some
     if (!isEmpty(errors)) {
       this.setState({ errors });
@@ -43,23 +37,14 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
     }
   }
 
-  /**
-   * Set the errors depending on the validations given to the input
-   * @param  {Object} target
-   */
-  handleBlur = ({ target }) => {
-    // Prevent from displaying error if the input is initially isEmpty
-    if (!isEmpty(target.value) || this.state.hasInitialValue) {
-      const errors = this.validate(target.value);
-      this.setState({ errors, hasInitialValue: true });
-    }
-  }
-
   render() {
     const {
       autoFocus,
+      className,
+      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
+      errors,
       errorsClassName,
       errorsStyle,
       inputClassName,
@@ -71,28 +56,20 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
       labelClassName,
       labelStyle,
       name,
-      noErrorsDescription,
       onBlur,
       onChange,
       onFocus,
-      placeholder,
+      selectOptions,
       style,
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
-
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
-
-    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
-      spacer = <div />;
-    }
 
     return (
       <div className={cn(
           styles.container,
-          this.props.customBootstrapClass,
-          !isEmpty(this.props.className) && this.props.className,
+          customBootstrapClass,
+          !isEmpty(className) && className,
         )}
         style={style}
       >
@@ -102,17 +79,17 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
           message={label}
           style={labelStyle}
         />
-        <InputEmail
+        <InputSelect
           autoFocus={autoFocus}
           className={inputClassName}
-          disabled={disabled}
           deactivateErrorHighlight={deactivateErrorHighlight}
+          disabled={disabled}
           error={!isEmpty(this.state.errors)}
           name={name}
-          onBlur={handleBlur}
+          onBlur={onBlur}
           onChange={onChange}
           onFocus={onFocus}
-          placeholder={placeholder}
+          selectOptions={selectOptions}
           style={inputStyle}
           tabIndex={tabIndex}
           value={value}
@@ -124,71 +101,21 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={this.state.errors}
           style={errorsStyle}
         />
-        {spacer}
       </div>
     );
   }
-
-  validate = (value) => {
-    const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-    const requiredError = { id: 'components.Input.error.validation.required' };
-    let errors = [];
-
-    mapKeys(this.props.validations, (validationValue, validationKey) => {
-      switch (validationKey) {
-        case 'maxLength': {
-          if (value.length > validationValue) {
-            errors.push({ id: 'components.Input.error.validation.maxLength' });
-          }
-          break;
-        }
-        case 'minLength': {
-          if (value.length < validationValue) {
-            errors.push({ id: 'components.Input.error.validation.minLength' });
-          }
-          break;
-        }
-        case 'required': {
-          if (value.length === 0) {
-            errors.push({ id: 'components.Input.error.validation.required' });
-          }
-          break;
-        }
-        case 'regex': {
-          if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: 'components.Input.error.validation.regex' });
-          }
-          break;
-        }
-        default:
-          errors = [];
-      }
-    });
-
-    if (!emailRegex.test(value)) {
-      errors.push({ id: 'components.Input.error.validation.email' });
-    }
-
-    if (includes(errors, requiredError)) {
-      errors = reject(errors, (error) => error !== requiredError);
-    }
-
-    return errors;
-  }
 }
 
-InputEmailWithErrors.defaultProps = {
+InputSelectWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
-  onBlur: false,
-  onFocus: () => {},
   errors: [],
   errorsClassName: '',
   errorsStyle: {},
@@ -200,14 +127,14 @@ InputEmailWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  noErrorsDescription: false,
-  placeholder: 'app.utils.placeholder.defaultMessage',
+  onBlur: () => {},
+  onFocus: () => {},
+  selectOptions: [],
   style: {},
   tabIndex: '0',
-  validations: {},
 };
 
-InputEmailWithErrors.propTypes = {
+InputSelectWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -240,18 +167,20 @@ InputEmailWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  placeholder: PropTypes.string,
+  selectOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      params: PropTypes.object,
+      value: PropTypes.string.isRequired,
+    }).isRequired,
+  ),
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  validations: PropTypes.object,
   value: PropTypes.string.isRequired,
 };
 
-export default InputEmailWithErrors;
+export default InputSelectWithErrors;

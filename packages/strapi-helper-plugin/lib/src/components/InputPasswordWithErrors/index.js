@@ -1,6 +1,6 @@
 /**
  *
- * InputEmailWithErrors
+ * InputPasswordWithErrors
  *
  */
 
@@ -13,11 +13,11 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputEmail from 'components/InputEmail';
+import InputPassword from 'components/InputPassword';
 
 import styles from './styles.scss';
 
-class InputEmailWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputPasswordWithErrors extends React.Component {
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -63,16 +63,12 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
       errorsClassName,
       errorsStyle,
       inputClassName,
-      inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
-      label,
       labelClassName,
       labelStyle,
       name,
-      noErrorsDescription,
-      onBlur,
       onChange,
       onFocus,
       placeholder,
@@ -80,13 +76,7 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
-
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
-
-    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
-      spacer = <div />;
-    }
+    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     return (
       <div className={cn(
@@ -99,10 +89,10 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
         <Label
           className={labelClassName}
           htmlFor={name}
-          message={label}
+          message={this.props.label}
           style={labelStyle}
         />
-        <InputEmail
+        <InputPassword
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -119,21 +109,19 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={inputDescription}
+          message={this.props.inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={this.state.errors}
           style={errorsStyle}
         />
-        {spacer}
       </div>
     );
   }
 
   validate = (value) => {
-    const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
     const requiredError = { id: 'components.Input.error.validation.required' };
     let errors = [];
 
@@ -168,10 +156,6 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
       }
     });
 
-    if (!emailRegex.test(value)) {
-      errors.push({ id: 'components.Input.error.validation.email' });
-    }
-
     if (includes(errors, requiredError)) {
       errors = reject(errors, (error) => error !== requiredError);
     }
@@ -180,7 +164,7 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
   }
 }
 
-InputEmailWithErrors.defaultProps = {
+InputPasswordWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -200,14 +184,14 @@ InputEmailWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
   validations: {},
 };
 
-InputEmailWithErrors.propTypes = {
+
+InputPasswordWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -240,7 +224,6 @@ InputEmailWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
@@ -254,4 +237,4 @@ InputEmailWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputEmailWithErrors;
+export default InputPasswordWithErrors;
