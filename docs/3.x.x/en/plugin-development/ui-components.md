@@ -403,6 +403,12 @@ export default Foo;
 
 ***
 
+## InputEmail
+
+Please refer to the [InputText documentation](#InputText);
+
+***
+
 ## InputNumber
 
 InputNumber component.
@@ -511,6 +517,12 @@ Input type: 'toggle' component
 
 ***
 
+## InputEmailWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
 ## InputNumberWithErrors
 
 Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
@@ -579,6 +591,7 @@ Component integrates Label, InputText, InputDescription and InputErrors.
 | onChange | func | yes | Handler to modify the input's value |
 | onFocus | func | no | Function executed when the user enters the input |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |
@@ -679,8 +692,9 @@ Component integrates Label, InputToggle, InputDescription and InputErrors.
 | label | string or func or object | no sets the input's label |
 | labelClassName | string | no | Overrides the Label's className |
 | labelStyle | object | no | Overrides the Label's style |
-| onChange | func | yes | Handler to modify the input's value |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| onChange | func | yes | Handler to modify the input's value |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |
 | validations | object | no | Input's validations |
@@ -717,6 +731,7 @@ Component integrates Label, InputTextArea, InputDescription and InputErrors.
 | onChange | func | yes | Handler to modify the input's value |
 | onFocus | func | no | Function executed when the user enters the input |
 | name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
 | placeholder | string | no | Input's placeholder, works with i18n |
 | style | object | no | Overrides the container style |
 | tabIndex | string | no | Input's tabIndex |
