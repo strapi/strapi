@@ -403,6 +403,26 @@ export default Foo;
 
 ***
 
+## InputAddon
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| addon | string | no | Sets the input's addon. Works with i18n |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
 ## InputDate
 
 Please refer to the [InputText documentation](#InputText);
@@ -540,6 +560,43 @@ Input type: 'toggle' component
 | style | object | no | Input's style property |
 | tabIndex | string | no | Input's tabIndex |
 | value | bool | yes | Input's value |
+
+***
+
+## InputAddonWithErrors
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| addon | string | no | Sets the input's addon. Works with i18n |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
 
 ***
 
