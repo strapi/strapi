@@ -9,9 +9,12 @@ module.exports = mongoose => {
 
   const SchemaTypes = mongoose.Schema.Types;
 
-  SchemaTypes.Decimal.prototype.cast = function (value) {
-    return value.toString();
-  };
+  // Note: The decimal format isn't well supported by MongoDB.
+  // It's recommended to use Float or Number type instead.
+  //
+  // SchemaTypes.Decimal.prototype.cast = function (value) {
+  //   return value.toString();
+  // };
 
   return {
     convertType: mongooseType => {
@@ -25,9 +28,8 @@ module.exports = mongoose => {
         case 'biginteger':
           return 'Number';
         case 'float':
-          return 'Float';
         case 'decimal':
-          return 'Decimal';
+          return 'Float';
         case 'date':
         case 'time':
         case 'datetime':
