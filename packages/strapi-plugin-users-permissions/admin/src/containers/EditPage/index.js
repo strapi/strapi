@@ -15,7 +15,7 @@ import cn from 'classnames';
 
 // Design
 import BackHeader from 'components/BackHeader';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 import InputSearch from 'components/InputSearch';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
@@ -159,7 +159,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                           customBootstrapClass="col-md-12"
                           errors={get(this.props.editPage, ['formErrors', findIndex(this.props.editPage.formErrors, ['name', 'name']), 'errors'])}
                           didCheckErrors={this.props.editPage.didCheckErrors}
-                          label="users-permissions.EditPage.form.roles.label.name"
+                          label={{ id: 'users-permissions.EditPage.form.roles.label.name' }}
                           name="name"
                           onChange={this.props.onChangeInput}
                           type="text"
@@ -170,7 +170,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       <div className="row">
                         <Input
                           customBootstrapClass="col-md-12"
-                          label="users-permissions.EditPage.form.roles.label.description"
+                          label={{ id: 'users-permissions.EditPage.form.roles.label.description' }}
                           name="description"
                           onChange={this.props.onChangeInput}
                           type="textarea"
