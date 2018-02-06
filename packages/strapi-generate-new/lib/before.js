@@ -151,7 +151,7 @@ module.exports = (scope, cb) => {
               prefix: '',
               name: 'host',
               message: 'Host:',
-              default: _.get(scope.database, 'host', 'localhost')
+              default: _.get(scope.database, 'host', '127.0.0.1')
             },
             {
               when: !hasDatabaseConfig,

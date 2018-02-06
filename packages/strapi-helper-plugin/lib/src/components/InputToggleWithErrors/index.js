@@ -54,11 +54,18 @@ class InputToggleWithErrors extends React.Component {
       labelClassName,
       labelStyle,
       name,
+      noErrorsDescription,
       onChange,
       style,
       tabIndex,
       value,
     } = this.props;
+
+    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
 
     return (
       <div className={cn(
@@ -95,9 +102,10 @@ class InputToggleWithErrors extends React.Component {
         />
         <InputErrors
           className={errorsClassName}
-          errors={this.state.errors}
+          errors={!noErrorsDescription && this.state.errors || []}
           style={errorsStyle}
         />
+        {spacer}
       </div>
     );
   }
@@ -121,6 +129,7 @@ InputToggleWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
+  noErrorsDescription: false,
   style: {},
   tabIndex: '0',
   value: true,
@@ -161,6 +170,7 @@ InputToggleWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
