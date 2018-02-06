@@ -423,6 +423,12 @@ export default Foo;
 
 ***
 
+## InputDate
+
+Please refer to the [InputText documentation](#InputText);
+
+***
+
 ## InputEmail
 
 Please refer to the [InputText documentation](#InputText);
@@ -449,6 +455,26 @@ InputNumber component.
 | value | string or number | yes | Input's value |
 
 ***
+
+## InputSearch
+
+InputSearch component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
 
 ***
 
@@ -571,6 +597,13 @@ Input type: 'toggle' component
 ### Usage
 
 Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputDateWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
 ***
 
 ## InputEmailWithErrors
@@ -580,6 +613,12 @@ Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
 ***
 
 ## InputNumberWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputSearchWithErrors
 
 Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
 
