@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 
 // Design
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
+import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputSearchWithErrors from 'components/InputSearchWithErrors';
@@ -21,6 +22,7 @@ const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does
 
 const inputs = {
   checkbox: InputCheckboxWithErrors,
+  date: InputDateWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
@@ -46,6 +48,7 @@ InputsIndex.propTypes = {
 export default InputsIndex;
 export {
   InputCheckboxWithErrors,
+  InputDateWithErrors,
   InputEmailWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
