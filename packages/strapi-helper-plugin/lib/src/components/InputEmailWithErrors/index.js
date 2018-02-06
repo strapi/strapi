@@ -102,7 +102,7 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
           message={label}
           style={labelStyle}
         />
-      <InputEmail
+        <InputEmail
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
