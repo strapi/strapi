@@ -34,7 +34,7 @@ const inputs = {
 
 function InputsIndex(props) {
   const Input = inputs[props.type] ? inputs[props.type] : DefaultInputError;
-  const inputValue = props.value || '';
+  const inputValue = props.type === 'checkbox' ? props.value || false : props.value || '';
 
   return <Input {...props} value={inputValue} />;
 }
