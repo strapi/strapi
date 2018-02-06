@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 // Design
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
+import InputSearchWithErrors from 'components/InputSearchWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
 import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
@@ -21,6 +22,7 @@ const inputs = {
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
+  search: InputSearchWithErrors,
   select: InputSelectWithErrors,
   string: InputTextWithErrors,
   text: InputTextWithErrors,
@@ -43,6 +45,7 @@ export {
   InputEmailWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
+  InputSearchWithErrors,
   InputSelectWithErrors,
   InputTextWithErrors,
   InputTextAreaWithErrors,
