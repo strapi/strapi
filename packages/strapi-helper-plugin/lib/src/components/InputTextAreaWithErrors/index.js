@@ -52,17 +52,23 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
   render() {
     const {
       autoFocus,
+      className,
+      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
       errorsStyle,
       inputClassName,
+      inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
+      label,
       labelClassName,
       labelStyle,
       name,
+      noErrorsDescription,
+      onBlur,
       onChange,
       onFocus,
       placeholder,
@@ -70,23 +76,29 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
+    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
+
+    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+
+    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
 
     return (
       <div className={cn(
           styles.container,
-          this.props.customBootstrapClass,
-          !isEmpty(this.props.className) && this.props.className,
+          customBootstrapClass,
+          !isEmpty(className) && className,
         )}
         style={style}
       >
         <Label
           className={labelClassName}
           htmlFor={name}
-          message={this.props.label}
+          message={label}
           style={labelStyle}
         />
-      <InputTextArea
+        <InputTextArea
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -103,14 +115,15 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={this.props.inputDescription}
+          message={inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
           className={errorsClassName}
-          errors={this.state.errors}
+          errors={!noErrorsDescription && this.state.errors || []}
           style={errorsStyle}
         />
+        {spacer}
       </div>
     );
   }
@@ -165,8 +178,6 @@ InputTextAreaWithErrors.defaultProps = {
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
-  onBlur: false,
-  onFocus: () => {},
   errors: [],
   errorsClassName: '',
   errorsStyle: {},
@@ -178,6 +189,9 @@ InputTextAreaWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
+  noErrorsDescription: false,
+  onBlur: false,
+  onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
@@ -217,6 +231,7 @@ InputTextAreaWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,
