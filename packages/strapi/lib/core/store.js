@@ -27,69 +27,95 @@ module.exports = {
         collectionName: 'core_store'
       };
 
-      this.config.get = async (key, environment = strapi.config.environment, type = 'core', name = '') => {
-        const prefix = `${type}${name ? `_${name}` : ''}`;
+      this.store = (source = {}) => {
+        const get = async (params = {}) => {
+          const configs = Object.assign(source, params);
 
-        const findAction = strapi.models['core_store'].orm === 'mongoose' ? 'findOne' : 'forge';
+          const {
+            key,
+            environment = strapi.config.environment,
+            type = 'core',
+            name = ''
+          } = configs;
 
-        const where = {
-          key: `${prefix}_${key}`,
-          environment
-        };
+          const prefix = `${type}${name ? `_${name}` : ''}`;
 
-        let data = strapi.models['core_store'].orm === 'mongoose'
+          const findAction = strapi.models['core_store'].orm === 'mongoose' ? 'findOne' : 'forge';
+
+          const where = {
+            key: `${prefix}_${key}`,
+            environment
+          };
+
+          let data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
           : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
 
-        if (!data) {
-          return null;
-        }
-
-        if (data.type === 'object' || data.type === 'array' || data.type === 'boolean') {
-          try {
-            return JSON.parse(data.value);
-          } catch (err) {
-            return new Date(data.value);
+          if (!data) {
+            return null;
           }
-        } else if (data.type === 'number') {
-          return parseFloat(data.value);
-        } else {
-          return null;
-        }
-      };
 
-      this.config.set = async (key, value, environment = strapi.config.environment, type, name) => {
-        const prefix = `${type}${name ? `_${name}` : ''}`;
-
-        const where = {
-          key: `${prefix}_${key}`,
-          environment
+          if (data.type === 'object' || data.type === 'array' || data.type === 'boolean') {
+            try {
+              return JSON.parse(data.value);
+            } catch (err) {
+              return new Date(data.value);
+            }
+          } else if (data.type === 'number') {
+            return parseFloat(data.value);
+          } else {
+            return null;
+          }
         };
 
-        let data = strapi.models['core_store'].orm === 'mongoose'
+        const set = async (params = {}) => {
+          const configs = Object.assign(source, params);
+
+          const {
+            key,
+            value,
+            environment = strapi.config.environment,
+            type,
+            name
+          } = configs;
+
+          const prefix = `${type}${name ? `_${name}` : ''}`;
+
+          const where = {
+            key: `${prefix}_${key}`,
+            environment
+          };
+
+          let data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
           : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
 
-        if (data) {
-          data = Object.assign(data, {
-            value: JSON.stringify(value) || value.toString(),
-            type: (typeof value).toString()
-          });
+          if (data) {
+            data = Object.assign(data, {
+              value: JSON.stringify(value) || value.toString(),
+              type: (typeof value).toString()
+            });
 
-          strapi.models['core_store'].orm === 'mongoose'
+            strapi.models['core_store'].orm === 'mongoose'
             ? await strapi.models['core_store'].update({ _id: data._id }, data, { strict: false })
             : await strapi.models['core_store'].forge({ id: data.id }).save(data, { patch: true });
-        } else {
-          data = Object.assign(where, {
-            value: JSON.stringify(value) || value.toString(),
-            type: (typeof value).toString()
-          });
+          } else {
+            data = Object.assign(where, {
+              value: JSON.stringify(value) || value.toString(),
+              type: (typeof value).toString()
+            });
 
-          strapi.models['core_store'].orm === 'mongoose'
+            strapi.models['core_store'].orm === 'mongoose'
             ? await strapi.models['core_store'].create(data)
             : await strapi.models['core_store'].forge().save(data);
+          }
+        };
+
+        return {
+          get,
+          set
         }
-      };
+      }
 
       resolve();
     });

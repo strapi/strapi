@@ -16,8 +16,13 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
+    const store = await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions'
+    });
+
     if (provider === 'local') {
-      if (!_.get(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'), 'email.enabled') && !ctx.request.admin) {
+      if (!_.get(await store.get({key: 'grant'}), 'email.enabled') && !ctx.request.admin) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -70,7 +75,7 @@ module.exports = {
         });
       }
     } else {
-      if (!_.get(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'), [provider, 'enabled'])) {
+      if (!_.get(await store.get({key: 'grant'}), [provider, 'enabled'])) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -123,7 +128,11 @@ module.exports = {
   },
 
   connect: async (ctx, next) => {
-    const grantConfig = await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions');
+    const grantConfig = await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).get();
 
     _.defaultsDeep(grantConfig, {
       server: {
@@ -194,8 +203,11 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    console.log(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions'));
-    if (!(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')).allow_register) {
+    if (!(await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).get()).allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 

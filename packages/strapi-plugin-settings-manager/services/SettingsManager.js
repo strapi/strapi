@@ -57,7 +57,11 @@ module.exports = {
   },
 
   application: async () => {
-    const application = await strapi.config.get('application', '', 'core')
+    const application = await strapi.store({
+      environment: '',
+      type: 'core',
+      key: 'application'
+    }).get();
 
     return {
       name: 'form.application.name',
@@ -828,11 +832,17 @@ module.exports = {
         const [file, ...objPath] = target.split('.');
 
         if (source === 'db') {
-          const data = await strapi.config.get(file, env, 'core');
+          const store = strapi.store({
+            environment: env,
+            type: 'core',
+            key: file
+          });
+
+          const data = await store.get();
 
           _.set(data, objPath, input);
 
-          await strapi.config.set(file, data, env, 'core');
+          await store.set({value: data});
 
           return;
         }

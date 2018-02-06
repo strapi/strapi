@@ -70,7 +70,11 @@ module.exports = {
    */
 
   create: async (ctx) => {
-    if ((await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')).unique_email && ctx.request.body.email) {
+    if ((await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).get()).unique_email && ctx.request.body.email) {
       const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
       if (user) {
@@ -96,7 +100,13 @@ module.exports = {
 
   update: async (ctx, next) => {
     try {
-      if ((await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')).unique_email && ctx.request.body.email) {
+      const advancedConfigs = await strapi.store({
+        type: 'plugin',
+        name: 'users-permissions',
+        key: 'advanced'
+      }).get();
+
+      if (advancedConfigs.unique_email && ctx.request.body.email) {
         const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
         if (user) {
@@ -114,7 +124,7 @@ module.exports = {
         delete ctx.request.body.role;
       }
 
-      if (ctx.request.body.email && (await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')).unique_email) {
+      if (ctx.request.body.email && advancedConfigs.unique_email) {
         const user = await strapi.query('user', 'users-permissions').findOne({
           email: ctx.request.body.email
         });

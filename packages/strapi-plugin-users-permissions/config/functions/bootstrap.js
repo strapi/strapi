@@ -28,8 +28,14 @@ module.exports = async cb => {
     }
   }
 
-  if (!await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions')) {
-    const grant = {
+  const pluginStore = strapi.store({
+    environment: strapi.config.environment,
+    type: 'plugin',
+    name: 'users-permissions'
+  });
+
+  if (!await pluginStore.get({key: 'grant'})) {
+    const value = {
       email: {
         enabled: true,
         icon: 'envelope'
@@ -70,11 +76,11 @@ module.exports = async cb => {
       }
     };
 
-    await strapi.config.set('grant', grant, strapi.config.environment, 'plugin', 'users-permissions');
+    await pluginStore.set({key: 'grant', value});
   }
 
-  if (!await strapi.config.get('email', strapi.config.environment, 'plugin', 'users-permissions')) {
-    const email = {
+  if (!await pluginStore.get({key: 'email'})) {
+    const value = {
       'reset_password': {
         display: 'Email.template.reset_password',
         icon: 'refresh',
@@ -96,16 +102,16 @@ module.exports = async cb => {
       }
     };
 
-    await strapi.config.set('email', email, strapi.config.environment, 'plugin', 'users-permissions');
+    await pluginStore.set({key: 'email', value});
   }
 
-  if (!await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions')) {
-    const advanced = {
+  if (!await pluginStore.get({key: 'advanced'})) {
+    const value = {
       unique_email: true,
       allow_register: true
     };
 
-    await strapi.config.set('advanced', advanced, strapi.config.environment, 'plugin', 'users-permissions');
+    await pluginStore.set({key: 'advanced', value});
   }
 
   strapi.plugins['users-permissions'].services.userspermissions.syncSchema(() => {

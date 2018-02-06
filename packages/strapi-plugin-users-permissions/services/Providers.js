@@ -49,7 +49,11 @@ exports.connect = (provider, query) => {
           email: profile.email
         });
 
-        const advanced = await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions');
+        const advanced = await strapi.store({
+          type: 'plugin',
+          name: 'users-permissions',
+          key: 'advanced'
+        }).get();
 
         if (_.isEmpty(_.find(users, {provider})) && !advanced.allow_register) {
           return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
@@ -92,7 +96,11 @@ exports.connect = (provider, query) => {
 const getProfile = async (provider, query, callback) => {
   const access_token = query.access_token || query.code || query.oauth_token;
 
-  const grant = await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions');
+  const grant = await strapi.store({
+    type: 'plugin',
+    name: 'users-permissions',
+    key: 'grant'
+  }).get();
 
   switch (provider) {
     case 'facebook':

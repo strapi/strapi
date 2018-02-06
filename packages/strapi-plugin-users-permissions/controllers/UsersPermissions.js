@@ -171,7 +171,11 @@ module.exports = {
   },
 
   getEmailTemplate: async (ctx) => {
-    ctx.send(await strapi.config.get('email', strapi.config.environment, 'plugin', 'users-permissions'));
+    ctx.send(await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'email'
+    }).get());
   },
 
   updateEmailTemplate: async (ctx) => {
@@ -179,13 +183,21 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    await strapi.config.set('email', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions')
+    await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'email'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
   },
 
   getAdvancedSettings: async (ctx) => {
-    ctx.send(await strapi.config.get('advanced', strapi.config.environment, 'plugin', 'users-permissions'));
+    ctx.send(await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).get());
   },
 
   updateAdvancedSettings: async (ctx) => {
@@ -193,13 +205,21 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    await strapi.config.set('advanced', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions');
+    await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
   },
 
   getProviders: async (ctx) => {
-    ctx.send(await strapi.config.get('grant', strapi.config.environment, 'plugin', 'users-permissions'));
+    ctx.send(await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).get());
   },
 
   updateProviders: async (ctx) => {
@@ -207,7 +227,11 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    await strapi.config.set('grant', ctx.request.body, strapi.config.environment, 'plugin', 'users-permissions');
+    await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
   }
