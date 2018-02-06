@@ -30,8 +30,9 @@ const inputs = {
 
 function InputsIndex(props) {
   const Input = inputs[props.type] ? inputs[props.type] : DefaultInputError;
+  const inputValue = props.value || '';
 
-  return <Input {...props} />;
+  return <Input {...props} value={inputValue} />;
 }
 
 InputsIndex.propTypes = {
