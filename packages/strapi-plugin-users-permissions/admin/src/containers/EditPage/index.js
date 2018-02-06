@@ -16,7 +16,7 @@ import cn from 'classnames';
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
-import InputSearch from 'components/InputSearch';
+import InputSearch from 'components/InputSearchContainer';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
 import Policies from 'components/Policies';
@@ -185,8 +185,12 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                       didFetchUsers={this.props.editPage.didFetchUsers}
                       didGetUsers={this.props.editPage.didGetUsers}
                       getUser={this.props.getUser}
-                      label="users-permissions.EditPage.form.roles.label.users"
-                      labelValues={{ number: size(get(this.props.editPage, ['modifiedData', 'users'])) }}
+                      label={{
+                        id: 'users-permissions.EditPage.form.roles.label.users',
+                        params: {
+                          number: size(get(this.props.editPage, ['modifiedData', 'users'])),
+                        },
+                      }}
                       onClickAdd={this.props.onClickAdd}
                       onClickDelete={this.props.onClickDelete}
                       name="users"
