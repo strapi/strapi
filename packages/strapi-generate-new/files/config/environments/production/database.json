@@ -5,7 +5,7 @@
       "connector": "strapi-mongoose",
       "settings": {
         "client": "mongo",
-        "host": "${process.env.DATABASE_HOST || 'localhost'}",
+        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
         "port": "${process.env.DATABASE_PORT || 27017}",
         "database": "${process.env.DATABASE_NAME || 'production'}",
         "username": "${process.env.DATABASE_USERNAME || ''}",
