@@ -21,25 +21,21 @@ module.exports = strapi => {
         // Execute next middleware.
         await next();
 
-        const start = Date.now();
-
-        // Array or plain object
-        if (_.isArray(ctx.body) || _.isPlainObject(ctx.body) && ctx.status === 200) {
-          // Array.
+        if (ctx.status === 200) {
+          // Array
           if (_.isArray(ctx.body)) {
             ctx.body = ctx.body.map(value => {
               if (_.isPlainObject(value)) {
-                console.log(this.mask(ctx, value));
                 return this.mask(ctx, value);
               }
 
               // Raw
               return obj;
             });
+          } else if (_.isPlainObject(ctx.body)) {
+            // Plain object.
+            ctx.body = this.mask(ctx, ctx.body);
           }
-
-          // Plain object.
-          ctx.body = this.mask(ctx, ctx.body);
         }
       });
 
@@ -71,7 +67,6 @@ module.exports = strapi => {
       const keys = Object.keys(value);
       let maxMatch = 0;
       let matchs = [];
-
 
       const match = (model, plugin) => {
         const attributes = plugin ?
