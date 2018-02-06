@@ -51,7 +51,7 @@ program
 program
   .command('new')
   .option('-d, --dev', 'Development mode')
-  .option('--dbtype <dbtype>', 'Database type')
+  .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
   .option('--dbname <dbname>', 'Database name')

@@ -45,7 +45,7 @@ module.exports = function (name, cliArguments) {
   if (_.values(_.omit(cliArguments, ['dev'])).length) {
     scope.database = {
       settings: {
-        client: cliArguments.dbtype,
+        client: cliArguments.dbclient,
         host: cliArguments.dbhost,
         port: cliArguments.dbport,
         database: cliArguments.dbname,
