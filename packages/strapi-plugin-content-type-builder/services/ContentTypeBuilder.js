@@ -10,7 +10,7 @@ module.exports = {
     const models = [];
 
     _.forEach(strapi.models, (model, name) => {
-      if (name === 'strapi-configs') {
+      if (name === 'core_store') {
         return true;
       }
 

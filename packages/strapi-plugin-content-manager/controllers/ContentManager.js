@@ -23,7 +23,7 @@ module.exports = {
     ]);
 
     const models = _.mapValues(strapi.models, pickData);
-    delete models['strapi-configs'];
+    delete models['core_store'];
 
     ctx.body = {
       models,

@@ -21,6 +21,9 @@ module.exports = {
           },
           environment: {
             type: 'string'
+          },
+          tag: {
+            type: 'string'
           }
         },
         globalId: 'StrapiConfigs',
@@ -35,7 +38,8 @@ module.exports = {
             key,
             environment = strapi.config.environment,
             type = 'core',
-            name = ''
+            name = '',
+            tag = ''
           } = configs;
 
           const prefix = `${type}${name ? `_${name}` : ''}`;
@@ -44,7 +48,8 @@ module.exports = {
 
           const where = {
             key: `${prefix}_${key}`,
-            environment
+            environment,
+            tag
           };
 
           let data = strapi.models['core_store'].orm === 'mongoose'
@@ -76,14 +81,16 @@ module.exports = {
             value,
             environment = strapi.config.environment,
             type,
-            name
+            name,
+            tag = ''
           } = configs;
 
           const prefix = `${type}${name ? `_${name}` : ''}`;
 
           const where = {
             key: `${prefix}_${key}`,
-            environment
+            environment,
+            tag
           };
 
           let data = strapi.models['core_store'].orm === 'mongoose'
@@ -102,7 +109,8 @@ module.exports = {
           } else {
             data = Object.assign(where, {
               value: JSON.stringify(value) || value.toString(),
-              type: (typeof value).toString()
+              type: (typeof value).toString(),
+              tag
             });
 
             strapi.models['core_store'].orm === 'mongoose'
@@ -141,8 +149,11 @@ CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
   key text,
   value text,
   environment text,
-  type text
+  type text,
+  flag text
 );
+
+ALTER TABLE ${quote}${Model.tableName || Model.collectionName}${quote} ADD COLUMN ${quote}parent${quote} integer, ADD FOREIGN KEY (${quote}parent${quote}) REFERENCES ${quote}${Model.tableName || Model.collectionName}${quote}(${quote}id${quote});
         `);
 
         // Stop the server.
