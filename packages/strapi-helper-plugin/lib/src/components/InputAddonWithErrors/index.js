@@ -59,6 +59,8 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     const {
       addon,
       autoFocus,
+      className,
+      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -91,9 +93,9 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
 
     return (
       <div className={cn(
-          styles.container,
-          this.props.customBootstrapClass,
-          !isEmpty(this.props.className) && this.props.className,
+          styles.containerAddon,
+          customBootstrapClass,
+          !isEmpty(className) && className,
         )}
         style={style}
       >
