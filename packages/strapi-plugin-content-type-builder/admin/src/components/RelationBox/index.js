@@ -11,7 +11,7 @@ import { get, isEmpty, map, startCase } from 'lodash';
 import pluralize from 'pluralize';
 
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */

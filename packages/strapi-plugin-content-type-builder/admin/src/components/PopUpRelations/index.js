@@ -10,7 +10,7 @@ import { findIndex, get, isEmpty, map, take, takeRight } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
 import RelationBox from 'components/RelationBox';
 import RelationNaturePicker from 'components/RelationNaturePicker';
