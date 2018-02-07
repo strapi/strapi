@@ -41,6 +41,7 @@ class InputPassword extends React.Component {
         <FormattedMessage id={placeholder} defaultMessage={placeholder}>
           {(message) => (
             <input
+              autoComplete="new-password"
               autoFocus={autoFocus}
               className={cn(
                 styles.inputPassword,
