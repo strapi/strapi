@@ -28,12 +28,14 @@ const logger = require('strapi-utils').logger;
 
 module.exports = (scope, cb) => {
   // App info.
+  const hasDatabaseConfig = !!scope.database;
   _.defaults(scope, {
     name: scope.name === '.' || !scope.name ? scope.name : path.basename(process.cwd()),
     author: process.env.USER || 'A Strapi developer',
     email: process.env.EMAIL || '',
     year: (new Date()).getFullYear(),
-    license: 'MIT'
+    license: 'MIT',
+    database: {}
   });
 
   // Make changes to the rootPath where the Strapi project will be created.
@@ -51,7 +53,9 @@ module.exports = (scope, cb) => {
 
   logger.info('Let\s configurate the connection to your database:');
 
-  scope.database = {};
+  if (hasDatabaseConfig) {
+    logger.info(`Database determined by CLI args: ${scope.database.settings.client}`);
+  }
 
   const connectionValidation = () => {
     const databaseChoices = [
@@ -98,6 +102,7 @@ module.exports = (scope, cb) => {
     inquirer
     .prompt([
       {
+        when: !hasDatabaseConfig,
         type: 'list',
         prefix: '',
         name: 'client',
@@ -111,20 +116,29 @@ module.exports = (scope, cb) => {
       }
     ])
     .then(answers => {
+
+      if (hasDatabaseConfig) {
+        const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
+        answers.client = {
+          ...databaseChoice.value
+        };
+      } else {
+        _.assign(scope.database, {
+          connector: answers.client.connector,
+          settings: {
+            client: answers.client.database
+          },
+          options: {}
+        });
+      }
       scope.client = answers.client;
-      _.assign(scope.database, {
-        connector: answers.client.connector,
-        settings: {
-          client: answers.client.database
-        },
-        options: {}
-      });
 
       const asyncFn = [
         new Promise(resolve => {
           inquirer
           .prompt([
             {
+              when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
               name: 'name',
@@ -132,13 +146,15 @@ module.exports = (scope, cb) => {
               default: _.get(scope.database, 'database', 'strapi')
             },
             {
+              when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
               name: 'host',
               message: 'Host:',
-              default: _.get(scope.database, 'host', 'localhost')
+              default: _.get(scope.database, 'host', '127.0.0.1')
             },
             {
+              when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
               name: 'port',
@@ -160,6 +176,7 @@ module.exports = (scope, cb) => {
               }
             },
             {
+              when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
               name: 'username',
@@ -167,6 +184,7 @@ module.exports = (scope, cb) => {
               default: _.get(scope.database, 'username', undefined)
             },
             {
+              when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
               name: 'password',
@@ -175,6 +193,11 @@ module.exports = (scope, cb) => {
             }
           ])
           .then(answers => {
+
+            if (hasDatabaseConfig) {
+              answers = _.omit(scope.database.settings, ['client'])
+            }
+
             scope.database.settings.host = answers.host;
             scope.database.settings.port = answers.port;
             scope.database.settings.database = answers.name;

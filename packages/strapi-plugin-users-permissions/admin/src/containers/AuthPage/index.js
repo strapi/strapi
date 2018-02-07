@@ -142,7 +142,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     const headerDescription = this.props.match.params.authType === 'register' ?
       <FormattedMessage id="users-permissions.Auth.header.register.description" />
       : <span />;
-    
+
     return (
       <div className={styles.authPage}>
         <div className={styles.wrapper}>
