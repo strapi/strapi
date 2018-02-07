@@ -142,7 +142,7 @@ module.exports = (scope, cb) => {
               when: !hasDatabaseConfig,
               type: 'input',
               prefix: '',
-              name: 'name',
+              name: 'database',
               message: 'Database name:',
               default: _.get(scope.database, 'database', 'strapi')
             },
@@ -201,7 +201,7 @@ module.exports = (scope, cb) => {
 
             scope.database.settings.host = answers.host;
             scope.database.settings.port = answers.port;
-            scope.database.settings.database = answers.name;
+            scope.database.settings.database = answers.database;
             scope.database.settings.username = answers.username;
             scope.database.settings.password = answers.password;
 
