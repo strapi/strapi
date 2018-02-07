@@ -163,12 +163,12 @@ module.exports = {
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       URL: url,
-      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider']),
+      USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
       TOKEN: resetPasswordToken
     });
 
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
-      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider'])
+      USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
 
     try {

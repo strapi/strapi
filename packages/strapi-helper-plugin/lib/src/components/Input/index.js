@@ -270,6 +270,7 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         <FormattedMessage id={this.props.placeholder || this.props.label} values={this.props.labelValues}>
           {(placeholder) => (
             <input
+              autoComplete="new-password"
               className={`form-control ${!this.props.deactivateErrorHighlight && !isEmpty(this.state.errors) ? 'is-invalid': ''}`}
               onChange={this.props.onChange}
               value={this.props.value}
