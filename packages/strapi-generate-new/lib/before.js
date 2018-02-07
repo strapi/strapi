@@ -119,6 +119,7 @@ module.exports = (scope, cb) => {
 
       if (hasDatabaseConfig) {
         const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
+        scope.database.connector = databaseChoice.value.connector;
         answers.client = {
           ...databaseChoice.value
         };
