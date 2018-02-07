@@ -13,150 +13,134 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-  import InputDate from 'components/InputDate';
+import InputDate from 'components/InputDate';
+
+// Utils
+import validateInput from 'utils/inputsValidations';
 
 import styles from './styles.scss';
 
 class InputDateWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
- state = { errors: [], hasInitialValue: false };
+  state = { errors: [], hasInitialValue: false };
 
- componentDidMount() {
-   const { value, errors } = this.props;
+  componentDidMount() {
+    const { value, errors } = this.props;
 
-   // Prevent the input from displaying an error when the user enters and leaves without filling it
-   if (value && !isEmpty(value)) {
-     this.setState({ hasInitialValue: true });
-   }
+    // Prevent the input from displaying an error when the user enters and leaves without filling it
+    if (!isEmpty(value)) {
+      this.setState({ hasInitialValue: true });
+    }
 
-   // Display input error if it already has some
-   if (!isEmpty(errors)) {
-     this.setState({ errors });
-   }
- }
+    // Display input error if it already has some
+    if (!isEmpty(errors)) {
+      this.setState({ errors });
+    }
+  }
 
- componentWillReceiveProps(nextProps) {
-   // Check if errors have been updated during validations
-   if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
-     // Remove from the state the errors that have already been set
-     const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
-     this.setState({ errors });
-   }
- }
+  componentWillReceiveProps(nextProps) {
+    // Show required error if the input's value is received after the compo is mounted
+    if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
+      this.setState({ hasInitialValue: true });
+    }
 
- /**
+    // Check if errors have been updated during validations
+    if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
+      // Remove from the state the errors that have already been set
+      const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
+      this.setState({ errors });
+    }
+  }
+
+  /**
   * Set the errors depending on the validations given to the input
   * @param  {Object} target
   */
- handleBlur = ({ target }) => {
-   // Prevent from displaying error if the input is initially isEmpty
-   if (!isEmpty(get(target, 'value')) || this.state.hasInitialValue) {
-     const errors = this.validate(target.value);
-     this.setState({ errors, hasInitialValue: true });
-   }
- }
+  handleBlur = ({ target }) => {
+    // Prevent from displaying error if the input is initially isEmpty
+    if (!isEmpty(get(target, 'value')) || this.state.hasInitialValue) {
+      const errors = validateInput(target.value, this.props.validations);
+      this.setState({ errors, hasInitialValue: true });
+    }
+  }
 
- render() {
-   const {
-     autoFocus,
-     className,
-     customBootstrapClass,
-     deactivateErrorHighlight,
-     disabled,
-     errorsClassName,
-     errorsStyle,
-     inputClassName,
-     inputDescription,
-     inputDescriptionClassName,
-     inputDescriptionStyle,
-     inputStyle,
-     label,
-     labelClassName,
-     labelStyle,
-     name,
-     noErrorsDescription,
-     onBlur,
-     onChange,
-     onFocus,
-     placeholder,
-     style,
-     tabIndex,
-     value,
-   } = this.props;
-   const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
+  render() {
+    const {
+      autoFocus,
+      className,
+      customBootstrapClass,
+      deactivateErrorHighlight,
+      disabled,
+      errorsClassName,
+      errorsStyle,
+      inputClassName,
+      inputDescription,
+      inputDescriptionClassName,
+      inputDescriptionStyle,
+      inputStyle,
+      label,
+      labelClassName,
+      labelStyle,
+      name,
+      noErrorsDescription,
+      onBlur,
+      onChange,
+      onFocus,
+      placeholder,
+      style,
+      tabIndex,
+      value,
+    } = this.props;
+    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
-   let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
 
-   if (!noErrorsDescription && !isEmpty(this.state.errors)) {
-     spacer = <div />;
-   }
+    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
 
-   return (
-     <div className={cn(
-         !isEmpty(customBootstrapClass) && customBootstrapClass || 'col-md-4',
-         styles.containerDate,
-         !isEmpty(className) && className,
-       )}
-       style={style}
-     >
-       <Label
-         className={labelClassName}
-         htmlFor={name}
-         message={label}
-         style={labelStyle}
-       />
-      <InputDate
-         autoFocus={autoFocus}
-         className={inputClassName}
-         disabled={disabled}
-         deactivateErrorHighlight={deactivateErrorHighlight}
-         error={!isEmpty(this.state.errors)}
-         name={name}
-         onBlur={handleBlur}
-         onChange={onChange}
-         onFocus={onFocus}
-         placeholder={placeholder}
-         style={inputStyle}
-         tabIndex={tabIndex}
-         value={value}
-       />
-       <InputDescription
-         className={inputDescriptionClassName}
-         message={inputDescription}
-         style={inputDescriptionStyle}
-       />
-       <InputErrors
-         className={errorsClassName}
-         errors={!noErrorsDescription && this.state.errors || []}
-         style={errorsStyle}
-       />
-       {spacer}
-     </div>
-   );
- }
-
- validate = (value) => {
-   const requiredError = { id: 'components.Input.error.validation.required' };
-   let errors = [];
-
-   mapKeys(this.props.validations, (validationValue, validationKey) => {
-     switch (validationKey) {
-       case 'required': {
-         if (value.length === 0) {
-           errors.push({ id: 'components.Input.error.validation.required' });
-         }
-         break;
-       }
-       default:
-         errors = [];
-     }
-   });
-
-   if (includes(errors, requiredError)) {
-     errors = reject(errors, (error) => error !== requiredError);
-   }
-
-   return errors;
- }
+    return (
+      <div className={cn(
+          !isEmpty(customBootstrapClass) && customBootstrapClass || 'col-md-4',
+          styles.containerDate,
+          !isEmpty(className) && className,
+        )}
+        style={style}
+      >
+        <Label
+          className={labelClassName}
+          htmlFor={name}
+          message={label}
+          style={labelStyle}
+        />
+        <InputDate
+          autoFocus={autoFocus}
+          className={inputClassName}
+          disabled={disabled}
+          deactivateErrorHighlight={deactivateErrorHighlight}
+          error={!isEmpty(this.state.errors)}
+          name={name}
+          onBlur={handleBlur}
+          onChange={onChange}
+          onFocus={onFocus}
+          placeholder={placeholder}
+          style={inputStyle}
+          tabIndex={tabIndex}
+          value={value}
+        />
+        <InputDescription
+          className={inputDescriptionClassName}
+          message={inputDescription}
+          style={inputDescriptionStyle}
+        />
+        <InputErrors
+          className={errorsClassName}
+          errors={!noErrorsDescription && this.state.errors || []}
+          style={errorsStyle}
+        />
+        {spacer}
+      </div>
+    );
+  }
 }
 
 InputDateWithErrors.defaultProps = {

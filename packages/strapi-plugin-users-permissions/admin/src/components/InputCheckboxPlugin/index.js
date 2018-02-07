@@ -1,6 +1,6 @@
 /**
 *
-* InputCheckbox
+* InputCheckboxPlugin
 *
 */
 
@@ -10,7 +10,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-class InputCheckbox extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputCheckboxPlugin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { showBackground: false, showCog: false };
 
   componentWillReceiveProps(nextProps) {
@@ -91,19 +91,19 @@ class InputCheckbox extends React.Component { // eslint-disable-line react/prefe
   }
 }
 
-InputCheckbox.contextTypes = {
+InputCheckboxPlugin.contextTypes = {
   onChange: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
   setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
 };
 
-InputCheckbox.defaultProps = {
+InputCheckboxPlugin.defaultProps = {
   label: '',
   value: false,
 };
 
-InputCheckbox.propTypes = {
+InputCheckboxPlugin.propTypes = {
   inputSelected: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   label: PropTypes.string,
@@ -112,4 +112,4 @@ InputCheckbox.propTypes = {
   value: PropTypes.bool,
 };
 
-export default InputCheckbox;
+export default InputCheckboxPlugin;
