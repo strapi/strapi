@@ -30,7 +30,8 @@
     },
     "resetPasswordToken": {
       "type": "string",
-      "configurable": false
+      "configurable": false,
+      "private": true
     },
     "role": {
       "model": "role",
