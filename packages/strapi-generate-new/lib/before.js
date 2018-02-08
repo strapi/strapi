@@ -186,10 +186,11 @@ module.exports = (scope, cb) => {
             },
             {
               when: !hasDatabaseConfig,
-              type: 'input',
+              type: 'password',
               prefix: '',
               name: 'password',
               message: 'Password:',
+              mask: '*',
               default: _.get(scope.database, 'password', undefined)
             }
           ])
