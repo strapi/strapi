@@ -17,33 +17,60 @@ module.exports = strapi => {
      */
 
     initialize: function (cb) {
-      strapi.app.use(async (ctx, next) => {
-        // Execute next middleware.
-        await next();
-
-        // Recursive to mask the private properties.
-        const mask = (payload) => {
-          if (_.isArray(payload)) {
-            return payload.map(value => mask(value));
-          } else if (_.isPlainObject(payload)) {
-            return this.mask(
-              ctx,
-              Object.keys(payload).reduce((acc, current) => {
-                acc[current] = _.isObjectLike(payload[current]) ? mask(payload[current]) : payload[current];
-
-                return acc;
-              }, {})
-            );
+      // Enable the middleware if we need it.
+      const enabled = (() => {
+        const main = Object.keys(strapi.models).reduce((acc, current) => {
+          if (Object.values(strapi.models[current].attributes).find(attr => attr.private === true)) {
+            acc = true;
           }
 
-          return payload;
-        };
+          return acc;
+        }, false);
 
-        // Only pick successful JSON requests.
-        if ([200, 201, 202].includes(ctx.status) && ctx.type === 'application/json') {
-          ctx.body = mask(ctx.body);
-        }
-      });
+        const plugins = Object.keys(strapi.plugins).reduce((acc, plugin) => {
+          acc = Object.keys(strapi.plugins[plugin].models).reduce((acc, model) => {
+            if (Object.values(strapi.plugins[plugin].models[model].attributes).find(attr => attr.private === true)) {
+              acc = true;
+            }
+
+            return acc;
+          }, false);
+
+          return acc;
+        }, false);
+
+        return main || plugins;
+      })();
+
+      if (enabled) {
+        strapi.app.use(async (ctx, next) => {
+          // Execute next middleware.
+          await next();
+
+          // Recursive to mask the private properties.
+          const mask = (payload) => {
+            if (_.isArray(payload)) {
+              return payload.map(value => mask(value));
+            } else if (_.isPlainObject(payload)) {
+              return this.mask(
+                ctx,
+                Object.keys(payload).reduce((acc, current) => {
+                  acc[current] = _.isObjectLike(payload[current]) ? mask(payload[current]) : payload[current];
+
+                  return acc;
+                }, {})
+              );
+            }
+
+            return payload;
+          };
+
+          // Only pick successful JSON requests.
+          if ([200, 201, 202].includes(ctx.status) && ctx.type === 'application/json') {
+            ctx.body = mask(ctx.body);
+          }
+        });
+      }
 
       cb();
     },
