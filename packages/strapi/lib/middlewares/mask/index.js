@@ -21,21 +21,27 @@ module.exports = strapi => {
         // Execute next middleware.
         await next();
 
-        if (ctx.status === 200) {
-          // Array
-          if (_.isArray(ctx.body)) {
-            ctx.body = ctx.body.map(value => {
-              if (_.isPlainObject(value)) {
-                return this.mask(ctx, value);
-              }
+        // Recursive to mask the private properties.
+        const mask = (payload) => {
+          if (_.isArray(payload)) {
+            return payload.map(value => mask(value));
+          } else if (_.isPlainObject(payload)) {
+            return this.mask(
+              ctx,
+              Object.keys(payload).reduce((acc, current) => {
+                acc[current] = _.isObjectLike(payload[current]) ? mask(payload[current]) : payload[current];
 
-              // Raw
-              return obj;
-            });
-          } else if (_.isPlainObject(ctx.body)) {
-            // Plain object.
-            ctx.body = this.mask(ctx, ctx.body);
+                return acc;
+              }, {})
+            );
           }
+
+          return payload;
+        };
+
+        // Only pick successful JSON requests.
+        if ([200, 201, 202].includes(ctx.status) && ctx.type === 'application/json') {
+          ctx.body = mask(ctx.body);
         }
       });
 
@@ -108,8 +114,8 @@ module.exports = strapi => {
           strapi.plugins[match.plugin].models[match.model].attributes:
           strapi.models[match.model].attributes;
 
-        // Filtered model which have more than half of the attributes in common
-        // with the original model.
+        // Filtered model which have more than 50% of the attributes
+        // in common with the original model.
         if (match.intersection >= Object.keys(attributes).length / 2) {
           acc[index] = match;
         }
