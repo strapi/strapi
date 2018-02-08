@@ -29,6 +29,7 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, cb) => {
   // App info.
   const hasDatabaseConfig = !!scope.database;
+
   _.defaults(scope, {
     name: scope.name === '.' || !scope.name ? scope.name : path.basename(process.cwd()),
     author: process.env.USER || 'A Strapi developer',
@@ -116,7 +117,6 @@ module.exports = (scope, cb) => {
       }
     ])
     .then(answers => {
-
       if (hasDatabaseConfig) {
         const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
         answers.client = {
