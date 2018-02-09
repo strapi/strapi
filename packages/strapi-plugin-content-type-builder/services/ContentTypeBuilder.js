@@ -79,7 +79,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const scope = {
         generatorType: 'api',
-        id: name,
+        id: name.toLowerCase(),
         rootPath: strapi.config.appPath,
         args: {
           api: name,
