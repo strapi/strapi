@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="30px" height="24px" viewBox="0 0 30 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 46.1 (44463) - http://www.bohemiancoding.com/sketch -->
-    <title>📖</title>
+    <title>🔐</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
-    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" font-size="30" font-family="AppleColorEmoji, Apple Color Emoji" font-weight="normal">
-        <g id="List-plugins" transform="translate(-299.000000, -454.000000)" fill="#4B515A">
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" font-size="24" font-family="AppleColorEmoji, Apple Color Emoji" font-weight="normal">
+        <g id="List-plugins" transform="translate(-303.000000, -562.000000)" fill="#4B515A">
             <g id="Container" transform="translate(263.000000, 83.000000)">
                 <g id="Content">
                     <g id="Forms" transform="translate(1.000000, 78.000000)">
                         <g id="List" transform="translate(15.000000, 19.000000)">
-                            <g id="5" transform="translate(0.000000, 268.000000)">
+                            <g id="7" transform="translate(0.000000, 376.000000)">
                                 <g id="Logo">
-                                    <text id="📖">
-                                        <tspan x="20" y="31">📖</tspan>
+                                    <text id="🔐">
+                                        <tspan x="24" y="28">🔐</tspan>
                                     </text>
                                 </g>
                             </g>
