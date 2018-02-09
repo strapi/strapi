@@ -8,7 +8,6 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
-const Grant = require('grant-koa');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
@@ -137,6 +136,7 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
+    const Grant = require('grant-koa');
     const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
 
     return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
