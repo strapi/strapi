@@ -28,13 +28,17 @@ module.exports = strapi => {
         }, false);
 
         const plugins = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-          acc = Object.keys(strapi.plugins[plugin].models).reduce((acc, model) => {
+          const bool = Object.keys(strapi.plugins[plugin].models).reduce((acc, model) => {
             if (Object.values(strapi.plugins[plugin].models[model].attributes).find(attr => attr.private === true)) {
               acc = true;
             }
 
             return acc;
           }, false);
+
+          if (bool) {
+            acc = true;
+          }
 
           return acc;
         }, false);
@@ -50,7 +54,7 @@ module.exports = strapi => {
           // Recursive to mask the private properties.
           const mask = (payload) => {
             if (_.isArray(payload)) {
-              return payload.map(value => mask(value));
+              return payload.map(mask);
             } else if (_.isPlainObject(payload)) {
               return this.mask(
                 ctx,
