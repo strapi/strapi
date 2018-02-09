@@ -42,7 +42,15 @@ module.exports = function (name, cliArguments) {
     developerMode
   };
 
-  if (_.values(_.omit(cliArguments, ['dev'])).length) {
+  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
+  const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
+
+  if (matchingDbArguments.length) {
+    if (matchingDbArguments.length !== dbArguments.length) {
+      logger.warn(`Some database arguments are missing. Required arguments list: ${dbArguments}`);
+      return process.exit(1);
+    }
+
     scope.database = {
       settings: {
         client: cliArguments.dbclient,

@@ -86,7 +86,7 @@
   "HeaderNav.link.providers": "Providers",
   "HeaderNav.link.roles": "Roles",
 
-  "HomePage.header.title": "Auth & Permissions",
+  "HomePage.header.title": "Users & Permissions",
   "HomePage.header.description": "Define the roles and permissions for every one of them",
 
   "InputSearch.placeholder": "Search for a user",

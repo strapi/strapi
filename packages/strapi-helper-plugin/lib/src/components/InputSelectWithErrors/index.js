@@ -86,7 +86,7 @@ class InputSelectWithErrors extends React.Component {
           disabled={disabled}
           error={!isEmpty(this.state.errors)}
           name={name}
-          onBlur={onBlur}
+          onBlur={isFunction(onBlur) ? onBlur : () => {}}
           onChange={onChange}
           onFocus={onFocus}
           selectOptions={selectOptions}
@@ -167,7 +167,10 @@ InputSelectWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
+  onBlur: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   selectOptions: PropTypes.arrayOf(
