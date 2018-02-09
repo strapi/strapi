@@ -1,6 +1,6 @@
 /**
 *
-* InputSearch
+* InputSearchContainer
 *
 */
 
@@ -10,15 +10,17 @@ import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
+import Label from 'components/Label';
 import InputSearchLi from 'components/InputSearchLi';
 
 import styles from './styles.scss';
 
-class InputSearch extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputSearchContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = {
     errors: [],
     filteredUsers: this.props.values,
     isAdding: false,
+    isFocused: false,
     users: this.props.values,
     value: '',
     autoFocus: false,
@@ -38,6 +40,8 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  handleBlur = () => this.setState({ isFocused: !this.state.isFocused });
+
   handleChange = ({ target }) => {
     const filteredUsers = isEmpty(target.value) ?
       this.state.users
@@ -53,6 +57,8 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
 
     this.setState({ value: target.value, filteredUsers });
   }
+
+  handleFocus = () => this.setState({ isFocused: !this.state.isFocused });
 
   handleClick = (item) => {
     if (this.state.isAdding) {
@@ -76,18 +82,18 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
   render() {
     return (
       <div className={cn(styles.inputSearch, 'col-md-6')}>
-        <label htmlFor={this.props.name}>
-          <FormattedMessage id={this.props.label} values={this.props.labelValues} />
-        </label>
+        <Label htmlFor={this.props.name} message={this.props.label} />
         <div className={cn('input-group')}>
-          <span className={cn('input-group-addon', styles.addon)} />
+          <span className={cn('input-group-addon', styles.addon, this.state.isFocused && styles.addonFocus,)} />
           <FormattedMessage id="users-permissions.InputSearch.placeholder">
             {(message) => (
               <input
                 className={cn('form-control', !isEmpty(this.state.errors) ? 'is-invalid': '')}
                 id={this.props.name}
                 name={this.props.name}
+                onBlur={this.handleBlur}
                 onChange={this.handleChange}
+                onFocus={this.handleFocus}
                 value={this.state.value}
                 placeholder={message}
                 type="text"
@@ -96,7 +102,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
             )}
           </FormattedMessage>
         </div>
-        <div className={styles.ulContainer}>
+        <div className={cn(styles.ulContainer, this.state.isFocused && styles.ulFocused)}>
           <ul>
             {map(this.state.filteredUsers, (user) => (
               <InputSearchLi
@@ -113,7 +119,7 @@ class InputSearch extends React.Component { // eslint-disable-line react/prefer-
   }
 }
 
-InputSearch.defaultProps = {
+InputSearchContainer.defaultProps = {
   labelValues: {
     number: 0,
   },
@@ -121,13 +127,15 @@ InputSearch.defaultProps = {
   values: [],
 };
 
-InputSearch.propTypes = {
+InputSearchContainer.propTypes = {
   didDeleteUser: PropTypes.bool.isRequired,
   didFetchUsers: PropTypes.bool.isRequired,
   didGetUsers: PropTypes.bool.isRequired,
   getUser: PropTypes.func.isRequired,
-  label: PropTypes.string.isRequired,
-  labelValues: PropTypes.object,
+  label: PropTypes.shape({
+    id: PropTypes.string,
+    params: PropTypes.object,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
@@ -135,4 +143,4 @@ InputSearch.propTypes = {
   values: PropTypes.array,
 };
 
-export default InputSearch;
+export default InputSearchContainer;
