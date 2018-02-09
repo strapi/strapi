@@ -9,6 +9,9 @@
 // Node.js core.
 const path = require('path');
 
+// Public node modules.
+const _ = require('lodash');
+
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
@@ -38,6 +41,20 @@ module.exports = function (name, cliArguments) {
     strapiPackageJSON: packageJSON,
     developerMode
   };
+
+  if (_.values(_.omit(cliArguments, ['dev'])).length) {
+    scope.database = {
+      settings: {
+        client: cliArguments.dbclient,
+        host: cliArguments.dbhost,
+        port: cliArguments.dbport,
+        database: cliArguments.dbname,
+        username: cliArguments.dbusername,
+        password: cliArguments.dbpassword
+      },
+      options: {}
+    }
+  }
 
   // Return the scope and the response (`error` or `success`).
   return generate(scope, {

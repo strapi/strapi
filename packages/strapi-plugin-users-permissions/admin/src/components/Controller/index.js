@@ -10,7 +10,7 @@ import { get, map, some } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 
-import InputCheckbox from 'components/InputCheckbox';
+import InputCheckbox from 'components/InputCheckboxPlugin';
 import styles from './styles.scss';
 
 class Controller extends React.Component {

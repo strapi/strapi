@@ -15,6 +15,9 @@ import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputEmail from 'components/InputEmail';
 
+// Utils
+import validateInput from 'utils/inputsValidations';
+
 import styles from './styles.scss';
 
 class InputEmailWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -24,7 +27,7 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
     const { value, errors } = this.props;
 
     // Prevent the input from displaying an error when the user enters and leaves without filling it
-    if (value && !isEmpty(value)) {
+    if (!isEmpty(value)) {
       this.setState({ hasInitialValue: true });
     }
 
@@ -35,6 +38,11 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
   }
 
   componentWillReceiveProps(nextProps) {
+    // Show required error if the input's value is received after the compo is mounted
+    if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
+      this.setState({ hasInitialValue: true });
+    }
+
     // Check if errors have been updated during validations
     if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
       // Remove from the state the errors that have already been set
@@ -50,7 +58,7 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
   handleBlur = ({ target }) => {
     // Prevent from displaying error if the input is initially isEmpty
     if (!isEmpty(target.value) || this.state.hasInitialValue) {
-      const errors = this.validate(target.value);
+      const errors = validateInput(target.value, this.props.validations, 'email');
       this.setState({ errors, hasInitialValue: true });
     }
   }
@@ -130,53 +138,6 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
         {spacer}
       </div>
     );
-  }
-
-  validate = (value) => {
-    const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-    const requiredError = { id: 'components.Input.error.validation.required' };
-    let errors = [];
-
-    mapKeys(this.props.validations, (validationValue, validationKey) => {
-      switch (validationKey) {
-        case 'maxLength': {
-          if (value.length > validationValue) {
-            errors.push({ id: 'components.Input.error.validation.maxLength' });
-          }
-          break;
-        }
-        case 'minLength': {
-          if (value.length < validationValue) {
-            errors.push({ id: 'components.Input.error.validation.minLength' });
-          }
-          break;
-        }
-        case 'required': {
-          if (value.length === 0) {
-            errors.push({ id: 'components.Input.error.validation.required' });
-          }
-          break;
-        }
-        case 'regex': {
-          if (!new RegExp(validationValue).test(value)) {
-            errors.push({ id: 'components.Input.error.validation.regex' });
-          }
-          break;
-        }
-        default:
-          errors = [];
-      }
-    });
-
-    if (!emailRegex.test(value)) {
-      errors.push({ id: 'components.Input.error.validation.email' });
-    }
-
-    if (includes(errors, requiredError)) {
-      errors = reject(errors, (error) => error !== requiredError);
-    }
-
-    return errors;
   }
 }
 
