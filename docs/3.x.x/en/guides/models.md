@@ -67,14 +67,23 @@ To improve the Developer eXperience when developing or using the administration 
     "lastname": {
       "type": "string"
     },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
     "password": {
-      "type": "password"
+      "type": "password",
+      "required": true,
+      "private": true
     },
     "about": {
       "type": "description"
     },
     "age": {
-      "type": "integer"
+      "type": "integer",
+      "min": 18,
+      "max": 99
     },
     "birthday": {
       "type": "date"
