@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, map, findIndex } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 import styles from './styles.scss';
 
 class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -69,7 +69,7 @@ class InputCheckboxWithNestedInputs extends React.Component { // eslint-disable-
       <div className={`${styles.inputCheckboxWithNestedInputs} col-md-12`}>
         <div className="form-check" style={{ zIndex: '9999' }}>
           {title}
-          <FormattedMessage id={this.props.data.label}>
+          <FormattedMessage id={this.props.data.label.id}>
             {(message) => (
               <label className={`${styles.checkboxLabel} form-check-label`} htmlFor={this.props.data.name} style={{ cursor: 'pointer' }}>
                 <input
