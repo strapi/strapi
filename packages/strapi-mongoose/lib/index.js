@@ -135,7 +135,18 @@ module.exports = function (strapi) {
                   });
 
                   if (!plugin) {
-                    global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.collectionName);
+                    // Enhance schema with polymorphic relationships.
+                    const morphs = _.pickBy(definition.loadedModel, model => {
+                      return model.type === 'discriminator';
+                    });
+
+                    if (_.size(morphs) > 0) {
+                      const morph = morphs[Object.keys(morphs)[0]];
+
+                      global[definition.globalName] = global[morph.ref].discriminator(morph.discriminator, collection.schema);
+                    } else {
+                      global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.collectionName);
+                    }
                   } else {
                     instance.model(definition.globalName, collection.schema, definition.collectionName);
                   }
@@ -195,10 +206,23 @@ module.exports = function (strapi) {
               // Call this callback function after we are done parsing
               // all attributes for relationships-- see below.
               const done = _.after(_.size(definition.attributes), () => {
-                // Generate schema without virtual populate
-                _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema(_.omitBy(definition.loadedModel, model => {
-                  return model.type === 'virtual';
-                })));
+                // Extract discriminator (morphTo side)
+                const discriminators = _.pickBy(definition.loadedModel, model => {
+                  return model.hasOwnProperty('discriminatorKey');
+                });
+
+                const options = {};
+
+                if (_.size(discriminators) > 0) {
+                  options.discriminatorKey = 'type';
+                }
+
+                // Generate schema without virtual populate & discriminators.
+                let schema = new instance.Schema(_.omitBy(definition.loadedModel, model => {
+                  return model.type === 'virtual' || model.type === 'discriminator' || model.hasOwnProperty('discriminatorKey');
+                }), options);
+
+                _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', schema);
 
                 loadedAttributes();
               });
@@ -291,6 +315,22 @@ module.exports = function (strapi) {
                       }];
                     }
                     break;
+                  }
+                  case 'morphOne': {
+                    const discriminator = plugin ? `${plugin}_${model.toLowerCase()}` : model.toLowerCase();
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
+
+                    definition.loadedModel[name] = {
+                      type: 'discriminator',
+                      ref,
+                      discriminator
+                    }
+                    break;
+                  }
+                  case 'morphTo': {
+                    definition.loadedModel[name] = {
+                      discriminatorKey: 'kind'
+                    };
                   }
                   default:
                     break;

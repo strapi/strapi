@@ -94,6 +94,8 @@ module.exports = {
           types.other = 'collectionD';
         } else if (relatedAttribute.hasOwnProperty('model')) {
           types.other = 'model';
+        } else if (relatedAttribute.hasOwnProperty('key')) {
+          types.other = 'morphTo';
         }
       } else if (association.hasOwnProperty('via') && association.hasOwnProperty('model')) {
         types.current = 'modelD';
@@ -111,6 +113,8 @@ module.exports = {
 
               // Break loop
               return false;
+            } else if (attribute.hasOwnProperty('key')) {
+              types.other = 'morphTo'; // MorphTo
             }
           });
         });
@@ -156,9 +160,26 @@ module.exports = {
             }
           });
         });
+      } else if (association.hasOwnProperty('key')) {
+        types.current = 'morphTo';
       }
 
-      if (types.current === 'modelD' && types.other === 'model') {
+      if (types.current === 'morphTo') {
+        return {
+          nature: 'morphTo',
+          verbose: 'morphTo'
+        };
+      } else if (types.current === 'modelD' && types.other === 'morphTo') {
+        return {
+          nature: 'oneToOne',
+          verbose: 'morphOne'
+        };
+      } else if (types.current === 'collection' && types.other === 'morphTo') {
+        return {
+          nature: 'oneToMany',
+          verbose: 'morphMany'
+        };
+      } else if (types.current === 'modelD' && types.other === 'model') {
         return {
           nature: 'oneToOne',
           verbose: 'belongsTo'
