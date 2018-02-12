@@ -1,3 +1,10 @@
+.icon {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .imgPreviewContainer {
   display: table-cell;
   height: 144px;
@@ -7,10 +14,9 @@
   border-top-right-radius: 2px;
   text-align: center;
   vertical-align: middle;
-  // background-color: red;
   background-color: #F3F4F4;
-  white-space: nowrap;
 
+  white-space: nowrap;
   > img {
     max-width: 358px;
     max-height: 144px;

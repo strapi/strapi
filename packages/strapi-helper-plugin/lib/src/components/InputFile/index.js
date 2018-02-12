@@ -16,24 +16,44 @@ import ImgPreview from 'components/ImgPreview';
 import styles from './styles.scss';
 
 class InputFile extends React.Component {
-  state = { isUploading: false };
+  // NOTE: use isDropping to change the background color of the ImgPreview
+  state = { isUploading: false, isDropping: false, position: 0 };
 
-  handleChange = (e) => {
-    const value = Object.keys(e.target.files).reduce((acc, current) => {
-      acc.push(e.target.files[current]);
+  addFilesToProps = (files) => {
+    const value = Object.keys(files).reduce((acc, current) => {
+      acc.push(files[current]);
 
       return acc;
-    }, cloneDeep(this.props.value));
-
-    this.setState({ isUploading: !this.state.isUploading });
+    }, cloneDeep(this.props.value))
 
     const target = {
       name: this.props.name,
       type: 'file',
       value,
     };
+
+    this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
   }
+
+  handleChange = ({ target }) => this.addFilesToProps(target.files);
+
+  handleDragEnter = () => {
+    this.setState({ isDropping: true });
+  }
+
+  handleDragLeave = () => {
+    this.setState({ isDropping: false });
+  }
+
+  handleDragOver = (e) => e.preventDefault();
+
+  handleDrop = (e) => {
+    e.preventDefault();
+    this.addFilesToProps(e.dataTransfer.files);
+  }
+
+  updateFilePosition = (newPosition) => this.setState({ position: newPosition });
 
   render() {
     const {
@@ -42,10 +62,14 @@ class InputFile extends React.Component {
       onChange,
       value,
     } = this.props;
-
+    
     return (
       <div>
         <label
+          onDragEnter={this.handleDragEnter}
+          onDragLeave={this.handleDragLeave}
+          onDragOver={this.handleDragOver}
+          onDrop={this.handleDrop}
         >
           <ImgPreview
             files={value}
@@ -53,6 +77,7 @@ class InputFile extends React.Component {
             multiple={multiple}
             name={name}
             onChange={onChange}
+            updateFilePosition={this.updateFilePosition}
           />
           <input
             className={styles.inputFile}
@@ -61,7 +86,6 @@ class InputFile extends React.Component {
             onChange={this.handleChange}
             type="file"
           />
-
           <div className={styles.buttonContainer}>
             <i className="fa fa-plus" />
             <FormattedMessage id="app.components.InputFile.newFile" />
