@@ -12,6 +12,7 @@
   "app.components.HomePage.feedback": "N'hésitez pas à utiliser un des channels ci-dessous pour poser vos questions ou nous donner vos retours.",
 
   "app.components.InputFile.newFile": "AJOUTER UN NOUVEAU FICHIER",
+  "app.components.InputFileDetails.details": "Détails",
 
   "app.components.InstallPluginPage.helmet": "Installez des plugins",
   "app.components.InstallPluginPage.title": "Installez des nouveaux plugins",

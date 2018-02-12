@@ -12,12 +12,13 @@ import { cloneDeep, isArray, isObject, isEmpty, last } from 'lodash';
 import cn from 'classnames';
 
 import ImgPreview from 'components/ImgPreview';
+import InputFileDetails from 'components/InputFileDetails';
 
 import styles from './styles.scss';
 
 class InputFile extends React.Component {
   // NOTE: use isDropping to change the background color of the ImgPreview
-  state = { isUploading: false, isDropping: false, position: 0 };
+  state = { isUploading: false, isDropping: false, position: 0, isOpen: false };
 
   addFilesToProps = (files) => {
     const value = Object.keys(files).reduce((acc, current) => {
@@ -62,7 +63,7 @@ class InputFile extends React.Component {
       onChange,
       value,
     } = this.props;
-    
+
     return (
       <div>
         <label
@@ -91,6 +92,12 @@ class InputFile extends React.Component {
             <FormattedMessage id="app.components.InputFile.newFile" />
           </div>
         </label>
+        <InputFileDetails
+          isOpen={!this.state.isOpen}
+          number={value.length}
+          onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
+          position={this.state.position}
+        />
       </div>
     );
   }
