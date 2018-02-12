@@ -9,6 +9,9 @@ The most advanced open-source Content Management Framework to build powerful API
 [![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
 [![Build status](https://travis-ci.org/strapi/strapi.svg?branch=master)](https://travis-ci.org/strapi/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+<a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" height="20px">
+</a>
 
 {% endcenter %}
 
