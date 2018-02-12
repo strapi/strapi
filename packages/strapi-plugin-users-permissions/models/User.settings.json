@@ -36,10 +36,6 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
-    },
-    "avatar": {
-      "model": "upload",
-      "via": "related"
     }
   }
 }

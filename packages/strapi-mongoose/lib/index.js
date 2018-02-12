@@ -106,7 +106,8 @@ module.exports = function (strapi) {
                             if (this._mongooseOptions.populate && this._mongooseOptions.populate[association.alias]) {
                               if (association.nature === 'oneToMorph' || association.nature === 'manyToMorph') {
                                 this._mongooseOptions.populate[association.alias].match = {
-                                  [`${association.via}.${association.where}`]: association.alias
+                                  [`${association.via}.${association.where}`]: association.alias,
+                                  [`${association.via}.kind`]: definition.globalId
                                 }
                               } else {
                                 this._mongooseOptions.populate[association.alias].path = `${association.alias}.${association.key}`;
