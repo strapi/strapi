@@ -45,7 +45,7 @@ module.exports = (scope, cb) => {
   // Ensure we aren't going to inadvertently delete any files.
   try {
     const files = fs.readdirSync(scope.rootPath);
-    if (files.length) {
+    if (files.length > 1) {
       return logger.error('`$ strapi new` can only be called in an empty directory.');
     }
   } catch (err) {
