@@ -15,9 +15,6 @@
   <a href="http://slack.strapi.io">
     <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
   </a>
-  <a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
-    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" height="20px">
-  </a>
 </p>
 
 <br>
@@ -30,6 +27,10 @@
 
 We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel. Performances has been increased, Developer eXperience has been improved and a brand new plugins
 ecosystem has been introduced. **Both versions are available, we still recommend you to use v1 for production usage.**.
+
+<a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
+</a>
 
 #### Alpha
 
