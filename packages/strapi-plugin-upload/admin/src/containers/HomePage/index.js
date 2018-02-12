@@ -25,7 +25,7 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  state = { value: [{ url: 'https://sofiaglobe.com/wp-content/uploads/2017/08/Toto-1979.jpg' }] };
+  state = { value: [{ url: 'https://sofiaglobe.com/wp-content/uploads/2017/08/Toto-1979.jpg', name: 'https://sofiaglobe.com/wp-content/uploads/2017/08/Toto-1979.jpg' }] };
 
   onChange = ({ target }) => {
     this.setState({ value: target.value });

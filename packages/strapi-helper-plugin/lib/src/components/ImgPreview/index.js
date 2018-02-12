@@ -20,18 +20,19 @@ class ImgPreview extends React.Component {
     // always have an init value here
     this.setState({
         imgURL: get(this.props.files, ['0', 'url'], ''),
+        isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
     });
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.isUploading !== this.props.isUploading) {
       const lastFile = nextProps.files.slice(-1)[0];
-
       this.generateImgURL(lastFile);
       this.updateFilePosition(nextProps.files.length - 1);
-      // this.setState({ position: nextProps.files.length - 1 });
     }
   }
+
+  getFileType = (fileName) => fileName.split('.').slice(-1)[0];
 
   /**
    * [generateImgURL description]
@@ -39,14 +40,19 @@ class ImgPreview extends React.Component {
    * @return {URL}
    */
   generateImgURL = (file) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      this.setState({
-        imgURL: reader.result
-      });
-    }
+    if ( /\.(jpe?g|png|gif)$/i.test(file.name) ) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.setState({
+          imgURL: reader.result,
+          isImg: true,
+        });
+      }
 
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    } else {
+      this.setState({ isImg: false, imgURL: file.name });
+    }
   }
 
   handleClick = (type) => {
@@ -74,9 +80,10 @@ class ImgPreview extends React.Component {
       this.setState({ imgURL: file.url });
     }
 
-    // this.setState({ position: nextPosition });
     this.updateFilePosition(nextPosition);
   }
+
+  isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
   removeFile = (e) => {
     e.preventDefault();
@@ -103,8 +110,6 @@ class ImgPreview extends React.Component {
     const nextPosition = value.length -1;
 
     this.updateFilePosition(nextPosition);
-    // this.setState({ position: nextPosition });
-    // this.props.updateFilePosition(nextPosition);
 
     if (!nextFile.url) {
       this.generateImgURL(nextFile);
@@ -141,13 +146,11 @@ class ImgPreview extends React.Component {
 
   render() {
     const { files, multiple } = this.props;
-    console.log(this.state.imgURL);
-    // TODO handle logo Img
-    // { isEmpty(files) && <div className={styles.icon}><img src={Logo} /></div> }
+
     return (
       <div className={styles.imgPreviewContainer}>
         { !isEmpty(files) && this.renderIconRemove() }
-        { !isEmpty(this.state.imgURL) && <img src={this.state.imgURL} /> }
+        { !isEmpty(this.state.imgURL) && this.state.isImg && <img src={this.state.imgURL} /> }
         { multiple && size(files) > 1 && this.renderArrow('right') }
         { multiple && size(files) > 1 && this.renderArrow('left') }
       </div>
