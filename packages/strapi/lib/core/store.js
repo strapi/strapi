@@ -32,7 +32,7 @@ module.exports = {
 
       this.store = (source = {}) => {
         const get = async (params = {}) => {
-          const configs = Object.assign(source, params);
+          Object.assign(source, params);
 
           const {
             key,
@@ -40,7 +40,7 @@ module.exports = {
             type = 'core',
             name = '',
             tag = ''
-          } = configs;
+          } = source;
 
           const prefix = `${type}${name ? `_${name}` : ''}`;
 
@@ -52,9 +52,9 @@ module.exports = {
             tag
           };
 
-          let data = strapi.models['core_store'].orm === 'mongoose'
+          const data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
-          : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
+          : await strapi.models['core_store'].forge(where).fetch().then(config => configs.toJSON());
 
           if (!data) {
             return null;
@@ -74,7 +74,7 @@ module.exports = {
         };
 
         const set = async (params = {}) => {
-          const configs = Object.assign(source, params);
+          Object.assign(source, params);
 
           const {
             key,
@@ -83,7 +83,7 @@ module.exports = {
             type,
             name,
             tag = ''
-          } = configs;
+          } = source;
 
           const prefix = `${type}${name ? `_${name}` : ''}`;
 
@@ -95,10 +95,10 @@ module.exports = {
 
           let data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
-          : await strapi.models['core_store'].forge(where).fetch().then(configs => configs.toJSON());
+          : await strapi.models['core_store'].forge(where).fetch().then(config => config.toJSON());
 
           if (data) {
-            data = Object.assign(data, {
+            Object.assign(data, {
               value: JSON.stringify(value) || value.toString(),
               type: (typeof value).toString()
             });
@@ -107,15 +107,15 @@ module.exports = {
             ? await strapi.models['core_store'].update({ _id: data._id }, data, { strict: false })
             : await strapi.models['core_store'].forge({ id: data.id }).save(data, { patch: true });
           } else {
-            data = Object.assign(where, {
+            Object.assign(where, {
               value: JSON.stringify(value) || value.toString(),
               type: (typeof value).toString(),
               tag
             });
 
             strapi.models['core_store'].orm === 'mongoose'
-            ? await strapi.models['core_store'].create(data)
-            : await strapi.models['core_store'].forge().save(data);
+            ? await strapi.models['core_store'].create(where)
+            : await strapi.models['core_store'].forge().save(where);
           }
         };
 
