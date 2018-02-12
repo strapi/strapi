@@ -33,12 +33,14 @@ export class HomePage extends React.Component {
 
   render() {
     return (
-      <div className={styles.homePage}>
-        <InputFile
-          name="test"
-          value={this.state.value}
-          onChange={this.onChange}
-        />
+      <div className={styles.homePage} style={{ paddingTop: '100px', marginLeft: '100px'}}>
+        <form>
+          <InputFile
+            name="test"
+            value={this.state.value}
+            onChange={this.onChange}
+            />
+        </form>
       </div>
     );
   }

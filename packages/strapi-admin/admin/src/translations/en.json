@@ -11,6 +11,8 @@
   "app.components.HomePage.button": "Create your first content type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
 
+  "app.components.InputFile.newFile": "ADD NEW FILE",
+
   "app.components.InstallPluginPage.helmet": "Install plugins",
   "app.components.InstallPluginPage.title": "Install new plugins",
   "app.components.InstallPluginPage.description": "Extend your app with no efforts",

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isArray, isObject, isEmpty, last } from 'lodash';
 import cn from 'classnames';
 
@@ -44,16 +45,28 @@ class InputFile extends React.Component {
 
     return (
       <div>
-        <ImgPreview
-          files={value}
-          isUploading={this.state.isUploading}
-        />
-        <input
-          multiple={multiple}
-          name={name}
-          onChange={this.handleChange}
-          type="file"
-        />
+        <label
+        >
+          <ImgPreview
+            files={value}
+            isUploading={this.state.isUploading}
+            multiple={multiple}
+            name={name}
+            onChange={onChange}
+          />
+          <input
+            className={styles.inputFile}
+            multiple={multiple}
+            name={name}
+            onChange={this.handleChange}
+            type="file"
+          />
+
+          <div className={styles.buttonContainer}>
+            <i className="fa fa-plus" />
+            <FormattedMessage id="app.components.InputFile.newFile" />
+          </div>
+        </label>
       </div>
     );
   }
