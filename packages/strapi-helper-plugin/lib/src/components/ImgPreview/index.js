@@ -77,7 +77,7 @@ class ImgPreview extends React.Component {
     if (!file.url) {
       this.generateImgURL(file)
     } else {
-      this.setState({ imgURL: file.url });
+      this.setState({ imgURL: file.url, isImg: this.isPictureType(file.url) });
     }
 
     this.updateFilePosition(nextPosition);
@@ -146,10 +146,12 @@ class ImgPreview extends React.Component {
 
   render() {
     const { files, multiple } = this.props;
+    const fileType = this.getFileType(this.state.imgURL);
 
     return (
       <div className={styles.imgPreviewContainer}>
         { !isEmpty(files) && this.renderIconRemove() }
+        { !this.state.isImg && <div style={{fontSize: '30px'}}><i className={`fa fa-file-${fileType}-o`} /></div>}
         { !isEmpty(this.state.imgURL) && this.state.isImg && <img src={this.state.imgURL} /> }
         { multiple && size(files) > 1 && this.renderArrow('right') }
         { multiple && size(files) > 1 && this.renderArrow('left') }
