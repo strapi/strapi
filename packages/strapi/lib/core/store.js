@@ -54,7 +54,11 @@ module.exports = {
 
           const data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
-          : await strapi.models['core_store'].forge(where).fetch().then(config => configs.toJSON());
+          : await strapi.models['core_store'].forge(where).fetch().then(config => {
+            if (config) {
+              return config.toJSON();
+            }
+          });
 
           if (!data) {
             return null;
@@ -95,7 +99,11 @@ module.exports = {
 
           let data = strapi.models['core_store'].orm === 'mongoose'
           ? await strapi.models['core_store'].findOne(where)
-          : await strapi.models['core_store'].forge(where).fetch().then(config => config.toJSON());
+          : await strapi.models['core_store'].forge(where).fetch().then(config => {
+            if (config) {
+              return config.toJSON();
+            }
+          });
 
           if (data) {
             Object.assign(data, {
@@ -150,7 +158,7 @@ CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
   value text,
   environment text,
   type text,
-  flag text
+  tag text
 );
 
 ALTER TABLE ${quote}${Model.tableName || Model.collectionName}${quote} ADD COLUMN ${quote}parent${quote} integer, ADD FOREIGN KEY (${quote}parent${quote}) REFERENCES ${quote}${Model.tableName || Model.collectionName}${quote}(${quote}id${quote});
