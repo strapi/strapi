@@ -86,7 +86,7 @@
   "HeaderNav.link.providers": "Providers",
   "HeaderNav.link.roles": "Roles",
 
-  "HomePage.header.title": "Auth & Permissions",
+  "HomePage.header.title": "Users & Permissions",
   "HomePage.header.description": "Define the roles and permissions for every one of them",
 
   "InputSearch.placeholder": "Search for a user",
@@ -168,6 +168,6 @@
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your  Twitter application configurations",
 
   "PopUpForm.Providers.callback.placeholder": "TEXT",
-  "PopUpForm.Email.email_templates.inputDescription": "Don't know how to set variables",
+  "PopUpForm.Email.email_templates.inputDescription": "Don't know how to set variables, {link}",
   "PopUpForm.Email.link.documentation": "check out our documentation."
 }

@@ -17,7 +17,11 @@ module.exports = {
       return new Error('This feature requires to install the Content Manager plugin');
     }
 
-    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions', 'type']));
+    if (!params.type) {
+      params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
+    }
+
+    const role = await strapi.query('role', 'users-permissions').create(_.omit(params, ['users', 'permissions']));
 
     const arrayOfPromises = Object.keys(params.permissions).reduce((acc, type) => {
       Object.keys(params.permissions[type].controllers).forEach(controller => {

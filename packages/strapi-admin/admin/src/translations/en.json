@@ -11,8 +11,8 @@
   "app.components.HomePage.button": "Create your first content type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
 
-  "app.components.InstallPluginPage.helmet": "Install plugins",
-  "app.components.InstallPluginPage.title": "Install new plugins",
+  "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
+  "app.components.InstallPluginPage.title": "Marketplace - Plugins",
   "app.components.InstallPluginPage.description": "Extend your app with no efforts",
   "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
   "app.components.InstallPluginPage.InputSearch.label": " ",
@@ -26,10 +26,10 @@
   "app.components.InstallPluginPopup.noDescription": "No description available",
 
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
-  "app.components.LeftMenuLinkContainer.configuration": "Configuration",
+  "app.components.LeftMenuLinkContainer.configuration": "Configurations",
   "app.components.LeftMenuLinkContainer.general": "General",
-  "app.components.LeftMenuLinkContainer.installNewPlugin": "Install new plugin",
-  "app.components.LeftMenuLinkContainer.listPlugins": "List plugins",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplace",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
 
@@ -54,6 +54,9 @@
   "app.components.PluginCard.Button.label.support": "Support us",
   "app.components.PluginCard.price.free": "Free",
   "app.components.PluginCard.more-details": "More details",
+
+  "app.utils.placeholder.defaultMessage": "\u0020",
+  "app.utils.SelectOption.defaultMessage": "\u0020",
 
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",

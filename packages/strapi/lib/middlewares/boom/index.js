@@ -27,7 +27,6 @@ module.exports = strapi => {
           // Log error.
           strapi.log.error(error);
 
-
           // Wrap error into a Boom's response.
           ctx.status = error.status || 500;
           ctx.body = _.get(ctx.body, 'isBoom')

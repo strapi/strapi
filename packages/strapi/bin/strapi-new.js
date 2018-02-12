@@ -9,6 +9,9 @@
 // Node.js core.
 const path = require('path');
 
+// Public node modules.
+const _ = require('lodash');
+
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
@@ -38,6 +41,28 @@ module.exports = function (name, cliArguments) {
     strapiPackageJSON: packageJSON,
     developerMode
   };
+
+  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
+  const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
+
+  if (matchingDbArguments.length) {
+    if (matchingDbArguments.length !== dbArguments.length) {
+      logger.warn(`Some database arguments are missing. Required arguments list: ${dbArguments}`);
+      return process.exit(1);
+    }
+
+    scope.database = {
+      settings: {
+        client: cliArguments.dbclient,
+        host: cliArguments.dbhost,
+        port: cliArguments.dbport,
+        database: cliArguments.dbname,
+        username: cliArguments.dbusername,
+        password: cliArguments.dbpassword
+      },
+      options: {}
+    }
+  }
 
   // Return the scope and the response (`error` or `success`).
   return generate(scope, {

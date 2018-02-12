@@ -8,7 +8,6 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
-const Grant = require('grant-koa');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
@@ -70,7 +69,7 @@ module.exports = {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       } else {
         ctx.send({
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+          jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
           user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
@@ -92,7 +91,7 @@ module.exports = {
       }
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     }
@@ -117,7 +116,7 @@ module.exports = {
       await strapi.query('user', 'users-permissions').update(user);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
@@ -148,6 +147,7 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
+    const Grant = require('grant-koa');
     const grant = new Grant(grantConfig);
 
     return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
@@ -174,12 +174,12 @@ module.exports = {
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       URL: url,
-      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider']),
+      USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
       TOKEN: resetPasswordToken
     });
 
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
-      USER: _.omit(user.toJSON(), ['password', 'resetPasswordToken', 'role', 'provider'])
+      USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
 
     try {
@@ -265,7 +265,7 @@ module.exports = {
       const user = await strapi.query('user', 'users-permissions').create(params);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } catch(err) {

@@ -33,6 +33,23 @@ The following types are currently available:
   - `json`
   - `email`
 
+#### Validations
+
+You can apply basic validations to the attributes. The following supported validations are *only supported by MongoDB* connection.
+If you're using SQL databases, you should use the native SQL constraints to apply them.
+
+  - `required` (boolean) — if true adds a required validator for this property.
+  - `unique` (boolean) — whether to define a unique index on this property.
+  - `max` (integer) — checks if the value is greater than or equal to the given minimum.
+  - `min` (integer) — checks if the value is less than or equal to the given maximum.
+
+
+**Security validations**
+To improve the Developer eXperience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
+
+  - `private` (boolean) — if true, the attribute will be removed from the server response (it's useful to hide sensitive data).
+  - `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+
 #### Example
 
 **Path —** `User.settings.json`.
@@ -50,14 +67,23 @@ The following types are currently available:
     "lastname": {
       "type": "string"
     },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
     "password": {
-      "type": "password"
+      "type": "password",
+      "required": true,
+      "private": true
     },
     "about": {
       "type": "description"
     },
     "age": {
-      "type": "integer"
+      "type": "integer",
+      "min": 18,
+      "max": 99
     },
     "birthday": {
       "type": "date"

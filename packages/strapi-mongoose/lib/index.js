@@ -40,7 +40,7 @@ module.exports = function (strapi) {
     initialize: cb => {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
-        const { host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {}
@@ -50,7 +50,8 @@ module.exports = function (strapi) {
             connectOptions.pass = password
           }
         }
-        instance.connect(`mongodb://${host}:${port}/${database}`, connectOptions);
+
+        instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 
         // Handle error
         instance.connection.on('error', error => {

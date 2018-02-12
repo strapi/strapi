@@ -18,7 +18,7 @@ import LogoStrapi from 'assets/images/logo_strapi.png';
 
 // Design
 import Button from 'components/Button';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 
 // Utils
 import injectSaga from 'utils/injectSaga';
@@ -142,7 +142,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     const headerDescription = this.props.match.params.authType === 'register' ?
       <FormattedMessage id="users-permissions.Auth.header.register.description" />
       : <span />;
-    
+
     return (
       <div className={styles.authPage}>
         <div className={styles.wrapper}>
@@ -173,7 +173,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
                       didCheckErrors={this.props.didCheckErrors}
                       errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', input.name]), 'errors'])}
                       key={get(input, 'name')}
-                      label={this.props.match.params.authType === 'forgot-password' && this.props.submitSuccess? 'users-permissions.Auth.form.forgot-password.email.label.success' : get(input, 'label')}
+                      label={this.props.match.params.authType === 'forgot-password' && this.props.submitSuccess? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } : get(input, 'label')}
                       name={get(input, 'name')}
                       onChange={this.props.onChangeInput}
                       placeholder={get(input, 'placeholder')}

@@ -107,9 +107,9 @@ module.exports = {
       }).get();
 
       if (advancedConfigs.unique_email && ctx.request.body.email) {
-        const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
+        const users = await strapi.plugins['users-permissions'].services.user.fetchAll({ email: ctx.request.body.email });
 
-        if (user) {
+        if (users && _.find(users, user => (user.id || user._id).toString() !== ctx.params.id)) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
         }
       }
@@ -129,7 +129,7 @@ module.exports = {
           email: ctx.request.body.email
         });
 
-        if (user.id !== ctx.params.id) {
+        if ((user.id || user._id).toString() !== ctx.params.id) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
         }
       }

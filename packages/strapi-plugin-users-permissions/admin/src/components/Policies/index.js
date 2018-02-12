@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
 
 import BoundRoute from 'components/BoundRoute';
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
 
 import styles from './styles.scss';
 
@@ -36,7 +36,7 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
             {!this.props.shouldDisplayPoliciesHint ? (
               <Input
                 customBootstrapClass="col-md-12"
-                label="users-permissions.Policies.InputSelect.label"
+                label={{ id: 'users-permissions.Policies.InputSelect.label' }}
                 name={this.props.inputSelectName}
                 onChange={this.handleChange}
                 selectOptions={this.props.selectOptions}

@@ -9,7 +9,7 @@ const logger = require('strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
   const Mongoose = require(path.resolve(`${scope.rootPath}/node_modules/mongoose`));
-  
+
   const { username, password } = scope.database.settings
   const connectOptions = {}
   if (username) {

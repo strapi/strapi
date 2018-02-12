@@ -193,6 +193,8 @@ Strapi provides a built-in input library which includes :
   - Error highlight
   - i18n
 
+> This component is likely to be deprecated in favor of InputsWithIndex
+
 ### Usage
 
 | Property | Type | Required | Description |
@@ -325,6 +327,607 @@ class FooPage extends React.Component {
 
 export default FooPage;
 ```
+
+***
+
+## InputDescription
+
+Component that allows to put a description under an input, it works with or without i18n
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| children | node | no | Anything that is wrapped inside the Description |
+| className | string | no | custom className for the Description |
+| message | func or string or object | no | Define the content of the Description |
+| style | object | no | Label style property |
+
+
+### Usage
+
+**Path -** `my-plugin/admin/src/translations.en.json`.
+
+```json
+{
+  "Email.inputDescription": "Don't know how to set variables, {documentationLink}",
+  "Tel.inputDescription": "Make sure to provide a phone number where you can be reached"
+}
+```
+**Path -** `my-plugin/admin/src/components/Foo/index.js`;
+
+```js
+import React from 'react';
+import InputText from 'components/InputText';
+import InputDescription from 'components/InputDescription';
+
+import styles from './styles.scss';
+
+function Foo({ onChange, value }) {
+  return (
+    <div className={`col-md-6 ${styles.inputContainer}`}>
+      <InputText name="tel" value={value} onChange={onChange} />
+      {/* Usage without i18n, custom className and style */}
+      <InputDescription
+        className={styles.inputDescription}
+        message="Make sure to provide a phone number where you can be reached"
+        style={{ paddingTop: '10px'}}
+      />
+
+      {/* Usage with function */}
+      <InputText name="email" value={value} onChange={onChange} />
+      <InputDescription
+        message={ () => <span>Don&#44;t know how to set variables, <a href="strapi.io" target="_blank">check out our doc!</a></span>}
+      />
+
+      {/* Usage with i18n and rich text formatting */}
+      <InputText name="email" value={value} onChange={onChange} />
+      <InputDescription
+        message={{
+          id: 'my-plugin.Email.inputDescription',
+          params: {
+            documentationLink: <a href="strapi.io" target="_blank">check out our doc!</a>
+          }
+        }}
+      />
+
+      {/* Usage with i18n only */}
+      <InputText name="tel" value={value} onChange={onChange} />
+      <InputDescription
+        message={{ id: 'my-plugin.Tel.inputDescription' }}
+      />
+    </div>
+  );
+}
+
+export default Foo;
+```
+
+***
+
+## InputAddon
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| addon | string | no | Sets the input's addon. Works with i18n |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
+## InputDate
+
+Please refer to the [InputText documentation](#InputText);
+
+***
+
+## InputEmail
+
+Please refer to the [InputText documentation](#InputText);
+
+***
+
+## InputNumber
+
+InputNumber component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
+## InputSearch
+
+InputSearch component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
+
+***
+
+## InputSelect
+
+InputSelect component.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| selectOptions | array of objects | yes | Options for the select. |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string or number | yes | Input's value |
+
+***
+
+## InputText
+
+InputText Component
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
+
+***
+
+## InputTextArea
+
+InputTextArea Component
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
+
+***
+
+## InputToggle
+
+Input type: 'toggle' component
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | custom className for the input |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| disabled | bool | no | Disables the input |
+| error | bool | no | Sets the red border on the input |
+| onChange | func | yes | Handler to modify the input's value |
+| name | string | yes | The name of the input |
+| style | object | no | Input's style property |
+| tabIndex | string | no | Input's tabIndex |
+| value | bool | yes | Input's value |
+
+***
+
+## InputAddonWithErrors
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| addon | string | no | Sets the input's addon. Works with i18n |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputDateWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputEmailWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputNumberWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputSearchWithErrors
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputSelectWithErrors
+
+Component integrates Label, InputSelect, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| selectOptions | array of objects | yes | Options for the select. |
+| tabIndex | string | no | Input's tabIndex |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## InputTextWithErrors
+
+Component integrates Label, InputText, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+
+### Usage
+
+**Path -** `my-plugin/admin/src/translations.en.json`.
+```json
+{
+  "inputFoo.label": "This is a label, {foo}",
+  "inputFoo.description": "Awesome description {bar}"
+}
+```
+
+**Path -** `my-plugin/admin/src/components/Foo/index.js`.
+
+```js
+  import React from 'react';
+
+  class Foo extends React.Component {
+    state = { didCheckErrors: false, errors: [], foo: '' };
+
+    handleChange = ({ target }) => this.setState({ [target.name]: target.value });
+
+    handleSubmit = () => {
+      const errors = [];
+
+      if (this.state.value.length === 0) {
+        errors.push({ id: 'components.Input.error.validation.required' });
+      }
+
+      this.setState({ didCheckErrors: !this.state.didCheckErrors, errors });
+    }
+
+    render() {
+      const { didCheckErrors, errors, foo } = this.state;
+      const inputDescription = {
+        id: 'my-plugin.inputFoo.description',
+        params: { bar: 'Something' },
+      };
+
+      // This can also works (it's the same behavior for the label)
+      // const inputDescription = () => <span>Something</span>;
+      // const inputDescription = 'Something';
+      return (
+        <form onSubmit={this.handleSubmit}>
+          <div className="container-fluid">
+            <div className="row">
+              <InputTextWithErrors
+                autoFocus
+                customBootstrapClass="col-md-12"
+                didCheckErrors={didCheckErrors}
+                errors={errors}
+                inputDescription={inputDescription}
+                name="foo"
+                onChange={this.handleChange}
+                label={{
+                  id: 'my-plugin.inputFoo.label',
+                  params: { name: <a href="strapi.io" target="_blank">Click me</a> }
+                }}
+                value={foo}
+                validations={{ required: true }}
+              />
+              <button type="submit">Submit</button>
+            </div>
+          </div>
+        </form>
+      )
+    }
+  }
+```
+
+***
+
+## InputToggleWithErrors
+
+Component integrates Label, InputToggle, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescription | string or object or func | no | Sets the input's description |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| label | string or func or object | no sets the input's label |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| onChange | func | yes | Handler to modify the input's value |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+### InputTextAreaWithErrors
+
+Component integrates Label, InputTextArea, InputDescription and InputErrors.
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| autoFocus | bool | no | Sets the input's autoFocus |
+| className | string | no | Overrides the container className |
+| customBootstrapClass | string | no | Allows to override the input bootstrap col system |
+| deactivateErrorHighlight | bool | no | Allow to deactivate the red border on the input when there is an error |
+| didCheckErrors | bool | no | Use this props to display errors after submitting a form. |
+| disabled | bool | no | Disables the input |
+| errors | array | no | Array of errors |
+| errorsClassName | string | no | Overrides the InputErrors' className |
+| errorsStyle | object | no | Overrides the InputErrors' style |
+| inputClassName | string | no | Overrides the InputText's className |
+| inputDescriptionClassName | string | no | Overrides the InputDescription's className |
+| inputDescriptionStyle | object | no | Overrides the InputDescription's style|
+| inputStyle | object | no | Overrides the InputText's style |
+| labelClassName | string | no | Overrides the Label's className |
+| labelStyle | object | no | Overrides the Label's style |
+| onBlur | func | no | Function executed when the user leaves the input |
+| onChange | func | yes | Handler to modify the input's value |
+| onFocus | func | no | Function executed when the user enters the input |
+| name | string | yes | The name of the input |
+| noErrorsDescription | bool | no | Remove the input's errors description |
+| placeholder | string | no | Input's placeholder, works with i18n |
+| style | object | no | Overrides the container style |
+| tabIndex | string | no | Input's tabIndex |
+| validations | object | no | Input's validations |
+| value | string | yes | Input's value |
+
+### Usage
+
+Please refer to the [InputTextWithErrors](#InputTextWithErrors) documentation.
+
+***
+
+## Label
+
+Label component that integrates FormattedMessage if needed
+
+| Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
+| children | node | no | Anything that is wrapped inside the Label |
+| className | string | no | custom className for the Label |
+| htmlFor | string | no | Represents the id of the element the label is bound to |
+| message | func or string or object | no | Define the content of the label |
+| style | object | no | Label style property |
+
+
+### Usage
+
+**Path -** `my-plugin/admin/src/translations.en.json`.
+
+```json
+{
+  "foo.label": "This is {bar} label",
+  "tel.label": "Enter your phone number"
+}
+```
+
+**Path -** `my-plugin/admin/src/components/Foo/index.js`;
+
+```js
+import React from 'react';
+import Label from 'components/Label';
+
+import styles from './styles.scss';
+
+export default function Foo(props) {
+  return (
+    <div>
+      {/* Example without i18n */}
+      <Label htmlFor="email" message="Enter your email" />
+      <input
+        id="email"
+        name="email"
+        onChange={props.onChange}
+        type="email"
+        value={props.values.email}
+      />
+
+      {/* Example using children className and style */}
+      <Label htmlFor="address" className={styles.labelEmail} style={{ marginTop: '10px' }} >Enter your address</Label>
+      <input
+        id="address"
+        name="address"
+        onChange={props.onChange}
+        type="text"
+        value={props.values.address}
+      />
+
+      {/* Example using a function */}
+      <Label htmlFor="name" message={() => <span>Enter your <b>name</b></span>} />
+      <input
+        id="name"
+        name="name"
+        onChange={props.onChange}
+        type="text"
+        value={props.values.name}
+      />
+
+      {/* Example using i18n only */}
+      <Label htmlFor="tel" message={{ id: 'my-plugin.tel.label' }} />
+      <input
+        id="tel"
+        name="tel"
+        onChange={props.onChange}
+        type="number"
+        value={props.values.tel}
+      />
+
+      {/* Example using i18n and dynamic value */}
+      <Label htmlFor="foo" message={{ id: 'my-plugin.foo.label', params: { bar: 'baz' } }} />
+      <input
+        id="foo"
+        name="foo"
+        type="text"
+        onChange={props.onChange}
+        value={props.values.foo}
+      />
+    </div>
+  );
+}
+```
+
 
 ***
 

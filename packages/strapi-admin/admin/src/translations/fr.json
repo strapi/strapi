@@ -11,8 +11,8 @@
   "app.components.HomePage.button": "Créez votre premier type de contenu",
   "app.components.HomePage.feedback": "N'hésitez pas à utiliser un des channels ci-dessous pour poser vos questions ou nous donner vos retours.",
 
-  "app.components.InstallPluginPage.helmet": "Installez des plugins",
-  "app.components.InstallPluginPage.title": "Installez des nouveaux plugins",
+  "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
+  "app.components.InstallPluginPage.title": "Marketplace - Plugins",
   "app.components.InstallPluginPage.description": "Améliorez votre app sans efforts",
   "app.components.InstallPluginPage.plugin.support-us.description": "Soutenez-nous en achetant un Strapi tee shirt. Cela nous aidera a continuer de travailler sur le projet pour vous donner la meilleure expérience possible!",
   "app.components.InstallPluginPage.InputSearch.label": " ",
@@ -26,10 +26,10 @@
   "app.components.InstallPluginPopup.noDescription": "Aucune description disponible",
 
   "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
-  "app.components.LeftMenuLinkContainer.configuration": "Configuration",
+  "app.components.LeftMenuLinkContainer.configuration": "Configurations",
   "app.components.LeftMenuLinkContainer.general": "Général",
-  "app.components.LeftMenuLinkContainer.installNewPlugin": "Installer un nouveau plugin",
-  "app.components.LeftMenuLinkContainer.listPlugins": "Liste des plugins",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplaces",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
 
@@ -54,6 +54,9 @@
   "app.components.PluginCard.Button.label.support": "Nous soutenir",
   "app.components.PluginCard.price.free": "Gratuit",
   "app.components.PluginCard.more-details": "Plus de détails",
+
+  "app.utils.placeholder.defaultMessage": "\u0020",
+  "app.utils.SelectOption.defaultMessage": "\u0020",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
