@@ -7,20 +7,72 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty  } from 'lodash';
+import { cloneDeep, isArray, isObject, isEmpty, last } from 'lodash';
 import cn from 'classnames';
 
 import ImgPreview from 'components/ImgPreview';
 
 import styles from './styles.scss';
 
-function InputFile(props) {
-  return (
-    <div></div>
-  );
+class InputFile extends React.Component {
+  state = { isUploading: false };
+
+  handleChange = (e) => {
+    const value = Object.keys(e.target.files).reduce((acc, current) => {
+      acc.push(e.target.files[current]);
+
+      return acc;
+    }, cloneDeep(this.props.value));
+
+    this.setState({ isUploading: !this.state.isUploading });
+
+    const target = {
+      name: this.props.name,
+      type: 'file',
+      value,
+    };
+    this.props.onChange({ target });
+  }
+
+  render() {
+    const {
+      multiple,
+      name,
+      onChange,
+      value,
+    } = this.props;
+
+    return (
+      <div>
+        <ImgPreview
+          files={value}
+          isUploading={this.state.isUploading}
+        />
+        <input
+          multiple={multiple}
+          name={name}
+          onChange={this.handleChange}
+          type="file"
+        />
+      </div>
+    );
+  }
 }
 
-InputFile.defaultProps = {};
-InputFile.propTypes = {};
+InputFile.defaultProps = {
+  multiple: true,
+  value: [],
+};
+
+InputFile.propTypes = {
+  multiple: PropTypes.bool,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+    PropTypes.array,
+  ]),
+};
 
 export default InputFile;
