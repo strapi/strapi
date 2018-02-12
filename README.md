@@ -15,6 +15,9 @@
   <a href="http://slack.strapi.io">
     <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
   </a>
+  <a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
+    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" height="20px">
+  </a>
 </p>
 
 <br>
