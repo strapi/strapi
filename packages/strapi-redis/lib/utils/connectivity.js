@@ -8,7 +8,7 @@ const path = require('path');
 const logger = require('strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
-  const Redis = require(`${scope.rootPath}/node_modules/ioredis`);
+  const Redis = require(`${scope.tmpPath}/node_modules/ioredis`);
   const redis = new Redis({
     port: scope.database.settings.port,
     host: scope.database.settings.host,
@@ -26,7 +26,7 @@ module.exports = (scope, success, error) => {
 
     logger.info('The app has been connected to the database successfully!');
 
-    execSync(`rm -r ${scope.rootPath}`);
+    execSync(`rm -r ${scope.tmpPath}`);
 
     logger.info('Copying the dashboard...');
 
