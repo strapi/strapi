@@ -72,6 +72,7 @@ export function* submitData(action) {
 
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
     yield put(submitSucceeded());
+    strapi.notification.success('users-permissions.notification.success.submit');
   } catch(error) {
     strapi.notification.error('notification.error');
   }
