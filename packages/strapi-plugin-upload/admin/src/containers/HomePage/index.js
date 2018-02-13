@@ -33,7 +33,7 @@ export class HomePage extends React.Component {
 
   render() {
     return (
-      <div className={styles.homePage} style={{ paddingTop: '100px', marginLeft: '100px'}}>
+      <div className={styles.homePage} style={{ paddingTop: '98px', marginLeft: '100px'}}>
         <form>
           <InputFile
             name="test"

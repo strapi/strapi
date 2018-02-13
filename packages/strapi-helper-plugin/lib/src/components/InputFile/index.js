@@ -17,8 +17,11 @@ import InputFileDetails from 'components/InputFileDetails';
 import styles from './styles.scss';
 
 class InputFile extends React.Component {
-  // NOTE: use isDropping to change the background color of the ImgPreview
-  state = { isUploading: false, isDropping: false, position: 0, isOpen: false };
+  state = {
+    isOpen: false,
+    isUploading: false,
+    position: 0,
+  };
 
   addFilesToProps = (files) => {
     const value = Object.keys(files).reduce((acc, current) => {
@@ -39,17 +42,7 @@ class InputFile extends React.Component {
 
   handleChange = ({ target }) => this.addFilesToProps(target.files);
 
-  handleDragEnter = () => {
-    this.setState({ isDropping: true });
-  }
-
-  handleDragLeave = () => {
-    this.setState({ isDropping: false });
-  }
-
-  handleDragOver = (e) => e.preventDefault();
-
-  handleDrop = (e) => {
+  onDrop = (e) => {
     e.preventDefault();
     this.addFilesToProps(e.dataTransfer.files);
   }
@@ -66,34 +59,31 @@ class InputFile extends React.Component {
 
     return (
       <div>
-        <label
-          onDragEnter={this.handleDragEnter}
-          onDragLeave={this.handleDragLeave}
-          onDragOver={this.handleDragOver}
-          onDrop={this.handleDrop}
-        >
-          <ImgPreview
-            files={value}
-            isUploading={this.state.isUploading}
-            multiple={multiple}
-            name={name}
-            onChange={onChange}
-            updateFilePosition={this.updateFilePosition}
-          />
+        <ImgPreview
+          files={value}
+          isUploading={this.state.isUploading}
+          multiple={multiple}
+          name={name}
+          onChange={onChange}
+          onDrop={this.onDrop}
+          updateFilePosition={this.updateFilePosition}
+        />
+        <label>
           <input
             className={styles.inputFile}
             multiple={multiple}
             name={name}
             onChange={this.handleChange}
             type="file"
-          />
+            />
+
           <div className={styles.buttonContainer}>
             <i className="fa fa-plus" />
             <FormattedMessage id="app.components.InputFile.newFile" />
           </div>
         </label>
         <InputFileDetails
-          isOpen={!this.state.isOpen}
+          isOpen={this.state.isOpen}
           number={value.length}
           onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
           position={this.state.position}

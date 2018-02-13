@@ -7,13 +7,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { cloneDeep, get, isEmpty, isObject, size } from 'lodash';
 import cn from 'classnames';
+
+import BkgImg  from 'assets/icons/icon_upload.svg';
 
 import styles from './styles.scss';
 
 class ImgPreview extends React.Component {
-  state = { imgURL: '', position: 0, isImg: false };
+  state = {
+    imgURL: '',
+    isDraging: false,
+    isImg: false,
+    position: 0,
+  };
 
   componentDidMount() {
     // We don't need the generateImgURL function here since the compo will
@@ -83,6 +91,23 @@ class ImgPreview extends React.Component {
     this.updateFilePosition(nextPosition);
   }
 
+  handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ isDraging: true });
+  }
+
+  handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ isDraging: false });
+  }
+
+  handleDrop = (e) => {
+    this.setState({ isDraging: false });
+    this.props.onDrop(e);
+  }
+
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
   removeFile = (e) => {
@@ -133,6 +158,41 @@ class ImgPreview extends React.Component {
     />
   )
 
+  renderContent = () => {
+    const fileType = this.getFileType(this.state.imgURL);
+
+    if (this.state.isImg) {
+      return (
+        <img src={this.state.imgURL} />
+      );
+    } else {
+      return (
+        <div className={styles.fileIcon}>
+          <i className={`fa fa-file-${fileType}-o`} />
+        </div>
+      );
+    }
+  }
+
+  renderHint = () => {
+    if (isEmpty(this.state.imgURL) || this.state.isDraging) {
+      return (
+        <div>
+          <p className={cn(this.state.isDraging && styles.hintDropping)}>
+            <FormattedMessage
+              id="app.components.ImgPreview.hint"
+              values={{
+                browse: <FormattedMessage id="app.components.ImgPreview.hint.browse">{(message) => <u>{message}</u>}</FormattedMessage>
+              }}
+            />
+          </p>
+        </div>
+      );
+    }
+
+    return '';
+  }
+
   renderIconRemove = () => (
     <div className={styles.iconContainer} onClick={this.removeFile}>
       <i className="fa fa-times" />
@@ -146,13 +206,28 @@ class ImgPreview extends React.Component {
 
   render() {
     const { files, multiple } = this.props;
-    const fileType = this.getFileType(this.state.imgURL);
+    const { imgURL } = this.state;
+    const containerStyle = isEmpty(imgURL) ? { backgroundImage: `url(${BkgImg})` } : {};
 
     return (
-      <div className={styles.imgPreviewContainer}>
+      <div
+        className={styles.imgPreviewContainer}
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.stopPropagation();
+
+          if (!this.state.isDraging) {
+            this.setState({ isDraging: true });
+          }
+        }}
+        onDragEnter={this.handleDragEnter}
+        onDragLeave={this.handleDragLeave}
+        onDrop={this.handleDrop}
+        style={containerStyle}
+      >
+        { this.renderHint() }
         { !isEmpty(files) && this.renderIconRemove() }
-        { !this.state.isImg && <div style={{fontSize: '30px'}}><i className={`fa fa-file-${fileType}-o`} /></div>}
-        { !isEmpty(this.state.imgURL) && this.state.isImg && <img src={this.state.imgURL} /> }
+        { !isEmpty(imgURL) && this.renderContent() }
         { multiple && size(files) > 1 && this.renderArrow('right') }
         { multiple && size(files) > 1 && this.renderArrow('left') }
       </div>
@@ -166,6 +241,7 @@ ImgPreview.defaultProps = {
   multiple: false,
   name: '',
   onChange: () => {},
+  onDrop: () => {},
   updateFilePosition: () => {},
 };
 
@@ -175,6 +251,7 @@ ImgPreview.propTypes = {
   multiple: PropTypes.bool,
   name: PropTypes.string,
   onChange: PropTypes.func,
+  onDrop: PropTypes.func,
   updateFilePosition: PropTypes.func,
 };
 
