@@ -74,7 +74,7 @@ module.exports = {
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].add(ctx.params, ctx.request.body, source);
     } catch(error) {
       logger.error(JSON.stringify(error));
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error);
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },
 
@@ -86,7 +86,7 @@ module.exports = {
     } catch(error) {
       // TODO handle error update
       logger.error(JSON.stringify(error));
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error);
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },
 
