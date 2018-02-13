@@ -10,6 +10,7 @@ const path = require('path');
 const fs = require('fs');
 
 const _ = require('lodash');
+const { logger } = require('strapi-utils')
 
 module.exports = {
 
@@ -28,6 +29,7 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch(err) {
+      logger.error(JSON.stringify(err));
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   },
@@ -69,6 +71,7 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch(err) {
+      logger.error(JSON.stringify(err));
       ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
   },
@@ -81,6 +84,7 @@ module.exports = {
 
       ctx.send({ permissions });
     } catch(err) {
+      logger.error(JSON.stringify(err));      
       ctx.badRequest(null, [{ message: [{ id: 'Not Found' }] }]);
     }
   },
@@ -98,7 +102,7 @@ module.exports = {
     const role = await strapi.plugins['users-permissions'].services.userspermissions.getRole(id, plugins);
 
     if (_.isEmpty(role)) {
-      return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: `Role does not exist` }] }]);
     }
 
     ctx.send({ role });
@@ -110,6 +114,7 @@ module.exports = {
 
       ctx.send({ roles });
     } catch(err) {
+      logger.error(JSON.stringify(err));      
       ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
     }
   },
@@ -120,6 +125,7 @@ module.exports = {
 
       ctx.send({ routes });
     } catch(err) {
+      logger.error(JSON.stringify(err));     
       ctx.badRequest(null, [{ messages: [{ id: 'Not found' }] }]);
     }
   },
@@ -165,7 +171,8 @@ module.exports = {
       await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleID, ctx.request.body);
 
       ctx.send({ ok: true });
-    } catch(error) {
+    } catch(err) {
+      logger.error(JSON.stringify(err));
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },

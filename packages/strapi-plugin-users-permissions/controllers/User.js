@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const { logger } = require('strapi-utils')
 
 module.exports = {
 
@@ -83,6 +84,7 @@ module.exports = {
       // Send 201 `created`
       ctx.created(data);
     } catch(error) {
+      logger.error(error)
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
 
@@ -129,6 +131,7 @@ module.exports = {
       // Send 200 `ok`
       ctx.send(data);
     } catch(error) {
+      logger.error(error)
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
   },

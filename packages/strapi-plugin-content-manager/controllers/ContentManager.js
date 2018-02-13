@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { logger } = require('strapi-utils');
 
 /**
  * A set of functions called "actions" for `ContentManager`
@@ -65,24 +66,24 @@ module.exports = {
 
   create: async ctx => {
     const { source } = ctx.request.query;
-
     try {
       // Create an entry using `queries` system
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].add(ctx.params, ctx.request.body, source);
     } catch(error) {
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+      logger.error(JSON.stringify(error));
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error);
     }
   },
 
   update: async ctx => {
     const { source } = ctx.request.query;
-
     try {
       // Return the last one which is the current model.
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].edit(ctx.params, ctx.request.body, source);
     } catch(error) {
       // TODO handle error update
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
+      logger.error(JSON.stringify(error));
+      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error);
     }
   },
 
