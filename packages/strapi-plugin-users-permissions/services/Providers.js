@@ -50,6 +50,7 @@ exports.connect = (provider, query) => {
         });
 
         const advanced = await strapi.store({
+          environment: '',
           type: 'plugin',
           name: 'users-permissions',
           key: 'advanced'
@@ -97,6 +98,7 @@ const getProfile = async (provider, query, callback) => {
   const access_token = query.access_token || query.code || query.oauth_token;
 
   const grant = await strapi.store({
+    environment: '',
     type: 'plugin',
     name: 'users-permissions',
     key: 'grant'
