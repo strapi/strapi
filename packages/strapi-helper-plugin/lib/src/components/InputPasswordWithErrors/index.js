@@ -77,6 +77,7 @@ class InputPasswordWithErrors extends React.Component {
       labelClassName,
       labelStyle,
       name,
+      noErrorsDescription,
       onChange,
       onFocus,
       placeholder,
@@ -122,7 +123,7 @@ class InputPasswordWithErrors extends React.Component {
         />
         <InputErrors
           className={errorsClassName}
-          errors={this.state.errors}
+          errors={!noErrorsDescription && this.state.errors || []}
           style={errorsStyle}
         />
       </div>
@@ -150,6 +151,7 @@ InputPasswordWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
+  noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
@@ -190,6 +192,7 @@ InputPasswordWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.func,

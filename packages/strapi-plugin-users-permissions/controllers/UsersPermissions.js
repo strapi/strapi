@@ -179,6 +179,7 @@ module.exports = {
 
   getEmailTemplate: async (ctx) => {
     ctx.send(await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'email'
@@ -191,6 +192,7 @@ module.exports = {
     }
 
     await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'email'
@@ -201,6 +203,7 @@ module.exports = {
 
   getAdvancedSettings: async (ctx) => {
     ctx.send(await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
@@ -213,6 +216,7 @@ module.exports = {
     }
 
     await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
@@ -223,6 +227,7 @@ module.exports = {
 
   getProviders: async (ctx) => {
     ctx.send(await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
@@ -235,6 +240,7 @@ module.exports = {
     }
 
     await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
