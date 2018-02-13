@@ -13,6 +13,8 @@ import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
 import ImgPreviewArrow from 'components/ImgPreviewArrow';
+import ImgPreviewRemoveIcon from 'components/ImgPreviewRemoveIcon';
+import ImgPreviewHint from 'components/ImgPreviewHint';
 
 import styles from './styles.scss';
 
@@ -104,6 +106,11 @@ class ImgPreview extends React.Component {
     this.setState({ isDraging: false });
   }
 
+  handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   handleDrop = (e) => {
     this.setState({ isDraging: false });
     this.props.onDrop(e);
@@ -160,31 +167,6 @@ class ImgPreview extends React.Component {
     }
   }
 
-  renderHint = () => {
-    if (isEmpty(this.state.imgURL) || this.state.isDraging) {
-      return (
-        <div>
-          <p className={cn(this.state.isDraging && styles.hintDropping)}>
-            <FormattedMessage
-              id="app.components.ImgPreview.hint"
-              values={{
-                browse: <FormattedMessage id="app.components.ImgPreview.hint.browse">{(message) => <u>{message}</u>}</FormattedMessage>
-              }}
-            />
-          </p>
-        </div>
-      );
-    }
-
-    return '';
-  }
-
-  renderIconRemove = () => (
-    <div className={styles.iconContainer} onClick={this.removeFile}>
-      <i className="fa fa-times" />
-    </div>
-  )
-
   updateFilePosition = (newPosition) => {
     this.setState({ position: newPosition });
     this.props.updateFilePosition(newPosition);
@@ -193,37 +175,47 @@ class ImgPreview extends React.Component {
   render() {
     const { files, multiple } = this.props;
     const { imgURL } = this.state;
-    const containerStyle = isEmpty(imgURL) ? { backgroundImage: `url(${BkgImg})` } : {};
+    const containerStyle = isEmpty(imgURL) ?
+      {
+        backgroundImage: `url(${BkgImg})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        zIndex: 9999,
+      } : {};
 
     return (
-      <div
-        className={styles.imgPreviewContainer}
-        onDragOver={(e) => {
-          e.preventDefault()
-          e.stopPropagation();
+        <div
+          className={cn(this.state.isDraging && styles.overed, styles.imgPreviewContainer)}
+          onDragOver={this.handleDragOver}
+          onDragEnter={this.handleDragEnter}
+          style={containerStyle}
+        >
+          <div
+            className={cn(this.state.isDraging && styles.overlay)}
+            onDragLeave={this.handleDragLeave}
+            onDragOver={this.handleDragOver}
+            onDrop={this.handleDrop}
+          />
+          <ImgPreviewHint
+            showWhiteHint={this.state.isDraging}
+            displayHint={isEmpty(files)}
+          />
+          { !isEmpty(imgURL) && this.renderContent() }
+          <ImgPreviewRemoveIcon
+            onClick={this.removeFile}
+            show={!isEmpty(files)}
+          />
+          <ImgPreviewArrow
+            onClick={this.handleClick}
+            show={size(files) > 1}
+            type="right"
+          />
+          <ImgPreviewArrow
+            onClick={this.handleClick}
+            show={size(files) > 1}
+          />
+        </div>
 
-          if (!this.state.isDraging) {
-            this.setState({ isDraging: true });
-          }
-        }}
-        onDragEnter={this.handleDragEnter}
-        onDragLeave={this.handleDragLeave}
-        onDrop={this.handleDrop}
-        style={containerStyle}
-      >
-        { this.renderHint() }
-        { !isEmpty(files) && this.renderIconRemove() }
-        { !isEmpty(imgURL) && this.renderContent() }
-        <ImgPreviewArrow
-          onClick={this.handleClick}
-          show={size(files) > 1}
-          type="right"
-        />
-        <ImgPreviewArrow
-          onClick={this.handleClick}
-          show={size(files) > 1}
-        />
-      </div>
     );
   }
 }

@@ -17,21 +17,19 @@
   vertical-align: middle;
   background-color: #F3F4F4;
   background-position: center;
+  background-repeat: no-repeat !important;
   white-space: nowrap;
+
+  z-index: 1;
   > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
     max-width: 358px;
     max-height: 144px;
-  }
-  > p, span {
-    display: block;
-    padding: 12px 40px 0 40px;
-    line-height: 18px;
-    color: #333740;
-    font-size: 13px;
-    white-space: pre-line;
-    > u {
-      cursor: pointer;
-    }
+    z-index: 3;
   }
 }
 
@@ -75,4 +73,20 @@
   height: 100%;
   justify-content: space-around;
   font-size: 30px;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 358px;
+  height: 144px;
+  z-index: 9999;
+  // background: #333740;
+}
+
+.overed {
+  background: #333740;
 }
