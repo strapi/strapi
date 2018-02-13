@@ -11,7 +11,7 @@ import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 
-import InputFile from 'components/InputFile';
+import Input from 'components/InputsIndex';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
@@ -35,11 +35,12 @@ export class HomePage extends React.Component {
     return (
       <div className={styles.homePage} style={{ paddingTop: '98px', marginLeft: '100px'}}>
         <form>
-          <InputFile
+          <Input
             name="test"
             value={this.state.value}
             onChange={this.onChange}
-            />
+            type="file"
+          />
         </form>
       </div>
     );

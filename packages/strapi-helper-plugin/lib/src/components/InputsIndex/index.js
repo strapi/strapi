@@ -12,6 +12,7 @@ import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
 import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
+import InputFileWithErrors from 'components/InputFileWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputSearchWithErrors from 'components/InputSearchWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
@@ -27,6 +28,7 @@ const inputs = {
   checkbox: InputCheckboxWithErrors,
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
+  file: InputFileWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -63,6 +65,7 @@ export {
   InputCheckboxWithErrors,
   InputDateWithErrors,
   InputEmailWithErrors,
+  InputFileWithErrors,
   InputNumberWithErrors,
   InputPasswordWithErrors,
   InputSearchWithErrors,
