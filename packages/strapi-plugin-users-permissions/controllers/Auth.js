@@ -172,7 +172,11 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
+    const settings = (await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions'
+    }).get({ key: 'email' }))['reset_password'].options;
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       URL: url,
