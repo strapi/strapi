@@ -49,7 +49,7 @@
 * [Table of contents](api-reference/reference.md)
 
 ### Tutorials
-* Coming soon
+* [Table of contents](tutorials/README.md)
 
 ### Migration
 * [Migrating from v1 to v3](migration/migration-guide.md)

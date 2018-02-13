@@ -41,7 +41,7 @@ function LeftMenuLinkContainer({ plugins }) {
       <p className={styles.title}>{pluginsSections[current].name}</p>
       <ul className={styles.list}>
         {sortBy(pluginsSections[current].links, 'label').map((link, i) =>
-          <LeftMenuLink key={`${i}-${link.label}`} icon={link.icon || 'link'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} source={link.source} />
+          <LeftMenuLink key={`${i}-${link.label}`} icon={link.icon || 'caret-right'} label={link.label} destination={`/plugins/${link.plugin}/${link.destination}`} source={link.source} />
         )}
       </ul>
     </div>
@@ -79,12 +79,12 @@ function LeftMenuLinkContainer({ plugins }) {
         <p className={styles.title}><FormattedMessage {...messages.general} /></p>
         <ul className={styles.list}>
           <LeftMenuLink
-            icon="puzzle-piece"
+            icon="list"
             label={messages.listPlugins.id}
             destination="/list-plugins"
           />
           <LeftMenuLink
-            icon="download"
+            icon="shopping-basket"
             label={messages.installNewPlugin.id}
             destination="/install-plugin"
           />

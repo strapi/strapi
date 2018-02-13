@@ -8,7 +8,6 @@
 
 const _ = require('lodash');
 const crypto = require('crypto');
-const Grant = require('grant-koa');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
@@ -16,8 +15,13 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
+    const store = await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions'
+    });
+
     if (provider === 'local') {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant['email'], 'enabled') && !ctx.request.admin) {
+      if (!_.get(await store.get({key: 'grant'}), 'email.enabled') && !ctx.request.admin) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -65,12 +69,12 @@ module.exports = {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       } else {
         ctx.send({
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+          jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
           user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
     } else {
-      if (!_.get(strapi.plugins['users-permissions'].config.grant[provider], 'enabled')) {
+      if (!_.get(await store.get({key: 'grant'}), [provider, 'enabled'])) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -87,7 +91,7 @@ module.exports = {
       }
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     }
@@ -112,7 +116,7 @@ module.exports = {
       await strapi.query('user', 'users-permissions').update(user);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
@@ -123,7 +127,13 @@ module.exports = {
   },
 
   connect: async (ctx, next) => {
-    _.defaultsDeep(strapi.plugins['users-permissions'].config.grant, {
+    const grantConfig = await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).get();
+
+    _.defaultsDeep(grantConfig, {
       server: {
         protocol: 'http',
         host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
@@ -131,13 +141,14 @@ module.exports = {
     });
 
     const provider = ctx.request.url.split('/')[2];
-    const config = strapi.plugins['users-permissions'].config.grant[provider];
+    const config = grantConfig[provider];
 
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
-    const grant = new Grant(strapi.plugins['users-permissions'].config.grant);
+    const Grant = require('grant-koa');
+    const grant = new Grant(grantConfig);
 
     return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
   },
@@ -192,7 +203,11 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    if (!strapi.plugins['users-permissions'].config.advanced.allow_register) {
+    if (!(await strapi.store({
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).get()).allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 
@@ -250,7 +265,7 @@ module.exports = {
       const user = await strapi.query('user', 'users-permissions').create(params);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(user),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } catch(err) {
