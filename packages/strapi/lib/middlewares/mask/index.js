@@ -70,7 +70,7 @@ module.exports = strapi => {
           };
 
           // Only pick successful JSON requests.
-          if ([200, 201, 202].includes(ctx.status) && ctx.type === 'application/json') {
+          if ([200, 201, 202].includes(ctx.status) && ctx.type === 'application/json' && !ctx.request.admin) {
             ctx.body = mask(ctx.body);
           }
         });

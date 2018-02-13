@@ -8,7 +8,7 @@ const path = require('path');
 const logger = require('strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
-  const knex  = require(path.resolve(`${scope.rootPath}/node_modules/knex`))({
+  const knex  = require(path.resolve(`${scope.tmpPath}/node_modules/knex`))({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
@@ -18,7 +18,7 @@ module.exports = (scope, success, error) => {
   knex.raw('select 1+1 as result').then(() => {
     logger.info('The app has been connected to the database successfully');
     knex.destroy();
-    execSync(`rm -r ${scope.rootPath}`);
+    execSync(`rm -r ${scope.tmpPath}`);
 
     logger.info('Copying the dashboard...');
 

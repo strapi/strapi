@@ -9,8 +9,6 @@ Contains the main configurations relative to your project.
 **Path —** `./config/application.json`.
 ```json
 {
-  "name": "Default Application",
-  "description": "This API is going to be awesome!",
   "favicon": {
     "path": "favicon.ico",
     "maxAge": 86400000
@@ -22,8 +20,6 @@ Contains the main configurations relative to your project.
 }
 ```
 
- - `name` (string): Application's name.
- - `description` (string): Application's description.
  - `favicon`
    - `path` (string): Path to the favicon file. Default value: `favicon.ico`.
    - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `86400000`.
@@ -351,20 +347,76 @@ The syntax is inspired by the [template literals ES2015 specifications](https://
 
 In any JSON configurations files in your project, you can inject dynamic values like this:
 
-**Path —** `./config/application.json`.
+**Path —** `./config/environments/production/database.json`.
 ```json
 {
-  "name": "${process.env.APP_NAME}",
-  "description": "${process.env.APP_DESCRIPTION}",
-  "favicon": {
-    "path": "favicon.ico",
-    "maxAge": 86400000
-  },
-  "public": {
-    "path": "./public",
-    "maxAge": 60000
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-mongoose",
+      "settings": {
+        "client": "mongo",
+        "uri": "${process.env.DATABASE_URI || ''}",
+        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
+        "port": "${process.env.DATABASE_PORT || 27017}",
+        "database": "${process.env.DATABASE_NAME || 'production'}",
+        "username": "${process.env.DATABASE_USERNAME || ''}",
+        "password": "${process.env.DATABASE_PASSWORD || ''}"
+      },
+      "options": {}
+    }
   }
 }
 ```
 
 > Note: You can't execute functions inside the curly braces. Only strings are allowed.
+
+***
+
+## Database configuration
+
+Configuration files are not multi server friendly. So we create a data store for config you will want to update in production.
+
+#### Usage
+
+## Get settings:
+
+- `environment` (string): Sets the environment you want to store the data in. By default it's current environment (can be an empty string if your config is environment agnostic).
+- `type` (string): Sets if your config is for an `api`, `plugin` or `core`. By default it's `core`.
+- `name` (string): You have to set the plugin or api name if `type` is `api` or `plugin`.
+- `key` (string, required): The name of the key you want to store.
+
+```
+// strapi.store(object).get(object);
+
+// create reusable plugin store variable
+const pluginStore = strapi.store({
+  environment: strapi.config.environment,
+  type: 'plugin',
+  name: 'users-permissions'
+});
+
+await pluginStore.get({key: 'grant'});
+```
+
+## Set settings:
+
+ - `value` (any, required): The value you want to store.
+
+ ```
+ // strapi.store(object).set(object);
+
+ // create reusable plugin store variable
+ const pluginStore = strapi.store({
+   environment: strapi.config.environment,
+   type: 'plugin',
+   name: 'users-permissions'
+ });
+
+ await pluginStore.set({
+   key: 'grant',
+   value: {
+     ...
+   }
+});
+ ```
