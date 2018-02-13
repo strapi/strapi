@@ -29,7 +29,7 @@ module.exports = async cb => {
   }
 
   const pluginStore = strapi.store({
-    environment: strapi.config.environment,
+    environment: '',
     type: 'plugin',
     name: 'users-permissions'
   });

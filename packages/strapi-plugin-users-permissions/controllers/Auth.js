@@ -16,6 +16,7 @@ module.exports = {
     const params = ctx.request.body;
 
     const store = await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions'
     });
@@ -128,6 +129,7 @@ module.exports = {
 
   connect: async (ctx, next) => {
     const grantConfig = await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
@@ -204,6 +206,7 @@ module.exports = {
 
   register: async (ctx) => {
     if (!(await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
