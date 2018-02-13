@@ -33,14 +33,19 @@ export class HomePage extends React.Component {
 
   render() {
     return (
-      <div className={styles.homePage} style={{ paddingTop: '98px', marginLeft: '100px'}}>
+      <div className={styles.homePage} style={{ paddingTop: '87px', marginLeft: '100px'}}>
         <form>
-          <Input
-            name="test"
-            value={this.state.value}
-            onChange={this.onChange}
-            type="file"
-          />
+          <div className="container-fluid">
+            <div className="row">
+              <Input
+                name="test"
+                label="Avatar"
+                value={this.state.value}
+                onChange={this.onChange}
+                type="file"
+              />
+            </div>
+          </div>
         </form>
       </div>
     );

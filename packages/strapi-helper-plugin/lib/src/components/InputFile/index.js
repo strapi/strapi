@@ -24,11 +24,18 @@ class InputFile extends React.Component {
   };
 
   addFilesToProps = (files) => {
+    const initAcc = this.props.multiple ? cloneDeep(this.props.value) : [];
     const value = Object.keys(files).reduce((acc, current) => {
-      acc.push(files[current]);
+
+      if (this.props.multiple) {
+        acc.push(files[current]);
+      } else if (current === '0') {
+
+        acc.push(files[0]);
+      }
 
       return acc;
-    }, cloneDeep(this.props.value))
+    }, initAcc)
 
     const target = {
       name: this.props.name,
@@ -62,7 +69,7 @@ class InputFile extends React.Component {
       onChange,
       value,
     } = this.props;
-
+    
     return (
       <div>
         <ImgPreview
@@ -102,7 +109,7 @@ class InputFile extends React.Component {
 }
 
 InputFile.defaultProps = {
-  multiple: true,
+  multiple: false,
   value: [],
 };
 
