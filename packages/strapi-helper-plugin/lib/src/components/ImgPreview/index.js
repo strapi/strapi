@@ -12,6 +12,7 @@ import { cloneDeep, get, isEmpty, isObject, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
+import ImgPreviewArrow from 'components/ImgPreviewArrow';
 
 import styles from './styles.scss';
 
@@ -143,21 +144,6 @@ class ImgPreview extends React.Component {
     }
   }
 
-  renderArrow = (type = 'left') => (
-    <div
-      className={cn(
-        styles.arrowContainer,
-        type === 'left' && styles.arrowLeft,
-        type !== 'left' && styles.arrowRight,
-      )}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.handleClick(type);
-      }}
-    />
-  )
-
   renderContent = () => {
     const fileType = this.getFileType(this.state.imgURL);
 
@@ -228,8 +214,15 @@ class ImgPreview extends React.Component {
         { this.renderHint() }
         { !isEmpty(files) && this.renderIconRemove() }
         { !isEmpty(imgURL) && this.renderContent() }
-        { multiple && size(files) > 1 && this.renderArrow('right') }
-        { multiple && size(files) > 1 && this.renderArrow('left') }
+        <ImgPreviewArrow
+          onClick={this.handleClick}
+          show={size(files) > 1}
+          type="right"
+        />
+        <ImgPreviewArrow
+          onClick={this.handleClick}
+          show={size(files) > 1}
+        />
       </div>
     );
   }
