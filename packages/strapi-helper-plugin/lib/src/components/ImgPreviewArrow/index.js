@@ -11,7 +11,12 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function ImgPreviewArrow(props) {
-  const divStyle = props.show ? {} : { display: 'none' };
+  let divStyle = props.show ? {} : { display: 'none' };
+
+  if (props.enable) {
+    divStyle = { zIndex: 99999 };
+  }
+
   return (
     <div
       className={cn(
@@ -30,12 +35,14 @@ function ImgPreviewArrow(props) {
 }
 
 ImgPreviewArrow.defaultProps = {
+  enable: false,
   onClick: () => {},
   show: false,
   type: 'left',
 };
 
 ImgPreviewArrow.propTypes = {
+  enable: PropTypes.bool,
   onClick: PropTypes.func,
   show: PropTypes.bool,
   type: PropTypes.string,

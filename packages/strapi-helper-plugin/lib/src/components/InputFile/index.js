@@ -42,6 +42,12 @@ class InputFile extends React.Component {
 
   handleChange = ({ target }) => this.addFilesToProps(target.files);
 
+  handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.refs.inputFile.click();
+  }
+
   onDrop = (e) => {
     e.preventDefault();
     this.addFilesToProps(e.dataTransfer.files);
@@ -65,6 +71,7 @@ class InputFile extends React.Component {
           multiple={multiple}
           name={name}
           onChange={onChange}
+          onBrowseClick={this.handleClick}
           onDrop={this.onDrop}
           updateFilePosition={this.updateFilePosition}
         />
@@ -75,7 +82,8 @@ class InputFile extends React.Component {
             name={name}
             onChange={this.handleChange}
             type="file"
-            />
+            ref="inputFile"
+          />
 
           <div className={styles.buttonContainer}>
             <i className="fa fa-plus" />

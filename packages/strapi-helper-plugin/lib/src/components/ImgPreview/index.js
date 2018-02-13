@@ -22,6 +22,7 @@ class ImgPreview extends React.Component {
   state = {
     imgURL: '',
     isDraging: false,
+    isOver: false,
     isImg: false,
     position: 0,
   };
@@ -116,6 +117,14 @@ class ImgPreview extends React.Component {
     this.props.onDrop(e);
   }
 
+  handleMouseEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ isOver: true });
+  }
+
+  handleMouseLeave = (e) => this.setState({ isOver: false });
+
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
   removeFile = (e) => {
@@ -173,7 +182,7 @@ class ImgPreview extends React.Component {
   }
 
   render() {
-    const { files, multiple } = this.props;
+    const { files, multiple, onBrowseClick } = this.props;
     const { imgURL } = this.state;
     const containerStyle = isEmpty(imgURL) ?
       {
@@ -185,9 +194,15 @@ class ImgPreview extends React.Component {
 
     return (
         <div
-          className={cn(this.state.isDraging && styles.overed, styles.imgPreviewContainer)}
+          className={cn(
+            this.state.isDraging && styles.overed,
+            this.state.isOver && styles.overed,
+            styles.imgPreviewContainer,
+          )}
           onDragOver={this.handleDragOver}
           onDragEnter={this.handleDragEnter}
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
           style={containerStyle}
         >
           <div
@@ -196,20 +211,27 @@ class ImgPreview extends React.Component {
             onDragOver={this.handleDragOver}
             onDrop={this.handleDrop}
           />
+
           <ImgPreviewHint
-            showWhiteHint={this.state.isDraging}
             displayHint={isEmpty(files)}
+            onClick={onBrowseClick}
+            showWhiteHint={this.state.isDraging || this.state.isOver}
           />
+
           { !isEmpty(imgURL) && this.renderContent() }
+
           <ImgPreviewRemoveIcon
             onClick={this.removeFile}
             show={!isEmpty(files)}
           />
+
           <ImgPreviewArrow
+            enable={this.state.isOver && size(files) > 1}
             onClick={this.handleClick}
             show={size(files) > 1}
             type="right"
           />
+        
           <ImgPreviewArrow
             onClick={this.handleClick}
             show={size(files) > 1}
@@ -225,6 +247,7 @@ ImgPreview.defaultProps = {
   isUploading: false,
   multiple: false,
   name: '',
+  onBrowseClick: () => {},
   onChange: () => {},
   onDrop: () => {},
   updateFilePosition: () => {},
@@ -235,6 +258,7 @@ ImgPreview.propTypes = {
   isUploading: PropTypes.bool,
   multiple: PropTypes.bool,
   name: PropTypes.string,
+  onBrowseClick: PropTypes.func,
   onChange: PropTypes.func,
   onDrop: PropTypes.func,
   updateFilePosition: PropTypes.func,

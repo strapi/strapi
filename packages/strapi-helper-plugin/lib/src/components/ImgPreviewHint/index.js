@@ -26,13 +26,17 @@ function ImgPreviewHint(props) {
       pStyle = { display: 'none' };
   }
 
+  const browse = (
+    <FormattedMessage id="app.components.ImgPreview.hint.browse">
+      {(message) => <u onClick={props.onClick}>{message}</u>}
+    </FormattedMessage>
+  );
+
   return (
     <p className={styles.imgPreviewHint} style={pStyle} onDragEnter={(e) => e.stopPropagation()}>
       <FormattedMessage
         id="app.components.ImgPreview.hint"
-        values={{
-          browse: <FormattedMessage id="app.components.ImgPreview.hint.browse">{(message) => <u>{message}</u>}</FormattedMessage>
-        }}
+        values={{ browse }}
       />
     </p>
   );
