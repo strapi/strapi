@@ -8,7 +8,7 @@ const path = require('path');
 const logger = require('strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
-  const Mongoose = require(path.resolve(`${scope.rootPath}/node_modules/mongoose`));
+  const Mongoose = require(path.resolve(`${scope.tmpPath}/node_modules/mongoose`));
 
   const { username, password } = scope.database.settings
   const connectOptions = {}
@@ -28,7 +28,7 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    execSync(`rm -r ${scope.rootPath}`);
+    execSync(`rm -r ${scope.tmpPath}`);
 
     logger.info('Copying the dashboard...');
 
