@@ -70,7 +70,7 @@ export function* submitData(action) {
     const body = yield select(makeSelectModifiedData());
     const opts = { method: 'PUT', body };
 
-    yield call(request, `/users-permissions/${action.endPoint}`, opts, true);
+    yield call(request, `/users-permissions/${action.endPoint}`, opts);
     yield put(submitSucceeded());
   } catch(error) {
     strapi.notification.error('notification.error');

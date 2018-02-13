@@ -59,7 +59,7 @@ module.exports = {
 
     if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
 
-    _.has(Service, slug) ? ctx.send(Service[slug](env)) : ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);
+    _.has(Service, slug) ? ctx.send(await Service[slug](env)) : ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);
   },
 
   update: async ctx => {
@@ -71,7 +71,7 @@ module.exports = {
 
     let model;
     if (_.has(Service, slug)) {
-      model = Service[slug](env);
+      model = await Service[slug](env);
     } else {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);
     }
@@ -87,7 +87,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const updateErrors = Service.updateSettings(params, items, env);
+    const updateErrors = await Service.updateSettings(params, items, env);
 
     !_.isEmpty(updateErrors) ? ctx.badRequest(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
 

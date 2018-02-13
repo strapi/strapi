@@ -10,6 +10,10 @@ module.exports = {
     const models = [];
 
     _.forEach(strapi.models, (model, name) => {
+      if (name === 'core_store') {
+        return true;
+      }
+
       models.push({
         icon: 'fa-cube',
         name: _.get(model, 'info.name', 'model.name.missing'),
