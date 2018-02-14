@@ -56,47 +56,57 @@ module.exports = {
     ]
   },
 
-  application: () => ({
-    name: 'form.application.name',
-    description: 'form.application.description',
-    sections: [
-      {
-        name: '',
-        items: [
-          {
-            name: 'form.application.item.name',
-            target: 'application.name',
-            type: 'string',
-            value: _.get(strapi.config, 'name', null),
-            validations : {
-              maxLength: 255,
-              required: true
+  application: async () => {
+    const application = await strapi.store({
+      environment: '',
+      type: 'core',
+      key: 'application'
+    }).get();
+
+    return {
+      name: 'form.application.name',
+      description: 'form.application.description',
+      sections: [
+        {
+          name: '',
+          items: [
+            {
+              name: 'form.application.item.name',
+              target: 'application.name',
+              source: 'db',
+              type: 'string',
+              value: _.get(application, 'name', null),
+              validations : {
+                maxLength: 255,
+                required: true
+              }
+            },
+            {
+              name: 'form.application.item.description',
+              target: 'application.description',
+              source: 'db',
+              type: 'string',
+              value: _.get(application, 'description', null),
+              validations : {
+                maxLength: 255,
+                required: true
+              }
+            },
+            {
+              name: 'form.application.item.version',
+              target: 'package.version',
+              type: 'string',
+              value: _.get(strapi.config, 'info.version', null),
+              validations : {
+                regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
+                required: true
+              }
             }
-          },
-          {
-            name: 'form.application.item.description',
-            target: 'application.description',
-            type: 'string',
-            value: _.get(strapi.config, 'description', null),
-            validations : {
-              maxLength: 255,
-              required: true
-            }
-          },
-          {
-            name: 'form.application.item.version',
-            target: 'package.version',
-            type: 'string',
-            value: _.get(strapi.config, 'info.version', null),
-            validations : {
-              regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
-              required: true
-            }
-          }
-        ]
-      }
-    ]
-  }),
+          ]
+        }
+      ]
+    }
+  },
 
   request: env => ({
     name: 'form.request.name',
@@ -806,14 +816,36 @@ module.exports = {
     return [params, errors];
   },
 
-  updateSettings: (params, items, env = '') => {
+  updateSettings: async (params, items, env = '') => {
     const appPath = strapi.config.appPath;
     const errors = [];
 
-    _.forEach(items, ({ target }) => {
+    async function asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    }
+
+    await asyncForEach(items, async ({ target, source }) => {
       if (_.has(params, target)) {
         let input = _.get(params, target, null);
         const [file, ...objPath] = target.split('.');
+
+        if (source === 'db') {
+          const store = strapi.store({
+            environment: env,
+            type: 'core',
+            key: file
+          });
+
+          const data = await store.get();
+
+          _.set(data, objPath, input);
+
+          await store.set({value: data});
+
+          return;
+        }
 
         if (target === 'language.defaultLocale') input = _.lowerCase(input).replace(/ /g, '_');
 

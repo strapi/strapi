@@ -27,7 +27,7 @@ Easily filter results according to fields values.
 
 Find users having `John` as first name.
 
-`GET /user?_firstName=John`
+`GET /user?firstName=John`
 
 Find products having a price equal or greater than `3`.
 
@@ -41,8 +41,8 @@ Sort according to a specific field.
 
 Sort users by email.
 
- - ASC: `GET /user?_sort=asc:email` or `GET /user?_sort=email`
- - DESC: `GET /user?_sort=desc:email` or `GET /user?_sort=-email`
+ - ASC: `GET /user?_sort=email:asc` or `GET /user?_sort=email`
+ - DESC: `GET /user?_sort=email:desc` or `GET /user?_sort=-email`
 
 ### Limit
 

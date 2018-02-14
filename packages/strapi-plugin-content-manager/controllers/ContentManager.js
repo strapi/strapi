@@ -22,8 +22,11 @@ module.exports = {
       'associations'
     ]);
 
+    const models = _.mapValues(strapi.models, pickData);
+    delete models['core_store'];
+
     ctx.body = {
-      models: _.mapValues(strapi.models, pickData),
+      models,
       plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
         acc[current] = {
           models: _.mapValues(strapi.plugins[current].models, pickData)

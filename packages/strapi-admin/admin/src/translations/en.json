@@ -15,9 +15,9 @@
   "app.components.InputFileDetails.details": "Details",
   "app.components.ImgPreview.hint": "Drag & drop your file into this area or {browse} for a file to upload",
   "app.components.ImgPreview.hint.browse": "browse",
-
-  "app.components.InstallPluginPage.helmet": "Install plugins",
-  "app.components.InstallPluginPage.title": "Install new plugins",
+  
+  "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
+  "app.components.InstallPluginPage.title": "Marketplace - Plugins",
   "app.components.InstallPluginPage.description": "Extend your app with no efforts",
   "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
   "app.components.InstallPluginPage.InputSearch.label": " ",
@@ -31,10 +31,10 @@
   "app.components.InstallPluginPopup.noDescription": "No description available",
 
   "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
-  "app.components.LeftMenuLinkContainer.configuration": "Configuration",
+  "app.components.LeftMenuLinkContainer.configuration": "Configurations",
   "app.components.LeftMenuLinkContainer.general": "General",
-  "app.components.LeftMenuLinkContainer.installNewPlugin": "Install new plugin",
-  "app.components.LeftMenuLinkContainer.listPlugins": "List plugins",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplace",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
 

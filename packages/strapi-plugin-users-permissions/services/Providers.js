@@ -49,7 +49,14 @@ exports.connect = (provider, query) => {
           email: profile.email
         });
 
-        if (_.isEmpty(_.find(users, {provider})) && !strapi.plugins['users-permissions'].config.advanced.allow_register) {
+        const advanced = await strapi.store({
+          environment: '',
+          type: 'plugin',
+          name: 'users-permissions',
+          key: 'advanced'
+        }).get();
+
+        if (_.isEmpty(_.find(users, {provider})) && !advanced.allow_register) {
           return resolve([null, [{ messages: [{ id: 'Auth.advanced.allow_register' }] }], 'Register action is actualy not available.']);
         }
 
@@ -57,7 +64,7 @@ exports.connect = (provider, query) => {
           return resolve([user, null]);
         }
 
-        if (!_.isEmpty(_.find(users, user => user.provider !== provider)) && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+        if (!_.isEmpty(_.find(users, user => user.provider !== provider)) && advanced.unique_email) {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
@@ -87,8 +94,15 @@ exports.connect = (provider, query) => {
  * @param {Function} callback
  */
 
-const getProfile = (provider, query, callback) => {
+const getProfile = async (provider, query, callback) => {
   const access_token = query.access_token || query.code || query.oauth_token;
+
+  const grant = await strapi.store({
+    environment: '',
+    type: 'plugin',
+    name: 'users-permissions',
+    key: 'grant'
+  }).get();
 
   switch (provider) {
     case 'facebook':
@@ -136,8 +150,8 @@ const getProfile = (provider, query, callback) => {
       request.post({
         url: 'https://github.com/login/oauth/access_token',
         form: {
-          client_id: strapi.plugins['users-permissions'].config.grant.github.key,
-          client_secret: strapi.plugins['users-permissions'].config.grant.github.secret,
+          client_id: grant.github.key,
+          client_secret: grant.github.secret,
           code: access_token
         }
       }, (err, res, body) => {
@@ -156,8 +170,8 @@ const getProfile = (provider, query, callback) => {
     case 'twitter':
       const twitter = new Purest({
         provider: 'twitter',
-        key: strapi.plugins['users-permissions'].config.grant.twitter.key,
-        secret: strapi.plugins['users-permissions'].config.grant.twitter.secret
+        key: grant.twitter.key,
+        secret: grant.twitter.secret
       });
 
       twitter.query().get('account/verify_credentials').auth(access_token, query.access_secret).qs({screen_name: query['raw[screen_name]'], include_email: 'true'}).request((err, res, body) => {
