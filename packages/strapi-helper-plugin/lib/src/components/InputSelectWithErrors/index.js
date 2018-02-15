@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
+import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -67,7 +67,7 @@ class InputSelectWithErrors extends React.Component {
 
     return (
       <div className={cn(
-          styles.container,
+          styles.containerSelect,
           customBootstrapClass,
           !isEmpty(className) && className,
         )}

@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputFile from 'components/InputFile';
+import InputSpacer from 'components/InputSpacer';
 
 import styles from './styles.scss';
 
@@ -35,9 +36,9 @@ class InputFileWithErrors extends React.Component {
       value,
     } = this.props;
 
-    const labelClass = labelClassName === '' ? styles.label : labelClassName;
-    const spacer = isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
-  
+    const labelClass = labelClassName === '' ? styles.labelFile : labelClassName;
+    const spacer = isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+
     return (
       <div
         className={cn(

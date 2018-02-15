@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
+import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -14,6 +14,7 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputAddon from 'components/InputAddon';
+import InputSpacer from 'components/InputSpacer';
 
 // Utils
 import validateInput from 'utils/inputsValidations';
@@ -93,7 +94,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
 
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
