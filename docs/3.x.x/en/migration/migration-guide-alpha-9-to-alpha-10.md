@@ -16,16 +16,16 @@ When it's done, generate a new empty project `strapi new myNewProject` (don't pa
 
 ## Configurations
 
-You will have to update just 1 files: `package.json`
+You will have to update just 1 file: `package.json`
 
-- Edit the Strapi's dependencies version: (move Strapi's dependencies to `3.0.0-alpha.9` version) in `package.json` file
+- Edit the Strapi's dependencies version: (move Strapi's dependencies to `3.0.0-alpha.10.1` version) in `package.json` file
 
 ```json
 {
   "dependencies": {
     "lodash": "4.x.x",
-    "strapi": "3.0.0-alpha.9",
-    "strapi-mongoose": "3.0.0-alpha.9"
+    "strapi": "3.0.0-alpha.10.1",
+    "strapi-mongoose": "3.0.0-alpha.10.1"
   }
 }
 ```
@@ -54,7 +54,7 @@ You will have to reconfigure all your `users-permissions` configs. Then delete t
 
 ## ⚠️  Data type Number
 
-We fix how mongoose handles the model's `Number` type. Previously, mongoose stored `Number` type as `String` and now it's `Integer`. So you will have to update all your documents which have a type `Number` in it's model  and replace its `String` value with a `Number` one.
+We fixed how mongoose handles the model's `Number` type. Previously, mongoose stored `Number` type as `String` and now it's `Integer`. So you will have to update all your documents which have a type `Number` in its model and replace their `String` value with a `Number` one.
 
 
 That's all, you have now upgraded to Strapi `alpha.10`.
