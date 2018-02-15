@@ -11,7 +11,6 @@ import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 
-import Input from 'components/InputsIndex';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
@@ -25,29 +24,9 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  state = { value: [{ url: 'https://sofiaglobe.com/wp-content/uploads/2017/08/Toto-1979.jpg', name: 'https://sofiaglobe.com/wp-content/uploads/2017/08/Toto-1979.jpg' }] };
-
-  onChange = ({ target }) => {
-    this.setState({ value: target.value });
-  }
-
   render() {
     return (
-      <div className={styles.homePage} style={{ paddingTop: '87px', marginLeft: '100px'}}>
-        <form>
-          <div className="container-fluid">
-            <div className="row">
-              <Input
-                name="test"
-                label="Avatar"
-                value={this.state.value}
-                onChange={this.onChange}
-                type="file"
-              />
-            </div>
-          </div>
-        </form>
-      </div>
+      <div></div>
     );
   }
 }
