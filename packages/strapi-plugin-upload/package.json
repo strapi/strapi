@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.9.3",
+  "version": "3.0.0-alpha.10.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "upload",
@@ -24,7 +24,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.9.3"
+    "strapi-helper-plugin": "3.0.0-alpha.10.1"
   },
   "author": {
     "name": "A Strapi developer",
