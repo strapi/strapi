@@ -154,14 +154,18 @@ module.exports = {
 
 CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
   id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  key text,
-  value text,
+  ${quote}key${quote} text,
+  ${quote}value${quote} text,
   environment text,
   type text,
   tag text
 );
 
 ALTER TABLE ${quote}${Model.tableName || Model.collectionName}${quote} ADD COLUMN ${quote}parent${quote} integer, ADD FOREIGN KEY (${quote}parent${quote}) REFERENCES ${quote}${Model.tableName || Model.collectionName}${quote}(${quote}id${quote});
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERY
+
+2️⃣  RESTART YOUR SERVER
         `);
 
         // Stop the server.
