@@ -6,14 +6,16 @@
 
 import { fromJS } from 'immutable';
 
-import { DEFAULT_ACTION } from './constants';
+import { ON_SEARCH } from './constants';
 
-const initialState = fromJS({});
+const initialState = fromJS({
+  search: '',
+});
 
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
-    case DEFAULT_ACTION:
-      return state;
+    case ON_SEARCH:
+      return state.update('search', () => action.value);
     default:
       return state;
   }

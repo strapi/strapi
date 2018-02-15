@@ -63,6 +63,7 @@
 
   "app.utils.placeholder.defaultMessage": "\u0020",
   "app.utils.SelectOption.defaultMessage": "\u0020",
+  "app.utils.defaultMessage": "\u0020",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",

@@ -4,4 +4,4 @@
  *
  */
 
-export const DEFAULT_ACTION = 'HomePage/DEFAULT_ACTION';
+export const ON_SEARCH = 'Upload/HomePage/ON_SEARCH';

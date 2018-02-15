@@ -4,10 +4,11 @@
  *
  */
 
-import { DEFAULT_ACTION } from './constants';
+import { ON_SEARCH } from './constants';
 
-export function defaultAction() {
+export function onSearch({ target }) {
   return {
-    type: DEFAULT_ACTION,
+    type: ON_SEARCH,
+    value: target.value,
   };
 }
