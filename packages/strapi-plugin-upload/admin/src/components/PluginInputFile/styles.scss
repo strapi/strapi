@@ -1,0 +1,21 @@
+.isDraging {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  // TODO change background
+  background-color: red;
+}
+
+.pluginInputFile {
+  position: relative;
+  height: 144px;
+  width: 100%;
+  border: 2px dashed #E3E9F3;
+
+  > input {
+    display: none;
+  }
+}

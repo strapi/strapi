@@ -18,6 +18,8 @@ import ContainerFluid from 'components/ContainerFluid';
 import InputSearch from 'components/InputSearch';
 import PluginHeader from 'components/PluginHeader';
 
+// Plugin's component
+import PluginInputFile from 'components/PluginInputFile';
 
 // Utils
 import injectReducer from 'utils/injectReducer';
@@ -40,11 +42,12 @@ import saga from './saga';
 export class HomePage extends React.Component {
   renderInputSearch = () =>
     <InputSearch
-      value={this.props.search}
+      autoFocus
       name="search"
       onChange={this.props.onSearch}
       placeholder="upload.HomePage.InputSearch.placeholder"
       style={{ marginTop: '-10px' }}
+      value={this.props.search}
     />
 
   render() {
@@ -60,8 +63,11 @@ export class HomePage extends React.Component {
             }}
             overrideRendering={this.renderInputSearch}
           />
-
         </div>
+          <PluginInputFile
+            name="files"
+          />
+
       </ContainerFluid>
     );
   }

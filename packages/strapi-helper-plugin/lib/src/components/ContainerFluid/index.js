@@ -8,12 +8,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 
 import styles from './styles.scss';
 
 function ContainerFluid({ children }) {
   return (
-    <div className={styles.helperContainerFluid}>
+    <div className={cn('container-fluid', styles.helperContainerFluid)}>
       {children}
     </div>
   );
