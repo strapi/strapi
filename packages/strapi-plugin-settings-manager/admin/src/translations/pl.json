@@ -116,7 +116,7 @@
   "request.error.type.boolean": "Typ logiczny jest wymagany.",
   "request.error.type.select": "Wartość musi znajdować się na uprzednio zdefiniowanej liście.",
 
-  "request.error.validation.required": "This value input is required.",
+  "request.error.validation.required": "Wpisanie wartości dla tego atrybutu jest wymagane.",
   "request.error.validation.regex": "The value does not match the regex.",
   "request.error.validation.max": "Ta wartość jest za wysoka.",
   "request.error.validation.min": "Ta wartość jest za niska",
@@ -650,5 +650,5 @@
   "language.zu": "isiZulu",
   "language.zu_ZA": "isiZulu (iNingizimu Afrika)",
 
-  "pageNotFound": "Page not found"
+  "pageNotFound": "Strona nie znaleziona"
 }

@@ -71,7 +71,7 @@
   "EditPage.form.roles.label.description": "Opis",
   "EditPage.form.roles.label.name": "Nazwa",
   "EditPage.form.roles.label.users": "Użytkownicy powiązani z tą rolą ({number})",
-  "EditPage.form.roles.name.error": "This value input is required.",
+  "EditPage.form.roles.name.error": "Wpisanie wartości dla tego atrybutu jest wymagane.",
   "EditPage.header.title": "{name} ",
   "EditPage.header.title.create": "Rola",
   "EditPage.header.description": "{description} ",

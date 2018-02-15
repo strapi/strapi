@@ -7,12 +7,12 @@
 
   "app.components.HomePage.welcome": "Witaj na pokładzie!",
   "app.components.HomePage.description.part1": "Cieszymy się, że jesteś jednym z naszych użytkowników!",
-  "app.components.HomePage.description.part2": "Należysz teraz do społeczności która pomoże ci zbudować twoją wymarzoną aplikację.",
-  "app.components.HomePage.button": "Stwórz swój pierwszy typ zawartości",
+  "app.components.HomePage.description.part2": "Należysz teraz do społeczności która pomoże ci zbudować wymarzoną aplikację.",
+  "app.components.HomePage.button": "Stwórz swój pierwszy model",
   "app.components.HomePage.feedback": "Możesz zadawać pytania lub przesyłać nam opinie, korzystając z jednego z poniższych kanałów pomocy.",
 
-  "app.components.InstallPluginPage.helmet": "Rynek – Wtyczki",
-  "app.components.InstallPluginPage.title": "Rynek – Wtyczki",
+  "app.components.InstallPluginPage.helmet": "Sklep – Wtyczki",
+  "app.components.InstallPluginPage.title": "Sklep – Wtyczki",
   "app.components.InstallPluginPage.description": "Rozszerz swoją aplikację bez wysiłku",
   "app.components.InstallPluginPage.plugin.support-us.description": "Wesprzyj nas kupując koszulkę Strapi. Pozwoli nam to kontynuuować pracę nad projektem i wzbogacanie go, tak aby dać ci jak najlepsze wrażenia.",
   "app.components.InstallPluginPage.InputSearch.label": " ",
@@ -28,7 +28,7 @@
   "app.components.LeftMenuFooter.poweredBy": "Dumnie wspierane przez",
   "app.components.LeftMenuLinkContainer.configuration": "Konfiguracje",
   "app.components.LeftMenuLinkContainer.general": "Ogólne",
-  "app.components.LeftMenuLinkContainer.installNewPlugin": "Rynek",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Sklep",
   "app.components.LeftMenuLinkContainer.listPlugins": "Wtyczki",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Brak zainstalowanych wtyczek",
   "app.components.LeftMenuLinkContainer.plugins": "Wtyczki",
@@ -75,7 +75,7 @@
   "components.popUpWarning.message": "Czy na pewno chcesz to usunąć?",
 
   "components.Input.error.validation.email": "To nie jest email",
-  "components.Input.error.validation.required": "Wpisanie wartości dla tego pola jest wymagane.",
+  "components.Input.error.validation.required": "Wpisanie wartości dla tego atrybutu jest wymagane.",
   "components.Input.error.validation.regex": "Wartość nie jest zgodna z wymaganym wzorcem.",
   "components.Input.error.validation.max": "Wartość jest za wysoka.",
   "components.Input.error.validation.min": "Wartość jest za niska.",
@@ -92,9 +92,9 @@
 
   "notification.error": "Wystąpił błąd",
 
-  "Auth & Permissions": "Autoryzacje & Uprawnienia",
+  "Auth & Permissions": "Użytkownicy & Uprawnienia",
   "Content Manager": "Menedżer treści",
-  "Content Type Builder": "Konstruktor treści",
+  "Content Type Builder": "Konstruktor modeli",
   "Settings Manager": "Menedżer ustawień",
   "Email": "Email",
   "Password": "Hasło",
