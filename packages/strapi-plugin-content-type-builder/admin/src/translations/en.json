@@ -1,6 +1,6 @@
 {
-  "plugin.description.short": "Modelize the data structure of you API.",
-  "plugin.description.long": "Modelize the data structure of you API. Create new fields and relations in a minute. The files are automatically created and updated in your project.",
+  "plugin.description.short": "Modelize the data structure of your API.",
+  "plugin.description.long": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
   "attribute.string": "String",
   "attribute.text": "Text",
   "attribute.boolean": "Boolean",
@@ -17,8 +17,8 @@
   "contentType.temporaryDisplay": "(Not saved)",
   "from": "from",
   "home.contentTypeBuilder.name": "Content Types",
-  "home.contentTypeBuilder.description": "Create, update your own content types.",
-  "home.emptyContentType.title": "There are no Content Types Available",
+  "home.contentTypeBuilder.description": "Create and update your own content types.",
+  "home.emptyContentType.title": "There are no Content Types available",
   "home.emptyContentType.description": "Create your first Content Type to be able to retrieve data from your API.",
 
   "home.emptyAttributes.title": "There are no fields yet",
@@ -70,12 +70,12 @@
 
   "form.contentType.item.connections": "Connection",
   "form.contentType.item.name": "Name",
-  "form.contentType.item.name.description": "Content type name's should be singular, {link}",
+  "form.contentType.item.name.description": "Content type names should be singular, {link}",
   "form.contentType.item.name.link.description": "check out our documentation",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Write your little description here...",
   "form.contentType.item.collectionName": "Collection Name",
-  "form.contentType.item.collectionName.inputDescription": "Useful when your Content Type Name and your table name is different",
+  "form.contentType.item.collectionName.inputDescription": "Useful when your Content Type Name and your table name differ",
 
   "menu.section.contentTypeBuilder.name.plural": "Content Types",
   "menu.section.contentTypeBuilder.name.singular": "Content Type",
@@ -94,7 +94,7 @@
   "modelPage.attribute.relationWith": "Relation with",
 
   "noTableWarning.description": "Don't forget to create the table `{modelName}` in your database",
-  "noTableWarning.infos": "More infos",
+  "noTableWarning.infos": "More info",
 
   "notification.error.message": "An error occured",
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
