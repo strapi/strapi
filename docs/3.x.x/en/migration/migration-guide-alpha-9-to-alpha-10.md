@@ -49,7 +49,7 @@ Then, delete your old `plugins` folder and replace it by the new one.
 
 To let you update your configurations when your application is deployed on multiple server instances, we have created a data store for settings. So we moved all the `users-permissions` plugin's configs in database.
 
-You will have to reconfigure all your `users-permissions` configs. Then delete the `advanced.json`, `email.json` and `grant.json` files from `plugins/users-permissions/config` folder.
+You will have to reconfigure all your `users-permissions` configs from the admin panel. Then delete the `advanced.json`, `email.json` and `grant.json` files from `plugins/users-permissions/config` folder.
 
 
 ## ⚠️  Data type Number
