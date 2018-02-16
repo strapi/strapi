@@ -1,0 +1,91 @@
+.icon {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.imgPreviewContainer {
+  // display: flex;
+  // flex-direction: column;
+  height: 144px;
+  width: 358px;
+  position: relative;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  text-align: center;
+  vertical-align: middle;
+  background-color: #F3F4F4;
+  background-position: center;
+  background-repeat: no-repeat !important;
+  white-space: nowrap;
+
+  z-index: 1;
+  > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 358px;
+    max-height: 144px;
+    z-index: 3;
+  }
+}
+
+.iconContainer {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+
+.hintDropping {
+  display: block;
+  position: absolute;
+  top: 37px;
+  z-index: 9999;
+  padding: 12px 40px 0 40px;
+  line-height: 18px;
+  color: #fff !important;
+  font-size: 13px;
+  white-space: pre-line;
+  > span {
+    display: block;
+    padding: 12px 40px 0 40px;
+    color: #fff;
+    > u {
+      cursor: pointer;
+    }
+
+  }
+}
+
+
+.fileIcon {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-around;
+  font-size: 30px;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 358px;
+  height: 144px;
+  z-index: 9999;
+}
+
+.overed {
+  background: #333740;
+}

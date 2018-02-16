@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { includes, isEmpty, isFunction, mapKeys, reject } from 'lodash';
+import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -14,6 +14,7 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputPassword from 'components/InputPassword';
+import InputSpacer from 'components/InputSpacer';
 
 // Utils
 import validateInput from 'utils/inputsValidations';
@@ -71,6 +72,7 @@ class InputPasswordWithErrors extends React.Component {
       errorsClassName,
       errorsStyle,
       inputClassName,
+      inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
@@ -87,9 +89,15 @@ class InputPasswordWithErrors extends React.Component {
     } = this.props;
     const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
+    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+
+    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
+
     return (
       <div className={cn(
-          styles.container,
+          styles.containerInputPassword,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className,
         )}
@@ -118,7 +126,7 @@ class InputPasswordWithErrors extends React.Component {
         />
         <InputDescription
           className={inputDescriptionClassName}
-          message={this.props.inputDescription}
+          message={inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
@@ -126,6 +134,7 @@ class InputPasswordWithErrors extends React.Component {
           errors={!noErrorsDescription && this.state.errors || []}
           style={errorsStyle}
         />
+        {spacer}
       </div>
     );
   }

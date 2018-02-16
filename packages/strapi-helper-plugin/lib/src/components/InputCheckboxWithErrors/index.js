@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { includes, isEmpty, isObject, isFunction, mapKeys, reject } from 'lodash';
+import { isEmpty, isObject, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -15,6 +15,7 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputCheckbox from 'components/InputCheckbox';
+import InputSpacer from 'components/InputSpacer';
 
 import styles from './styles.scss';
 
@@ -70,7 +71,7 @@ class InputCheckboxWithErrors extends React.Component {
     const handleBlur = onBlur ? onBlur : () => {};
     let inputTitle = '';
 
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
 
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
