@@ -14,4 +14,10 @@
   > li {
     width: 100%;
   }
+
+  > li:last-child {
+    > div {
+      border-bottom: 0;
+    }
+  }
 }

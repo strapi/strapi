@@ -1,0 +1,40 @@
+.liWrapper {
+  height: 53px;
+}
+
+.liContainer {
+  display: flex;
+  height: 52px;
+  margin-left: 32px;
+  margin-right: 32px;
+  border-bottom: 1px solid #0E1622;
+  
+  > div:first-child {
+    min-width: 53px;
+  }
+  > div:nth-child(2) {
+    min-width: 80px;
+  }
+  > div:nth-child(3) {
+    min-width: 148px;
+  }
+  > div:nth-child(4) {
+    min-width: 221px;
+  }
+  > div:nth-child(5) {
+    min-width: 184px;
+    > span {
+      &:after {
+        content: '\f0d8';
+        margin-left: 10px;
+        font-family: 'FontAwesome';
+      }
+    }
+  }
+  > div:nth-child(6) {
+    min-width: 100px;
+  }
+  > div:nth-child(7) {
+    min-width: 114px;
+  }
+}
