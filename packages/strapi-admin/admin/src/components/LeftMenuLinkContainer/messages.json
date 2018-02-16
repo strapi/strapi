@@ -1,15 +1,15 @@
 {
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",
-    "defaultMessage": "List plugins"
+    "defaultMessage": "Plugins"
   },
   "installNewPlugin": {
     "id": "app.components.LeftMenuLinkContainer.installNewPlugin",
-    "defaultMessage": "Install new plugin"
+    "defaultMessage": "Marketplace"
   },
   "configuration": {
     "id": "app.components.LeftMenuLinkContainer.configuration",
-    "defaultMessage": "Configuration"
+    "defaultMessage": "Configurations"
   },
   "plugins": {
     "id": "app.components.LeftMenuLinkContainer.plugins",

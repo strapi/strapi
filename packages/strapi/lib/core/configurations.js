@@ -244,6 +244,9 @@ module.exports.app = async function() {
       boom: {
         enabled: true
       },
+      mask: {
+        enabled: true
+      },
       // Necessary middlewares for the administration panel.
       cors: {
         enabled: true

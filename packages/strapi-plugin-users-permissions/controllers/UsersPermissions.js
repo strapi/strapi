@@ -171,7 +171,12 @@ module.exports = {
   },
 
   getEmailTemplate: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.email);
+    ctx.send(await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'email'
+    }).get());
   },
 
   updateEmailTemplate: async (ctx) => {
@@ -179,19 +184,23 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'email.json'), JSON.stringify({
-      email: ctx.request.body
-    }, null, 2), 'utf8');
+    await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'email'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   getAdvancedSettings: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.advanced);
+    ctx.send(await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).get());
   },
 
   updateAdvancedSettings: async (ctx) => {
@@ -199,19 +208,23 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'advanced.json'), JSON.stringify({
-      advanced: ctx.request.body
-    }, null, 2), 'utf8');
+    await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'advanced'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   },
 
   getProviders: async (ctx) => {
-    ctx.send(strapi.plugins['users-permissions'].config.grant);
+    ctx.send(await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).get());
   },
 
   updateProviders: async (ctx) => {
@@ -219,15 +232,13 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
-    strapi.reload.isWatching = false;
-
-    fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'grant.json'), JSON.stringify({
-      grant: ctx.request.body
-    }, null, 2), 'utf8');
-
+    await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+      key: 'grant'
+    }).set({value: ctx.request.body})
 
     ctx.send({ ok: true });
-
-    strapi.reload();
   }
 };

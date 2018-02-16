@@ -29,6 +29,7 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, cb) => {
   // App info.
   const hasDatabaseConfig = !!scope.database;
+
   _.defaults(scope, {
     name: scope.name === '.' || !scope.name ? scope.name : path.basename(process.cwd()),
     author: process.env.USER || 'A Strapi developer',
@@ -40,11 +41,12 @@ module.exports = (scope, cb) => {
 
   // Make changes to the rootPath where the Strapi project will be created.
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
+  scope.tmpPath = path.resolve(process.cwd(), 'tmp');
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
     const files = fs.readdirSync(scope.rootPath);
-    if (files.length) {
+    if (files.length > 1) {
       return logger.error('`$ strapi new` can only be called in an empty directory.');
     }
   } catch (err) {
@@ -116,7 +118,6 @@ module.exports = (scope, cb) => {
       }
     ])
     .then(answers => {
-
       if (hasDatabaseConfig) {
         const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
         scope.database.connector = databaseChoice.value.connector;
@@ -212,14 +213,14 @@ module.exports = (scope, cb) => {
           });
         }),
         new Promise(resolve => {
-          let cmd = `npm install --prefix "${scope.rootPath}" ${scope.client.connector}@alpha`;
+          let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
           if (scope.client.module) {
             cmd += ` ${scope.client.module}`;
           }
 
           exec(cmd, () => {
             if (scope.client.module) {
-              const lock = require(path.join(`${scope.rootPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+              const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
               scope.client.version = lock.version;
             }
 
@@ -231,9 +232,9 @@ module.exports = (scope, cb) => {
       Promise.all(asyncFn)
       .then(() => {
         try {
-          require(path.join(`${scope.rootPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+          require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
-          shell.rm('-r', scope.rootPath);
+          shell.rm('-r', scope.tmpPath);
           logger.info('Copying the dashboard...');
           cb.success();
         }

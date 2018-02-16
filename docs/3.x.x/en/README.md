@@ -9,13 +9,16 @@ The most advanced open-source Content Management Framework to build powerful API
 [![npm downloads](https://img.shields.io/npm/dm/strapi.svg)](https://www.npmjs.org/package/strapi)
 [![Build status](https://travis-ci.org/strapi/strapi.svg?branch=master)](https://travis-ci.org/strapi/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+<a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" height="20px">
+</a>
 
 {% endcenter %}
 
-## v3@alpha.8 is available!
+## v3@alpha.10 is available!
 We've been working on a major update for Strapi during the past months, rewriting the core framework and the dashboard.
 
-This documentation is only related to Strapi v3@alpha.8 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
+This documentation is only related to Strapi v3@alpha.10 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
 
 **[Get Started](getting-started/installation.md)**<br />
 Learn how to install Strapi and start developing your API.
