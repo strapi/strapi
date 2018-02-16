@@ -1,4 +1,7 @@
 {
+  "EntriesNumber.number": "{number} file found",
+  "EntriesNumber.number.plural": "{number} files found",
+
   "HomePage.title": "Upload",
   "HomePage.description": "Discover all the uploaded files",
   "HomePage.InputSearch.placeholder": "Search for a file...",

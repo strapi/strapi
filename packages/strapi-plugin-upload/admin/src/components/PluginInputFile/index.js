@@ -56,7 +56,6 @@ class PluginInputFile extends React.PureComponent {
         <p className={styles.textWrapper}>
           <FormattedMessage id="upload.PluginInputFile.text" values={{ link }} />
         </p>
-
         <div
           onDragLeave={this.handleDragLeave}
           className={cn(isDraging && styles.isDraging)}

@@ -16,9 +16,11 @@ import { bindActionCreators, compose } from 'redux';
 // or strapi/packages/strapi-helper-plugin/lib/src
 import ContainerFluid from 'components/ContainerFluid';
 import InputSearch from 'components/InputSearch';
+// import InputSelect from 'components/InputSelect';
 import PluginHeader from 'components/PluginHeader';
 
 // Plugin's component
+import EntriesNumber from 'components/EntriesNumber';
 import PluginInputFile from 'components/PluginInputFile';
 
 // Utils
@@ -28,6 +30,7 @@ import injectSaga from 'utils/injectSaga';
 // Actions
 import {
   onDrop,
+  getData,
   onSearch,
 } from './actions';
 
@@ -41,6 +44,10 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
+  componentDidMount() {
+    this.props.getData();
+  }
+
   renderInputSearch = () =>
     <InputSearch
       autoFocus
@@ -69,7 +76,19 @@ export class HomePage extends React.Component {
             name="files"
             onDrop={this.props.onDrop}
           />
-
+        <div className={styles.entriesWrapper}>
+          <div>
+            {/* NOTE: Prepare for bulk actions}
+            <InputSelect
+              name="bulkAction"
+              onChange={() => console.log('change')}
+              selectOptions={[{ value: 'select all'}]}
+              style={{ minWidth: '200px', marginTop: '-8px' }}
+            />
+            */}
+          </div>
+          <EntriesNumber number={this.props.entriesNumber} />
+        </div>
       </ContainerFluid>
     );
   }
@@ -80,6 +99,7 @@ HomePage.contextTypes = {
 };
 
 HomePage.propTypes = {
+  getData: PropTypes.func.isRequired,
   onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   search: PropTypes.string.isRequired,
@@ -89,6 +109,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       onDrop,
+      getData,
       onSearch,
     },
     dispatch,

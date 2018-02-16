@@ -6,6 +6,8 @@
 
 import {
   DROP_SUCCESS,
+  GET_DATA,
+  GET_DATA_SUCCESS,
   ON_DROP,
   ON_SEARCH,
 } from './constants';
@@ -14,6 +16,20 @@ export function dropSuccess(newFiles) {
   return {
     type: DROP_SUCCESS,
     newFiles,
+  };
+}
+
+export function getData() {
+  return {
+    type: GET_DATA,
+  };
+}
+
+export function getDataSuccess(data, entriesNumber) {
+  return {
+    type: GET_DATA_SUCCESS,
+    data,
+    entriesNumber,
   };
 }
 

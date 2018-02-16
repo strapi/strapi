@@ -1,4 +1,7 @@
 {
+  "EntriesNumber.number": "{number} fichier trouvé",
+  "EntriesNumber.number.plural": "{number} fichiers trouvés",
+
   "HomePage.title": "Upload",
   "HomePage.description": "Découvrez tous les fichiers téléchargés",
   "HomePage.InputSearch.placeholder": "Rechercher un fichier...",
