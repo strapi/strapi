@@ -5,7 +5,7 @@
   "Auth.form.button.reset-password": "Change password",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
-  "Auth.form.error.noAdminAccess": "You can't access to the administration panel.",
+  "Auth.form.error.noAdminAccess": "You can't access the administration panel.",
 
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.label.success": "Email successfully sent to",
@@ -46,7 +46,7 @@
   "Auth.form.error.email.taken": "Email is already taken",
 
   "Auth.link.forgot-password": "Forgot your password?",
-  "Auth.link.ready": "Ready to sign-in?",
+  "Auth.link.ready": "Ready to sign in?",
 
   "BoundRoute.title": "Bound route to",
 
@@ -61,7 +61,7 @@
   "EditForm.inputSelect.durations.description": "Number of hours during which the user can't subscribe.",
 
   "EditForm.inputToggle.label.email": "One account per email address",
-  "EditForm.inputToggle.label.sign-up": "Enable sign-up",
+  "EditForm.inputToggle.label.sign-up": "Enable sign-ups",
   "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
   "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
 
@@ -87,7 +87,7 @@
   "HeaderNav.link.roles": "Roles",
 
   "HomePage.header.title": "Users & Permissions",
-  "HomePage.header.description": "Define the roles and permissions for your users",
+  "HomePage.header.description": "Define the roles and permissions for your users.",
 
   "InputSearch.placeholder": "Search for a user",
 
@@ -123,7 +123,7 @@
 
   "Policies.InputSelect.empty": "None",
   "Policies.InputSelect.label": "Allow to perform this action for:",
-  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bounded route",
+  "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
   "Policies.header.title": "Advanced settings",
 
   "Email.template.validation_email": "Email address validation",
@@ -153,7 +153,7 @@
   "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
   "PopUpForm.Email.options.from.name.placeholder": "John Doe",
   "PopUpForm.Providers.enabled.label": "Enable",
-  "PopUpForm.Providers.enabled.description": "If disabled, the users won't be able to use this provider.",
+  "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.secret.label": "Client Secret",
@@ -169,6 +169,6 @@
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your  Twitter application configurations",
 
   "PopUpForm.Providers.callback.placeholder": "TEXT",
-  "PopUpForm.Email.email_templates.inputDescription": "If you're unsure how to set variables, {link}",
+  "PopUpForm.Email.email_templates.inputDescription": "If you're unsure how to use variables, {link}",
   "PopUpForm.Email.link.documentation": "check out our documentation."
 }

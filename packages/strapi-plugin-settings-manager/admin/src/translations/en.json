@@ -1,8 +1,8 @@
 {
   "components.DownloadDb.download": "Installation in progess...",
   "components.DownloadDb.text": "This could take a minute or so. Thanks for your patience.",
-  "plugin.description.short": "Configure your project in seconds",
-  "plugin.description.long": "Configure your project in seconds",
+  "plugin.description.short": "Configure your project within seconds.",
+  "plugin.description.long": "Configure your project within seconds.",
   "menu.section.global-settings": "Global settings",
   "menu.item.application": "Application",
   "menu.item.languages": "Languages",
@@ -17,10 +17,10 @@
 
   "form.button.cancel": "Cancel",
   "form.button.save": "Save",
-  "form.button.confirm": "Confim",
+  "form.button.confirm": "Confirm",
 
   "form.databases.name": "Database",
-  "form.databases.description": "Configure your database settings by environnement.",
+  "form.databases.description": "Configure your database settings by environment.",
 
   "form.database.item.name": "Connection Name",
   "form.database.item.client": "Client",
@@ -140,7 +140,7 @@
   "list.databases.title.plural": "connections in this environment",
 
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.databases.danger.message": "Content Types are still linked with this connection. By removing it, you could cause criticals issues to your app. Be careful...",
+  "popUpWarning.databases.danger.message": "Content Types are still linked with this connection. By removing it, you could cause critical issues to your app. Be careful...",
   "popUpWarning.danger.ok.message": "I Understand",
   "popUpWarning.databases.delete.message": "Are you sure you want to delete this database?",
   "popUpWarning.languages.delete.message": "Are you sure you want to delete this language?",
