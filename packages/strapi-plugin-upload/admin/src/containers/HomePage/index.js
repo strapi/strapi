@@ -21,6 +21,7 @@ import PluginHeader from 'components/PluginHeader';
 
 // Plugin's component
 import EntriesNumber from 'components/EntriesNumber';
+import List from 'components/List';
 import PluginInputFile from 'components/PluginInputFile';
 
 // Utils
@@ -83,12 +84,13 @@ export class HomePage extends React.Component {
               name="bulkAction"
               onChange={() => console.log('change')}
               selectOptions={[{ value: 'select all'}]}
-              style={{ minWidth: '200px', marginTop: '-8px' }}
+              style={{ minWidth: '200px', height: '32px', marginTop: '-8px' }}
             />
             */}
           </div>
           <EntriesNumber number={this.props.entriesNumber} />
         </div>
+        <List />
       </ContainerFluid>
     );
   }

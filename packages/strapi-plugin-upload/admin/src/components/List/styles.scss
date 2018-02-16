@@ -1,0 +1,17 @@
+.listWrapper {
+  margin-top: 9px;
+  padding: 0;
+
+  > div:first-child {
+    margin: 0;
+  }
+}
+
+.ulList {
+  width: 100%;
+  padding: 0 !important;
+  list-style: none;
+  > li {
+    width: 100%;
+  }
+}

@@ -6,6 +6,13 @@
   "HomePage.description": "Discover all the uploaded files",
   "HomePage.InputSearch.placeholder": "Search for a file...",
 
+  "ListHeader.type": "Type",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "Name",
+  "ListHeader.updated": "Updated",
+  "ListHeader.size": "Size",
+  "ListHeader.related": "Related to",
+
   "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
   "PluginInputFile.link": "browse",
 

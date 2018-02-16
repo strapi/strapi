@@ -6,6 +6,13 @@
   "HomePage.description": "Découvrez tous les fichiers téléchargés",
   "HomePage.InputSearch.placeholder": "Rechercher un fichier...",
 
+  "ListHeader.type": "Type",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "Nom",
+  "ListHeader.updated": "Modifié",
+  "ListHeader.size": "Taille",
+  "ListHeader.related": "Relié à",
+
   "PluginInputFile.text": "Drag & drop vos fichiers dans cette zone ou {link} un fichier à télécharger",
   "PluginInputFile.link": "recherchez",
 
