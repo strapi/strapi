@@ -27,6 +27,7 @@ import injectSaga from 'utils/injectSaga';
 
 // Actions
 import {
+  onDrop,
   onSearch,
 } from './actions';
 
@@ -66,6 +67,7 @@ export class HomePage extends React.Component {
         </div>
           <PluginInputFile
             name="files"
+            onDrop={this.props.onDrop}
           />
 
       </ContainerFluid>
@@ -78,6 +80,7 @@ HomePage.contextTypes = {
 };
 
 HomePage.propTypes = {
+  onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   search: PropTypes.string.isRequired,
 };
@@ -85,6 +88,7 @@ HomePage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      onDrop,
       onSearch,
     },
     dispatch,

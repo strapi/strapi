@@ -6,12 +6,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
 import styles from './styles.scss';
 
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };
+
+  handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('click');
+    this.refs.input.click();
+  }
 
   handleDragEnter = () => this.setState({ isDraging: true });
 
@@ -20,6 +28,7 @@ class PluginInputFile extends React.PureComponent {
   handleDrop = (e) => {
     e.preventDefault();
     this.setState({ isDraging: false });
+    this.props.onDrop(e);
   }
 
   render() {
@@ -28,10 +37,15 @@ class PluginInputFile extends React.PureComponent {
       onChange,
     } = this.props;
     const { isDraging } = this.state;
+    const link = (
+      <FormattedMessage id="upload.PluginInputFile.link">
+        {(message) => <u onClick={this.handleClick}>{message}</u>}
+      </FormattedMessage>
+    );
 
     return (
       <label
-        className={cn(styles.pluginInputFile)}
+        className={cn(styles.pluginInputFile, isDraging && styles.pluginInputFileHover)}
         onDragEnter={this.handleDragEnter}
         onDragOver={(e) => {
           e.preventDefault();
@@ -39,13 +53,19 @@ class PluginInputFile extends React.PureComponent {
         }}
         onDrop={this.handleDrop}
       >
+        <p className={styles.textWrapper}>
+          <FormattedMessage id="upload.PluginInputFile.text" values={{ link }} />
+        </p>
+
         <div
           onDragLeave={this.handleDragLeave}
           className={cn(isDraging && styles.isDraging)}
         />
         <input
+          multiple
           name={name}
           onChange={onChange}
+          ref="input"
           type="file"
         />
       </label>

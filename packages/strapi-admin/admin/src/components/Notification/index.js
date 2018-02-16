@@ -47,7 +47,7 @@ class Notification extends React.Component { // eslint-disable-line react/prefer
       : <FormattedMessage id={message} defaultMessage={message} />;
 
     return (
-      <li key={this.props.notification.id} className={`${styles.notification} ${styles[options.class]}`}>
+      <li key={this.props.notification.id} className={`${styles.notification} ${styles[options.class]}`} onClick={this.handleCloseClicked}>
         <i className={`fa ${options.icon} ${styles.notificationIcon}`} />
         <div className={styles.notificationContent}>
           <p className={styles.notificationTitle}>

@@ -1,6 +1,11 @@
 {
   "HomePage.title": "Upload",
   "HomePage.description": "Discover all the uploaded files",
+  "HomePage.InputSearch.placeholder": "Search for a file...",
 
-  "HomePage.InputSearch.placeholder": "Search for a file..."
+  "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
+  "PluginInputFile.link": "browse",
+
+  "notification.dropFile.success": "Your file has been uploaded",
+  "notification.dropFiles.success": "{number} files have been uploaded"
 }
