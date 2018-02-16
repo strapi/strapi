@@ -11,6 +11,11 @@
   "app.components.HomePage.button": "Stwórz swój pierwszy model",
   "app.components.HomePage.feedback": "Możesz zadawać pytania lub przesyłać nam opinie, korzystając z jednego z poniższych kanałów pomocy.",
 
+  "app.components.InputFile.newFile": "DODAJ NOWY PLIK",
+  "app.components.InputFileDetails.details": "Szczegóły",
+  "app.components.ImgPreview.hint": "Przeciągnij i upuść plik w tym obszarze lub {browse}, aby przesłać plik",
+  "app.components.ImgPreview.hint.browse": "przeglądaj",
+
   "app.components.InstallPluginPage.helmet": "Sklep – Wtyczki",
   "app.components.InstallPluginPage.title": "Sklep – Wtyczki",
   "app.components.InstallPluginPage.description": "Rozszerz swoją aplikację bez wysiłku",
