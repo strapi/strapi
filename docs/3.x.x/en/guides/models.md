@@ -3,6 +3,7 @@
 See the [models' concepts](../concepts/concepts.md#models) for details.
 
 ## How to create a model?
+> Note: If you are just starting out it is very convinient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
 
 Use the CLI, and run the following command `strapi generate:model user firstname:string lastname:string`. Read the [CLI documentation](../cli/CLI.md) for more informations.
 
