@@ -82,7 +82,7 @@ module.exports = {
 
 In this example, any time a web browser is pointed to the `/hello` URL on your app, the page will display the text: `Hello World!`.
 
-### Where are defined the controllers?
+### Where are the controllers defined?
 
 The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
