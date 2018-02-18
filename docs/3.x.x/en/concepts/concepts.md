@@ -198,7 +198,7 @@ Internationalization and localization (i18n) allows to adapt the project to diff
 
 ## Plugin
 
-A plugin is like a fully intedependent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
+A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
 
 > Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
 
@@ -206,7 +206,7 @@ A plugin is like a fully intedependent sub-application. It has its own business 
 
 ## Plugin styles
 
-The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintable.
+The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
 > Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
 
