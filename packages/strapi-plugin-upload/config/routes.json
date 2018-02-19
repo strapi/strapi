@@ -7,6 +7,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/files",
+      "handler": "Upload.find",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

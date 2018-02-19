@@ -90,7 +90,6 @@ module.exports = {
     } catch(error) {
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
-
   },
 
   /**
