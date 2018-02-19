@@ -7,18 +7,18 @@
     "containers.Edit.submit": "Speichern",
     "containers.Edit.editing": "Bearbeite...",
     "containers.Edit.delete": "Löschen",
-    "containers.Edit.cancel": "Abbrechen",
+    "containers.Edit.reset": "Abbrechen",
     "containers.Edit.returnList": "Zu Liste zurückkehren",
     "containers.List.addAnEntry": "Füge {entity} hinzu",
     "containers.List.pluginHeaderDescription": "{label} Einträge gefunden",
     "containers.List.pluginHeaderDescription.singular": "{label} Eintrag gefunden",
     "components.LimitSelect.itemsPerPage": "Einträge pro Seite",
     "containers.List.errorFetchRecords": "Fehler",
-  
+
     "emptyAttributes.title": "Es gibt noch keine Felder",
     "emptyAttributes.description": "Füge deinem Content-Typen das erste Feld hinzu",
     "emptyAttributes.button": "Den Content-Typ-Generator öffnen",
-  
+
     "error.schema.generation": "Bei der Generierung des Schemas ist ein Fehler aufgetreten.",
     "error.records.count": "Beim Abruf von count records ist ein Fehler aufgetreten.",
     "error.records.fetch": "Beim Abruf von Dokumenten ist ein Fehler aufgetreten.",
@@ -38,17 +38,16 @@
     "error.attribute.key.taken": "Dieser Wert existiert bereits",
     "error.attribute.sameKeyAndName": "Darf nicht gleich sein",
     "error.validation.minSupMax": "Darf nicht höher sein",
-  
+
     "notification.error.relationship.fetch": "Beim Abruf von Beziehungen ist ein Fehler aufgetreten.",
-  
+
     "success.record.delete": "Gelöscht",
     "success.record.save": "Gespeichert",
-  
+
     "pageNotFound": "Seite nicht gefunden",
-  
+
     "popUpWarning.button.cancel": "Abbrechen",
     "popUpWarning.button.confirm": "Bestätigen",
     "popUpWarning.title": "Bitte bestätigen",
     "popUpWarning.bodyMessage.contentType.delete": "Bist du sicher, dass du diesen Content-Typ löschen willst?"
   }
-  

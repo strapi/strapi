@@ -7,7 +7,7 @@
   "containers.Edit.submit": "Zapisz",
   "containers.Edit.editing": "Edytowanie...",
   "containers.Edit.delete": "Usuń",
-  "containers.Edit.cancel": "Anuluj",
+  "containers.Edit.reset": "Anuluj",
   "containers.Edit.returnList": "Wróć do listy",
   "containers.List.addAnEntry": "Dodaj {entity}",
   "containers.List.pluginHeaderDescription": "{label} wpisów znalezionych",
