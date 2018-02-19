@@ -21,7 +21,7 @@ function List(props) {
           <ListHeader />
           {props.data.map((item, key) => (
             <Li
-              key={key}
+              key={item.hash || key}
               item={item}
             />
           ))}

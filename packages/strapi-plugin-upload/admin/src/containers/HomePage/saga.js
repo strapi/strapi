@@ -43,11 +43,10 @@ function* dataGet() {
 function* uploadFiles(action) {
   try {
     const files = action.files;
-
     const newFiles = [
       Map({
-        type: 'pdf',
-        hash: '12345',
+        type: 'mov',
+        hash: `${Math.random()}`,
         name: 'avatar1.pdf',
         updatedAt: '20/11/2017',
         size: '24 B',

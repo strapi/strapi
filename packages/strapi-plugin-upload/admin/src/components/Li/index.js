@@ -10,6 +10,8 @@ import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import cn from 'classnames';
 
+import FileIcon from 'components/FileIcon';
+
 import styles from './styles.scss';
 
 class Li extends React.Component {
@@ -56,11 +58,7 @@ class Li extends React.Component {
             <div />
             {Object.keys(item).map((value, key) => {
               if (key === 0) {
-                return (
-                  <div key={key} className={styles.liIconContainer}>
-                    <i className={`fa fa-file-${item[value]}-o`} />
-                  </div>
-                );
+                return <FileIcon key={key} fileType={item[value]} />;
               }
 
               if (value !== 'url') {
