@@ -17,6 +17,7 @@ import { bindActionCreators, compose } from 'redux';
 import ContainerFluid from 'components/ContainerFluid';
 import InputSearch from 'components/InputSearch';
 // import InputSelect from 'components/InputSelect';
+import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
 
 // Plugin's component
@@ -30,6 +31,7 @@ import injectSaga from 'utils/injectSaga';
 
 // Actions
 import {
+  changeParams,
   deleteData,
   getData,
   onDrop,
@@ -60,6 +62,19 @@ export class HomePage extends React.Component {
     if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
       this.props.getData();
     }
+  }
+
+  handleChangeParams = (e) => {
+    const { history, params } = this.props;
+    const search = e.target.nanme === 'params.limit' ?
+      `page=${params.page}&limit=${e.target.value}&sort=${params.sort}`
+      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`
+    this.props.history.push({
+      pathname: history.pathname,
+      search,
+    });
+
+    this.props.changeParams(e);
   }
 
   renderInputSearch = () =>
@@ -106,6 +121,12 @@ export class HomePage extends React.Component {
         <List
           data={this.props.uploadedFiles}
         />
+        <div className="col-md-12">
+          <PageFooter
+            onChangeParams={this.handleChangeParams}
+            params={this.props.params}
+          />
+        </div>
       </ContainerFluid>
     );
   }
@@ -115,16 +136,27 @@ HomePage.childContextTypes = {
   deleteData: PropTypes.func.isRequired,
 };
 
-HomePage.defaultProps = {
-  uploadedFiles: [{}],
-};
-
 HomePage.contextTypes = {
+  params: PropTypes.shape({
+    limit: PropTypes.number,
+    page: PropTypes.number,
+    sort: PropTypes.string,
+  }),
   router: PropTypes.object,
   uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
 
+HomePage.defaultProps = {
+  params: {
+    limit: 10,
+    page: 1,
+    sort: 'updatedAt',
+  },
+  uploadedFiles: [{}],
+};
+
 HomePage.propTypes = {
+  changeParams: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
@@ -134,6 +166,7 @@ HomePage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      changeParams,
       deleteData,
       getData,
       onDrop,

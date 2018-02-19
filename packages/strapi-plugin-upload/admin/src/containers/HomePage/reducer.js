@@ -30,7 +30,7 @@ const initialState = fromJS({
 function homePageReducer(state = initialState, action) {
   switch (action.type) {
     case CHANGE_PARAMS:
-      return state.updateIn(actions.keys, () => action.value);
+      return state.updateIn(action.keys, () => action.value);
     case DELETE_SUCCESS:
       return state.update('deleteSuccess', (v) => v = !v);
     case DROP_SUCCESS:

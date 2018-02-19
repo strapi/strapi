@@ -1,4 +1,4 @@
-.liWrapper {
+  .liWrapper {
   height: 54px;
   background-color: #fff;
   padding-top: 5px;
@@ -39,7 +39,10 @@
     min-width: 100px;
   }
   > div:nth-child(7) {
-    min-width: 114px;
+    min-width: 147px;
+  }
+  > div:last-child {
+    min-width: 116px;
   }
 }
 
