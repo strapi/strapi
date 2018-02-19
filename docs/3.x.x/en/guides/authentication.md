@@ -1,6 +1,6 @@
 # Authentication
 
-## Register a new user.
+## Register a new user
 
 This route lets you create new users.
 
@@ -28,7 +28,7 @@ $.ajax({
 
 ## Login.
 
-This route lets you log your users in  by getting an authentication token.
+This route lets you login your users by getting an authentication token.
 
 #### Local
 

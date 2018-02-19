@@ -146,13 +146,13 @@ In this example, there is a `User` model which contains two attributes `firstnam
 
 ### Where are the models defined?
 
-The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file put in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contains the ORM model object that they are referring to. By convention, models' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `User.settings.json`, `LegalEntity.js`, `LegalEntity.settings.json`.
+The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable every where in the project, they contain the ORM model object that they are refer to. By convention, models' names should be Pascal-cased, so that every word in the file (including the first one) is capitalized `User.js`, `User.settings.json`, `LegalEntity.js`, `LegalEntity.settings.json`.
 
 ### Attributes
 
 A model must contain a list of attributes, and each of these attributes must have a type.
 
-> Please refer to the [models' guide for more informations about attributes](../guides/models.md#define-the-attributes).
+> Please refer to the [models' guide for more informations about the attributes](../guides/models.md#define-the-attributes).
 
 ### Relations
 
@@ -198,7 +198,7 @@ Internationalization and localization (i18n) allows to adapt the project to diff
 
 ## Plugin
 
-A plugin is like a sub-app fully independent. It has its own business logic with its dedicated models, controllers, services, middlewares or hooks. It can also contains an UI integrated into the admin panel to use it easily. It allows to develops or plugs features in a project in a short time span.
+A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
 
 > Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
 
@@ -206,7 +206,7 @@ A plugin is like a sub-app fully independent. It has its own business logic with
 
 ## Plugin styles
 
-The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. Also, it uses [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
+The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
 > Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
 
@@ -214,14 +214,14 @@ The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top o
 
 ## Policies
 
-Policies are functions which have the ability to execute a logic on each request before it reaches the controller's action. They are mostly used for securing business logic easily.
+Policies are functions which have the ability to execute specific logic on each request before it reaches the controller's action. They are mostly used for securing business logic easily.
 Each route of the project can be associated to an array of policies. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
 
 Policies can be:
  - `global`: so they can be used within the entire project.
  - `scoped`: used by single API or plugin.
 
-### Where are defined the policies?
+### Where are the policies defined?
 
 The API and plugins policies (scoped) are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
 
