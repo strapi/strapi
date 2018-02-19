@@ -53,8 +53,19 @@ function PageFooter(props) {
   );
 }
 
-PageFooter.defaultProps = {};
+PageFooter.defaultProps = {
+  count: 1,
+  onChangeParams: () => {},
+  params: {
+    currentPage: 1,
+    limit: 10,
+  },
+};
 
-PageFooter.propTypes = {};
+PageFooter.propTypes = {
+  count: PropTypes.number,
+  onChangeParams: PropTypes.func,
+  params: PropTypes.object,
+};
 
 export default PageFooter;
