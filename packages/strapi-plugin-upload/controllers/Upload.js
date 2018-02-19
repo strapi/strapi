@@ -15,11 +15,17 @@ module.exports = {
    */
 
   index: async (ctx) => {
-    // Add your own logic here.
+    const Service = strapi.plugins['upload'].services.upload;
+
+    const files = await Service.getFiles(ctx.request.body.files);
+
+    await Service.upload(files);
 
     // Send 200 `ok`
-    ctx.send({
-      message: 'ok'
-    });
+    ctx.send(files.map((file) => {
+      return {
+        url: `/${file.key}`
+      };
+    }));
   }
 };

@@ -1,7 +1,7 @@
 {
   "routes": [
     {
-      "method": "GET",
+      "method": "POST",
       "path": "/",
       "handler": "Upload.index",
       "config": {
