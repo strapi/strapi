@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
+import GlobalPagination from 'components/GlobalPagination';
 import InputSelect from 'components/InputSelect';
 
 import styles from './styles.scss';
@@ -22,19 +23,31 @@ function PageFooter(props) {
           <div className={styles.pageFooterSelectWrapper}>
             <select
               className={`form-control ${styles.select}`}
+              id="params.limit"
               name="params.limit"
-              onChange={props.onChangeParams}
+              onChange={(e) => {
+                const target = {
+                  name: 'params.limit',
+                  value: parseInt(e.target.value, 10),
+                };
+                props.onChangeParams({ target });
+              }}
               value={get(props, ['params', 'limit'], 10)}
             >
               {[10, 20, 50, 100].map((value, key) => <option value={value} key={value}>{value}</option>)}
             </select>
           </div>
-          <label className={styles.pageFooterLabel} htmlFor="params.name">
+          <label className={styles.pageFooterLabel} htmlFor="params.limit">
             <FormattedMessage id="components.PageFooter.select" />
           </label>
         </form>
       </div>
       <div className="col-md-6 col-lg-6">
+        <GlobalPagination
+          count={props.count}
+          onChangeParams={props.onChangeParams}
+          params={props.params}
+        />
       </div>
     </div>
   );

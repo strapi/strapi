@@ -67,7 +67,7 @@ export class HomePage extends React.Component {
   handleChangeParams = (e) => {
     const { history, params } = this.props;
     const search = e.target.nanme === 'params.limit' ?
-      `page=${params.page}&limit=${e.target.value}&sort=${params.sort}`
+      `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}`
       : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`
     this.props.history.push({
       pathname: history.pathname,
@@ -123,6 +123,7 @@ export class HomePage extends React.Component {
         />
         <div className="col-md-12">
           <PageFooter
+            count={this.props.entriesNumber}
             onChangeParams={this.handleChangeParams}
             params={this.props.params}
           />
@@ -137,11 +138,6 @@ HomePage.childContextTypes = {
 };
 
 HomePage.contextTypes = {
-  params: PropTypes.shape({
-    limit: PropTypes.number,
-    page: PropTypes.number,
-    sort: PropTypes.string,
-  }),
   router: PropTypes.object,
   uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
@@ -149,7 +145,7 @@ HomePage.contextTypes = {
 HomePage.defaultProps = {
   params: {
     limit: 10,
-    page: 1,
+    currentPage: 1,
     sort: 'updatedAt',
   },
   uploadedFiles: [{}],

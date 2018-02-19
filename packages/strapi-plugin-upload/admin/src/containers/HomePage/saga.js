@@ -27,7 +27,7 @@ function* dataDelete(action) {
 
 function* dataGet() {
   try {
-    const entriesNumber = 100;
+    const entriesNumber = 20;
     const data = [
       Map({
         type: 'pdf',

@@ -17,13 +17,13 @@ import {
 const initialState = fromJS({
   deleteSuccess: false,
   dataToDelete: '',
-  entriesNumber: 0,
+  entriesNumber: 1,
   search: '',
   uploadedFiles: List([Map({})]),
   params: Map({
     sort: 'updatedAt',
     limit: 10,
-    page: 1,
+    currentPage: 1,
   }),
 });
 
