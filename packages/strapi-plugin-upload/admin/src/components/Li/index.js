@@ -11,6 +11,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import cn from 'classnames';
 
 import FileIcon from 'components/FileIcon';
+import IcoContainer from 'components/IcoContainer';
+import PopUpWarning from 'components/PopUpWarning';
 
 import styles from './styles.scss';
 
@@ -23,6 +25,16 @@ class Li extends React.Component {
         this.setState({ copied: false });
       }, 3000);
     }
+  }
+
+  handleClick = (e) => {
+    e.preventDefault();
+    this.refs.aTag.click();
+  }
+
+  handleDelete = (e) => {
+    e.preventDefault();
+    this.context.deleteData(this.props.item);
   }
 
   renderLiCopied = () => (
@@ -38,12 +50,6 @@ class Li extends React.Component {
     </li>
   );
 
-  toggle = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ isOpen: !this.state.isOpen });
-  }
-
   render() {
     const { item } = this.props;
 
@@ -51,9 +57,25 @@ class Li extends React.Component {
       return this.renderLiCopied();
     }
 
+    const icons = [
+      {
+        icoType: item.private ? 'lock' : 'unlock',
+        onClick: () => {},
+      },
+      {
+        icoType: 'eye',
+        onClick: this.handleClick,
+      },
+      {
+        icoType: 'trash',
+        onClick: () => this.setState({ isOpen: true }),
+      },
+    ];
+
     return (
       <CopyToClipboard text={item.url} onCopy={() => this.setState({copied: true})}>
         <li className={styles.liWrapper}>
+          <a href={item.url} target="_blank" style={{ display: 'none' }} ref="aTag" />
           <div className={styles.liContainer}>
             <div />
             {Object.keys(item).map((value, key) => {
@@ -66,13 +88,24 @@ class Li extends React.Component {
                   <div key={key}>{item[value]}</div>
                 );
               }
+
+              return <IcoContainer key={key} icons={icons} />
             })}
           </div>
+          <PopUpWarning
+            isOpen={this.state.isOpen}
+            onConfirm={this.handleDelete}
+            toggleModal={() => this.setState({ isOpen: false })}
+          />
         </li>
       </CopyToClipboard>
     );
   }
 }
+
+Li.contextTypes = {
+  deleteData: PropTypes.func.isRequired,
+};
 
 Li.defaultProps = {
   item: {

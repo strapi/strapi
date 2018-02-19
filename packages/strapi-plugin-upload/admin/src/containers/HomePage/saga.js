@@ -4,15 +4,26 @@ import { Map } from 'immutable';
 // import request from 'utils/request';
 
 import {
+  deleteSuccess,
   dropSuccess,
   getDataSuccess,
 } from './actions';
 import {
+  DELETE_DATA,
   GET_DATA,
   ON_DROP,
   ON_SEARCH,
 } from './constants';
 import { makeSelectSearch } from './selectors';
+
+function* dataDelete(action) {
+  try {
+    // const requestURL = `/upload/something/${action.dataToDelete.id}`;
+    yield put(deleteSuccess());
+  } catch(err) {
+    console.log(err);
+  }
+}
 
 function* dataGet() {
   try {
@@ -25,7 +36,8 @@ function* dataGet() {
         updatedAt: '20/11/2017',
         size: '24 B',
         relatedTo: 'John Doe',
-        url: 'www.google.com',
+        url: 'https://www.google.com',
+        private: false,
       }),
     ];
 
@@ -51,7 +63,8 @@ function* uploadFiles(action) {
         updatedAt: '20/11/2017',
         size: '24 B',
         relatedTo: 'John Doe',
-        url: 'www.google.com',
+        url: 'https://www.youtube.com',
+        private: true,
       }),
     ];
 
@@ -80,6 +93,7 @@ function* search() {
 
 // Individual exports for testing
 export function* defaultSaga() {
+  yield fork(takeLatest, DELETE_DATA, dataDelete)
   yield fork(takeLatest, ON_DROP, uploadFiles);
   yield fork(takeLatest, ON_SEARCH, search);
 

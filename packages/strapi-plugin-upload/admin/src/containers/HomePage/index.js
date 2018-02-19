@@ -30,8 +30,9 @@ import injectSaga from 'utils/injectSaga';
 
 // Actions
 import {
-  onDrop,
+  deleteData,
   getData,
+  onDrop,
   onSearch,
 } from './actions';
 
@@ -45,8 +46,20 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
+  getChildContext = () => (
+    {
+      deleteData: this.props.deleteData,
+    }
+  );
+
   componentDidMount() {
     this.props.getData();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
+      this.props.getData();
+    }
   }
 
   renderInputSearch = () =>
@@ -98,6 +111,10 @@ export class HomePage extends React.Component {
   }
 }
 
+HomePage.childContextTypes = {
+  deleteData: PropTypes.func.isRequired,
+};
+
 HomePage.defaultProps = {
   uploadedFiles: [{}],
 };
@@ -117,8 +134,9 @@ HomePage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      onDrop,
+      deleteData,
       getData,
+      onDrop,
       onSearch,
     },
     dispatch,
