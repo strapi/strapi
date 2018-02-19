@@ -17,6 +17,14 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/files/count",
+      "handler": "Upload.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "DELETE",
       "path": "/files/:_id",
       "handler": "Upload.destroy",

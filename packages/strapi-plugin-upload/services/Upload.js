@@ -91,6 +91,10 @@ module.exports = {
     return strapi.query('file', 'upload').find(strapi.utils.models.convertParams('file', params));
   },
 
+  count: async (params, source) => {
+    return await strapi.query('file', 'upload').count();
+  },
+
   remove: async params => {
     const {url} = await strapi.plugins['upload'].services.upload.fetch(params);
 

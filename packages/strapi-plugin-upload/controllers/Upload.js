@@ -44,6 +44,15 @@ module.exports = {
     }));
   },
 
+  count: async (ctx, next) => {
+    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
+
+    // Send 200 `ok`
+    ctx.send({
+      count: data
+    });
+  },
+
   destroy: async (ctx, next) => {
     const data = await strapi.plugins['upload'].services.upload.remove(ctx.params);
 
