@@ -80,6 +80,7 @@ module.exports = function (strapi) {
                   // Initialize lifecycle callbacks.
                   const preLifecycle = {
                     validate: 'beforeCreate',
+                    findOneAndUpdate: 'beforeUpdate',
                     findOneAndRemove: 'beforeDestroy',
                     remove: 'beforeDestroy',
                     update: 'beforeUpdate',
@@ -87,6 +88,37 @@ module.exports = function (strapi) {
                     findOne: 'beforeFetch',
                     save: 'beforeSave'
                   };
+
+                  /*
+                    Override populate path for polymorphic association.
+
+                    It allows us to make Upload.find().populate('related')
+                    instead of Upload.find().populate('related.item')
+                  */
+                  const morphAssociations = definition.associations.filter(association => association.nature.toLowerCase().indexOf('morph') !== -1);
+
+                  if (morphAssociations.length > 0) {
+                    morphAssociations.forEach(association => {
+                      Object.keys(preLifecycle)
+                        .filter(key => key.indexOf('find') !== -1)
+                        .forEach(key => {
+                          collection.schema.pre(key,  function (next) {
+                            if (this._mongooseOptions.populate && this._mongooseOptions.populate[association.alias]) {
+                              if (association.nature === 'oneToMorph' || association.nature === 'manyToMorph') {
+                                this._mongooseOptions.populate[association.alias].match = {
+                                  [`${association.via}.${association.where}`]: association.alias,
+                                  [`${association.via}.kind`]: definition.globalId
+                                }
+                              } else {
+                                this._mongooseOptions.populate[association.alias].path = `${association.alias}.${association.key}`;
+                              }
+                            }
+
+                            next();
+                          });
+                        });
+                    });
+                  }
 
                   _.forEach(preLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
@@ -126,18 +158,21 @@ module.exports = function (strapi) {
                     });
                   });
 
-                  collection.schema.set('toObject', {
-                    virtuals: true
-                  });
-
-                  collection.schema.set('toJSON', {
-                    virtuals: true
-                  });
+                  collection.schema.options.toObject = collection.schema.options.toJSON = {
+                    virtuals: true,
+                    transform: function (doc, returned, opts) {
+                      morphAssociations.forEach(association => {
+                        if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
+                          returned[association.alias] = returned[association.alias].map(o => o[association.key]);
+                        }
+                      });
+                    }
+                  };
 
                   if (!plugin) {
-                    global[definition.globalName] = instance.model(definition.globalName, collection.schema, definition.collectionName);
+                    global[definition.globalName] = instance.model(definition.globalId, collection.schema, definition.collectionName);
                   } else {
-                    instance.model(definition.globalName, collection.schema, definition.collectionName);
+                    instance.model(definition.globalId, collection.schema, definition.collectionName);
                   }
 
                   // Expose ORM functions through the `target` object.
@@ -196,9 +231,11 @@ module.exports = function (strapi) {
               // all attributes for relationships-- see below.
               const done = _.after(_.size(definition.attributes), () => {
                 // Generate schema without virtual populate
-                _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', new instance.Schema(_.omitBy(definition.loadedModel, model => {
+                const schema = new instance.Schema(_.omitBy(definition.loadedModel, model => {
                   return model.type === 'virtual';
-                })));
+                }));
+
+                _.set(strapi.config.hook.settings.mongoose, 'collections.' + mongooseUtils.toCollectionName(definition.globalName) + '.schema', schema);
 
                 loadedAttributes();
               });
@@ -251,11 +288,25 @@ module.exports = function (strapi) {
                     const FK = _.find(definition.associations, {alias: name});
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
 
-                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne' && FK.nature !== 'oneWay') {
+                    if (FK && FK.nature !== 'oneToOne' && FK.nature !== 'manyToOne' && FK.nature !== 'oneWay' && FK.nature !== 'oneToMorph') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
                         ref,
                         via: FK.via,
+                        justOne: true
+                      };
+
+                      // Set this info to be able to see if this field is a real database's field.
+                      details.isVirtual = true;
+                    } else if (FK.nature === 'oneToMorph') {
+                      const key = details.plugin ?
+                        strapi.plugins[details.plugin].models[details.model].attributes[details.via].key:
+                        strapi.models[details.model].attributes[details.via].key;
+
+                      definition.loadedModel[name] = {
+                        type: 'virtual',
+                        ref,
+                        via: `${FK.via}.${key}`,
                         justOne: true
                       };
 
@@ -275,11 +326,24 @@ module.exports = function (strapi) {
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     // One-side of the relationship has to be a virtual field to be bidirectional.
-                    if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
+                    if ((FK && _.isUndefined(FK.via)) || details.dominant !== true && FK.nature !== 'manyToMorph') {
                       definition.loadedModel[name] = {
                         type: 'virtual',
                         ref,
                         via: FK.via
+                      };
+
+                      // Set this info to be able to see if this field is a real database's field.
+                      details.isVirtual = true;
+                    } else if (FK.nature === 'manyToMorph') {
+                      const key = details.plugin ?
+                        strapi.plugins[details.plugin].models[details.collection].attributes[details.via].key:
+                        strapi.models[details.collection].attributes[details.via].key;
+
+                      definition.loadedModel[name] = {
+                        type: 'virtual',
+                        ref,
+                        via: `${FK.via}.${key}`
                       };
 
                       // Set this info to be able to see if this field is a real database's field.
@@ -290,6 +354,28 @@ module.exports = function (strapi) {
                         ref
                       }];
                     }
+                    break;
+                  }
+                  case 'belongsToMorph': {
+                    definition.loadedModel[name] = {
+                      kind: String,
+                      [details.where]: String,
+                      [details.key]: {
+                        type: instance.Schema.Types.ObjectId,
+                        refPath: `${name}.kind`
+                      }
+                    };
+                    break;
+                  }
+                  case 'belongsToManyMorph': {
+                    definition.loadedModel[name] = [{
+                      kind: String,
+                      [details.where]: String,
+                      [details.key]: {
+                        type: instance.Schema.Types.ObjectId,
+                        refPath: `${name}.kind`
+                      }
+                    }];
                     break;
                   }
                   default:
