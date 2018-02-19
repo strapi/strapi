@@ -22,7 +22,9 @@
     "test": "npm run lint",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "react-copy-to-clipboard": "^5.0.1"
+  },
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.10.1"
   },

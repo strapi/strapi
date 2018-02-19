@@ -6,6 +6,8 @@
   "HomePage.description": "Discover all the uploaded files",
   "HomePage.InputSearch.placeholder": "Search for a file...",
 
+  "Li.linkCopied": "LINK COPIED INTO THE CLIPBOARD",
+
   "ListHeader.type": "Type",
   "ListHeader.hash": "Hash",
   "ListHeader.name": "Name",

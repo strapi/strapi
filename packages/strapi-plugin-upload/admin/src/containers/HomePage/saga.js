@@ -56,7 +56,6 @@ function* uploadFiles(action) {
       }),
     ];
 
-    console.log('n', newFiles);
     yield put(dropSuccess(newFiles));
 
     if (newFiles.length > 1) {

@@ -46,3 +46,42 @@
 .liIconContainer {
   font-size: 20px;
 }
+
+.copied {
+  background-color: #FAFAFB;
+  > div {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding-top: 1px;
+    text-align: center;
+    color: #868FA1;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 54px;
+  }
+}
+
+.checked {
+  padding-top: 20px;
+  line-height: 54px;
+  position: relative;
+  > div {
+    height: 14px;
+    width: 14px;
+    margin-right: 10px;
+    background-color: #2DD210;
+    border: 1px solid rgba(16,22,34,0.10);
+    border-radius: 3px;
+    &:after {
+      content: '\f00c';
+      position: absolute;
+      top: 0; left: 2px;
+      font-size: 10px;
+      font-family: 'FontAwesome';
+      font-weight: 100;
+      color: #fff;
+      transition: all .2s;
+    }
+  }
+}
