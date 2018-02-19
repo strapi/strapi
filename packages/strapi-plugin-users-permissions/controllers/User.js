@@ -71,6 +71,7 @@ module.exports = {
 
   create: async (ctx) => {
     if ((await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
@@ -101,6 +102,7 @@ module.exports = {
   update: async (ctx, next) => {
     try {
       const advancedConfigs = await strapi.store({
+        environment: '',
         type: 'plugin',
         name: 'users-permissions',
         key: 'advanced'
