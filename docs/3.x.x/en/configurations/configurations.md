@@ -386,7 +386,7 @@ Configuration files are not multi server friendly. So we create a data store for
 - `name` (string): You have to set the plugin or api name if `type` is `api` or `plugin`.
 - `key` (string, required): The name of the key you want to store.
 
-```
+```js
 // strapi.store(object).get(object);
 
 // create reusable plugin store variable
@@ -403,7 +403,7 @@ await pluginStore.get({key: 'grant'});
 
  - `value` (any, required): The value you want to store.
 
- ```
+ ```js
  // strapi.store(object).set(object);
 
  // create reusable plugin store variable

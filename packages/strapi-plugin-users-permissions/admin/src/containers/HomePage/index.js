@@ -122,7 +122,7 @@ export class HomePage extends React.Component {
     e.preventDefault();
     const modifiedObject = get(this.props.modifiedData, this.props.dataToEdit);
     const initObject = get(this.props.initialData, this.props.dataToEdit);
-    const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject);
+    const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
 
     if (isEqual(initObject, modifiedObject)) {
       return this.props.unsetDataToEdit();
