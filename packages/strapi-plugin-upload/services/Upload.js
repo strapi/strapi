@@ -92,9 +92,24 @@ module.exports = {
   },
 
   remove: async params => {
+    const {url} = await strapi.plugins['upload'].services.upload.fetch(params);
+
+    await new Promise((resolve, reject) => {
+      fs.unlink(path.join(strapi.config.appPath, 'public', url), (err) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      });
+    });
+
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
-      await strapi.plugins['content-manager'].services['contentmanager'].delete(params, 'upload');
+      params.model = 'file';
+      params.id = (params._id || params.id);
+
+      await strapi.plugins['content-manager'].services['contentmanager'].delete(params, {source: 'upload'});
     }
 
     return strapi.query('file', 'upload').delete(params);

@@ -15,6 +15,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "DELETE",
+      "path": "/files/:_id",
+      "handler": "Upload.destroy",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

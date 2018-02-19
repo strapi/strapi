@@ -38,6 +38,16 @@ module.exports = {
     const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 
     // Send 200 `ok`
-    ctx.send(data);
+    ctx.send(data.map((file) => {
+      file.url = `${strapi.config.url}${file.url}`;
+      return file;
+    }));
   },
+
+  destroy: async (ctx, next) => {
+    const data = await strapi.plugins['upload'].services.upload.remove(ctx.params);
+
+    // Send 200 `ok`
+    ctx.send(data);
+  }
 };
