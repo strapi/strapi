@@ -23,20 +23,23 @@ class Li extends React.Component {
 
     return (
       <li className={styles.liWrapper}>
+        <input value={item.url} style={{ display: 'none' }} ref="inputCopy" />
         <div className={styles.liContainer}>
           <div />
           {Object.keys(item).map((value, key) => {
             if (key === 0) {
               return (
-                <div key={key}>
+                <div key={key} className={styles.liIconContainer}>
                   <i className={`fa fa-file-${item[value]}-o`} />
                 </div>
               );
             }
 
-            return (
-              <div key={key}>{item[value]}</div>
-            );
+            if (value !== 'url') {
+              return (
+                <div key={key}>{item[value]}</div>
+              );
+            }
           })}
         </div>
       </li>

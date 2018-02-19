@@ -1,14 +1,18 @@
 .liWrapper {
-  height: 53px;
+  height: 54px;
+  background-color: #fff;
+  padding-top: 5px;
+  cursor: pointer;
 }
 
 .liContainer {
   display: flex;
-  height: 52px;
+  height: 100%;
   margin-left: 32px;
   margin-right: 32px;
-  border-bottom: 1px solid #0E1622;
-  
+  line-height: 54px;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+
   > div:first-child {
     min-width: 53px;
   }
@@ -37,4 +41,8 @@
   > div:nth-child(7) {
     min-width: 114px;
   }
+}
+
+.liIconContainer {
+  font-size: 20px;
 }

@@ -90,14 +90,21 @@ export class HomePage extends React.Component {
           </div>
           <EntriesNumber number={this.props.entriesNumber} />
         </div>
-        <List />
+        <List
+          data={this.props.uploadedFiles}
+        />
       </ContainerFluid>
     );
   }
 }
 
+HomePage.defaultProps = {
+  uploadedFiles: [{}],
+};
+
 HomePage.contextTypes = {
   router: PropTypes.object,
+  uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
 
 HomePage.propTypes = {

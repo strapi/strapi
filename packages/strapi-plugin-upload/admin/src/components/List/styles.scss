@@ -13,11 +13,12 @@
   list-style: none;
   > li {
     width: 100%;
+    margin-top: 0;
   }
 
   > li:last-child {
     > div {
-      border-bottom: 0;
+      border-bottom: 0 !important;
     }
   }
 }

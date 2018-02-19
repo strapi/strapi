@@ -19,7 +19,12 @@ function List(props) {
       <div className="row">
         <ul className={styles.ulList}>
           <ListHeader />
-          <Li />
+          {props.data.map((item, key) => (
+            <Li
+              key={item.hash || key}
+              item={item}
+            />
+          ))}
         </ul>
       </div>
     </div>
@@ -28,6 +33,8 @@ function List(props) {
 
 List.defaultProps = {};
 
-List.propTypes = {};
+List.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.object).isRequired,
+};
 
 export default List;

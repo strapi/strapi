@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS, List } from 'immutable';
+import { fromJS, List, Map } from 'immutable';
 
 import {
   DROP_SUCCESS,
@@ -15,7 +15,7 @@ import {
 const initialState = fromJS({
   entriesNumber: 0,
   search: '',
-  uploadedFiles: List([]),
+  uploadedFiles: List([Map({})]),
 });
 
 function homePageReducer(state = initialState, action) {

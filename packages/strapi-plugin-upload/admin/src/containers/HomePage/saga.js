@@ -1,5 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { fork, put, select, take, takeLatest } from 'redux-saga/effects';
+import { Map } from 'immutable';
 // import request from 'utils/request';
 
 import {
@@ -17,14 +18,15 @@ function* dataGet() {
   try {
     const entriesNumber = 100;
     const data = [
-      {
+      Map({
         type: 'pdf',
         hash: '1234',
         name: 'avatar.pdf',
         updatedAt: '20/11/2017',
         size: '24 B',
         relatedTo: 'John Doe',
-      },
+        url: 'www.google.com',
+      }),
     ];
 
     yield put(getDataSuccess(data, entriesNumber));
@@ -41,14 +43,20 @@ function* dataGet() {
 function* uploadFiles(action) {
   try {
     const files = action.files;
-    console.log(files);
 
-    const newFiles = Object.keys(files).reduce((acc, current) => {
-      acc.push(files[current]);
+    const newFiles = [
+      Map({
+        type: 'pdf',
+        hash: '12345',
+        name: 'avatar1.pdf',
+        updatedAt: '20/11/2017',
+        size: '24 B',
+        relatedTo: 'John Doe',
+        url: 'www.google.com',
+      }),
+    ];
 
-      return acc;
-    }, []);
-
+    console.log('n', newFiles);
     yield put(dropSuccess(newFiles));
 
     if (newFiles.length > 1) {
