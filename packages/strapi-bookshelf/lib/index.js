@@ -133,6 +133,30 @@ module.exports = function(strapi) {
                       : key;
                   });
 
+                if (definition.globalId === 'Upload') {
+                  loadedModel.serialize = function(options) {
+                    const attrs = _.clone(this.attributes);
+
+                    if (options && options.shallow) {
+                      return attrs;
+                    }
+
+                    const relations = this.relations;
+
+                    for (let key in relations) {
+                      const relation = relations[key];
+
+                      attrs[key] = relation.toJSON ? relation.toJSON(options) : relation;
+
+                      if (key === 'related') {
+                        attrs[key] = attrs[key].map(rel => rel['related']);
+                      }
+                    }
+
+                    return attrs;
+                  }
+                }
+
                 // Initialize lifecycle callbacks.
                 loadedModel.initialize = function() {
                   const lifecycle = {
@@ -149,6 +173,22 @@ module.exports = function(strapi) {
                     saving: 'beforeSave',
                     saved: 'afterSave'
                   };
+
+                  if (definition.globalId === 'Upload') {
+                    this.on('fetching fetching:collection', (instance, attrs, options) => {
+                      if (_.isArray(options.withRelated)) {
+                        options.withRelated = options.withRelated.map(path => {
+                          if (_.isString(path) && path === 'related') {
+                            return 'related.related';
+                          }
+
+                          return path;
+                        })
+                      }
+
+                      return Promise.resolve();
+                    });
+                  }
 
                   _.forEach(lifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
@@ -365,6 +405,69 @@ module.exports = function(strapi) {
                       collectionName,
                       relationship.attribute + '_' + relationship.column,
                       details.attribute + '_' + details.column
+                    );
+                  };
+                  break;
+                }
+                case 'morphOne': {
+                  loadedModel[name] =  function() {
+                    return this.morphOne(GLOBALS[globalId], details.via);
+                  }
+                  break;
+                }
+                case 'morphMany': {
+                  loadedModel[name] =  function() {
+                    return this.morphMany(GLOBALS[globalId], details.via);
+                  }
+                  break;
+                }
+                case 'belongsToMorph':
+                case 'belongsToManyMorph': {
+                  const association = definition.associations
+                    .find(association => association.alias === name);
+
+                  // console.log("coucou");
+                  // console.log(association.related.map(id => GLOBALS[id]));
+
+                  const morphValues = association.related.map(id => {
+                    let models = Object.values(strapi.models).filter(model => model.globalId === id);
+
+                    if (models.length === 0) {
+                      models = Object.keys(strapi.plugins).reduce((acc, current) => {
+                        const models = Object.values(strapi.plugins[current].models).filter(model => model.globalId === id);
+
+                        if (acc.length === 0 && models.length > 0) {
+                          acc = models;
+                        }
+
+                        return acc;
+                      }, []);
+                    }
+
+                    if (models.length === 0) {
+                      strapi.log.error('Impossible to register the `' + model + '` model.');
+                      strapi.log.error('The collection name cannot be found for the morphTo method.');
+                      strapi.stop();
+                    }
+
+                    return models[0].collectionName;
+                  });
+
+
+                  // Define new model.
+                  const options = {
+                    tableName: `${loadedModel.tableName}_morph`,
+                    related: function () {
+                      return this.morphTo(name, ...association.related.map((id, index) => [GLOBALS[id], morphValues[index]]));
+                    }
+                  };
+
+                  const MorphModel = ORM.Model.extend(options);
+
+                  loadedModel[name] = function () {
+                    return this.hasMany(
+                      MorphModel,
+                      'upload_id'
                     );
                   };
                   break;

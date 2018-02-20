@@ -16,7 +16,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "^0.10.3",
+    "bookshelf": "^0.12.1",
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0",
     "strapi-knex": "3.0.0-alpha.9.3",

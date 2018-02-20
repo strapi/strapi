@@ -199,12 +199,12 @@ module.exports = {
       if (types.current === 'collection' && types.other === 'morphTo') {
         return {
           nature: 'manyToMorph',
-          verbose: 'belongsToMany'
+          verbose: 'morphMany'
         };
       } else if (types.current === 'modelD' && types.other === 'morphTo') {
         return {
           nature: 'oneToMorph',
-          verbose: 'belongsTo'
+          verbose: 'morphOne'
         };
       } else if (types.current === 'morphTo' && types.other === 'collection') {
         return {
@@ -324,9 +324,43 @@ module.exports = {
           where: details.where,
         });
       } else if (association.hasOwnProperty('key')) {
+        const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
+          Object.keys(strapi.plugins[current].models).forEach((entity) => {
+            Object.keys(strapi.plugins[current].models[entity].attributes).forEach((attribute) => {
+              const attr = strapi.plugins[current].models[entity].attributes[attribute];
+              if (
+                (attr.collection || attr.model || '').toLowerCase() === model.toLowerCase() &&
+                strapi.plugins[current].models[entity].globalId !== definition.globalId
+              ) {
+                acc.push(strapi.plugins[current].models[entity].globalId);
+              }
+            });
+          });
+
+          return acc;
+        }, []);
+
+        const appModels = Object.keys(strapi.models).reduce((acc, entity) => {
+          Object.keys(strapi.models[entity].attributes).forEach((attribute) => {
+            const attr = strapi.models[entity].attributes[attribute];
+
+            if (
+              (attr.collection || attr.model || '').toLowerCase() === model.toLowerCase() &&
+              strapi.models[entity].globalId !== definition.globalId
+            ) {
+              acc.push(strapi.models[entity].globalId);
+            }
+          });
+
+          return acc;
+        }, []);
+
+        const models = _.uniq(appModels.concat(pluginsModels));
+
         definition.associations.push({
           alias: key,
           type: 'collection',
+          related: models,
           nature: infos.nature,
           autoPopulate: _.get(association, 'autoPopulate', true),
           key: association.key,

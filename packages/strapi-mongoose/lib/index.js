@@ -298,20 +298,6 @@ module.exports = function (strapi) {
 
                       // Set this info to be able to see if this field is a real database's field.
                       details.isVirtual = true;
-                    } else if (FK.nature === 'oneToMorph') {
-                      const key = details.plugin ?
-                        strapi.plugins[details.plugin].models[details.model].attributes[details.via].key:
-                        strapi.models[details.model].attributes[details.via].key;
-
-                      definition.loadedModel[name] = {
-                        type: 'virtual',
-                        ref,
-                        via: `${FK.via}.${key}`,
-                        justOne: true
-                      };
-
-                      // Set this info to be able to see if this field is a real database's field.
-                      details.isVirtual = true;
                     } else {
                       definition.loadedModel[name] = {
                         type: instance.Schema.Types.ObjectId,
@@ -326,24 +312,11 @@ module.exports = function (strapi) {
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
 
                     // One-side of the relationship has to be a virtual field to be bidirectional.
-                    if ((FK && _.isUndefined(FK.via)) || details.dominant !== true && FK.nature !== 'manyToMorph') {
+                    if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
                       definition.loadedModel[name] = {
                         type: 'virtual',
                         ref,
                         via: FK.via
-                      };
-
-                      // Set this info to be able to see if this field is a real database's field.
-                      details.isVirtual = true;
-                    } else if (FK.nature === 'manyToMorph') {
-                      const key = details.plugin ?
-                        strapi.plugins[details.plugin].models[details.collection].attributes[details.via].key:
-                        strapi.models[details.collection].attributes[details.via].key;
-
-                      definition.loadedModel[name] = {
-                        type: 'virtual',
-                        ref,
-                        via: `${FK.via}.${key}`
                       };
 
                       // Set this info to be able to see if this field is a real database's field.
@@ -354,6 +327,41 @@ module.exports = function (strapi) {
                         ref
                       }];
                     }
+                    break;
+                  }
+                  case 'morphOne': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
+                    const key = details.plugin ?
+                      strapi.plugins[details.plugin].models[details.model].attributes[details.via].key:
+                      strapi.models[details.model].attributes[details.via].key;
+
+                    definition.loadedModel[name] = {
+                      type: 'virtual',
+                      ref,
+                      via: `${FK.via}.${key}`,
+                      justOne: true
+                    };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
+                    break;
+                  }
+                  case 'morphMany': {
+                    const FK = _.find(definition.associations, {alias: name});
+                    const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
+                    const key = details.plugin ?
+                      strapi.plugins[details.plugin].models[details.collection].attributes[details.via].key:
+                      strapi.models[details.collection].attributes[details.via].key;
+
+                    definition.loadedModel[name] = {
+                      type: 'virtual',
+                      ref,
+                      via: `${FK.via}.${key}`
+                    };
+
+                    // Set this info to be able to see if this field is a real database's field.
+                    details.isVirtual = true;
                     break;
                   }
                   case 'belongsToMorph': {

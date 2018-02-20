@@ -53,6 +53,9 @@ module.exports = strapi => {
 
           // Recursive to mask the private properties.
           const mask = (payload) => {
+            // Handle ORM toJSON() method to work on real JSON object.
+            payload = payload.toJSON ? payload.toJSON() : payload;
+
             if (_.isArray(payload)) {
               return payload.map(mask);
             } else if (_.isPlainObject(payload)) {

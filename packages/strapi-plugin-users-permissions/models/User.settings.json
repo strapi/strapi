@@ -38,6 +38,14 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "avatar": {
+      "model": "upload",
+      "via": "related"
+    },
+    "photos": {
+      "collection": "upload",
+      "via": "related"
     }
   }
 }
