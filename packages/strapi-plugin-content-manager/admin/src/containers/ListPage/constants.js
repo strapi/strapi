@@ -5,4 +5,5 @@
  *
  */
 
-export const DEFAULT_ACTION = 'ContentManager/ListPage/DEFAULT_ACTION';
+export const GET_DATA = 'ContentManager/ListPage/GET_DATA';
+export const GET_DATA_SUCCEEDED = 'ContentManager/ListPage/GET_DATA_SUCCEEDED';

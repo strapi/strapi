@@ -25,8 +25,19 @@ const makeSelectListPage = () => createSelector(
  *
  * Other specific selectors
  */
+const makeSelectCurrentModel = () => createSelector(
+  selectListPageDomain(),
+  (substate) => substate.get('currentModel'),
+);
+
+const makeSelectSource = () => createSelector(
+  selectListPageDomain(),
+  (substate) => substate.get('source'),
+);
 
 export default makeSelectListPage;
 export {
+  makeSelectCurrentModel,
+  makeSelectSource,
   selectListPageDomain,
 };

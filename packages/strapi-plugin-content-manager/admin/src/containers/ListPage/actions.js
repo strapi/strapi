@@ -5,11 +5,21 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
 } from './constants';
 
-export function defaultAction() {
+export function getData(currentModel, source) {
   return {
-    type: DEFAULT_ACTION,
+    type: GET_DATA,
+    currentModel,
+    source,
+  };
+}
+
+export function getDataSucceeded(data) {
+  return {
+    type: GET_DATA_SUCCEEDED,
+    data,
   };
 }
