@@ -18,7 +18,7 @@ import injectSaga from 'utils/injectSaga';
 import selectHomePage from './selectors';
 
 // Styles
-import styles from './styles.scss';
+// import styles from './styles.scss';
 
 import reducer from './reducer';
 import saga from './saga';
