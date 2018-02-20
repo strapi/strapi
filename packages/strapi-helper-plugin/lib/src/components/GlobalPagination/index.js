@@ -20,8 +20,8 @@ class GlobalPagination extends React.Component {
 
     if (!this.isFirstPage()) {
       const target = {
-        name: 'params.currentPage',
-        value: this.props.params.currentPage - 1,
+        name: 'params.page',
+        value: this.props.params.page - 1,
       };
       this.props.onChangeParams({ target });
     }
@@ -32,8 +32,8 @@ class GlobalPagination extends React.Component {
 
     if (!this.isLastPage()) {
       const target = {
-        name: 'params.currentPage',
-        value: this.props.params.currentPage + 1,
+        name: 'params.page',
+        value: this.props.params.page + 1,
       };
       this.props.onChangeParams({ target });
     }
@@ -42,7 +42,7 @@ class GlobalPagination extends React.Component {
   handleFirstPageClick = (e) => {
     e.preventDefault();
     const target = {
-      name: 'params.currentPage',
+      name: 'params.page',
       value: 1,
     };
     this.props.onChangeParams({ target });
@@ -51,19 +51,19 @@ class GlobalPagination extends React.Component {
   handleLastPageClick = (e) => {
     e.preventDefault();
     const target = {
-      name: 'params.currentPage',
+      name: 'params.page',
       value: this.getLastPageNumber(),
     };
     this.props.onChangeParams({ target });
   }
 
-  isFirstPage = () => this.props.params.currentPage === 1;
+  isFirstPage = () => this.props.params.page === 1;
 
-  isLastPage = () => this.props.params.currentPage === this.getLastPageNumber();
+  isLastPage = () => this.props.params.page === this.getLastPageNumber();
 
-  needAfterLinksDots = () => this.props.params.currentPage < this.getLastPageNumber() - 1;
+  needAfterLinksDots = () => this.props.params.page < this.getLastPageNumber() - 1;
 
-  needPreviousLinksDots = () => this.props.params.currentPage > 3;
+  needPreviousLinksDots = () => this.props.params.page > 3;
 
   renderLinks = () => {
     // Init variables
@@ -71,7 +71,7 @@ class GlobalPagination extends React.Component {
 
     // Add active page link
     linksOptions.push({
-      value: this.props.params.currentPage,
+      value: this.props.params.page,
       isActive: true,
       handleClick: e => e.preventDefault(),
     });
@@ -79,7 +79,7 @@ class GlobalPagination extends React.Component {
     // Add previous page link
     if (!this.isFirstPage()) {
       linksOptions.unshift({
-        value: this.props.params.currentPage - 1,
+        value: this.props.params.page - 1,
         isActive: false,
         handleClick: this.handlePreviousPageClick,
       });
@@ -88,7 +88,7 @@ class GlobalPagination extends React.Component {
     // Add next page link
     if (!this.isLastPage() && this.props.count > this.props.params.limit) {
       linksOptions.push({
-        value: this.props.params.currentPage + 1,
+        value: this.props.params.page + 1,
         isActive: false,
         handleClick: this.handleNextPageClick,
       });
@@ -165,7 +165,7 @@ class GlobalPagination extends React.Component {
 GlobalPagination.defaultProps = {
   onChangeParams: () => {},
   params: {
-    currentPage: 1,
+    page: 1,
     limit: 10,
   },
 };
@@ -177,7 +177,7 @@ GlobalPagination.propTypes = {
   ]),
   onChangeParams: PropTypes.func,
   params: PropTypes.shape({
-    currentPage: PropTypes.oneOfType([
+    page: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number,
     ]),

@@ -17,7 +17,7 @@ import styles from './styles.scss';
 
 function PageFooter(props) {
   return (
-    <div className={cn('row', styles.pageFooter)}>
+    <div className={cn('row', styles.pageFooter)} style={props.style}>
       <div className="col-md-6 col-lg-6">
         <form className="form-inline">
           <div className={styles.pageFooterSelectWrapper}>
@@ -60,12 +60,14 @@ PageFooter.defaultProps = {
     currentPage: 1,
     limit: 10,
   },
+  style: {},
 };
 
 PageFooter.propTypes = {
   count: PropTypes.number,
   onChangeParams: PropTypes.func,
   params: PropTypes.object,
+  style: PropTypes.object,
 };
 
 export default PageFooter;

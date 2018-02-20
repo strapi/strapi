@@ -6,6 +6,8 @@
 
 import {
   CHANGE_PARAMS,
+  DELETE_DATA,
+  DELETE_DATA_SUCCESS,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   SET_PARAMS,
@@ -19,10 +21,27 @@ export function changeParams({ target }) {
   };
 }
 
-export function getData(currentModel) {
+export function deleteData(id, modelName, source) {
+  return {
+    type: DELETE_DATA,
+    id,
+    modelName,
+    source,
+  };
+}
+
+export function deleteDataSuccess(id) {
+  return {
+    type: DELETE_DATA_SUCCESS,
+    id,
+  };
+}
+
+export function getData(currentModel, source) {
   return {
     type: GET_DATA,
     currentModel,
+    source,
   };
 }
 

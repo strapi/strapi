@@ -15,10 +15,12 @@ import request from 'utils/request';
 
 // Actions
 import {
+  deleteDataSuccess,
   getDataSucceeded,
 } from './actions';
 // Constants
 import {
+  DELETE_DATA,
   GET_DATA,
 } from './constants';
 // Selectors
@@ -28,7 +30,8 @@ import {
 
 export function* dataGet(action) {
   try {
-    const { limit, page, sort, source } = yield select(makeSelectParams());
+    const { limit, page, sort } = yield select(makeSelectParams());
+    const source = action.source;
     const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
 
@@ -39,6 +42,7 @@ export function* dataGet(action) {
       limit,
       skip,
       sort,
+      source,
     };
 
     const response = yield [
@@ -53,9 +57,32 @@ export function* dataGet(action) {
   }
 }
 
+export function* dataDelete({ id, modelName, source}) {
+  try {
+    const requestUrl = `/content-manager/explorer/${modelName}/${id}`;
+    const params = {};
+
+    if (source !== undefined) {
+      params.source = source;
+    }
+
+    yield call(request, requestUrl, {
+      method: 'DELETE',
+      params,
+    });
+
+    strapi.notification.success('content-manager.success.record.delete');
+
+    yield put(deleteDataSuccess(id));
+  } catch(err) {
+    console.log('eer', err);
+  }
+}
+
 // All sagas to be loaded
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, DELETE_DATA, dataDelete);
 
   yield take(LOCATION_CHANGE);
 

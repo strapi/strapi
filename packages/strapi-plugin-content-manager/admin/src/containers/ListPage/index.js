@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, get, map, toInteger } from 'lodash';
+import { capitalize, get, isUndefined, map, toInteger } from 'lodash';
 import cn from 'classnames';
 
 // App selectors
@@ -18,7 +18,9 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
+import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 // Components from the plugin itself
 import Table from 'components/Table';
@@ -30,6 +32,7 @@ import injectSaga from 'utils/injectSaga';
 
 import {
   changeParams,
+  deleteData,
   getData,
   setParams,
 } from './actions';
@@ -41,18 +44,20 @@ import makeSelectListPage from './selectors';
 import styles from './styles.scss';
 
 export class ListPage extends React.Component {
-  componentWillMount() {
-    // Init search params
-    const limit = toInteger(getQueryParameters(this.props.location.search, 'limit')) || 10;
-    const page = toInteger(getQueryParameters(this.props.location.search, 'page')) || 1;
-    const sort = this.findPageSort(this.props);
-    const source = getQueryParameters(this.props.location.search, 'source') || 'content-manager';
-    const params = { limit, page, sort, source };
-    this.props.setParams(params);
-  }
+  state = { showWarning: false, target: '' };
 
   componentDidMount() {
     this.getData(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.getData(nextProps);
+    }
+
+    if (nextProps.location.search !== this.props.location.search) {
+      this.getData(nextProps);
+    }
   }
 
   /**
@@ -73,7 +78,14 @@ export class ListPage extends React.Component {
    * @param  {Object} props
    */
   getData = (props) => {
-    this.props.getData(props.match.params.slug);
+    const source = getQueryParameters(props.location.search, 'source');
+    const limit = toInteger(getQueryParameters(props.location.search, 'limit')) || 10;
+    const page = toInteger(getQueryParameters(props.location.search, 'page')) || 1;
+    const sort = this.findPageSort(props);
+    const params = { limit, page, sort };
+
+    this.props.setParams(params);
+    this.props.getData(props.match.params.slug, source);
   }
 
   /**
@@ -108,16 +120,64 @@ export class ListPage extends React.Component {
     const { match: { params: { slug } } } = props;
     const source = this.getSource();
     const modelPrimaryKey = get(
-      this.props.models,
+      props.models,
       ['models', slug.toLowerCase(), 'primaryKey'],
     );
     // Check if the model is in a plugin
     const pluginModelPrimaryKey = get(
-      this.props.models.plugins,
+      props.models.plugins,
       [source, 'models', slug.toLowerCase(), 'primaryKey'],
     );
 
     return getQueryParameters(props.location.search, 'sort') || modelPrimaryKey || pluginModelPrimaryKey || 'id';
+  }
+
+  handleChangeParams = (e) => {
+    const { history, listPage: { params } } = this.props;
+    const search = e.target.name === 'params.limit' ?
+      `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}`
+      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
+    this.props.history.push({
+      pathname: history.pathname,
+      search,
+    });
+
+    this.props.changeParams(e);
+  }
+
+  handleChangeSort = (sort) => {
+    const target = {
+      name: 'params.sort',
+      value: sort,
+    };
+
+    const { listPage: { params } } = this.props;
+
+    this.props.history.push({
+      pathname: this.props.location.pathname,
+      search: `?page=${params.page}&limit=${params.limit}&sort=${sort}&source=${this.getSource()}`,
+    });
+    this.props.changeParams({ target });
+  }
+
+  handleDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.deleteData(this.state.target, 'product', 'content-manager');
+    this.setState({ showWarning: false });
+  }
+
+
+  toggleModalWarning = (e) => {
+    if (!isUndefined(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState({
+        target: e.target.id,
+      });
+    }
+
+    this.setState({ showWarning: !this.state.showWarning });
   }
 
   pluginHeaderActions = [
@@ -129,7 +189,7 @@ export class ListPage extends React.Component {
       kind: 'primaryAddShape',
       onClick: () => this.props.history.push({
         pathname: `${this.props.location.pathname}/create`,
-        search: `?source=${this.props.listPage.params.source}`,
+        search: `?source=${this.getSource()}`,
       }),
     },
   ];
@@ -153,18 +213,36 @@ export class ListPage extends React.Component {
             }}
           />
           <div className={cn('row', styles.row)}>
-            <div className="col-lg-12">
+            <div className="col-md-12">
               <Table
                 records={listPage.records}
                 route={this.props.match}
                 routeParams={this.props.match.params}
                 headers={this.generateTableHeaders()}
-                onChangeSort={() => {}}
+                onChangeSort={this.handleChangeSort}
                 sort={listPage.params.sort}
                 history={this.props.history}
                 primaryKey={this.getCurrentModel().primaryKey || 'id'}
-                handleDelete={() => {}}
+                handleDelete={this.toggleModalWarning}
                 redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?page=${params.page}&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`}
+              />
+              <PopUpWarning
+                isOpen={this.state.showWarning}
+                toggleModal={this.toggleModalWarning}
+                content={{
+                  title: 'content-manager.popUpWarning.title',
+                  message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
+                  cancel: 'content-manager.popUpWarning.button.cancel',
+                  confirm: 'content-manager.popUpWarning.button.confirm',
+                }}
+                popUpWarningType={'danger'}
+                onConfirm={this.handleDelete}
+              />
+              <PageFooter
+                count={listPage.count}
+                onChangeParams={this.handleChangeParams}
+                params={listPage.params}
+                style={{ marginTop: '2.9rem', padding: '0 15px 0 15px' }}
               />
             </div>
           </div>
@@ -174,11 +252,9 @@ export class ListPage extends React.Component {
   }
 }
 
-ListPage.contextTypes = {};
-
-ListPage.defaultProps = {};
-
 ListPage.propTypes = {
+  changeParams: PropTypes.func.isRequired,
+  deleteData: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   listPage: PropTypes.object.isRequired,
@@ -193,6 +269,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       changeParams,
+      deleteData,
       getData,
       setParams,
     },

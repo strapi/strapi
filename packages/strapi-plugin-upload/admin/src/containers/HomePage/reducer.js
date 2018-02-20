@@ -23,7 +23,7 @@ const initialState = fromJS({
   params: Map({
     sort: 'updatedAt',
     limit: 10,
-    currentPage: 1,
+    page: 1,
   }),
 });
 
