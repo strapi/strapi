@@ -13,6 +13,7 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputToggle from 'components/InputToggle';
+import InputSpacer from 'components/InputSpacer';
 
 import styles from './styles.scss';
 
@@ -61,7 +62,7 @@ class InputToggleWithErrors extends React.Component {
       value,
     } = this.props;
 
-    let spacer = !isEmpty(inputDescription) ? <div className={styles.spacer} /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
 
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
@@ -69,7 +70,7 @@ class InputToggleWithErrors extends React.Component {
 
     return (
       <div className={cn(
-          styles.container,
+          styles.containerToggleErrors,
           customBootstrapClass,
           !isEmpty(className) && className,
         )}
