@@ -33,6 +33,7 @@ class TableRow extends React.Component {
       case 'string':
       case 'text':
       case 'email':
+      case 'enumeration':
         return (value && !isEmpty(value.toString())) || name === 'id' ? value.toString() : '-';
       case 'float':
       case 'integer':
