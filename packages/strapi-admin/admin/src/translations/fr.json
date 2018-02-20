@@ -14,7 +14,7 @@
   "app.components.ImgPreview.hint": "Drag & drop dans cette zone ou {browse} un fichier à télécharger",
   "app.components.ImgPreview.hint.browse": "recherchez",
 
-  "app.components.InputFile.newFile": "AJOUTER UN NOUVEAU FICHIER",
+  "app.components.InputFile.newFile": "ajouter un  nouveau fichier",
   "app.components.InputFileDetails.details": "Détails",
 
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",

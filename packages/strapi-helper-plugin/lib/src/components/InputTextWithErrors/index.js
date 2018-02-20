@@ -95,7 +95,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
 
     return (
       <div className={cn(
-          styles.container,
+          styles.containerText,
           customBootstrapClass,
           !isEmpty(className) && className,
         )}
