@@ -9,8 +9,12 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import cn from 'classnames';
 
-// import cn from 'classnames';
+// You can find these components in either
+// ./node_modules/strapi-helper-plugin/lib/src
+// or strapi/packages/strapi-helper-plugin/lib/src
+import PluginHeader from 'components/PluginHeader';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
 import injectReducer from 'utils/injectReducer';
@@ -21,14 +25,19 @@ import reducer from './reducer';
 import saga from './saga';
 import makeSelectListPage from './selectors';
 
-// import styles from './styles.scss';
+import styles from './styles.scss';
 
 export class ListPage extends React.PureComponent {
   render() {
-    console.log(this.props);
     return (
       <div>
-        ListPage component
+        <div className={cn('container-fluid', styles.containerFluid)}>
+          <PluginHeader
+            title={{
+              id: 'Content Manager',
+            }}
+          />
+        </div>
       </div>
     );
   }

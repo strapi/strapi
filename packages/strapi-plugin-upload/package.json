@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.10.1",
+  "version": "3.0.0-alpha.10.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Upload",
@@ -26,7 +26,7 @@
     "react-copy-to-clipboard": "^5.0.1"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.10.1"
+    "strapi-helper-plugin": "3.0.0-alpha.10.2"
   },
   "author": {
     "name": "A Strapi developer",
