@@ -23,20 +23,29 @@ import {
 } from './constants';
 // Selectors
 import {
-  makeSelectCurrentModel,
-  makeSelectSource,
+  makeSelectParams,
 } from './selectors';
 
-export function* dataGet() {
+export function* dataGet(action) {
   try {
-    const source = yield select(makeSelectSource());
-    const params = { source };
-    const currentModel = yield select(makeSelectCurrentModel());
+    const { limit, page, sort, source } = yield select(makeSelectParams());
+    const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
 
+    // Params to get the model's records
+    const recordsURL = `/content-manager/explorer/${currentModel}`;
+    const skip = (page - 1 ) * limit;
+    const params = {
+      limit,
+      skip,
+      sort,
+    };
+
     const response = yield [
-      call(request, countURL, { method: 'GET', params }),
+      call(request, countURL, { method: 'GET', params: { source } }),
+      call(request, recordsURL, { method: 'GET', params }),
     ];
+
     yield put(getDataSucceeded(response));
 
   } catch(err) {

@@ -69,7 +69,6 @@ class App extends React.Component {
         <Switch>
           <Route path="/plugins/content-manager/:slug/:id" component={Edit} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
-          <Route path="/plugins/content-manager/:slug" component={ListPage} />
           <Route path="/plugins/content-manager/:slug" component={List} />
           <Route path="/plugins/content-manager" component={Home} />
         </Switch>

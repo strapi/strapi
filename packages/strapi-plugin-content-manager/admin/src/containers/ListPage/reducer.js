@@ -4,32 +4,30 @@
  *
  */
 
-import { fromJS, Map } from 'immutable';
+import { fromJS, List, Map } from 'immutable';
 
 // ListPage constants
 import {
-  GET_DATA,
   GET_DATA_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
   count: 0,
-  currentModel: '',
   params: Map({
-    currentPage: 1,
+    limit: 10,
+    page: 1,
+    sort: 'id',
+    source: 'content-manager',
   }),
-  source: '',
+  records: List([]),
 });
 
 function listPageReducer(state = initialState, action) {
   switch (action.type) {
-    case GET_DATA:
-      return state
-        .update('currentModel', () => action.currentModel)
-        .update('source', () => action.source);
     case GET_DATA_SUCCEEDED:
       return state
-        .update('count', () => action.data[0].count);
+        .update('count', () => action.data[0].count)
+        .update('records', () => List(action.data[1]));
     default:
       return state;
   }

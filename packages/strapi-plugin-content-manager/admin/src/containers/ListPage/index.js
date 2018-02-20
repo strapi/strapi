@@ -9,8 +9,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize } from 'lodash';
+import { capitalize, get, toInteger } from 'lodash';
 import cn from 'classnames';
+
+// App selectors
+import { makeSelectModels } from 'containers/App/selectors';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -23,7 +26,9 @@ import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
 import {
+  changeParams,
   getData,
+  setParams,
 } from './actions';
 
 import reducer from './reducer';
@@ -33,13 +38,43 @@ import makeSelectListPage from './selectors';
 import styles from './styles.scss';
 
 export class ListPage extends React.Component {
+  componentWillMount() {
+    // Init search params
+    const limit = toInteger(getQueryParameters(this.props.location.search, 'limit')) || 10;
+    const page = toInteger(getQueryParameters(this.props.location.search, 'page')) || 1;
+    const sort = this.findPageSort(this.props);
+    const source = getQueryParameters(this.props.location.search, 'source') || 'content-manager';
+    const params = { limit, page, sort, source };
+    this.props.setParams(params);
+  }
+
   componentDidMount() {
     this.getData(this.props);
   }
 
   getData = (props) => {
+    this.props.getData(props.match.params.slug);
+  }
+
+  /**
+   * [findPageSort description]
+   * @param  {Object} props [description]
+   * @return {String}      the model's primaryKey
+   */
+  findPageSort = (props) => {
+    const { match: { params: { slug } } } = props;
     const source = getQueryParameters(props.location.search, 'source');
-    this.props.getData(props.match.params.slug, source);
+    const modelPrimaryKey = get(
+      this.props.models,
+      ['models', slug.toLowerCase(), 'primaryKey'],
+    );
+    // Check if the model is in a plugin
+    const pluginModelPrimaryKey = get(
+      this.props.models.plugins,
+      [source, 'models', slug.toLowerCase(), 'primaryKey'],
+    );
+
+    return getQueryParameters(props.location.search, 'sort') || modelPrimaryKey || pluginModelPrimaryKey || 'id';
   }
 
   pluginHeaderActions = [
@@ -58,7 +93,7 @@ export class ListPage extends React.Component {
 
   render() {
     const { listPage } = this.props;
-
+    console.log(this.props);
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
@@ -90,12 +125,16 @@ ListPage.propTypes = {
   listPage: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
+  models: PropTypes.object.isRequired,
+  setParams: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      changeParams,
       getData,
+      setParams,
     },
     dispatch,
   );
@@ -103,6 +142,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   listPage: makeSelectListPage(),
+  models: makeSelectModels(),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
