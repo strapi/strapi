@@ -42,18 +42,9 @@ module.exports = {
   upload: (files) => {
     return Promise.all(
       files.map(async file => {
-        await new Promise((resolve, reject) => {
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}.${file.ext}`), file.buffer, (err) => {
-            if (err) {
-              return reject(err);
-            }
-
-            resolve();
-          });
-        });
+        await strapi.plugins.upload.services.provider.upload(file);
 
         delete file.buffer;
-        file.url = `/uploads/${file.hash}.${file.ext}`;
 
         await strapi.plugins['upload'].services.upload.add(file);
       })
@@ -96,17 +87,9 @@ module.exports = {
   },
 
   remove: async params => {
-    const {url} = await strapi.plugins['upload'].services.upload.fetch(params);
+    const file = await strapi.plugins['upload'].services.upload.fetch(params);
 
-    await new Promise((resolve, reject) => {
-      fs.unlink(path.join(strapi.config.appPath, 'public', url), (err) => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve();
-      });
-    });
+    await strapi.plugins.upload.services.provider.delete(file);
 
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {

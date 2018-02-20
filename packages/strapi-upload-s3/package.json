@@ -1,0 +1,44 @@
+{
+  "name": "strapi-upload-local",
+  "version": "3.0.0-alpha.10.2",
+  "description": "Local provider for strapi upload",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "upload",
+    "strapi"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
+  "strapi": {
+    "isHook": false
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.3.0"
+  },
+  "license": "MIT"
+}

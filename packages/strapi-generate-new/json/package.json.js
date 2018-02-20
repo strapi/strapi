@@ -40,6 +40,7 @@ module.exports = scope => {
     'dependencies': {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-upload-local': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.module]: scope.client.version
     },
