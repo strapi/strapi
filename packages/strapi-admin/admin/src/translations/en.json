@@ -3,12 +3,12 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
 
   "app.components.DownloadInfo.download": "Download in progress...",
-  "app.components.DownloadInfo.text": "It can take a minute. Thanks for your patience.",
+  "app.components.DownloadInfo.text": "This could take a minute. Thanks for your patience.",
 
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.description.part1": "We are happy to have you as one of our users!",
-  "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dreamed app.",
-  "app.components.HomePage.button": "Create your first content type",
+  "app.components.HomePage.description.part2": "You are now a member of our community which will help you building your dream app.",
+  "app.components.HomePage.button": "Create your first Content Type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
 
   "app.components.InputFile.newFile": "Add new file",
@@ -18,10 +18,10 @@
 
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
   "app.components.InstallPluginPage.title": "Marketplace - Plugins",
-  "app.components.InstallPluginPage.description": "Extend your app with no efforts",
-  "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi t-shirt. It will allow us to keep working on the project and try giving the best possible experience!",
+  "app.components.InstallPluginPage.description": "Extend your app effortlessly.",
+  "app.components.InstallPluginPage.plugin.support-us.description": "Support us by buying the Strapi T-shirt. That will allow us to keep working on the project and try giving you the best possible experience!",
   "app.components.InstallPluginPage.InputSearch.label": " ",
-  "app.components.InstallPluginPage.InputSearch.placeholder": "Search a plugin... (ex: authentication)",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Search for a plugin... (ex: authentication)",
   "app.components.InstallPluginPopup.downloads": "download",
   "app.components.InstallPluginPopup.navLink.description": "Description",
   "app.components.InstallPluginPopup.navLink.screenshots": "Screenshots",
@@ -41,10 +41,10 @@
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",
-  "app.components.listPluginsPage.deletePlugin.error": "An error occurred during the plugin uninstallation",
+  "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
-  "app.components.listPlugins.title.none": "No plugin is installed",
+  "app.components.listPlugins.title.none": "No plugins installed",
   "app.components.listPlugins.button": "Add New Plugin",
 
   "app.components.NotFoundPage.description": "Not Found",
@@ -66,13 +66,13 @@
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
 
-  "components.ErrorBoundary.title": "Something wen't wrong...",
+  "components.ErrorBoundary.title": "Something went wrong...",
 
   "components.OverlayBlocker.title": "Waiting for restart...",
   "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
 
   "components.ProductionBlocker.header": "This plugin is only available in development.",
-  "components.ProductionBlocker.description": "For safety we have to disable this plugin in other environments.",
+  "components.ProductionBlocker.description": "For safety purposes we have to disable this plugin in other environments.",
 
   "components.popUpWarning.button.cancel": "Cancel",
   "components.popUpWarning.button.confirm": "Confirm",
@@ -80,7 +80,7 @@
   "components.popUpWarning.message": "Are you sure you want to delete this?",
 
   "components.Input.error.validation.email": "This is not an email",
-  "components.Input.error.validation.required": "This value input is required.",
+  "components.Input.error.validation.required": "This value is required.",
   "components.Input.error.validation.regex": "The value not match the regex.",
   "components.Input.error.validation.max": "The value is too high.",
   "components.Input.error.validation.min": "The value is too low.",
@@ -89,7 +89,7 @@
   "components.Input.error.contentTypeName.taken": "This name already exists",
   "components.Input.error.attribute.taken": "This field name already exists",
   "components.Input.error.attribute.key.taken": "This value already exists",
-  "components.Input.error.attribute.sameKeyAndName": "Can't be equals",
+  "components.Input.error.attribute.sameKeyAndName": "Can't be equal",
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.Input.error.custom-error": "{errorMessage} ",
 

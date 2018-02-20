@@ -94,6 +94,8 @@ module.exports = {
           types.other = 'collectionD';
         } else if (relatedAttribute.hasOwnProperty('model')) {
           types.other = 'model';
+        } else if (relatedAttribute.hasOwnProperty('key')) {
+          types.other = 'morphTo';
         }
       } else if (association.hasOwnProperty('via') && association.hasOwnProperty('model')) {
         types.current = 'modelD';
@@ -108,6 +110,11 @@ module.exports = {
               return false;
             } else if (attribute.hasOwnProperty('model')) {
               types.other = 'model';
+
+              // Break loop
+              return false;
+            } else if (attribute.hasOwnProperty('key')) {
+              types.other = 'morphTo';
 
               // Break loop
               return false;
@@ -156,9 +163,60 @@ module.exports = {
             }
           });
         });
+      } else if (association.hasOwnProperty('key')) {
+        types.current = 'morphTo';
+
+        const flattenedPluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
+          Object.keys(strapi.plugins[current].models).forEach((model) => {
+            acc[`${current}_${model}`] = strapi.plugins[current].models[model];
+          });
+
+          return acc;
+        }, {});
+
+        const allModels = _.merge({}, strapi.models, flattenedPluginsModels);
+
+        // We have to find if they are a model linked to this key
+        _.forIn(allModels, model => {
+          _.forIn(model.attributes, attribute => {
+            if (attribute.hasOwnProperty('via') && attribute.via === key) {
+              if (attribute.hasOwnProperty('collection')) {
+                types.other = 'collection';
+
+                // Break loop
+                return false;
+              } else if (attribute.hasOwnProperty('model')) {
+                types.other = 'model';
+
+                // Break loop
+                return false;
+              }
+            }
+          });
+        });
       }
 
-      if (types.current === 'modelD' && types.other === 'model') {
+      if (types.current === 'collection' && types.other === 'morphTo') {
+        return {
+          nature: 'manyToMorph',
+          verbose: 'belongsToMany'
+        };
+      } else if (types.current === 'modelD' && types.other === 'morphTo') {
+        return {
+          nature: 'oneToMorph',
+          verbose: 'belongsTo'
+        };
+      } else if (types.current === 'morphTo' && types.other === 'collection') {
+        return {
+          nature: 'morphToMany',
+          verbose: 'belongsToMorph'
+        };
+      } else if (types.current === 'morphTo' && types.other === 'model') {
+        return {
+          nature: 'morphToOne',
+          verbose: 'belongsToManyMorph'
+        };
+      } else if (types.current === 'modelD' && types.other === 'model') {
         return {
           nature: 'oneToOne',
           verbose: 'belongsTo'
@@ -232,7 +290,7 @@ module.exports = {
       }
 
       // Exclude non-relational attribute
-      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model')) {
+      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model') && !association.hasOwnProperty('key')) {
         return undefined;
       }
 
@@ -251,6 +309,7 @@ module.exports = {
           autoPopulate: _.get(association, 'autoPopulate', true),
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
+          where: details.where,
         });
       } else if (association.hasOwnProperty('model')) {
         definition.associations.push({
@@ -262,6 +321,15 @@ module.exports = {
           autoPopulate: _.get(association, 'autoPopulate', true),
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
+          where: details.where,
+        });
+      } else if (association.hasOwnProperty('key')) {
+        definition.associations.push({
+          alias: key,
+          type: 'collection',
+          nature: infos.nature,
+          autoPopulate: _.get(association, 'autoPopulate', true),
+          key: association.key,
         });
       }
     } catch (e) {
