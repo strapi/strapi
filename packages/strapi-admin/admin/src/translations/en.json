@@ -11,11 +11,11 @@
   "app.components.HomePage.button": "Create your first Content Type",
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
 
-  "app.components.InputFile.newFile": "ADD NEW FILE",
+  "app.components.InputFile.newFile": "Add new file",
   "app.components.InputFileDetails.details": "Details",
   "app.components.ImgPreview.hint": "Drag & drop your file into this area or {browse} for a file to upload",
   "app.components.ImgPreview.hint.browse": "browse",
-  
+
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
   "app.components.InstallPluginPage.title": "Marketplace - Plugins",
   "app.components.InstallPluginPage.description": "Extend your app effortlessly.",
