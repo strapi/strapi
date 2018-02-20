@@ -163,7 +163,7 @@ export class ListPage extends React.Component {
   handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.deleteData(this.state.target, 'product', 'content-manager');
+    this.props.deleteData(this.state.target, this.getCurrentModelName(), this.getSource());
     this.setState({ showWarning: false });
   }
 
