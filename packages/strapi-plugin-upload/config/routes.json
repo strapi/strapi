@@ -10,6 +10,22 @@
     },
     {
       "method": "GET",
+      "path": "/settings/:environment",
+      "handler": "Upload.getSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/settings/:environment",
+      "handler": "Upload.updateSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/files",
       "handler": "Upload.find",
       "config": {

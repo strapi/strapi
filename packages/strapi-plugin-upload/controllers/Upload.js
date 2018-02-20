@@ -15,11 +15,21 @@ module.exports = {
    */
 
   index: async (ctx) => {
+    const config = await strapi.store({
+      environment: strapi.config.environment,
+      type: 'plugin',
+      name: 'upload'
+    }).get({key: 'provider'});
+
+    if (!config.enabled) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'Upload is disabled!');
+    }
+
     const Service = strapi.plugins['upload'].services.upload;
 
     const files = await Service.buffurize(ctx.request.body.files);
 
-    await Service.upload(files);
+    await Service.upload(files, config);
 
     // Send 200 `ok`
     ctx.send(files.map((file) => {
@@ -32,6 +42,29 @@ module.exports = {
 
       return file;
     }));
+  },
+
+  getSettings: async (ctx) => {
+    const config = await strapi.store({
+      environment: ctx.params.environment,
+      type: 'plugin',
+      name: 'upload'
+    }).get({key: 'provider'});
+
+    ctx.send({
+      providers: strapi.plugins.upload.config.providers,
+      config
+    });
+  },
+
+  updateSettings: async (ctx) => {
+    await strapi.store({
+      environment: ctx.params.environment,
+      type: 'plugin',
+      name: 'upload'
+    }).get({key: 'provider'});
+
+    ctx.send({ok: true});
   },
 
   find: async (ctx) => {
@@ -54,7 +87,13 @@ module.exports = {
   },
 
   destroy: async (ctx, next) => {
-    const data = await strapi.plugins['upload'].services.upload.remove(ctx.params);
+    const config = await strapi.store({
+      environment: strapi.config.environment,
+      type: 'plugin',
+      name: 'upload'
+    }).get({key: 'provider'});
+
+    const data = await strapi.plugins['upload'].services.upload.remove(ctx.params, config);
 
     // Send 200 `ok`
     ctx.send(data);

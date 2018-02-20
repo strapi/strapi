@@ -1,10 +1,12 @@
 {
-  "name": "strapi-upload-local",
+  "name": "strapi-upload-s3",
   "version": "3.0.0-alpha.10.2",
-  "description": "Local provider for strapi upload",
+  "description": "AWS S3 provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
     "upload",
+    "aws",
+    "s3",
     "strapi"
   ],
   "directories": {

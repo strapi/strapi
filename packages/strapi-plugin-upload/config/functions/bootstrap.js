@@ -41,14 +41,7 @@ module.exports = async cb => {
         const value = _.assign({}, provider, {enabled: true});
 
         await pluginStore.set({key: 'provider', value});
-
-        strapi.plugins.upload.config.provider = provider;
-      } else {
-        strapi.plugins.upload.config.provider = _.find(strapi.plugins.upload.config.providers, {provider: config.provider});
-        _.assign(strapi.plugins.upload.config.provider, config);
       }
-
-      strapi.plugins.upload.config.provider.init(strapi);
     } catch (err) {
       strapi.log.error(`Can't laod ${config.provider} upload provider`);
       strapi.log.warn(`Please install  strapi-upload-${config.provider} --save`);

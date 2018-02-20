@@ -39,10 +39,14 @@ module.exports = {
     );
   },
 
-  upload: (files) => {
+  upload: async (files, config) => {
+    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
+    _.assign(provider, config);
+    const actions = provider.init(strapi, config);
+
     return Promise.all(
       files.map(async file => {
-        await strapi.plugins.upload.services.provider.upload(file);
+        await actions.upload(file);
 
         delete file.buffer;
 
@@ -86,10 +90,14 @@ module.exports = {
     return await strapi.query('file', 'upload').count();
   },
 
-  remove: async params => {
+  remove: async (params, config) => {
     const file = await strapi.plugins['upload'].services.upload.fetch(params);
 
-    await strapi.plugins.upload.services.provider.delete(file);
+    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
+    _.assign(provider, config);
+    const actions = provider.init(strapi, config);
+
+    await actions.delete(file);
 
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {

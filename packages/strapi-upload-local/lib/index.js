@@ -12,8 +12,8 @@ const path = require('path');
 module.exports = {
   provider: 'local',
   name: 'Local server',
-  init: (strapi) => {
-    strapi.plugins.upload.services.provider = {
+  init: (strapi, config) => {
+    return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
           fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}.${file.ext}`), file.buffer, (err) => {

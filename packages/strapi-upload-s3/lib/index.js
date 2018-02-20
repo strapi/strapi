@@ -48,8 +48,8 @@ module.exports = {
       type: 'text'
     }
   },
-  init: (strapi) => {
-    strapi.plugins.upload.services.provider = {
+  init: (strapi, config) => {
+    return {
       upload: (buffers) => {
 
       },
