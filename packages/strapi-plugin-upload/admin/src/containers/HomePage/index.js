@@ -68,7 +68,7 @@ export class HomePage extends React.Component {
     const { history, params } = this.props;
     const search = e.target.nanme === 'params.limit' ?
       `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}`
-      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`
+      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
