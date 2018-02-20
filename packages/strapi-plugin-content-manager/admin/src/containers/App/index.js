@@ -19,6 +19,7 @@ import getQueryParameters from 'utils/getQueryParameters';
 import Home from 'containers/Home';
 import Edit from 'containers/Edit';
 import List from 'containers/List';
+import ListPage from 'containers/ListPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
 import { emptyStore, getModelEntries, loadModels } from './actions';
@@ -67,6 +68,8 @@ class App extends React.Component {
       <div className="content-manager">
         <Switch>
           <Route path="/plugins/content-manager/:slug/:id" component={Edit} />
+          <Route path="/plugins/content-manager/:slug" component={ListPage} />
+          <Route path="/plugins/content-manager/:slug" component={ListPage} />
           <Route path="/plugins/content-manager/:slug" component={List} />
           <Route path="/plugins/content-manager" component={Home} />
         </Switch>
