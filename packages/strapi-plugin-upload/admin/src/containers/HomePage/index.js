@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+// import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 
@@ -77,7 +77,7 @@ export class HomePage extends React.Component {
     this.props.changeParams(e);
   }
 
-  renderInputSearch = () =>
+  renderInputSearch = () => (
     <InputSearch
       autoFocus
       name="search"
@@ -86,6 +86,7 @@ export class HomePage extends React.Component {
       style={{ marginTop: '-10px' }}
       value={this.props.search}
     />
+  )
 
   render() {
     return (
@@ -101,10 +102,10 @@ export class HomePage extends React.Component {
             overrideRendering={this.renderInputSearch}
           />
         </div>
-          <PluginInputFile
-            name="files"
-            onDrop={this.props.onDrop}
-          />
+        <PluginInputFile
+          name="files"
+          onDrop={this.props.onDrop}
+        />
         <div className={styles.entriesWrapper}>
           <div>
             {/* NOTE: Prepare for bulk actions}
@@ -148,15 +149,21 @@ HomePage.defaultProps = {
     currentPage: 1,
     sort: 'updatedAt',
   },
-  uploadedFiles: [{}],
+  uploadedFiles: [],
 };
 
 HomePage.propTypes = {
   changeParams: PropTypes.func.isRequired,
+  deleteData: PropTypes.func.isRequired,
+  deleteSuccess: PropTypes.bool.isRequired,
+  entriesNumber: PropTypes.number.isRequired,
   getData: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
+  params: PropTypes.object,
   search: PropTypes.string.isRequired,
+  uploadedFiles: PropTypes.array,
 };
 
 function mapDispatchToProps(dispatch) {

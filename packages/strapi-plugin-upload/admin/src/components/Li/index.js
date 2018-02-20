@@ -16,6 +16,7 @@ import PopUpWarning from 'components/PopUpWarning';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/no-string-refs */
 class Li extends React.Component {
   state = { isOpen: false, copied: false };
 
@@ -75,7 +76,7 @@ class Li extends React.Component {
     return (
       <CopyToClipboard text={item.url} onCopy={() => this.setState({copied: true})}>
         <li className={styles.liWrapper}>
-          <a href={item.url} target="_blank" style={{ display: 'none' }} ref="aTag" />
+          <a href={item.url} target="_blank" style={{ display: 'none' }} ref={(a) => { this.aTag = a; }}>nothing</a>
           <div className={styles.liContainer}>
             <div />
             {Object.keys(item).map((value, key) => {
@@ -89,7 +90,7 @@ class Li extends React.Component {
                 );
               }
 
-              return <IcoContainer key={key} icons={icons} />
+              return <IcoContainer key={key} icons={icons} />;
             })}
           </div>
           <PopUpWarning
@@ -118,7 +119,7 @@ Li.defaultProps = {
   },
 };
 
-Li.proptypes = {
+Li.propTypes = {
   item: PropTypes.object,
 };
 
