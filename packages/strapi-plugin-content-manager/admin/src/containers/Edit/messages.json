@@ -12,7 +12,7 @@
     "defaultMessage": "Delete"
   },
   "cancel": {
-    "id": "contentManager.containers.Edit.cancel",
+    "id": "contentManager.containers.Edit.reset",
     "defaultMessage": "Cancel"
   }
 }
