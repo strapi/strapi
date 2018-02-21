@@ -11,8 +11,7 @@
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {
-  },
+  "dependencies": {},
   "strapi": {
     "isHook": false
   },

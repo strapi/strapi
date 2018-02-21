@@ -13,7 +13,7 @@ const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
 
 module.exports = {
-  buffurize: async values => {
+  bufferize: async values => {
     if (_.size(values.files) === 0) {
       throw 'Missing files.';
     }
@@ -33,7 +33,7 @@ module.exports = {
           ext: _.last(stream.name.split('.')),
           buffer: Buffer.concat(buffers),
           mime: stream.type,
-          size: `${(stream.size / 1000).toFixed(2)} KB`
+          size: `${(stream.size / 1000).toFixed(2)}`
         };
       })
     );

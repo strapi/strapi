@@ -38,7 +38,9 @@ module.exports = async cb => {
       if (!config) {
         const provider = strapi.plugins.upload.config.providers[0];
 
-        const value = _.assign({}, provider, {enabled: true});
+        const value = _.assign({}, provider, {
+          enabled: true
+        });
 
         await pluginStore.set({key: 'provider', value});
       }

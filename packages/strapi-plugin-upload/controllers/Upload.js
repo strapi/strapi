@@ -29,7 +29,7 @@ module.exports = {
 
     const Service = strapi.plugins['upload'].services.upload;
 
-    const files = await Service.buffurize(ctx.request.body.files);
+    const files = await Service.bufferize(ctx.request.body.files);
 
     await Service.upload(files, config);
 
