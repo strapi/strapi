@@ -25,8 +25,19 @@ const makeSelectEditPage = () => createSelector(
  *
  * Other specific selectors
  */
+const makeSelectModelName = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('modelName'),
+);
+
+const makeSelectSource = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('source'),
+);
 
 export default makeSelectEditPage;
 export {
   selectEditPageDomain,
+  makeSelectModelName,
+  makeSelectSource,
 };

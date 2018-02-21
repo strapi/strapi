@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, toNumber, toString } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -24,8 +25,15 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
+import { bindLayout } from 'utils/bindLayout';
+
+// Layout
+import layout from '../../../../config/layout';
+
 
 import {
+  changeData,
+  getData,
   initModelProps,
 } from './actions';
 
@@ -36,7 +44,16 @@ import styles from './styles.scss';
 
 export class EditPage extends React.Component {
   componentDidMount() {
-    this.props.initModelProps(this.getModelName(), this.isEditing());
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
+    this.layout = bindLayout.call(
+      this,
+      get(this.context.plugins.toJS(), `${this.getSource()}.layout`, layout),
+    );
+
+    if (!this.isCreating()) {
+      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
+      this.props.getData(this.props.match.params.id, this.getSource(), mainField);
+    }
   }
 
   /**
@@ -58,17 +75,46 @@ export class EditPage extends React.Component {
   getModelName = () => this.props.match.params.slug.toLowerCase();
 
   /**
+   * Retrieve model's schema
+   * @return {Object}
+   */
+  getSchema = () => this.getSource() !== 'content-manager' ?
+    get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
+    : get(this.props.schema, [this.getModelName()]);
+
+
+  /**
    * Retrieve the model's source
    * @return {String}
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source');
+
+  handleChange = (e) => {
+    let value = e.target.value;
+
+    // Check if date
+    if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
+      value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(this.getSchema().fields[e.target.name].type) !== -1) {
+      value = toNumber(e.target.value);
+    }
+
+    const target = {
+      name: e.target.name,
+      value,
+    };
+
+    this.props.changeData({ target });
+  }
+
+  layout = bindLayout.call(this, layout);
 
   componentDidCatch(error, info) {
     console.log('err', error);
     console.log('info', info);
   }
 
-  isEditing = () => this.props.match.params.id === 'create';
+  isCreating = () => this.props.match.params.id === 'create';
 
   pluginHeaderActions = [
     {
@@ -79,7 +125,7 @@ export class EditPage extends React.Component {
     },
     {
       kind: 'primary',
-      label: this.isEditing() ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
+      label: !this.isCreating() ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
       onClick: () => {},
       type: 'submit',
     },
@@ -94,7 +140,7 @@ export class EditPage extends React.Component {
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
             actions={this.pluginHeaderActions}
-            title={{ id: editPage.pluginHeaderTitle }}
+            title={{ id: toString(editPage.pluginHeaderTitle) }}
           />
         </div>
       </div>
@@ -102,22 +148,31 @@ export class EditPage extends React.Component {
   }
 }
 
+EditPage.contextTypes = {
+  plugins: PropTypes.object,
+};
+
 EditPage.defaultProps = {
   models: {},
 };
 
 EditPage.propTypes = {
+  changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
+  getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.object,
+  schema: PropTypes.object.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      changeData,
+      getData,
       initModelProps,
     },
     dispatch,

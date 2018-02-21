@@ -4,23 +4,38 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, Map } from 'immutable';
 import {
+  CHANGE_DATA,
+  GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
 } from './constants';
 
 const initialState = fromJS({
+  form: Map({}),
   isCreating: false,
+  id: '',
   modelName: '',
   pluginHeaderTitle: 'New Entry',
+  record: Map({}),
+  source: 'content-manager',
 });
 
 function editPageReducer(state = initialState, action) {
   switch (action.type) {
+    case CHANGE_DATA:
+      return state.updateIn(actions.keys, () => action.value);
+    case GET_DATA_SUCCEEDED:
+      return state
+        .update('id', () => action.id)
+        .update('pluginHeaderTitle', () => action.pluginHeaderTitle)
+        .update('record', () => Map(action.data));
     case INIT_MODEL_PROPS:
       return state
+        .update('form', () => Map(action.form))
         .update('isCreating', () => action.isCreating)
-        .update('modelName', () => action.modelName);
+        .update('modelName', () => action.modelName)
+        .update('source', () => action.source);
     default:
       return state;
   }
