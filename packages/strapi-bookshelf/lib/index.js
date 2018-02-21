@@ -133,28 +133,44 @@ module.exports = function(strapi) {
                       : key;
                   });
 
-                if (definition.globalId === 'Upload') {
-                  loadedModel.serialize = function(options) {
-                    const attrs = _.clone(this.attributes);
+                // Update serialize to reformat data for polymorphic associations.
+                loadedModel.serialize = function(options) {
+                  const attrs = _.clone(this.attributes);
 
-                    if (options && options.shallow) {
-                      return attrs;
-                    }
-
-                    const relations = this.relations;
-
-                    for (let key in relations) {
-                      const relation = relations[key];
-
-                      attrs[key] = relation.toJSON ? relation.toJSON(options) : relation;
-
-                      if (key === 'related') {
-                        attrs[key] = attrs[key].map(rel => rel['related']);
-                      }
-                    }
-
+                  if (options && options.shallow) {
                     return attrs;
                   }
+
+                  const relations = this.relations;
+
+                  definition.associations
+                    .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
+                    .map(association => {
+                      // Retrieve relation Bookshelf object.
+                      const relation = relations[association.alias];
+
+                      if (relation) {
+                        // Extract raw JSON data.
+                        attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
+
+                        // Retrieve opposite model.
+                        const model = association.plugin ?
+                          strapi.plugins[association.plugin].models[association.collection || association.model]:
+                          strapi.models[association.collection || association.model];
+
+                        // Reformat data by bypassing the many-to-many relationship.
+                        if (association.nature === 'oneToMorph') {
+                          attrs[association.alias] = attrs[association.alias][model.collectionName];
+                        } else if (association.nature === 'manyToMorph') {
+                          attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
+                        } else {
+                          // MorphToX cases.
+                          attrs[association.alias] = attrs[association.alias].map(rel => rel[association.alias]);
+                        }
+                      }
+                    });
+
+                  return attrs;
                 }
 
                 // Initialize lifecycle callbacks.
@@ -174,27 +190,51 @@ module.exports = function(strapi) {
                     saved: 'afterSave'
                   };
 
-                  if (definition.globalId === 'Upload') {
-                    this.on('fetching fetching:collection', (instance, attrs, options) => {
-                      if (_.isArray(options.withRelated)) {
-                        options.withRelated = options.withRelated.map(path => {
-                          if (_.isString(path) && path === 'related') {
-                            return 'related.related';
-                          }
-
-                          return path;
-                        })
-                      }
-
-                      return Promise.resolve();
-                    });
-                  }
-
                   _.forEach(lifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
                       this.on(key, target[model.toLowerCase()][fn]);
                     }
                   });
+
+                  // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
+                  // Apply only during fetching.
+                  this.on('fetching:collection', (instance, attrs, options) => {
+                    if (_.isArray(options.withRelated)) {
+                        options.withRelated = options.withRelated.map(path => {
+                          const association = definition.associations
+                            .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
+                            .filter(association => association.alias === path || association.via === path)[0];
+
+                          if (association) {
+                            // Override on polymorphic path only.
+                            if (_.isString(path) && path === association.via) {
+                              return `related.${association.via}`;
+                            } else if (_.isString(path) && path === association.alias) {
+                              // MorphTo side.
+                              if (association.related) {
+                                return `${association.alias}.related`;
+                              }
+
+                              // oneToMorph or manyToMorph side.
+                              // Retrieve collection name because we are using it to build our hidden model.
+                              const model = association.plugin ?
+                                strapi.plugins[association.plugin].models[association.collection || association.model]:
+                                strapi.models[association.collection || association.model];
+
+                              return `${association.alias}.${model.collectionName}`;
+                            }
+                          }
+
+                          return path;
+                        });
+                      }
+
+                      return _.isFunction(
+                        target[model.toLowerCase()]['beforeFetchCollection']
+                      )
+                        ? target[model.toLowerCase()]['beforeFetchCollection']
+                        : Promise.resolve();
+                    });
 
                   this.on('saving', (instance, attrs, options) => {
                     instance.attributes = mapper(instance.attributes);
@@ -410,14 +450,34 @@ module.exports = function(strapi) {
                   break;
                 }
                 case 'morphOne': {
+                  const model = details.plugin ?
+                    strapi.plugins[details.plugin].models[details.model]:
+                    strapi.models[details.model];
+
+                  const globalId = `${model.collectionName}_morph`;
+
                   loadedModel[name] =  function() {
-                    return this.morphOne(GLOBALS[globalId], details.via);
+                    return this
+                      .morphOne(GLOBALS[globalId], details.via, `${definition.collectionName}`)
+                      .query(qb => {
+                        qb.where('field', name);
+                      });
                   }
                   break;
                 }
                 case 'morphMany': {
+                  const collection = details.plugin ?
+                    strapi.plugins[details.plugin].models[details.collection]:
+                    strapi.models[details.collection];
+
+                  const globalId = `${collection.collectionName}_morph`;
+
                   loadedModel[name] =  function() {
-                    return this.morphMany(GLOBALS[globalId], details.via);
+                    return this
+                      .morphMany(GLOBALS[globalId], details.via, `${definition.collectionName}`)
+                      .query(qb => {
+                        qb.where('field', name);
+                      });
                   }
                   break;
                 }
@@ -425,9 +485,6 @@ module.exports = function(strapi) {
                 case 'belongsToManyMorph': {
                   const association = definition.associations
                     .find(association => association.alias === name);
-
-                  // console.log("coucou");
-                  // console.log(association.related.map(id => GLOBALS[id]));
 
                   const morphValues = association.related.map(id => {
                     let models = Object.values(strapi.models).filter(model => model.globalId === id);
@@ -453,21 +510,37 @@ module.exports = function(strapi) {
                     return models[0].collectionName;
                   });
 
-
                   // Define new model.
                   const options = {
-                    tableName: `${loadedModel.tableName}_morph`,
+                    tableName: `${definition.collectionName}_morph`,
+                    [definition.collectionName]: function () {
+                      return this
+                        .belongsTo(
+                          GLOBALS[definition.globalId],
+                          `${definition.collectionName}_id`
+                        );
+                    },
                     related: function () {
-                      return this.morphTo(name, ...association.related.map((id, index) => [GLOBALS[id], morphValues[index]]));
+                      return this
+                        .morphTo(name, ...association.related.map((id, index) => [GLOBALS[id], morphValues[index]]));
                     }
                   };
 
-                  const MorphModel = ORM.Model.extend(options);
+                  GLOBALS[options.tableName] = ORM.Model.extend(options);
 
+                  // Hack Bookshelf to create a many-to-many polymorphic association.
+                  // Upload has many Upload_morph that morph to different model.
                   loadedModel[name] = function () {
+                    if (verbose === 'belongsToMorph') {
+                      return this.hasOne(
+                        GLOBALS[options.tableName],
+                        `${definition.collectionName}_id`
+                      );
+                    }
+
                     return this.hasMany(
-                      MorphModel,
-                      'upload_id'
+                      GLOBALS[options.tableName],
+                      `${definition.collectionName}_id`
                     );
                   };
                   break;
