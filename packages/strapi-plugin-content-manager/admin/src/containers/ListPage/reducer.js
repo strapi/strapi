@@ -33,7 +33,7 @@ function listPageReducer(state = initialState, action) {
             return o._id !== action.id;
           }
 
-          return o.id !== action.id;
+          return o.id !== parseInt(action.id, 10);
         })
       ));
     case CHANGE_PARAMS:
