@@ -18,6 +18,7 @@ import getQueryParameters from 'utils/getQueryParameters';
 
 import Home from 'containers/Home';
 import Edit from 'containers/Edit';
+import EditPage from 'containers/EditPage';
 import List from 'containers/List';
 import ListPage from 'containers/ListPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
@@ -67,6 +68,7 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
+          <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug/:id" component={Edit} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
           <Route path="/plugins/content-manager/:slug" component={List} />
