@@ -1,12 +1,12 @@
 import { get, isEmpty, isObject } from 'lodash';
 
-export default function checkFormValidity(settingType, data) {
+export default function checkFormValidity(settingType, data, providerToEdit = '') {
   const formErrors = [];
 
   switch (settingType) {
     case 'providers': {
       const isProviderEnabled = get(data, 'enabled');
-      const keys = [ 'key', 'secret' ];
+      const keys = providerToEdit === 'email' ? [] : ['key', 'secret'];
 
       keys.map(key => {
         if (isProviderEnabled && isEmpty(get(data, key))) {

@@ -8,7 +8,7 @@
   "containers.Edit.submit": "Valider",
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.delete": "Supprimer",
-  "containers.Edit.cancel": "Annuler",
+  "containers.Edit.reset": "Annuler",
   "containers.Edit.returnList": "Retourner à la liste",
   "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.pluginHeaderDescription": "{label} entrées trouvées",

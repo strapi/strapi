@@ -1,0 +1,174 @@
+{
+  "Auth.form.button.register-success": "Erneut schicken",
+  "Auth.form.button.forgot-password.success": "Erneut schicken",
+  "Auth.form.button.forgot-password": "E-Mail versenden",
+  "Auth.form.button.reset-password": "Passwort ändern",
+  "Auth.form.button.login": "Login",
+  "Auth.form.button.register": "Bereit zum Start",
+  "Auth.form.error.noAdminAccess": "Du hast keinen Zugriff auf den Administrator-Bereich.",
+
+  "Auth.form.forgot-password.email.label": "Gib deine E-Mail ein",
+  "Auth.form.forgot-password.email.label.success": "Eine E-Mail wurde erfolgreich verschickt an",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.header.register.description": "Erstelle bitte einen Administrator durch Ausfüllen der folgenden Felder, um die Einrichtung deiner App abzuschließen.",
+  "Auth.form.header.login": "strapi",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "Willkommen!",
+  "Auth.form.header.register-success": "strapi",
+
+  "Auth.form.login.password.label": "Passwort",
+  "Auth.form.login.rememberMe.label": "Eingeloggt bleiben",
+  "Auth.form.login.username.label": "Benutzername",
+  "Auth.form.login.username.placeholder": "John Doe",
+
+  "Auth.form.register.email.label": "E-Mail",
+  "Auth.form.register.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.register.username.label": "Benutzername",
+  "Auth.form.register.username.placeholder": "John Doe",
+  "Auth.form.register.password.label": "Passwort",
+  "Auth.form.register.confirmPassword.label": "Passwort-Bestätigung",
+
+  "Auth.form.register-success.email.label": "Eine E-Mail wurde erfolgreich verschickt an",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.error.email.provide": "Bitte nenne uns deinen Benutzernamen oder deine E-Mail-Adresse.",
+  "Auth.form.error.email.invalid": "Diese E-Mail-Adresse ist ungültig.",
+  "Auth.form.error.password.provide": "Bitte gib dein Passwort ein.",
+  "Auth.form.error.invalid": "Ungültige Login-Daten.",
+  "Auth.form.error.password.local": "Dieser Benutzer hat kein lokales Passwort. Bitte logge dich mithilfe des Providers ein, den du bei der Erstellung deines Accounts genutzt hast.",
+  "Auth.form.error.password.format": "Dein Passwort darf nicht mehr als dreimal das Symbol `$` enthalten.",
+  "Auth.form.error.user.not-exist": "Diese E-Mail-Adresse ist nicht registriert.",
+  "Auth.form.error.code.provide": "Ungültiger Code.",
+  "Auth.form.error.password.matching": "Passwörter sind nicht gleich.",
+  "Auth.form.error.params.provide": "Ungültige Parameter.",
+  "Auth.form.error.username.taken": "Der Benutzername ist bereits vergeben",
+  "Auth.form.error.email.taken": "Die E-Mail-Adresse wird bereits genutzt",
+
+  "Auth.link.forgot-password": "Passwort vergessen?",
+  "Auth.link.ready": "Bereit für den Login?",
+
+  "BoundRoute.title": "Pfad gebunden an",
+
+  "components.Input.error.password.noMatch": "Passwörter stimmen nicht überein",
+
+  "Controller.input.label": "{label} ",
+  "Controller.selectAll": "Alle auswählen",
+
+  "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
+  "EditForm.inputSelect.subscriptions.description": "Lege die Anzahl an subscriptions pro Stunde und IP fest.",
+  "EditForm.inputSelect.durations.label": "Dauer",
+  "EditForm.inputSelect.durations.description": "Anzahl Stunden, während derer eine Registration unmöglich ist.",
+
+  "EditForm.inputToggle.label.email": "Ein Account pro E-Mail-Adresse",
+  "EditForm.inputToggle.label.sign-up": "Registration ermöglichen",
+  "EditForm.inputToggle.description.email": "Verbiete das Anlegen verschiedener Accounts derselben E-Mail-Adresse bei unterschiedlichen Anmeldemethoden.",
+  "EditForm.inputToggle.description.sign-up": "Wenn deaktiviert (OFF), wird der Registrationsprozess unterbunden. Niemand kann sich mehr registrieren.",
+
+  "EditPage.cancel": "Abbrechen",
+  "EditPage.submit": "Speichern",
+  "EditPage.form.roles": "Details zu Rollen",
+  "EditPage.form.roles.label.description": "Beschreibung",
+  "EditPage.form.roles.label.name": "Name",
+  "EditPage.form.roles.label.users": "Benutzer mit dieser Rolle ({number})",
+  "EditPage.form.roles.name.error": "Dieser Wert ist erforderlich.",
+  "EditPage.header.title": "{name} ",
+  "EditPage.header.title.create": "Erstelle eine neue Rolle",
+  "EditPage.header.description": "{description} ",
+  "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "Beim Abruf von Befugnissen ist ein Fehler aufgetreten",
+  "EditPage.notification.policies.error": "Beim Abruf von policies ist ein Fehler aufgetreten",
+  "EditPage.notification.role.error": "Beim Abruf der Rolle ist ein Fehler aufgetreten",
+
+  "HeaderNav.link.advancedSettings": "Erweiterte Einstellungen",
+  "HeaderNav.link.emailTemplates": "E-Mail-Templates",
+  "HeaderNav.link.providers": "Methoden",
+  "HeaderNav.link.roles": "Rollen",
+
+  "HomePage.header.title": "Benutzer & Befugnisse",
+  "HomePage.header.description": "Lege Rollen und deren Befugnisse fest",
+
+  "InputSearch.placeholder": "Suche nach einem Benutzer",
+
+  "List.button.roles": "Neue Rolle hinzufügen",
+  "List.button.providers": "Neue Methode hinzufügen",
+
+  "List.title.emailTemplates.singular": "{number} E-Mail-Template ist verfügbar",
+  "List.title.emailTemplates.plural": "{number} E-Mail-Templates sind verfügbar",
+
+  "List.title.providers.disabled.singular": "{number} ist deaktiviert",
+  "List.title.providers.disabled.plural": "{number} sind deaktiviert",
+  "List.title.providers.enabled.singular": "{number} Methode ist aktiviert und",
+  "List.title.providers.enabled.plural": "{number} Methoden sind aktiviert und",
+
+  "List.title.roles.singular": "{number} Rolle ist verfügbar",
+  "List.title.roles.plural": "{number} Rollen sind verfügbar",
+
+  "notification.error.delete": "Beim Löschen des Objekts ist ein Fehler aufgetreten",
+  "notification.error.fetch": "Beim Abruf von Daten ist ein Fehler aufgetreten",
+  "notification.error.fetchUser": "Beim Abruf von Benutzern ist ein Fehler aufgetreten",
+  "notification.info.emailSent": "Die E-Mail wurde versendet",
+  "notification.success.delete": "Das Objekt wurde gelöscht",
+  "notification.success.submit": "Einstellungen aktualisiert",
+
+  "plugin.description.short": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT.",
+  "plugin.description.long": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT. Zudem bietet dieses Plugin eine ACL-Strategie, die erlaubt, die Befugnisse zwischen Benutzergruppen festzulegen.",
+
+  "Plugin.permissions.application.description": "Definiere die möglichen Aktionen deines Projekts.",
+  "Plugin.permissions.plugins.description": "Definiere die möglichen Aktionen des {name} Plugins.",
+
+  "Plugins.header.title": "Befugnisse",
+  "Plugins.header.description": "Nur Aktionen, die an einen Pfad gebunden sind, werden hier gelistet.",
+
+  "Policies.InputSelect.empty": "Keine",
+  "Policies.InputSelect.label": "Diese Aktion folgenden erlauben:",
+  "Policies.header.hint": "Wähle eine Aktion aus und klicke auf das Zahnrad, um den an diese Aktion gebundenen Pfand anzuzeigen",
+  "Policies.header.title": "Fortgeschrittene Einstellungen",
+
+  "Email.template.validation_email": "Validierung der E-Mail-Adresse",
+  "Email.template.reset_password": "Passwort zurücksetzen",
+  "Email.template.success_register": "Anmeldung erfolgreich",
+
+  "Auth.advanced.allow_register": "",
+
+  "PopUpForm.button.cancel": "Abbrechen",
+  "PopUpForm.button.save": "Speichern",
+  "PopUpForm.header.add.providers": "Neue Methode hinzufügen",
+  "PopUpForm.header.edit.email-templates": "E-Mail-Templates bearbeiten",
+  "PopUpForm.header.edit.providers": "Methode {provider} bearbeiten",
+  "PopUpForm.inputSelect.providers.label": "Wähle die Methode aus",
+  "PopUpForm.Email.options.from.name.label": "Name des Absenders",
+  "PopUpForm.Email.options.from.email.label": "E-Mail-Adresse des Absenders",
+  "PopUpForm.Email.options.response_email.label": "Antwort E-Mail-Adresse",
+  "PopUpForm.Email.options.object.label": "Betreff",
+  "PopUpForm.Email.options.message.label": "Nachricht",
+  "PopUpForm.Email.validation_email.options.object.placeholder": "Bitte bestätige deine E-Mail-Adresse für %APP_NAME%",
+  "PopUpForm.Email.reset_password.options.object.placeholder": "Bitte bestätige deine E-Mail-Adresse für %APP_NAME%",
+  "PopUpForm.Email.success_register.options.object.placeholder": "Bitte bestätige deine E-Mail-Adresse für %APP_NAME%",
+  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Hier klicken, um deinen Account zu bestätigen</p>",
+  "PopUpForm.Email.reset_password.options.message.placeholder": "<p>Hier klicken, um deinen Account zu bestätigen</p>",
+  "PopUpForm.Email.success_register.options.message.placeholder": "<p>Hier klicken, um deinen Account zu bestätigen</p>",
+  "PopUpForm.Email.options.from.email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.from.name.placeholder": "John Doe",
+  "PopUpForm.Providers.enabled.label": "Aktivieren",
+  "PopUpForm.Providers.enabled.description": "Wenn deaktiviert, kann diese Methode nicht verwendet werden.",
+  "PopUpForm.Providers.key.label": "Client ID",
+  "PopUpForm.Providers.key.placeholder": "TEXT",
+  "PopUpForm.Providers.secret.label": "Client Secret",
+  "PopUpForm.Providers.secret.placeholder": "TEXT",
+  "PopUpForm.Providers.redirectURL.front-end.label": "Die URL, die zur Weiterleitung zu deiner Frontend-App verwendet wird",
+
+
+
+  "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Facebook-App gesetzt wird",
+  "PopUpForm.Providers.google.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Google-App gesetzt wird",
+  "PopUpForm.Providers.github.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Github-App gesetzt wird",
+  "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner LinkedIn-App gesetzt wird",
+  "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Twitter-App gesetzt wird",
+
+  "PopUpForm.Providers.callback.placeholder": "TEXT",
+  "PopUpForm.Email.email_templates.inputDescription": "Für mehr Informationen, {link}",
+  "PopUpForm.Email.link.documentation": "schau in unsere Dokumentation."
+}
