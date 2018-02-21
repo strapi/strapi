@@ -37,6 +37,12 @@ class InputSelectWithErrors extends React.Component {
     }
   }
 
+  handleBlur = ({ target }) => {
+    if (!isEmpty(target.value)) {
+      this.setState({ errors: [] });
+    }
+  }
+
   render() {
     const {
       autoFocus,
@@ -86,7 +92,7 @@ class InputSelectWithErrors extends React.Component {
           disabled={disabled}
           error={!isEmpty(this.state.errors)}
           name={name}
-          onBlur={isFunction(onBlur) ? onBlur : () => {}}
+          onBlur={isFunction(onBlur) ? onBlur : this.handleBlur}
           onChange={onChange}
           onFocus={onFocus}
           selectOptions={selectOptions}
@@ -127,7 +133,7 @@ InputSelectWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  onBlur: () => {},
+  onBlur: false,
   onFocus: () => {},
   selectOptions: [],
   style: {},

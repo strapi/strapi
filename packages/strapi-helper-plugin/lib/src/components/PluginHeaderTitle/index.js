@@ -21,7 +21,7 @@ function PluginHeaderTitle({ description, title }) {
         {contentTitle}
       </h1>
       <p className={styles.pluginHeaderTitleDescription}>
-        {contentDescription}
+        {contentDescription}&nbsp;
       </p>
     </div>
   );

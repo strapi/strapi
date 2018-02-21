@@ -4,12 +4,17 @@
  *
  */
 
+import { get } from 'lodash';
+import { getValidationsFromForm } from 'utils/formValidations';
+
 import {
   CHANGE_DATA,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  ON_CANCEL,
   RESET_PROPS,
+  SET_FORM_ERRORS,
 } from './constants';
 
 export function changeData({ target }) {
@@ -38,17 +43,36 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
   };
 }
 
-export function initModelProps(modelName, isCreating, source) {
+export function initModelProps(modelName, isCreating, source, attributes) {
+  const formValidations = getValidationsFromForm(
+    Object.keys(attributes).map(attr => ({ name: attr, validations: get(attributes, attr, {}) })),
+    [],
+  );
+
   return {
     type: INIT_MODEL_PROPS,
-    modelName,
+    formValidations,
     isCreating,
+    modelName,
     source,
+  };
+}
+
+export function onCancel() {
+  return {
+    type: ON_CANCEL,
   };
 }
 
 export function resetProps() {
   return {
     type: RESET_PROPS,
+  };
+}
+
+export function setFormErrors(formErrors) {
+  return {
+    type: SET_FORM_ERRORS,
+    formErrors,
   };
 }

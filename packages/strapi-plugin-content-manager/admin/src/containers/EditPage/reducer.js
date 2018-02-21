@@ -4,18 +4,23 @@
  *
  */
 
-import { fromJS, Map } from 'immutable';
+import { fromJS, Map, List } from 'immutable';
 import {
   CHANGE_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  ON_CANCEL,
   RESET_PROPS,
+  SET_FORM_ERRORS,
 } from './constants';
 
 const initialState = fromJS({
   didCheckErrors: true,
+  formErrors: List([]),
+  formValidations: List([]),
   isCreating: false,
   id: '',
+  initialRecord: Map({}),
   modelName: '',
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
@@ -29,15 +34,26 @@ function editPageReducer(state = initialState, action) {
     case GET_DATA_SUCCEEDED:
       return state
         .update('id', () => action.id)
+        .update('initialRecord', () => Map(action.data))
         .update('pluginHeaderTitle', () => action.pluginHeaderTitle)
         .update('record', () => Map(action.data));
     case INIT_MODEL_PROPS:
       return state
+        .update('formValidations', () => List(action.formValidations))
         .update('isCreating', () => action.isCreating)
         .update('modelName', () => action.modelName)
         .update('source', () => action.source);
+    case ON_CANCEL:
+      return state
+        .update('didCheckErrors', (v) => v = !v)
+        .update('formErrors', () => List([]))
+        .update('record', () => state.get('initialRecord'));
     case RESET_PROPS:
       return initialState;
+    case SET_FORM_ERRORS:
+      return state
+        .update('didCheckErrors', (v) => v = !v)
+        .update('formErrors', () => List(action.formErrors));
     default:
       return state;
   }

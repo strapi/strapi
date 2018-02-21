@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, isObject, toNumber, toString, size } from 'lodash';
+import { get, isEmpty, isObject, toNumber, toString, size } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -30,6 +30,7 @@ import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
+import { checkFormValidity } from 'utils/formValidations';
 
 // Layout
 import layout from '../../../../config/layout';
@@ -38,7 +39,9 @@ import {
   changeData,
   getData,
   initModelProps,
+  onCancel,
   resetProps,
+  setFormErrors,
 } from './actions';
 
 import reducer from './reducer';
@@ -115,6 +118,17 @@ export class EditPage extends React.Component {
     this.props.changeData({ target });
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
+
+    if (isEmpty(formErrors)) {
+      // this.props.submit()
+    }
+
+    this.props.setFormErrors(formErrors);
+  }
+
   layout = bindLayout.call(this, layout);
 
   componentDidCatch(error, info) {
@@ -126,11 +140,20 @@ export class EditPage extends React.Component {
 
   isRelationComponentNull = () => size(get(this.getSchema(), 'relations')) === 0;
 
+  // NOTE: technical debt that needs to be redone
+  generateFormFromRecord = () => (
+    Object.keys(this.getModelAttributes()).reduce((acc, current) => {
+      acc[current] = get(this.props.editPage.record, current, '');
+
+      return acc;
+    }, {})
+  )
+
   pluginHeaderActions = [
     {
       label: 'content-manager.containers.Edit.reset',
       kind: 'secondary',
-      onClick: () => {},
+      onClick: this.props.onCancel,
       type: 'button',
     },
     {
@@ -146,7 +169,7 @@ export class EditPage extends React.Component {
 
     return (
       <div>
-        <form onSubmit={(e) => { e.preventDefault(); }}>
+        <form onSubmit={this.handleSubmit}>
           <BackHeader onClick={() => this.props.history.goBack()} />
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
@@ -159,6 +182,8 @@ export class EditPage extends React.Component {
                   <Edit
                     attributes={this.getModelAttributes()}
                     didCheckErrors={editPage.didCheckErrors}
+                    formValidations={editPage.formValidations}
+                    formErrors={editPage.formErrors}
                     layout={this.layout}
                     modelName={this.getModelName()}
                     onChange={this.handleChange}
@@ -197,8 +222,10 @@ EditPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.object,
+  onCancel: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  setFormErrors: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -207,7 +234,9 @@ function mapDispatchToProps(dispatch) {
       changeData,
       getData,
       initModelProps,
+      onCancel,
       resetProps,
+      setFormErrors,
     },
     dispatch,
   );

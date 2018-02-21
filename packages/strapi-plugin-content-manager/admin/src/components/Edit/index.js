@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  // findIndex,
+  findIndex,
   get,
   isEmpty,
   isFunction,
@@ -69,6 +69,11 @@ class Edit extends React.PureComponent {
     this.setState({ currentLayout, displayedFields });
   }
 
+  getInputErrors = (attr) => {
+    const index = findIndex(this.props.formErrors, ['name', attr]);
+    return index !== -1 ? this.props.formErrors[index].errors : [];
+  }
+
   /**
    * Retrieve the Input layout
    * @param  {String} attr [description]
@@ -82,6 +87,18 @@ class Edit extends React.PureComponent {
       return acc;
     }, {})
   )
+
+  /**
+   * Retrieve the input's validations
+   * @param  {String} attr
+   * @return {Object}
+   */
+  getInputValidations = (attr) => {
+    const { formValidations } = this.props;
+    const index = findIndex(formValidations, ['name', attr]);
+
+    return get(formValidations, [index, 'validations'], {});
+  }
 
   render(){
     return (
@@ -97,6 +114,7 @@ class Edit extends React.PureComponent {
                 autoFocus={key === 0}
                 customBootstrapClass={get(layout, 'className')}
                 didCheckErrors={this.props.didCheckErrors}
+                errors={this.getInputErrors(attr)}
                 key={attr}
                 label={get(layout, 'label') || details.label || ''}
                 name={attr}
@@ -104,6 +122,7 @@ class Edit extends React.PureComponent {
                 selectOptions={get(this.props.attributes, [attr, 'enum'])}
                 placeholder={get(layout, 'placeholder') || details.placeholder}
                 type={get(layout, 'type', getInputType(details.type))}
+                validations={this.getInputValidations(attr)}
                 value={this.props.record[attr]}
               />
             );
@@ -116,6 +135,8 @@ class Edit extends React.PureComponent {
 
 Edit.defaultProps = {
   attributes: {},
+  formErrors: [],
+  formValidations: [],
   layout: {},
   onChange: () => {},
   record: {},
@@ -124,6 +145,8 @@ Edit.defaultProps = {
 Edit.propTypes = {
   attributes: PropTypes.object,
   didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array,
+  formValidations: PropTypes.array,
   layout: PropTypes.object,
   onChange: PropTypes.func,
   record: PropTypes.object,
