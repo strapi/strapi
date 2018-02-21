@@ -1,10 +1,10 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.10.2",
+  "version": "3.0.0-alpha.10.1",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "Upload",
-    "icon": "upload",
+    "name": "upload",
+    "icon": "plug",
     "description": "Description of upload plugin."
   },
   "scripts": {
@@ -23,10 +23,12 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "react-copy-to-clipboard": "^5.0.1"
+    "react-copy-to-clipboard": "^5.0.1",
+    "stream-to-array": "^2.3.0",
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.10.2"
+    "strapi-helper-plugin": "3.0.0-alpha.10.1"
   },
   "author": {
     "name": "A Strapi developer",

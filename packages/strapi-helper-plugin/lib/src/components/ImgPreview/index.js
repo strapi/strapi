@@ -52,7 +52,7 @@ class ImgPreview extends React.Component {
    * @return {URL}
    */
   generateImgURL = (file) => {
-    if ( /\.(jpe?g|png|gif)$/i.test(file.name) ) {
+    if (this.isPictureType(file.name)) {
       const reader = new FileReader();
       reader.onloadend = () => {
         this.setState({
@@ -125,6 +125,7 @@ class ImgPreview extends React.Component {
 
   handleMouseLeave = (e) => this.setState({ isOver: false });
 
+  // TODO change logic to depend on the type
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
   removeFile = (e) => {
@@ -167,13 +168,13 @@ class ImgPreview extends React.Component {
       return (
         <img src={this.state.imgURL} />
       );
-    } else {
-      return (
-        <div className={styles.fileIcon}>
-          <i className={`fa fa-file-${fileType}-o`} />
-        </div>
-      );
     }
+
+    return (
+      <div className={styles.fileIcon}>
+        <i className={`fa fa-file-${fileType}-o`} />
+      </div>
+    );
   }
 
   updateFilePosition = (newPosition) => {
@@ -231,7 +232,7 @@ class ImgPreview extends React.Component {
             show={size(files) > 1}
             type="right"
           />
-        
+
           <ImgPreviewArrow
             onClick={this.handleClick}
             show={size(files) > 1}
@@ -243,7 +244,7 @@ class ImgPreview extends React.Component {
 }
 
 ImgPreview.defaultProps = {
-  files: [{}],
+  files: [],
   isUploading: false,
   multiple: false,
   name: '',

@@ -63,6 +63,11 @@ module.exports = {
     // Empty public directory.
     'public': {
       folder: {}
+    },
+
+    // Empty public directory.
+    'public/uploads': {
+      folder: {}
     }
   }
 };
