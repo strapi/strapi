@@ -22,7 +22,10 @@
     "test": "npm run lint",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "stream-to-array": "^2.3.0",
+    "uuid": "^3.2.1"
+  },
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.10.1"
   },
