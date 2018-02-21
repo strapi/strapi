@@ -33,7 +33,7 @@ module.exports = {
           ext: _.last(stream.name.split('.')),
           buffer: Buffer.concat(buffers),
           mime: stream.type,
-          size: `${(stream.size / 1000).toFixed(2)}`
+          size: (stream.size / 1000).toFixed(2)
         };
       })
     );

@@ -65,7 +65,6 @@ module.exports = {
 
     return {
       upload: (file) => {
-        console.log(file);
         return new Promise((resolve, reject) => {
           S3.upload(
             {

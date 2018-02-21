@@ -31,6 +31,12 @@ module.exports = {
 
     const files = await Service.bufferize(ctx.request.body.files);
 
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].size > config.sizeLimit) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit' }] }] : 'One of file is bigger than limit size!');
+      }
+    }
+
     await Service.upload(files, config);
 
     // Send 200 `ok`
