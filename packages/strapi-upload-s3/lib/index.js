@@ -50,6 +50,7 @@ module.exports = {
     }
   },
   init: (strapi, config) => {
+    // configure AWS S3 bucket connection
     AWS.config.update({
       accessKeyId: config.auth.public,
       secretAccessKey: config.auth.private,
@@ -66,6 +67,7 @@ module.exports = {
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
+          // upload file on S3 bucket
           S3.upload(
             {
               Key: `${file.hash}.${file.ext}`,
@@ -78,6 +80,7 @@ module.exports = {
                 return reject(err);
               }
 
+              // set the bucket file url
               file.url = data.Location;
 
               resolve();

@@ -18,8 +18,10 @@ module.exports = {
       throw 'Missing files.';
     }
 
+    // files is always an array to map on
     const files = _.isArray(values.files) ? values.files : [values.files];
 
+    // transform all files in buffer
     return Promise.all(
       files.map(async stream => {
         const parts = await toArray(fs.createReadStream(stream.path));
@@ -40,14 +42,17 @@ module.exports = {
   },
 
   upload: async (files, config) => {
+    // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
     _.assign(provider, config);
     const actions = provider.init(strapi, config);
 
+    // execute upload function of the provider for all files
     return Promise.all(
       files.map(async file => {
         await actions.upload(file);
 
+        // remove buffer to don't save it
         delete file.buffer;
 
         await strapi.plugins['upload'].services.upload.add(file);
@@ -93,10 +98,12 @@ module.exports = {
   remove: async (params, config) => {
     const file = await strapi.plugins['upload'].services.upload.fetch(params);
 
+    // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
     _.assign(provider, config);
     const actions = provider.init(strapi, config);
 
+    // execute delete function of the provider
     await actions.delete(file);
 
     // Use Content Manager business logic to handle relation.

@@ -29,6 +29,7 @@ module.exports = {
 
     const Service = strapi.plugins['upload'].services.upload;
 
+    // transform stream files to buffer
     const files = await Service.bufferize(ctx.request.body.files);
 
     for (var i = 0; i < files.length; i++) {
@@ -43,11 +44,12 @@ module.exports = {
     ctx.send(files.map((file) => {
       delete file.buffer;
 
+      // if is local server upload, add backend host as prefix
       if (_.startsWith(file.url, '/')) {
         file.url = strapi.config.url + file.url;
       }
 
-      // Static data
+      // Static data waiting relations
       file.updatedAt = new Date();
       file.relatedTo = 'John Doe';
 
@@ -83,6 +85,7 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send(data.map((file) => {
+      // if is local server upload, add backend host as prefix
       if (_.startsWith(file.url, '/')) {
         file.url = strapi.config.url + file.url;
       }

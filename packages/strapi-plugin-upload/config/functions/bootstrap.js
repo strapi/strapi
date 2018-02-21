@@ -13,6 +13,7 @@ const _ = require('lodash');
 const fs = require('fs');
 
 module.exports = async cb => {
+  // set plugin store
   const pluginStore = strapi.store({
     environment: strapi.config.environment,
     type: 'plugin',
@@ -20,6 +21,7 @@ module.exports = async cb => {
   });
 
   fs.readdir(path.join(strapi.config.appPath, 'node_modules'), async (err, node_modules) => {
+    // get all upload provider
     const uploads = _.filter(node_modules, (node_module) => {
       return _.startsWith(node_module, ('strapi-upload-'));
     });

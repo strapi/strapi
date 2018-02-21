@@ -15,6 +15,7 @@ module.exports = {
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
+          // write file in public/assets folder
           fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}.${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
@@ -28,6 +29,7 @@ module.exports = {
       },
       delete: (file) => {
         return new Promise((resolve, reject) => {
+          // remove file from public/assets folder
           fs.unlink(path.join(strapi.config.appPath, 'public', file.url), (err) => {
             if (err) {
               return reject(err);
