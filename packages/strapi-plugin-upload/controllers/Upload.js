@@ -6,6 +6,8 @@
  * @description: A set of functions called "actions" of the `upload` plugin.
  */
 
+const _ = require('lodash');
+
 module.exports = {
 
   /**
@@ -34,7 +36,10 @@ module.exports = {
     // Send 200 `ok`
     ctx.send(files.map((file) => {
       delete file.buffer;
-      file.url = `${strapi.config.url}/uploads/${file.hash}.${file.ext}`;
+
+      if (_.startsWith(file.url, '/')) {
+        file.url = strapi.config.url + file.url;
+      }
 
       // Static data
       file.updatedAt = new Date();
@@ -62,7 +67,7 @@ module.exports = {
       environment: ctx.params.environment,
       type: 'plugin',
       name: 'upload'
-    }).get({key: 'provider'});
+    }).set({key: 'provider', value: ctx.request.body});
 
     ctx.send({ok: true});
   },
@@ -72,7 +77,10 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send(data.map((file) => {
-      file.url = `${strapi.config.url}${file.url}`;
+      if (_.startsWith(file.url, '/')) {
+        file.url = strapi.config.url + file.url;
+      }
+
       return file;
     }));
   },

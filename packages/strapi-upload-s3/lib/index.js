@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const AWS = require('aws-sdk');
 
 module.exports = {
   provider: 's3',
@@ -49,11 +50,43 @@ module.exports = {
     }
   },
   init: (strapi, config) => {
-    return {
-      upload: (buffers) => {
+    AWS.config.update({
+      accessKeyId: config.auth.public,
+      secretAccessKey: config.auth.private,
+      region: config.auth.region
+    });
 
+    const S3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      params: {
+        Bucket: config.auth.bucket
+      }
+    });
+
+    return {
+      upload: (file) => {
+        console.log(file);
+        return new Promise((resolve, reject) => {
+          S3.upload(
+            {
+              Key: `${file.hash}.${file.ext}`,
+              Body: new Buffer(file.buffer, 'binary'),
+              ACL: 'public-read'
+            },
+            function(err, data) {
+              if (err) {
+                console.log(err);
+                return reject(err);
+              }
+
+              file.url = data.Location;
+
+              resolve();
+            }
+          );
+        });
       },
-      delete: () => {
+      delete: (file) => {
 
       }
     };

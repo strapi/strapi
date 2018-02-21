@@ -12,7 +12,6 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "^4.17.4"
   },
   "strapi": {
     "isHook": false
