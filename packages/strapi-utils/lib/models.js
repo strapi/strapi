@@ -163,8 +163,12 @@ module.exports = {
             }
           });
         });
-      } else if (association.hasOwnProperty('key')) {
-        types.current = 'morphTo';
+      } else if (association.hasOwnProperty('morphTo')) {
+        if (association.morphTo === 'single') {
+          types.current = 'morphToD';
+        } else {
+          types.current = 'morphTo';
+        }
 
         const flattenedPluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
           Object.keys(strapi.plugins[current].models).forEach((model) => {
@@ -198,22 +202,42 @@ module.exports = {
 
       if (types.current === 'collection' && types.other === 'morphTo') {
         return {
+          nature: 'manyToManyMorph',
+          verbose: 'morphMany'
+        };
+      } else if (types.current === 'collection' && types.other === 'morphToD') {
+        return {
           nature: 'manyToMorph',
           verbose: 'morphMany'
         };
-      } else if (types.current === 'modelD' && types.other === 'morphTo') {
+      }  else if (types.current === 'modelD' && types.other === 'morphTo') {
+        return {
+          nature: 'oneToManyMorph',
+          verbose: 'morphOne'
+        };
+      } else if (types.current === 'modelD' && types.other === 'morphToD') {
         return {
           nature: 'oneToMorph',
           verbose: 'morphOne'
         };
-      } else if (types.current === 'morphTo' && types.other === 'collection') {
+      } else if (types.current === 'morphToD' && types.other === 'collection') {
         return {
           nature: 'morphToMany',
           verbose: 'belongsToMorph'
         };
-      } else if (types.current === 'morphTo' && types.other === 'model') {
+      } else if (types.current === 'morphToD' && types.other === 'model') {
         return {
           nature: 'morphToOne',
+          verbose: 'belongsToMorph'
+        };
+      } else if (types.current === 'morphTo' && types.other === 'model') {
+        return {
+          nature: 'manyMorphToOne',
+          verbose: 'belongsToManyMorph'
+        };
+      } else if (types.current === 'morphTo' && types.other === 'collection') {
+        return {
+          nature: 'manyMorphToMany',
           verbose: 'belongsToManyMorph'
         };
       } else if (types.current === 'modelD' && types.other === 'model') {
@@ -266,6 +290,7 @@ module.exports = {
       return undefined;
     } catch (e) {
       strapi.log.error(`Something went wrong in the model \`${_.upperFirst(currentModelName)}\` with the attribute \`${key}\``);
+      strapi.log.error(e);
       strapi.stop();
     }
   },
@@ -290,7 +315,7 @@ module.exports = {
       }
 
       // Exclude non-relational attribute
-      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model') && !association.hasOwnProperty('key')) {
+      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model') && !association.hasOwnProperty('morphTo')) {
         return undefined;
       }
 
@@ -323,7 +348,7 @@ module.exports = {
           plugin: association.plugin || undefined,
           where: details.where,
         });
-      } else if (association.hasOwnProperty('key')) {
+      } else if (association.hasOwnProperty('morphTo')) {
         const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
           Object.keys(strapi.plugins[current].models).forEach((entity) => {
             Object.keys(strapi.plugins[current].models[entity].attributes).forEach((attribute) => {
@@ -359,7 +384,7 @@ module.exports = {
 
         definition.associations.push({
           alias: key,
-          type: 'collection',
+          type: association.morphTo === 'single' ? 'model' : 'collection',
           related: models,
           nature: infos.nature,
           autoPopulate: _.get(association, 'autoPopulate', true),
@@ -368,6 +393,7 @@ module.exports = {
       }
     } catch (e) {
       strapi.log.error(`Something went wrong in the model \`${_.upperFirst(model)}\` with the attribute \`${key}\``);
+      strapi.log.error(e);
       strapi.stop();
     }
   },

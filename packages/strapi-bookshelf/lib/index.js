@@ -159,13 +159,21 @@ module.exports = function(strapi) {
                           strapi.models[association.collection || association.model];
 
                         // Reformat data by bypassing the many-to-many relationship.
-                        if (association.nature === 'oneToMorph') {
-                          attrs[association.alias] = attrs[association.alias][model.collectionName];
-                        } else if (association.nature === 'manyToMorph') {
-                          attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
-                        } else {
-                          // MorphToX cases.
-                          attrs[association.alias] = attrs[association.alias].map(rel => rel[association.alias]);
+                        switch (association.nature) {
+                          case 'oneToMorph':
+                            attrs[association.alias] = attrs[association.alias][model.collectionName];
+                            break;
+                          case 'manyToMorph':
+                            attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
+                            break;
+                          case 'morphToOne':
+                            attrs[association.alias] = attrs[association.alias][association.alias];
+                            break;
+                          case 'morphToMany':
+                            attrs[association.alias] = attrs[association.alias].map(rel => rel[association.alias]);
+                            break;
+                          default:
+
                         }
                       }
                     });
@@ -460,7 +468,7 @@ module.exports = function(strapi) {
                     return this
                       .morphOne(GLOBALS[globalId], details.via, `${definition.collectionName}`)
                       .query(qb => {
-                        qb.where('field', name);
+                        qb.where(_.get(model, `attributes.${details.via}.filter`, 'field'), name);
                       });
                   }
                   break;
@@ -476,7 +484,7 @@ module.exports = function(strapi) {
                     return this
                       .morphMany(GLOBALS[globalId], details.via, `${definition.collectionName}`)
                       .query(qb => {
-                        qb.where('field', name);
+                        qb.where(_.get(collection, `attributes.${details.via}.filter`, 'field'), name);
                       });
                   }
                   break;
