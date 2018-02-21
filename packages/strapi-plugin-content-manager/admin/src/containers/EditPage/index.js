@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, toNumber, toString } from 'lodash';
+import { get, toNumber, toString, size } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -18,6 +18,10 @@ import cn from 'classnames';
 // or strapi/packages/strapi-helper-plugin/lib/src
 import BackHeader from 'components/BackHeader';
 import PluginHeader from 'components/PluginHeader';
+
+// Plugin's components
+import Edit from 'components/Edit';
+import EditRelations from 'components/EditRelations';
 
 // App selectors
 import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
@@ -35,6 +39,7 @@ import {
   changeData,
   getData,
   initModelProps,
+  resetProps,
 } from './actions';
 
 import reducer from './reducer';
@@ -54,6 +59,10 @@ export class EditPage extends React.Component {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
     }
+  }
+
+  componentWillUnmount() {
+    this.props.resetProps();
   }
 
   /**
@@ -116,6 +125,8 @@ export class EditPage extends React.Component {
 
   isCreating = () => this.props.match.params.id === 'create';
 
+  isRelationComponentNull = () => size(get(this.getSchema(), 'relations')) === 0;
+
   pluginHeaderActions = [
     {
       label: 'content-manager.containers.Edit.reset',
@@ -136,13 +147,27 @@ export class EditPage extends React.Component {
 
     return (
       <div>
-        <BackHeader onClick={() => this.props.history.goBack()} />
-        <div className={cn('container-fluid', styles.containerFluid)}>
-          <PluginHeader
-            actions={this.pluginHeaderActions}
-            title={{ id: toString(editPage.pluginHeaderTitle) }}
-          />
-        </div>
+        <form onSubmit={(e) => { e.preventDefault(); }}>
+          <BackHeader onClick={() => this.props.history.goBack()} />
+          <div className={cn('container-fluid', styles.containerFluid)}>
+            <PluginHeader
+              actions={this.pluginHeaderActions}
+              title={{ id: toString(editPage.pluginHeaderTitle) }}
+            />
+            <div className="row">
+              <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
+                <div className={styles.main_wrapper}>
+                  <Edit />
+                </div>
+              </div>
+              <div className={cn('col-lg-3', this.isRelationComponentNull() ? 'hidden-xl-down' : '')}>
+                <div className={styles.sub_wrapper}>
+                  <EditRelations />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
     );
   }
@@ -165,6 +190,7 @@ EditPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.object,
+  resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
 };
 
@@ -174,6 +200,7 @@ function mapDispatchToProps(dispatch) {
       changeData,
       getData,
       initModelProps,
+      resetProps,
     },
     dispatch,
   );

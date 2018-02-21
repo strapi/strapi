@@ -9,6 +9,7 @@ import {
   CHANGE_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  RESET_PROPS,
 } from './constants';
 
 const initialState = fromJS({
@@ -36,6 +37,8 @@ function editPageReducer(state = initialState, action) {
         .update('isCreating', () => action.isCreating)
         .update('modelName', () => action.modelName)
         .update('source', () => action.source);
+    case RESET_PROPS:
+      return initialState;
     default:
       return state;
   }

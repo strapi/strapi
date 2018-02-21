@@ -9,6 +9,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  RESET_PROPS,
 } from './constants';
 
 export function changeData({ target }) {
@@ -47,5 +48,11 @@ export function initModelProps(modelName, isCreating, source, attributes) {
     isCreating,
     source,
     form,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }
