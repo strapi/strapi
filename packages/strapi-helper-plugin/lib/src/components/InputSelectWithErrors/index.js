@@ -174,13 +174,16 @@ InputSelectWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   selectOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      params: PropTypes.object,
-      value: PropTypes.string.isRequired,
-    }).isRequired,
-  ),
+    PropTypes.oneOfType([
+      PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        params: PropTypes.object,
+        value: PropTypes.string.isRequired,
+      }),
+      PropTypes.string,
+    ]),
+  ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   value: PropTypes.string.isRequired,

@@ -30,7 +30,6 @@ export function getData(id, source, mainField) {
 }
 
 export function getDataSucceeded(id, data, pluginHeaderTitle) {
-  console.log('yuyy', pluginHeaderTitle);
   return {
     type: GET_DATA_SUCCEEDED,
     id,
@@ -39,15 +38,12 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
   };
 }
 
-export function initModelProps(modelName, isCreating, source, attributes) {
-  const form = Object.keys(attributes).map(attr => [attr, '']);
-
+export function initModelProps(modelName, isCreating, source) {
   return {
     type: INIT_MODEL_PROPS,
     modelName,
     isCreating,
     source,
-    form,
   };
 }
 

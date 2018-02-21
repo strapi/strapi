@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, toNumber, toString, size } from 'lodash';
+import { get, isObject, toNumber, toString, size } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -33,7 +33,6 @@ import { bindLayout } from 'utils/bindLayout';
 
 // Layout
 import layout from '../../../../config/layout';
-
 
 import {
   changeData,
@@ -109,7 +108,7 @@ export class EditPage extends React.Component {
     }
 
     const target = {
-      name: e.target.name,
+      name: `record.${e.target.name}`,
       value,
     };
 
@@ -157,12 +156,20 @@ export class EditPage extends React.Component {
             <div className="row">
               <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
                 <div className={styles.main_wrapper}>
-                  <Edit />
+                  <Edit
+                    attributes={this.getModelAttributes()}
+                    didCheckErrors={editPage.didCheckErrors}
+                    layout={this.layout}
+                    modelName={this.getModelName()}
+                    onChange={this.handleChange}
+                    record={editPage.record}
+                    schema={this.getSchema()}
+                  />
                 </div>
               </div>
               <div className={cn('col-lg-3', this.isRelationComponentNull() ? 'hidden-xl-down' : '')}>
                 <div className={styles.sub_wrapper}>
-                  <EditRelations />
+                  {!this.isRelationComponentNull() && <EditRelations />}
                 </div>
               </div>
             </div>

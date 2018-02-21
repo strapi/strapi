@@ -13,7 +13,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  form: Map({}),
+  didCheckErrors: true,
   isCreating: false,
   id: '',
   modelName: '',
@@ -25,7 +25,7 @@ const initialState = fromJS({
 function editPageReducer(state = initialState, action) {
   switch (action.type) {
     case CHANGE_DATA:
-      return state.updateIn(actions.keys, () => action.value);
+      return state.updateIn(action.keys, () => action.value);
     case GET_DATA_SUCCEEDED:
       return state
         .update('id', () => action.id)
@@ -33,7 +33,6 @@ function editPageReducer(state = initialState, action) {
         .update('record', () => Map(action.data));
     case INIT_MODEL_PROPS:
       return state
-        .update('form', () => Map(action.form))
         .update('isCreating', () => action.isCreating)
         .update('modelName', () => action.modelName)
         .update('source', () => action.source);
