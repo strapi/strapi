@@ -86,7 +86,7 @@
   "components.Input.error.validation.min": "Değer çok az.",
   "components.Input.error.validation.maxLength": "Değer çok uzun.",
   "components.Input.error.validation.minLength": "Değer çok kısa.",
-  "components.Input.error.contentTypeName.taken": "Bu isim zaten.",
+  "components.Input.error.contentTypeName.taken": "Bu isim zaten var.",
   "components.Input.error.attribute.taken": "Bu alan ismi zaten var.",
   "components.Input.error.attribute.key.taken": "Bu değer zaten var.",
   "components.Input.error.attribute.sameKeyAndName": "Eşit olamaz",

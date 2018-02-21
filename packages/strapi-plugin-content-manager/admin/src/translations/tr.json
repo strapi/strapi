@@ -1,0 +1,53 @@
+{
+  "plugin.description.short": "Veritabanındaki verileri görmek, düzenlemek ve silmek için hızlı bir yol.",
+  "plugin.description.long": "Veritabanındaki verileri görmek, düzenlemek ve silmek için hızlı bir yol.",
+  "containers.Home.pluginHeaderTitle": "İçerik Yönetimi",
+  "containers.Home.introduction": "Girişlerinizi düzenlemek için soldaki menüdeki ilgili bağlantıya gidin. Bu eklentinin ayarları düzenlemek için uygun bir yol bulunmamaktadır ve halen aktif geliştirme aşamasındadır.",
+  "containers.Home.pluginHeaderDescription": "Güçlü ve güzel bir arayüz aracılığıyla girişlerinizi yönetin.",
+  "containers.Edit.submit": "Kaydet",
+  "containers.Edit.editing": "Düzenleniyor...",
+  "containers.Edit.delete": "Sil",
+  "containers.Edit.reset": "Reset",
+  "containers.Edit.returnList": "Listeye dön",
+  "containers.List.addAnEntry": "Yeni {entity} ekle",
+  "containers.List.pluginHeaderDescription": "{label} kayıt bulundu",
+  "containers.List.pluginHeaderDescription.singular": "{label} kayıt bulundu",
+  "components.LimitSelect.itemsPerPage": "Sayfa başı",
+  "containers.List.errorFetchRecords": "Hata",
+
+  "emptyAttributes.title": "Henüz bir alan yok",
+  "emptyAttributes.description": "İçerik türüne ilk alanınızı ekleyin",
+  "emptyAttributes.button": "Içerik türü oluşturucuya gidin",
+
+  "error.schema.generation": "Şema oluşturma sırasında bir hata oluştu.",
+  "error.records.count": "Sayım kayıtları getirilinceye kadar",
+  "error.records.fetch": "Kayıtlar getirilirken bir hata oluştu.",
+  "error.record.fetch": "Kayıt getirilirken bir hata oluştu.",
+  "error.record.create": "Kayıt oluşturulurken bir hata oluştu.",
+  "error.record.update": "Kayıt güncelleme sırasında bir hata oluştu.",
+  "error.record.delete": "Kayıt silinirken bir hata oluştu.",
+  "error.model.fetch": "Modellerin yapılandırması getirilirken bir hata oluştu.",
+  "error.validation.required": "Zorunlu alandır.",
+  "error.validation.regex": "Regex ile eşleşmiyor.",
+  "error.validation.max": "Değer çok yüksek.",
+  "error.validation.min": "Değer çok az.",
+  "error.validation.maxLength": "Değer çok uzun.",
+  "error.validation.minLength": "Değer çok kısa.",
+  "error.contentTypeName.taken": "Bu alan ismi zaten var.",
+  "error.attribute.taken": "Bu alan ismi zaten var.",
+  "error.attribute.key.taken": "Bu değer zaten var.",
+  "error.attribute.sameKeyAndName": "Eşit olamaz",
+  "error.validation.minSupMax": "Üstü olamaz",
+
+  "notification.error.relationship.fetch": "İlişki getirme sırasında bir hata oluştu.",
+
+  "success.record.delete": "Silindi",
+  "success.record.save": "Kaydedildi",
+
+  "pageNotFound": "Sayfa bulunamadı",
+
+  "popUpWarning.button.cancel": "İptal",
+  "popUpWarning.button.confirm": "Onayla",
+  "popUpWarning.title": "Lütfen onaylayın",
+  "popUpWarning.bodyMessage.contentType.delete": "Bu girişi silmek istediğinizden emin misiniz?"
+}
