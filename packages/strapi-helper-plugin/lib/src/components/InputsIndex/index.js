@@ -41,7 +41,7 @@ const inputs = {
 
 function InputsIndex(props) {
   const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
-  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : props.value || '';
+  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : (props.value === 0 ? props.value : props.value || '');
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
