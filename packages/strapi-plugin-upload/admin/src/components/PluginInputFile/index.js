@@ -40,7 +40,7 @@ class PluginInputFile extends React.PureComponent {
     const { isDraging } = this.state;
     const link = (
       <FormattedMessage id="upload.PluginInputFile.link">
-        {(message) => <u onClick={this.handleClick}>{message}</u>}
+        {(message) => <span className={styles.underline} onClick={this.handleClick}>{message}</span>}
       </FormattedMessage>
     );
 
@@ -65,9 +65,7 @@ class PluginInputFile extends React.PureComponent {
           multiple
           name={name}
           onChange={onChange}
-          ref={(input) => {
-            this.input = input;
-          }}
+          ref="input"
           type="file"
         />
       </label>

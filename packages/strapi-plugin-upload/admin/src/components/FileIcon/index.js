@@ -11,15 +11,23 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function FileIcon({ fileType }) {
-  let iconType = fileType;
-
-  if ( ['jpeg', 'jpg', 'png', 'gif'].includes(fileType) ) {
-    iconType = 'image';
-  }
-
-  if ( ['avi', 'm4v', 'mpg', 'mp4', 'mov'].includes(fileType) ) {
-    iconType = 'video';
-  }
+  const iconType = (() => {
+    switch (fileType) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return 'image';
+      case 'mov':
+      case 'avi':
+      case 'mpg':
+      case 'm4v':
+      case 'mp4':
+        return 'video';
+      default:
+        return fileType;
+    };
+  })();
 
   return (
     <div

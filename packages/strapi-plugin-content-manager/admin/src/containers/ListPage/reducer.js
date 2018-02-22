@@ -28,12 +28,12 @@ function listPageReducer(state = initialState, action) {
   switch (action.type) {
     case DELETE_DATA_SUCCESS:
       return state.update('records', (list) => (
-        list.filter(o => {
-          if (o._id) {
-            return o._id !== action.id;
+        list.filter(obj => {
+          if (obj._id) {
+            return obj._id !== action.id;
           }
 
-          return o.id !== parseInt(action.id, 10);
+          return obj.id !== parseInt(action.id, 10);
         })
       ));
     case CHANGE_PARAMS:

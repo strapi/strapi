@@ -6,7 +6,7 @@
   "HomePage.description": "Découvrez tous les fichiers téléchargés",
   "HomePage.InputSearch.placeholder": "Rechercher un fichier...",
 
-  "Li.linkCopied": "LINK COPIÉ DANS LE PRESSE-PAPIER",
+  "Li.linkCopied": "Lien copié dans le presse-papier",
 
   "ListHeader.type": "Type",
   "ListHeader.hash": "Hash",

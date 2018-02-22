@@ -78,6 +78,7 @@ function* uploadFiles() {
 
   } catch(err) {
     console.log(err);
+    strapi.notification.error('notification.error');
   }
 }
 
