@@ -1,0 +1,112 @@
+{
+  "app.components.ComingSoonPage.comingSoon": "Çok Yakında",
+  "app.components.ComingSoonPage.featuresNotAvailable": "Bu özellik geliştirme aşamasındadır.",
+
+  "app.components.DownloadInfo.download": "İndirme devam ediyor...",
+  "app.components.DownloadInfo.text": "Bu birkaç dakika sürebilir. Sabrınız için teşekkürler.",
+
+  "app.components.HomePage.welcome": "Panele hoşgeldiniz.",
+  "app.components.HomePage.description.part1": "Sizi kullanıcılarımızdan biri olarak görmekten mutluyuz!",
+  "app.components.HomePage.description.part2": "Hayalinizdeki uygulamayı oluşturmanıza yardımcı olacak topluluğumuza üye oldunuz.",
+  "app.components.HomePage.button": "İlk içerik türünü oluşturun",
+  "app.components.HomePage.feedback": "Aşağıdaki destek kanallarından birini kullanarak soru sormaya ya da bize geri bildirimde bulunmaya çekinmeyin.",
+
+  "app.components.InputFile.newFile": "Yeni dosya ekle",
+  "app.components.InputFileDetails.details": "Detaylar",
+  "app.components.ImgPreview.hint": "Dosyanızı bu alana sürükleyip bırakın ya da bir dosya yüklemek için {browse}",
+  "app.components.ImgPreview.hint.browse": "gözat",
+
+  "app.components.InstallPluginPage.helmet": "Pazar Yeri - Eklentiler",
+  "app.components.InstallPluginPage.title": "Pazar Yeri - Eklentiler",
+  "app.components.InstallPluginPage.description": "Uygulamanızı rahatlıkla genişletin.",
+  "app.components.InstallPluginPage.plugin.support-us.description": "Strapi tişörtünü satın alarak bize destek olun. Bu, projede çalışmaya devam etmemize ve size mümkün olan en iyi deneyimi sunmamızı sağlayacaktır!",
+  "app.components.InstallPluginPage.InputSearch.label": " ",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Eklenti ara... (örnek: authentication)",
+  "app.components.InstallPluginPopup.downloads": "indir",
+  "app.components.InstallPluginPopup.navLink.description": "Açıklama",
+  "app.components.InstallPluginPopup.navLink.screenshots": "Ekran Görüntüleri",
+  "app.components.InstallPluginPopup.navLink.avis": "avis",
+  "app.components.InstallPluginPopup.navLink.faq": "sss",
+  "app.components.InstallPluginPopup.navLink.changelog": "Değişim Günlüğü",
+  "app.components.InstallPluginPopup.noDescription": "Açıklama bulunmamaktadır.",
+
+  "app.components.LeftMenuFooter.poweredBy": "Gururla sunar",
+  "app.components.LeftMenuLinkContainer.configuration": "Yapılandırma",
+  "app.components.LeftMenuLinkContainer.general": "Genel",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "Pazar Yeri",
+  "app.components.LeftMenuLinkContainer.listPlugins": "Eklentiler",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Yüklenen eklenti bulunmamaktadır.",
+  "app.components.LeftMenuLinkContainer.plugins": "Eklentiler",
+
+  "app.components.ListPluginsPage.helmet.title": "Eklenti Listesi",
+  "app.components.ListPluginsPage.title": "Etklentiler",
+  "app.components.ListPluginsPage.description": "Projedeki yüklenen eklentiler.",
+  "app.components.listPluginsPage.deletePlugin.error": "Eklenti kaldırılırken bir hata oluştu",
+  "app.components.listPlugins.title.singular": "{number} eklenti yüklü",
+  "app.components.listPlugins.title.plural": "{number} eklenti yüklü",
+  "app.components.listPlugins.title.none": "Yüklenen eklenti bulunmamaktadır.",
+  "app.components.listPlugins.button": "Yeni eklenti ekle",
+
+  "app.components.NotFoundPage.description": "Bulunamadı",
+  "app.components.NotFoundPage.back": "Anasayfaya geri dön",
+
+  "app.components.Official": "Resmi",
+
+  "app.components.PluginCard.compatible": "Uygulamanızla uyumlu",
+  "app.components.PluginCard.compatibleCommunity": "Toplulukla uyumlu",
+  "app.components.PluginCard.Button.label.download": "İndir",
+  "app.components.PluginCard.Button.label.install": "Zaten yüklenmiş",
+  "app.components.PluginCard.Button.label.support": "Bizi destekleyin",
+  "app.components.PluginCard.price.free": "Ücretsiz",
+  "app.components.PluginCard.more-details": "Daha fazla detay",
+
+  "app.utils.placeholder.defaultMessage": "\u0020",
+  "app.utils.SelectOption.defaultMessage": "\u0020",
+
+  "components.AutoReloadBlocker.header": "Bu eklenti için tekrar yükleme özelliği gerekiyor.",
+  "components.AutoReloadBlocker.description": "Aşağıdaki dosyayı açın ve özelliği etkinleştirin.",
+
+  "components.ErrorBoundary.title": "Bir şeyler yanlış gitti...",
+
+  "components.OverlayBlocker.title": "Yeniden başlatılmayı bekliyor...",
+  "components.OverlayBlocker.description": "Sunucunun yeniden başlatılması gereken bir özellik kullanıyorsunuz. Lütfen sunucu çalışana kadar bekleyin.",
+
+  "components.ProductionBlocker.header": "Bu eklenti yalnızca geliştirme aşamasında mevcuttur.",
+  "components.ProductionBlocker.description": "Güvenlik nedeniyle, bu eklentiyi diğer ortamlarda devre dışı bırakmamız gerekir.",
+
+  "components.popUpWarning.button.cancel": "İptal",
+  "components.popUpWarning.button.confirm": "Onayla",
+  "components.popUpWarning.title": "Lütfen onaylayın",
+  "components.popUpWarning.message": "Bunu silmek istediğinizden emin misiniz?",
+
+  "components.Input.error.validation.email": "Geçersiz e-posta adresi.",
+  "components.Input.error.validation.required": "Zorunlu alandır.",
+  "components.Input.error.validation.regex": "Regex ile eşleşmiyor.",
+  "components.Input.error.validation.max": "Değer çok yüksek.",
+  "components.Input.error.validation.min": "Değer çok az.",
+  "components.Input.error.validation.maxLength": "Değer çok uzun.",
+  "components.Input.error.validation.minLength": "Değer çok kısa.",
+  "components.Input.error.contentTypeName.taken": "Bu isim zaten var.",
+  "components.Input.error.attribute.taken": "Bu alan ismi zaten var.",
+  "components.Input.error.attribute.key.taken": "Bu değer zaten var.",
+  "components.Input.error.attribute.sameKeyAndName": "Eşit olamaz",
+  "components.Input.error.validation.minSupMax": "Üstü olamaz",
+  "components.Input.error.custom-error": "{errorMessage} ",
+
+  "components.ListRow.empty": "Gösterilecek veri bulunmamaktadır.",
+
+  "notification.error": "Bir hata oluştu",
+
+  "Auth & Permissions": "Yetki & İzinler",
+  "Content Manager": "İçerik Yönetimi",
+  "Content Type Builder": "İçerik Türü Oluşturucusu",
+  "Settings Manager": "Yönetici Ayarları",
+  "Email": "E-posta",
+  "Password": "Şifre",
+  "Username": "Kullanıcı Adı",
+  "Provider": "Sağlayıcı",
+  " ": "Şifreyi yenileme",
+  "Role": "Rol",
+  "New entry": "Yeni giriş",
+  "request.error.model.unknow": "Bu model bulunmamaktadır."
+}
