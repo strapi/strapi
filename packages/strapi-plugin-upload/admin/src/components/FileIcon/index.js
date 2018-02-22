@@ -26,7 +26,7 @@ function FileIcon({ fileType }) {
         return 'video';
       default:
         return fileType;
-    };
+    }
   })();
 
   return (

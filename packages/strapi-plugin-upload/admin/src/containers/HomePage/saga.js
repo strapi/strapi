@@ -88,6 +88,7 @@ function* search() {
     console.log('will search', search);
   } catch(err) {
     console.log(err);
+    strapi.notification.error('notification.error');
   }
 }
 
