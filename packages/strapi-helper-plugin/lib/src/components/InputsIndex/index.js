@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
-// import InputDateWithErrors from 'components/InputDateWithErrors';
+import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
 import InputFileWithErrors from 'components/InputFileWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
@@ -26,7 +26,7 @@ const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does
 const inputs = {
   addon: InputAddonWithErrors,
   checkbox: InputCheckboxWithErrors,
-  // date: InputDateWithErrors,
+  date: InputDateWithErrors,
   email: InputEmailWithErrors,
   file: InputFileWithErrors,
   number: InputNumberWithErrors,
