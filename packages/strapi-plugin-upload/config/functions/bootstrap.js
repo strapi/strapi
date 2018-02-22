@@ -28,6 +28,7 @@ module.exports = async cb => {
 
     strapi.plugins.upload.config.providers = [];
 
+    // mount all providers to get configs
     _.forEach(uploads, (node_module) => {
       strapi.plugins.upload.config.providers.push(
         require(path.join(`${strapi.config.appPath}/node_modules/${node_module}`))
@@ -35,6 +36,7 @@ module.exports = async cb => {
     });
 
     try {
+      // if profiver config not exit set one by default
       const config = await pluginStore.get({key: 'provider'});
 
       if (!config) {
@@ -42,6 +44,7 @@ module.exports = async cb => {
 
         const value = _.assign({}, provider, {
           enabled: true,
+          // by default limit size to 1 GB
           sizeLimit: 1000000
         });
 
