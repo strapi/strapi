@@ -34,10 +34,6 @@
       "type": "string",
       "configurable": false,
       "required": true
-    },
-    "ref": {
-      "type": "string",
-      "configurable": false
     }
   }
 }
