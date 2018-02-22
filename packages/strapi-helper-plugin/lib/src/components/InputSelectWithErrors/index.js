@@ -37,6 +37,12 @@ class InputSelectWithErrors extends React.Component {
     }
   }
 
+  handleBlur = ({ target }) => {
+    if (!isEmpty(target.value)) {
+      this.setState({ errors: [] });
+    }
+  }
+
   render() {
     const {
       autoFocus,
@@ -86,7 +92,7 @@ class InputSelectWithErrors extends React.Component {
           disabled={disabled}
           error={!isEmpty(this.state.errors)}
           name={name}
-          onBlur={isFunction(onBlur) ? onBlur : () => {}}
+          onBlur={isFunction(onBlur) ? onBlur : this.handleBlur}
           onChange={onChange}
           onFocus={onFocus}
           selectOptions={selectOptions}
@@ -127,7 +133,7 @@ InputSelectWithErrors.defaultProps = {
   label: '',
   labelClassName: '',
   labelStyle: {},
-  onBlur: () => {},
+  onBlur: false,
   onFocus: () => {},
   selectOptions: [],
   style: {},
@@ -174,13 +180,16 @@ InputSelectWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   selectOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      params: PropTypes.object,
-      value: PropTypes.string.isRequired,
-    }).isRequired,
-  ),
+    PropTypes.oneOfType([
+      PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        params: PropTypes.object,
+        value: PropTypes.string.isRequired,
+      }),
+      PropTypes.string,
+    ]),
+  ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   value: PropTypes.string.isRequired,
