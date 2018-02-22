@@ -96,7 +96,7 @@
   "noTableWarning.description": "Don't forget to create the table `{modelName}` in your database",
   "noTableWarning.infos": "More info",
 
-  "notification.error.message": "An error occured",
+  "notification.error.message": "An error occurred",
   "notification.info.contentType.creating.notSaved": "Please save your current Content Type before creating a new one",
   "notification.info.optimized": "This plugin is optimized with your localStorage",
   "notification.success.message.contentType.edit": "Your Content Type has been updated",
