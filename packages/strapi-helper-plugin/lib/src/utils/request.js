@@ -108,7 +108,7 @@ function serverRestartWatcher(response) {
  *
  * @return {object}           The response data
  */
-export default function request(url, options = {}, shouldWatchServerRestart = false) {
+export default function request(url, options = {}, shouldWatchServerRestart = false, stringify = true ) {
  // Set headers
   if (!options.headers) {
     options.headers = Object.assign({
@@ -135,7 +135,7 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
   }
 
   // Stringify body object
-  if (options && options.body) {
+  if (options && options.body && stringify) {
     options.body = JSON.stringify(options.body);
   }
 

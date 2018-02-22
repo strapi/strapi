@@ -12,21 +12,22 @@
   margin-right: 32px;
   line-height: 54px;
   border-bottom: 1px solid rgba(14,22,34,0.04);
+  justify-content: space-between;
 
   > div:first-child {
-    min-width: 53px;
+    width: 53px;
   }
   > div:nth-child(2) {
-    min-width: 80px;
+    width: 80px;
   }
   > div:nth-child(3) {
-    min-width: 148px;
+    width: 148px;
   }
   > div:nth-child(4) {
-    min-width: 221px;
+    width: 221px;
   }
   > div:nth-child(5) {
-    min-width: 184px;
+    width: 184px;
     > span {
       &:after {
         content: '\f0d8';
@@ -36,13 +37,13 @@
     }
   }
   > div:nth-child(6) {
-    min-width: 100px;
+    width: 100px;
   }
   > div:nth-child(7) {
-    min-width: 147px;
+    width: 147px;
   }
   > div:nth-child(8) {
-    min-width: 116px;
+    width: 116px;
   }
 }
 
@@ -84,4 +85,10 @@
       transition: all .2s;
     }
   }
+}
+
+.truncate {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

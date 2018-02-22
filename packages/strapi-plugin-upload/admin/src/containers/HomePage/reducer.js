@@ -17,11 +17,11 @@ import {
 const initialState = fromJS({
   deleteSuccess: false,
   dataToDelete: '',
-  entriesNumber: 1,
+  entriesNumber: 0,
   search: '',
   uploadedFiles: List([Map({})]),
   params: Map({
-    sort: 'updatedAt',
+    sort: 'hash',
     limit: 10,
     page: 1,
   }),
