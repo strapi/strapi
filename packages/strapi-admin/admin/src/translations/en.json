@@ -62,6 +62,7 @@
 
   "app.utils.placeholder.defaultMessage": "\u0020",
   "app.utils.SelectOption.defaultMessage": "\u0020",
+  "app.utils.defaultMessage": "\u0020",
 
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.AutoReloadBlocker.description": "Open the following file and enable the feature.",
@@ -70,6 +71,8 @@
 
   "components.OverlayBlocker.title": "Waiting for restart...",
   "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
+
+  "components.PageFooter.select": "entries per page",
 
   "components.ProductionBlocker.header": "This plugin is only available in development.",
   "components.ProductionBlocker.description": "For safety purposes we have to disable this plugin in other environments.",
