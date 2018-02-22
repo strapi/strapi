@@ -104,16 +104,15 @@ module.exports = function (strapi) {
                         .forEach(key => {
                           collection.schema.pre(key,  function (next) {
                             if (this._mongooseOptions.populate && this._mongooseOptions.populate[association.alias]) {
-                              if (association.nature === 'oneToMorph' || association.nature === 'manyToMorph') {
+                              if (association.nature === 'oneToManyMorph' || association.nature === 'manyToManyMorph') {
                                 this._mongooseOptions.populate[association.alias].match = {
                                   [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
                                 }
                               } else {
-                                this._mongooseOptions.populate[association.alias].path = `${association.alias}.${association.filter}`;
+                                this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                               }
                             }
-
                             next();
                           });
                         });
@@ -163,7 +162,18 @@ module.exports = function (strapi) {
                     transform: function (doc, returned, opts) {
                       morphAssociations.forEach(association => {
                         if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
-                          returned[association.alias] = returned[association.alias].map(o => o[association.filter]);
+                          // Reformat data by bypassing the many-to-many relationship.
+                          switch (association.nature) {
+                            case 'oneMorphToOne':
+                              returned[association.alias] = returned[association.alias][0].ref;
+                              break;
+                            case 'manyMorphToOne':
+                              returned[association.alias] = returned[association.alias].map(obj => obj.ref);
+                              break;
+                            default:
+
+                          }
+
                         }
                       });
                     }

@@ -339,7 +339,7 @@ module.exports = {
           autoPopulate: _.get(association, 'autoPopulate', true),
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
-          where: details.where,
+          filter: details.filter,
         });
       } else if (association.hasOwnProperty('model') && association.model !== '*') {
         definition.associations.push({
@@ -351,7 +351,7 @@ module.exports = {
           autoPopulate: _.get(association, 'autoPopulate', true),
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
-          where: details.where,
+          filter: details.filter,
         });
       } else if (association.hasOwnProperty('collection') || association.hasOwnProperty('model')) {
         const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
