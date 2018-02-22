@@ -68,7 +68,7 @@ export class EditPage extends React.Component {
   }
 
   /**
-   * Retrive the model
+   * Retrieve the model
    * @type {Object}
    */
   getModel = () => get(this.props.models, ['models', this.getModelName()]) || get(this.props.models, ['plugins', this.getSource(), 'models', this.getModelName()]);
@@ -194,7 +194,15 @@ export class EditPage extends React.Component {
               </div>
               <div className={cn('col-lg-3', this.isRelationComponentNull() ? 'hidden-xl-down' : '')}>
                 <div className={styles.sub_wrapper}>
-                  {!this.isRelationComponentNull() && <EditRelations />}
+                  {!this.isRelationComponentNull() && (
+                    <EditRelations
+                      currentModelName={this.getModelName()}
+                      location={this.props.location}
+                      changeData={this.props.changeData}
+                      record={editPage.record}
+                      schema={this.getSchema()}
+                    />
+                  )}
                 </div>
               </div>
             </div>

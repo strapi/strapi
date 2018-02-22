@@ -1,5 +1,6 @@
+import { LOCATION_CHANGE } from 'react-router-redux';
 import { map, omit } from 'lodash';
-import { fork, put, select, call, takeLatest } from 'redux-saga/effects';
+import { fork, put, select, call, takeLatest, take, cancel } from 'redux-saga/effects';
 
 import request from 'utils/request';
 import { generateSchema } from 'utils/schema';
@@ -68,9 +69,15 @@ export function* modelsLoaded() {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  yield fork(takeLatest, LOAD_MODELS, getModels);
-  yield fork(takeLatest, LOADED_MODELS, modelsLoaded);
-  yield fork(takeLatest, GET_MODEL_ENTRIES, modelEntriesGet);
+  const loadModelsWatcher = yield fork(takeLatest, LOAD_MODELS, getModels);
+  const loadedModelsWatcher = yield fork(takeLatest, LOADED_MODELS, modelsLoaded);
+  const loadEntriesWatcher = yield fork(takeLatest, GET_MODEL_ENTRIES, modelEntriesGet);
+
+  yield take(LOCATION_CHANGE);
+
+  yield cancel(loadModelsWatcher);
+  yield cancel(loadedModelsWatcher);
+  yield cancel(loadEntriesWatcher);
 }
 
 // All sagas to be loaded
