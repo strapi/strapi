@@ -41,11 +41,11 @@
     },
     "avatar": {
       "model": "upload",
-      "via": "related"
+      "via": "uploaded"
     },
     "photos": {
       "collection": "upload",
-      "via": "related"
+      "via": "uploaded"
     }
   }
 }

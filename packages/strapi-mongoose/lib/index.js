@@ -106,11 +106,11 @@ module.exports = function (strapi) {
                             if (this._mongooseOptions.populate && this._mongooseOptions.populate[association.alias]) {
                               if (association.nature === 'oneToMorph' || association.nature === 'manyToMorph') {
                                 this._mongooseOptions.populate[association.alias].match = {
-                                  [`${association.via}.${association.where}`]: association.alias,
+                                  [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
                                 }
                               } else {
-                                this._mongooseOptions.populate[association.alias].path = `${association.alias}.${association.key}`;
+                                this._mongooseOptions.populate[association.alias].path = `${association.alias}.${association.filter}`;
                               }
                             }
 
@@ -163,7 +163,7 @@ module.exports = function (strapi) {
                     transform: function (doc, returned, opts) {
                       morphAssociations.forEach(association => {
                         if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
-                          returned[association.alias] = returned[association.alias].map(o => o[association.key]);
+                          returned[association.alias] = returned[association.alias].map(o => o[association.filter]);
                         }
                       });
                     }
@@ -332,14 +332,11 @@ module.exports = function (strapi) {
                   case 'morphOne': {
                     const FK = _.find(definition.associations, {alias: name});
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.model].globalId : strapi.models[details.model].globalId;
-                    const key = details.plugin ?
-                      strapi.plugins[details.plugin].models[details.model].attributes[details.via].key:
-                      strapi.models[details.model].attributes[details.via].key;
 
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref,
-                      via: `${FK.via}.${key}`,
+                      via: `${FK.via}.ref`,
                       justOne: true
                     };
 
@@ -350,14 +347,11 @@ module.exports = function (strapi) {
                   case 'morphMany': {
                     const FK = _.find(definition.associations, {alias: name});
                     const ref = details.plugin ? strapi.plugins[details.plugin].models[details.collection].globalId : strapi.models[details.collection].globalId;
-                    const key = details.plugin ?
-                      strapi.plugins[details.plugin].models[details.collection].attributes[details.via].key:
-                      strapi.models[details.collection].attributes[details.via].key;
 
                     definition.loadedModel[name] = {
                       type: 'virtual',
                       ref,
-                      via: `${FK.via}.${key}`
+                      via: `${FK.via}.ref`
                     };
 
                     // Set this info to be able to see if this field is a real database's field.
@@ -367,8 +361,8 @@ module.exports = function (strapi) {
                   case 'belongsToMorph': {
                     definition.loadedModel[name] = {
                       kind: String,
-                      [details.where]: String,
-                      [details.key]: {
+                      [details.filter]: String,
+                      ref: {
                         type: instance.Schema.Types.ObjectId,
                         refPath: `${name}.kind`
                       }
@@ -378,8 +372,8 @@ module.exports = function (strapi) {
                   case 'belongsToManyMorph': {
                     definition.loadedModel[name] = [{
                       kind: String,
-                      [details.where]: String,
-                      [details.key]: {
+                      [details.filter]: String,
+                      ref: {
                         type: instance.Schema.Types.ObjectId,
                         refPath: `${name}.kind`
                       }

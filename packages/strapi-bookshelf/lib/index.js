@@ -160,17 +160,17 @@ module.exports = function(strapi) {
 
                         // Reformat data by bypassing the many-to-many relationship.
                         switch (association.nature) {
-                          case 'oneToMorph':
+                          case 'oneToManyMorph':
                             attrs[association.alias] = attrs[association.alias][model.collectionName];
                             break;
-                          case 'manyToMorph':
+                          case 'manyToManyMorph':
                             attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
                             break;
-                          case 'morphToOne':
-                            attrs[association.alias] = attrs[association.alias][association.alias];
+                          case 'oneMorphToOne':
+                            attrs[association.alias] = attrs[association.alias].related;
                             break;
-                          case 'morphToMany':
-                            attrs[association.alias] = attrs[association.alias].map(rel => rel[association.alias]);
+                          case 'manyMorphToOne':
+                            attrs[association.alias] = attrs[association.alias].map(obj => obj.related);
                             break;
                           default:
 
@@ -313,9 +313,15 @@ module.exports = function(strapi) {
                 name
               );
 
-              const globalId = details.plugin ?
-                _.get(strapi.plugins,`${details.plugin}.models.${(details.model || details.collection || '').toLowerCase()}.globalId`):
-                _.get(strapi.models, `${(details.model || details.collection || '').toLowerCase()}.globalId`);
+              let globalId;
+              const globalName = details.model || details.collection || '';
+
+              // Exclude polymorphic association.
+              if (globalName !== '*') {
+                globalId = details.plugin ?
+                  _.get(strapi.plugins,`${details.plugin}.models.${globalName.toLowerCase()}.globalId`):
+                  _.get(strapi.models, `${globalName.toLowerCase()}.globalId`);
+              }
 
               switch (verbose) {
                 case 'hasOne': {
