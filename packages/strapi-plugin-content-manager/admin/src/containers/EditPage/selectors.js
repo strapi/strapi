@@ -25,9 +25,19 @@ const makeSelectEditPage = () => createSelector(
  *
  * Other specific selectors
  */
+const makeSelectIsCreating = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('isCreating'),
+);
+
 const makeSelectModelName = () => createSelector(
   selectEditPageDomain(),
   (substate) => substate.get('modelName'),
+);
+
+const makeSelectRecord = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('record'),
 );
 
 const makeSelectSource = () => createSelector(
@@ -37,7 +47,9 @@ const makeSelectSource = () => createSelector(
 
 export default makeSelectEditPage;
 export {
-  selectEditPageDomain,
+  makeSelectIsCreating,
   makeSelectModelName,
+  makeSelectRecord,
   makeSelectSource,
+  selectEditPageDomain,
 };

@@ -180,28 +180,27 @@ export class ListPage extends React.Component {
     this.setState({ showWarning: !this.state.showWarning });
   }
 
-  pluginHeaderActions = [
-    {
-      label: 'content-manager.containers.List.addAnEntry',
-      labelValues: {
-        entity: capitalize(this.props.match.params.slug) || 'Content Manager',
-      },
-      kind: 'primaryAddShape',
-      onClick: () => this.props.history.push({
-        pathname: `${this.props.location.pathname}/create`,
-        search: `?source=${this.getSource()}`,
-      }),
-    },
-  ];
-
   render() {
     const { listPage, listPage: { params } } = this.props;
+    const pluginHeaderActions = [
+      {
+        label: 'content-manager.containers.List.addAnEntry',
+        labelValues: {
+          entity: capitalize(this.props.match.params.slug) || 'Content Manager',
+        },
+        kind: 'primaryAddShape',
+        onClick: () => this.props.history.push({
+          pathname: `${this.props.location.pathname}/create`,
+          search: `?source=${this.getSource()}`,
+        }),
+      },
+    ];
 
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
-            actions={this.pluginHeaderActions}
+            actions={pluginHeaderActions}
             description={{
               id: listPage.count > 1 ? 'content-manager.containers.List.pluginHeaderDescription' : 'content-manager.containers.List.pluginHeaderDescription.singular',
               values: {

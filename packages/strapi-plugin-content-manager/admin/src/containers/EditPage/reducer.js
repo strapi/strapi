@@ -12,6 +12,7 @@ import {
   ON_CANCEL,
   RESET_PROPS,
   SET_FORM_ERRORS,
+  SUBMIT_SUCCESS,
 } from './constants';
 
 const initialState = fromJS({
@@ -25,6 +26,7 @@ const initialState = fromJS({
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
   source: 'content-manager',
+  submitSuccess: false,
 });
 
 function editPageReducer(state = initialState, action) {
@@ -54,6 +56,8 @@ function editPageReducer(state = initialState, action) {
       return state
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List(action.formErrors));
+    case SUBMIT_SUCCESS:
+      return state.update('submitSuccess', (v) => v = !v);
     default:
       return state;
   }

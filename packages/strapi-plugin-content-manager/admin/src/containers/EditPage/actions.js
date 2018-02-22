@@ -15,6 +15,8 @@ import {
   ON_CANCEL,
   RESET_PROPS,
   SET_FORM_ERRORS,
+  SUBMIT,
+  SUBMIT_SUCCESS,
 } from './constants';
 
 export function changeData({ target }) {
@@ -74,5 +76,17 @@ export function setFormErrors(formErrors) {
   return {
     type: SET_FORM_ERRORS,
     formErrors,
+  };
+}
+
+export function submit() {
+  return {
+    type: SUBMIT,
+  };
+}
+
+export function submitSuccess() {
+  return {
+    type: SUBMIT_SUCCESS,
   };
 }

@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, isEmpty, isObject, toNumber, toString, size } from 'lodash';
+import { get, includes, isEmpty, isObject, toNumber, toString, replace, size } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -42,6 +42,7 @@ import {
   onCancel,
   resetProps,
   setFormErrors,
+  submit,
 } from './actions';
 
 import reducer from './reducer';
@@ -60,6 +61,24 @@ export class EditPage extends React.Component {
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
+      if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
+        const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
+
+        this.props.history.push({
+          pathname: redirectUrl.split('?')[0],
+          search: redirectUrl.split('?')[1],
+        });
+      } else {
+        this.props.history.push({
+          pathname: replace(this.props.location.pathname, '/create', ''),
+          search: `?source=${this.getSource()}`,
+        });
+      }
     }
   }
 
@@ -123,7 +142,7 @@ export class EditPage extends React.Component {
     const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
 
     if (isEmpty(formErrors)) {
-      // this.props.submit()
+      this.props.submit();
     }
 
     this.props.setFormErrors(formErrors);
@@ -159,7 +178,7 @@ export class EditPage extends React.Component {
     {
       kind: 'primary',
       label: !this.isCreating() ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
-      onClick: () => {},
+      onClick: this.handleSubmit,
       type: 'submit',
     },
   ];
@@ -234,6 +253,7 @@ EditPage.propTypes = {
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   setFormErrors: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -245,6 +265,7 @@ function mapDispatchToProps(dispatch) {
       onCancel,
       resetProps,
       setFormErrors,
+      submit,
     },
     dispatch,
   );
