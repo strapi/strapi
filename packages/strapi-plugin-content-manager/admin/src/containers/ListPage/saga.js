@@ -75,7 +75,7 @@ export function* dataDelete({ id, modelName, source}) {
 
     yield put(deleteDataSuccess(id));
   } catch(err) {
-    console.log('eer', err);
+    strapi.notification.error('content-manager.error.record.delete');
   }
 }
 

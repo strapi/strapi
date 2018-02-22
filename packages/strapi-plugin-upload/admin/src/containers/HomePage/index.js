@@ -77,7 +77,7 @@ export class HomePage extends React.Component {
     this.props.changeParams(e);
   }
 
-  renderInputSearch = () =>
+  renderInputSearch = () => (
     <InputSearch
       autoFocus
       name="search"
@@ -86,6 +86,7 @@ export class HomePage extends React.Component {
       style={{ marginTop: '-10px' }}
       value={this.props.search}
     />
+  )
 
   render() {
     return (
