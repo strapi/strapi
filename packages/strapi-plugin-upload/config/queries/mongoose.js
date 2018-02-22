@@ -90,8 +90,8 @@ module.exports = {
     return this
       .find({
         '$or': [
-          { username: re },
-          { email: re }
+          { hash: re },
+          { name: re }
         ]
       });
   },

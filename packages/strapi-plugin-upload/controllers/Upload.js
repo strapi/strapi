@@ -17,6 +17,7 @@ module.exports = {
    */
 
   index: async (ctx) => {
+    console.log(ctx.request.body.files);
     const config = await strapi.store({
       environment: strapi.config.environment,
       type: 'plugin',
@@ -114,5 +115,11 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send(data);
-  }
+  },
+
+  search: async (ctx) => {
+    const data = await strapi.query('file', 'upload').search(ctx.params);
+
+    ctx.send(data);
+  },
 };

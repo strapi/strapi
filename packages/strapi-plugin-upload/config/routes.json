@@ -41,6 +41,14 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/search/:id",
+      "handler": "Upload.search",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "DELETE",
       "path": "/files/:_id",
       "handler": "Upload.destroy",

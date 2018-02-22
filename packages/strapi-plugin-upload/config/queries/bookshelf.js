@@ -112,8 +112,8 @@ module.exports = {
     return this
       .query(function(qb) {
         qb
-        .where('username', 'LIKE', `%${params.id}%`)
-        .orWhere('email', 'LIKE', `%${params.id}%`);
+        .where('hash', 'LIKE', `%${params.id}%`)
+        .orWhere('name', 'LIKE', `%${params.id}%`);
       })
       .fetchAll();
   },
