@@ -61,7 +61,7 @@ export function onDrop({ dataTransfer: { files } }) {
   return {
     type: ON_DROP,
     files,
-  }
+  };
 }
 
 export function onSearch({ target }) {

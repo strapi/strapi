@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+// import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 
@@ -68,7 +68,7 @@ export class HomePage extends React.Component {
     const { history, params } = this.props;
     const search = e.target.name === 'params.limit' ?
       `page=${params.page}&limit=${e.target.value}&sort=${params.sort}`
-      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`
+      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -101,10 +101,10 @@ export class HomePage extends React.Component {
             overrideRendering={this.renderInputSearch}
           />
         </div>
-          <PluginInputFile
-            name="files"
-            onDrop={this.props.onDrop}
-          />
+        <PluginInputFile
+          name="files"
+          onDrop={this.props.onDrop}
+        />
         <div className={styles.entriesWrapper}>
           <div>
             {/* NOTE: Prepare for bulk actions}
@@ -139,7 +139,6 @@ HomePage.childContextTypes = {
 
 HomePage.contextTypes = {
   router: PropTypes.object,
-  uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
 
 HomePage.defaultProps = {
@@ -153,10 +152,16 @@ HomePage.defaultProps = {
 
 HomePage.propTypes = {
   changeParams: PropTypes.func.isRequired,
+  deleteData: PropTypes.func.isRequired,
+  deleteSuccess: PropTypes.bool.isRequired,
+  entriesNumber: PropTypes.number.isRequired,
   getData: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
+  params: PropTypes.object,
   search: PropTypes.string.isRequired,
+  uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
 
 function mapDispatchToProps(dispatch) {

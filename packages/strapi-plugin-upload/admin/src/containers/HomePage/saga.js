@@ -1,6 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { fork, put, select, take, takeLatest } from 'redux-saga/effects';
 import { Map } from 'immutable';
+import { fork, put, select, take, takeLatest } from 'redux-saga/effects';
 // import request from 'utils/request';
 
 import {
@@ -16,7 +16,7 @@ import {
 } from './constants';
 import { makeSelectSearch } from './selectors';
 
-function* dataDelete(action) {
+function* dataDelete() {
   try {
     // const requestURL = `/upload/something/${action.dataToDelete.id}`;
     yield put(deleteSuccess());
@@ -52,9 +52,9 @@ function* dataGet() {
   }
 }
 
-function* uploadFiles(action) {
+function* uploadFiles() {
   try {
-    const files = action.files;
+    // const files = action.files;
     const newFiles = [
       Map({
         type: 'mov',
@@ -93,7 +93,7 @@ function* search() {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  yield fork(takeLatest, DELETE_DATA, dataDelete)
+  yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield fork(takeLatest, ON_DROP, uploadFiles);
   yield fork(takeLatest, ON_SEARCH, search);
 

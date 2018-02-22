@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-import InputCheckBox from 'components/InputCheckBox';
+// import InputCheckBox from 'components/InputCheckbox';
 
 import styles from './styles.scss';
 
@@ -21,7 +21,7 @@ function ListHeader() {
     'updated',
     'size',
     'related',
-    ''
+    '',
   ];
   return (
     <li className={styles.listheaderWrapper}>

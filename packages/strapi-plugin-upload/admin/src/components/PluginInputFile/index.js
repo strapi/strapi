@@ -11,13 +11,14 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/no-string-refs */
+/* eslint-disable jsx-a11y/label-has-for */
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };
 
   handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('click');
     this.refs.input.click();
   }
 
@@ -64,7 +65,9 @@ class PluginInputFile extends React.PureComponent {
           multiple
           name={name}
           onChange={onChange}
-          ref="input"
+          ref={(input) => {
+            this.input = input;
+          }}
           type="file"
         />
       </label>
@@ -74,13 +77,12 @@ class PluginInputFile extends React.PureComponent {
 
 PluginInputFile.defaultProps = {
   onChange: () => {},
-  value: [],
 };
 
 PluginInputFile.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
-  value: PropTypes.array,
+  onDrop: PropTypes.func.isRequired,
 };
 
 export default PluginInputFile;
