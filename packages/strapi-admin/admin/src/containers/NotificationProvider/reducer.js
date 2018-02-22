@@ -21,8 +21,8 @@ function notificationProviderReducer(state = initialState, action) {
   switch (action.type) {
     case SHOW_NOTIFICATION:
       return state.set('notifications', state.get('notifications').push({
-        message: action.message,
-        status: action.status,
+        message: action.message || 'app.utils.defaultMessage',
+        status: action.status || 'success',
         id: action.id,
       }));
     case HIDE_NOTIFICATION:

@@ -43,8 +43,21 @@ class NotificationsContainer extends React.Component { // eslint-disable-line re
   }
 }
 
+NotificationsContainer.defaultProps = {
+  notifications: [
+    {
+      id: 1,
+      message: 'app.utils.defaultMessage',
+      status: 'success',
+    },
+  ],
+};
+
 NotificationsContainer.propTypes = {
-  notifications: PropTypes.object.isRequired,
+  notifications: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
   onHideNotification: PropTypes.func.isRequired,
 };
 
