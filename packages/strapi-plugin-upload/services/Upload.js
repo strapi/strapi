@@ -13,13 +13,15 @@ const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
 
 module.exports = {
-  buffurize: async values => {
+  bufferize: async values => {
     if (_.size(values.files) === 0) {
       throw 'Missing files.';
     }
 
+    // files is always an array to map on
     const files = _.isArray(values.files) ? values.files : [values.files];
 
+    // transform all files in buffer
     return Promise.all(
       files.map(async stream => {
         const parts = await toArray(fs.createReadStream(stream.path));
@@ -30,30 +32,28 @@ module.exports = {
         return {
           name: stream.name,
           hash: uuid().replace(/-/g, ''),
-          ext: _.last(stream.name.split('.')),
+          ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
           buffer: Buffer.concat(buffers),
           mime: stream.type,
-          size: `${(stream.size / 1000).toFixed(2)} KB`
+          size: (stream.size / 1000).toFixed(2)
         };
       })
     );
   },
 
-  upload: (files) => {
+  upload: async (files, config) => {
+    // get upload provider settings to configure the provider to use
+    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
+    _.assign(provider, config);
+    const actions = provider.init(strapi, config);
+
+    // execute upload function of the provider for all files
     return Promise.all(
       files.map(async file => {
-        await new Promise((resolve, reject) => {
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}.${file.ext}`), file.buffer, (err) => {
-            if (err) {
-              return reject(err);
-            }
+        await actions.upload(file);
 
-            resolve();
-          });
-        });
-
+        // remove buffer to don't save it
         delete file.buffer;
-        file.url = `/uploads/${file.hash}.${file.ext}`;
 
         await strapi.plugins['upload'].services.upload.add(file);
       })
@@ -95,18 +95,16 @@ module.exports = {
     return await strapi.query('file', 'upload').count();
   },
 
-  remove: async params => {
-    const {url} = await strapi.plugins['upload'].services.upload.fetch(params);
+  remove: async (params, config) => {
+    const file = await strapi.plugins['upload'].services.upload.fetch(params);
 
-    await new Promise((resolve, reject) => {
-      fs.unlink(path.join(strapi.config.appPath, 'public', url), (err) => {
-        if (err) {
-          return reject(err);
-        }
+    // get upload provider settings to configure the provider to use
+    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
+    _.assign(provider, config);
+    const actions = provider.init(strapi, config);
 
-        resolve();
-      });
-    });
+    // execute delete function of the provider
+    await actions.delete(file);
 
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {

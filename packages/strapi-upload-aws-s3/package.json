@@ -1,11 +1,12 @@
 {
-  "name": "strapi-ejs",
+  "name": "strapi-upload-aws-s3",
   "version": "3.0.0-alpha.10.2",
-  "description": "EJS hook for the Strapi framework",
+  "description": "AWS S3 provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
-    "ejs",
-    "hook",
+    "upload",
+    "aws",
+    "s3",
     "strapi"
   ],
   "directories": {
@@ -13,14 +14,10 @@
   },
   "main": "./lib",
   "dependencies": {
-    "co": "^4.6.0",
-    "koa-ejs": "^4.1.0"
+    "aws-sdk": "^2.199.0"
   },
   "strapi": {
-    "isHook": true
-  },
-  "scripts": {
-    "prepublishOnly": "npm prune"
+    "isProvider": true
   },
   "author": {
     "email": "hi@strapi.io",

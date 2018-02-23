@@ -1,26 +1,19 @@
 {
-  "name": "strapi-ejs",
+  "name": "strapi-upload-local",
   "version": "3.0.0-alpha.10.2",
-  "description": "EJS hook for the Strapi framework",
+  "description": "Local provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
-    "ejs",
-    "hook",
+    "upload",
     "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {
-    "co": "^4.6.0",
-    "koa-ejs": "^4.1.0"
-  },
+  "dependencies": {},
   "strapi": {
-    "isHook": true
-  },
-  "scripts": {
-    "prepublishOnly": "npm prune"
+    "isProvider": true
   },
   "author": {
     "email": "hi@strapi.io",

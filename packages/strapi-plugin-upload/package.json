@@ -28,6 +28,7 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
+    "strapi-upload-local": "3.0.0-alpha.10.2",
     "strapi-helper-plugin": "3.0.0-alpha.10.2"
   },
   "author": {
