@@ -20,7 +20,7 @@ const initialState = fromJS({
   dataToDelete: '',
   entriesNumber: 0,
   search: '',
-  uploadedFiles: List([Map({})]),
+  uploadedFiles: List([]),
   params: Map({
     sort: 'hash',
     limit: 10,

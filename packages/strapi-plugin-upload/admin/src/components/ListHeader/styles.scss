@@ -32,13 +32,6 @@
   > div:nth-child(4) {
     width: 184px;
     flex-shrink: 0;
-    > span {
-      &:after {
-        content: '\f0d8';
-        margin-left: 10px;
-        font-family: 'FontAwesome';
-      }
-    }
   }
   > div:nth-child(5) {
     width: 100px;
@@ -51,5 +44,25 @@
   > div:nth-child(7) {
     width: 116px;
     flex-shrink: 0;
+  }
+}
+
+.icon {
+  > span:last-child {
+    &:after {
+      content: '\f0d8';
+      margin-left: 10px;
+      font-family: 'FontAwesome';
+    }
+  }
+}
+
+.iconDesc {
+  > span:last-child {
+    &:after {
+      content: '\f0d7';
+      margin-left: 10px;
+      font-family: 'FontAwesome';
+    }
   }
 }

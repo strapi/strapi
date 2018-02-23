@@ -1,4 +1,6 @@
 {
+  "EmptyLi.message": "Aucun fichier n'a été téléchargé",
+
   "EntriesNumber.number": "{number} fichier trouvé",
   "EntriesNumber.number.plural": "{number} fichiers trouvés",
 

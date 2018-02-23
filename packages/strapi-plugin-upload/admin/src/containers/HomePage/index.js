@@ -81,6 +81,21 @@ export class HomePage extends React.Component {
 
   getURLParams = (type) => getQueryParameters(this.props.location.search, type);
 
+  changeSort = (name) => {
+    const { params: { limit, page } } = this.props;
+    const target = {
+      name: 'params.sort',
+      value: name,
+    };
+    const search = `page=${page}&limit=${limit}&sort=${name}`;
+
+    this.props.changeParams({ target });
+    this.props.history.push({
+      pathname: this.props.history.pathname,
+      search,
+    });
+  }
+
   handleChangeParams = (e) => {
     const { history, params } = this.props;
     const search = e.target.name === 'params.limit' ?
@@ -138,6 +153,8 @@ export class HomePage extends React.Component {
         </div>
         <List
           data={this.props.uploadedFiles}
+          changeSort={this.changeSort}
+          sort={this.props.params.sort}
         />
         <div className="col-md-12">
           <PageFooter
@@ -165,7 +182,7 @@ HomePage.defaultProps = {
     page: 1,
     sort: 'updatedAt',
   },
-  uploadedFiles: [{}],
+  uploadedFiles: [],
 };
 
 HomePage.propTypes = {
