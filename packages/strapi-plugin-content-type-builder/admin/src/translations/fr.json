@@ -13,6 +13,7 @@
   "attribute.password": "Mot de passe",
   "attribute.email": "Email",
   "attribute.relation": "Relation",
+  "attribute.enumeration": "Enumération",
 
   "contentType.temporaryDisplay": "(Non sauvegardé)",
 
@@ -48,6 +49,7 @@
   "form.attribute.item.number.name": "Nom",
   "form.attribute.item.json.name": "Nom",
   "form.attribute.item.media.name": "Nom",
+  "form.attribute.item.media.multiple": "Peut avoir plusierus fichiers",
   "form.attribute.item.string.name": "Nom",
   "form.attribute.item.settings.name": "Paramètres",
   "form.attribute.item.requiredField": "Champ obligatoire",
@@ -105,6 +107,7 @@
   "notification.success.message.contentType.edit": "Votre modèle a bien été modifié",
   "notification.success.message.contentType.create": "Votre modèle a bien été créée",
   "notification.success.contentTypeDeleted": "Le modèle a bien été supprimé.",
+  "notification.info.enumeration": "Ce champ n'est pas modifiable pour le moment...😮",
 
   "popUpForm.attributes.string.description": "Titres, noms,...",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",

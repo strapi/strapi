@@ -109,6 +109,10 @@
         "description": "content-type-builder.popUpForm.attributes.password.description"
       },
       {
+        "type": "media",
+        "description": "content-type-builder.popUpForm.attributes.media.description"
+      },
+      {
         "type": "relation",
         "description": "content-type-builder.popUpForm.attributes.relation.description"
       }
@@ -713,6 +717,17 @@
             "name": "name",
             "type": "string",
             "value": "",
+            "validations": {
+              "required": true
+            }
+          },
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.item.media.multiple"
+            },
+            "name": "multiple",
+            "type": "checkbox",
+            "value": false,
             "validations": {
               "required": true
             }
