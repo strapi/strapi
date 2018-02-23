@@ -17,8 +17,7 @@
     },
     "ext": {
       "type": "string",
-      "configurable": false,
-      "required": true
+      "configurable": false
     },
     "mime": {
       "type": "string",

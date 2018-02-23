@@ -20,10 +20,10 @@ module.exports = async cb => {
     name: 'upload'
   });
 
-  fs.readdir(path.join(strapi.config.appPath, 'node_modules'), async (err, node_modules) => {
+  fs.readdir(path.join(strapi.config.appPath, 'plugins', 'upload', 'node_modules'), async (err, node_modules) => {
     // get all upload provider
     const uploads = _.filter(node_modules, (node_module) => {
-      return _.startsWith(node_module, ('strapi-upload-'));
+      return _.startsWith(node_module, ('strapi-upload'));
     });
 
     strapi.plugins.upload.config.providers = [];
@@ -31,16 +31,16 @@ module.exports = async cb => {
     // mount all providers to get configs
     _.forEach(uploads, (node_module) => {
       strapi.plugins.upload.config.providers.push(
-        require(path.join(`${strapi.config.appPath}/node_modules/${node_module}`))
+        require(path.join(`${strapi.config.appPath}/plugins/upload/node_modules/${node_module}`))
       );
     });
 
     try {
-      // if profiver config not exit set one by default
+      // if provider config not exit set one by default
       const config = await pluginStore.get({key: 'provider'});
 
       if (!config) {
-        const provider = strapi.plugins.upload.config.providers[0];
+        const provider = _.find(strapi.plugins.upload.config.providers, {provider: 'local'});
 
         const value = _.assign({}, provider, {
           enabled: true,
@@ -51,8 +51,8 @@ module.exports = async cb => {
         await pluginStore.set({key: 'provider', value});
       }
     } catch (err) {
-      strapi.log.error(`Can't laod ${config.provider} upload provider`);
-      strapi.log.warn(`Please install  strapi-upload-${config.provider} --save`);
+      strapi.log.error(`Can't load ${config.provider} upload provider.`);
+      strapi.log.warn(`Please install strapi-upload-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'upload')} folder.`);
       strapi.stop();
     }
 

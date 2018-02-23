@@ -17,7 +17,6 @@ module.exports = {
    */
 
   index: async (ctx) => {
-    console.log(ctx.request.body.files);
     const config = await strapi.store({
       environment: strapi.config.environment,
       type: 'plugin',
@@ -35,7 +34,7 @@ module.exports = {
 
     for (var i = 0; i < files.length; i++) {
       if (files[i].size > config.sizeLimit) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit' }] }] : 'One of file is bigger than limit size!');
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit', values: {file: files[i].name} }] }] : `${files[i].name} file is bigger than limit size!`);
       }
     }
 

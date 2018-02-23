@@ -16,12 +16,12 @@ module.exports = {
       upload: (file) => {
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}.${file.ext}`), file.buffer, (err) => {
+          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
             }
 
-            file.url = `/uploads/${file.hash}.${file.ext}`;
+            file.url = `/uploads/${file.hash}${file.ext}`;
 
             resolve();
           });
@@ -29,8 +29,14 @@ module.exports = {
       },
       delete: (file) => {
         return new Promise((resolve, reject) => {
+          const filePath = path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`);
+
+          if (!fs.existsSync(filePath)) {
+            return resolve('File doesn\'t exist');
+          }
+
           // remove file from public/assets folder
-          fs.unlink(path.join(strapi.config.appPath, 'public', file.url), (err) => {
+          fs.unlink(filePath, (err) => {
             if (err) {
               return reject(err);
             }

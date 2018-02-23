@@ -32,7 +32,7 @@ module.exports = {
         return {
           name: stream.name,
           hash: uuid().replace(/-/g, ''),
-          ext: _.last(stream.name.split('.')),
+          ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
           buffer: Buffer.concat(buffers),
           mime: stream.type,
           size: (stream.size / 1000).toFixed(2)

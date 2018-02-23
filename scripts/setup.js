@@ -107,7 +107,7 @@ watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-upload-local');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
-shell.cd('../strapi-upload-s3');
+shell.cd('../strapi-upload-aws-s3');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-content-type-builder');

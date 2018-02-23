@@ -9,7 +9,7 @@ const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 module.exports = {
-  provider: 's3',
+  provider: 'aws-s3',
   name: 'Amazon Web Service S3',
   auth: {
     public: {
@@ -69,12 +69,11 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // upload file on S3 bucket
           S3.upload({
-            Key: `${file.hash}.${file.ext}`,
+            Key: `${file.hash}${file.ext}`,
             Body: new Buffer(file.buffer, 'binary'),
             ACL: 'public-read'
           }, (err, data) => {
             if (err) {
-              console.log(err);
               return reject(err);
             }
 
@@ -91,12 +90,11 @@ module.exports = {
           S3.deleteObjects({
             Delete: {
               Objects: [{
-                Key: `${file.hash}.${file.ext}`
+                Key: `${file.hash}${file.ext}`
               }]
             }
           }, (err, data) => {
             if (err) {
-              console.log(err);
               return reject(err);
             }
 
