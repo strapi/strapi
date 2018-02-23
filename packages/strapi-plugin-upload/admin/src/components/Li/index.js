@@ -84,7 +84,7 @@ class Li extends React.Component {
                 return <FileIcon key={key} fileType={item[value]} />;
               }
 
-              if (value !== 'url' && value !== '') {
+              if (value !== '') {
                 return (
                   <div key={key} className={styles.truncate}>{item[value]}</div>
                 );

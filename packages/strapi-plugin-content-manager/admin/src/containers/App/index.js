@@ -17,15 +17,12 @@ import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 
 import Home from 'containers/Home';
-// import Edit from 'containers/Edit';
 import EditPage from 'containers/EditPage';
-// import List from 'containers/List';
 import ListPage from 'containers/ListPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
 import {
   emptyStore,
-  // getModelEntries,
   loadModels,
 } from './actions';
 import { makeSelectLoading, makeSelectModels, makeSelectModelEntries } from './selectors';
@@ -35,23 +32,7 @@ import saga from './sagas';
 class App extends React.Component {
   componentDidMount() {
     this.props.loadModels();
-
-    // NOTE: I'm commenting this part of code since I'm not sure why it is needed
-    // const modelName = this.props.location.pathname.split('/')[3];
-
-    // if (modelName) {
-    //   this.props.getModelEntries(modelName, getQueryParameters(this.props.location.search, 'source'));
-    // }
   }
-
-  // NOTE: I'm commenting this part of code since I'm not sure why it is needed
-  // componentDidUpdate(prevProps) {
-  //   const currentModelName = this.props.location.pathname.split('/')[3];
-  //
-  //   if (prevProps.location.pathname !== this.props.location.pathname && currentModelName) {
-  //     this.props.getModelEntries(currentModelName, getQueryParameters(this.props.location.search, 'source'));
-  //   }
-  // }
 
   componentWillUnmount() {
     this.props.emptyStore();
@@ -76,10 +57,6 @@ class App extends React.Component {
         <Switch>
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
-          {/* Note: I'm commenting this lines in case we need to rollback to the previous containers
-          <Route path="/plugins/content-manager/:slug/:id" component={Edit} />
-          <Route path="/plugins/content-manager/:slug" component={List} />
-          */}
           <Route path="/plugins/content-manager" component={Home} />
         </Switch>
       </div>
@@ -93,7 +70,6 @@ App.contextTypes = {
 
 App.propTypes = {
   emptyStore: PropTypes.func.isRequired,
-  // getModelEntries: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   loading: PropTypes.bool.isRequired,
   loadModels: PropTypes.func.isRequired,
