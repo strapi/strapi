@@ -3,8 +3,8 @@
   "version": "3.0.0-alpha.10.2",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "upload",
-    "icon": "plug",
+    "name": "Upload",
+    "icon": "upload",
     "description": "Description of upload plugin."
   },
   "scripts": {
@@ -23,6 +23,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "react-copy-to-clipboard": "^5.0.1",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },

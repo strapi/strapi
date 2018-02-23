@@ -7,13 +7,15 @@
   "containers.Edit.submit": "Zapisz",
   "containers.Edit.editing": "Edytowanie...",
   "containers.Edit.delete": "Usuń",
-  "containers.Edit.cancel": "Anuluj",
+  "containers.Edit.reset": "Anuluj",
   "containers.Edit.returnList": "Wróć do listy",
   "containers.List.addAnEntry": "Dodaj {entity}",
   "containers.List.pluginHeaderDescription": "{label} wpisów znalezionych",
   "containers.List.pluginHeaderDescription.singular": "{label} wpis znaleziony",
   "components.LimitSelect.itemsPerPage": "Wpisów na stronę",
   "containers.List.errorFetchRecords": "Błąd",
+
+  "EditRelations.title": "Relational data",
 
   "emptyAttributes.title": "Nie ma jeszcze żadnych atrybutów",
   "emptyAttributes.description": "Dodaj swoje pierwszy atrybut do modelu",

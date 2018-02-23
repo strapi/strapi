@@ -37,10 +37,13 @@ function InputDate(props) {
             placeholder,
             style: props.style,
           }}
-          onBlur={props.onBlur}
+          onBlur={(moment) => props.onBlur({ target: {
+            name: props.name,
+            value: moment,
+          }})}
           onChange={(moment) => props.onChange({ target: {
             name: props.name,
-            value: moment
+            value: moment,
           }})}
           onFocus={props.onFocus}
           tabIndex={props.tabIndex}

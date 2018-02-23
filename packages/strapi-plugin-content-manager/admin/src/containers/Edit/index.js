@@ -89,7 +89,7 @@ export class Edit extends React.Component {
 
     this.pluginHeaderActions = [
       {
-        label: 'content-manager.containers.Edit.cancel',
+        label: 'content-manager.containers.Edit.reset',
         kind: 'secondary',
         onClick: this.props.cancelChanges,
         type: 'button',
