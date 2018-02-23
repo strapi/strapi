@@ -13,6 +13,7 @@ import {
   GET_DATA_SUCCESS,
   ON_DROP,
   ON_SEARCH,
+  ON_SEARCH_SUCCESS,
   SET_PARAMS,
 } from './constants';
 
@@ -81,5 +82,12 @@ export function setParams(params) {
   return {
     type: SET_PARAMS,
     params,
+  };
+}
+
+export function onSearchSuccess(data) {
+  return {
+    type: ON_SEARCH_SUCCESS,
+    data,
   };
 }

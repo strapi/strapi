@@ -59,10 +59,10 @@ class Li extends React.Component {
     }
 
     const icons = [
-      {
-        icoType: item.private ? 'lock' : 'unlock',
-        onClick: () => {},
-      },
+      // {
+      //   icoType: item.private ? 'lock' : 'unlock',
+      //   onClick: () => {},
+      // },
       {
         icoType: 'eye',
         onClick: this.handleClick,

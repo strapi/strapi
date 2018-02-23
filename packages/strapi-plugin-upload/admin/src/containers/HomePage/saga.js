@@ -1,5 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
+import { isEmpty } from 'lodash';
 import { call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
@@ -7,6 +8,7 @@ import {
   deleteSuccess,
   dropSuccess,
   getDataSuccess,
+  onSearchSuccess,
 } from './actions';
 import {
   DELETE_DATA,
@@ -75,10 +77,18 @@ function* uploadFiles(action) {
 function* search() {
   try {
     const search = yield select(makeSelectSearch());
-    const requestURL = `/upload/search/${search}`;
-
-    const response = yield call(request, requestURL, { method: 'GET' });
-    console.log(response);
+    const pageParams = yield select(makeSelectParams());
+    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const requestURL = !isEmpty(search) ? `/upload/search/${search}` : '/upload/files';
+    const params = isEmpty(search) ? {
+      _limit: pageParams.limit,
+      _sort: pageParams.sort,
+      _start,
+    } : {};
+    const response = yield call(request, requestURL, { method: 'GET', params });
+    const entries = response.length === 0 ? [] : response.map(obj => Map(obj));
+    
+    yield put(onSearchSuccess(entries));
   } catch(err) {
     strapi.notification.error('notification.error');
   }

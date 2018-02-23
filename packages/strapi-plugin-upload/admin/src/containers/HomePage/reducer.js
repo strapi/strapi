@@ -12,6 +12,7 @@ import {
   DROP_SUCCESS,
   GET_DATA_SUCCESS,
   ON_SEARCH,
+  ON_SEARCH_SUCCESS,
   SET_PARAMS,
 } from './constants';
 
@@ -43,6 +44,8 @@ function homePageReducer(state = initialState, action) {
         .update('entriesNumber', () => action.entriesNumber);
     case ON_SEARCH:
       return state.update('search', () => action.value);
+    case ON_SEARCH_SUCCESS:
+      return state.update('uploadedFiles', () => List(action.data));
     case SET_PARAMS:
       return state.set('params', Map(action.params));
     default:
