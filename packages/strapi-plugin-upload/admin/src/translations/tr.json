@@ -1,26 +1,26 @@
 {
   "EmptyLi.message": "There is no uploaded files",
-  
-  "EntriesNumber.number": "{number} file found",
-  "EntriesNumber.number.plural": "{number} files found",
 
-  "HomePage.title": "Upload",
-  "HomePage.description": "Discover all the uploaded files",
-  "HomePage.InputSearch.placeholder": "Search for a file...",
+  "EntriesNumber.number": "{number} dosya bulundu",
+  "EntriesNumber.number.plural": "{number} dosya bulundu",
 
-  "Li.linkCopied": "Link copied into the clipboard",
+  "HomePage.title": "Yükle",
+  "HomePage.description": "Yüklenen dosyalar",
+  "HomePage.InputSearch.placeholder": "Dosya ara...",
 
-  "ListHeader.type": "Type",
+  "Li.linkCopied": "Bağlantı, panoya kopyalandı",
+
+  "ListHeader.type": "Tip",
   "ListHeader.hash": "Hash",
-  "ListHeader.name": "Name",
-  "ListHeader.updated": "Updated",
-  "ListHeader.size": "Size",
-  "ListHeader.related": "Related to",
+  "ListHeader.name": "İsim",
+  "ListHeader.updated": "Yüklendi",
+  "ListHeader.size": "Boyut",
+  "ListHeader.related": "İlişkili",
 
-  "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
-  "PluginInputFile.link": "browse",
+  "PluginInputFile.text": "Dosyanızı bu alana sürükleyip bırakın ya da dosya yüklemek için {link}",
+  "PluginInputFile.link": "gözat",
 
   "notification.delete.success": "The file has been deleted",
-  "notification.dropFile.success": "Your file has been uploaded",
-  "notification.dropFiles.success": "{number} files have been uploaded"
+  "notification.dropFile.success": "Dosyanız yüklendi",
+  "notification.dropFiles.success": "{number} dosyalar yüklendi"
 }
