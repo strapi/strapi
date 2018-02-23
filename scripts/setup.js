@@ -99,16 +99,17 @@ shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-settings-manager...', 'npm link --no-optional', false);
 watcher('🏗  Building...', 'npm run build');
 
-shell.cd('../strapi-plugin-upload');
-watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-shell.rm('-f', 'package-lock.json');
-watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
-watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-upload-local');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
 shell.cd('../strapi-upload-aws-s3');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
+
+shell.cd('../strapi-plugin-upload');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+shell.rm('-f', 'package-lock.json');
+watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
+watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-content-type-builder');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
