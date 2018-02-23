@@ -101,12 +101,13 @@ watcher('🏗  Building...', 'npm run build');
 
 
 shell.cd('../strapi-upload-local');
-watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
+watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false);
 shell.cd('../strapi-upload-aws-s3');
-watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
+watcher('📦  Linking strapi-upload-aws-s3...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-upload');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-upload-local --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
 watcher('🏗  Building...', 'npm run build');
