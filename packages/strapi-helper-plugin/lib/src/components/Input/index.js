@@ -9,8 +9,8 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { get, isEmpty, map, mapKeys, isObject, reject, includes, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import DateTime from 'react-datetime';
-import DateTimeStyle from 'react-datetime/css/react-datetime.css';
+// import DateTime from 'react-datetime';
+// import DateTimeStyle from 'react-datetime/css/react-datetime.css';
 import styles from './styles.scss';
 
 class Input extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -145,47 +145,47 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
     )
   }
 
-  renderInputDate = (requiredClass, inputDescription) => {
-    let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
-
-    if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
-      spacer = <div />;
-    }
-
-    const value = isObject(this.props.value) && this.props.value._isAMomentObject === true ?
-      this.props.value :
-      moment(this.props.value);
-
-    return (
-      <div className={`${styles.inputDate} ${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
-        <label htmlFor={this.props.label}>
-          <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
-        </label>
-        <DateTime
-          value={value}
-          dateFormat='YYYY-MM-DD'
-          timeFormat='HH:mm:ss'
-          tabIndex={this.props.tabIndex}
-          utc={true}
-          inputProps={{
-            placeholder: this.props.placeholder,
-            className: 'form-control',
-            name: this.props.name,
-            id: this.props.label,
-          }}
-          onChange={(moment) => this.props.onChange({ target: {
-            name: this.props.name,
-            value: moment
-          }})}
-         />
-        <div className={styles.inputDescriptionContainer}>
-          <small>{inputDescription}</small>
-        </div>
-        {this.renderErrors(styles.errorContainerTextArea)}
-        {spacer}
-      </div>
-    )
-  }
+  // renderInputDate = (requiredClass, inputDescription) => {
+  //   let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
+  //
+  //   if (!this.props.noErrorsDescription && !isEmpty(this.state.errors)) {
+  //     spacer = <div />;
+  //   }
+  //
+  //   const value = isObject(this.props.value) && this.props.value._isAMomentObject === true ?
+  //     this.props.value :
+  //     moment(this.props.value);
+  //
+  //   return (
+  //     <div className={`${styles.inputDate} ${styles.input} ${this.props.customBootstrapClass || 'col-md-4'} ${requiredClass}`}>
+  //       <label htmlFor={this.props.label}>
+  //         <FormattedMessage id={`${this.props.label}`} defaultMessage={upperFirst(this.props.label)} />
+  //       </label>
+  //       <DateTime
+  //         value={value}
+  //         dateFormat='YYYY-MM-DD'
+  //         timeFormat='HH:mm:ss'
+  //         tabIndex={this.props.tabIndex}
+  //         utc={true}
+  //         inputProps={{
+  //           placeholder: this.props.placeholder,
+  //           className: 'form-control',
+  //           name: this.props.name,
+  //           id: this.props.label,
+  //         }}
+  //         onChange={(moment) => this.props.onChange({ target: {
+  //           name: this.props.name,
+  //           value: moment
+  //         }})}
+  //        />
+  //       <div className={styles.inputDescriptionContainer}>
+  //         <small>{inputDescription}</small>
+  //       </div>
+  //       {this.renderErrors(styles.errorContainerTextArea)}
+  //       {spacer}
+  //     </div>
+  //   )
+  // }
 
   renderInputEmail = (requiredClass, inputDescription, handleBlur) => {
     let spacer = !isEmpty(this.props.inputDescription) ? <div className={styles.spacer} /> : <div />;
@@ -502,8 +502,8 @@ class Input extends React.Component { // eslint-disable-line react/prefer-statel
         return this.renderInputTextArea(requiredClass, inputDescription, handleBlur);
       case 'checkbox':
         return this.renderInputCheckbox(requiredClass, inputDescription);
-      case 'date':
-        return this.renderInputDate(requiredClass, inputDescription);
+      // case 'date':
+      //   return this.renderInputDate(requiredClass, inputDescription);
       case 'password':
         return this.renderInputPassword(requiredClass, inputDescription, handleBlur);
       case 'toggle':

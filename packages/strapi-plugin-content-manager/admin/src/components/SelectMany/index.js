@@ -37,7 +37,9 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
     }
 
     // Request URL
-    const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias).toJS() ? this.props.record.get(this.props.relation.alias).toJS() : '';
+    const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
+    // NOTE: keep this line if we rollback to the old container
+    // const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias).toJS() ? this.props.record.get(this.props.relation.alias).toJS() : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
@@ -65,8 +67,15 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
 
   handleChange = (value) => {
     const filteredValue = value.filter((data, index  ) => findIndex(value, (o) => o.value.id === data.value.id) === index);
+    const target = {
+      name: `record.${this.props.relation.alias}`,
+      type: 'select',
+      value: filteredValue,
+    };
 
-    this.props.setRecordAttribute(this.props.relation.alias, filteredValue);
+    this.props.setRecordAttribute({ target });
+    // NOTE: keep this line if we rollback to the old container
+    // this.props.setRecordAttribute(this.props.relation.alias, filteredValue);
   }
 
   render() {
@@ -74,7 +83,9 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
       ? <p>{this.props.relation.description}</p>
       : '';
 
-    const value = this.props.record.get(this.props.relation.alias);
+    const value = get(this.props.record, this.props.relation.alias);
+    // NOTE: keep this line if we rollback to the old container
+    // const value = this.props.record.get(this.props.relation.alias);
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
@@ -86,7 +97,7 @@ class SelectMany extends React.Component { // eslint-disable-line react/prefer-s
           loadOptions={this.getOptions}
           id={this.props.relation.alias}
           multi
-          value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.toJS().map(item => {
+          value={isNull(value) || isUndefined(value) || value.size === 0 ? null : value.map(item => {
             if (item) {
               return {
                 value: get(item, 'value') || item,

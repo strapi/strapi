@@ -64,7 +64,15 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   handleChange = (value) => {
-    this.props.setRecordAttribute(this.props.relation.alias, value);
+    const target = {
+      name: `record.${this.props.relation.alias}`,
+      value,
+      type: 'select',
+    };
+
+    this.props.setRecordAttribute({ target });
+    // NOTE: keep this line if we rollback to the old container
+    // this.props.setRecordAttribute(this.props.relation.alias, value);
   }
 
   render() {
@@ -72,7 +80,9 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       ? <p>{this.props.relation.description}</p>
       : '';
 
-    const value = this.props.record.get(this.props.relation.alias);
+    const value = get(this.props.record, this.props.relation.alias);
+    // NOTE: keep this line if we rollback to the old container
+    // const value = this.props.record.get(this.props.relation.alias);
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
