@@ -12,6 +12,7 @@ import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
 import InputDateWithErrors from 'components/InputDateWithErrors';
 import InputEmailWithErrors from 'components/InputEmailWithErrors';
+import InputFileWithErrors from 'components/InputFileWithErrors';
 import InputNumberWithErrors from 'components/InputNumberWithErrors';
 import InputSearchWithErrors from 'components/InputSearchWithErrors';
 import InputSelectWithErrors from 'components/InputSelectWithErrors';
@@ -27,6 +28,7 @@ const inputs = {
   checkbox: InputCheckboxWithErrors,
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
+  file: InputFileWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -39,7 +41,7 @@ const inputs = {
 
 function InputsIndex(props) {
   const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
-  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : props.value || '';
+  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : (props.value === 0 ? props.value : props.value || '');
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
@@ -58,16 +60,3 @@ InputsIndex.propTypes = {
 };
 
 export default InputsIndex;
-export {
-  InputAddonWithErrors,
-  InputCheckboxWithErrors,
-  InputDateWithErrors,
-  InputEmailWithErrors,
-  InputNumberWithErrors,
-  InputPasswordWithErrors,
-  InputSearchWithErrors,
-  InputSelectWithErrors,
-  InputTextWithErrors,
-  InputTextAreaWithErrors,
-  InputToggleWithErrors,
-};

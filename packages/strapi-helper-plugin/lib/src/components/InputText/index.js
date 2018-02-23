@@ -13,7 +13,7 @@ function InputText(props) {
         <input
           autoFocus={props.autoFocus}
           className={cn(
-            styles.input,
+            styles.textInput,
             'form-control',
             !props.deactivateErrorHighlight && props.error && 'is-invalid',
             !isEmpty(props.className) && props.className,

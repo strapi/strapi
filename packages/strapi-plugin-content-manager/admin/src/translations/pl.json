@@ -1,0 +1,55 @@
+{
+  "plugin.description.short": "Szybki sposób na przeglądanie, zmianę i usuwanie wpisów z twojej bazy danych.",
+  "plugin.description.long": "Szybki sposób na przeglądanie, zmianę i usuwanie wpisów z twojej bazy danych.",
+  "containers.Home.pluginHeaderTitle": "Menedżer treści",
+  "containers.Home.introduction": "Aby edytować wpisy przejdź do odpowiedniego linku w menu po lewej. Ta wtyczka nie ma odpowiedniego sposobu na edytowanie ustawień i nadal jest w trakcie rozwijania.",
+  "containers.Home.pluginHeaderDescription": "Zarządzaj swoimi wpisami za pomocą potężnego i pięknego interfejsu.",
+  "containers.Edit.submit": "Zapisz",
+  "containers.Edit.editing": "Edytowanie...",
+  "containers.Edit.delete": "Usuń",
+  "containers.Edit.reset": "Anuluj",
+  "containers.Edit.returnList": "Wróć do listy",
+  "containers.List.addAnEntry": "Dodaj {entity}",
+  "containers.List.pluginHeaderDescription": "{label} wpisów znalezionych",
+  "containers.List.pluginHeaderDescription.singular": "{label} wpis znaleziony",
+  "components.LimitSelect.itemsPerPage": "Wpisów na stronę",
+  "containers.List.errorFetchRecords": "Błąd",
+
+  "EditRelations.title": "Relational data",
+
+  "emptyAttributes.title": "Nie ma jeszcze żadnych atrybutów",
+  "emptyAttributes.description": "Dodaj swoje pierwszy atrybut do modelu",
+  "emptyAttributes.button": "Przejdź do konstruktora modeli",
+
+  "error.schema.generation": "Wystąpił błąd podczas generowania schematu.",
+  "error.records.count": "Wystąpił błąd podczas liczenia rekordów.",
+  "error.records.fetch": "Wystąpił błąd podczas pobierania rekordów.",
+  "error.record.fetch": "Wystąpił błąd podczas pobierania rekordu.",
+  "error.record.create": "Wystąpił błąd podczas tworzenia rekordu.",
+  "error.record.update": "Wystąpił błąd podczas zmiany rekordu.",
+  "error.record.delete": "Wystąpił błąd podczas usuwania rekordu.",
+  "error.model.fetch": "Wystąpił błąd podczas pobierania konfiguracji modelów.",
+  "error.validation.required": "Wpisanie wartości dla tego atrybutu jest wymagane.",
+  "error.validation.regex": "Wartość nie jest zgodna z wymaganym wzorcem.",
+  "error.validation.max": "Wartość jest za wysoka.",
+  "error.validation.min": "Wartość jest za niska.",
+  "error.validation.maxLength": "Wartość jest za długa.",
+  "error.validation.minLength": "Wartość jest za krótka.",
+  "error.contentTypeName.taken": "Ta nazwa już istnieje",
+  "error.attribute.taken": "Atrybut o tej nazwie już istnieje",
+  "error.attribute.key.taken": "Ta wartość już istnieje",
+  "error.attribute.sameKeyAndName": "Nie mogą być takie same",
+  "error.validation.minSupMax": "Nie może być większa",
+
+  "notification.error.relationship.fetch": "Wystąpił błąd podczas pobierania relacji.",
+
+  "success.record.delete": "Usunięto",
+  "success.record.save": "Zapisano",
+
+  "pageNotFound": "Strona nie znaleziona",
+
+  "popUpWarning.button.cancel": "Nie",
+  "popUpWarning.button.confirm": "Tak",
+  "popUpWarning.title": "Potwierdzenie",
+  "popUpWarning.bodyMessage.contentType.delete": "Czy na pewno chcesz usunąć ten wpis?"
+}

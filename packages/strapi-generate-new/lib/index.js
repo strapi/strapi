@@ -65,8 +65,8 @@ module.exports = {
       folder: {}
     },
 
-    // Empty node_modules directory.
-    'node_modules': {
+    // Empty public directory.
+    'public/uploads': {
       folder: {}
     }
   }

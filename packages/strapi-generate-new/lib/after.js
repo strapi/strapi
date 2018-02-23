@@ -98,6 +98,9 @@ module.exports = (scope, cb) => {
     }, {
       name: 'email',
       core: true
+    },{
+      name: 'upload',
+      core: true
     }, {
       name: 'analytics',
       core: false

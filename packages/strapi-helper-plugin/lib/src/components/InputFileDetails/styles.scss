@@ -1,0 +1,42 @@
+.detailBanner {
+  display: flex;
+  justify-content: space-between;
+  line-height: 23px;
+  -webkit-font-smoothing: antialiased;
+
+  > div:first-child {
+    display: flex;
+    > div:nth-child(2) {
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+}
+
+.chevronDown {
+  margin-right: 8px;
+  &:before {
+    content: '\F078';
+    display: block;
+    color: #787E8F;
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
+
+.chevronUp {
+  margin-right: 8px;
+  &:before {
+    content: '\F077';
+    display: block;
+    color: #787E8F;
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
+
+.inputFileDetails {
+  width: 350px;
+  padding-top: 4px;
+  margin-bottom: -13px;
+}

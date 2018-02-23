@@ -7,7 +7,7 @@
   "containers.Edit.submit": "Save",
   "containers.Edit.editing": "Editing...",
   "containers.Edit.delete": "Delete",
-  "containers.Edit.cancel": "Cancel",
+  "containers.Edit.reset": "Reset",
   "containers.Edit.returnList": "Return to list",
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.pluginHeaderDescription": "{label} entries found",
@@ -15,6 +15,8 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 
+  "EditRelations.title": "Relational data",
+  
   "emptyAttributes.title": "There are no fields yet",
   "emptyAttributes.description": "Add your first field to your Content Type",
   "emptyAttributes.button": "Go to content type builder",

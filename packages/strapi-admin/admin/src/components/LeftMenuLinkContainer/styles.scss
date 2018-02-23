@@ -3,6 +3,12 @@
 
 .leftMenuLinkContainer { /* stylelint-ignore */
   padding-top: .6rem;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: scroll;
 }
 
 .title {

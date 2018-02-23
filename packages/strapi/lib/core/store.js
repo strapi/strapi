@@ -162,6 +162,10 @@ CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
 );
 
 ALTER TABLE ${quote}${Model.tableName || Model.collectionName}${quote} ADD COLUMN ${quote}parent${quote} integer, ADD FOREIGN KEY (${quote}parent${quote}) REFERENCES ${quote}${Model.tableName || Model.collectionName}${quote}(${quote}id${quote});
+
+1️⃣  EXECUTE THE FOLLOWING SQL QUERY
+
+2️⃣  RESTART YOUR SERVER
         `);
 
         // Stop the server.

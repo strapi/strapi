@@ -16,6 +16,7 @@ module.exports = {
     const params = ctx.request.body;
 
     const store = await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions'
     });
@@ -128,6 +129,7 @@ module.exports = {
 
   connect: async (ctx, next) => {
     const grantConfig = await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
@@ -170,7 +172,11 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    const settings = strapi.plugins['users-permissions'].config.email['reset_password'].options;
+    const settings = (await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions'
+    }).get({ key: 'email' }))['reset_password'].options;
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       URL: url,
@@ -204,6 +210,7 @@ module.exports = {
 
   register: async (ctx) => {
     if (!(await strapi.store({
+      environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
