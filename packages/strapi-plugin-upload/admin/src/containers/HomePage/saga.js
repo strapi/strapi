@@ -75,7 +75,10 @@ function* uploadFiles(action) {
 function* search() {
   try {
     const search = yield select(makeSelectSearch());
-    console.log('will search', search);
+    const requestURL = `/upload/search/${search}`;
+
+    const response = yield call(request, requestURL, { method: 'GET' });
+    console.log(response);
   } catch(err) {
     strapi.notification.error('notification.error');
   }
