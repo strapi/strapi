@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 // import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
+import { isEmpty } from 'lodash';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -26,6 +27,7 @@ import List from 'components/List';
 import PluginInputFile from 'components/PluginInputFile';
 
 // Utils
+import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
@@ -36,6 +38,7 @@ import {
   getData,
   onDrop,
   onSearch,
+  setParams,
 } from './actions';
 
 // Selectors
@@ -54,6 +57,15 @@ export class HomePage extends React.Component {
     }
   );
 
+  componentWillMount() {
+    if (!isEmpty(this.props.location.search)) {
+      const page = parseInt(this.getURLParams('page'), 10);
+      const limit = parseInt(this.getURLParams('limit'), 10);
+      const sort = this.getURLParams('sort');
+
+      this.props.setParams({ limit, page, sort });
+    }
+  }
   componentDidMount() {
     this.props.getData();
   }
@@ -62,7 +74,12 @@ export class HomePage extends React.Component {
     if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
       this.props.getData();
     }
+    if (nextProps.location.search !== this.props.location.search) {
+      this.props.getData();
+    }
   }
+
+  getURLParams = (type) => getQueryParameters(this.props.location.search, type);
 
   handleChangeParams = (e) => {
     const { history, params } = this.props;
@@ -158,10 +175,12 @@ HomePage.propTypes = {
   entriesNumber: PropTypes.number.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   onDrop: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   params: PropTypes.object,
   search: PropTypes.string.isRequired,
+  setParams: PropTypes.func.isRequired,
   uploadedFiles: PropTypes.arrayOf(PropTypes.object),
 };
 
@@ -173,6 +192,7 @@ function mapDispatchToProps(dispatch) {
       getData,
       onDrop,
       onSearch,
+      setParams,
     },
     dispatch,
   );

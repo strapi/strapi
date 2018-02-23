@@ -15,19 +15,26 @@
   justify-content: space-between;
 
   > div:first-child {
-    width: 53px;
+    display: flex;
+    width: 133px;
+    > div:first-child {
+      width: 51px;
+    }
+    > div:last-child {
+      width: 82px;
+    }
   }
+
   > div:nth-child(2) {
-    width: 80px;
+    width: calc(100% - 696px);
+    padding-right: 20px;
   }
   > div:nth-child(3) {
-    width: 148px;
+    width: calc(100% - 596px);
   }
   > div:nth-child(4) {
-    width: 221px;
-  }
-  > div:nth-child(5) {
     width: 184px;
+    flex-shrink: 0;
     > span {
       &:after {
         content: '\f0d8';
@@ -36,14 +43,17 @@
       }
     }
   }
-  > div:nth-child(6) {
+  > div:nth-child(5) {
+    flex-shrink: 0;
     width: 100px;
   }
-  > div:nth-child(7) {
+  > div:nth-child(6) {
     width: 147px;
+    flex-shrink: 0;
   }
-  > div:nth-child(8) {
+  > div:nth-child(7) {
     width: 116px;
+    flex-shrink: 0;
   }
 }
 

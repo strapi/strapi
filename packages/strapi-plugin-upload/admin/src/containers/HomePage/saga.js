@@ -15,7 +15,7 @@ import {
   ON_SEARCH,
 } from './constants';
 import {
-  // makeSelectParams,
+  makeSelectParams,
   makeSelectSearch,
 } from './selectors';
 
@@ -27,25 +27,24 @@ function* dataDelete(action) {
     yield put(deleteSuccess());
     strapi.notification.success('upload.notification.delete.success');
   } catch(err) {
-    console.log(err);
+    strapi.notification.error('notification.error');
   }
 }
 
 function* dataGet() {
   try {
-    // const pageParams = yield select(makeSelectParams());
-    // const skip = ( pageParams.page - 1) * pageParams.limit;
-    // const params = {
-    //   limit: pageParams.limit,
-    //   sort: pageParams.sort,
-    //   skip,
-    // };
-
+    const pageParams = yield select(makeSelectParams());
+    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const params = {
+      _limit: pageParams.limit,
+      _sort: pageParams.sort,
+      _start,
+    };
     const data = yield [
-      call(request, '/upload/files', { method: 'GET', params: {} }),
+      call(request, '/upload/files', { method: 'GET', params }),
       call(request, '/upload/files/count', { method: 'GET' }),
     ];
-    const entries = data[0].length === 0 ? [Map({})] : data[0].map(obj => Map(obj));
+    const entries = data[0].length === 0 ? [] : data[0].map(obj => Map(obj));
     yield put(getDataSuccess(entries, data[1].count));
   } catch(err) {
     strapi.notification.error('notification.error');
@@ -78,7 +77,6 @@ function* search() {
     const search = yield select(makeSelectSearch());
     console.log('will search', search);
   } catch(err) {
-    console.log(err);
     strapi.notification.error('notification.error');
   }
 }

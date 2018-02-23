@@ -12,6 +12,7 @@ import {
   DROP_SUCCESS,
   GET_DATA_SUCCESS,
   ON_SEARCH,
+  SET_PARAMS,
 } from './constants';
 
 const initialState = fromJS({
@@ -42,6 +43,8 @@ function homePageReducer(state = initialState, action) {
         .update('entriesNumber', () => action.entriesNumber);
     case ON_SEARCH:
       return state.update('search', () => action.value);
+    case SET_PARAMS:
+      return state.set('params', Map(action.params));
     default:
       return state;
   }

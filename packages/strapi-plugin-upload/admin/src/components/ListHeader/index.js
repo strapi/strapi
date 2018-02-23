@@ -14,8 +14,8 @@ import styles from './styles.scss';
 
 function ListHeader() {
   const titles = [
-    '',
-    'type',
+    // '',
+    // 'type',
     'hash',
     'name',
     'updated',
@@ -26,6 +26,12 @@ function ListHeader() {
   return (
     <li className={styles.listheaderWrapper}>
       <div className={cn(styles.listHeader)}>
+        <div>
+          <div />
+          <div>
+            <FormattedMessage id="upload.ListHeader.type" />
+          </div>
+        </div>
         {titles.map((title, key) => {
           if (title !== '') {
             return (

@@ -12,3 +12,4 @@ export const GET_DATA = 'Upload/HomePage/GET_DATA';
 export const GET_DATA_SUCCESS = 'Upload/HomePage/GET_DATA_SUCCESS';
 export const ON_DROP = 'Upload/HomePage/ON_DROP';
 export const ON_SEARCH = 'Upload/HomePage/ON_SEARCH';
+export const SET_PARAMS = 'Upload/HomePage/SET_PARAMS';
