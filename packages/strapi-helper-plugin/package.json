@@ -3,7 +3,7 @@
   "version": "3.0.0-alpha.10.3",
   "description": "Helper for Strapi plugins development",
   "engines": {
-    "node": ">= 8.0.0",
+    "node": ">= 9.0.0",
     "npm": ">= 5.3.0"
   },
   "author": {

@@ -1,0 +1,26 @@
+{
+  "EmptyLi.message": "Aucun fichier n'a été téléchargé",
+
+  "EntriesNumber.number": "{number} fichier trouvé",
+  "EntriesNumber.number.plural": "{number} fichiers trouvés",
+
+  "HomePage.title": "Upload",
+  "HomePage.description": "Découvrez tous les fichiers téléchargés",
+  "HomePage.InputSearch.placeholder": "Rechercher un fichier...",
+
+  "Li.linkCopied": "Lien copié dans le presse-papier",
+
+  "ListHeader.type": "Type",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "Nom",
+  "ListHeader.updated": "Modifié",
+  "ListHeader.size": "Taille",
+  "ListHeader.related": "Relié à",
+
+  "PluginInputFile.text": "Drag & drop vos fichiers dans cette zone ou {link} un fichier à télécharger",
+  "PluginInputFile.link": "recherchez",
+
+  "notification.delete.success": "Le fichier a bien été supprimé",
+  "notification.dropFile.success": "Votre fichier a été téléchargé",
+  "notification.dropFiles.success": "{number} fichiers ont été téléchargées"
+}

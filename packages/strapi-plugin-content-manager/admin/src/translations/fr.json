@@ -8,13 +8,15 @@
   "containers.Edit.submit": "Valider",
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.delete": "Supprimer",
-  "containers.Edit.cancel": "Annuler",
+  "containers.Edit.reset": "Annuler",
   "containers.Edit.returnList": "Retourner à la liste",
   "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.pluginHeaderDescription": "{label} entrées trouvées",
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
+
+  "EditRelations.title": "Données associées",
 
   "emptyAttributes.title": "Il n'y a pas encore de champs",
   "emptyAttributes.description": "Ajoutez votre premier champ a votre modèle",

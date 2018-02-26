@@ -16,7 +16,7 @@
   "main": "./lib",
   "dependencies": {
     "lodash": "^4.17.4",
-    "mongoose": "^5.0.0-rc1",
+    "mongoose": "^5.0.4",
     "mongoose-float": "^1.0.2",
     "pluralize": "^6.0.0",
     "strapi-utils": "3.0.0-alpha.10.3"
@@ -44,7 +44,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 8.0.0",
+    "node": ">= 9.0.0",
     "npm": ">= 5.3.0"
   },
   "license": "MIT"

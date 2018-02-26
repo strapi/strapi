@@ -23,7 +23,7 @@ function Label(props) {
 
   return (
     <label
-      className={cn(styles.label, props.className)}
+      className={cn(styles.labelCompo, props.className)}
       htmlFor={props.htmlFor}
       style={props.style}
     >

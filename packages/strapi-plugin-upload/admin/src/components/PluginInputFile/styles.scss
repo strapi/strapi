@@ -1,0 +1,49 @@
+.isDraging {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url('../../assets/icons/icon_upload_2.svg');
+  background-size: auto 64px;
+  background-position: center 27px;
+  background-repeat: no-repeat;
+}
+
+.pluginInputFile {
+  position: relative;
+  height: 146px;
+  width: 100%;
+  border: 2px dashed #E3E9F3;
+  border-radius: 2px;
+  background-image: url('../../assets/icons/icon_upload_2.svg');
+  background-size: auto 64px;
+  background-position: center 27px;
+  background-repeat: no-repeat;
+
+  > input {
+    display: none;
+  }
+}
+
+.textWrapper {
+  margin-top: 103px;
+  text-align: center;
+  font-size: 13px;
+  color: #9EA7B8;
+
+  u {
+    color: #1C5DE7;
+  }
+}
+
+.pluginInputFileHover {
+  background: rgba(28,93,231,0.01) !important;
+  border: 2px dashed rgba(28,93,231,0.10) !important;
+}
+
+.underline {
+  color: #1C5DE7;
+  text-decoration: underline;
+  cursor: pointer;
+}

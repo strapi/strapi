@@ -17,11 +17,14 @@ import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 
 import Home from 'containers/Home';
-import Edit from 'containers/Edit';
-import List from 'containers/List';
+import EditPage from 'containers/EditPage';
+import ListPage from 'containers/ListPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
-import { emptyStore, getModelEntries, loadModels } from './actions';
+import {
+  emptyStore,
+  loadModels,
+} from './actions';
 import { makeSelectLoading, makeSelectModels, makeSelectModelEntries } from './selectors';
 
 import saga from './sagas';
@@ -29,20 +32,6 @@ import saga from './sagas';
 class App extends React.Component {
   componentDidMount() {
     this.props.loadModels();
-
-    const modelName = this.props.location.pathname.split('/')[3];
-
-    if (modelName) {
-      this.props.getModelEntries(modelName, getQueryParameters(this.props.location.search, 'source'));
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    const currentModelName = this.props.location.pathname.split('/')[3];
-
-    if (prevProps.location.pathname !== this.props.location.pathname && currentModelName) {
-      this.props.getModelEntries(currentModelName, getQueryParameters(this.props.location.search, 'source'));
-    }
   }
 
   componentWillUnmount() {
@@ -66,8 +55,8 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
-          <Route path="/plugins/content-manager/:slug/:id" component={Edit} />
-          <Route path="/plugins/content-manager/:slug" component={List} />
+          <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
+          <Route path="/plugins/content-manager/:slug" component={ListPage} />
           <Route path="/plugins/content-manager" component={Home} />
         </Switch>
       </div>
@@ -81,7 +70,6 @@ App.contextTypes = {
 
 App.propTypes = {
   emptyStore: PropTypes.func.isRequired,
-  getModelEntries: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   loading: PropTypes.bool.isRequired,
   loadModels: PropTypes.func.isRequired,
@@ -97,7 +85,7 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       emptyStore,
-      getModelEntries,
+      // getModelEntries,
       loadModels,
     },
     dispatch,

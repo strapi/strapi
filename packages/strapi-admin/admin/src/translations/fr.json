@@ -11,6 +11,12 @@
   "app.components.HomePage.button": "Créez votre premier type de contenu",
   "app.components.HomePage.feedback": "N'hésitez pas à utiliser un des channels ci-dessous pour poser vos questions ou nous donner vos retours.",
 
+  "app.components.ImgPreview.hint": "Drag & drop dans cette zone ou {browse} un fichier à télécharger",
+  "app.components.ImgPreview.hint.browse": "recherchez",
+
+  "app.components.InputFile.newFile": "Ajouter un  nouveau fichier",
+  "app.components.InputFileDetails.details": "Détails",
+
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
   "app.components.InstallPluginPage.title": "Marketplace - Plugins",
   "app.components.InstallPluginPage.description": "Améliorez votre app sans efforts",
@@ -57,6 +63,7 @@
 
   "app.utils.placeholder.defaultMessage": "\u0020",
   "app.utils.SelectOption.defaultMessage": "\u0020",
+  "app.utils.defaultMessage": "\u0020",
 
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
@@ -65,6 +72,8 @@
   "components.OverlayBlocker.description": "Vous utilisez une fonctionnalité qui nécessite le redémarrage du server. Merci d'attendre que celui-ci ait redémarré.",
 
   "components.ErrorBoundary.title": "Une erreur est survenue...",
+
+  "components.PageFooter.select": "entrées par page",
 
   "components.ProductionBlocker.header": "Ce plugin est disponible uniquement en développement.",
   "components.ProductionBlocker.description": "Pour des raisons de sécurité il est désactivé dans les autres environnements.",

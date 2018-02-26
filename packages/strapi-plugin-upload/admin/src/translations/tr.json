@@ -1,0 +1,26 @@
+{
+  "EmptyLi.message": "There are no uploaded files",
+
+  "EntriesNumber.number": "{number} dosya bulundu",
+  "EntriesNumber.number.plural": "{number} dosya bulundu",
+
+  "HomePage.title": "Yükle",
+  "HomePage.description": "Yüklenen dosyalar",
+  "HomePage.InputSearch.placeholder": "Dosya ara...",
+
+  "Li.linkCopied": "Bağlantı, panoya kopyalandı",
+
+  "ListHeader.type": "Tip",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "İsim",
+  "ListHeader.updated": "Yüklendi",
+  "ListHeader.size": "Boyut",
+  "ListHeader.related": "İlişkili",
+
+  "PluginInputFile.text": "Dosyanızı bu alana sürükleyip bırakın ya da dosya yüklemek için {link}",
+  "PluginInputFile.link": "gözat",
+
+  "notification.delete.success": "The file has been deleted",
+  "notification.dropFile.success": "Dosyanız yüklendi",
+  "notification.dropFiles.success": "{number} dosyalar yüklendi"
+}
