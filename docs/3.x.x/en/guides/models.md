@@ -97,69 +97,100 @@ To improve the Developer eXperience when developing or using the administration 
 
 Refer to the [relations concept](../concepts/concepts.md#relations) for more informations about relations type.
 
-### Many-to-many
+### One-way
 
-Refer to the [many-to-many concept](../concepts/concepts.md#many-to-many).
+Refer to the [one-way concept](../concepts/concepts.md#one-way) for informations.
 
 #### Example
 
-A `product` can be related to many `categories`, so a `category` can have many `products`.
+A `pet` can be owned by someone (a `user`).
 
-**Path —** `./api/product/models/Product.settings.json`.
+**Path —** `./api/pet/models/Pet.settings.json`.
 ```json
 {
   "attributes": {
-    "categories": {
-      "collection": "product",
-      "via": "products",
-      "dominant": true
+    "owner": {
+      "model": "user"
     }
   }
 }
 ```
 
-> Note: The `dominant` key allows you to define in which table/collection (only for NoSQL databases) should be stored the array that defines the relationship. Because there is no join table in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+**Path —** `./api/pet/controllers/Pet.js`.
+```js
+// Mongoose example
+module.exports = {
+  findPetsWithOwners: async (ctx) => {
+    // Retrieve the list of pets with their owners.
+    const pets = Pet
+      .find()
+      .populate('owner');
 
-**Path —** `./api/category/models/Category.settings.json`.
+    // Send the list of pets.
+    ctx.body = pets;
+  }
+}
+```
+
+### One-to-one
+
+Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
+
+#### Example
+
+A `user` can have one `address`. And this address is only related to this `user`.
+
+**Path —** `./api/user/models/User.settings.json`.
 ```json
 {
   "attributes": {
-    "products": {
-      "collection": "category",
-      "via": "categories"
+    "address": {
+      "model": "address",
+      "via": "user"
     }
   }
 }
 ```
 
-**Path —** `./api/product/controllers/Product.js`.
-```js
-// Mongoose example
-module.exports = {
-  findProductsWithCategories: async (ctx) => {
-    // Retrieve the list of products.
-    const products = Product
-      .find()
-      .populate('categories');
-
-    // Send the list of products.
-    ctx.body = products;
+**Path —** `./api/address/models/Address.settings.json`.
+```json
+{
+  "attributes": {
+    "user": {
+      "model": "user"
+    }
   }
 }
 ```
 
-**Path —** `./api/category/controllers/Category.js`.
+**Path —** `./api/user/controllers/User.js`.
 ```js
 // Mongoose example
 module.exports = {
-  findCategoriesWithProducts: async (ctx) => {
-    // Retrieve the list of categories.
-    const categories = Category
+  findUsersWithAddresses: async (ctx) => {
+    // Retrieve the list of users with their addresses.
+    const users = User
       .find()
-      .populate('products');
+      .populate('address');
 
-    // Send the list of categories.
-    ctx.body = categories;
+    // Send the list of users.
+    ctx.body = users;
+  }
+}
+```
+
+**Path —** `./api/adress/controllers/Address.js`.
+```js
+// Mongoose example
+module.exports = {
+  findArticlesWithUsers: async (ctx) => {
+    // Retrieve the list of addresses with their users.
+    const articles = Address
+      .find()
+      .populate('user');
+
+    // Send the list of addresses.
+    ctx.body = addresses;
   }
 }
 ```
@@ -227,102 +258,335 @@ module.exports = {
 }
 ```
 
-### One-to-one
+### Many-to-many
 
-Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
+Refer to the [many-to-many concept](../concepts/concepts.md#many-to-many).
 
 #### Example
 
-A `user` can have one `address`. And this address is only related to this `user`.
+A `product` can be related to many `categories`, so a `category` can have many `products`.
 
-**Path —** `./api/user/models/User.settings.json`.
+**Path —** `./api/product/models/Product.settings.json`.
 ```json
 {
   "attributes": {
-    "address": {
-      "model": "address",
-      "via": "user"
+    "categories": {
+      "collection": "product",
+      "via": "products",
+      "dominant": true
     }
   }
 }
 ```
 
-**Path —** `./api/address/models/Address.settings.json`.
+> Note: The `dominant` key allows you to define in which table/collection (only for NoSQL databases) should be stored the array that defines the relationship. Because there is no join table in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+
+**Path —** `./api/category/models/Category.settings.json`.
 ```json
 {
   "attributes": {
-    "user": {
-      "model": "user"
+    "products": {
+      "collection": "category",
+      "via": "categories"
     }
   }
 }
 ```
 
-**Path —** `./api/user/controllers/User.js`.
+**Path —** `./api/product/controllers/Product.js`.
 ```js
 // Mongoose example
 module.exports = {
-  findUsersWithAddresses: async (ctx) => {
-    // Retrieve the list of users with their addresses.
-    const users = User
+  findProductsWithCategories: async (ctx) => {
+    // Retrieve the list of products.
+    const products = Product
       .find()
-      .populate('address');
+      .populate('categories');
+
+    // Send the list of products.
+    ctx.body = products;
+  }
+}
+```
+
+**Path —** `./api/category/controllers/Category.js`.
+```js
+// Mongoose example
+module.exports = {
+  findCategoriesWithProducts: async (ctx) => {
+    // Retrieve the list of categories.
+    const categories = Category
+      .find()
+      .populate('products');
+
+    // Send the list of categories.
+    ctx.body = categories;
+  }
+}
+```
+
+### Polymorphic
+
+Refer to the [polymorphic concept](../concepts/concepts.md#polymorphic) for more informations.
+
+The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
+
+#### Single vs Many
+
+Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
+
+> In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+
+**Path —** `./api/image/models/Image.settings.json`.
+```json
+{
+  "attributes": {
+    "related": {
+      "model": "*",
+      "filter": "field"
+    }
+  }
+}
+```
+
+Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
+
+> In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+
+**Path —** `./api/image/models/Image.settings.json`.
+```json
+{
+  "attributes": {
+    "related": {
+      "collection": "*",
+      "filter": "field"
+    }
+  }
+}
+```
+
+#### Filter
+
+The `filter` attribute is optional (but we highly recommend to use every time). If it's provided it adds a new match level to retrieve the related data.
+
+For example, the `Product` model might have two attributes which are associated to the `Image` model. To distinguish which image is attached to the `cover` field and which images are attached to the `pictures` field, we need to save and provide this to the database.
+
+**Path —** `./api/article/models/Product.settings.json`.
+```json
+{
+  "attributes": {
+    "cover": {
+      "model": "image",
+      "via": "related",
+    },
+    "pictures": {
+      "collection": "image",
+      "via": "related"
+    }
+  }
+}
+```
+
+The value is the `filter` attribute is the name of the column where the information is stored.
+
+#### Example
+
+A `Image` model might belongs to many either `Article` models or a `Product` models.
+
+**Path —** `./api/image/models/Image.settings.json`.
+```json
+{
+  "attributes": {
+    "related": {
+      "collection": "*",
+      "filter": "field"
+    }
+  }
+}
+```
+
+**Path —** `./api/article/models/Article.settings.json`.
+```json
+{
+  "attributes": {
+    "avatar": {
+      "model": "image",
+      "via": "related"
+    }
+  }
+}
+```
+
+**Path —** `./api/article/models/Product.settings.json`.
+```json
+{
+  "attributes": {
+    "pictures": {
+      "collection": "image",
+      "via": "related"
+    }
+  }
+}
+```
+
+**Path —** `./api/image/controllers/Image.js`.
+```js
+// Mongoose example
+module.exports = {
+  findFiles: async (ctx) => {
+    // Retrieve the list of images with the Article or Product entries related to them.
+    const images = Images
+      .find()
+      .populate('related');
+
+    /*
+    [{
+      "_id": "5a81b0fa8c063a53298a934a",
+      "url": "http://....",
+      "name": "john_doe_avatar.png",
+      "related": [{
+        "_id": "5a81b0fa8c063a5393qj934a",
+        "title": "John Doe is awesome",
+        "description": "..."
+      }, {
+        "_id": "5a81jei389ns5abd75f79c",
+        "name": "A simple chair",
+        "description": "..."
+      }]
+    }]
+    */
+
+    // Send the list of files.
+    ctx.body = images;
+  }
+}
+```
+
+**Path —** `./api/article/controllers/Article.js`.
+```js
+// Mongoose example
+module.exports = {
+  findArticlesWithAvatar: async (ctx) => {
+    // Retrieve the list of articles with the avatar (image).
+    const articles = Article
+      .find()
+      .populate('avatar');
+
+    /*
+    [{
+      "_id": "5a81b0fa8c063a5393qj934a",
+      "title": "John Doe is awesome",
+      "description": "...",
+      "avatar": {
+        "_id": "5a81b0fa8c063a53298a934a",
+        "url": "http://....",
+        "name": "john_doe_avatar.png"
+      }
+    }]
+    */
 
     // Send the list of users.
-    ctx.body = users;
+    ctx.body = articles;
   }
 }
 ```
 
-**Path —** `./api/adress/controllers/Address.js`.
+**Path —** `./api/product/controllers/Product.js`.
 ```js
 // Mongoose example
 module.exports = {
-  findArticlesWithUsers: async (ctx) => {
-    // Retrieve the list of addresses with their users.
-    const articles = Address
+  findProductWithPictures: async (ctx) => {
+    // Retrieve the list of products with the pictures (images).
+    const products = Product
       .find()
-      .populate('user');
+      .populate('pictures');
 
-    // Send the list of addresses.
-    ctx.body = addresses;
+    /*
+    [{
+      "_id": "5a81jei389ns5abd75f79c",
+      "name": "A simple chair",
+      "description": "...",
+      "pictures": [{
+        "_id": "5a81b0fa8c063a53298a934a",
+        "url": "http://....",
+        "name": "chair_position_1.png"
+      }, {
+        "_id": "5a81d22bee1ad45abd75f79c",
+        "url": "http://....",
+        "name": "chair_position_2.png"
+      }, {
+        "_id": "5a81d232ee1ad45abd75f79e",
+        "url": "http://....",
+        "name": "chair_position_3.png"
+      }]
+    }]
+    */
+
+    // Send the list of users.
+    ctx.body = products;
   }
 }
 ```
-### One-way
 
-Refer to the [one-way concept](../concepts/concepts.md#one-way) for informations.
+#### Database implementation
 
-#### Example
+If you're using MongoDB as a database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
 
-A `pet` can be owned by someone (a `user`).
-
-**Path —** `./api/pet/models/Pet.settings.json`.
+**Path —** `./api/image/models/Image.settings.json`.
 ```json
 {
   "attributes": {
-    "owner": {
-      "model": "user"
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "related": {
+      "collection": "*",
+      "filter": "field"
     }
   }
 }
 ```
 
-**Path —** `./api/pet/controllers/Pet.js`.
-```js
-// Mongoose example
-module.exports = {
-  findPetsWithOwners: async (ctx) => {
-    // Retrieve the list of pets with their owners.
-    const pets = Pet
-      .find()
-      .populate('owner');
-
-    // Send the list of pets.
-    ctx.body = pets;
-  }
-}
+The first table to create is the table which has the same name as your model.
 ```
+CREATE TABLE `image` (
+  `id` int(11) NOT NULL,
+  `name` text NOT NULL,
+  `text` text NOT NULL
+)
+```
+
+> Note: If you've overrided the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
+
+The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
+```
+CREATE TABLE `image_morph` (
+  `id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `related_id` int(11) NOT NULL,
+  `related_type` text NOT NULL,
+  `field` text NOT NULL
+)
+```
+
+- `image_id` is using the name of the first table with the suffix `_id`.
+  - **Attempted value:** It correspond to the id of an `Image` entry.
+- `related_id` is using the attribute name where the relation happens with the suffix `_id`.
+  - **Attempted value:** It correspond to the id of an `Article` or `Product` entry.
+- `related_type` is using the attribute name where the relation happens with the suffix `_type`.
+  - **Attempted value:** It correspond to the table name where the `Article` or `Product` entry is stored.
+- `field` is using the filter property value defined in the model. If you change the filter value, you have to change the name of this column as well.
+  - **Attempted value:** It correspond to the attribute of a `Article`, `Product` with which the `Image` entry is related.
+
+
+| id | image_id | related_id | related_type | field  |
+|----|----------|------------|--------------|--------|
+| 1  | 1738     | 39         | product      | cover  |
+| 2  | 4738     | 58         | article      | avatar |
+| 3  | 1738     | 71         | article      | avatar |
 
 ## Lifecycle callbacks
 

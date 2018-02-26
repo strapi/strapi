@@ -1,4 +1,6 @@
 {
+  "EmptyLi.message": "There are no uploaded files",
+
   "EntriesNumber.number": "{number} file found",
   "EntriesNumber.number.plural": "{number} files found",
 
@@ -18,6 +20,7 @@
   "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
   "PluginInputFile.link": "browse",
 
+  "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
   "notification.dropFiles.success": "{number} files have been uploaded"
 }

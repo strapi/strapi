@@ -13,6 +13,8 @@ import {
   GET_DATA_SUCCESS,
   ON_DROP,
   ON_SEARCH,
+  ON_SEARCH_SUCCESS,
+  SET_PARAMS,
 } from './constants';
 
 export function changeParams({ target }) {
@@ -58,9 +60,14 @@ export function getDataSuccess(data, entriesNumber) {
 }
 
 export function onDrop({ dataTransfer: { files } }) {
+  const formData = Object.keys(files).reduce((acc, current) => {
+    acc.append('files', files[current]);
+    return acc;
+  }, new FormData());
+
   return {
     type: ON_DROP,
-    files,
+    formData,
   };
 }
 
@@ -68,5 +75,19 @@ export function onSearch({ target }) {
   return {
     type: ON_SEARCH,
     value: target.value,
+  };
+}
+
+export function setParams(params) {
+  return {
+    type: SET_PARAMS,
+    params,
+  };
+}
+
+export function onSearchSuccess(data) {
+  return {
+    type: ON_SEARCH_SUCCESS,
+    data,
   };
 }

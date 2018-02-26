@@ -1,4 +1,6 @@
 {
+  "EmptyLi.message": "There are no uploaded files",
+
   "EntriesNumber.number": "{number} dosya bulundu",
   "EntriesNumber.number.plural": "{number} dosya bulundu",
 
@@ -18,6 +20,7 @@
   "PluginInputFile.text": "Dosyanızı bu alana sürükleyip bırakın ya da dosya yüklemek için {link}",
   "PluginInputFile.link": "gözat",
 
+  "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Dosyanız yüklendi",
   "notification.dropFiles.success": "{number} dosyalar yüklendi"
 }
