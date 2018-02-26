@@ -36,7 +36,8 @@
     },
     "related": {
       "collection": "*",
-      "filter": "field"
+      "filter": "field",
+      "configurable": false
     }
   }
 }
