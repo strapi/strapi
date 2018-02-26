@@ -88,7 +88,8 @@ module.exports = function(strapi) {
             const loadedModel = _.assign({
                 tableName: definition.collectionName,
                 hasTimestamps: _.get(definition, 'options.timestamps') === true,
-                idAttribute: _.get(definition, 'options.idAttribute', 'id')
+                idAttribute: _.get(definition, 'options.idAttribute', 'id'),
+                associations: []
               }, definition.options);
 
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
