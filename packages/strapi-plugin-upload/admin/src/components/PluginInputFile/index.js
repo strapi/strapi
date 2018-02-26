@@ -16,12 +16,6 @@ import styles from './styles.scss';
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };
 
-  handleClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.refs.input.click();
-  }
-
   handleDragEnter = () => this.setState({ isDraging: true });
 
   handleDragLeave = () => this.setState({ isDraging: false });
@@ -40,7 +34,7 @@ class PluginInputFile extends React.PureComponent {
     const { isDraging } = this.state;
     const link = (
       <FormattedMessage id="upload.PluginInputFile.link">
-        {(message) => <span className={styles.underline} onClick={this.handleClick}>{message}</span>}
+        {(message) => <span className={styles.underline}>{message}</span>}
       </FormattedMessage>
     );
 
@@ -65,7 +59,6 @@ class PluginInputFile extends React.PureComponent {
           multiple
           name={name}
           onChange={onChange}
-          ref="input"
           type="file"
         />
       </label>
