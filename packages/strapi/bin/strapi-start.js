@@ -66,7 +66,8 @@ module.exports = function() {
             _.startsWith(file, '.') ||
             file === 'node_modules' ||
             file === 'plugins.json' ||
-            file === 'index.html'
+            file === 'index.html'   ||
+            file === 'public'
           ) {
             return;
           }

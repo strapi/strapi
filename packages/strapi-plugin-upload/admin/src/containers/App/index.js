@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { bindActionCreators, compose } from 'redux';
 
 // Utils
 import { pluginId } from 'app';
@@ -19,39 +15,15 @@ import { pluginId } from 'app';
 import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';
 
-class App extends React.Component {
-  render() {
-    return (
-      <div className={pluginId}>
-        <Switch>
-          <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-          <Route component={NotFoundPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
-
-App.contextTypes = {
-  plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  updatePlugin: PropTypes.func,
-};
-
-App.propTypes = {};
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
+function App() {
+  return (
+    <div className={pluginId}>
+      <Switch>
+        <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+        <Route component={NotFoundPage} />
+      </Switch>
+    </div>
   );
 }
 
-const mapStateToProps = createStructuredSelector({});
-
-// Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-export default compose(
-  withConnect,
-)(App);
+export default App;

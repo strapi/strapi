@@ -14,6 +14,11 @@ const selectHomePage = () => createSelector(
   (substate) => substate.toJS(),
 );
 
+const makeSelectParams = () => createSelector(
+  selectHomePageDomain(),
+  (substate) => substate.get('params').toJS(),
+);
+
 const makeSelectSearch = () => createSelector(
   selectHomePageDomain(),
   (substate) => substate.get('search'),
@@ -22,4 +27,5 @@ const makeSelectSearch = () => createSelector(
 export default selectHomePage;
 export {
   makeSelectSearch,
+  makeSelectParams,
 };

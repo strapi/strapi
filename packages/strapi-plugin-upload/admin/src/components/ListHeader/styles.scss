@@ -9,33 +9,60 @@
 
 .listHeader {
   display: flex;
+  margin-left: 32px;
+  margin-right: 32px;
+  justify-content: space-between;
+
   > div:first-child {
-    min-width: 84px;
-    text-align: center;
-  }
-  > div:nth-child(2) {
-    min-width: 80px;
-  }
-  > div:nth-child(3) {
-    min-width: 148px;
-  }
-  > div:nth-child(4) {
-    min-width: 221px;
-  }
-  > div:nth-child(5) {
-    min-width: 184px;
-    > span {
-      &:after {
-        content: '\f0d8';
-        margin-left: 10px;
-        font-family: 'FontAwesome';
-      }
+    display: flex;
+    width: 133px;
+    > div:first-child {
+      width: 51px;
+    }
+    > div:last-child {
+      width: 82px;
     }
   }
+  > div:nth-child(2) {
+    width: calc(100% - 496px - 221px);
+  }
+  > div:nth-child(3) {
+    width: calc(100% - 496px - 148px);
+  }
+  > div:nth-child(4) {
+    width: 184px;
+    flex-shrink: 0;
+  }
+  > div:nth-child(5) {
+    width: 100px;
+    flex-shrink: 0;
+  }
   > div:nth-child(6) {
-    min-width: 100px;
+    width: 147px;
+    flex-shrink: 0;
   }
   > div:nth-child(7) {
-    min-width: 146px;
+    width: 116px;
+    flex-shrink: 0;
+  }
+}
+
+.icon {
+  > span:last-child {
+    &:after {
+      content: '\f0d8';
+      margin-left: 10px;
+      font-family: 'FontAwesome';
+    }
+  }
+}
+
+.iconDesc {
+  > span:last-child {
+    &:after {
+      content: '\f0d7';
+      margin-left: 10px;
+      font-family: 'FontAwesome';
+    }
   }
 }
