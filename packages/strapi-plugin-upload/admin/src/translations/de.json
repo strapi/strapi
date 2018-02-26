@@ -1,6 +1,6 @@
 {
-  "EmptyLi.message": "There is no uploaded files",
-  
+  "EmptyLi.message": "There are no uploaded files",
+
   "EntriesNumber.number": "{number} file found",
   "EntriesNumber.number.plural": "{number} files found",
 
