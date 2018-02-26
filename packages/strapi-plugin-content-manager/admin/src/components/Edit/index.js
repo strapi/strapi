@@ -13,6 +13,7 @@ import {
   isFunction,
   merge,
   omit,
+  upperFirst,
 } from 'lodash';
 
 // You can find these components in either
@@ -44,6 +45,9 @@ const getInputType = (type = '') => {
       return 'text';
     case 'text':
       return 'textarea';
+    case 'file':
+    case 'files':
+      return 'file';
     default:
       return 'text';
   }
@@ -64,8 +68,7 @@ class Edit extends React.PureComponent {
 
   setLayout = (props) => {
     const currentLayout = get(props.layout, [props.modelName, 'attributes']);
-    const displayedFields = merge(get(currentLayout), omit(props.schema.fields, 'id'));
-
+    const displayedFields = merge(this.getUploadRelations(props), get(currentLayout), omit(props.schema.fields, 'id'));
     this.setState({ currentLayout, displayedFields });
   }
 
@@ -99,6 +102,25 @@ class Edit extends React.PureComponent {
 
     return get(formValidations, [index, 'validations'], {});
   }
+
+  /**
+   * Retrieve all relations made with the upload plugin
+   * @param  {Object} props
+   * @return {Object}
+   */
+  getUploadRelations = (props) => (
+    Object.keys(get(props.schema, 'relations', {})).reduce((acc, current) => {
+      if (get(props.schema, ['relations', current, 'plugin']) === 'upload') {
+        acc[current] = {
+          description: '',
+          label: upperFirst(current),
+          type: 'file',
+        };
+      }
+
+      return acc;
+    }, {})
+  )
 
   render(){
     return (

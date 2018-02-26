@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, includes, isEmpty, isObject, toNumber, toString, replace, size } from 'lodash';
+import { get, includes, isEmpty, isObject, toNumber, toString, replace } from 'lodash';
 import cn from 'classnames';
 
 // You can find these components in either
@@ -157,7 +157,11 @@ export class EditPage extends React.Component {
 
   isCreating = () => this.props.match.params.id === 'create';
 
-  isRelationComponentNull = () => size(get(this.getSchema(), 'relations')) === 0;
+  isRelationComponentNull = () => (
+    Object.keys(get(this.getSchema(), 'relations', {})).filter(relation => (
+      get(this.getSchema(), ['relations', relation, 'plugin']) !== 'upload'
+    )).length === 0
+  )
 
   // NOTE: technical debt that needs to be redone
   generateFormFromRecord = () => (
