@@ -1,4 +1,6 @@
 {
+  "EmptyLi.message": "Aucun fichier n'a été téléchargé",
+
   "EntriesNumber.number": "{number} fichier trouvé",
   "EntriesNumber.number.plural": "{number} fichiers trouvés",
 
@@ -18,6 +20,7 @@
   "PluginInputFile.text": "Drag & drop vos fichiers dans cette zone ou {link} un fichier à télécharger",
   "PluginInputFile.link": "recherchez",
 
+  "notification.delete.success": "Le fichier a bien été supprimé",
   "notification.dropFile.success": "Votre fichier a été téléchargé",
   "notification.dropFiles.success": "{number} fichiers ont été téléchargées"
 }

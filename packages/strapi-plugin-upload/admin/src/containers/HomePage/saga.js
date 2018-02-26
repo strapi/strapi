@@ -1,12 +1,14 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
-import { fork, put, select, take, takeLatest } from 'redux-saga/effects';
-// import request from 'utils/request';
+import { isEmpty } from 'lodash';
+import { call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
+import request from 'utils/request';
 
 import {
   deleteSuccess,
   dropSuccess,
   getDataSuccess,
+  onSearchSuccess,
 } from './actions';
 import {
   DELETE_DATA,
@@ -14,59 +16,50 @@ import {
   ON_DROP,
   ON_SEARCH,
 } from './constants';
-import { makeSelectSearch } from './selectors';
+import {
+  makeSelectParams,
+  makeSelectSearch,
+} from './selectors';
 
-function* dataDelete() {
+function* dataDelete(action) {
   try {
-    // const requestURL = `/upload/something/${action.dataToDelete.id}`;
+    const dataId = action.dataToDelete.id || action.dataToDelete._id;
+    const requestURL = `/upload/files/${dataId}`;
+    yield call(request, requestURL, { method: 'DELETE' });
     yield put(deleteSuccess());
-  } catch(err) {
-    console.log(err);
-  }
-}
-
-function* dataGet() {
-  try {
-    const entriesNumber = 20;
-    const data = [
-      Map({
-        type: 'pdf',
-        hash: '1234',
-        name: 'avatar.pdf',
-        updatedAt: '20/11/2017',
-        size: '24 B',
-        relatedTo: 'John Doe',
-        url: 'https://www.google.com',
-        private: false,
-      }),
-    ];
-
-    yield put(getDataSuccess(data, entriesNumber));
-    // TODO: prepare for API call
-    // const data = yield [
-    //   call(request, 'PATH', { method: 'GET' }),
-    //   call(request, 'PATH', { method: 'GET' }),
-    // ];
+    strapi.notification.success('upload.notification.delete.success');
   } catch(err) {
     strapi.notification.error('notification.error');
   }
 }
 
-function* uploadFiles() {
+function* dataGet() {
   try {
-    // const files = action.files;
-    const newFiles = [
-      Map({
-        type: 'mov',
-        hash: `${Math.random()}`,
-        name: 'avatar1.pdf',
-        updatedAt: '20/11/2017',
-        size: '24 B',
-        relatedTo: 'John Doe',
-        url: 'https://www.youtube.com',
-        private: true,
-      }),
+    const pageParams = yield select(makeSelectParams());
+    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const params = {
+      _limit: pageParams.limit,
+      _sort: pageParams.sort,
+      _start,
+    };
+    const data = yield [
+      call(request, '/upload/files', { method: 'GET', params }),
+      call(request, '/upload/files/count', { method: 'GET' }),
     ];
+    const entries = data[0].length === 0 ? [] : data[0].map(obj => Map(obj));
+    yield put(getDataSuccess(entries, data[1].count));
+  } catch(err) {
+    strapi.notification.error('notification.error');
+  }
+}
+
+function* uploadFiles(action) {
+  try {
+    const headers = {
+      'X-Forwarded-Host': 'strapi',
+    };
+    const response = yield call(request, '/upload', { method: 'POST', headers, body: action.formData }, false, false);
+    const newFiles = response.map(file => Map(file));
 
     yield put(dropSuccess(newFiles));
 
@@ -77,7 +70,6 @@ function* uploadFiles() {
     }
 
   } catch(err) {
-    console.log(err);
     strapi.notification.error('notification.error');
   }
 }
@@ -85,9 +77,19 @@ function* uploadFiles() {
 function* search() {
   try {
     const search = yield select(makeSelectSearch());
-    console.log('will search', search);
+    const pageParams = yield select(makeSelectParams());
+    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const requestURL = !isEmpty(search) ? `/upload/search/${search}` : '/upload/files';
+    const params = isEmpty(search) ? {
+      _limit: pageParams.limit,
+      _sort: pageParams.sort,
+      _start,
+    } : {};
+    const response = yield call(request, requestURL, { method: 'GET', params });
+    const entries = response.length === 0 ? [] : response.map(obj => Map(obj));
+    
+    yield put(onSearchSuccess(entries));
   } catch(err) {
-    console.log(err);
     strapi.notification.error('notification.error');
   }
 }

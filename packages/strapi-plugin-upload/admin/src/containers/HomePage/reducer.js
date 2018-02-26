@@ -12,16 +12,18 @@ import {
   DROP_SUCCESS,
   GET_DATA_SUCCESS,
   ON_SEARCH,
+  ON_SEARCH_SUCCESS,
+  SET_PARAMS,
 } from './constants';
 
 const initialState = fromJS({
   deleteSuccess: false,
   dataToDelete: '',
-  entriesNumber: 1,
+  entriesNumber: 0,
   search: '',
-  uploadedFiles: List([Map({})]),
+  uploadedFiles: List([]),
   params: Map({
-    sort: 'updatedAt',
+    sort: 'hash',
     limit: 10,
     page: 1,
   }),
@@ -42,6 +44,10 @@ function homePageReducer(state = initialState, action) {
         .update('entriesNumber', () => action.entriesNumber);
     case ON_SEARCH:
       return state.update('search', () => action.value);
+    case ON_SEARCH_SUCCESS:
+      return state.update('uploadedFiles', () => List(action.data));
+    case SET_PARAMS:
+      return state.set('params', Map(action.params));
     default:
       return state;
   }

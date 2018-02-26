@@ -6,7 +6,7 @@ module.exports = {
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
-      .skip(Number(params.skip))
+      .skip(Number(params.start))
       .populate(populate || this.associations.map(x => x.alias).join(' '))
       .lean();
   },
@@ -90,8 +90,8 @@ module.exports = {
     return this
       .find({
         '$or': [
-          { username: re },
-          { email: re }
+          { hash: re },
+          { name: re }
         ]
       });
   },

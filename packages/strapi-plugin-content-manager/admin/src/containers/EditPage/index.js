@@ -177,7 +177,7 @@ export class EditPage extends React.Component {
     },
     {
       kind: 'primary',
-      label: !this.isCreating() ? 'content-manager.containers.Edit.editing' : 'content-manager.containers.Edit.submit',
+      label: 'content-manager.containers.Edit.submit',
       onClick: this.handleSubmit,
       type: 'submit',
     },
