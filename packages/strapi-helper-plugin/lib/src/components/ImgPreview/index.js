@@ -44,6 +44,10 @@ class ImgPreview extends React.Component {
     }
   }
 
+  componentDidCatch(error, info) {
+    console.log('An error occured in ImgPreview', info);
+  }
+
   getFileType = (fileName) => fileName.split('.').slice(-1)[0];
 
   /**

@@ -125,7 +125,7 @@ export class EditPage extends React.Component {
     // Check if date
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
       value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
-    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(this.getSchema().fields[e.target.name].type) !== -1) {
+    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(get(this.getSchema(), ['fields', e.target.name, 'type'])) !== -1) {
       value = toNumber(e.target.value);
     }
 
