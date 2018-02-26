@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import {
   findIndex,
   get,
+  has,
   isEmpty,
   isFunction,
   merge,
@@ -122,6 +123,8 @@ class Edit extends React.PureComponent {
     }, {})
   )
 
+  fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
+
   render(){
     return (
       <div className={styles.form}>
@@ -139,6 +142,7 @@ class Edit extends React.PureComponent {
                 errors={this.getInputErrors(attr)}
                 key={attr}
                 label={get(layout, 'label') || details.label || ''}
+                multiple={this.fileRelationAllowMultipleUpload(attr)}
                 name={attr}
                 onChange={this.props.onChange}
                 selectOptions={get(this.props.attributes, [attr, 'enum'])}
@@ -162,6 +166,7 @@ Edit.defaultProps = {
   layout: {},
   onChange: () => {},
   record: {},
+  schema: {},
 };
 
 Edit.propTypes = {
@@ -172,6 +177,7 @@ Edit.propTypes = {
   layout: PropTypes.object,
   onChange: PropTypes.func,
   record: PropTypes.object,
+  schema: PropTypes.object,
 };
 
 export default Edit;

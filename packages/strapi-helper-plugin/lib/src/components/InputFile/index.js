@@ -69,7 +69,7 @@ class InputFile extends React.Component {
       onChange,
       value,
     } = this.props;
-    
+
     return (
       <div>
         <ImgPreview
