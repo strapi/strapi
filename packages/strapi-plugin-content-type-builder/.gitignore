@@ -1,6 +1,7 @@
-# Don’t check auto-generated stuff into git
-coverage
-node_modules
+# Don't check auto-generated stuff into git
+coverage/
+node_modules/
+package-lock.json
 stats.json
 
 # Cruft
