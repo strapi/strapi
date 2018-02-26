@@ -30,7 +30,8 @@ class Li extends React.Component {
 
   handleClick = (e) => {
     e.preventDefault();
-    this.refs.aTag.click();
+    const aTag = document.getElementById('aTag');
+    aTag.click();
   }
 
   handleDelete = (e) => {
@@ -76,7 +77,7 @@ class Li extends React.Component {
     return (
       <CopyToClipboard text={item.url} onCopy={() => this.setState({copied: true})}>
         <li className={styles.liWrapper}>
-          <a href={item.url} target="_blank" style={{ display: 'none' }} ref="aTag">nothing</a>
+          <a href={item.url} target="_blank" style={{ display: 'none' }} id="aTag">nothing</a>
           <div className={styles.liContainer}>
             <div>
               <div />
