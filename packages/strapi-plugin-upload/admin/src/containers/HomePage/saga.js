@@ -87,7 +87,7 @@ function* search() {
     } : {};
     const response = yield call(request, requestURL, { method: 'GET', params });
     const entries = response.length === 0 ? [] : response.map(obj => Map(obj));
-    
+
     yield put(onSearchSuccess(entries));
   } catch(err) {
     strapi.notification.error('notification.error');
