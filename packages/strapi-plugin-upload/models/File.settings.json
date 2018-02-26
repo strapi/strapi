@@ -34,6 +34,10 @@
       "type": "string",
       "configurable": false,
       "required": true
+    },
+    "related": {
+      "collection": "*",
+      "filter": "field"
     }
   }
 }

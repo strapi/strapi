@@ -230,12 +230,12 @@ module.exports = {
           nature: 'oneMorphToOne',
           verbose: 'belongsToMorph'
         };
-      } else if (types.current === 'morphTo' && types.other === 'model') {
+      } else if (types.current === 'morphTo' && (types.other === 'model' || association.hasOwnProperty('model'))) {
         return {
           nature: 'manyMorphToOne',
           verbose: 'belongsToManyMorph'
         };
-      } else if (types.current === 'morphTo' && types.other === 'collection') {
+      } else if (types.current === 'morphTo' && (types.other === 'collection' || association.hasOwnProperty('collection'))) {
         return {
           nature: 'manyMorphToMany',
           verbose: 'belongsToManyMorph'
@@ -358,6 +358,7 @@ module.exports = {
           Object.keys(strapi.plugins[current].models).forEach((entity) => {
             Object.keys(strapi.plugins[current].models[entity].attributes).forEach((attribute) => {
               const attr = strapi.plugins[current].models[entity].attributes[attribute];
+
               if (
                 (attr.collection || attr.model || '').toLowerCase() === model.toLowerCase() &&
                 strapi.plugins[current].models[entity].globalId !== definition.globalId
