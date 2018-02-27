@@ -59,7 +59,7 @@ export function* submit() {
         // Don't stringify the file
         map(record[current], (file) => acc.append(current, file));
       } else {
-        acc.append(current, JSON.stringify(cleanData(record[current], 'value', 'id')));
+        acc.append(current, JSON.stringify(cleanedData));
       }
 
       return acc;
