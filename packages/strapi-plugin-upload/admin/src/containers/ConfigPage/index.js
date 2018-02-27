@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 
@@ -25,6 +26,10 @@ class ConfigPage extends React.PureComponent {
     );
   }
 }
+
+ConfigPage.contextTypes = {
+  appEnvironments: PropTypes.array,
+};
 
 ConfigPage.defaultProps = {};
 ConfigPage.propTypes = {};
