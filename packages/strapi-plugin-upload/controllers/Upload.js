@@ -30,7 +30,7 @@ module.exports = {
     const Service = strapi.plugins['upload'].services.upload;
 
     // transform stream files to buffer
-    const files = await Service.bufferize(ctx.request.body.files);
+    const files = await Service.bufferize(ctx.request.body.files.files);
 
     for (var i = 0; i < files.length; i++) {
       if (files[i].size > config.sizeLimit) {

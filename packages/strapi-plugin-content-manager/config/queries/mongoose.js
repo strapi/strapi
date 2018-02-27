@@ -23,20 +23,40 @@ module.exports = {
   },
 
   create: async function (params) {
-    const entry = await this.create(Object.keys(params.values).reduce((acc, current) => {
+    // Exclude relationships.
+    const values = Object.keys(params.values).reduce((acc, current) => {
       if (this._attributes[current].type) {
         acc[current] = params.values[current];
       }
 
       return acc;
-    }, {}))
-    .catch((err) => {
-      const message = err.message.split('index:');
-      const field = _.words(_.last(message).split('_')[0]);
-      const error = { message: `This ${field} is already taken`, field };
+    }, {});
 
-      throw error;
-    });
+    this.associations
+      .filter(association => association.nature.toLowerCase().indexOf('morphto') !== -1)
+      .map(association => {
+        values[association.alias] = params.values[association.alias]
+          .map(obj => {
+            const globalId = obj.source && obj.source !== 'content-manager' ?
+              strapi.plugins[obj.source].models[obj.model].globalId:
+              strapi.models[obj.model].globalId;
+
+            return {
+              ref: obj.ref,
+              kind: globalId,
+              [association.filter]: obj.field
+            }
+          })
+      });
+
+    const entry = await this.create(values)
+      .catch((err) => {
+        const message = err.message.split('index:');
+        const field = _.words(_.last(message).split('_')[0]);
+        const error = { message: `This ${field} is already taken`, field };
+
+        throw error;
+      });
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
