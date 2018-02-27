@@ -70,6 +70,7 @@ class Edit extends React.PureComponent {
   setLayout = (props) => {
     const currentLayout = get(props.layout, [props.modelName, 'attributes']);
     const displayedFields = merge(this.getUploadRelations(props), get(currentLayout), omit(props.schema.fields, 'id'));
+
     this.setState({ currentLayout, displayedFields });
   }
 
@@ -125,11 +126,13 @@ class Edit extends React.PureComponent {
 
   fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
 
+  orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
+
   render(){
     return (
       <div className={styles.form}>
         <div className="row">
-          {Object.keys(this.state.displayedFields).map((attr, key) => {
+          {this.orderAttributes(this.state.displayedFields).map((attr, key) => {
             const details = this.state.displayedFields[attr];
             // Retrieve the input's bootstrapClass from the layout
             const layout = this.getInputLayout(attr);

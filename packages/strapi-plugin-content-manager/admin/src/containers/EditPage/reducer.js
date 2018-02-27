@@ -11,12 +11,14 @@ import {
   INIT_MODEL_PROPS,
   ON_CANCEL,
   RESET_PROPS,
+  SET_FILE_RELATIONS,
   SET_FORM_ERRORS,
   SUBMIT_SUCCESS,
 } from './constants';
 
 const initialState = fromJS({
   didCheckErrors: true,
+  fileRelations: List([]),
   formErrors: List([]),
   formValidations: List([]),
   isCreating: false,
@@ -52,6 +54,8 @@ function editPageReducer(state = initialState, action) {
         .update('record', () => state.get('initialRecord'));
     case RESET_PROPS:
       return initialState;
+    case SET_FILE_RELATIONS:
+      return state.set('fileRelations', List(action.fileRelations));
     case SET_FORM_ERRORS:
       return state
         .update('didCheckErrors', (v) => v = !v)

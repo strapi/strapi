@@ -10,6 +10,7 @@ export const GET_DATA_SUCCEEDED = 'ContentManager/EditPage/GET_DATA_SUCCEEDED';
 export const INIT_MODEL_PROPS = 'ContentManager/EditPage/INIT_MODEL_PROPS';
 export const ON_CANCEL = 'ContentManager/EditPage/ON_CANCEL';
 export const RESET_PROPS = 'ContentManager/EditPage/RESET_PROPS';
+export const SET_FILE_RELATIONS = 'ContentManager/EditPage/SET_FILE_RELATIONS';
 export const SET_FORM_ERRORS = 'ContentManager/EditPage/SET_FORM_ERRORS';
 export const SUBMIT = 'ContentManager/EditPage/SUBMIT';
 export const SUBMIT_SUCCESS = 'ContentManager/EditPage/SUBMIT_SUCCESS';

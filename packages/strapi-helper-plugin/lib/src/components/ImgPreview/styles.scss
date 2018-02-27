@@ -6,16 +6,16 @@
 }
 
 .imgPreviewContainer {
-  // display: flex;
-  // flex-direction: column;
   height: 144px;
-  width: 358px;
+  width: 100%;
+  // width: 358px;
   position: relative;
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   text-align: center;
   vertical-align: middle;
-  background-color: #F3F4F4;
+  // background-color: #F3F4F4;
+  background-color: #333740;
   background-position: center;
   background-repeat: no-repeat !important;
   white-space: nowrap;
@@ -71,6 +71,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  color: #fff;
   justify-content: space-around;
   font-size: 30px;
 }
@@ -83,9 +84,7 @@
   left: 0;
   width: 358px;
   height: 144px;
-  z-index: 9999;
-}
-
-.overed {
+  z-index: 999;
   background: #333740;
+  opacity: 0.9;
 }

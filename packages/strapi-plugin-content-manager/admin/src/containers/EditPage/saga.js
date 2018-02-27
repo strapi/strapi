@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { get, isArray } from 'lodash';
+import { get, isArray, isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -18,6 +18,7 @@ import templateObject from 'utils/templateObject';
 import { getDataSucceeded, setFormErrors, submitSuccess } from './actions';
 import { GET_DATA,SUBMIT } from './constants';
 import {
+  makeSelectFileRelations,
   makeSelectIsCreating,
   makeSelectModelName,
   makeSelectRecord,
@@ -43,38 +44,53 @@ function* dataGet(action) {
 
 export function* submit() {
   const currentModelName = yield select(makeSelectModelName());
-  const record = yield select(makeSelectRecord());
-  const recordJSON = record.toJSON();
-  const source = yield select(makeSelectSource());
+  const fileRelations = yield select(makeSelectFileRelations());
   const isCreating = yield select(makeSelectIsCreating());
+  const record = yield select(makeSelectRecord());
+  const source = yield select(makeSelectSource());
 
   try {
-    const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-      acc.append(current, cleanData(recordJSON[current], 'value', 'id'));
+    const recordCleaned = Object.keys(record).reduce((acc, current) => {
+      const cleanedData = cleanData(record[current], 'value', 'id');
+
+      if (isString(cleanData) || isNumber(cleanData)) {
+        acc.append(current, cleanedData);
+      } else if (fileRelations.includes(current)) {
+        // Don't stringify the file
+        map(record[current], (file) => acc.append(current, file));
+      } else {
+        acc.append(current, JSON.stringify(cleanData(record[current], 'value', 'id')));
+      }
 
       return acc;
     }, new FormData());
 
-    const id = isCreating ? '' : recordCleaned.id;
+    const id = isCreating ? '' : record.id;
     const params = { source };
+    // Change the request helper default headers so we can pass a FormData
+    const headers = {
+      'X-Forwarded-Host': 'strapi',
+    };
 
     const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
+    // Pass false and false as arguments so the request helper doesn't stringify
+    // the body and doesn't watch for the server to restart
     yield call(request, requestUrl, {
       method: isCreating ? 'POST' : 'PUT',
-      headers: {
-        'X-Forwarded-Host': 'strapi',
-      },
+      headers,
       body: recordCleaned,
       params,
     }, false, false);
 
     strapi.notification.success('content-manager.success.record.save');
+    // Redirect the user to the ListPage container
     yield put(submitSuccess());
 
-
   } catch(err) {
+    // NOTE: leave the error log
+    console.log(err.response);
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {

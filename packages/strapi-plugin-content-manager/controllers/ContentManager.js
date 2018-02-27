@@ -80,7 +80,7 @@ module.exports = {
 
   update: async ctx => {
     const { source } = ctx.request.query;
-
+    console.log('hhhh', ctx.request.body.files.pictures[0]);
     try {
       // Return the last one which is the current model.
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].edit(ctx.params, ctx.request.body, source);
