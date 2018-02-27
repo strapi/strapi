@@ -53,11 +53,17 @@ export function* submit() {
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
       const cleanedData = cleanData(record[current], 'value', 'id');
 
-      if (isString(cleanData) || isNumber(cleanData)) {
+      if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
       } else if (fileRelations.includes(current)) {
         // Don't stringify the file
-        map(record[current], (file) => acc.append(current, file));
+        map(record[current], (file) => {
+          if (file instanceof File) {
+            return acc.append(current, file);
+          }
+
+          return acc.append(current, JSON.stringify(file));
+        });
       } else {
         acc.append(current, JSON.stringify(cleanedData));
       }

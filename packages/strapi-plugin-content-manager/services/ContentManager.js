@@ -40,8 +40,28 @@ module.exports = {
   edit: async (params, values, source) => {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      // Silent recursive parser.
+      const parser = (value) => {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // Silent.
+        }
+
+        if (_.isArray(value)) {
+          value = value.map(obj => parser(obj));
+        }
+
+        return value;
+      };
+
       // Parse stringify JSON data.
-      const parsedFields = JSON.parse(values.fields);
+      const parsedFields = Object.keys(values.fields).reduce((acc, current) => {
+        acc[current] = parser(values.fields[current]);
+
+        return acc;
+      }, {});
+
       // Update JSON fields (files are exlucded).
       const fields = await strapi.query(params.model, source).update({
         id: params.id,
@@ -70,17 +90,17 @@ module.exports = {
               // Bufferize files per attribute.
               const buffers = await strapi.plugins.upload.services.upload.bufferize(values.files[attribute]);
               const files = buffers.map(file => {
-                  // Add related information to be able to make
-                  // the relationships later.
-                  file.related = [{
-                    ref: params.id,
-                    model: params.model,
-                    source,
-                    field: attribute,
-                  }];
+                // Add related information to be able to make
+                // the relationships later.
+                file.related = [{
+                  refId: params.id,
+                  ref: params.model,
+                  source,
+                  field: attribute,
+                }];
 
-                  return file;
-                });
+                return file;
+              });
 
               const arrayOfPromises = [strapi.plugins.upload.services.upload.upload(files, config)];
 
@@ -102,7 +122,9 @@ module.exports = {
 
                 const removeRelations = _.difference(storedValue, currentValue);
 
-                console.log("removeRelation", removeRelation);
+                console.log("Current", currentValue);
+                console.log("Stored", storedValue);
+                console.log("removeRelations", removeRelations);
 
                 // TODO:
                 // - Remove relationships in files.
