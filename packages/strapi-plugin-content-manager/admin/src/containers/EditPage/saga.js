@@ -49,12 +49,18 @@ export function* submit() {
   const isCreating = yield select(makeSelectIsCreating());
 
   try {
+    // const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
+    //   acc.append(current, cleanData(recordJSON[current], 'value', 'id'));
+    //
+    //   return acc;
+    // }, new FormData());
     const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-      acc.append(current, cleanData(recordJSON[current], 'value', 'id'));
+      acc[current] = cleanData(recordJSON[current], 'value', 'id');
 
       return acc;
-    }, new FormData());
+    }, {});
 
+    console.log(recordCleaned);
     const id = isCreating ? '' : recordCleaned.id;
     const params = { source };
 
@@ -63,18 +69,20 @@ export function* submit() {
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
       method: isCreating ? 'POST' : 'PUT',
-      headers: {
-        'X-Forwarded-Host': 'strapi',
-      },
+      // headers: {
+      //   'X-Forwarded-Host': 'strapi',
+      // },
       body: recordCleaned,
       params,
-    }, false, false);
+    });
 
     strapi.notification.success('content-manager.success.record.save');
     yield put(submitSuccess());
 
 
   } catch(err) {
+    // NOTE: leave the error log 
+    console.log(err.response);
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
