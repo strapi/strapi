@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { cloneDeep, get, isEmpty, isObject, size } from 'lodash';
+import { cloneDeep, get, has, isEmpty, isObject, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
@@ -25,6 +25,7 @@ class ImgPreview extends React.Component {
     isOver: false,
     isOverArrow: false,
     isImg: false,
+    isInitValue: false,
   };
 
   componentDidMount() {
@@ -43,16 +44,14 @@ class ImgPreview extends React.Component {
       this.updateFilePosition(nextProps.files.length - 1);
     }
 
-    // Update the preview
-    if (nextProps.didDeleteFile !== this.props.didDeleteFile) {
+    // Update the preview or slide pictures or init the component
+    if (nextProps.didDeleteFile !== this.props.didDeleteFile || nextProps.position !== this.props.position || size(nextProps.files) !== size(this.props.files) && !this.state.isInitValue) {
       const file = nextProps.files[nextProps.position] || '';
       this.generateImgURL(file)
-    }
 
-    // Slide pictures
-    if (nextProps.position !== this.props.position) {
-      const file = nextProps.files[nextProps.position] || '';
-      this.generateImgURL(file);
+      if (!this.state.isInitValue) {
+        this.setState({ isInitValue: true });
+      }
     }
   }
 
@@ -68,7 +67,7 @@ class ImgPreview extends React.Component {
    * @return {URL}
    */
   generateImgURL = (file) => {
-    if (this.isPictureType(file.name)) {
+    if (this.isPictureType(file.name) && !has(file, 'url')) {
       const reader = new FileReader();
       reader.onloadend = () => {
         this.setState({
@@ -78,6 +77,9 @@ class ImgPreview extends React.Component {
       }
 
       reader.readAsDataURL(file);
+    } else if (has(file, 'url')) {
+      const isImg = this.isPictureType(file.name);
+      this.setState({ isImg, imgURL: `${strapi.backendURL}${file.url}` });
     } else {
       this.setState({ isImg: false, imgURL: file.name });
     }
