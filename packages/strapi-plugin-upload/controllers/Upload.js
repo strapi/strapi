@@ -57,6 +57,17 @@ module.exports = {
     }));
   },
 
+  getEnvironments: async (ctx) => {
+    const environments =  _.map(_.keys(strapi.config.environments), environment => {
+      return {
+        name: environment,
+        active: (strapi.config.environment === environment)
+      };
+    });
+
+    ctx.send({ environments });
+  },
+
   getSettings: async (ctx) => {
     const config = await strapi.store({
       environment: ctx.params.environment,

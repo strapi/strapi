@@ -10,6 +10,14 @@
     },
     {
       "method": "GET",
+      "path": "/environments",
+      "handler": "Upload.getEnvironments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/settings/:environment",
       "handler": "Upload.getSettings",
       "config": {

@@ -15,6 +15,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
+import { compose } from 'redux';
 
 // Actions required for disabling and enabling the OverlayBlocker
 import {
@@ -45,7 +46,14 @@ import NotFoundPage from 'containers/NotFoundPage';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginPage from 'containers/PluginPage';
 
+// Utils
 import auth from 'utils/auth';
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
+
+import reducer from './reducer';
+import saga from './saga';
+import selectAdminPage from './selectors';
 
 import styles from './styles.scss';
 
@@ -63,6 +71,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidMount() {
     this.checkLogin(this.props);
+    // TODO add saga and reducer to get the environments for the upload plugin
   }
 
   componentWillReceiveProps(nextProps) {
@@ -124,6 +133,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
 
+    console.log(this.props.adminPage);
+
     return (
       <div className={styles.adminPage}>
         {leftMenu}
@@ -163,10 +174,12 @@ AdminPage.contextTypes = {
 };
 
 AdminPage.defaultProps = {
+  adminPage: {},
   hasUserPlugin: true,
 };
 
 AdminPage.propTypes = {
+  adminPage: PropTypes.object,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
@@ -180,6 +193,7 @@ AdminPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
+  adminPage: selectAdminPage(),
   blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
@@ -197,4 +211,15 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'adminPage', reducer });
+const withSaga = injectSaga({ key: 'adminPage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(AdminPage);
+
+// export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);
