@@ -41,6 +41,7 @@ import {
   initModelProps,
   onCancel,
   resetProps,
+  setFileRelations,
   setFormErrors,
   submit,
 } from './actions';
@@ -62,6 +63,14 @@ export class EditPage extends React.Component {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
     }
+
+    // Get all relations made with the upload plugin
+    // TODO: check if collectionName or model === 'upload_file'
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).filter(relation => (
+      get(this.getSchema(), ['relations', relation, 'plugin']) === 'upload'
+    ));
+    // Update the reducer so we can use it to create the appropriate FormData in the saga
+    this.props.setFileRelations(fileRelations);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -256,6 +265,7 @@ EditPage.propTypes = {
   onCancel: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
@@ -268,6 +278,7 @@ function mapDispatchToProps(dispatch) {
       initModelProps,
       onCancel,
       resetProps,
+      setFileRelations,
       setFormErrors,
       submit,
     },

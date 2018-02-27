@@ -25,6 +25,11 @@ const makeSelectEditPage = () => createSelector(
  *
  * Other specific selectors
  */
+const makeSelectFileRelations = () => createSelector(
+  selectEditPageDomain(),
+  (substate) => substate.get('fileRelations').toJS(),
+);
+
 const makeSelectIsCreating = () => createSelector(
   selectEditPageDomain(),
   (substate) => substate.get('isCreating'),
@@ -37,7 +42,7 @@ const makeSelectModelName = () => createSelector(
 
 const makeSelectRecord = () => createSelector(
   selectEditPageDomain(),
-  (substate) => substate.get('record'),
+  (substate) => substate.get('record').toJS(),
 );
 
 const makeSelectSource = () => createSelector(
@@ -47,6 +52,7 @@ const makeSelectSource = () => createSelector(
 
 export default makeSelectEditPage;
 export {
+  makeSelectFileRelations,
   makeSelectIsCreating,
   makeSelectModelName,
   makeSelectRecord,

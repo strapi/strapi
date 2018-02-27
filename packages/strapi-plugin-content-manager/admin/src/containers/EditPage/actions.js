@@ -14,6 +14,7 @@ import {
   INIT_MODEL_PROPS,
   ON_CANCEL,
   RESET_PROPS,
+  SET_FILE_RELATIONS,
   SET_FORM_ERRORS,
   SUBMIT,
   SUBMIT_SUCCESS,
@@ -69,6 +70,13 @@ export function onCancel() {
 export function resetProps() {
   return {
     type: RESET_PROPS,
+  };
+}
+
+export function setFileRelations(fileRelations) {
+  return {
+    type: SET_FILE_RELATIONS,
+    fileRelations,
   };
 }
 
