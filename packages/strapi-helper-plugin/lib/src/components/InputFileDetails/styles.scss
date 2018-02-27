@@ -35,6 +35,23 @@
   }
 }
 
+.infoContainer {
+  border-top: 1px solid #F6F6F6;
+  padding-top: 7px;
+}
+
+.infoWrapper {
+  line-height: 18px;
+  font-size: 12px;
+  > span:first-child {
+    color: #333740;
+    font-weight: 600;
+  }
+  >span:last-child {
+    color: rgba(51, 55, 64, 0.80);
+    font-weight: 400;
+  }
+}
 .inputFileDetails {
   // width: 350px;
   width: 100%;

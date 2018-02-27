@@ -14,6 +14,8 @@
   "app.components.InputFile.newFile": "DODAJ NOWY PLIK",
   "app.components.InputFileDetails.details": "Szczegóły",
   "app.components.InputFileDetails.remove": "Remove this file",
+  "app.components.InputFileDetails.originalName": "Original name:",
+  "app.components.InputFileDetails.size": "Size:",
 
   "app.components.ImgPreview.hint": "Przeciągnij i upuść plik w tym obszarze lub {browse}, aby przesłać plik",
   "app.components.ImgPreview.hint.browse": "przeglądaj",

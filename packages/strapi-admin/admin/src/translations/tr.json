@@ -12,9 +12,11 @@
   "app.components.HomePage.feedback": "Aşağıdaki destek kanallarından birini kullanarak soru sormaya ya da bize geri bildirimde bulunmaya çekinmeyin.",
 
   "app.components.InputFile.newFile": "Yeni dosya ekle",
-  
+
   "app.components.InputFileDetails.details": "Detaylar",
   "app.components.InputFileDetails.remove": "Remove this file",
+  "app.components.InputFileDetails.originalName": "Original name:",
+  "app.components.InputFileDetails.size": "Size:",
 
   "app.components.ImgPreview.hint": "Dosyanızı bu alana sürükleyip bırakın ya da bir dosya yüklemek için {browse}",
   "app.components.ImgPreview.hint.browse": "gözat",

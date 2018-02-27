@@ -35,11 +35,16 @@ function InputFileDetails(props) {
         </div>
       </div>
       <Collapse isOpen={props.isOpen}>
-        <div>
-          Original name: {props.file.name}
-        </div>
-        <div>
-          Size: {props.file.size}
+        <div className={styles.infoContainer}>
+
+          <div className={styles.infoWrapper}>
+            <FormattedMessage id="app.components.InputFileDetails.originalName" />&nbsp;
+            <span>{props.file.name}</span>
+          </div>
+          <div className={styles.infoWrapper}>
+            <FormattedMessage id="app.components.InputFileDetails.size" />&nbsp;
+            <span>{props.file.name}</span>
+          </div>
         </div>
       </Collapse>
     </div>
