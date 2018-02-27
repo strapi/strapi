@@ -188,6 +188,12 @@ module.exports = {
             }
 
             break;
+          case 'manyMorphToMany':
+          case 'manyMorphToOne':
+          case 'oneMorphToOne':
+          case 'oneMorphToMany':
+            acc[current] = params.values[current];
+            break;
           default:
         }
       }
