@@ -1,16 +1,23 @@
 {
     "app.components.ComingSoonPage.comingSoon": "Bald verfügbar",
     "app.components.ComingSoonPage.featuresNotAvailable": "Dieses Feature ist derzeit noch in aktiver Entwicklung.",
-  
+
     "app.components.DownloadInfo.download": "Download wird ausgeführt...",
     "app.components.DownloadInfo.text": "Dies könnte kurz dauern. Danke für deine Geduld.",
-  
+
     "app.components.HomePage.welcome": "Willkommen an Bord!",
     "app.components.HomePage.description.part1": "Wir sind froh, dass du einer unserer Nutzer bist!",
     "app.components.HomePage.description.part2": "Du bist jetzt ein Mitglied unserer Community, die dir dabei helfen kann, deine Traum-App zu entwickeln.",
     "app.components.HomePage.button": "Erstelle deinen ersten Content-Typ",
     "app.components.HomePage.feedback": "Stelle uns deine Fragen oder gib uns deine Rückmeldung über einen der folgenden Kanäle.",
-  
+
+    "app.components.InputFile.newFile": "Add new file",
+    "app.components.InputFileDetails.details": "Details",
+    "app.components.InputFileDetails.remove": "Remove this file",
+
+    "app.components.ImgPreview.hint": "Drag & drop your file into this area or {browse} for a file to upload",
+    "app.components.ImgPreview.hint.browse": "browse",
+
     "app.components.InstallPluginPage.helmet": "Marktplatz - Plugins",
     "app.components.InstallPluginPage.title": "Marktplatz - Plugins",
     "app.components.InstallPluginPage.description": "Erweitere problemlos deine App",
@@ -24,7 +31,7 @@
     "app.components.InstallPluginPopup.navLink.faq": "faq",
     "app.components.InstallPluginPopup.navLink.changelog": "Änderungsprotokoll",
     "app.components.InstallPluginPopup.noDescription": "Keine Beschreibung verfügbar",
-  
+
     "app.components.LeftMenuFooter.poweredBy": "Stolz präsentiert von",
     "app.components.LeftMenuLinkContainer.configuration": "Konfiguration",
     "app.components.LeftMenuLinkContainer.general": "Allgemein",
@@ -32,7 +39,7 @@
     "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
     "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Bisher sind keine Plugins installiert",
     "app.components.LeftMenuLinkContainer.plugins": "Plugins",
-  
+
     "app.components.ListPluginsPage.helmet.title": "Plugins anzeigen",
     "app.components.ListPluginsPage.title": "Plugins",
     "app.components.ListPluginsPage.description": "Liste aller im Projekt installierten Plugins.",
@@ -41,12 +48,12 @@
     "app.components.listPlugins.title.plural": "{number} Plugins sind installiert",
     "app.components.listPlugins.title.none": "Es ist kein Plugin installiert",
     "app.components.listPlugins.button": "Neues Plugin hinzufügen",
-  
+
     "app.components.NotFoundPage.description": "Nicht gefunden",
     "app.components.NotFoundPage.back": "Zurück zur Homepage",
-  
+
     "app.components.Official": "Offiziell",
-  
+
     "app.components.PluginCard.compatible": "Mit der App kompatibel",
     "app.components.PluginCard.compatibleCommunity": "Mit der Community kompatibel",
     "app.components.PluginCard.Button.label.download": "Download",
@@ -54,26 +61,26 @@
     "app.components.PluginCard.Button.label.support": "Unterstütze uns",
     "app.components.PluginCard.price.free": "Umsonst",
     "app.components.PluginCard.more-details": "Mehr Details",
-  
+
     "app.utils.placeholder.defaultMessage": "\u0020",
     "app.utils.SelectOption.defaultMessage": "\u0020",
-  
+
     "components.AutoReloadBlocker.header": "Dieses Plugin benötigt das Neuladen-Feature.",
     "components.AutoReloadBlocker.description": "Öffne die folgende Datei und aktiviere das Feature.",
-  
+
     "components.ErrorBoundary.title": "Etwas ist falsch gelaufen...",
-  
+
     "components.OverlayBlocker.title": "Auf Neustart warten...",
     "components.OverlayBlocker.description": "Du verwendest ein Feature, das einen Neustart des Servers erfordert. Bitte warte, bis der Server wieder gestartet wurde.",
-  
+
     "components.ProductionBlocker.header": "Dieses Plugin ist nur in der Entwicklungsumgebung verfügbar.",
     "components.ProductionBlocker.description": "Aus Sicherheitsgründen müssen wir dieses Plugin in anderen Umgebungen deaktivieren.",
-  
+
     "components.popUpWarning.button.cancel": "Abbrechen",
     "components.popUpWarning.button.confirm": "Bestätigen",
     "components.popUpWarning.title": "Bitte bestätigen",
     "components.popUpWarning.message": "Bist du sicher, dass du dies löschen möchtest?",
-  
+
     "components.Input.error.validation.email": "Das ist keine gültige E-Mail-Adresse",
     "components.Input.error.validation.required": "Die Eingabe dieses Wertes ist erforderlich.",
     "components.Input.error.validation.regex": "Dieser Wert entspricht nicht dem RegEx.",
@@ -87,11 +94,11 @@
     "components.Input.error.attribute.sameKeyAndName": "Darf nicht gleich sein",
     "components.Input.error.validation.minSupMax": "Darf nicht höher sein",
     "components.Input.error.custom-error": "{errorMessage} ",
-  
+
     "components.ListRow.empty": "Es gibt keine Daten.",
-  
+
     "notification.error": "Ein Fehler ist aufgetreten",
-  
+
     "Auth & Permissions": "Auth & Permissions",
     "Content Manager": "Inhalts-Manager",
     "Content Type Builder": "Content-Typ-Manager",
@@ -105,4 +112,3 @@
     "New entry": "Neuer Eintrag",
     "request.error.model.unknow": "Dieses Schema existiert nicht"
   }
-  

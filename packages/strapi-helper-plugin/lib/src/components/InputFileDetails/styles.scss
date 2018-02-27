@@ -36,7 +36,30 @@
 }
 
 .inputFileDetails {
-  width: 350px;
+  // width: 350px;
+  width: 100%;
   padding-top: 4px;
   margin-bottom: -13px;
+}
+
+.positionContainer {
+  margin-left: 10px;
+  color: #333740;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
+  > span:first-child {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  > span:last-child {
+    font-size: 11px;
+    font-weight: 400;
+  }
+}
+
+.removeContainer {
+  color: #FF3000;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
 }

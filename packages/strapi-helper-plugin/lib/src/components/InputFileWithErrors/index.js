@@ -73,7 +73,7 @@ class InputFileWithErrors extends React.Component {
 
 InputFileWithErrors.defaultProps = {
   className: '',
-  customBootstrapClass: 'col-md-12',
+  customBootstrapClass: 'col-md-6',
   inputDescription: '',
   inputDescriptionClassName: '',
   inputDescriptionStyle: {},

@@ -18,6 +18,7 @@ import styles from './styles.scss';
 
 class InputFile extends React.Component {
   state = {
+    didDeleteFile: false,
     isOpen: false,
     isUploading: false,
     position: 0,
@@ -60,6 +61,29 @@ class InputFile extends React.Component {
     this.addFilesToProps(e.dataTransfer.files);
   }
 
+  handleFileDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Remove the file from props
+    const value = cloneDeep(this.props.value);
+    value.splice(this.state.position, 1);
+    // Update the parent's props
+    const target = {
+      name: this.props.name,
+      type: 'file',
+      value,
+    };
+
+    this.props.onChange({ target });
+
+    // Update the position of the children
+    const newPosition = value.length === 0 ? 0 : value.length - 1;
+
+    this.updateFilePosition(newPosition);
+    this.setState({ didDeleteFile: !this.state.didDeleteFile });
+  }
+
   updateFilePosition = (newPosition) => this.setState({ position: newPosition });
 
   render() {
@@ -73,6 +97,7 @@ class InputFile extends React.Component {
     return (
       <div>
         <ImgPreview
+          didDeleteFile={this.state.didDeleteFile}
           files={value}
           isUploading={this.state.isUploading}
           multiple={multiple}
@@ -80,9 +105,10 @@ class InputFile extends React.Component {
           onChange={onChange}
           onBrowseClick={this.handleClick}
           onDrop={this.onDrop}
+          position={this.state.position}
           updateFilePosition={this.updateFilePosition}
         />
-        <label>
+        <label style={{ width: '100%'}}>
           <input
             className={styles.inputFile}
             multiple={multiple}
@@ -98,10 +124,12 @@ class InputFile extends React.Component {
           </div>
         </label>
         <InputFileDetails
+          file={value[this.state.position]}
           isOpen={this.state.isOpen}
           number={value.length}
           onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
           position={this.state.position}
+          onFileDelete={this.handleFileDelete}
         />
       </div>
     );

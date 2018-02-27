@@ -16,7 +16,7 @@ function InputFileDetails(props) {
   if (props.number === 0) {
     return <div />;
   }
-  
+
   return (
     <div className={styles.inputFileDetails}>
       <div className={styles.detailBanner} onClick={props.onClick}>
@@ -25,12 +25,23 @@ function InputFileDetails(props) {
           <div>
             <FormattedMessage id="app.components.InputFileDetails.details" />
           </div>
+          <div className={styles.positionContainer}>
+            <span>{props.position + 1}</span>
+            <span>/{props.number}</span>
+          </div>
         </div>
-        <div className={styles.positionContainer}>
-          <span>{props.position + 1}/</span>
-          <span>{props.number}</span>
+        <div className={styles.removeContainer} onClick={props.onFileDelete}>
+          <FormattedMessage id="app.components.InputFileDetails.remove" />
         </div>
       </div>
+      <Collapse isOpen={props.isOpen}>
+        <div>
+          Original name: {props.file.name}
+        </div>
+        <div>
+          Size: {props.file.size}
+        </div>
+      </Collapse>
     </div>
   );
 }

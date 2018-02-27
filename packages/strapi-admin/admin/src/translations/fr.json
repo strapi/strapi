@@ -15,6 +15,7 @@
   "app.components.ImgPreview.hint.browse": "recherchez",
 
   "app.components.InputFile.newFile": "Ajouter un  nouveau fichier",
+  "app.components.InputFileDetails.remove": "Supprimer ce fichier",
   "app.components.InputFileDetails.details": "Détails",
 
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
