@@ -11,7 +11,7 @@ const path = require('path');
 module.exports = {
   provider: 'local',
   name: 'Local server',
-  init: (strapi, config) => {
+  init: (config) => {
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {

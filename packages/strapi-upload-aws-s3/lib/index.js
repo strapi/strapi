@@ -49,7 +49,7 @@ module.exports = {
       type: 'text'
     }
   },
-  init: (strapi, config) => {
+  init: (config) => {
     // configure AWS S3 bucket connection
     AWS.config.update({
       accessKeyId: config.auth.public,

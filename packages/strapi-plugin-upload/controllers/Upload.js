@@ -17,41 +17,60 @@ module.exports = {
    */
 
   index: async (ctx) => {
+    // Retrieve provider configuration.
     const config = await strapi.store({
       environment: strapi.config.environment,
       type: 'plugin',
       name: 'upload'
     }).get({key: 'provider'});
 
-    if (!config.enabled) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'Upload is disabled!');
+    // Verify if the file upload is enable.
+    if (config.enabled === false) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'The file upload is disabled!');
     }
 
-    const Service = strapi.plugins['upload'].services.upload;
+    // Extract optional relational data.
+    const { refId, ref, source, field } = ctx.request.body.fields;
 
-    // transform stream files to buffer
-    const files = await Service.bufferize(ctx.request.body.files.files);
+    // Transform stream files to buffer
+    const buffers = await strapi.plugins.upload.services.upload.bufferize(ctx.request.body.files.files);
+    const files = buffers.map(file => {
+        if (file.size > config.sizeLimit) {
+          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit', values: {file: file.name} }] }] : `${file.name} file is bigger than limit size!`);
+        }
 
-    for (var i = 0; i < files.length; i++) {
-      if (files[i].size > config.sizeLimit) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit', values: {file: files[i].name} }] }] : `${files[i].name} file is bigger than limit size!`);
-      }
+        // Add details to the file to be able to create the relationships.
+        if (refId && ref && field) {
+          Object.assign(file, {
+            related: [{
+              refId,
+              ref,
+              source,
+              field
+            }]
+          });
+        }
+
+        return file;
+      });
+
+    // Something is wrong (size limit)...
+    if (ctx.status === 400) {
+      return;
     }
 
-    await Service.upload(files, config);
+    const uploadedFiles = await strapi.plugins.upload.services.upload.upload(files, config);
 
     // Send 200 `ok`
-    ctx.send(files.map((file) => {
-      delete file.buffer;
-
-      // if is local server upload, add backend host as prefix
-      if (_.startsWith(file.url, '/')) {
+    ctx.send(uploadedFiles.map((file) => {
+      // If is local server upload, add backend host as prefix
+      if (file.url && file.url[0] === '/') {
         file.url = strapi.config.url + file.url;
       }
 
-      // Static data waiting relations
-      file.updatedAt = new Date();
-      file.relatedTo = 'John Doe';
+      if (_.isArray(file.related)) {
+        file.related = file.related.map(obj => obj.ref || obj);
+      }
 
       return file;
     }));
@@ -86,7 +105,7 @@ module.exports = {
     // Send 200 `ok`
     ctx.send(data.map((file) => {
       // if is local server upload, add backend host as prefix
-      if (_.startsWith(file.url, '/')) {
+      if (file.url[0] === '/') {
         file.url = strapi.config.url + file.url;
       }
 

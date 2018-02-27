@@ -42,20 +42,19 @@ module.exports = {
   },
 
   upload: async (files, config) => {
-    // get upload provider settings to configure the provider to use
-    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
-    _.assign(provider, config);
-    const actions = provider.init(strapi, config);
+    // Get upload provider settings to configure the provider to use.
+    const provider = _.find(strapi.plugins.upload.config.providers, { provider: config.provider });
+    const actions = provider.init(config);
 
-    // execute upload function of the provider for all files
+    // Execute upload function of the provider for all files.
     return Promise.all(
       files.map(async file => {
         await actions.upload(file);
 
-        // remove buffer to don't save it
+        // Remove buffer to don't save it.
         delete file.buffer;
 
-        await strapi.plugins['upload'].services.upload.add(file);
+        return await strapi.plugins['upload'].services.upload.add(file);
       })
     );
   },

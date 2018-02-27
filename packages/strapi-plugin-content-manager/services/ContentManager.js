@@ -40,9 +40,12 @@ module.exports = {
   edit: async (params, values, source) => {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      // Parse stringify JSON data.
+      const parsedFields = JSON.parse(values.fields);
+      // Update JSON fields (files are exlucded).
       const fields = await strapi.query(params.model, source).update({
         id: params.id,
-        values
+        values: parsedFields
       });
 
       // Request plugin upload.
@@ -53,7 +56,15 @@ module.exports = {
           name: 'upload'
         }).get({ key: 'provider' });
 
-        const arrayOfPromise = await Promise.all(
+        // Retrieve primary key.
+        const primaryKey = strapi.query(params.model, source).primaryKey;
+
+        // Delete removed files.
+        const entry =  await strapi.query(params.model, source).findOne({
+          id: params.id
+        });
+
+        await Promise.all(
           Object.keys(values.files)
             .map(async attribute => {
               // Bufferize files per attribute.
@@ -71,8 +82,34 @@ module.exports = {
                   return file;
                 });
 
+              const arrayOfPromises = [strapi.plugins.upload.services.upload.upload(files, config)];
+
+              // Remove deleted files.
+              if (parsedFields[attribute]) {
+                const transformToArrayID = (array) => {
+                  return _.isArray(array) ? array.map(value => {
+                    if (_.isPlainObject(value)) {
+                      return value[primaryKey];
+                    }
+
+                    return value;
+                  }) : array;
+                };
+
+                // Compare array of ID to find deleted files.
+                const currentValue = transformToArrayID(parsedFields[attribute]);
+                const storedValue = transformToArrayID(entry[attribute]);
+
+                const removeRelations = _.difference(storedValue, currentValue);
+
+                console.log("removeRelation", removeRelation);
+
+                // TODO:
+                // - Remove relationships in files.
+              }
+
               // Make upload async.
-              return await strapi.plugins.upload.services.upload.upload(files, config);
+              return await Promise.all(arrayOfPromises);
             })
         );
       }

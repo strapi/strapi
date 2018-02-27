@@ -19,13 +19,14 @@ module.exports = {
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(this.associations.map(x => x.alias).join(' '));
+      .populate(this.associations.map(x => x.alias).join(' '))
+      .lean();
   },
 
   create: async function (params) {
     // Exclude relationships.
     const values = Object.keys(params.values).reduce((acc, current) => {
-      if (this._attributes[current].type) {
+      if (this._attributes[current] && this._attributes[current].type) {
         acc[current] = params.values[current];
       }
 
@@ -39,10 +40,10 @@ module.exports = {
           .map(obj => {
             const globalId = obj.source && obj.source !== 'content-manager' ?
               strapi.plugins[obj.source].models[obj.model].globalId:
-              strapi.models[obj.model].globalId;
+              strapi.models[obj.ref.toLowerCase()].globalId;
 
             return {
-              ref: obj.ref,
+              ref: obj.refId,
               kind: globalId,
               [association.filter]: obj.field
             }
@@ -202,9 +203,9 @@ module.exports = {
       }));
 
     // Update virtuals fields.
-    const process = await Promise.all(virtualFields);
+    await Promise.all(virtualFields);
 
-    return process[process.length - 1];
+    return await module.exports.findOne.call(this, params);
   },
 
   delete: async function (params) {

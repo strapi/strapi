@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-module.exports = {
+module.exports = {  
   find: async function (params) {
     return this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
