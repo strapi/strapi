@@ -49,13 +49,11 @@ export function* submit() {
   const isCreating = yield select(makeSelectIsCreating());
 
   try {
-
     const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-      acc[current] = cleanData(recordJSON[current], 'value', 'id');
+      acc.append(current, cleanData(recordJSON[current], 'value', 'id'));
 
       return acc;
-    }, {});
-
+    }, new FormData());
 
     const id = isCreating ? '' : recordCleaned.id;
     const params = { source };
@@ -65,9 +63,12 @@ export function* submit() {
     // Call our request helper (see 'utils/request')
     yield call(request, requestUrl, {
       method: isCreating ? 'POST' : 'PUT',
+      headers: {
+        'X-Forwarded-Host': 'strapi',
+      },
       body: recordCleaned,
       params,
-    });
+    }, false, false);
 
     strapi.notification.success('content-manager.success.record.save');
     yield put(submitSuccess());

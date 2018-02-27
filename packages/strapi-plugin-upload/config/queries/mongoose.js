@@ -32,24 +32,27 @@ module.exports = {
   },
 
   create: async function (params) {
-    return this.create(Object.keys(params).reduce((acc, current) => {
+    // Exclude relationships.
+    const values = Object.keys(params).reduce((acc, current) => {
       if (_.get(this._attributes, [current, 'type']) || _.get(this._attributes, [current, 'model'])) {
         acc[current] = params[current];
       }
 
       return acc;
-    }, {}))
-    .catch((err) => {
-      if (err.message.indexOf('index:') !== -1) {
-        const message = err.message.split('index:');
-        const field = _.words(_.last(message).split('_')[0]);
-        const error = { message: `This ${field} is already taken`, field };
+    }, {});
 
-        throw error;
-      }
+    return this.create(values)
+      .catch((err) => {
+        if (err.message.indexOf('index:') !== -1) {
+          const message = err.message.split('index:');
+          const field = _.words(_.last(message).split('_')[0]);
+          const error = { message: `This ${field} is already taken`, field };
 
-      throw err;
-    });
+          throw error;
+        }
+
+        throw err;
+      });
   },
 
   update: async function (search, params = {}) {

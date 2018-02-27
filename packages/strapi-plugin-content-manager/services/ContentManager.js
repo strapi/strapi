@@ -38,6 +38,49 @@ module.exports = {
   },
 
   edit: async (params, values, source) => {
+    // Multipart/form-data.
+    if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      const fields = await strapi.query(params.model, source).update({
+        id: params.id,
+        values
+      });
+
+      // Request plugin upload.
+      if (strapi.plugins.upload) {
+        const config = await strapi.store({
+          environment: strapi.config.environment,
+          type: 'plugin',
+          name: 'upload'
+        }).get({ key: 'provider' });
+
+        const arrayOfPromise = await Promise.all(
+          Object.keys(values.files)
+            .map(async attribute => {
+              // Bufferize files per attribute.
+              const buffers = await strapi.plugins.upload.services.upload.bufferize(values.files[attribute]);
+              const files = buffers.map(file => {
+                  // Add related information to be able to make
+                  // the relationships later.
+                  file.related = [{
+                    ref: params.id,
+                    model: params.model,
+                    source,
+                    field: attribute,
+                  }];
+
+                  return file;
+                });
+
+              // Make upload async.
+              return await strapi.plugins.upload.services.upload.upload(files, config);
+            })
+        );
+      }
+
+      return fields;
+    }
+
+    // Raw JSON.
     return strapi.query(params.model, source).update({
       id: params.id,
       values

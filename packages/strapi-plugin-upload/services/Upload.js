@@ -13,13 +13,13 @@ const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
 
 module.exports = {
-  bufferize: async values => {
-    if (_.size(values.files) === 0) {
+  bufferize: async files => {
+    if (_.isEmpty(files) === 0) {
       throw 'Missing files.';
     }
 
     // files is always an array to map on
-    const files = _.isArray(values.files) ? values.files : [values.files];
+    files = _.isArray(files) ? files : [files];
 
     // transform all files in buffer
     return Promise.all(
