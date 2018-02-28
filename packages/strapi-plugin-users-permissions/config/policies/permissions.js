@@ -4,8 +4,10 @@ module.exports = async (ctx, next) => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
       const { _id, id } = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
-      
-      if ((id || _id) === undefined) throw new Error('Invalid token: Token did not contain required fields');
+
+      if ((id || _id) === undefined) {
+        throw new Error('Invalid token: Token did not contain required fields');
+      }
 
       ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id }, ['role']);
     } catch (err) {
@@ -22,7 +24,6 @@ module.exports = async (ctx, next) => {
       return await next();
     }
   }
-
   // Retrieve `guest` role.
   if (!role) {
     role = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
