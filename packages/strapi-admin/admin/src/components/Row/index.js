@@ -8,9 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
+import { get } from 'lodash';
 
 // Design
-import Ico from 'components/Ico';
+import IcoContainer from 'components/IcoContainer';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
 
@@ -31,6 +32,27 @@ class Row extends React.Component {
   }
 
   render() {
+    const uploadPath = `/plugins/upload/configurations/${get(this.context, ['appEnvironments', '0', 'name'])}`;
+    const icons = this.props.name === 'upload' ? [
+      {
+        icoType: 'cog',
+        onClick: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.context.router.history.push(uploadPath);
+        },
+      },
+      {
+        icoType: 'trash',
+        onClick: this.handleClick,
+      },
+    ] : [
+      {
+        icoType: 'trash',
+        onClick: this.handleClick,
+      },
+    ];
+
     return (
       <ListRow>
         <div className={cn("col-md-11", styles.nameWrapper)}>
@@ -44,7 +66,7 @@ class Row extends React.Component {
         </div>
         <div className="col-md-1">
           <div className={styles.actionContainer}>
-            <Ico onClick={this.handleClick} id={this.props.name} />
+            <IcoContainer icons={icons} />
           </div>
         </div>
         <PopUpWarning
@@ -57,6 +79,11 @@ class Row extends React.Component {
     );
   }
 }
+
+Row.contextTypes = {
+  appEnvironments: PropTypes.array,
+  router: PropTypes.object,
+};
 
 Row.propTypes = {
   name: PropTypes.string.isRequired,
