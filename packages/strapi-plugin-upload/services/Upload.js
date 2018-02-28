@@ -116,74 +116,30 @@ module.exports = {
     return strapi.query('file', 'upload').delete(params);
   },
 
-  attachToEntity: async function (params, files, source) {
+  uploadToEntity: async function (params, files, source) {
+    // Retrieve provider settings from database.
     const config = await strapi.store({
       environment: strapi.config.environment,
       type: 'plugin',
       name: 'upload'
     }).get({ key: 'provider' });
 
-    // Retrieve primary key.
-    // const primaryKey = strapi.query(params.model, source).primaryKey;
+    const model = source && source !== 'content-manager' ?
+      strapi.plugins[source].models[params.model]:
+      strapi.models[params.model];
 
-    // Delete removed files.
-    // const entry =  await strapi.query(params.model, source).findOne({
-    //   id: params.id
-    // });
-
-    // const model = source && source !== 'content-manager' ?
-    //   strapi.plugins[source].models[params.model]:
-    //   strapi.models[params.model];
-
-    // const arrayOfPromises = [];
-
-    // model.associations
-    //   .filter(association => association.via === 'related')
-    //   .forEach(association => {
-    //     // Remove deleted files.
-    //     if (parsedFields[association.alias]) {
-    //       const transformToArrayID = (array) => {
-    //         return _.isArray(array) ? array.map(value => {
-    //           if (_.isPlainObject(value)) {
-    //             return value[primaryKey];
-    //           }
-    //
-    //           return value;
-    //         }) : array;
-    //       };
-    //
-    //       // Compare array of ID to find deleted files.
-    //       const currentValue = transformToArrayID(parsedFields[association.alias]).map(id => id.toString());
-    //       const storedValue = transformToArrayID(entry[association.alias]).map(id => id.toString());
-    //
-    //       const removeRelations = _.difference(storedValue, currentValue);
-    //
-    //       // console.log("Current", currentValue);
-    //       // console.log("Stored", storedValue);
-    //       // console.log("removeRelations", removeRelations);
-    //
-    //       removeRelations.forEach(id => {
-    //         arrayOfPromises.push(strapi.plugins.upload.services.upload.edit({
-    //           id
-    //         }, {
-    //           related: []
-    //         }))
-    //       });
-    //
-    //       // TODO:
-    //       // - Remove relationships in files.
-    //     }
-    //   });
-
+    // Asynchronous upload.
     await Promise.all(
       Object.keys(files)
         .map(async attribute => {
           // Bufferize files per attribute.
           const buffers = await this.bufferize(files[attribute]);
           const enhancedFiles = buffers.map(file => {
+            const details = model.attributes[attribute];
+
             // Add related information to be able to make
             // the relationships later.
-            file.related = [{
+            file[details.via] = [{
               refId: params.id,
               ref: params.model,
               source,

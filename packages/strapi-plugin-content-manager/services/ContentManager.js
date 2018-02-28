@@ -60,11 +60,21 @@ module.exports = {
         return acc;
       }, {});
 
-      // Request plugin upload.
+      // Update JSON fields.
+      await strapi.query(params.model, source).update({
+        id: params.id,
+        values
+      });
+
+      // Then, request plugin upload.
       if (strapi.plugins.upload) {
-        // Attach new uploaded files to this entity.
-        await strapi.plugins.upload.services.upload.attachToEntity(params, files, source);
+        // Upload new files and attach them to this entity.
+        await strapi.plugins.upload.services.upload.uploadToEntity(params, files, source);
       }
+
+      return strapi.query(params.model, source).findOne({
+        id: params.id
+      });
     }
 
     // Raw JSON.

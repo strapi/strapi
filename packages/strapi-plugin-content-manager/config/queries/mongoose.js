@@ -79,9 +79,6 @@ module.exports = {
       if (_.get(this._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
         acc[current] = params.values[current];
       } else {
-        console.log(association);
-        console.log(details);
-        console.log();
         switch (association.nature) {
           case 'oneWay':
             acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
@@ -90,7 +87,6 @@ module.exports = {
           case 'oneToOne':
             if (response[current] !== params.values[current]) {
               const value = _.isNull(params.values[current]) ? response[current] : params.values;
-
               const recordId = _.isNull(params.values[current]) ? value[this.primaryKey] || value.id || value._id : value[current];
 
               if (response[current] && _.isObject(response[current]) && response[current][this.primaryKey] !== value[current]) {
@@ -193,11 +189,19 @@ module.exports = {
             break;
           case 'manyMorphToMany':
           case 'manyMorphToOne':
-            acc[current] = params.values[current].filter(ref => {
-              // Check if there is already an association.
-              return _.isEmpty(
-                response[current].find(obj => _.toLower(obj.ref._id) === _.toLower(ref.refId))
-              );
+            // Update the relational array.
+            acc[current] = params.values[current].map(obj => {
+              const globalId = obj.source && obj.source !== 'content-manager' ?
+                strapi.plugins[obj.source].models[obj.ref].globalId:
+                strapi.models[obj.ref].globalId;
+
+              // Define the object stored in database.
+              // The shape is this object is defined by the strapi-mongoose connector.
+              return {
+                ref: obj.refId,
+                kind: globalId,
+                [association.filter]: obj.field
+              }
             });
             break;
           case 'manyToManyMorph':
@@ -215,9 +219,6 @@ module.exports = {
             const currentValue = transformToArrayID(response[current]).map(id => id.toString());
             const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
 
-            console.log(currentValue);
-            console.log(storedValue);
-
             const toAdd = _.difference(storedValue, currentValue);
             const toRemove = _.difference(currentValue, storedValue);
 
@@ -232,9 +233,6 @@ module.exports = {
               }));
             });
 
-            console.log(details.model || details.collection, details.plugin);
-            console.log(strapi.query(details.model || details.collection, details.plugin));
-
             // Remove relations in the other side.
             toRemove.forEach(id => {
               virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelationMorph({
@@ -245,11 +243,9 @@ module.exports = {
                 field: association.alias
               }));
             });
-
             break;
           case 'oneMorphToOne':
           case 'oneMorphToMany':
-
             break;
           default:
         }
@@ -264,8 +260,6 @@ module.exports = {
       }, values, {
         strict: false
       }));
-
-    console.log('-------------------');
 
     // Update virtuals fields.
     await Promise.all(virtualFields);
@@ -289,11 +283,57 @@ module.exports = {
     return module.exports.update.call(this, params);
   },
 
+  addRelationMorph: async function (params) {
+    /*
+      TODO:
+      Test this part because it has been coded during the development of the upload feature.
+      However the upload doesn't need this method. It only uses the `removeRelationMorph`.
+    */
+
+    const entry = await module.exports.findOne.call(this, params, []);
+    const value = entry[params.alias] || [];
+
+    // Retrieve association.
+    const association = this.associations.find(association => association.via === params.alias)[0];
+
+    if (!association) {
+      throw Error(`Impossible to create relationship with ${params.ref} (${params.refId})`);
+    }
+
+    // Resolve if the association is already existing.
+    const isExisting = entry[params.alias].find(obj => {
+      if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
+        return true;
+      }
+
+      return false;
+    });
+
+    // Avoid duplicate.
+    if (isExisting) {
+      return Promise.resolve();
+    }
+
+    // Push new relation to the association array.
+    value.push({
+      ref: params.refId,
+      kind: params.ref,
+      field: association.filter
+    });
+
+    entry[params.alias] = value;
+
+    return module.exports.update.call(this, {
+      id: params.id,
+      values: entry
+    });
+  },
+
   removeRelationMorph: async function (params) {
     const entry = await module.exports.findOne.call(this, params, []);
 
+    // Filter the association array and remove the association.
     entry[params.alias] = entry[params.alias].filter(obj => {
-      console.log(obj.ref.toString(), params.refId.toString());
       if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
         return false;
       }
