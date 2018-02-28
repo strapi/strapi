@@ -144,40 +144,53 @@ module.exports = function(strapi) {
 
                   const relations = this.relations;
 
-                  definition.associations
-                    .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
-                    .map(association => {
-                      // Retrieve relation Bookshelf object.
-                      const relation = relations[association.alias];
+                  // Extract association except polymorphic.
+                  const associations = definition.associations
+                    .filter(association => association.nature.toLowerCase().indexOf('morph') === -1);
+                  // Extract polymorphic association.
+                  const polymorphicAssociations = definition.associations
+                    .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1);
 
-                      if (relation) {
-                        // Extract raw JSON data.
-                        attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
+                  polymorphicAssociations.map(association => {
+                    // Retrieve relation Bookshelf object.
+                    const relation = relations[association.alias];
 
-                        // Retrieve opposite model.
-                        const model = association.plugin ?
-                          strapi.plugins[association.plugin].models[association.collection || association.model]:
-                          strapi.models[association.collection || association.model];
+                    if (relation) {
+                      // Extract raw JSON data.
+                      attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
 
-                        // Reformat data by bypassing the many-to-many relationship.
-                        switch (association.nature) {
-                          case 'oneToManyMorph':
-                            attrs[association.alias] = attrs[association.alias][model.collectionName];
-                            break;
-                          case 'manyToManyMorph':
-                            attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
-                            break;
-                          case 'oneMorphToOne':
-                            attrs[association.alias] = attrs[association.alias].related;
-                            break;
-                          case 'manyMorphToOne':
-                            attrs[association.alias] = attrs[association.alias].map(obj => obj.related);
-                            break;
-                          default:
+                      // Retrieve opposite model.
+                      const model = association.plugin ?
+                        strapi.plugins[association.plugin].models[association.collection || association.model]:
+                        strapi.models[association.collection || association.model];
 
-                        }
+                      // Reformat data by bypassing the many-to-many relationship.
+                      switch (association.nature) {
+                        case 'oneToManyMorph':
+                          attrs[association.alias] = attrs[association.alias][model.collectionName];
+                          break;
+                        case 'manyToManyMorph':
+                          attrs[association.alias] = attrs[association.alias].map(rel => rel[model.collectionName]);
+                          break;
+                        case 'oneMorphToOne':
+                          attrs[association.alias] = attrs[association.alias].related;
+                          break;
+                        case 'manyMorphToOne':
+                          attrs[association.alias] = attrs[association.alias].map(obj => obj.related);
+                          break;
+                        default:
                       }
-                    });
+                    }
+                  });
+
+                  associations.map(association => {
+                    const relation = relations[association.alias];
+
+                    if (relation) {
+                      // Extract raw JSON data.
+                      attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
+                    }
+                  });
 
                   return attrs;
                 }
@@ -237,7 +250,7 @@ module.exports = function(strapi) {
                           return path;
                         });
                       }
-
+                      
                       return _.isFunction(
                         target[model.toLowerCase()]['beforeFetchCollection']
                       )
