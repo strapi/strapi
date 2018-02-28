@@ -23,11 +23,37 @@ import PluginHeader from 'components/PluginHeader';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
+import {
+  getSettings,
+  onCancel,
+} from './actions';
+
 import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
 class ConfigPage extends React.Component {
+  componentDidMount() {
+    this.getSettings(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Get new settings on navigation change
+    if (nextProps.match.params.env !== this.props.match.params.env) {
+      this.getSettings(nextProps);
+    }
+  }
+
+  /**
+   * Get Settings depending on the props
+   * @param  {Object} props
+   * @return {Func}       calls the saga that gets the current settings
+   */
+  getSettings = (props) => {
+    const { match: { params: { env} } } = props;
+    this.props.getSettings(env);
+  }
+
   generateLinks = () => {
     const headerNavLinks = this.context.appEnvironments.reduce((acc, current) => {
       const link = Object.assign(current, { to: `/plugins/upload/configurations/${current.name}` });
@@ -42,7 +68,7 @@ class ConfigPage extends React.Component {
     {
       kind: 'secondary',
       label: 'app.components.Button.cancel',
-      onClick: () => console.log('will cancel'),
+      onClick: this.props.onCancel,
       type: 'button',
     },
     {
@@ -76,11 +102,19 @@ ConfigPage.contextTypes = {
 };
 
 ConfigPage.defaultProps = {};
-ConfigPage.propTypes = {};
+
+ConfigPage.propTypes = {
+  getSettings: PropTypes.func.isRequired,
+  match: PropTypes.object.isRequired,
+  onCancel: PropTypes.func.isRequired,
+};
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    {},
+    {
+      getSettings,
+      onCancel,
+    },
     dispatch,
   );
 }
