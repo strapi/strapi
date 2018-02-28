@@ -1,4 +1,7 @@
 {
+  "app.components.Button.save": "Save",
+  "app.components.Button.cancel": "Cancel",
+
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
   "app.components.ComingSoonPage.featuresNotAvailable": "This feature is still under active development.",
 

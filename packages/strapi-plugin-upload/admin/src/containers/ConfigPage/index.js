@@ -9,6 +9,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 
+// You can find these components in either
+// ./node_modules/strapi-helper-plugin/lib/src
+// or strapi/packages/strapi-helper-plugin/lib/src
+import ContainerFluid from 'components/ContainerFluid';
+import HeaderNav from 'components/HeaderNav';
+import PluginHeader from 'components/PluginHeader';
+
+
 // You can find these utils in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -19,10 +27,46 @@ import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
-class ConfigPage extends React.PureComponent {
+class ConfigPage extends React.Component {
+  generateLinks = () => {
+    const headerNavLinks = this.context.appEnvironments.reduce((acc, current) => {
+      const link = Object.assign(current, { to: `/plugins/upload/configurations/${current.name}` });
+      acc.push(link);
+      return acc;
+    }, []).sort(link => link.name === 'production');
+
+    return headerNavLinks;
+  }
+
+  pluginHeaderActions = [
+    {
+      kind: 'secondary',
+      label: 'app.components.Button.cancel',
+      onClick: () => console.log('will cancel'),
+      type: 'button',
+    },
+    {
+      kind: 'primary',
+      label: 'app.components.Button.save',
+      onClick: () => console.log('will save'),
+      type: 'button',
+    },
+  ];
+
   render() {
     return (
-      <div>ConfigPage container</div>
+      <div>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <ContainerFluid>
+            <PluginHeader
+              actions={this.pluginHeaderActions}
+              description={{ id: 'upload.ConfigPage.description' }}
+              title={{ id: 'upload.ConfigPage.title'}}
+            />
+            <HeaderNav links={this.generateLinks()} />
+          </ContainerFluid>
+        </form>
+      </div>
     );
   }
 }
@@ -41,7 +85,7 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const mapStateToProps = selectConfigPage;
+const mapStateToProps = selectConfigPage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 

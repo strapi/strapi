@@ -1,4 +1,7 @@
 {
+  "ConfigPage.title": "Upload - Paramètres",
+  "ConfigPage.description": "Configurez le plugin upload",
+
   "EmptyLi.message": "Aucun fichier n'a été téléchargé",
 
   "EntriesNumber.number": "{number} fichier trouvé",

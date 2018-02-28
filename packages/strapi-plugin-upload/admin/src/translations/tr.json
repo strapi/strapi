@@ -1,4 +1,7 @@
 {
+  "ConfigPage.title": "Upload - Settings",
+  "ConfigPage.description": "Configure the upload plugin",
+
   "EmptyLi.message": "There are no uploaded files",
 
   "EntriesNumber.number": "{number} dosya bulundu",
