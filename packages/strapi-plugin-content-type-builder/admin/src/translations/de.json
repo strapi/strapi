@@ -13,21 +13,22 @@
     "attribute.email": "E-Mail",
     "attribute.password": "Passwort",
     "attribute.relation": "Beziehung",
-  
+    "attribute.enumeration": "Enumeration",
+
     "contentType.temporaryDisplay": "(Nicht gespeichert)",
     "from": "aus",
     "home.contentTypeBuilder.name": "Content-Typen",
     "home.contentTypeBuilder.description": "Verwalte deine Content-Typen.",
     "home.emptyContentType.title": "Es sind keine Content-Typen verfügbar",
     "home.emptyContentType.description": "Lege deinen ersten Content-Typ an, Daten deiner API abrufen zu können.",
-  
+
     "home.emptyAttributes.title": "Es gibt noch keine Felder",
     "home.emptyAttributes.description": "Füge deinem Content-Typen das erste Feld hinzu",
-  
+
     "button.contentType.create": "Lege einen Content-Typ an",
     "button.contentType.add": "Neuer Content-Typ",
     "button.attributes.add": "Neues Feld",
-  
+
     "error.validation.required": "Dieser Wert ist erforderlich.",
     "error.validation.regex": "Dieser Wert entspricht nicht dem RegEx.",
     "error.validation.max": "Dieser Wert ist zu hoch.",
@@ -39,11 +40,12 @@
     "error.attribute.key.taken": "Dieser Wert existiert bereits",
     "error.attribute.sameKeyAndName": "Darf nicht gleich sein",
     "error.validation.minSupMax": "Darf nicht höher sein",
-  
+
     "form.attribute.item.textarea.name": "Name",
     "form.attribute.item.number.name": "Name",
     "form.attribute.item.date.name": "Name",
     "form.attribute.item.media.name": "Name",
+    "form.attribute.item.media.multiple": "Allow multiple files",
     "form.attribute.item.json.name": "Name",
     "form.attribute.item.boolean.name": "Name",
     "form.attribute.item.string.name": "Name",
@@ -63,11 +65,11 @@
     "form.attribute.item.number.type.integer": "integer (ex: 10)",
     "form.attribute.item.number.type.float": "float (ex: 3.33333333)",
     "form.attribute.item.number.type.decimal": "decimal (ex: 2.22)",
-  
+
     "form.button.cancel": "Abbrechen",
     "form.button.continue": "Weiter",
     "form.button.save": "Speichern",
-  
+
     "form.contentType.item.connections": "Verbindung",
     "form.contentType.item.name": "Name",
     "form.contentType.item.name.description": "Der Name des Content-Typs sollte Singular sein. {link}",
@@ -76,7 +78,7 @@
     "form.contentType.item.description.placeholder": "Beschreibe deinen Content-Typ",
     "form.contentType.item.collectionName": "Name des Dokuments in der Datenbank",
     "form.contentType.item.collectionName.inputDescription": "Nützlich, wenn Content-Typ und Datenbankname unterschiedlich sind",
-  
+
     "menu.section.contentTypeBuilder.name.plural": "Content-Typen",
     "menu.section.contentTypeBuilder.name.singular": "Content-Typ",
     "menu.section.documentation.name": "Dokumentation",
@@ -84,7 +86,7 @@
     "menu.section.documentation.guideLink": "Anleitung.",
     "menu.section.documentation.tutorial": "Schau dir unser",
     "menu.section.documentation.tutorialLink": "Tutorial an.",
-  
+
     "modelPage.contentHeader.emptyDescription.description": "Dieser Content-Typ hat keine Beschreibung",
     "modelPage.contentType.list.title.plural": "Felder",
     "modelPage.contentType.list.title.singular": "Feld",
@@ -92,17 +94,18 @@
     "modelPage.contentType.list.relationShipTitle.plural": "Beziehungen",
     "modelPage.contentType.list.relationShipTitle.singular": "Beziehung",
     "modelPage.attribute.relationWith": "Beziehung mit",
-  
+
     "noTableWarning.description": "Vergiss nicht, die Tabelle `{modelName}` in deiner Datenbank zu erstellen",
     "noTableWarning.infos": "Mehr Informationen",
-  
+
     "notification.error.message": "Ein Fehler ist aufgetreten",
     "notification.info.contentType.creating.notSaved": "Bitte speichere zuerst diesen Content-Typ bevor du einen neuen anlegst",
     "notification.info.optimized": "Dieses Plugin ist auf deinen localStorage optimiert",
     "notification.success.message.contentType.edit": "Der Content-Typ wurde aktualisiert",
     "notification.success.message.contentType.create": "Der Content-Typ wurde angelegt",
     "notification.success.contentTypeDeleted": "Der Content-Typ wurde gelöscht",
-  
+    "notification.info.enumeration": "This field is not editable for the moment...😮",
+
     "popUpForm.attributes.string.description": "Titel, Namen, Namenslisten",
     "popUpForm.attributes.text.description": "Beschreibungen, Paragraphen, Artikel",
     "popUpForm.attributes.boolean.description": "Ja/Nein, 1 oder 0, Wahr/Falsch",
@@ -113,7 +116,7 @@
     "popUpForm.attributes.relation.description": "Bezieht sich auf einen Content-Typ",
     "popUpForm.attributes.email.description": "E-Mail-Adressen von Benutzern",
     "popUpForm.attributes.password.description": "Passwörter von Benutzers",
-  
+
     "popUpForm.attributes.string.name": "String",
     "popUpForm.attributes.text.name": "Text",
     "popUpForm.attributes.boolean.name": "Boolean",
@@ -130,31 +133,30 @@
     "popUpForm.create.contentType.header.title": "Neuer Content-Typ",
     "popUpForm.choose.attributes.header.title": "Neues Feld hinzufügen",
     "popUpForm.edit.contentType.header.title": "Content-Typen bearbeiten",
-  
+
     "popUpForm.navContainer.relation": "Beziehung definieren",
     "popUpForm.navContainer.base": "Grundeinstellungen",
     "popUpForm.navContainer.advanced": "Fortgeschrittene Einstellungen",
-  
+
     "popUpRelation.title": "Beziehung",
-  
+
     "popUpWarning.button.cancel": "Abbrechen",
     "popUpWarning.button.confirm": "Bestätigen",
     "popUpWarning.title": "Bitte bestätigen",
     "popUpWarning.bodyMessage.contentType.delete": "Bist du sicher, dass du diesen Content-Typ löschen willst?",
     "popUpWarning.bodyMessage.attribute.delete": "Bist du sicher, dass du dieses Feld löschen willst?",
-  
-  
+
+
     "table.contentType.title.plural": "Content-Typen sind verfügbar",
     "table.contentType.title.singular": "Content-Typ ist verfügbar",
     "table.contentType.head.name": "Name",
     "table.contentType.head.description": "Beschreibung",
     "table.contentType.head.fields": "Felder",
-  
+
     "relation.oneToOne": "hat ein(en)",
     "relation.oneToMany": "gehört zu vielen",
     "relation.manyToOne": "hat viele",
     "relation.manyToMany": "hat und gehört zu vielen",
     "relation.attributeName.placeholder": "z.B.: Autor, Kategorie"
-  
+
   }
-  
