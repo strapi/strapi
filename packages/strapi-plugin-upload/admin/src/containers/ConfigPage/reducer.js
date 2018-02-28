@@ -10,6 +10,7 @@ import {
   GET_SETTINGS,
   GET_SETTINGS_SUCCEEDED,
   ON_CANCEL,
+  ON_CHANGE,
 } from './constants';
 
 const initialState = fromJS({
@@ -30,6 +31,9 @@ function configPageReducer(state = initialState, action) {
         .update('settings', () => action.settings);
     case ON_CANCEL:
       return state.update('modifiedData', () => state.get('initialData'));
+    case ON_CHANGE:
+      return state
+        .updateIn(action.keys, () => action.value);
     default:
       return state;
   }

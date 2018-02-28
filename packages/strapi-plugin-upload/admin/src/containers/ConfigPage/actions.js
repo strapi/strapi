@@ -9,6 +9,7 @@ import {
   GET_SETTINGS,
   GET_SETTINGS_SUCCEEDED,
   ON_CANCEL,
+  ON_CHANGE,
 } from './constants';
 
 export function getSettings(env) {
@@ -29,5 +30,16 @@ export function getSettingsSucceeded(settings) {
 export function onCancel() {
   return {
     type: ON_CANCEL,
+  };
+}
+
+export function onChange({ target }) {
+  const keys = ['modifiedData'].concat(target.name.split('.'));
+  const value = target.name === 'sizeLimit' ? parseInt(target.value, 10) * 1000 : target.value;
+
+  return {
+    type: ON_CHANGE,
+    keys,
+    value,
   };
 }

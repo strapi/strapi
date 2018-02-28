@@ -2,6 +2,11 @@
   "ConfigPage.title": "Upload - Settings",
   "ConfigPage.description": "Configure the upload plugin",
 
+  "EditForm.Input.number.label": "Maximum size allowed (in MB)",
+  "EditForm.Input.select.label": "Providers",
+  "EditForm.Input.select.inputDescription": "Files can either be uploaded on your sever or on external providers.",
+  "EditForm.Input.toggle.label": "Enable file upload",
+
   "EmptyLi.message": "There are no uploaded files",
 
   "EntriesNumber.number": "{number} dosya bulundu",

@@ -16,6 +16,8 @@ import ContainerFluid from 'components/ContainerFluid';
 import HeaderNav from 'components/HeaderNav';
 import PluginHeader from 'components/PluginHeader';
 
+// Plugin's components
+import EditForm from 'components/EditForm';
 
 // You can find these utils in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -26,6 +28,7 @@ import injectSaga from 'utils/injectSaga';
 import {
   getSettings,
   onCancel,
+  onChange,
 } from './actions';
 
 import reducer from './reducer';
@@ -80,6 +83,8 @@ class ConfigPage extends React.Component {
   ];
 
   render() {
+    console.log('modifiedData', this.props.modifiedData);
+    console.log('settings', this.props.settings);
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -90,6 +95,11 @@ class ConfigPage extends React.Component {
               title={{ id: 'upload.ConfigPage.title'}}
             />
             <HeaderNav links={this.generateLinks()} />
+            <EditForm
+              modifiedData={this.props.modifiedData}
+              onChange={this.props.onChange}
+              settings={this.props.settings}
+            />
           </ContainerFluid>
         </form>
       </div>
@@ -101,12 +111,19 @@ ConfigPage.contextTypes = {
   appEnvironments: PropTypes.array,
 };
 
-ConfigPage.defaultProps = {};
+ConfigPage.defaultProps = {
+  settings: {
+    providers: [],
+  },
+};
 
 ConfigPage.propTypes = {
   getSettings: PropTypes.func.isRequired,
   match: PropTypes.object.isRequired,
+  modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  settings: PropTypes.object,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -114,6 +131,7 @@ function mapDispatchToProps(dispatch) {
     {
       getSettings,
       onCancel,
+      onChange,
     },
     dispatch,
   );
