@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import { findIndex, get, isEmpty, map } from 'lodash';
 import PropTypes from 'prop-types';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -15,6 +15,10 @@ import Input from 'components/InputsIndex';
 import styles from './styles.scss';
 
 class EditForm extends React.Component  {
+  getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
+
+  getProviderForm = () => get(this.props.settings, ['providers', this.getSelectedProviderIndex(), 'auth'], {});
+
   generateSelectOptions = () => (
     Object.keys(get(this.props.settings, 'providers', {})).reduce((acc, current) => {
       const option = {
@@ -27,7 +31,6 @@ class EditForm extends React.Component  {
   )
 
   render() {
-
     return (
       <div className={styles.editForm}>
         <div className="row">
@@ -43,11 +46,27 @@ class EditForm extends React.Component  {
             value={get(this.props.modifiedData, 'provider')}
           />
         </div>
+        {!isEmpty(this.getProviderForm()) && (
+
+          <div className={styles.subFormWrapper}>
+            <div className="row">
+
+              {map(this.getProviderForm(), (value, key) => (
+                <Input
+                  key={key}
+                  label={{ id: value.label }}
+                  name={key}
+                  onChange={this.props.onChange}
+                  selectOptions={value.values}
+                  type={value.type === 'enum' ? 'select' : value.type}
+                  validations={{ required: true }}
+                  value={get(this.props.modifiedData, key, '')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <div className={styles.separator} />
-        <div className="row">
-
-
-        </div>
         <div className="row">
           <Input
             inputStyle={{ maxWidth: '350px' }}

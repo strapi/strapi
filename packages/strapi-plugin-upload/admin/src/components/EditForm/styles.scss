@@ -6,10 +6,15 @@
 }
 
 .separator {
-  box-sizing: border-box;
   height: 1px;
   width: 100%;
-  // margin-top: 1.4rem;
   margin-bottom: 22px;
   background: #F6F6F6;
+  box-sizing: border-box;
+}
+
+.subFormWrapper {
+  margin-bottom: 14px;
+  padding: 5px 30px 0 30px;
+  background-color: #FAFAFB;
 }

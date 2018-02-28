@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
+// import { get, findIndex } from 'lodash';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src

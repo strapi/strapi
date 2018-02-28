@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 // Design
 import IcoContainer from 'components/IcoContainer';
@@ -57,11 +57,16 @@ class Row extends React.Component {
       <ListRow>
         <div className={cn("col-md-11", styles.nameWrapper)}>
           <div className={styles.icoContainer} style={{ marginRight: '14px' }}>
-            <img src={`${this.props.plugin.logo}`} alt="icon" />
+            {!isEmpty(this.props.plugin.logo) && <img src={`${this.props.plugin.logo}`} alt="icon" />}
+            { isEmpty(this.props.plugin.logo) && (
+              <div className={styles.icoWrapper}>
+                <i className={`fa fa-${this.props.plugin.icon}`} />
+              </div>
+            )}
           </div>
           <div className={styles.pluginContent}>
             <span>{this.props.plugin.name} —&nbsp;</span>
-            <FormattedMessage id={`${this.props.plugin.description}.short`} />
+            <FormattedMessage id={`${this.props.plugin.description}.short`} defaultMessage={this.props.plugin.description} />
           </div>
         </div>
         <div className="col-md-1">
