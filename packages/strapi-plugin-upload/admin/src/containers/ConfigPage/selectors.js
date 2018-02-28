@@ -14,4 +14,18 @@ const selectConfigPage = () => createSelector(
   (substate) => substate.toJS(),
 );
 
+const makeSelectEnv = () => createSelector(
+  selectConfigPageDomain(),
+  (substate) => substate.get('env'),
+);
+
+const makeSelectModifiedData = () => createSelector(
+  selectConfigPageDomain(),
+  (substate) => substate.get('modifiedData').toJS(),
+);
+
 export default selectConfigPage;
+export {
+  makeSelectEnv,
+  makeSelectModifiedData,
+};

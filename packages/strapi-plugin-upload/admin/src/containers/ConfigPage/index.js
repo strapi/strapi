@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-// import { get, findIndex } from 'lodash';
+import { findIndex, get, isEmpty } from 'lodash';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -30,6 +30,8 @@ import {
   getSettings,
   onCancel,
   onChange,
+  setErrors,
+  submit,
 } from './actions';
 
 import reducer from './reducer';
@@ -47,6 +49,8 @@ class ConfigPage extends React.Component {
       this.getSettings(nextProps);
     }
   }
+
+  getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
 
   /**
    * Get Settings depending on the props
@@ -68,6 +72,25 @@ class ConfigPage extends React.Component {
     return headerNavLinks;
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const formErrors = Object.keys(get(this.props.settings, ['providers', this.getSelectedProviderIndex(), 'auth'], {})).reduce((acc, current) => {
+      if (isEmpty(get(this.props.modifiedData, current, ''))) {
+        acc.push({
+          name: current,
+          errors: [{ id: 'components.Input.error.validation.required' }],
+        });
+      }
+      return acc;
+    }, []);
+
+    if (!isEmpty(formErrors)) {
+      return this.props.setErrors(formErrors);
+    }
+
+    return this.props.submit();
+  }
+
   pluginHeaderActions = [
     {
       kind: 'secondary',
@@ -78,17 +101,15 @@ class ConfigPage extends React.Component {
     {
       kind: 'primary',
       label: 'app.components.Button.save',
-      onClick: () => console.log('will save'),
-      type: 'button',
+      onClick: this.handleSubmit,
+      type: 'submit',
     },
   ];
 
   render() {
-    console.log('modifiedData', this.props.modifiedData);
-    console.log('settings', this.props.settings);
     return (
       <div>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={this.handleSubmit}>
           <ContainerFluid>
             <PluginHeader
               actions={this.pluginHeaderActions}
@@ -97,8 +118,11 @@ class ConfigPage extends React.Component {
             />
             <HeaderNav links={this.generateLinks()} />
             <EditForm
+              didCheckErrors={this.props.didCheckErrors}
+              formErrors={this.props.formErrors}
               modifiedData={this.props.modifiedData}
               onChange={this.props.onChange}
+              selectedProviderIndex={this.getSelectedProviderIndex()}
               settings={this.props.settings}
             />
           </ContainerFluid>
@@ -113,18 +137,23 @@ ConfigPage.contextTypes = {
 };
 
 ConfigPage.defaultProps = {
+  formErrors: [],
   settings: {
     providers: [],
   },
 };
 
 ConfigPage.propTypes = {
+  didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array,
   getSettings: PropTypes.func.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  setErrors: PropTypes.func.isRequired,
   settings: PropTypes.object,
+  submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -133,6 +162,8 @@ function mapDispatchToProps(dispatch) {
       getSettings,
       onCancel,
       onChange,
+      setErrors,
+      submit,
     },
     dispatch,
   );

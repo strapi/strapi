@@ -1,13 +1,19 @@
 // import { LOCATION_CHANGE } from 'react-router-redux';
-import { call, fork, put, takeLatest } from 'redux-saga/effects';
+import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
 import {
   getSettingsSucceeded,
+  submitSucceeded,
 } from './actions';
 import {
   GET_SETTINGS,
+  SUBMIT,
 } from './constants';
+import {
+  makeSelectEnv,
+  makeSelectModifiedData,
+} from './selectors';
 
 export function* settingsGet(action) {
   try {
@@ -19,8 +25,33 @@ export function* settingsGet(action) {
   }
 }
 
+export function* submit() {
+  try {
+    const env = yield select(makeSelectEnv());
+    let body = yield select(makeSelectModifiedData());
+
+    if (body.provider === 'local') {
+      body = {
+        enabled: body.enabled,
+        provider: 'local',
+        sizeLimit: body.sizeLimit,
+      };
+    }
+    const requestURL = `/upload/settings/${env}`;
+    yield call(request, requestURL, { method: 'PUT', body });
+
+    // Update reducer with optimisticResponse
+    yield put(submitSucceeded(body));
+  } catch(err) {
+    console.log('err', err);
+    strapi.notification.error('notification.error');
+    // TODO handle error PUT
+  }
+}
+
 function* defaultSaga() {
   yield fork(takeLatest, GET_SETTINGS, settingsGet);
+  yield fork(takeLatest, SUBMIT, submit);
 }
 
 export default defaultSaga;

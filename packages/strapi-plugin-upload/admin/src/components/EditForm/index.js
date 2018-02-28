@@ -15,9 +15,7 @@ import Input from 'components/InputsIndex';
 import styles from './styles.scss';
 
 class EditForm extends React.Component  {
-  getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
-
-  getProviderForm = () => get(this.props.settings, ['providers', this.getSelectedProviderIndex(), 'auth'], {});
+  getProviderForm = () => get(this.props.settings, ['providers', this.props.selectedProviderIndex, 'auth'], {});
 
   generateSelectOptions = () => (
     Object.keys(get(this.props.settings, 'providers', {})).reduce((acc, current) => {
@@ -47,12 +45,12 @@ class EditForm extends React.Component  {
           />
         </div>
         {!isEmpty(this.getProviderForm()) && (
-
           <div className={styles.subFormWrapper}>
             <div className="row">
-
               {map(this.getProviderForm(), (value, key) => (
                 <Input
+                  didCheckErrors={this.props.didCheckErrors}
+                  errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', key]), 'errors'])}
                   key={key}
                   label={{ id: value.label }}
                   name={key}
@@ -97,9 +95,13 @@ EditForm.defaultProps = {
     providers: [],
   },
 };
+
 EditForm.propTypes = {
+  didCheckErrors: PropTypes.bool.isRequired,
+  formErrors: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  selectedProviderIndex: PropTypes.number.isRequired,
   settings: PropTypes.object,
 };
 
