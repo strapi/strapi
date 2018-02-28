@@ -38,10 +38,6 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
-    },
-    "product": {
-      "model": "product",
-      "via": "buyers"
     }
   }
 }
