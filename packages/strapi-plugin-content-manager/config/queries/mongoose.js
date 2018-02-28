@@ -14,12 +14,12 @@ module.exports = {
       .count());
   },
 
-  findOne: async function (params) {
+  findOne: async function (params, populate) {
     return this
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(this.associations.map(x => x.alias).join(' '))
+      .populate(populate || this.associations.map(x => x.alias).join(' '))
       .lean();
   },
 
@@ -79,6 +79,9 @@ module.exports = {
       if (_.get(this._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
         acc[current] = params.values[current];
       } else {
+        console.log(association);
+        console.log(details);
+        console.log();
         switch (association.nature) {
           case 'oneWay':
             acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
@@ -190,9 +193,63 @@ module.exports = {
             break;
           case 'manyMorphToMany':
           case 'manyMorphToOne':
+            acc[current] = params.values[current].filter(ref => {
+              // Check if there is already an association.
+              return _.isEmpty(
+                response[current].find(obj => _.toLower(obj.ref._id) === _.toLower(ref.refId))
+              );
+            });
+            break;
+          case 'manyToManyMorph':
+            const transformToArrayID = (array) => {
+              return _.isArray(array) ? array.map(value => {
+                if (_.isPlainObject(value)) {
+                  return value._id || value.id;
+                }
+
+                return value;
+              }) : array;
+            };
+
+            // Compare array of ID to find deleted files.
+            const currentValue = transformToArrayID(response[current]).map(id => id.toString());
+            const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+
+            console.log(currentValue);
+            console.log(storedValue);
+
+            const toAdd = _.difference(storedValue, currentValue);
+            const toRemove = _.difference(currentValue, storedValue);
+
+            // Remove relations in the other side.
+            toAdd.forEach(id => {
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelationMorph({
+                id,
+                alias: association.via,
+                ref: this.globalId,
+                refId: response._id,
+                field: association.alias
+              }));
+            });
+
+            console.log(details.model || details.collection, details.plugin);
+            console.log(strapi.query(details.model || details.collection, details.plugin));
+
+            // Remove relations in the other side.
+            toRemove.forEach(id => {
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelationMorph({
+                id,
+                alias: association.via,
+                ref: this.globalId,
+                refId: response._id,
+                field: association.alias
+              }));
+            });
+
+            break;
           case 'oneMorphToOne':
           case 'oneMorphToMany':
-            acc[current] = params.values[current];
+
             break;
           default:
         }
@@ -207,6 +264,8 @@ module.exports = {
       }, values, {
         strict: false
       }));
+
+    console.log('-------------------');
 
     // Update virtuals fields.
     await Promise.all(virtualFields);
@@ -228,5 +287,23 @@ module.exports = {
 
   removeRelation: async function (params) {
     return module.exports.update.call(this, params);
+  },
+
+  removeRelationMorph: async function (params) {
+    const entry = await module.exports.findOne.call(this, params, []);
+
+    entry[params.alias] = entry[params.alias].filter(obj => {
+      console.log(obj.ref.toString(), params.refId.toString());
+      if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return module.exports.update.call(this, {
+      id: params.id,
+      values: entry
+    });
   }
 };
