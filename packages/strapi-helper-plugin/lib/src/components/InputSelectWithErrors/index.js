@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, isFunction } from 'lodash';
+import { get, isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
@@ -25,6 +25,15 @@ class InputSelectWithErrors extends React.Component {
     // Display input error if it already has some
     if (!isEmpty(errors)) {
       this.setState({ errors });
+    }
+
+    if (isEmpty(this.props.value) && this.props.validations.required) {
+      const target = {
+        type: 'select',
+        name: this.props.name,
+        value: get(this.props.selectOptions, ['0', 'value']) || get(this.props.selectOptions, ['0']),
+      };
+      this.props.onChange({ target });
     }
   }
 
@@ -138,6 +147,7 @@ InputSelectWithErrors.defaultProps = {
   selectOptions: [],
   style: {},
   tabIndex: '0',
+  validations: {},
 };
 
 InputSelectWithErrors.propTypes = {
@@ -192,6 +202,7 @@ InputSelectWithErrors.propTypes = {
   ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
+  validation: PropTypes.object,
   value: PropTypes.string.isRequired,
 };
 
