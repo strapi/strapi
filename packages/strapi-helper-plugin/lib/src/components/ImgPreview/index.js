@@ -39,9 +39,12 @@ class ImgPreview extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.isUploading !== this.props.isUploading) {
-      const lastFile = nextProps.files.slice(-1)[0];
+      const lastFile = this.props.multiple ? nextProps.files.slice(-1)[0] : nextProps.files[0];
       this.generateImgURL(lastFile);
-      this.updateFilePosition(nextProps.files.length - 1);
+
+      if (this.props.multiple) {  
+        this.updateFilePosition(nextProps.files.length - 1);
+      }
     }
 
     // Update the preview or slide pictures or init the component
@@ -240,7 +243,10 @@ ImgPreview.defaultProps = {
 
 ImgPreview.propTypes = {
   didDeleteFile: PropTypes.bool,
-  files: PropTypes.array,
+  files: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
   isUploading: PropTypes.bool,
   multiple: PropTypes.bool,
   name: PropTypes.string,

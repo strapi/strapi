@@ -25,14 +25,13 @@ class InputFile extends React.Component {
   };
 
   addFilesToProps = (files) => {
-    const initAcc = this.props.multiple ? cloneDeep(this.props.value) : [];
+    const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
     const value = Object.keys(files).reduce((acc, current) => {
 
       if (this.props.multiple) {
         acc.push(files[current]);
       } else if (current === '0') {
-
-        acc.push(files[0]);
+        acc[0] = files[0];
       }
 
       return acc;
@@ -66,8 +65,12 @@ class InputFile extends React.Component {
     e.stopPropagation();
 
     // Remove the file from props
-    const value = cloneDeep(this.props.value);
-    value.splice(this.state.position, 1);
+    const value = this.props.multiple ? cloneDeep(this.props.value) : {};
+
+    // Remove the file from the array if multiple files upload is enable
+    if (this.props.multiple) {
+      value.splice(this.state.position, 1);
+    }
     // Update the parent's props
     const target = {
       name: this.props.name,
@@ -78,9 +81,10 @@ class InputFile extends React.Component {
     this.props.onChange({ target });
 
     // Update the position of the children
-    const newPosition = value.length === 0 ? 0 : value.length - 1;
-
-    this.updateFilePosition(newPosition);
+    if (this.props.multiple) {
+      const newPosition = value.length === 0 ? 0 : value.length - 1;
+      this.updateFilePosition(newPosition);
+    }
     this.setState({ didDeleteFile: !this.state.didDeleteFile });
   }
 
@@ -124,8 +128,9 @@ class InputFile extends React.Component {
           </div>
         </label>
         <InputFileDetails
-          file={value[this.state.position]}
+          file={value[this.state.position] || value[0]}
           isOpen={this.state.isOpen}
+          multiple={multiple}
           number={value.length}
           onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
           position={this.state.position}
