@@ -13,7 +13,7 @@ function getLogLevel() {
   if (_.isString(process.env.STRAPI_LOG_LEVEL) && _.includes(logLevels, process.env.STRAPI_LOG_LEVEL.toLowerCase())) {
     return process.env.STRAPI_LOG_LEVEL;
   }
-  return 'debug'
+  return 'debug';
 }
 
 function getBool(envVar, defaultValue) {

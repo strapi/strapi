@@ -30,9 +30,18 @@ module.exports = {
 }
 ```
 
-## Configuration
+## Global logger configuration
 
-To configure the logger, you have to edit the following file `./config/environments/*/request.json`.
+The global logger is configured by environment variables.
+
+`STRAPI_LOG_LEVEL`: Can be one of 'fatal', 'error', 'warn', 'info', 'debug' or 'trace'.
+`STRAPI_LOG_TIMESTAMP`: Can be true/false
+`STRAPI_LOG_PRETTY_PRINT`: Can be true/false
+`STRAPI_LOG_FORCE_COLOR`: Can be true/false
+
+## Request logging middleware
+
+To configure the request-logger middleware, you have to edit the following file `./config/environments/*/request.json`.
 
 
 ```json
