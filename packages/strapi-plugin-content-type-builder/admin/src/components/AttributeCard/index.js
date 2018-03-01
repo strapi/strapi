@@ -22,6 +22,7 @@ import IcoText from '../../assets/images/icon_text.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/no-autofocus */
 const asset = {
   'boolean': IcoBoolean,
   'date': IcoDate,
@@ -35,10 +36,16 @@ const asset = {
   'text': IcoText,
 };
 
-function AttributeCard({ attribute, handleClick }) {
+function AttributeCard({ attribute, autoFocus, handleClick, tabIndex }) {
   return (
     <div className="col-md-6">
-      <div className={styles.attributeCardContainer} onClick={() => handleClick(attribute.type)}>
+      <button
+        autoFocus={autoFocus}
+        className={styles.attributeCardContainer}
+        onClick={() => handleClick(attribute.type)}
+        type="button"
+        tabIndex={tabIndex + 1}
+      >
         <div className={styles.attributeCard}>
           <img src={asset[attribute.type]} alt="ico" />
           <FormattedMessage id={`content-type-builder.popUpForm.attributes.${attribute.type}.name`}>
@@ -46,14 +53,21 @@ function AttributeCard({ attribute, handleClick }) {
           </FormattedMessage>
           <FormattedMessage id={attribute.description} />
         </div>
-      </div>
+      </button>
     </div>
   );
 }
 
+AttributeCard.defaultProps = {
+  autoFocus: false,
+  tabIndex: 0,
+};
+
 AttributeCard.propTypes = {
   attribute: PropTypes.object.isRequired,
+  autoFocus: PropTypes.bool,
   handleClick: PropTypes.func.isRequired,
+  tabIndex: PropTypes.number,
 };
 
 export default AttributeCard;

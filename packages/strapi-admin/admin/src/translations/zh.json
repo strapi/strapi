@@ -1,0 +1,124 @@
+{
+  "app.components.ComingSoonPage.comingSoon": "即將推出",
+  "app.components.ComingSoonPage.featuresNotAvailable": "這個功能正在開發中",
+
+  "app.components.DownloadInfo.download": "正在下載...",
+  "app.components.DownloadInfo.text": "請稍等幾分鐘，謝謝您的耐心。",
+
+  "app.components.HomePage.welcome": "歡迎回來!",
+  "app.components.HomePage.description.part1": "我們很高興您能使用我們的產品!",
+  "app.components.HomePage.description.part2":
+    "您現在是這個社群的一份子了，這將幫助您打造夢想中的產品",
+  "app.components.HomePage.button": "建立您第一個資料結構",
+  "app.components.HomePage.feedback":
+    "請不要吝嗇使用以下的管道問我們問題，或是給我們建議。",
+
+  "app.components.InputFile.newFile": "增加新檔案 {browse}",
+  "app.components.InputFileDetails.details": "詳細資料",
+  "app.components.ImgPreview.hint":
+    "將您要上傳的檔案拖拉到這個框框，或是瀏覽檔案",
+  "app.components.ImgPreview.hint.browse": "瀏覽",
+
+  "app.components.InstallPluginPage.helmet": "市集 - 擴充功能",
+  "app.components.InstallPluginPage.title": "市集 - 擴充功能",
+  "app.components.InstallPluginPage.description": "輕鬆擴充您的應用程式",
+  "app.components.InstallPluginPage.plugin.support-us.description":
+    "透過購買 Strapi T-shirt 來支持我們。這些資金將幫助我們繼續努力打造更好的產品和使用者體驗。",
+  "app.components.InstallPluginPage.InputSearch.label": " ",
+  "app.components.InstallPluginPage.InputSearch.placeholder":
+    "搜尋擴充功能... (範例: 使用者認證)",
+  "app.components.InstallPluginPopup.downloads": "下載",
+  "app.components.InstallPluginPopup.navLink.description": "說明",
+  "app.components.InstallPluginPopup.navLink.screenshots": "螢幕截圖",
+  "app.components.InstallPluginPopup.navLink.avis": "avis",
+  "app.components.InstallPluginPopup.navLink.faq": "常見問題",
+  "app.components.InstallPluginPopup.navLink.changelog": "更新紀錄",
+  "app.components.InstallPluginPopup.noDescription": "目前沒有說明",
+
+  "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
+  "app.components.LeftMenuLinkContainer.configuration": "設定",
+  "app.components.LeftMenuLinkContainer.general": "一般",
+  "app.components.LeftMenuLinkContainer.installNewPlugin": "市集",
+  "app.components.LeftMenuLinkContainer.listPlugins": "擴充功能",
+  "app.components.LeftMenuLinkContainer.noPluginsInstalled":
+    "目前沒有安裝任何擴充功能",
+  "app.components.LeftMenuLinkContainer.plugins": "擴充功能",
+
+  "app.components.ListPluginsPage.helmet.title": "擴充功能列表",
+  "app.components.ListPluginsPage.title": "擴充功能",
+  "app.components.ListPluginsPage.description": "這個專案安裝的擴充功能列表",
+  "app.components.listPluginsPage.deletePlugin.error":
+    "解除安裝擴充功能時發生了錯誤",
+  "app.components.listPlugins.title.singular": "安裝了 {number} 個擴充功能",
+  "app.components.listPlugins.title.plural": "安裝了 {number} 個擴充功能",
+  "app.components.listPlugins.title.none": "目前沒有安裝任何擴充功能",
+  "app.components.listPlugins.button": "安裝新的擴充功能",
+
+  "app.components.NotFoundPage.description": "沒有結果",
+  "app.components.NotFoundPage.back": "回到主頁",
+
+  "app.components.Official": "官方",
+
+  "app.components.PluginCard.compatible": "相容您的應用程式",
+  "app.components.PluginCard.compatibleCommunity": "相容社群",
+  "app.components.PluginCard.Button.label.download": "下載",
+  "app.components.PluginCard.Button.label.install": "已經安裝",
+  "app.components.PluginCard.Button.label.support": "幫助我們",
+  "app.components.PluginCard.price.free": "免費",
+  "app.components.PluginCard.more-details": "更多細節",
+
+  "app.utils.placeholder.defaultMessage": "\u0020",
+  "app.utils.SelectOption.defaultMessage": "\u0020",
+  "app.utils.defaultMessage": "\u0020",
+
+  "components.AutoReloadBlocker.header": "需要這個擴充功能才能重新整理",
+  "components.AutoReloadBlocker.description": "打開此檔案來安裝功能",
+
+  "components.ErrorBoundary.title": "有錯誤發生...",
+
+  "components.OverlayBlocker.title": "等候回應...",
+  "components.OverlayBlocker.description":
+    "您正在使用的功能需要重新啟動，請等到重新啟動完成。",
+
+  "components.PageFooter.select": "個數(頁)",
+
+  "components.ProductionBlocker.header": "這個擴充功能只能在開發環境中使用",
+  "components.ProductionBlocker.description":
+    "為了安全起見，我們需要在其他環境關閉這個擴充功能",
+
+  "components.popUpWarning.button.cancel": "取消",
+  "components.popUpWarning.button.confirm": "確認",
+  "components.popUpWarning.title": "請確認",
+  "components.popUpWarning.message": "您確定要刪除這個嗎？",
+
+  "components.Input.error.validation.email": "請輸入有效 Email",
+  "components.Input.error.validation.required": "此欄位必填",
+  "components.Input.error.validation.regex": "此欄位沒有對應到 regex",
+  "components.Input.error.validation.max": "這個數值太高了",
+  "components.Input.error.validation.min": "這個數值太低了",
+  "components.Input.error.validation.maxLength": "這個數值太長了",
+  "components.Input.error.validation.minLength": "這個數值太短了",
+  "components.Input.error.contentTypeName.taken": "這個名稱已經存在了",
+  "components.Input.error.attribute.taken": "這個欄位名稱已經存在了",
+  "components.Input.error.attribute.key.taken": "這個數值已經存在了",
+  "components.Input.error.attribute.sameKeyAndName": "不能等於",
+  "components.Input.error.validation.minSupMax": "不能高過",
+  "components.Input.error.custom-error": "{errorMessage} ",
+
+  "components.ListRow.empty": "沒有資料可以顯示",
+
+  "notification.error": "有錯誤發生了",
+
+  "Auth & Permissions": "認證 & 權限",
+  "Content Manager": "內容管理",
+  "Content Type Builder": "創建資料結構",
+  "Settings Manager": "管理設定",
+  "Email": "Email",
+  "Password": "密碼",
+  "Username": "使用者名稱",
+  "Provider": "供應商",
+  "ResetPasswordToken": "重設密碼的 Token",
+  "Role": "權限",
+  "New entry": "新入口",
+  "request.error.model.unknow": "這個資料不存在"
+}
