@@ -137,24 +137,28 @@ module.exports = {
 
         // We have to find if they are a model linked to this key
         _.forIn(_.omit(models, currentModelName || ''), model => {
-          _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
-              types.other = 'collection';
+          Object.keys(model.attributes)
+            .filter(key => key === association.via)
+            .forEach(attr => {
+              const attribute = model.attributes[attr];
 
-              // Break loop
-              return false;
-            } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
-              types.other = 'model';
+              if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
+                types.other = 'collection';
 
-              // Break loop
-              return false;
-            } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
-              types.other = 'morphTo';
+                // Break loop
+                return false;
+              } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
+                types.other = 'model';
 
-              // Break loop
-              return false;
-            }
-          });
+                // Break loop
+                return false;
+              } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
+                types.other = 'morphTo';
+
+                // Break loop
+                return false;
+              }
+            });
         });
       } else if (association.hasOwnProperty('model')) {
         types.current = 'model';
@@ -230,12 +234,12 @@ module.exports = {
           nature: 'oneMorphToOne',
           verbose: 'belongsToMorph'
         };
-      } else if (types.current === 'morphTo' && types.other === 'model') {
+      } else if (types.current === 'morphTo' && (types.other === 'model' || association.hasOwnProperty('model'))) {
         return {
           nature: 'manyMorphToOne',
           verbose: 'belongsToManyMorph'
         };
-      } else if (types.current === 'morphTo' && types.other === 'collection') {
+      } else if (types.current === 'morphTo' && (types.other === 'collection' || association.hasOwnProperty('collection'))) {
         return {
           nature: 'manyMorphToMany',
           verbose: 'belongsToManyMorph'
@@ -358,6 +362,7 @@ module.exports = {
           Object.keys(strapi.plugins[current].models).forEach((entity) => {
             Object.keys(strapi.plugins[current].models[entity].attributes).forEach((attribute) => {
               const attr = strapi.plugins[current].models[entity].attributes[attribute];
+
               if (
                 (attr.collection || attr.model || '').toLowerCase() === model.toLowerCase() &&
                 strapi.plugins[current].models[entity].globalId !== definition.globalId

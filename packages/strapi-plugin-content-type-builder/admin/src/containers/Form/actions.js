@@ -251,6 +251,7 @@ function setAttributeFormData(hash) {
       unique: false,
       maxLength: false,
       minLength: false,
+      multiple: false,
       min: false,
       max: false,
     }),

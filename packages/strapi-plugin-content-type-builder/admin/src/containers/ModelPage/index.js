@@ -173,6 +173,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   handleEditAttribute = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
+
+    // Remove enumeration type because it's not supported by this plugin for the moment.
+    if (attribute.params.type === 'enumeration') {
+      return strapi.notification.info('content-type-builder.notification.info.enumeration');
+    }
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
