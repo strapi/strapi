@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { get, isArray, isNumber, isString, map } from 'lodash';
+import { get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -64,12 +64,20 @@ export function* submit() {
 
           return acc.append(current, JSON.stringify(file));
         });
+
+        if (isEmpty(record[current])) {
+          acc.append(current, JSON.stringify([]));
+        }
       } else {
         acc.append(current, JSON.stringify(cleanedData));
       }
 
       return acc;
     }, new FormData());
+
+    // for(var pair of recordCleaned.entries()) {
+    //   console.log(pair[0]+ ', '+ pair[1]);
+    // }
 
     const id = isCreating ? '' : record.id;
     const params = { source };
