@@ -174,6 +174,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
 
+    // Remove enumeration type because it's not supported by this plugin for the moment.
     if (attribute.params.type === 'enumeration') {
       return strapi.notification.info('content-type-builder.notification.info.enumeration');
     }
