@@ -100,7 +100,7 @@ export function* submitChanges(action) {
           set(body.attributes[index].params, 'plugin', true);
         }
 
-        if (!value) {
+        if (!value && key !== 'multiple') {
           const paramsKey = includes(key, 'Value') ? replace(key,'Value', '') : key;
           unset(body.attributes[index].params, paramsKey);
         }
@@ -116,6 +116,7 @@ export function* submitChanges(action) {
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
+
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {

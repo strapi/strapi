@@ -11,15 +11,16 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
+      const middlewareLogger = strapi.log.child();
       if (strapi.config.middleware.settings.logger.level) {
-        strapi.log.level = strapi.config.middleware.settings.logger.level;
+        middlewareLogger.level = strapi.config.middleware.settings.logger.level;
       }
 
       if (strapi.config.middleware.settings.logger.exposeInContext) {
-        strapi.app.context.log = strapi.log;
+        strapi.app.context.log = middlewareLogger;
       }
 
-      if (strapi.config.middleware.settings.logger.requests && strapi.log.levelVal <= 20) {
+      if (strapi.config.middleware.settings.logger.requests && middlewareLogger.levelVal <= 20) {
         strapi.app.use(async (ctx, next) => {
           const start = Date.now();
 
@@ -27,7 +28,7 @@ module.exports = strapi => {
 
           const delta = Math.ceil(Date.now() - start);
 
-          strapi.log.debug(`${ctx.method} ${ctx.url} (${delta} ms)`);
+          middlewareLogger.debug(`${ctx.method} ${ctx.url} (${delta} ms)`);
         });
       }
 
