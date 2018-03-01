@@ -33,6 +33,7 @@ module.exports = {
       return acc;
     }, {});
 
+    // Add polymorphic array to the values.
     this.associations
       .filter(association => association.nature.toLowerCase().indexOf('morphto') !== -1)
       .map(association => {
@@ -212,7 +213,7 @@ module.exports = {
                 }
 
                 return value;
-              }) : array;
+              }) : transformToArrayID([array]);
             };
 
             // Compare array of ID to find deleted files.

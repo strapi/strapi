@@ -31,6 +31,47 @@ module.exports = {
   },
 
   add: async (params, values, source) => {
+    // Multipart/form-data.
+    if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      // Silent recursive parser.
+      const parser = (value) => {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // Silent.
+        }
+
+        return _.isArray(value) ? value.map(obj => parser(obj)) : value;
+      };
+
+      const files = values.files;
+
+      // Parse stringify JSON data.
+      values = Object.keys(values.fields).reduce((acc, current) => {
+        acc[current] = parser(values.fields[current]);
+
+        return acc;
+      }, {});
+
+      // Update JSON fields.
+      const entry = await strapi.query(params.model, source).create({
+        values
+      });
+
+      // Then, request plugin upload.
+      if (strapi.plugins.upload) {
+        // Upload new files and attach them to this entity.
+        await strapi.plugins.upload.services.upload.uploadToEntity({
+          id: entry.id || entry._id,
+          model: params.model
+        }, files, source);
+      }
+
+      return strapi.query(params.model, source).findOne({
+        id: entry.id || entry._id
+      });
+    }
+
     // Create an entry using `queries` system
     return await strapi.query(params.model, source).create({
       values

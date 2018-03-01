@@ -220,43 +220,43 @@ module.exports = function(strapi) {
 
                   // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
                   // Apply only during fetching.
-                  this.on('fetching:collection', (instance, attrs, options) => {
+                  this.on('fetching fetching:collection', (instance, attrs, options) => {
                     if (_.isArray(options.withRelated)) {
-                        options.withRelated = options.withRelated.map(path => {
-                          const association = definition.associations
-                            .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
-                            .filter(association => association.alias === path || association.via === path)[0];
+                      options.withRelated = options.withRelated.map(path => {
+                        const association = definition.associations
+                          .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
+                          .filter(association => association.alias === path || association.via === path)[0];
 
-                          if (association) {
-                            // Override on polymorphic path only.
-                            if (_.isString(path) && path === association.via) {
-                              return `related.${association.via}`;
-                            } else if (_.isString(path) && path === association.alias) {
-                              // MorphTo side.
-                              if (association.related) {
-                                return `${association.alias}.related`;
-                              }
-
-                              // oneToMorph or manyToMorph side.
-                              // Retrieve collection name because we are using it to build our hidden model.
-                              const model = association.plugin ?
-                                strapi.plugins[association.plugin].models[association.collection || association.model]:
-                                strapi.models[association.collection || association.model];
-
-                              return `${association.alias}.${model.collectionName}`;
+                        if (association) {
+                          // Override on polymorphic path only.
+                          if (_.isString(path) && path === association.via) {
+                            return `related.${association.via}`;
+                          } else if (_.isString(path) && path === association.alias) {
+                            // MorphTo side.
+                            if (association.related) {
+                              return `${association.alias}.related`;
                             }
-                          }
 
-                          return path;
-                        });
-                      }
-                      
-                      return _.isFunction(
-                        target[model.toLowerCase()]['beforeFetchCollection']
-                      )
-                        ? target[model.toLowerCase()]['beforeFetchCollection']
-                        : Promise.resolve();
-                    });
+                            // oneToMorph or manyToMorph side.
+                            // Retrieve collection name because we are using it to build our hidden model.
+                            const model = association.plugin ?
+                              strapi.plugins[association.plugin].models[association.collection || association.model]:
+                              strapi.models[association.collection || association.model];
+
+                            return `${association.alias}.${model.collectionName}`;
+                          }
+                        }
+
+                        return path;
+                      });
+                    }
+
+                    return _.isFunction(
+                      target[model.toLowerCase()]['beforeFetchCollection']
+                    )
+                      ? target[model.toLowerCase()]['beforeFetchCollection']
+                      : Promise.resolve();
+                  });
 
                   this.on('saving', (instance, attrs, options) => {
                     instance.attributes = mapper(instance.attributes);
@@ -555,6 +555,9 @@ module.exports = function(strapi) {
                   };
 
                   GLOBALS[options.tableName] = ORM.Model.extend(options);
+
+                  // Set polymorphic table name to the main model.
+                  target[model].morph = GLOBALS[options.tableName];
 
                   // Hack Bookshelf to create a many-to-many polymorphic association.
                   // Upload has many Upload_morph that morph to different model.
