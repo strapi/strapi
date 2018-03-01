@@ -66,9 +66,18 @@ export class EditPage extends React.Component {
 
     // Get all relations made with the upload plugin
     // TODO: check if collectionName or model === 'upload_file'
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).filter(relation => (
-      get(this.getSchema(), ['relations', relation, 'plugin']) === 'upload'
-    ));
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
+      if (get(this.getSchema(), ['relations', current, 'plugin']) === 'upload') {
+        const relation = {
+          name: current,
+          multiple: get(this.getSchema(), ['relations', current, 'nature']) === 'manyToManyMorph',
+        };
+
+        acc.push(relation);
+      }
+      return acc;
+    }, []);
+
     // Update the reducer so we can use it to create the appropriate FormData in the saga
     this.props.setFileRelations(fileRelations);
   }
@@ -198,7 +207,7 @@ export class EditPage extends React.Component {
 
   render() {
     const { editPage } = this.props;
-  
+
     return (
       <div>
         <form onSubmit={this.handleSubmit}>

@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
+import { findIndex, get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -55,7 +55,7 @@ export function* submit() {
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
-      } else if (fileRelations.includes(current)) {
+      } else if (findIndex(fileRelations, ['name', current]) !== -1) {
         // Don't stringify the file
         map(record[current], (file) => {
           if (file instanceof File) {
@@ -66,7 +66,9 @@ export function* submit() {
         });
 
         if (isEmpty(record[current])) {
-          acc.append(current, JSON.stringify([]));
+          // Send an empty array if relation is manyToManyMorph else an object
+          const data = get(fileRelations, [findIndex(fileRelations, ['name', current]), 'multiple']) ? [] : {};
+          acc.append(current, JSON.stringify(data));
         }
       } else {
         acc.append(current, JSON.stringify(cleanedData));
@@ -75,6 +77,8 @@ export function* submit() {
       return acc;
     }, new FormData());
 
+    // Helper to log FormData
+    // NOTE : keep this line for the moment
     // for(var pair of recordCleaned.entries()) {
     //   console.log(pair[0]+ ', '+ pair[1]);
     // }
