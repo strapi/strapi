@@ -95,6 +95,7 @@ module.exports = function (strapi) {
                     It allows us to make Upload.find().populate('related')
                     instead of Upload.find().populate('related.item')
                   */
+
                   const morphAssociations = definition.associations.filter(association => association.nature.toLowerCase().indexOf('morph') !== -1);
 
                   if (morphAssociations.length > 0) {
@@ -220,6 +221,7 @@ module.exports = function (strapi) {
               // Add some informations about ORM & client connection
               definition.orm = 'mongoose';
               definition.client = _.get(strapi.config.connections[definition.connection], 'client');
+              definition.associations = [];
 
               // Register the final model for Mongoose.
               definition.loadedModel = _.cloneDeep(definition.attributes);

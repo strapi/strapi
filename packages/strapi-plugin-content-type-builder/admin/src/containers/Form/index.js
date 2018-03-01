@@ -460,8 +460,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       <AttributeCard
         key={key}
         attribute={attribute}
+        autoFocus={key === 0}
         routePath={this.props.routePath}
         handleClick={this.goToAttributeTypeView}
+        tabIndex={key}
       />
     ))
   )

@@ -42,6 +42,8 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
       'decimal': IcoNumber,
       'email': IcoEmail,
       'password': IcoPassword,
+      // TODO add Enumeration icon
+      'enumeration': IcoJson,
     };
     this.state = {
       showWarning: false,
@@ -90,7 +92,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
     const icons = isNotEditable ? [{ icoType: 'lock' }] : [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
     const editableStyle = isNotEditable ? '' : styles.editable;
-    
+
     return (
       <li
         className={`${styles.attributeRow} ${editableStyle} ${relationStyle}`}

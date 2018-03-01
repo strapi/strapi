@@ -65,3 +65,10 @@
   height: 100%;
   vertical-align: middle;
 }
+
+.icoWrapper {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-around;
+}
