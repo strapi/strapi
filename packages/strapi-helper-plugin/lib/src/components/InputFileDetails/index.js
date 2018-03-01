@@ -27,7 +27,7 @@ function InputFileDetails(props) {
     <div className={styles.inputFileDetails}>
       <div className={styles.detailBanner} onClick={props.onClick}>
         <div>
-          <div className={cn(props.isOpen && styles.chevronDown, !props.isOpen && styles.chevronUp)} />
+          <div className={cn(props.isOpen && styles.chevronDown, !props.isOpen && styles.chevronRight)} />
           <div>
             <FormattedMessage id="app.components.InputFileDetails.details" />
           </div>

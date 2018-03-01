@@ -7,7 +7,7 @@
   > div:first-child {
     display: flex;
     > div:nth-child(2) {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
     }
   }
@@ -20,18 +20,18 @@
     display: block;
     color: #787E8F;
     font-family: 'FontAwesome';
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
-.chevronUp {
+.chevronRight {
   margin-right: 8px;
   &:before {
-    content: '\F077';
+    content: '\f054';
     display: block;
     color: #787E8F;
     font-family: 'FontAwesome';
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -42,10 +42,10 @@
 
 .infoWrapper {
   line-height: 18px;
-  font-size: 12px;
+  font-size: 13px;
   > span:first-child {
     color: #333740;
-    font-weight: 600;
+    font-weight: 500;
   }
   >span:last-child {
     color: rgba(51, 55, 64, 0.80);
@@ -53,7 +53,6 @@
   }
 }
 .inputFileDetails {
-  // width: 350px;
   width: 100%;
   padding-top: 4px;
   margin-bottom: -13px;
@@ -65,18 +64,18 @@
   font-family: Lato;
   -webkit-font-smoothing: antialiased;
   > span:first-child {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
   }
   > span:last-child {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
   }
 }
 
 .removeContainer {
   color: #FF3000;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
 }
