@@ -4,7 +4,7 @@
 
   "EditForm.Input.number.label": "Maximum size allowed (in MB)",
   "EditForm.Input.select.label": "Providers",
-  "EditForm.Input.select.inputDescription": "Files can either be uploaded on your sever or on external providers.",
+  "EditForm.Input.select.inputDescription": "Files can either be uploaded on your server or on external providers.",
   "EditForm.Input.toggle.label": "Enable file upload",
 
   "EmptyLi.message": "Yüklenmiş dosya bulunmamaktadır.",

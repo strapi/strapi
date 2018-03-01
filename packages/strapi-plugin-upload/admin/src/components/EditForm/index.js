@@ -35,7 +35,7 @@ class EditForm extends React.Component  {
           <Input
             customBootstrapClass="col-md-6"
             inputDescription={{ id: 'upload.EditForm.Input.select.inputDescription' }}
-            inputStyle={{ maxWidth: '358px' }}
+            inputClassName={styles.inputStyle}
             label={{ id: 'upload.EditForm.Input.select.label' }}
             name="provider"
             onChange={this.props.onChange}
@@ -67,7 +67,7 @@ class EditForm extends React.Component  {
         <div className={styles.separator} />
         <div className="row">
           <Input
-            inputStyle={{ maxWidth: '350px' }}
+            inputClassName={styles.inputStyle}
             label={{ id: 'upload.EditForm.Input.number.label' }}
             name="sizeLimit"
             onChange={this.props.onChange}
