@@ -134,18 +134,6 @@ class ImgPreview extends React.Component {
     this.props.onDrop(e);
   }
 
-  handleMouseEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ isOver: true });
-  }
-
-  handleMouseLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ isOver: false });
-  }
-
   // TODO change logic to depend on the type
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
@@ -188,12 +176,10 @@ class ImgPreview extends React.Component {
           )}
           onDragOver={this.handleDragOver}
           onDragEnter={this.handleDragEnter}
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
           style={containerStyle}
         >
           <div
-            className={cn(this.state.isDraging && styles.overlay || this.state.isOver && !this.state.isOverArrow && styles.overlay)}
+            className={cn(this.state.isDraging && styles.overlay)}
             onDragLeave={this.handleDragLeave}
             onDragOver={this.handleDragOver}
             onDrop={this.handleDrop}
@@ -203,13 +189,13 @@ class ImgPreview extends React.Component {
             displayHint={isEmpty(files)}
             onClick={onBrowseClick}
             onDrop={this.handleDrop}
-            showWhiteHint={this.state.isDraging || this.state.isOver && !this.state.isOverArrow || isEmpty(files)}
+            showWhiteHint={this.state.isDraging || isEmpty(files)}
           />
 
           { !isEmpty(imgURL) && this.renderContent() }
 
           <ImgPreviewArrow
-            enable={this.state.isOver && isArray(files) && size(files) > 1}
+            enable={isArray(files) && size(files) > 1}
             onClick={this.handleClick}
             onMouseEnter={(e) => this.setState({ isOverArrow: true })}
             onMouseLeave={(e) => this.setState({ isOverArrow: false })}
@@ -218,7 +204,7 @@ class ImgPreview extends React.Component {
           />
 
           <ImgPreviewArrow
-            enable={this.state.isOver && isArray(files) && size(files) > 1}
+            enable={isArray(files) && size(files) > 1}
             onClick={this.handleClick}
             onMouseEnter={(e) => this.setState({ isOverArrow: true })}
             onMouseLeave={(e) => this.setState({ isOverArrow: false })}
