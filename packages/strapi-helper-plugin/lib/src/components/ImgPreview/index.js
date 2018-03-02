@@ -82,7 +82,9 @@ class ImgPreview extends React.Component {
       reader.readAsDataURL(file);
     } else if (has(file, 'url')) {
       const isImg = this.isPictureType(file.name);
-      this.setState({ isImg, imgURL: `${strapi.backendURL}${file.url}` });
+      const imgURL = file.url[0] === '/' ?`${strapi.backendURL}${file.url}` :file.url;
+
+      this.setState({ isImg, imgURL });
     } else {
       this.setState({ isImg: false, imgURL: file.name });
     }
