@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { trim } from 'lodash';
 
 import ext from './extensions.json';
 
@@ -15,19 +16,19 @@ import styles from './styles.scss';
 function FileIcon({ fileType }) {
   const iconType = (() => {
     switch (true) {
-      case ext.archive.includes(fileType):
+      case ext.archive.includes(trim(fileType, '.')):
         return 'file-archive-o';
-      case ext.code.includes(fileType):
+      case ext.code.includes(trim(fileType, '.')):
         return 'file-code-o';
-      case ext.img.includes(fileType):
+      case ext.img.includes(trim(fileType, '.')):
         return 'file-image-o';
-      case ext.pdf.includes(fileType):
+      case ext.pdf.includes(trim(fileType, '.')):
         return 'file-pdf-o';
-      case ext.powerpoint.includes(fileType):
+      case ext.powerpoint.includes(trim(fileType, '.')):
         return 'file-powerpoint-o';
-      case ext.video.includes(fileType):
+      case ext.video.includes(trim(fileType, '.')):
         return 'file-video-o';
-      case ext.word.includes(fileType):
+      case ext.word.includes(trim(fileType, '.')):
         return 'file-word-o';
       default:
         return 'file';

@@ -16,6 +16,7 @@ import InstallPluginPopup from 'components/InstallPluginPopup';
 import Official from 'components/Official';
 // import StarsContainer from 'components/StarsContainer';
 
+import logoTShirt from 'assets/images/logo-t-shirt.svg';
 import styles from './styles.scss';
 import Screenshot from './screenshot.png';
 
@@ -89,7 +90,7 @@ class PluginCard extends React.Component {
     const pluginIcon = (
       <div className={styles.frame}>
         <span className={styles.helper} />
-        <img src={`${this.props.plugin.logo}`} alt="icon" />
+        <img src={`${this.props.plugin.id === 'support-us' ? logoTShirt : this.props.plugin.logo}`} alt="icon" />
       </div>
     );
 

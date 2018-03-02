@@ -1,22 +1,22 @@
 .attributeCardContainer { /* stylelint-disable */
-  cursor: pointer;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  width: 100% !important;
   height: 4rem;
+  padding: 0 1rem 0 1rem;
   margin-top: .6rem;
   margin-bottom: .8rem;
-  padding: 0 1rem 0 1rem;
-  border: 1px solid #E3E9F3;
+  align-items: center;
+  justify-content: space-between;
   border-radius: 0.25rem;
-  line-height: 4rem;
+  border: 1px solid #E3E9F3;
   background: #FFFFFF;
+  line-height: 4rem;
   box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
-
-  &:hover, &:active {
+  cursor: pointer;
+  &:hover, &:active, &:focus {
     background: #F7F7F7;
-
-    > div:after{
+    outline: 0;
+    > div:after {
       color: #0097F6;
     }
   }
@@ -24,25 +24,24 @@
 
 .attributeCard {
   font-size: 1.3rem;
+  &:after{
+    content: '\f05d';
+    position: absolute;
+    top: 7px;
+    right: 26px;
+    color: #E3E9F3;
+    font-size: 1.4rem;
+    font-family: 'FontAwesome';
+    -webkit-font-smoothing: antialiased;
+  }
 
   &:hover{
     background: none;
   }
-
-  &:after{
-    position: absolute;
-    top: 7px; right: 26px;
-    content: '\f05d';
-    font-size: 1.4rem;
-    font-family: 'FontAwesome';
-    color: #E3E9F3;
-    -webkit-font-smoothing: antialiased;
-  }
-
   > img{
     display: inline-block;
-    width: 35px;
     height: 20px;
+    width: 35px;
     margin-top: -3px;
     margin-right: 10px;
   }
@@ -57,11 +56,11 @@
 }
 
 .attributeType {
-  color: #323740 !important;
   margin-right: 1.2rem;
-  font-style: normal !important;
+  color: #323740 !important;
+  text-transform: capitalize;
   font-size: 1.3rem !important;
   font-weight: 500 !important;
-  text-transform: capitalize;
+  font-style: normal !important;
   -webkit-font-smoothing: subpixel-antialiased !important;
 }

@@ -1,4 +1,7 @@
 {
+  "app.components.Button.save": "Save",
+  "app.components.Button.cancel": "Cancel",
+  
   "app.components.ComingSoonPage.comingSoon": "Çok Yakında",
   "app.components.ComingSoonPage.featuresNotAvailable": "Bu özellik geliştirme aşamasındadır.",
 
