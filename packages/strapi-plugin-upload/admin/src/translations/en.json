@@ -7,7 +7,7 @@
   "EditForm.Input.select.inputDescription": "Files can either be uploaded on your server or on external providers.",
   "EditForm.Input.toggle.label": "Enable file upload",
 
-  "EmptyLi.message": "There is no uploaded files",
+  "EmptyLi.message": "There are no uploaded files",
 
   "EntriesNumber.number": "{number} file found",
   "EntriesNumber.number.plural": "{number} files found",
