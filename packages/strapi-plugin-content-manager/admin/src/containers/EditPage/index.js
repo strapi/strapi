@@ -65,12 +65,13 @@ export class EditPage extends React.Component {
     }
 
     // Get all relations made with the upload plugin
-    // TODO: check if collectionName or model === 'upload_file'
     const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      if (get(this.getSchema(), ['relations', current, 'plugin']) === 'upload') {
+      const association = get(this.getSchema(), ['relations', current], {});
+
+      if (association.plugin === 'upload' && association[association.type] === 'file') {
         const relation = {
           name: current,
-          multiple: get(this.getSchema(), ['relations', current, 'nature']) === 'manyToManyMorph',
+          multiple: association.nature === 'manyToManyMorph',
         };
 
         acc.push(relation);

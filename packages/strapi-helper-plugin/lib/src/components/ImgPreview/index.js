@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { cloneDeep, get, has, isEmpty, isObject, size } from 'lodash';
+import { cloneDeep, get, has, isArray, isEmpty, isObject, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
@@ -32,24 +32,24 @@ class ImgPreview extends React.Component {
     // We don't need the generateImgURL function here since the compo will
     // always have an init value here
     this.setState({
-        imgURL: get(this.props.files, ['0', 'url'], ''),
+        imgURL: get(this.props.files, ['0', 'url'], '') || get(this.props.files, 'url', ''),
         isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
     });
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.isUploading !== this.props.isUploading) {
-      const lastFile = this.props.multiple ? nextProps.files.slice(-1)[0] : nextProps.files[0];
+      const lastFile = this.props.multiple ? nextProps.files.slice(-1)[0] : nextProps.files[0] || nextProps.files;
       this.generateImgURL(lastFile);
 
-      if (this.props.multiple) {  
+      if (this.props.multiple) {
         this.updateFilePosition(nextProps.files.length - 1);
       }
     }
 
     // Update the preview or slide pictures or init the component
     if (nextProps.didDeleteFile !== this.props.didDeleteFile || nextProps.position !== this.props.position || size(nextProps.files) !== size(this.props.files) && !this.state.isInitValue) {
-      const file = nextProps.files[nextProps.position] || '';
+      const file = nextProps.files[nextProps.position] || nextProps.files || '';
       this.generateImgURL(file)
 
       if (!this.state.isInitValue) {
@@ -207,20 +207,20 @@ class ImgPreview extends React.Component {
           { !isEmpty(imgURL) && this.renderContent() }
 
           <ImgPreviewArrow
-            enable={this.state.isOver && size(files) > 1}
+            enable={this.state.isOver && isArray(files) && size(files) > 1}
             onClick={this.handleClick}
             onMouseEnter={(e) => this.setState({ isOverArrow: true })}
             onMouseLeave={(e) => this.setState({ isOverArrow: false })}
-            show={size(files) > 1}
+            show={isArray(files) && size(files) > 1}
             type="right"
           />
 
           <ImgPreviewArrow
-            enable={this.state.isOver && size(files) > 1}
+            enable={this.state.isOver && isArray(files) && size(files) > 1}
             onClick={this.handleClick}
             onMouseEnter={(e) => this.setState({ isOverArrow: true })}
             onMouseLeave={(e) => this.setState({ isOverArrow: false })}
-            show={size(files) > 1}
+            show={isArray(files) && size(files) > 1}
           />
         </div>
 

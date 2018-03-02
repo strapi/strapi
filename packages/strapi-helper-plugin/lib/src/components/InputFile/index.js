@@ -128,7 +128,7 @@ class InputFile extends React.Component {
           </div>
         </label>
         <InputFileDetails
-          file={value[this.state.position] || value[0]}
+          file={value[this.state.position] || value[0] || value}
           isOpen={this.state.isOpen}
           multiple={multiple}
           number={value.length}
