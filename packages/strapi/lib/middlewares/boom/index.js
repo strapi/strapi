@@ -59,10 +59,10 @@ module.exports = strapi => {
     createResponses: function() {
       Object.keys(Boom).forEach(key => {
         strapi.app.response[key] = function(...rest) {
-          const error = Boom[key](...rest);
+          const error = Boom[key](...rest) || {};
 
           this.status = error.isBoom ? error.output.statusCode : this.status;
-          this.body = Boom[key](...rest);
+          this.body = error;
         };
 
         this.delegator.method(key);
