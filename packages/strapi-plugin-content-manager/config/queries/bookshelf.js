@@ -211,6 +211,8 @@ module.exports = {
               if (_.isPlainObject(array)) {
                 return _.isEmpty(array) ? [] : transformToArrayID([array]);
               }
+
+              return [];
             };
 
             // Compare array of ID to find deleted files.
