@@ -33,24 +33,6 @@ module.exports = {
       return acc;
     }, {});
 
-    // Add polymorphic array to the values.
-    this.associations
-      .filter(association => association.nature.toLowerCase().indexOf('morphto') !== -1)
-      .map(association => {
-        values[association.alias] = params.values[association.alias]
-          .map(obj => {
-            const globalId = obj.source && obj.source !== 'content-manager' ?
-              strapi.plugins[obj.source].models[obj.model].globalId:
-              strapi.models[obj.ref.toLowerCase()].globalId;
-
-            return {
-              ref: obj.refId,
-              kind: globalId,
-              [association.filter]: obj.field
-            }
-          })
-      });
-
     const entry = await this.create(values)
       .catch((err) => {
         const message = err.message.split('index:');
