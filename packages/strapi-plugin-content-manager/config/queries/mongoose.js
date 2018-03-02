@@ -205,6 +205,7 @@ module.exports = {
               }
             });
             break;
+          case 'oneToManyMorph':
           case 'manyToManyMorph':
             const transformToArrayID = (array) => {
               return _.isArray(array) ? array.map(value => {
@@ -213,7 +214,7 @@ module.exports = {
                 }
 
                 return value;
-              }) : transformToArrayID([array]);
+              }) : transformToArrayID(_.isEmpty(array) ? [] : [array]);
             };
 
             // Compare array of ID to find deleted files.
