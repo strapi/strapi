@@ -151,8 +151,8 @@
   "popUpWarning.bodyMessage.contentType.delete": "您確定要刪除這個資料結構嗎？",
   "popUpWarning.bodyMessage.attribute.delete": "您確定要刪除這個欄位嗎？",
 
-  "table.contentType.title.plural": "可用資料結構",
-  "table.contentType.title.singular": "可用資料結構",
+  "table.contentType.title.plural": "筆資料結構",
+  "table.contentType.title.singular": "筆資料結構",
   "table.contentType.head.name": "名稱",
   "table.contentType.head.description": "說明",
   "table.contentType.head.fields": "欄位",

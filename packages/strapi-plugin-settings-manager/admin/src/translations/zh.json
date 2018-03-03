@@ -136,8 +136,8 @@
   "list.languages.default.languages": "預設語言",
   "list.languages.set.languages": "設為預設",
   "list.databases.button.label": "增加新的連線",
-  "list.databases.title.singular": "這個環境的連線",
-  "list.databases.title.plural": "這個環境的連線",
+  "list.databases.title.singular": "個環境連線",
+  "list.databases.title.plural": "個環境連線",
 
   "popUpWarning.title": "請確認",
   "popUpWarning.databases.danger.message":
