@@ -9,7 +9,8 @@
         "port": 27017,
         "database": "test",
         "username": "",
-        "password": ""
+        "password": "",
+        "ssl": false
       },
       "options": {}
     }
