@@ -13,6 +13,7 @@
   "attribute.email": "E-posta",
   "attribute.password": "Parola",
   "attribute.relation": "İlişki",
+  "attribute.enumeration": "Enumeration",
 
   "contentType.temporaryDisplay": "(Kaydedilmedi)",
   "from": "kimden",
@@ -44,6 +45,7 @@
   "form.attribute.item.number.name": "İsim",
   "form.attribute.item.date.name": "İsim",
   "form.attribute.item.media.name": "İsim",
+  "form.attribute.item.media.multiple": "Allow multiple files",
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.boolean.name": "İsim",
   "form.attribute.item.string.name": "İsim",
@@ -102,6 +104,7 @@
   "notification.success.message.contentType.edit": "İçerik Türünüz güncellendi",
   "notification.success.message.contentType.create": "İçerik Türünüz oluşturuldu",
   "notification.success.contentTypeDeleted": "İçerik Türü silindi",
+  "notification.info.enumeration": "This field is not editable for the moment...😮",
 
   "popUpForm.attributes.string.description": "Başlıklar, adlar, paragraflar, isim listesi",
   "popUpForm.attributes.text.description": "Tanımlar, metin paragrafları, makaleler ",

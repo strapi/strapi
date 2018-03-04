@@ -1,0 +1,56 @@
+{
+  "plugin.description.short": "快速瀏覽、編輯、刪除您資料庫的檔案",
+  "plugin.description.long": "快速瀏覽、編輯、刪除您資料庫的檔案",
+  "containers.Home.pluginHeaderTitle": "內容管理員",
+  "containers.Home.introduction":
+    "這個擴充功能還在開發階段，如果要編輯進入點，請去左邊 Menu 對應的連結",
+  "containers.Home.pluginHeaderDescription": "透過強大的介面來管理您的進入點",
+  "containers.Edit.submit": "儲存",
+  "containers.Edit.editing": "編輯中...",
+  "containers.Edit.delete": "刪除",
+  "containers.Edit.reset": "重設",
+  "containers.Edit.returnList": "回到清單",
+  "containers.List.addAnEntry": "增加新的 {entity}",
+  "containers.List.pluginHeaderDescription": "找到 {label} 筆資料",
+  "containers.List.pluginHeaderDescription.singular": "找到 {label} 筆資料",
+  "components.LimitSelect.itemsPerPage": "每個頁面檔案數量",
+  "containers.List.errorFetchRecords": "錯誤",
+
+  "EditRelations.title": "關聯式資料",
+
+  "emptyAttributes.title": "目前還沒有欄位",
+  "emptyAttributes.description": "增加您第一個欄位到資料結構",
+  "emptyAttributes.button": "去資料建構頁面",
+
+  "error.schema.generation": "產生資料結構時發生錯誤",
+  "error.records.count": "讀取資料數量時發生錯誤",
+  "error.records.fetch": "讀取資料時發生錯誤",
+  "error.record.fetch": "讀取資料時發生錯誤",
+  "error.record.create": "增加資料時發生錯誤",
+  "error.record.update": "更新資料時發生錯誤",
+  "error.record.delete": "刪除資料時發生錯誤",
+  "error.model.fetch": "讀取資料結構設定時發生錯誤",
+  "error.validation.required": "這個數值必填",
+  "error.validation.regex": "這個數值和 regex 不符合",
+  "error.validation.max": "這個數值太高",
+  "error.validation.min": "這個數值太低",
+  "error.validation.maxLength": "這個數值太長",
+  "error.validation.minLength": "這個數值太短",
+  "error.contentTypeName.taken": "這個名稱已存在",
+  "error.attribute.taken": "這個欄位名稱已存在",
+  "error.attribute.key.taken": "這個數值已存在",
+  "error.attribute.sameKeyAndName": "不能等於",
+  "error.validation.minSupMax": "不能大於",
+
+  "notification.error.relationship.fetch": "讀取關聯資料時發生錯誤",
+
+  "success.record.delete": "已刪除",
+  "success.record.save": "已儲存",
+
+  "pageNotFound": "頁面沒有找到",
+
+  "popUpWarning.button.cancel": "取消",
+  "popUpWarning.button.confirm": "確認",
+  "popUpWarning.title": "請確認",
+  "popUpWarning.bodyMessage.contentType.delete": "您確定要刪除這筆資料嗎？"
+}

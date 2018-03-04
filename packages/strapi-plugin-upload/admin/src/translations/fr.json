@@ -1,4 +1,12 @@
 {
+  "ConfigPage.title": "Upload - Paramètres",
+  "ConfigPage.description": "Configurez le plugin upload",
+
+  "EditForm.Input.number.label": "Taille limite acceptée (en MB)",
+  "EditForm.Input.select.label": "Fournisseurs",
+  "EditForm.Input.select.inputDescription": "Les fichiers peuvent être téléchargés soit sur votre serveur soit sur des providers externes.",
+  "EditForm.Input.toggle.label": "Autoriser le téléchargement de fichiers",
+
   "EmptyLi.message": "Aucun fichier n'a été téléchargé",
 
   "EntriesNumber.number": "{number} fichier trouvé",

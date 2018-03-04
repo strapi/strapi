@@ -11,12 +11,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { IntlProvider } from 'react-intl';
+import { defaultsDeep } from 'lodash';
 import { selectLocale } from './selectors';
 
 export class LanguageProvider extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const messages = defaultsDeep(this.props.messages[this.props.locale], this.props.messages.en);
+
     return (
-      <IntlProvider locale={this.props.locale} messages={this.props.messages[this.props.locale]}>
+      <IntlProvider locale={this.props.locale} defaultLocale="en" messages={messages}>
         {React.Children.only(this.props.children)}
       </IntlProvider>
     );
