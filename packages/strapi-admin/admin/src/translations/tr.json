@@ -1,7 +1,7 @@
 {
   "app.components.Button.save": "Save",
   "app.components.Button.cancel": "Cancel",
-  
+
   "app.components.ComingSoonPage.comingSoon": "Çok Yakında",
   "app.components.ComingSoonPage.featuresNotAvailable": "Bu özellik geliştirme aşamasındadır.",
 
@@ -16,7 +16,7 @@
 
   "app.components.InputFile.newFile": "Yeni dosya ekle",
 
-  "app.components.InputFileDetails.details": "Detaylar",
+  "app.components.InputFileDetails.open": "Open in a new tab",
   "app.components.InputFileDetails.remove": "Remove this file",
   "app.components.InputFileDetails.originalName": "Original name:",
   "app.components.InputFileDetails.size": "Size:",

@@ -6,9 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty, get } from 'lodash';
+import { get } from 'lodash';
 import cn from 'classnames';
 
 import styles from './styles.scss';
@@ -25,50 +24,38 @@ function InputFileDetails(props) {
 
   return (
     <div className={styles.inputFileDetails}>
-      <div className={styles.detailBanner} onClick={props.onClick}>
+      <div className={styles.detailBanner}>
         <div>
-          <div className={cn(props.isOpen && styles.chevronDown, !props.isOpen && styles.chevronRight)} />
-          <div>
-            <FormattedMessage id="app.components.InputFileDetails.details" />
-          </div>
-          <div className={styles.positionContainer}>
-            <span>{props.multiple ? props.position + 1 : 1}</span>
-            <span>/{props.multiple ? props.number : 1}</span>
-          </div>
+          {props.file.url && (
+            <a href={`${strapi.backendURL}${props.file.url}`} className={styles.externalLink} target="_blank">
+              <i className="fa fa-external-link-square" />
+              <FormattedMessage id="app.components.InputFileDetails.open" />
+            </a>
+          )}
         </div>
         <div className={styles.removeContainer} onClick={props.onFileDelete}>
           <FormattedMessage id="app.components.InputFileDetails.remove" />
         </div>
       </div>
-      <Collapse isOpen={props.isOpen}>
-        <div className={styles.infoContainer}>
-
-          <div className={styles.infoWrapper}>
-            <FormattedMessage id="app.components.InputFileDetails.originalName" />&nbsp;
-            <span>{props.file.name}</span>
-          </div>
-          <div className={styles.infoWrapper}>
-            <FormattedMessage id="app.components.InputFileDetails.size" />&nbsp;
-            <span>{props.file.size}</span>
-          </div>
-        </div>
-      </Collapse>
     </div>
   );
 }
 
 InputFileDetails.defaultProps = {
-  isOpen: false,
+  file: {},
   multiple: false,
   number: 0,
-  position: 0,
+  onFileDelete: () => {},
 };
 
 InputFileDetails.propTypes = {
-  isOpen: PropTypes.bool,
+  file: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
   multiple: PropTypes.bool,
   number: PropTypes.number,
-  position: PropTypes.number,
+  onFileDelete: PropTypes.func,
 };
 
 export default InputFileDetails;
