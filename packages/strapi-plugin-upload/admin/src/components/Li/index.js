@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import cn from 'classnames';
+import moment from 'moment';
 
 import FileIcon from 'components/FileIcon';
 import IcoContainer from 'components/IcoContainer';
@@ -100,6 +101,12 @@ class Li extends React.Component {
               <FileIcon fileType={item.ext} />
             </div>
             {['hash', 'name', 'updatedAt', 'size', 'relatedTo', ''].map((value, key) => {
+              if (value === 'updatedAt') {
+                return (
+                  <div key={key} className={styles.truncate}>{moment(item[value]).format('YYYY/MM/DD - HH:mm')}</div>
+                );
+              }
+
               if (value === 'size') {
                 const unit = this.getUnit(item[value]);
 
