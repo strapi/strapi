@@ -23,6 +23,7 @@ const initialState = fromJS({
   initialData: Map({}),
   modifiedData: Map({}),
   settings: {},
+  submitSuccess: false,
 });
 
 function configPageReducer(state = initialState, action) {
@@ -54,7 +55,8 @@ function configPageReducer(state = initialState, action) {
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List([]))
         .update('initialData', () => Map(action.data))
-        .update('modifiedData', () => Map(action.data));
+        .update('modifiedData', () => Map(action.data))
+        .update('submitSuccess', (v) => v = !v);
     default:
       return state;
   }

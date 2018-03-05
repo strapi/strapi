@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, startsWith } from 'lodash';
 import cn from 'classnames';
 
 import styles from './styles.scss';
@@ -22,12 +22,14 @@ function InputFileDetails(props) {
     return <div />
   }
 
+  const url = startsWith(props.file.url, '/') ? `${strapi.backendURL}${props.file.url}` : props.file.url;
+
   return (
     <div className={styles.inputFileDetails}>
       <div className={styles.detailBanner}>
         <div>
           {props.file.url && (
-            <a href={`${strapi.backendURL}${props.file.url}`} className={styles.externalLink} target="_blank">
+            <a href={url} className={styles.externalLink} target="_blank">
               <i className="fa fa-external-link-square" />
               <FormattedMessage id="app.components.InputFileDetails.open" />
             </a>
