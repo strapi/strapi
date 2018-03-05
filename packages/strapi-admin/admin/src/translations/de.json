@@ -12,7 +12,7 @@
     "app.components.HomePage.feedback": "Stelle uns deine Fragen oder gib uns deine Rückmeldung über einen der folgenden Kanäle.",
 
     "app.components.InputFile.newFile": "Add new file",
-    "app.components.InputFileDetails.details": "Details",
+    "app.components.InputFileDetails.open": "Open in a new tab",
     "app.components.InputFileDetails.remove": "Remove this file",
     "app.components.InputFileDetails.originalName": "Original name:",
     "app.components.InputFileDetails.size": "Size:",

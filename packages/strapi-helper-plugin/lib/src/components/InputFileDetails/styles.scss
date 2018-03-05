@@ -7,8 +7,9 @@
   > div:first-child {
     display: flex;
     > div:nth-child(2) {
+      color: #333740;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 400;
     }
   }
 }
@@ -78,4 +79,26 @@
   font-size: 13px;
   font-weight: 400;
   cursor: pointer;
+}
+
+.externalLink {
+  color: #333740;
+  text-decoration: none;
+
+  &:hover, &:active {
+    color: #333740;
+    text-decoration: none;
+  }
+
+  > i {
+    margin-right: 7px;
+    color: #B3B5B9;
+  }
+  // margin-right: 8px;
+  // &:before {
+  //   content: '\F08E';
+  //   display: block;
+  //   font-family: 'FontAwesome';
+  //   font-size: 11px;
+  // }
 }

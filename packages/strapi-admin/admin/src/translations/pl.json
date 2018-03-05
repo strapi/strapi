@@ -1,7 +1,7 @@
 {
   "app.components.Button.save": "Save",
   "app.components.Button.cancel": "Cancel",
-  
+
   "app.components.ComingSoonPage.comingSoon": "Wkrótce",
   "app.components.ComingSoonPage.featuresNotAvailable": "Ta funkcjonalność wciąż jest w fazie tworzenia.",
 
@@ -15,7 +15,7 @@
   "app.components.HomePage.feedback": "Możesz zadawać pytania lub przesyłać nam opinie, korzystając z jednego z poniższych kanałów pomocy.",
 
   "app.components.InputFile.newFile": "DODAJ NOWY PLIK",
-  "app.components.InputFileDetails.details": "Szczegóły",
+  "app.components.InputFileDetails.open": "Open in a new tab",
   "app.components.InputFileDetails.remove": "Remove this file",
   "app.components.InputFileDetails.originalName": "Original name:",
   "app.components.InputFileDetails.size": "Size:",

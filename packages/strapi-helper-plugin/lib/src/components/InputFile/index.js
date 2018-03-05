@@ -19,7 +19,6 @@ import styles from './styles.scss';
 class InputFile extends React.Component {
   state = {
     didDeleteFile: false,
-    isOpen: false,
     isUploading: false,
     position: 0,
   };
@@ -83,12 +82,16 @@ class InputFile extends React.Component {
     // Update the position of the children
     if (this.props.multiple) {
       const newPosition = value.length === 0 ? 0 : value.length - 1;
-      this.updateFilePosition(newPosition);
+      this.updateFilePosition(newPosition, value.length);
     }
     this.setState({ didDeleteFile: !this.state.didDeleteFile });
   }
 
-  updateFilePosition = (newPosition) => this.setState({ position: newPosition });
+  updateFilePosition = (newPosition, size = this.props.value.length) => {
+    const label = size === 0 ? false : newPosition + 1;
+    this.props.setLabel(label);
+    this.setState({ position: newPosition });
+  }
 
   render() {
     const {
@@ -129,11 +132,8 @@ class InputFile extends React.Component {
         </label>
         <InputFileDetails
           file={value[this.state.position] || value[0] || value}
-          isOpen={this.state.isOpen}
           multiple={multiple}
           number={value.length}
-          onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
-          position={this.state.position}
           onFileDelete={this.handleFileDelete}
         />
       </div>
@@ -143,6 +143,7 @@ class InputFile extends React.Component {
 
 InputFile.defaultProps = {
   multiple: false,
+  setLabel: () => {},
   value: [],
 };
 
@@ -150,6 +151,7 @@ InputFile.propTypes = {
   multiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  setLabel: PropTypes.func,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object,

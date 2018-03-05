@@ -1,7 +1,7 @@
 {
   "app.components.Button.save": "Save",
   "app.components.Button.cancel": "Cancel",
-  
+
   "app.components.ComingSoonPage.comingSoon": "Bientôt disponible",
   "app.components.ComingSoonPage.featuresNotAvailable": "Cette fonctionnalité est toujours en cours de développement.",
 
@@ -19,7 +19,7 @@
 
   "app.components.InputFile.newFile": "Ajouter un  nouveau fichier",
   "app.components.InputFileDetails.remove": "Supprimer ce fichier",
-  "app.components.InputFileDetails.details": "Détails",
+  "app.components.InputFileDetails.open": "Ouvrir dans une nouvelle fenêtre",
   "app.components.InputFileDetails.originalName": "Nom d'origine:",
   "app.components.InputFileDetails.size": "Taille:",
 

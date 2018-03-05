@@ -15,7 +15,7 @@
   "app.components.HomePage.feedback": "Feel free to ask questions or give us feedback by using one of the support channels below.",
 
   "app.components.InputFile.newFile": "Add new file",
-  "app.components.InputFileDetails.details": "Details",
+  "app.components.InputFileDetails.open": "Open in a new tab",
   "app.components.InputFileDetails.remove": "Remove this file",
   "app.components.InputFileDetails.originalName": "Original name:",
   "app.components.InputFileDetails.size": "Size:",
