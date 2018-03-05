@@ -114,7 +114,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
           style={labelStyle}
         />
         <Wysiwyg
-          autoFocuss={autoFocus}
+          autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
           deactivateErrorHighlight={deactivateErrorHighlight}
