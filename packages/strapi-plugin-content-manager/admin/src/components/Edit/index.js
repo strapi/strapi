@@ -126,7 +126,8 @@ class Edit extends React.PureComponent {
 
   fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
 
-  orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
+  // orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
+  orderAttributes = (displayedFields) => Object.keys(displayedFields);
 
   render(){
     return (
