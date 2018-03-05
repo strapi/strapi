@@ -158,6 +158,8 @@ module.exports = function (strapi) {
                     });
                   });
 
+                  collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+
                   collection.schema.options.toObject = collection.schema.options.toJSON = {
                     virtuals: true,
                     transform: function (doc, returned, opts) {

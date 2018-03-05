@@ -4,6 +4,9 @@
     "name": "file",
     "description": ""
   },
+  "options": {
+    "timestamps": true
+  },
   "attributes": {
     "name": {
       "type": "string",
