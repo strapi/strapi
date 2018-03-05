@@ -1,1 +1,9 @@
-module.exports = {};
+module.exports = {
+  product: {
+    attributes: {
+      description: {
+        type: 'wysiwyg'
+      }
+    }
+  }
+};
