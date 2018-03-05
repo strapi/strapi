@@ -76,7 +76,7 @@ function validate(value, validations) {
         }
         break;
       case 'required':
-        if (value.length === 0) {
+        if (validationValue === true && value.length === 0) {
           errors.push({ id: 'content-manager.error.validation.required' });
         }
         break;

@@ -27,7 +27,7 @@ class InputSelectWithErrors extends React.Component {
       this.setState({ errors });
     }
 
-    if (isEmpty(this.props.value) && this.props.validations.required) {
+    if (isEmpty(this.props.value) && this.props.validations.required === true) {
       const target = {
         type: 'select',
         name: this.props.name,
