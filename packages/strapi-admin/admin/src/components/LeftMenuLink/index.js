@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import en from 'translations/en.json';
+
 import styles from './styles.scss';
 
 class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -22,6 +24,20 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
         <span>{upperFirst(this.props.source.split('-').join(' '))}</span>
       </div>) : '';
 
+    // Check if messageId exists in en locale to prevent warning messages
+    const content = en[this.props.label] ? (
+      <FormattedMessage
+        id={this.props.label}
+        defaultMessage='{label}'
+        values={{
+          label: `${this.props.label}`,
+        }}
+        className={styles.linkLabel}
+      />
+    ) : (
+      <span className={styles.linkLabel}>{this.props.label}</span>
+    );
+
     return (
       <li className={styles.item}>
         <Link
@@ -32,14 +48,7 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
           }}
         >
           <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
-          <FormattedMessage
-            id={this.props.label}
-            defaultMessage='{label}'
-            values={{
-              label: `${this.props.label}`,
-            }}
-            className={styles.linkLabel}
-          />
+          {content}
         </Link>
         {plugin}
       </li>

@@ -48,7 +48,7 @@ module.exports = {
     _.forEach(model.attributes, (params, name) => {
       const relation = _.find(model.associations, { alias: name });
 
-      if (relation &&  !_.isArray(_.get(relation, 'related'))) {
+      if (relation &&  !_.isArray(_.get(relation, relation.alias))) {
         if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
           params = {
             type: 'media',
@@ -151,9 +151,11 @@ module.exports = {
         attrs[attribute.name] = attribute.params;
 
         if (attribute.params.type === 'media') {
+          const via = _.findKey(strapi.plugins.upload.models.file.attributes, {collection: '*'});
+
           attrs[attribute.name] = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
-            via: 'related',
+            via,
             plugin: 'upload'
           }
         }
