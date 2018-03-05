@@ -28,6 +28,22 @@ class Li extends React.Component {
     }
   }
 
+  getUnit = (value) => {
+    let unit;
+    switch (true) {
+      case value > 1000:
+        unit = 'GB';
+        break;
+      case value < 1:
+        unit = 'B';
+        break;
+      default:
+        unit = 'MB';
+    }
+
+    return unit;
+  }
+
   handleClick = (e) => {
     e.preventDefault();
     const aTag = document.getElementById('aTag');
@@ -84,9 +100,13 @@ class Li extends React.Component {
               <FileIcon fileType={item.ext} />
             </div>
             {['hash', 'name', 'updatedAt', 'size', 'relatedTo', ''].map((value, key) => {
-              // if (key === 0) {
-              //   return <FileIcon key={key} fileType={item[value]} />;
-              // }
+              if (value === 'size') {
+                const unit = this.getUnit(item[value]);
+
+                return (
+                  <div key={key} className={styles.truncate}>{item[value]}&nbsp;{unit}</div>
+                );
+              }
 
               if (value !== '') {
                 return (

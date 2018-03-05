@@ -22,13 +22,13 @@ class InputFileWithErrors extends React.Component {
 
   componentDidMount() {
     if (this.props.multiple && !isEmpty(this.props.value)) {
-      this.setState({ label: this.props.value.length, hasValue: true });
+      this.setState({ label: 1, hasValue: true });
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (!this.state.hasValue && !isEmpty(nextProps.value) && nextProps.multiple && differenceBy(nextProps.value, this.props.value, 'name').length > 0) {
-      this.setState({ label: nextProps.value.length });
+      this.setState({ label: 1, hasValue: true });
     }
   }
 

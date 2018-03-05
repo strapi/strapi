@@ -48,6 +48,11 @@ class ConfigPage extends React.Component {
     if (nextProps.match.params.env !== this.props.match.params.env) {
       this.getSettings(nextProps);
     }
+
+    // Redirect the user to the upload list after modifying is provider
+    if (nextProps.submitSuccess !== this.props.submitSuccess) {
+      this.props.history.push('/plugins/upload');
+    }
   }
 
   getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
@@ -147,6 +152,7 @@ ConfigPage.propTypes = {
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array,
   getSettings: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
@@ -154,6 +160,7 @@ ConfigPage.propTypes = {
   setErrors: PropTypes.func.isRequired,
   settings: PropTypes.object,
   submit: PropTypes.func.isRequired,
+  submitSuccess: PropTypes.bool.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

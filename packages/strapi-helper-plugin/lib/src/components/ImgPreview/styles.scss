@@ -6,7 +6,7 @@
 }
 
 .imgPreviewContainer {
-  height: 144px;
+  height: 162px;
   width: 100%;
   // width: 358px;
   position: relative;
@@ -28,7 +28,7 @@
     right: 0;
     margin: auto;
     max-width: 358px;
-    max-height: 144px;
+    max-height: 162px;
     z-index: 3;
   }
 }
@@ -82,7 +82,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  height: 144px;
+  height: 162px;
   z-index: 999;
   background: #333740;
   opacity: 0.9;
