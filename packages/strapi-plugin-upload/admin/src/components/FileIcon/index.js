@@ -40,7 +40,7 @@ function FileIcon({ fileType }) {
       className={(cn(
         styles.fileIconContainer,
         iconType === 'file-pdf-o' && styles.pdf,
-        iconType === 'file-zip-o' && styles.zip,
+        iconType === 'file-archive-o' && styles.zip,
         iconType === 'file-image-o' && styles.image,
         iconType === 'file-video-o' && styles.video,
         iconType === 'file-code-o' && styles.code,
