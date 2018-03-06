@@ -165,7 +165,7 @@ WysiwygWithErrors.defaultProps = {
   noErrorsDescription: false,
   onBlur: false,
   onFocus: () => {},
-  placeholder: 'app.utils.placeholder.defaultMessage',
+  placeholder: '',
   style: {},
   tabIndex: '0',
   validations: {},

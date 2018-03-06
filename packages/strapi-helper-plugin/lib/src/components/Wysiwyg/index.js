@@ -22,6 +22,7 @@ const styleMap = {
     padding: 2,
   },
 };
+
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote': return 'RichEditor-blockquote';
@@ -32,7 +33,7 @@ function getBlockStyle(block) {
 class Wysiwyg extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty(), isFocused: false };
+    this.state = { editorState: EditorState.createEmpty(), isFocused: false, initialValue: '', previewHTML: false };
     this.focus = () => {
       this.setState({ isFocused: true });
       return this.refs.editor.focus();
@@ -53,6 +54,16 @@ class Wysiwyg extends React.Component {
     if (nextProps.value !== this.props.value && !this.state.hasInitialValue) {
       this.setInitialValue(nextProps);
     }
+
+    // Handle reset props
+    if (nextProps.value === this.state.initialValue && this.state.hasInitialValue) {
+      this.setInitialValue(nextProps);
+    }
+  }
+
+  componentDidCatch(error, info) {
+    console.log('err', error);
+    console.log('info', info);
   }
 
   handleKeyCommand(command, editorState) {
@@ -113,14 +124,13 @@ class Wysiwyg extends React.Component {
     // Get the cursor at the end
     editorState = EditorState.moveFocusToEnd(editorState);
 
-    this.setState({ editorState, hasInitialValue: true });
+    this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
 
   previewHTML = () => {
     const blocksFromHTML = convertFromHTML(this.props.value);
     const contentState = ContentState.createFromBlockArray(blocksFromHTML);
-    const editorState = EditorState.createWithContent(contentState);
-    this.setState({ editorState });
+    return EditorState.createWithContent(contentState);
   }
 
   render() {
@@ -132,7 +142,7 @@ class Wysiwyg extends React.Component {
           editorState={editorState}
           onToggle={this.toggleInlineStyle}
           onToggleBlock={this.toggleBlockType}
-          previewHTML={this.previewHTML}
+          previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
         />
         <div className={styles.editor} onClick={this.focus}>
           <Editor
