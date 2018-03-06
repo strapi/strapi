@@ -88,7 +88,7 @@ module.exports = {
   },
 
   search: async function (params) {
-    const re = new RegExp(params.id);
+    const re = new RegExp(params.id, 'i');
 
     return this
       .find({
