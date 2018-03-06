@@ -44,11 +44,13 @@ class Row extends React.Component {
       },
       {
         icoType: 'trash',
+        id: this.props.name,
         onClick: this.handleClick,
       },
     ] : [
       {
         icoType: 'trash',
+        id: this.props.name,
         onClick: this.handleClick,
       },
     ];
