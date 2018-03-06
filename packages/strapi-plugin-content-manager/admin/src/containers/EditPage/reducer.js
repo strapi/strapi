@@ -13,7 +13,9 @@ import {
   RESET_PROPS,
   SET_FILE_RELATIONS,
   SET_FORM_ERRORS,
+  SET_LOADER,
   SUBMIT_SUCCESS,
+  UNSET_LOADER,
 } from './constants';
 
 const initialState = fromJS({
@@ -27,6 +29,7 @@ const initialState = fromJS({
   modelName: '',
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
+  showLoader: false,
   source: 'content-manager',
   submitSuccess: false,
 });
@@ -60,8 +63,13 @@ function editPageReducer(state = initialState, action) {
       return state
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List(action.formErrors));
+    case SET_LOADER:
+      return state
+        .update('showLoader', () => true);
     case SUBMIT_SUCCESS:
       return state.update('submitSuccess', (v) => v = !v);
+    case UNSET_LOADER:
+      return state.update('showLoader', () => false);
     default:
       return state;
   }

@@ -191,31 +191,35 @@ export class EditPage extends React.Component {
     }, {})
   )
 
-  pluginHeaderActions = [
-    {
-      label: 'content-manager.containers.Edit.reset',
-      kind: 'secondary',
-      onClick: this.props.onCancel,
-      type: 'button',
-    },
-    {
-      kind: 'primary',
-      label: 'content-manager.containers.Edit.submit',
-      onClick: this.handleSubmit,
-      type: 'submit',
-    },
-  ];
+  pluginHeaderActions =  () => (
+    [
+      {
+        label: 'content-manager.containers.Edit.reset',
+        kind: 'secondary',
+        onClick: this.props.onCancel,
+        type: 'button',
+      },
+      {
+        kind: 'primary',
+        label: 'content-manager.containers.Edit.submit',
+        onClick: this.handleSubmit,
+        type: 'submit',
+        loader: this.props.editPage.showLoader,
+        style: this.props.editPage.showLoader ? { marginRight: '18px' } : {},
+      },
+    ]
+  );
 
   render() {
     const { editPage } = this.props;
-
+    
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
           <BackHeader onClick={() => this.props.history.goBack()} />
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
-              actions={this.pluginHeaderActions}
+              actions={this.pluginHeaderActions()}
               title={{ id: toString(editPage.pluginHeaderTitle) }}
             />
             <div className="row">
