@@ -39,9 +39,10 @@ class PluginInputFile extends React.PureComponent {
       </FormattedMessage>
     );
 
+    console.log(showLoader);
     return (
       <label
-        className={cn(styles.pluginInputFile, isDraging && styles.pluginInputFileHover, showLoader && styles.pluginInputFileHover)}
+        className={cn(styles.pluginInputFile, isDraging && styles.pluginInputFileHover, showLoader && styles.quadrat)}
         onDragEnter={this.handleDragEnter}
         onDragOver={(e) => {
           e.preventDefault();

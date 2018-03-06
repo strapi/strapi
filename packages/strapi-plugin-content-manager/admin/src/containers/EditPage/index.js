@@ -205,13 +205,14 @@ export class EditPage extends React.Component {
         onClick: this.handleSubmit,
         type: 'submit',
         loader: this.props.editPage.showLoader,
+        style: this.props.editPage.showLoader ? { marginRight: '18px' } : {},
       },
     ]
   );
 
   render() {
     const { editPage } = this.props;
-    console.log(editPage.showLoader);
+    
     return (
       <div>
         <form onSubmit={this.handleSubmit}>

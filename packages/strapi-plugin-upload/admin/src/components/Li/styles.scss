@@ -8,8 +8,10 @@
 .liContainer {
   display: flex;
   height: 100%;
-  margin-left: 32px;
-  margin-right: 32px;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-left: 20px;
+  margin-right: 20px;
   line-height: 48px;
   border-bottom: 1px solid rgba(14,22,34,0.04);
   justify-content: space-between;

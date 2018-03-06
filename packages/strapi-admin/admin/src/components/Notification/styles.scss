@@ -67,12 +67,9 @@
 
   width: 20px;
   font-size: 1.4rem;
-  // NOTE: @aurelisicoko what is the right color?
-  // color: #BBC2BF; <-- ?
-  opacity: 0.25;
-  color: #0E1622; // <-- ?
-  // color: #C3C5C8; // <-- ?
+  color: #BBC2BF;
   transition: opacity 0.1s ease;
+  -webkit-font-smoothing: antialiased;
 
   &:hover {
     opacity: 1;
@@ -82,7 +79,8 @@
     position: absolute;
     top: calc(50% - 6px);
     height: 100%;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    font-weight: 100!important;
   }
 }
 
