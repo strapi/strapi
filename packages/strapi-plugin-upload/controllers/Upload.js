@@ -22,11 +22,12 @@ module.exports = {
       environment: strapi.config.environment,
       type: 'plugin',
       name: 'upload'
-    }).get({key: 'provider'});
+    }).get({ key: 'provider' });
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'The file upload is disabled!');
+      strapi.log.error('File upload is disabled');
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'File upload is disabled');
     }
 
     // Extract optional relational data.

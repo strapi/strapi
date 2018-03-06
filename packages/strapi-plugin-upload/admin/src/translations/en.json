@@ -7,7 +7,7 @@
   "EditForm.Input.select.inputDescription": "Files can either be uploaded on your server or on external providers.",
   "EditForm.Input.toggle.label": "Enable file upload",
 
-  "EmptyLi.message": "There is no uploaded files",
+  "EmptyLi.message": "There are no uploaded files",
 
   "EntriesNumber.number": "{number} file found",
   "EntriesNumber.number.plural": "{number} files found",
@@ -29,6 +29,7 @@
   "PluginInputFile.link": "browse",
   "PluginInputFile.loading": "Your files are being uploaded",
 
+  "notification.config.success": "The settings has been updated",
   "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
   "notification.dropFiles.success": "{number} files have been uploaded"
