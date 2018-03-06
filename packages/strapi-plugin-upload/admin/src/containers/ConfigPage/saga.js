@@ -41,6 +41,7 @@ export function* submit() {
     yield call(request, requestURL, { method: 'PUT', body });
 
     // Update reducer with optimisticResponse
+    strapi.notification.success('upload.notification.config.success');
     yield put(submitSucceeded(body));
   } catch(err) {
     console.log('err', err);

@@ -44,6 +44,11 @@ module.exports = {
   upload: async (files, config) => {
     // Get upload provider settings to configure the provider to use.
     const provider = _.find(strapi.plugins.upload.config.providers, { provider: config.provider });
+
+    if (!provider) {
+      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-upload-${config.provider}\``);
+    }
+
     const actions = provider.init(config);
 
     // Execute upload function of the provider for all files.

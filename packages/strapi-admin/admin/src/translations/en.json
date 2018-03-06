@@ -104,7 +104,7 @@
   "components.Input.error.custom-error": "{errorMessage} ",
 
   "components.ListRow.empty": "There is no data to be shown.",
-
+  
   "notification.error": "An error occurred",
 
   "Users & Permissions": "Users & Permissions",

@@ -22,7 +22,7 @@ module.exports = {
       environment: strapi.config.environment,
       type: 'plugin',
       name: 'upload'
-    }).get({key: 'provider'});
+    }).get({ key: 'provider' });
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
