@@ -11,6 +11,12 @@
   width: 100%;
   padding: 0 !important;
   list-style: none;
+  > li:nth-child(2) {
+    height: 57px;
+    > div {
+      line-height: 54px !important;
+    }
+  }
   > li {
     width: 100%;
     margin-top: 0;

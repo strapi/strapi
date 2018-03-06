@@ -13,13 +13,16 @@ import {
   GET_DATA_SUCCESS,
   ON_SEARCH,
   ON_SEARCH_SUCCESS,
+  SET_LOADING,
   SET_PARAMS,
+  UNSET_LOADING,
 } from './constants';
 
 const initialState = fromJS({
   deleteSuccess: false,
   dataToDelete: '',
   entriesNumber: 0,
+  uploadFilesLoading: false,
   search: '',
   uploadedFiles: List([]),
   params: Map({
@@ -46,8 +49,12 @@ function homePageReducer(state = initialState, action) {
       return state.update('search', () => action.value);
     case ON_SEARCH_SUCCESS:
       return state.update('uploadedFiles', () => List(action.data));
+    case SET_LOADING:
+      return state.update('uploadFilesLoading', () => true);
     case SET_PARAMS:
       return state.set('params', Map(action.params));
+    case UNSET_LOADING:
+      return state.update('uploadFilesLoading', () => false);
     default:
       return state;
   }

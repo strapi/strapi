@@ -15,7 +15,13 @@ import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
 
-import { getDataSucceeded, setFormErrors, submitSuccess } from './actions';
+import {
+  getDataSucceeded,
+  setFormErrors,
+  setLoader,
+  submitSuccess,
+  unsetLoader,
+} from './actions';
 import { GET_DATA,SUBMIT } from './constants';
 import {
   makeSelectFileRelations,
@@ -50,6 +56,8 @@ export function* submit() {
   const source = yield select(makeSelectSource());
 
   try {
+    // Show button loader
+    yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
       const cleanedData = cleanData(record[current], 'value', 'id');
 
@@ -126,6 +134,8 @@ export function* submit() {
       yield put(setFormErrors([{ name, errors }]));
     }
     strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
+  } finally {
+    yield put(unsetLoader());
   }
 }
 

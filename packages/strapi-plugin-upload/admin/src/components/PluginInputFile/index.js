@@ -30,6 +30,7 @@ class PluginInputFile extends React.PureComponent {
     const {
       name,
       onChange,
+      showLoader,
     } = this.props;
     const { isDraging } = this.state;
     const link = (
@@ -40,7 +41,7 @@ class PluginInputFile extends React.PureComponent {
 
     return (
       <label
-        className={cn(styles.pluginInputFile, isDraging && styles.pluginInputFileHover)}
+        className={cn(styles.pluginInputFile, isDraging && styles.pluginInputFileHover, showLoader && styles.pluginInputFileHover)}
         onDragEnter={this.handleDragEnter}
         onDragOver={(e) => {
           e.preventDefault();
@@ -49,7 +50,8 @@ class PluginInputFile extends React.PureComponent {
         onDrop={this.handleDrop}
       >
         <p className={styles.textWrapper}>
-          <FormattedMessage id="upload.PluginInputFile.text" values={{ link }} />
+          {!showLoader && <FormattedMessage id="upload.PluginInputFile.text" values={{ link }} /> }
+          {showLoader && <FormattedMessage id="upload.PluginInputFile.loading" />}
         </p>
         <div
           onDragLeave={this.handleDragLeave}
@@ -74,6 +76,7 @@ PluginInputFile.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   onDrop: PropTypes.func.isRequired,
+  showLoader: PropTypes.bool.isRequired,
 };
 
 export default PluginInputFile;
