@@ -66,8 +66,12 @@
   display: block;
 
   width: 20px;
-  font-size: 1.6rem;
-  color: #BBC2BF;
+  font-size: 1.4rem;
+  // NOTE: @aurelisicoko what is the right color?
+  // color: #BBC2BF; <-- ?
+  opacity: 0.25;
+  color: #0E1622; // <-- ?
+  // color: #C3C5C8; // <-- ?
   transition: opacity 0.1s ease;
 
   &:hover {
