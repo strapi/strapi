@@ -200,7 +200,7 @@ module.exports = {
                 })
               }
 
-              if (_.isPlainObject(array)) {
+              if (association.type === 'model') {
                 return _.isEmpty(array) ? [] : transformToArrayID([array]);
               }
 
