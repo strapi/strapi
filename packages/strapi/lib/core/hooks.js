@@ -23,7 +23,8 @@ module.exports = function() {
           './node_modules/strapi-generate*',
           './node_modules/strapi-plugin-*',
           './node_modules/strapi-helper-*',
-          './node_modules/strapi-middleware-*'
+          './node_modules/strapi-middleware-*',
+          './node_modules/strapi-upload-*'
         ]
       }, (err, files) => {
         if (err) {

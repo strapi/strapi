@@ -487,7 +487,6 @@ module.exports = function (strapi) {
         if (_.get(Model._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
           acc[current] = params.values[current];
         } else {
-          console.log(association);
           switch (association.nature) {
             case 'oneToOne':
               if (response[current] !== params.values[current]) {
@@ -630,22 +629,13 @@ module.exports = function (strapi) {
 
                 return [];
               };
-              //
-              // console.log(response[current]);
-              // console.log(params.values[current]);
 
               // Compare array of ID to find deleted files.
               const currentValue = transformToArrayID(response[current]).map(id => id.toString());
               const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
-              //
-              console.log(currentValue);
-              console.log(storedValue);
 
               const toAdd = _.difference(storedValue, currentValue);
               const toRemove = _.difference(currentValue, storedValue);
-
-              console.log("ADD", toAdd);
-              console.log("REMOVE", toRemove)
 
               // Remove relations in the other side.
               toAdd.forEach(id => {
