@@ -61,14 +61,14 @@ module.exports = async cb => {
     name: 'upload'
   });
 
+  strapi.plugins.upload.config.providers = [];
+
   const loadProviders = (basePath, cb) => {
     fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
       // get all upload provider
       const uploads = _.filter(node_modules, (node_module) => {
         return _.startsWith(node_module, ('strapi-upload'));
       });
-
-      strapi.plugins.upload.config.providers = [];
 
       // mount all providers to get configs
       _.forEach(uploads, (node_module) => {

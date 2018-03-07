@@ -27,7 +27,7 @@
 
   "PluginInputFile.text": "Drag & drop vos fichiers dans cette zone ou {link} un fichier à télécharger",
   "PluginInputFile.link": "recherchez",
-  "PluginInputFile.loading": "Vos fichiers sont en train d'être téléchargés",
+  "PluginInputFile.loading": "Vos fichiers sont en train d'être téléchargés...",
 
   "notification.delete.success": "Le fichier a bien été supprimé",
   "notification.dropFile.success": "Votre fichier a été téléchargé",
