@@ -17,6 +17,11 @@ import styles from './styles.scss';
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };
 
+  handleChange = (e) => {
+    const dataTransfer = e.target;
+    this.props.onDrop({ dataTransfer });
+  }
+
   handleDragEnter = () => this.setState({ isDraging: true });
 
   handleDragLeave = () => this.setState({ isDraging: false });
@@ -30,7 +35,6 @@ class PluginInputFile extends React.PureComponent {
   render() {
     const {
       name,
-      onChange,
       showLoader,
     } = this.props;
     const { isDraging } = this.state;
@@ -62,7 +66,7 @@ class PluginInputFile extends React.PureComponent {
         <input
           multiple
           name={name}
-          onChange={onChange}
+          onChange={this.handleChange}
           type="file"
         />
       </label>
@@ -70,13 +74,10 @@ class PluginInputFile extends React.PureComponent {
   }
 }
 
-PluginInputFile.defaultProps = {
-  onChange: () => {},
-};
+PluginInputFile.defaultProps = {};
 
 PluginInputFile.propTypes = {
   name: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
   onDrop: PropTypes.func.isRequired,
   showLoader: PropTypes.bool.isRequired,
 };
