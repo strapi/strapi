@@ -10,11 +10,11 @@ The plugin exposes a single route `POST /upload` to upload one or multiple files
 
 **Parameters**
 
-`files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
-`refId` (optional): The ID of the entry which the file(s) will be linked to.
-`ref` (optional): The name of the model which the file(s) will be linked to (see more below).
-`source` (optional): The name of the plugin where the model is located.
-`field` (optional): The field of the entry which the file(s) will be precisely linked to.
+- `files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
+- `refId`: (optional): The ID of the entry which the file(s) will be linked to.
+- `ref`: (optional): The name of the model which the file(s) will be linked to (see more below).
+- `source`: (optional): The name of the plugin where the model is located.
+- `field`: (optional): The field of the entry which the file(s) will be precisely linked to.
 
 
 #### Examples
