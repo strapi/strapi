@@ -37,6 +37,11 @@
       "configurable": false,
       "required": true
     },
+    "provider": {
+      "type": "string",
+      "configurable": false,
+      "required": true
+    },
     "related": {
       "collection": "*",
       "filter": "field",

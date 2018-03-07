@@ -59,6 +59,8 @@ module.exports = {
         // Remove buffer to don't save it.
         delete file.buffer;
 
+        file.provider = provider.provider;
+
         return await strapi.plugins['upload'].services.upload.add(file);
       })
     );
@@ -105,10 +107,12 @@ module.exports = {
     // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
     _.assign(provider, config);
-    const actions = provider.init(strapi, config);
+    const actions = provider.init(config);
 
     // execute delete function of the provider
-    await actions.delete(file);
+    if (file.provider === provider.provider) {
+      await actions.delete(file);
+    }
 
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
