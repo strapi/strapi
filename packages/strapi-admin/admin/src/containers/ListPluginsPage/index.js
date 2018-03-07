@@ -16,6 +16,7 @@ import cn from 'classnames';
 import PluginHeader from 'components/PluginHeader';
 import ListPlugins from 'components/ListPlugins';
 
+import { makeSelectEnv } from 'containers/AdminPage/selectors';
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import { makeSelectPluginDeleteAction, makeSelectPlugins } from './selectors';
@@ -25,6 +26,12 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class ListPluginsPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => {
+    return {
+      appEnvironments: this.props.appEnvironments,
+    };
+  }
+
   componentDidMount() {
     this.props.getPlugins();
   }
@@ -65,7 +72,12 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
 
 ListPluginsPage.contextTypes = {};
 
+ListPluginsPage.childContextTypes = {
+  appEnvironments: PropTypes.array.isRequired,
+};
+
 ListPluginsPage.propTypes = {
+  appEnvironments: PropTypes.array.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
@@ -75,6 +87,7 @@ ListPluginsPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
+  appEnvironments: makeSelectEnv(),
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
   plugins: makeSelectPlugins(),
 });

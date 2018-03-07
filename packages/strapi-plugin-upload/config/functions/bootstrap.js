@@ -33,6 +33,7 @@ module.exports = async cb => {
     mime text,
     size text,
     url text,
+    provider text,
     updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
     created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
   );
