@@ -84,7 +84,7 @@
   "HeaderNav.link.advancedSettings": "Advanced settings",
   "HeaderNav.link.emailTemplates": "Email templates",
   "HeaderNav.link.providers": "Providers",
-  "HeaderNav.link.roles": "Roles",
+  "HeaderNav.link.roles": "Roles & Permissions",
 
   "HomePage.header.title": "Roles & Permissions",
   "HomePage.header.description": "Define the roles and permissions for your users.",
