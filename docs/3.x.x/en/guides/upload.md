@@ -16,6 +16,54 @@ The plugin exposes a single route `POST /upload` to upload one or multiple files
 - `source`: (optional): The name of the plugin where the model is located.
 - `field`: (optional): The field of the entry which the file(s) will be precisely linked to.
 
+## Models
+
+To add a new file attribute in your models, it's like adding a new association. In the first example, you will be able to upload and attach one file to the avatar attribute. Whereas, in our second example, you can upload and attach multiple pictures to the product.
+
+**Path —** `User.settings.json`.
+```json
+{
+  "connection": "default",
+  "attributes": {
+    "pseudo": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "avatar": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    }
+  }
+}
+```
+
+**Path —** `Product.settings.json`.
+```json
+{
+  "connection": "default",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "price": {
+      "type": "integer",
+      "required": true
+    },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    }
+  }
+}
+```
 
 #### Examples
 
@@ -38,26 +86,15 @@ Let's say that you want to have a `User` model provided by the plugin `Users & P
 ```json
 {
   "connection": "default",
-  "info": {
-    "name": "user",
-    "description": "This represents the User Model"
-  },
   "attributes": {
-    "firstname": {
-      "type": "string"
-    },
-    "lastname": {
-      "type": "string"
+    "pseudo": {
+      "type": "string",
+      "required": true
     },
     "email": {
       "type": "email",
       "required": true,
       "unique": true
-    },
-    "password": {
-      "type": "password",
-      "required": true,
-      "private": true
     },
     "avatar": {
       "model": "file",
