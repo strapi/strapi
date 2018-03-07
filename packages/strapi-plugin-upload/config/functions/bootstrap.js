@@ -15,41 +15,43 @@ const fs = require('fs');
 module.exports = async cb => {
   const Model = strapi.plugins.upload.models.file;
 
-  const hasTable = await strapi.connections[Model.connection].schema.hasTable(Model.tableName || Model.collectionName);
+  if (Model.orm === 'bookshelf') {
+    const hasTable = await strapi.connections[Model.connection].schema.hasTable(Model.tableName || Model.collectionName);
 
-  if (!hasTable) {
-    const quote = Model.client === 'pg' ? '"' : '`';
+    if (!hasTable) {
+      const quote = Model.client === 'pg' ? '"' : '`';
 
-    strapi.log.warn(`
-⚠️  TABLE \`upload_file\` DOESN'T EXIST
-⚠️  TABLE \`upload_file_morph\` DOESN'T EXIST
+      strapi.log.warn(`
+  ⚠️  TABLE \`upload_file\` DOESN'T EXIST
+  ⚠️  TABLE \`upload_file_morph\` DOESN'T EXIST
 
-CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
-  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  name text,
-  hash text,
-  ext text,
-  mime text,
-  size text,
-  url text,
-  updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-);
+  CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
+    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+    name text,
+    hash text,
+    ext text,
+    mime text,
+    size text,
+    url text,
+    updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+    created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+  );
 
-CREATE TABLE ${quote}upload_file_morph${quote} (
-  id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  upload_file_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-  related_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-  related_type text,
-  field text
-);
+  CREATE TABLE ${quote}upload_file_morph${quote} (
+    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+    upload_file_id  ${Model.client === 'pg' ? 'integer' : 'int'},
+    related_id  ${Model.client === 'pg' ? 'integer' : 'int'},
+    related_type text,
+    field text
+  );
 
-1️⃣  EXECUTE THE FOLLOWING SQL QUERY
+  1️⃣  EXECUTE THE FOLLOWING SQL QUERY
 
-2️⃣  RESTART YOUR SERVER
-    `);
+  2️⃣  RESTART YOUR SERVER
+      `);
 
-    strapi.stop();
+      strapi.stop();
+    }
   }
 
   // set plugin store
