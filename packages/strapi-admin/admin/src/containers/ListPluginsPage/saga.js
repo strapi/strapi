@@ -13,8 +13,6 @@ export function* deletePlugin() {
   try {
     const plugin = yield select(makeSelectPluginToDelete());
 
-    console.log("DELETE", plugin);
-
     const requestUrl = `/admin/plugins/uninstall/${plugin}`;
 
     const resp = yield call(request, requestUrl, { method: 'DELETE' });

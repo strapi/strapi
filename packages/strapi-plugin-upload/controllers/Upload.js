@@ -9,14 +9,7 @@
 const _ = require('lodash');
 
 module.exports = {
-
-  /**
-   * Default action.
-   *
-   * @return {Object}
-   */
-
-  index: async (ctx) => {
+  upload: async (ctx) => {
     // Retrieve provider configuration.
     const config = await strapi.store({
       environment: strapi.config.environment,

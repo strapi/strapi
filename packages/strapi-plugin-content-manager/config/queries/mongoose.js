@@ -175,8 +175,8 @@ module.exports = {
             // Update the relational array.
             acc[current] = params.values[current].map(obj => {
               const globalId = obj.source && obj.source !== 'content-manager' ?
-                strapi.plugins[obj.source].models[obj.ref].globalId:
-                strapi.models[obj.ref].globalId;
+                strapi.plugins[obj.source].models[_.toLower(obj.ref)].globalId:
+                strapi.models[_.toLower(obj.ref)].globalId;
 
               // Define the object stored in database.
               // The shape is this object is defined by the strapi-mongoose connector.
