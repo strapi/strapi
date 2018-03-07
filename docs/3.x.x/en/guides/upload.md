@@ -65,7 +65,7 @@ To add a new file attribute in your models, it's like adding a new association. 
 }
 ```
 
-#### Examples
+## Examples
 
 **Single file**
 
