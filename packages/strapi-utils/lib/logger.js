@@ -34,7 +34,7 @@ const loggerConfig = {
 
 const pretty = pino.pretty({
   formatter: (logs, options) => {
-    return `\u001b[90m[${new Date().toISOString()}] ${options.prefix.toLowerCase()} ${options.asColoredText(logs.level, logs.msg)}`;
+    return `${options.asColoredText({ level: 10 }, `[${new Date().toISOString()}]`)} ${options.prefix.toLowerCase()} ${logs.msg}`;
   }
 });
 
