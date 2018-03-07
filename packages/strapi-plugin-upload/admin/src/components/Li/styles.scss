@@ -61,6 +61,7 @@
 
 .copied {
   background-color: #FAFAFB;
+
   > div {
     display: flex;
     width: 100%;
@@ -69,9 +70,10 @@
     text-align: center;
     color: #868FA1;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 54px;
     text-transform: uppercase;
+    letter-spacing: .05rem;
   }
 }
 
