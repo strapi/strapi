@@ -32,10 +32,15 @@ module.exports = {
 
     // Extract optional relational data.
     const { refId, ref, source, field } = ctx.request.body.fields;
+    const { files = {} } = ctx.request.body.files;
+
+    if (_.isEmpty(files)) {
+      return ctx.send(true);
+    }
 
     // Transform stream files to buffer
     const buffers = await strapi.plugins.upload.services.upload.bufferize(ctx.request.body.files.files);
-    const files = buffers.map(file => {
+    const enhancedFiles = buffers.map(file => {
         if (file.size > config.sizeLimit) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit', values: {file: file.name} }] }] : `${file.name} file is bigger than limit size!`);
         }
@@ -60,7 +65,7 @@ module.exports = {
       return;
     }
 
-    const uploadedFiles = await strapi.plugins.upload.services.upload.upload(files, config);
+    const uploadedFiles = await strapi.plugins.upload.services.upload.upload(enhancedFiles, config);
 
     // Send 200 `ok`
     ctx.send(uploadedFiles.map((file) => {
