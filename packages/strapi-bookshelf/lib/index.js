@@ -840,7 +840,7 @@ module.exports = function(strapi) {
                 virtualFields.push(this.addRelationMorph(details.model || details.collection, {
                   id,
                   alias: association.via,
-                  ref: this.collectionName,
+                  ref: Model.collectionName,
                   refId: response.id,
                   field: association.alias
                 }, details.plugin));
@@ -851,7 +851,7 @@ module.exports = function(strapi) {
                 virtualFields.push(this.removeRelationMorph(details.model || details.collection, {
                   id,
                   alias: association.via,
-                  ref: this.collectionName,
+                  ref: Model.collectionName,
                   refId: response.id,
                   field: association.alias
                 }, details.plugin));
@@ -974,7 +974,7 @@ module.exports = function(strapi) {
         .save();
     },
 
-    removeRelationMorph: async function (params) {
+    removeRelationMorph: async function (model, params, source) {
       const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
         _.assign(acc, strapi.plugins[current].models);
         return acc;
