@@ -12,7 +12,9 @@
   margin-left: 32px;
   margin-right: 32px;
   justify-content: space-between;
-
+  span {
+    letter-spacing: 0.3px;
+  }
   > div:first-child {
     display: flex;
     width: 133px;
@@ -55,6 +57,7 @@
       font-family: 'FontAwesome';
     }
   }
+  cursor: pointer;
 }
 
 .iconDesc {
@@ -65,4 +68,5 @@
       font-family: 'FontAwesome';
     }
   }
+  cursor: pointer;
 }

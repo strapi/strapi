@@ -41,7 +41,22 @@ const inputs = {
 
 function InputsIndex(props) {
   const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
-  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : (props.value === 0 ? props.value : props.value || '');
+  let inputValue;
+  switch (props.type) {
+    case 'checkbox':
+    case 'toggle':
+      inputValue = props.value || false;
+      break;
+    case 'number':
+      inputValue = props.value === 0 ? props.values : props.value || '';
+      break;
+    case 'file':
+      inputValue = props.value || [];
+      break;
+    default:
+      inputValue = props.value || '';
+  }
+  
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;

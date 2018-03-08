@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { get, includes, isFunction, map, omit, has } from 'lodash';
+import { get, includes, isFunction, map, omit } from 'lodash';
 import { compose } from 'redux';
 
 // Actions required for disabling and enabling the OverlayBlocker
@@ -51,9 +51,6 @@ import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
-// AdminPage actions
-import { getUploadEnv } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -65,7 +62,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   getChildContext = () => (
     {
-      appEnvironments: this.props.adminPage.appEnvironments,
       disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
       enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
       plugins: this.props.plugins,
@@ -75,10 +71,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidMount() {
     this.checkLogin(this.props);
-    // Check if the upload plugin is installed and send request
-    if (has(this.props.plugins.toJS(), 'upload')) {
-      this.props.getUploadEnv();
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -168,7 +160,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 }
 
 AdminPage.childContextTypes = {
-  appEnvironments: PropTypes.array,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -189,7 +180,6 @@ AdminPage.propTypes = {
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  getUploadEnv: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -211,7 +201,6 @@ function mapDispatchToProps(dispatch) {
   return {
     disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
     enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
-    getUploadEnv: () => { dispatch(getUploadEnv()); },
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
     pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
     updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },

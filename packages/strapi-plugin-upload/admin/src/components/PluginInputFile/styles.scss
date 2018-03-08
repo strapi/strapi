@@ -4,30 +4,36 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-image: url('../../assets/icons/icon_upload_2.svg');
-  background-size: auto 64px;
-  background-position: center 27px;
-  background-repeat: no-repeat;
 }
 
 .pluginInputFile {
   position: relative;
   height: 146px;
   width: 100%;
+  padding-top: 28px;
   border: 2px dashed #E3E9F3;
   border-radius: 2px;
-  background-image: url('../../assets/icons/icon_upload_2.svg');
-  background-size: auto 64px;
-  background-position: center 27px;
-  background-repeat: no-repeat;
+  text-align: center;
 
   > input {
     display: none;
   }
+
+  .icon{
+    width: 82px;
+    path{
+      fill: #CCD0DA;
+      transition: fill .3s ease;
+    }
+  }
+
+  &:hover{
+    cursor: pointer;
+  }
 }
 
 .textWrapper {
-  margin-top: 103px;
+  margin-top: 10px;
   text-align: center;
   font-size: 13px;
   color: #9EA7B8;
@@ -38,7 +44,7 @@
 }
 
 .pluginInputFileHover {
-  background: rgba(28,93,231,0.01) !important;
+  background-color: rgba(28,93,231,0.01) !important;
   border: 2px dashed rgba(28,93,231,0.10) !important;
 }
 
@@ -46,4 +52,51 @@
   color: #1C5DE7;
   text-decoration: underline;
   cursor: pointer;
+}
+
+@mixin smoothBlink($firstColor, $secondColor) {
+  @-webkit-keyframes blink {
+    0% {
+      fill: $firstColor;
+      background-color: $firstColor;
+    }
+    26% {
+      fill: $secondColor;
+      background-color: $secondColor;
+    }
+    76% {
+      fill: $firstColor;
+      background-color: $firstColor;
+    }
+  }
+
+  @keyframes blink {
+    0% {
+      fill: $firstColor;
+      background-color: $firstColor;
+    }
+    26% {
+      fill: $secondColor;
+      background-color: $secondColor;
+    }
+    76% {
+      fill: $firstColor;
+      background-color: $firstColor;
+    }
+  }
+
+  -webkit-animation: blink 2s linear infinite;
+  -moz-animation: blink 2s linear infinite;
+  -o-animation: blink 2s linear infinite;
+  animation: blink 2s linear infinite;
+}
+
+.quadrat {
+  .icon{
+    path {
+      fill: #729BEF;
+    }
+  }
+
+  @include smoothBlink(transparent, rgba(28, 93, 231, 0.05));
 }

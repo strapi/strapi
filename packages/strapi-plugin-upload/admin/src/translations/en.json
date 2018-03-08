@@ -27,7 +27,9 @@
 
   "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
   "PluginInputFile.link": "browse",
+  "PluginInputFile.loading": "Your files are being uploaded...",
 
+  "notification.config.success": "The settings has been updated",
   "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
   "notification.dropFiles.success": "{number} files have been uploaded"

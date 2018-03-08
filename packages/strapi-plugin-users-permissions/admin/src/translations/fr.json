@@ -84,9 +84,9 @@
   "HeaderNav.link.advancedSettings": "Paramètres avancés",
   "HeaderNav.link.emailTemplates": "Templates d'email",
   "HeaderNav.link.providers": "Fournisseurs",
-  "HeaderNav.link.roles": "Rôles",
+  "HeaderNav.link.roles": "Rôles & Permissions",
 
-  "HomePage.header.title": "Utilisateurs & Permissions",
+  "HomePage.header.title": "Roles & Permissions",
   "HomePage.header.description": "Définissez les rôles et permissions pour chacun d'eux",
 
   "InputSearch.placeholder": "Recherez un utilisateur",

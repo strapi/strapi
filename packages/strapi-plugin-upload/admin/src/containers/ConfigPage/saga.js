@@ -18,8 +18,12 @@ import {
 export function* settingsGet(action) {
   try {
     const requestURL = `/upload/settings/${action.env}`;
-    const response = yield call(request, requestURL, { method: 'GET' });
-    yield put(getSettingsSucceeded(response));
+    const response = yield [
+      call(request, requestURL, { method: 'GET' }),
+      call(request, '/upload/environments', { method: 'GET' }),
+    ];
+
+    yield put(getSettingsSucceeded(response[0], response[1].environments));
   } catch(err) {
     strapi.notification.error('notification.error');
   }
@@ -41,9 +45,9 @@ export function* submit() {
     yield call(request, requestURL, { method: 'PUT', body });
 
     // Update reducer with optimisticResponse
+    strapi.notification.success('upload.notification.config.success');
     yield put(submitSucceeded(body));
   } catch(err) {
-    console.log('err', err);
     strapi.notification.error('notification.error');
     // TODO handle error PUT
   }

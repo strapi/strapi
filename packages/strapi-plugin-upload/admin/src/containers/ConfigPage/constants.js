@@ -4,6 +4,8 @@
  *
  */
 
+export const GET_ENV = 'Upload/ConfigPage/GET_ENV';
+export const GET_ENV_SUCCEEDED = 'Upload/ConfigPage/GET_ENV_SUCCEEDED';
 export const GET_SETTINGS = 'Upload/ConfigPage/GET_SETTINGS';
 export const GET_SETTINGS_SUCCEEDED = 'Upload/ConfigPage/GET_SETTINGS_SUCCEEDED';
 export const ON_CANCEL = 'Upload/ConfigPage/ON_CANCEL';

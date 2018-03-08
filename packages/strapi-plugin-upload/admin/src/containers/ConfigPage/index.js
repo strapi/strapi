@@ -48,6 +48,11 @@ class ConfigPage extends React.Component {
     if (nextProps.match.params.env !== this.props.match.params.env) {
       this.getSettings(nextProps);
     }
+
+    // Redirect the user to the upload list after modifying is provider
+    if (nextProps.submitSuccess !== this.props.submitSuccess) {
+      this.props.history.push('/plugins/upload');
+    }
   }
 
   getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
@@ -63,7 +68,7 @@ class ConfigPage extends React.Component {
   }
 
   generateLinks = () => {
-    const headerNavLinks = this.context.appEnvironments.reduce((acc, current) => {
+    const headerNavLinks = this.props.appEnvironments.reduce((acc, current) => {
       const link = Object.assign(current, { to: `/plugins/upload/configurations/${current.name}` });
       acc.push(link);
       return acc;
@@ -132,11 +137,10 @@ class ConfigPage extends React.Component {
   }
 }
 
-ConfigPage.contextTypes = {
-  appEnvironments: PropTypes.array,
-};
+ConfigPage.contextTypes = {};
 
 ConfigPage.defaultProps = {
+  appEnvironments: [],
   formErrors: [],
   settings: {
     providers: [],
@@ -144,9 +148,11 @@ ConfigPage.defaultProps = {
 };
 
 ConfigPage.propTypes = {
+  appEnvironments: PropTypes.array,
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array,
   getSettings: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
@@ -154,6 +160,7 @@ ConfigPage.propTypes = {
   setErrors: PropTypes.func.isRequired,
   settings: PropTypes.object,
   submit: PropTypes.func.isRequired,
+  submitSuccess: PropTypes.bool.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

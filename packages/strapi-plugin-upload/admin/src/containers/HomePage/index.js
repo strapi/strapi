@@ -137,6 +137,7 @@ export class HomePage extends React.Component {
         <PluginInputFile
           name="files"
           onDrop={this.props.onDrop}
+          showLoader={this.props.uploadFilesLoading}
         />
         <div className={styles.entriesWrapper}>
           <div>
@@ -199,6 +200,7 @@ HomePage.propTypes = {
   search: PropTypes.string.isRequired,
   setParams: PropTypes.func.isRequired,
   uploadedFiles: PropTypes.arrayOf(PropTypes.object),
+  uploadFilesLoading: PropTypes.bool.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

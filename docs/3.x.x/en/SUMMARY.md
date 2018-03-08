@@ -20,6 +20,7 @@
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
 * [Deployment](guides/deployment.md)
+* [File Upload](guides/upload.md)
 * [Filters](guides/filters.md)
 * [Internationalization](guides/i18n.md)
 * [Models](guides/models.md)

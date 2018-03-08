@@ -3,7 +3,7 @@
     {
       "method": "POST",
       "path": "/",
-      "handler": "Upload.index",
+      "handler": "Upload.upload",
       "config": {
         "policies": []
       }
