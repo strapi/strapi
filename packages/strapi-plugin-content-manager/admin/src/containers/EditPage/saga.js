@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { get, isArray } from 'lodash';
+import { findIndex, get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -15,9 +15,16 @@ import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
 
-import { getDataSucceeded, setFormErrors, submitSuccess } from './actions';
+import {
+  getDataSucceeded,
+  setFormErrors,
+  setLoader,
+  submitSuccess,
+  unsetLoader,
+} from './actions';
 import { GET_DATA,SUBMIT } from './constants';
 import {
+  makeSelectFileRelations,
   makeSelectIsCreating,
   makeSelectModelName,
   makeSelectRecord,
@@ -43,35 +50,63 @@ function* dataGet(action) {
 
 export function* submit() {
   const currentModelName = yield select(makeSelectModelName());
-  const record = yield select(makeSelectRecord());
-  const recordJSON = record.toJSON();
-  const source = yield select(makeSelectSource());
+  const fileRelations = yield select(makeSelectFileRelations());
   const isCreating = yield select(makeSelectIsCreating());
+  const record = yield select(makeSelectRecord());
+  const source = yield select(makeSelectSource());
 
   try {
+    // Show button loader
+    yield put(setLoader());
+    const recordCleaned = Object.keys(record).reduce((acc, current) => {
+      const cleanedData = cleanData(record[current], 'value', 'id');
 
-    const recordCleaned = Object.keys(recordJSON).reduce((acc, current) => {
-      acc[current] = cleanData(recordJSON[current], 'value', 'id');
+      if (isString(cleanedData) || isNumber(cleanedData)) {
+        acc.append(current, cleanedData);
+      } else if (findIndex(fileRelations, ['name', current]) !== -1) {
+        // Don't stringify the file
+        map(record[current], (file) => {
+          if (file instanceof File) {
+            return acc.append(current, file);
+          }
+
+          return acc.append(current, JSON.stringify(file));
+        });
+
+        if (isEmpty(record[current])) {
+          // Send an empty array if relation is manyToManyMorph else an object
+          const data = get(fileRelations, [findIndex(fileRelations, ['name', current]), 'multiple']) ? [] : {};
+          acc.append(current, JSON.stringify(data));
+        }
+      } else {
+        acc.append(current, JSON.stringify(cleanedData));
+      }
 
       return acc;
-    }, {});
+    }, new FormData());
 
-
-    const id = isCreating ? '' : recordCleaned.id;
+    const id = isCreating ? '' : record.id;
     const params = { source };
+    // Change the request helper default headers so we can pass a FormData
+    const headers = {
+      'X-Forwarded-Host': 'strapi',
+    };
 
     const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
     // Call our request helper (see 'utils/request')
+    // Pass false and false as arguments so the request helper doesn't stringify
+    // the body and doesn't watch for the server to restart
     yield call(request, requestUrl, {
       method: isCreating ? 'POST' : 'PUT',
+      headers,
       body: recordCleaned,
       params,
-    });
+    }, false, false);
 
     strapi.notification.success('content-manager.success.record.save');
+    // Redirect the user to the ListPage container
     yield put(submitSuccess());
-
 
   } catch(err) {
     if (isArray(err.response.payload.message)) {
@@ -91,6 +126,8 @@ export function* submit() {
       yield put(setFormErrors([{ name, errors }]));
     }
     strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
+  } finally {
+    yield put(unsetLoader());
   }
 }
 

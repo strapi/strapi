@@ -235,9 +235,10 @@ module.exports = {
 
     // Retrieve root role.
     const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+    const users = root.users || [];
 
     // First, check if the user is the first one to register as admin.
-    const hasAdmin = root.users.length > 0;
+    const hasAdmin = users.length > 0;
 
     // Check if the user is the first to register
     const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);

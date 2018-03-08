@@ -66,9 +66,10 @@
   display: block;
 
   width: 20px;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: #BBC2BF;
   transition: opacity 0.1s ease;
+  -webkit-font-smoothing: antialiased;
 
   &:hover {
     opacity: 1;
@@ -78,7 +79,8 @@
     position: absolute;
     top: calc(50% - 6px);
     height: 100%;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    font-weight: 100!important;
   }
 }
 

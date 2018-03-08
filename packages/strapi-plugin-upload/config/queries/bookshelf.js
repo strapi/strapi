@@ -112,8 +112,8 @@ module.exports = {
     return this
       .query(function(qb) {
         qb
-        .where('hash', 'LIKE', `%${params.id}%`)
-        .orWhere('name', 'LIKE', `%${params.id}%`);
+        .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
+        .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
       })
       .fetchAll();
   },

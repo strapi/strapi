@@ -13,13 +13,13 @@ const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
 
 module.exports = {
-  bufferize: async values => {
-    if (_.size(values.files) === 0) {
+  bufferize: async files => {
+    if (_.isEmpty(files) === 0) {
       throw 'Missing files.';
     }
 
     // files is always an array to map on
-    const files = _.isArray(values.files) ? values.files : [values.files];
+    files = _.isArray(files) ? files : [files];
 
     // transform all files in buffer
     return Promise.all(
@@ -42,20 +42,26 @@ module.exports = {
   },
 
   upload: async (files, config) => {
-    // get upload provider settings to configure the provider to use
-    const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
-    _.assign(provider, config);
-    const actions = provider.init(strapi, config);
+    // Get upload provider settings to configure the provider to use.
+    const provider = _.find(strapi.plugins.upload.config.providers, { provider: config.provider });
 
-    // execute upload function of the provider for all files
+    if (!provider) {
+      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-upload-${config.provider}\``);
+    }
+
+    const actions = provider.init(config);
+
+    // Execute upload function of the provider for all files.
     return Promise.all(
       files.map(async file => {
         await actions.upload(file);
 
-        // remove buffer to don't save it
+        // Remove buffer to don't save it.
         delete file.buffer;
 
-        await strapi.plugins['upload'].services.upload.add(file);
+        file.provider = provider.provider;
+
+        return await strapi.plugins['upload'].services.upload.add(file);
       })
     );
   },
@@ -101,10 +107,12 @@ module.exports = {
     // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(_.find(strapi.plugins.upload.config.providers, {provider: config.provider}));
     _.assign(provider, config);
-    const actions = provider.init(strapi, config);
+    const actions = provider.init(config);
 
     // execute delete function of the provider
-    await actions.delete(file);
+    if (file.provider === provider.provider) {
+      await actions.delete(file);
+    }
 
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
@@ -115,5 +123,44 @@ module.exports = {
     }
 
     return strapi.query('file', 'upload').delete(params);
+  },
+
+  uploadToEntity: async function (params, files, source) {
+    // Retrieve provider settings from database.
+    const config = await strapi.store({
+      environment: strapi.config.environment,
+      type: 'plugin',
+      name: 'upload'
+    }).get({ key: 'provider' });
+
+    const model = source && source !== 'content-manager' ?
+      strapi.plugins[source].models[params.model]:
+      strapi.models[params.model];
+
+    // Asynchronous upload.
+    await Promise.all(
+      Object.keys(files)
+        .map(async attribute => {
+          // Bufferize files per attribute.
+          const buffers = await this.bufferize(files[attribute]);
+          const enhancedFiles = buffers.map(file => {
+            const details = model.attributes[attribute];
+
+            // Add related information to be able to make
+            // the relationships later.
+            file[details.via] = [{
+              refId: params.id,
+              ref: params.model,
+              source,
+              field: attribute,
+            }];
+
+            return file;
+          });
+
+          // Make upload async.
+          return this.upload(enhancedFiles, config);
+        })
+    );
   }
 };

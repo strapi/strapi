@@ -33,7 +33,7 @@ function ImgPreviewHint(props) {
   );
 
   return (
-    <p className={styles.imgPreviewHint} style={pStyle} onDragEnter={(e) => e.stopPropagation()}>
+    <p className={styles.imgPreviewHint} style={pStyle} onDragEnter={(e) => e.stopPropagation()} onDrop={props.onDrop}>
       <FormattedMessage
         id="app.components.ImgPreview.hint"
         values={{ browse }}

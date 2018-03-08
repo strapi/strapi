@@ -4,6 +4,9 @@
     "name": "file",
     "description": ""
   },
+  "options": {
+    "timestamps": true
+  },
   "attributes": {
     "name": {
       "type": "string",
@@ -30,6 +33,11 @@
       "required": true
     },
     "url": {
+      "type": "string",
+      "configurable": false,
+      "required": true
+    },
+    "provider": {
       "type": "string",
       "configurable": false,
       "required": true

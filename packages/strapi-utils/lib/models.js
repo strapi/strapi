@@ -121,6 +121,10 @@ module.exports = {
       } else if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
         const relatedAttribute = models[association.collection].attributes[association.via];
 
+        if (!relatedAttribute) {
+          throw new Error(`The attribute \`${association.via}\` is missing in the model ${_.upperFirst(association.collection)} ${association.plugin ? '(plugin - ' + association.plugin + ')' : '' }`);
+        }
+
         types.current = 'collection';
 
         if (relatedAttribute.hasOwnProperty('collection') && relatedAttribute.collection !== '*' && relatedAttribute.hasOwnProperty('via')) {
@@ -329,7 +333,9 @@ module.exports = {
       const infos = this.getNature(association, key, undefined, model.toLowerCase());
 
       if (globalName !== '*') {
-        details = _.get(strapi.models, `${globalName}.attributes.${association.via}`, {});
+        details = association.plugin ?
+          _.get(strapi.plugins, `${association.plugin}.models.${globalName}.attributes.${association.via}`, {}):
+          _.get(strapi.models, `${globalName}.attributes.${association.via}`, {});
       }
 
       // Build associations object

@@ -5,6 +5,9 @@
     "name": "<%= id %>",
     "description": "<%= description %>"
   },
+  "options": {
+    "timestamps": true
+  },
   "attributes": {
     <%= attributes %>
   }

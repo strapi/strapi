@@ -49,18 +49,18 @@ module.exports = {
       type: 'text'
     }
   },
-  init: (strapi, config) => {
+  init: (config) => {
     // configure AWS S3 bucket connection
     AWS.config.update({
-      accessKeyId: config.auth.public,
-      secretAccessKey: config.auth.private,
-      region: config.auth.region
+      accessKeyId: config.public,
+      secretAccessKey: config.private,
+      region: config.region
     });
 
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       params: {
-        Bucket: config.auth.bucket
+        Bucket: config.bucket
       }
     });
 

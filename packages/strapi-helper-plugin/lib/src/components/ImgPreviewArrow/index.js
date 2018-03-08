@@ -30,6 +30,8 @@ function ImgPreviewArrow(props) {
         e.stopPropagation();
         props.onClick(props.type);
       }}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
     />
   )
 }
