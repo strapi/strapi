@@ -63,6 +63,7 @@
 .addonFocus {
   border-color: #78caff;
   border-right: 0;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 
 .invalidSearch {

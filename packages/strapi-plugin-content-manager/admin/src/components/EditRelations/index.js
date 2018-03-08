@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 
 // Components.
 import SelectOne from 'components/SelectOne';
@@ -15,13 +15,21 @@ import SelectMany from 'components/SelectMany';
 
 import styles from './styles.scss';
 
+const filterRelationsUpload = (data) => Object.keys(data).reduce((acc, current) => {
+  if (get(data, [current, 'plugin']) !== 'upload') {
+    acc[current] = data[current];
+  }
+
+  return acc;
+}, {});
+
 function EditRelations(props) {
   return (
     <div className={styles.editFormRelations}>
       <FormattedMessage id="content-manager.EditRelations.title">
         {(message) => <h3>{message}</h3>}
       </FormattedMessage>
-      {map(props.schema.relations, (relation, key) => {
+      {map(filterRelationsUpload(props.schema.relations), (relation, key) => {
 
         const Select = ['oneWay', 'oneToOne', 'manyToOne'].includes(relation.nature) && relation.dominant ? SelectOne : SelectMany;
 

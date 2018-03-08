@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import cn from 'classnames';
+import moment from 'moment';
 
 import FileIcon from 'components/FileIcon';
 import IcoContainer from 'components/IcoContainer';
@@ -26,6 +27,22 @@ class Li extends React.Component {
         this.setState({ copied: false });
       }, 3000);
     }
+  }
+
+  getUnit = (value) => {
+    let unit;
+    switch (true) {
+      case value > 1000:
+        unit = 'GB';
+        break;
+      case value < 1:
+        unit = 'B';
+        break;
+      default:
+        unit = 'MB';
+    }
+
+    return unit;
   }
 
   handleClick = (e) => {
@@ -84,9 +101,19 @@ class Li extends React.Component {
               <FileIcon fileType={item.ext} />
             </div>
             {['hash', 'name', 'updatedAt', 'size', 'relatedTo', ''].map((value, key) => {
-              // if (key === 0) {
-              //   return <FileIcon key={key} fileType={item[value]} />;
-              // }
+              if (value === 'updatedAt') {
+                return (
+                  <div key={key} className={styles.truncate}>{moment(item[value]).format('YYYY/MM/DD - HH:mm')}</div>
+                );
+              }
+
+              if (value === 'size') {
+                const unit = this.getUnit(item[value]);
+
+                return (
+                  <div key={key} className={styles.truncate}>{item[value]}&nbsp;{unit}</div>
+                );
+              }
 
               if (value !== '') {
                 return (

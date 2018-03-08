@@ -9,6 +9,8 @@ import {
   dropSuccess,
   getDataSuccess,
   onSearchSuccess,
+  setLoading,
+  unsetLoading,
 } from './actions';
 import {
   DELETE_DATA,
@@ -55,6 +57,7 @@ function* dataGet() {
 
 function* uploadFiles(action) {
   try {
+    yield put(setLoading());
     const headers = {
       'X-Forwarded-Host': 'strapi',
     };
@@ -71,6 +74,8 @@ function* uploadFiles(action) {
 
   } catch(err) {
     strapi.notification.error('notification.error');
+  } finally {
+    yield put(unsetLoading());
   }
 }
 
@@ -87,7 +92,7 @@ function* search() {
     } : {};
     const response = yield call(request, requestURL, { method: 'GET', params });
     const entries = response.length === 0 ? [] : response.map(obj => Map(obj));
-    
+
     yield put(onSearchSuccess(entries));
   } catch(err) {
     strapi.notification.error('notification.error');

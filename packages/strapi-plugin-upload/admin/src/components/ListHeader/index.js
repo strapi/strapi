@@ -19,7 +19,8 @@ function ListHeader({ changeSort, sort }) {
     'name',
     'updated',
     'size',
-    'related',
+    // 'related',
+    '',
     '',
   ];
 

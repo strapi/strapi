@@ -52,13 +52,13 @@ function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarn
   const footerButtons = onlyConfirmButton ? singleButton : buttons;
 
   return (
-    <div className={styles.popUpWarning}>
+    <div className={styles.popUpWarningHelper}>
       <Modal isOpen={isOpen} toggle={toggleModal} className={styles.modalPosition}>
-        <ModalHeader toggle={toggleModal} className={styles.header}>
+        <ModalHeader toggle={toggleModal} className={styles.popUpWarningHeader}>
           <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </ModalHeader>
-        <ModalBody className={styles.modalBody}>
-          <div className={styles.modalBodyContainer}>
+        <ModalBody className={styles.modalBodyHelper}>
+          <div className={styles.modalBodyContainerHelper}>
             <img src={icons[popUpWarningType]} alt="icon" />
             <FormattedMessage id={content.message || 'components.popUpWarning.message'}>
               {(message) => (
@@ -66,7 +66,7 @@ function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarn
               )}
             </FormattedMessage>
           </div>
-          <div className={styles.buttonContainer}>
+          <div className={styles.popUpWarningButtonContainer}>
             {map(footerButtons, (button) => (
               <FormattedMessage id={button.id} key={button.id}>
                 {(message) => <Button onClick={button.handleClick} className={button.className} style={button.style}>{message}</Button>}

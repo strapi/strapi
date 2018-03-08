@@ -9,10 +9,12 @@ import PropTypes from 'prop-types';
 import {
   findIndex,
   get,
+  has,
   isEmpty,
   isFunction,
   merge,
   omit,
+  upperFirst,
 } from 'lodash';
 
 // You can find these components in either
@@ -44,6 +46,9 @@ const getInputType = (type = '') => {
       return 'text';
     case 'text':
       return 'textarea';
+    case 'file':
+    case 'files':
+      return 'file';
     default:
       return 'text';
   }
@@ -64,7 +69,7 @@ class Edit extends React.PureComponent {
 
   setLayout = (props) => {
     const currentLayout = get(props.layout, [props.modelName, 'attributes']);
-    const displayedFields = merge(get(currentLayout), omit(props.schema.fields, 'id'));
+    const displayedFields = merge(this.getUploadRelations(props), get(currentLayout), omit(props.schema.fields, 'id'));
 
     this.setState({ currentLayout, displayedFields });
   }
@@ -100,11 +105,35 @@ class Edit extends React.PureComponent {
     return get(formValidations, [index, 'validations'], {});
   }
 
+  /**
+   * Retrieve all relations made with the upload plugin
+   * @param  {Object} props
+   * @return {Object}
+   */
+  getUploadRelations = (props) => (
+    Object.keys(get(props.schema, 'relations', {})).reduce((acc, current) => {
+      if (get(props.schema, ['relations', current, 'plugin']) === 'upload') {
+        acc[current] = {
+          description: '',
+          label: upperFirst(current),
+          type: 'file',
+        };
+      }
+
+      return acc;
+    }, {})
+  )
+
+  fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
+
+  // orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
+  orderAttributes = (displayedFields) => Object.keys(displayedFields);
+
   render(){
     return (
       <div className={styles.form}>
         <div className="row">
-          {Object.keys(this.state.displayedFields).map((attr, key) => {
+          {this.orderAttributes(this.state.displayedFields).map((attr, key) => {
             const details = this.state.displayedFields[attr];
             // Retrieve the input's bootstrapClass from the layout
             const layout = this.getInputLayout(attr);
@@ -117,6 +146,7 @@ class Edit extends React.PureComponent {
                 errors={this.getInputErrors(attr)}
                 key={attr}
                 label={get(layout, 'label') || details.label || ''}
+                multiple={this.fileRelationAllowMultipleUpload(attr)}
                 name={attr}
                 onChange={this.props.onChange}
                 selectOptions={get(this.props.attributes, [attr, 'enum'])}
@@ -140,6 +170,7 @@ Edit.defaultProps = {
   layout: {},
   onChange: () => {},
   record: {},
+  schema: {},
 };
 
 Edit.propTypes = {
@@ -150,6 +181,7 @@ Edit.propTypes = {
   layout: PropTypes.object,
   onChange: PropTypes.func,
   record: PropTypes.object,
+  schema: PropTypes.object,
 };
 
 export default Edit;
