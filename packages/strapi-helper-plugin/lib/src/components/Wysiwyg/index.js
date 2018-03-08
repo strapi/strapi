@@ -13,6 +13,7 @@ import {
   Editor,
   EditorState,
   getDefaultKeyBinding,
+  Modifier,
   RichUtils,
 } from 'draft-js';
 import PropTypes from 'prop-types';
@@ -23,15 +24,25 @@ import Select from 'components/InputSelect';
 import Controls from 'components/WysiwygInlineControls';
 import styles from './styles.scss';
 
+const SELECT_OPTIONS = [
+  { id: 'Add a title', value: '' },
+  { id: 'Title H1', value: '# ' },
+  { id: 'Title H2', value: '## ' },
+  { id: 'Title H3', value: '### ' },
+  { id: 'Title H4', value: '#### '},
+  { id: 'Title H5', value: '##### ' },
+  { id: 'Title H6', value: '###### ' },
+]
+
 const CONTROLS = [
-  [
-    { label: 'H1', style: 'header-one', handler: 'toggleBlockType' },
-    { label: 'H2', style: 'header-two', handler: 'toggleBlockType' },
-    { label: 'H3', style: 'header-three', handler: 'toggleBlockType' },
-    { label: 'H4', style: 'header-four', handler: 'toggleBlockType' },
-    { label: 'H5', style: 'header-five', handler: 'toggleBlockType' },
-    { label: 'H6', style: 'header-six', handler: 'toggleBlockType' },
-  ],
+  // [
+  //   { label: 'H1', style: 'header-one', handler: 'toggleBlockType' },
+  //   { label: 'H2', style: 'header-two', handler: 'toggleBlockType' },
+  //   { label: 'H3', style: 'header-three', handler: 'toggleBlockType' },
+  //   { label: 'H4', style: 'header-four', handler: 'toggleBlockType' },
+  //   { label: 'H5', style: 'header-five', handler: 'toggleBlockType' },
+  //   { label: 'H6', style: 'header-six', handler: 'toggleBlockType' },
+  // ],
   [
     {label: 'B', style: 'BOLD', handler: 'toggleInlineStyle' },
     {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'toggleInlineStyle' },
@@ -103,16 +114,32 @@ class Wysiwyg extends React.Component {
     return false;
   }
 
-  // TODO: uncoment if select
-  // handleChangeSelect = ({ target }) => {
-  //   this.onChange(
-  //     RichUtils.toggleBlockType(
-  //       this.state.editorState,
-  //       target.value,
-  //     )
-  //   );
-  //   this.setState({ headerValue: target.value });
-  // }
+  addEntity = (text) => {
+    const editorState = this.state.editorState;
+    const currentContent = editorState.getCurrentContent();
+
+    // Get the selected text
+    const selection = editorState.getSelection();
+    const anchorKey = selection.getAnchorKey();
+    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    const start = selection.getStartOffset();
+    const end = selection.getEndOffset();
+    const selectedText = currentContentBlock.getText().slice(start, end);
+    // Replace it with the value
+    const textWithEntity = Modifier.replaceText(currentContent, selection, `${text} ${selectedText}`);
+
+    this.setState({
+        editorState: EditorState.push(editorState, textWithEntity, 'insert-characters'),
+        headerValue: '',
+    }, () => {
+        this.focus();
+    });
+  }
+
+  handleChangeSelect = ({ target }) => {
+    this.setState({ headerValue: target.value });
+    this.addEntity(target.value);
+  }
 
   onChange = (editorState) => {
     this.setState({ editorState });
@@ -183,12 +210,14 @@ class Wysiwyg extends React.Component {
     return (
       <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>
         <div className={styles.controlsContainer}>
-          {/*}<Select
-            name="headerSelect"
-            onChange={this.handleChangeSelect}
-            value={this.state.headerValue}
-            selectOptions={SELECT_OPTIONS}
-          />*/}
+          <div style={{ minWidth: '161px', marginLeft: '8px' }}>
+            <Select
+              name="headerSelect"
+              onChange={this.handleChangeSelect}
+              value={this.state.headerValue}
+              selectOptions={SELECT_OPTIONS}
+            />
+          </div>
           {CONTROLS.map((value, key) => (
             <Controls
               key={key}

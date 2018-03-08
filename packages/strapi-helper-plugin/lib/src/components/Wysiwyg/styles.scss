@@ -1,7 +1,13 @@
 .controlsContainer {
   display: flex;
-  // width: 100%;
+  background-color: #F3F4F4;
+  select {
+    min-height: 31px !important;
+    width: 161px !important;
+    font-weight: 600;
+  }
 }
+
 .editorWrapper {
   min-height: 350px;
   margin-top: .9rem;
@@ -42,11 +48,4 @@
   padding: 5px;
   background-color: rgba(0, 0, 0, 0.05);
   font-family: Lato;
-
-  // div, pre {
-  //   background-color: red;
-  //   pre {
-  //     margin-bottom: 0;
-  //   }
-  // }
 }
