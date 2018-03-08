@@ -85,12 +85,6 @@ export function* submit() {
       return acc;
     }, new FormData());
 
-    // Helper to log FormData
-    // NOTE : keep this line for the moment
-    // for(var pair of recordCleaned.entries()) {
-    //   console.log(pair[0]+ ', '+ pair[1]);
-    // }
-
     const id = isCreating ? '' : record.id;
     const params = { source };
     // Change the request helper default headers so we can pass a FormData
@@ -115,8 +109,6 @@ export function* submit() {
     yield put(submitSuccess());
 
   } catch(err) {
-    // NOTE: leave the error log
-    console.log(err.response);
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
