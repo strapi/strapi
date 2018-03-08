@@ -30,3 +30,7 @@ npm run test
 # Test `strapi-plugin-upload`
 cd ../strapi-plugin-upload
 npm run test
+
+# Test `strapi-helper-plugin`
+# cd ../strapi-helper-plugin/lib
+# npm run test

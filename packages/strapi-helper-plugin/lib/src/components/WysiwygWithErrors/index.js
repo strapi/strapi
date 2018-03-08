@@ -14,7 +14,7 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputSpacer from 'components/InputSpacer';
-import Wysiwyg from 'components/Wysiwyg'
+import Wysiwyg from 'components/Wysiwyg';
 
 // Utils
 import validateInput from 'utils/inputsValidations';
@@ -100,7 +100,8 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerWysiwyg,
           customBootstrapClass,
           !isEmpty(className) && className,

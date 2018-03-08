@@ -16,7 +16,6 @@
   font-weight: 500;
   line-height: 31px;
   text-align: center;
-  // color: #999;
   cursor: pointer;
 }
 
@@ -49,4 +48,28 @@
 
 .active {
   background-color: red;
+}
+
+.styleButtonUL {
+  &:before {
+    content: '\f0ca';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+  }
+}
+
+.styleButtonOL {
+  &:before {
+    content: '\f0cb';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+  }
+}
+
+.styleButtonBlockQuote {
+  &:before {
+    content: '\f10d';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+  }
 }

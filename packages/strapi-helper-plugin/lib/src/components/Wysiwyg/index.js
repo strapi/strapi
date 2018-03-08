@@ -5,31 +5,49 @@
  */
 
 import React from 'react';
-import {  ContentState, convertFromHTML, Editor, EditorState, getDefaultKeyBinding, RichUtils, convertToRaw } from 'draft-js';
+import {
+  ContentState,
+  convertFromHTML,
+  // convertToRaw,
+  Editor,
+  EditorState,
+  getDefaultKeyBinding,
+  RichUtils,
+} from 'draft-js';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import cn from 'classnames';
 
 import Controls from 'components/WysiwygInlineControls';
 import styles from './styles.scss';
 
-const styleMap = {
-  CODE: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
-    fontSize: 16,
-    padding: 2,
-  },
-};
+
+const CONTROLS = [
+  [
+    {label: 'B', style: 'BOLD'},
+    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic'},
+    {label: 'U', style: 'UNDERLINE'},
+    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hide: true },
+    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hide: true },
+  ],
+  [
+    {label: '<>', style: 'code-block' },
+    {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hide: true },
+  ],
+];
 
 function getBlockStyle(block) {
   switch (block.getType()) {
-    case 'blockquote': return 'RichEditor-blockquote';
+    case 'blockquote':
+      return styles.editorBlockquote;
+    case 'code-block':
+      return styles.editorCodeBlock;
     default: return null;
   }
-}
+};
 
+/* eslint-disable  react/no-string-refs */
+/* eslint-disable react/jsx-handler-names */
 class Wysiwyg extends React.Component {
   constructor(props) {
     super(props);
@@ -59,11 +77,6 @@ class Wysiwyg extends React.Component {
     if (nextProps.value === this.state.initialValue && this.state.hasInitialValue) {
       this.setInitialValue(nextProps);
     }
-  }
-
-  componentDidCatch(error, info) {
-    console.log('err', error);
-    console.log('info', info);
   }
 
   handleKeyCommand(command, editorState) {
@@ -127,6 +140,11 @@ class Wysiwyg extends React.Component {
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
 
+  componentDidCatch(error, info) {
+    console.log('err', error);
+    console.log('info', info);
+  }
+
   previewHTML = () => {
     const blocksFromHTML = convertFromHTML(this.props.value);
     const contentState = ContentState.createFromBlockArray(blocksFromHTML);
@@ -138,16 +156,21 @@ class Wysiwyg extends React.Component {
 
     return (
       <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>
-        <Controls
-          editorState={editorState}
-          onToggle={this.toggleInlineStyle}
-          onToggleBlock={this.toggleBlockType}
-          previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
-        />
+        <div className={styles.controlsContainer}>
+          {CONTROLS.map((value, key) => (
+            <Controls
+              key={key}
+              buttons={value}
+              editorState={editorState}
+              onToggle={this.toggleInlineStyle}
+              onToggleBlock={this.toggleBlockType}
+              previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
+            />
+          ))}
+        </div>
         <div className={styles.editor} onClick={this.focus}>
           <Editor
             blockStyleFn={getBlockStyle}
-            customStyleMap={styleMap}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             keyBindingFn={this.mapKeyToEditorCommand}
@@ -155,7 +178,7 @@ class Wysiwyg extends React.Component {
             onChange={this.onChange}
             placeholder={this.props.placeholder}
             ref="editor"
-            spellCheck={true}
+            spellCheck
           />
           <input className={styles.editorInput} value="" tabIndex="-1" />
         </div>
@@ -166,12 +189,17 @@ class Wysiwyg extends React.Component {
 
 Wysiwyg.defaultProps = {
   autoFocus: false,
+  onChange: () => {},
   placeholder: '',
+  value: '',
 };
 
 Wysiwyg.propTypes = {
   autoFocus: PropTypes.bool,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func,
   placeholder: PropTypes.string,
+  value: PropTypes.string,
 };
 
 export default Wysiwyg;

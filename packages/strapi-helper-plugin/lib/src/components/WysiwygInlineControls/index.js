@@ -10,21 +10,21 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-const CONTROLS = [
-  {label: 'B', style: 'BOLD'},
-  {label: 'I', style: 'ITALIC', className: 'styleButtonItalic'},
-  {label: 'U', style: 'UNDERLINE'},
-  {label: 'UL', style: 'unordered-list-item'},
-  {label: 'OL', style: 'ordered-list-item'},
+const TOGGLE_BLOCK_TYPES = [
+  'blockquote',
+  'code-block',
+  'ordered-list-item',
+  'unordered-list-item',
 ];
 
 class StyleButton extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
 
-    if (['UL', 'OL'].includes(this.props.label)) {
+    if (TOGGLE_BLOCK_TYPES.includes(this.props.style)) {
       return this.props.onToggleBlock(this.props.style);
     }
+
     return this.props.onToggle(this.props.style);
   }
 
@@ -38,13 +38,13 @@ class StyleButton extends React.Component {
         )}
         onMouseDown={this.handleClick}
       >
-      {this.props.label}
+        {!this.props.hide && this.props.label}
       </div>
     );
   }
 }
 
-const  WysiwygInlineControls = ({ editorState, onToggle, onToggleBlock, previewHTML }) => {
+const  WysiwygInlineControls = ({ buttons, editorState, onToggle, onToggleBlock }) => {
   const selection = editorState.getSelection();
   const blockType = editorState
     .getCurrentContent()
@@ -55,48 +55,53 @@ const  WysiwygInlineControls = ({ editorState, onToggle, onToggleBlock, previewH
 
   return (
     <div className={cn(styles.wysiwygInlineControls)}>
-      {CONTROLS.map(type => (
-          <StyleButton
-            key={type.label}
-            active={type.style === blockType || currentStyle.has(type.style)}
-            className={type.className}
-            label={type.label}
-            onToggle={onToggle}
-            onToggleBlock={onToggleBlock}
-            style={type.style}
-          />
-        ))}
+      {buttons.map(type => (
         <StyleButton
-          label={'TOGGLE'}
-          onToggle={previewHTML}
+          key={type.label}
+          active={type.style === blockType || currentStyle.has(type.style)}
+          className={type.className}
+          label={type.label}
+          onToggle={onToggle}
+          onToggleBlock={onToggleBlock}
+          style={type.style}
+          hide={type.hide || false}
         />
+      ))}
     </div>
   );
-}
+};
 
 StyleButton.defaultProps = {
   active: false,
   className: '',
+  hide: false,
   label: '',
   onToggle: () => {},
+  onToggleBlock: () => {},
   style: '',
 };
 
 StyleButton.propTypes = {
   active: PropTypes.bool,
   className: PropTypes.string,
+  hide: PropTypes.bool,
   label: PropTypes.string,
   onToggle: PropTypes.func,
-  style: PropTypes.string
+  onToggleBlock: PropTypes.func,
+  style: PropTypes.string,
 };
 
 WysiwygInlineControls.defaultProps = {
+  buttons: [],
   onToggle: () => {},
+  onToggleBlock: () => {},
 };
 
 WysiwygInlineControls.propTypes = {
- editorState: PropTypes.object.isRequired,
- onToggle: PropTypes.func,
+  buttons: PropTypes.array,
+  editorState: PropTypes.object.isRequired,
+  onToggle: PropTypes.func,
+  onToggleBlock: PropTypes.func,
 };
 
 export default WysiwygInlineControls;

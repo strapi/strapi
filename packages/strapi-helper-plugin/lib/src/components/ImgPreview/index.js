@@ -7,8 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { cloneDeep, get, isEmpty, isObject, size } from 'lodash';
+import { cloneDeep, get, isEmpty, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
@@ -31,8 +30,8 @@ class ImgPreview extends React.Component {
     // We don't need the generateImgURL function here since the compo will
     // always have an init value here
     this.setState({
-        imgURL: get(this.props.files, ['0', 'url'], ''),
-        isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
+      imgURL: get(this.props.files, ['0', 'url'], ''),
+      isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
     });
   }
 
@@ -59,7 +58,7 @@ class ImgPreview extends React.Component {
           imgURL: reader.result,
           isImg: true,
         });
-      }
+      };
 
       reader.readAsDataURL(file);
     } else {
@@ -123,7 +122,7 @@ class ImgPreview extends React.Component {
     this.setState({ isOver: true });
   }
 
-  handleMouseLeave = (e) => this.setState({ isOver: false });
+  handleMouseLeave = () => this.setState({ isOver: false });
 
   // TODO change logic to depend on the type
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
@@ -161,6 +160,11 @@ class ImgPreview extends React.Component {
     }
   }
 
+  updateFilePosition = (newPosition) => {
+    this.setState({ position: newPosition });
+    this.props.updateFilePosition(newPosition);
+  }
+
   renderContent = () => {
     const fileType = this.getFileType(this.state.imgURL);
 
@@ -177,13 +181,8 @@ class ImgPreview extends React.Component {
     );
   }
 
-  updateFilePosition = (newPosition) => {
-    this.setState({ position: newPosition });
-    this.props.updateFilePosition(newPosition);
-  }
-
   render() {
-    const { files, multiple, onBrowseClick } = this.props;
+    const { files, onBrowseClick } = this.props;
     const { imgURL } = this.state;
     const containerStyle = isEmpty(imgURL) ?
       {
@@ -194,51 +193,50 @@ class ImgPreview extends React.Component {
       } : {};
 
     return (
+      <div
+        className={cn(
+          this.state.isDraging && styles.overed,
+          this.state.isOver && styles.overed,
+          styles.imgPreviewContainer,
+        )}
+        onDragOver={this.handleDragOver}
+        onDragEnter={this.handleDragEnter}
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+        style={containerStyle}
+      >
         <div
-          className={cn(
-            this.state.isDraging && styles.overed,
-            this.state.isOver && styles.overed,
-            styles.imgPreviewContainer,
-          )}
+          className={cn(this.state.isDraging && styles.overlay)}
+          onDragLeave={this.handleDragLeave}
           onDragOver={this.handleDragOver}
-          onDragEnter={this.handleDragEnter}
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-          style={containerStyle}
-        >
-          <div
-            className={cn(this.state.isDraging && styles.overlay)}
-            onDragLeave={this.handleDragLeave}
-            onDragOver={this.handleDragOver}
-            onDrop={this.handleDrop}
-          />
+          onDrop={this.handleDrop}
+        />
 
-          <ImgPreviewHint
-            displayHint={isEmpty(files)}
-            onClick={onBrowseClick}
-            showWhiteHint={this.state.isDraging || this.state.isOver}
-          />
+        <ImgPreviewHint
+          displayHint={isEmpty(files)}
+          onClick={onBrowseClick}
+          showWhiteHint={this.state.isDraging || this.state.isOver}
+        />
 
-          { !isEmpty(imgURL) && this.renderContent() }
+        { !isEmpty(imgURL) && this.renderContent() }
 
-          <ImgPreviewRemoveIcon
-            onClick={this.removeFile}
-            show={!isEmpty(files)}
-          />
+        <ImgPreviewRemoveIcon
+          onClick={this.removeFile}
+          show={!isEmpty(files)}
+        />
 
-          <ImgPreviewArrow
-            enable={this.state.isOver && size(files) > 1}
-            onClick={this.handleClick}
-            show={size(files) > 1}
-            type="right"
-          />
+        <ImgPreviewArrow
+          enable={this.state.isOver && size(files) > 1}
+          onClick={this.handleClick}
+          show={size(files) > 1}
+          type="right"
+        />
 
-          <ImgPreviewArrow
-            onClick={this.handleClick}
-            show={size(files) > 1}
-          />
-        </div>
-
+        <ImgPreviewArrow
+          onClick={this.handleClick}
+          show={size(files) > 1}
+        />
+      </div>
     );
   }
 }

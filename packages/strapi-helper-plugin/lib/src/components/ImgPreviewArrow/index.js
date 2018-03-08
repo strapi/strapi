@@ -31,7 +31,7 @@ function ImgPreviewArrow(props) {
         props.onClick(props.type);
       }}
     />
-  )
+  );
 }
 
 ImgPreviewArrow.defaultProps = {
