@@ -18,21 +18,29 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import cn from 'classnames';
 
+import Select from 'components/InputSelect';
 import Controls from 'components/WysiwygInlineControls';
 import styles from './styles.scss';
 
-
 const CONTROLS = [
   [
-    {label: 'B', style: 'BOLD'},
-    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic'},
-    {label: 'U', style: 'UNDERLINE'},
-    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hide: true },
-    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hide: true },
+    { label: 'H1', style: 'header-one', handler: 'toggleBlockType' },
+    { label: 'H2', style: 'header-two', handler: 'toggleBlockType' },
+    { label: 'H3', style: 'header-three', handler: 'toggleBlockType' },
+    { label: 'H4', style: 'header-four', handler: 'toggleBlockType' },
+    { label: 'H5', style: 'header-five', handler: 'toggleBlockType' },
+    { label: 'H6', style: 'header-six', handler: 'toggleBlockType' },
   ],
   [
-    {label: '<>', style: 'code-block' },
-    {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hide: true },
+    {label: 'B', style: 'BOLD', handler: 'toggleInlineStyle' },
+    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'toggleInlineStyle' },
+    {label: 'U', style: 'UNDERLINE', handler: 'toggleInlineStyle' },
+    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'toggleBlockType' },
+    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'toggleBlockType' },
+  ],
+  [
+    {label: '<>', style: 'code-block', handler: 'toggleBlockType' },
+    {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'toggleBlockType' },
   ],
 ];
 
@@ -51,7 +59,7 @@ function getBlockStyle(block) {
 class Wysiwyg extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty(), isFocused: false, initialValue: '', previewHTML: false };
+    this.state = { editorState: EditorState.createEmpty(), isFocused: false, initialValue: '', previewHTML: false, headerValue: '' };
     this.focus = () => {
       this.setState({ isFocused: true });
       return this.refs.editor.focus();
@@ -87,6 +95,17 @@ class Wysiwyg extends React.Component {
     }
     return false;
   }
+
+  // TODO: uncoment if select
+  // handleChangeSelect = ({ target }) => {
+  //   this.onChange(
+  //     RichUtils.toggleBlockType(
+  //       this.state.editorState,
+  //       target.value,
+  //     )
+  //   );
+  //   this.setState({ headerValue: target.value });
+  // }
 
   onChange = (editorState) => {
     this.setState({ editorState });
@@ -157,11 +176,21 @@ class Wysiwyg extends React.Component {
     return (
       <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>
         <div className={styles.controlsContainer}>
+          {/*}<Select
+            name="headerSelect"
+            onChange={this.handleChangeSelect}
+            value={this.state.headerValue}
+            selectOptions={SELECT_OPTIONS}
+          />*/}
           {CONTROLS.map((value, key) => (
             <Controls
               key={key}
               buttons={value}
               editorState={editorState}
+              handlers={{
+                toggleBlockType: this.toggleBlockType,
+                toggleInlineStyle: this.toggleInlineStyle,
+              }}
               onToggle={this.toggleInlineStyle}
               onToggleBlock={this.toggleBlockType}
               previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}

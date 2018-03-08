@@ -20,12 +20,7 @@ const TOGGLE_BLOCK_TYPES = [
 class StyleButton extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
-
-    if (TOGGLE_BLOCK_TYPES.includes(this.props.style)) {
-      return this.props.onToggleBlock(this.props.style);
-    }
-
-    return this.props.onToggle(this.props.style);
+    this.props.handlers[this.props.handler](this.props.style);
   }
 
   render() {
@@ -38,13 +33,13 @@ class StyleButton extends React.Component {
         )}
         onMouseDown={this.handleClick}
       >
-        {!this.props.hide && this.props.label}
+        {!this.props.hideLabel && this.props.label}
       </div>
     );
   }
 }
 
-const  WysiwygInlineControls = ({ buttons, editorState, onToggle, onToggleBlock }) => {
+const  WysiwygInlineControls = ({ buttons, editorState, handlers, onToggle, onToggleBlock }) => {
   const selection = editorState.getSelection();
   const blockType = editorState
     .getCurrentContent()
@@ -60,11 +55,13 @@ const  WysiwygInlineControls = ({ buttons, editorState, onToggle, onToggleBlock 
           key={type.label}
           active={type.style === blockType || currentStyle.has(type.style)}
           className={type.className}
+          handler={type.handler}
+          handlers={handlers}
+          hideLabel={type.hideLabel || false}
           label={type.label}
           onToggle={onToggle}
           onToggleBlock={onToggleBlock}
           style={type.style}
-          hide={type.hide || false}
         />
       ))}
     </div>
@@ -74,7 +71,7 @@ const  WysiwygInlineControls = ({ buttons, editorState, onToggle, onToggleBlock 
 StyleButton.defaultProps = {
   active: false,
   className: '',
-  hide: false,
+  hideLabel: false,
   label: '',
   onToggle: () => {},
   onToggleBlock: () => {},
@@ -84,7 +81,9 @@ StyleButton.defaultProps = {
 StyleButton.propTypes = {
   active: PropTypes.bool,
   className: PropTypes.string,
-  hide: PropTypes.bool,
+  handler: PropTypes.string.isRequired,
+  handlers: PropTypes.object.isRequired,
+  hideLabel: PropTypes.bool,
   label: PropTypes.string,
   onToggle: PropTypes.func,
   onToggleBlock: PropTypes.func,
@@ -100,6 +99,7 @@ WysiwygInlineControls.defaultProps = {
 WysiwygInlineControls.propTypes = {
   buttons: PropTypes.array,
   editorState: PropTypes.object.isRequired,
+  handlers: PropTypes.object.isRequired,
   onToggle: PropTypes.func,
   onToggleBlock: PropTypes.func,
 };
