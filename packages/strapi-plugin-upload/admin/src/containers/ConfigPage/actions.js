@@ -23,9 +23,10 @@ export function getSettings(env) {
   };
 }
 
-export function getSettingsSucceeded(settings) {
+export function getSettingsSucceeded(settings, appEnvironments) {
   return {
     type: GET_SETTINGS_SUCCEEDED,
+    appEnvironments,
     settings,
     initialData: settings.config,
   };

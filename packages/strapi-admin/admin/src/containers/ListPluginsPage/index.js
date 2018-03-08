@@ -16,21 +16,20 @@ import cn from 'classnames';
 import PluginHeader from 'components/PluginHeader';
 import ListPlugins from 'components/ListPlugins';
 
-import { makeSelectEnv } from 'containers/AdminPage/selectors';
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectPluginDeleteAction, makeSelectPlugins } from './selectors';
+import { makeSelectCurrentEnv, makeSelectPluginDeleteAction, makeSelectPlugins } from './selectors';
 import { getPlugins, onDeletePluginClick, onDeletePluginConfirm } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
 
 export class ListPluginsPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => {
-    return {
-      appEnvironments: this.props.appEnvironments,
-    };
-  }
+  getChildContext = () => (
+    {
+      currentEnvironment: this.props.currentEnvironment,
+    }
+  );
 
   componentDidMount() {
     this.props.getPlugins();
@@ -70,14 +69,14 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
   }
 }
 
-ListPluginsPage.contextTypes = {};
-
 ListPluginsPage.childContextTypes = {
-  appEnvironments: PropTypes.array.isRequired,
+  currentEnvironment: PropTypes.string.isRequired,
 };
 
+ListPluginsPage.contextTypes = {};
+
 ListPluginsPage.propTypes = {
-  appEnvironments: PropTypes.array.isRequired,
+  currentEnvironment: PropTypes.string.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
@@ -87,7 +86,7 @@ ListPluginsPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-  appEnvironments: makeSelectEnv(),
+  currentEnvironment: makeSelectCurrentEnv(),
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
   plugins: makeSelectPlugins(),
 });

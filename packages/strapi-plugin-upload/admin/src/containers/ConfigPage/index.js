@@ -68,7 +68,7 @@ class ConfigPage extends React.Component {
   }
 
   generateLinks = () => {
-    const headerNavLinks = this.context.appEnvironments.reduce((acc, current) => {
+    const headerNavLinks = this.props.appEnvironments.reduce((acc, current) => {
       const link = Object.assign(current, { to: `/plugins/upload/configurations/${current.name}` });
       acc.push(link);
       return acc;
@@ -137,11 +137,10 @@ class ConfigPage extends React.Component {
   }
 }
 
-ConfigPage.contextTypes = {
-  appEnvironments: PropTypes.array,
-};
+ConfigPage.contextTypes = {};
 
 ConfigPage.defaultProps = {
+  appEnvironments: [],
   formErrors: [],
   settings: {
     providers: [],
@@ -149,6 +148,7 @@ ConfigPage.defaultProps = {
 };
 
 ConfigPage.propTypes = {
+  appEnvironments: PropTypes.array,
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array,
   getSettings: PropTypes.func.isRequired,

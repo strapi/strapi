@@ -19,14 +19,4 @@ const selectAdminPage = () => createSelector(
   (substate) => substate.toJS(),
 );
 
-const makeSelectEnv = () => createSelector(
-  selectAdminPageDomain(),
-  (substate) => substate.get('appEnvironments').toJS(),
-);
-
-export {
-  selectAdminPage,
-  makeSelectEnv,
-};
-
 export default selectAdminPage;

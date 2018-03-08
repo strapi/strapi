@@ -17,6 +17,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  appEnvironments: List([]),
   didCheckErrors: false,
   env: '',
   formErrors: List([]),
@@ -32,6 +33,7 @@ function configPageReducer(state = initialState, action) {
       return state.update('env', () => action.env);
     case GET_SETTINGS_SUCCEEDED:
       return state
+        .update('appEnvironments', () => List(action.appEnvironments))
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List([]))
         .update('initialData', () => Map(action.initialData))

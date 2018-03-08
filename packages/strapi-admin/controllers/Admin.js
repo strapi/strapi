@@ -8,6 +8,14 @@ const exec = require('child_process').execSync;
  */
 
 module.exports = {
+  getCurrentEnvironment: async ctx => {
+    try {
+      ctx.send({ currentEnvironment: strapi.app.env });
+    } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
   installPlugin: async ctx => {
     try {
       const { plugin, port } = ctx.request.body;
@@ -16,7 +24,7 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-      
+
       exec(`node ${strapiBin} install ${plugin} ${port === '4000' ? '--dev' : ''}`);
 
       ctx.send({ ok: true });

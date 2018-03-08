@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 // Design
 import IcoContainer from 'components/IcoContainer';
@@ -32,7 +32,7 @@ class Row extends React.Component {
   }
 
   render() {
-    const uploadPath = `/plugins/upload/configurations/${get(this.context, ['appEnvironments', '0', 'name'])}`;
+    const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
     const icons = this.props.name === 'upload' ? [
       {
         icoType: 'cog',
@@ -88,7 +88,7 @@ class Row extends React.Component {
 }
 
 Row.contextTypes = {
-  appEnvironments: PropTypes.array,
+  currentEnvironment: PropTypes.string,
   router: PropTypes.object,
 };
 
