@@ -10,13 +10,6 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-const TOGGLE_BLOCK_TYPES = [
-  'blockquote',
-  'code-block',
-  'ordered-list-item',
-  'unordered-list-item',
-];
-
 class StyleButton extends React.Component {
   handleClick = (e) => {
     e.preventDefault();

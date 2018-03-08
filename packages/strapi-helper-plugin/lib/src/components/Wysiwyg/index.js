@@ -6,6 +6,7 @@
 
 import React from 'react';
 import {
+  // CompositeDecorator,
   ContentState,
   convertFromHTML,
   // convertToRaw,
@@ -59,7 +60,13 @@ function getBlockStyle(block) {
 class Wysiwyg extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty(), isFocused: false, initialValue: '', previewHTML: false, headerValue: '' };
+    this.state = {
+      editorState: EditorState.createEmpty(),
+      isFocused: false,
+      initialValue: '',
+      previewHTML: false,
+      headerValue: '',
+    };
     this.focus = () => {
       this.setState({ isFocused: true });
       return this.refs.editor.focus();
