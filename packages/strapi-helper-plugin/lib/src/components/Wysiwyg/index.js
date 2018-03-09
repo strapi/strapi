@@ -80,7 +80,7 @@ class Wysiwyg extends React.Component {
     };
     this.focus = () => {
       this.setState({ isFocused: true });
-      return this.refs.editor.focus();
+      return this.domEditor.focus();
     }
   }
 
@@ -242,7 +242,7 @@ class Wysiwyg extends React.Component {
             onBlur={() => this.setState({ isFocused: false })}
             onChange={this.onChange}
             placeholder={this.props.placeholder}
-            ref="editor"
+            ref={(editor) => this.domEditor = editor}
             spellCheck
           />
           <input className={styles.editorInput} value="" tabIndex="-1" />
