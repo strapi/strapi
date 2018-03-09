@@ -32,14 +32,17 @@ class Li extends React.Component {
   getUnit = (value) => {
     let unit;
     switch (true) {
-      case value > 1000:
+      case value > 10000:
         unit = 'GB';
         break;
       case value < 1:
         unit = 'B';
         break;
-      default:
+      case value > 1000:
         unit = 'MB';
+        break;
+      default:
+        unit = 'KB';
     }
 
     return unit;
