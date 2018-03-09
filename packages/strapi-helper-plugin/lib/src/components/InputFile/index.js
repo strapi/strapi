@@ -51,7 +51,7 @@ class InputFile extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.refs.inputFile.click();
+    this.inputFile.click();
   }
 
   onDrop = (e) => {
@@ -122,7 +122,7 @@ class InputFile extends React.Component {
             name={name}
             onChange={this.handleChange}
             type="file"
-            ref="inputFile"
+            ref={(input) => this.inputFile = input}
           />
 
           <div className={styles.buttonContainer}>
