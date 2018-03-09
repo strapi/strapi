@@ -149,7 +149,7 @@ module.exports = {
       if (!hasTable) {
         const quote = Model.client === 'pg' ? '"' : '`';
 
-        console.log(`
+        this.log.warn(`
 ⚠️  TABLE \`core_store\` DOESN'T EXIST
 
 CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (

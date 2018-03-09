@@ -14,9 +14,12 @@ import {
   INIT_MODEL_PROPS,
   ON_CANCEL,
   RESET_PROPS,
+  SET_FILE_RELATIONS,
+  SET_LOADER,
   SET_FORM_ERRORS,
   SUBMIT,
   SUBMIT_SUCCESS,
+  UNSET_LOADER,
 } from './constants';
 
 export function changeData({ target }) {
@@ -72,10 +75,23 @@ export function resetProps() {
   };
 }
 
+export function setFileRelations(fileRelations) {
+  return {
+    type: SET_FILE_RELATIONS,
+    fileRelations,
+  };
+}
+
 export function setFormErrors(formErrors) {
   return {
     type: SET_FORM_ERRORS,
     formErrors,
+  };
+}
+
+export function setLoader() {
+  return {
+    type: SET_LOADER,
   };
 }
 
@@ -88,5 +104,11 @@ export function submit() {
 export function submitSuccess() {
   return {
     type: SUBMIT_SUCCESS,
+  };
+}
+
+export function unsetLoader() {
+  return {
+    type: UNSET_LOADER,
   };
 }

@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 
 import App from 'containers/App'; // eslint-disable-line
 
-import './public-path.js'; // eslint-disabled-line import/extensions
+import './public-path.js'; // eslint-disable-line import/extensions
 import configureStore from './store';
 import { translationMessages } from './i18n';
 

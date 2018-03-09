@@ -14,7 +14,9 @@ import {
   ON_DROP,
   ON_SEARCH,
   ON_SEARCH_SUCCESS,
+  SET_LOADING,
   SET_PARAMS,
+  UNSET_LOADING,
 } from './constants';
 
 export function changeParams({ target }) {
@@ -78,6 +80,12 @@ export function onSearch({ target }) {
   };
 }
 
+export function setLoading() {
+  return {
+    type: SET_LOADING,
+  };
+}
+
 export function setParams(params) {
   return {
     type: SET_PARAMS,
@@ -89,5 +97,11 @@ export function onSearchSuccess(data) {
   return {
     type: ON_SEARCH_SUCCESS,
     data,
+  };
+}
+
+export function unsetLoading() {
+  return {
+    type: UNSET_LOADING,
   };
 }

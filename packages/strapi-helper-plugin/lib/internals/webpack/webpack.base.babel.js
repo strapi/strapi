@@ -37,7 +37,7 @@ if (!isSetup) {
 
     (async () => {
       await strapi.load({
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
       });
     })();
   } catch (e) {

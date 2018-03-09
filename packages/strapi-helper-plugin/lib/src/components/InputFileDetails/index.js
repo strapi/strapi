@@ -6,29 +6,37 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
+import { get, startsWith } from 'lodash';
 import cn from 'classnames';
 
 import styles from './styles.scss';
 
 function InputFileDetails(props) {
-  if (props.number === 0) {
+  if (props.number === 0 && props.multiple) {
     return <div />;
   }
-  
+
+  // TODO improve logic
+  if (!get(props.file, 'name') && !props.multiple) {
+    return <div />
+  }
+
+  const url = startsWith(props.file.url, '/') ? `${strapi.backendURL}${props.file.url}` : props.file.url;
+
   return (
     <div className={styles.inputFileDetails}>
-      <div className={styles.detailBanner} onClick={props.onClick}>
+      <div className={styles.detailBanner}>
         <div>
-          <div className={cn(props.isOpen && styles.chevronDown, !props.isOpen && styles.chevronUp)} />
-          <div>
-            <FormattedMessage id="app.components.InputFileDetails.details" />
-          </div>
+          {props.file.url && (
+            <a href={url} className={styles.externalLink} target="_blank">
+              <i className="fa fa-external-link-square" />
+              <FormattedMessage id="app.components.InputFileDetails.open" />
+            </a>
+          )}
         </div>
-        <div className={styles.positionContainer}>
-          <span>{props.position + 1}/</span>
-          <span>{props.number}</span>
+        <div className={styles.removeContainer} onClick={props.onFileDelete}>
+          <FormattedMessage id="app.components.InputFileDetails.remove" />
         </div>
       </div>
     </div>
@@ -36,15 +44,20 @@ function InputFileDetails(props) {
 }
 
 InputFileDetails.defaultProps = {
-  isOpen: false,
+  file: {},
+  multiple: false,
   number: 0,
-  position: 0,
+  onFileDelete: () => {},
 };
 
 InputFileDetails.propTypes = {
-  isOpen: PropTypes.bool,
+  file: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
+  multiple: PropTypes.bool,
   number: PropTypes.number,
-  position: PropTypes.number,
+  onFileDelete: PropTypes.func,
 };
 
 export default InputFileDetails;

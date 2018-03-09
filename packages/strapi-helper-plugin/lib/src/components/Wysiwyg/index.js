@@ -32,7 +32,7 @@ const SELECT_OPTIONS = [
   { id: 'Title H4', value: '#### '},
   { id: 'Title H5', value: '##### ' },
   { id: 'Title H6', value: '###### ' },
-]
+];
 
 const CONTROLS = [
   // [
@@ -64,7 +64,7 @@ function getBlockStyle(block) {
       return styles.editorCodeBlock;
     default: return null;
   }
-};
+}
 
 /* eslint-disable  react/no-string-refs */
 /* eslint-disable react/jsx-handler-names */
@@ -81,7 +81,7 @@ class Wysiwyg extends React.Component {
     this.focus = () => {
       this.setState({ isFocused: true });
       return this.domEditor.focus();
-    }
+    };
   }
 
   componentDidMount() {
@@ -105,15 +105,6 @@ class Wysiwyg extends React.Component {
     }
   }
 
-  handleKeyCommand(command, editorState) {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    if (newState) {
-      this.onChange(newState);
-      return true;
-    }
-    return false;
-  }
-
   addEntity = (text) => {
     const editorState = this.state.editorState;
     const currentContent = editorState.getCurrentContent();
@@ -129,10 +120,10 @@ class Wysiwyg extends React.Component {
     const textWithEntity = Modifier.replaceText(currentContent, selection, `${text} ${selectedText}`);
 
     this.setState({
-        editorState: EditorState.push(editorState, textWithEntity, 'insert-characters'),
-        headerValue: '',
+      editorState: EditorState.push(editorState, textWithEntity, 'insert-characters'),
+      headerValue: '',
     }, () => {
-        this.focus();
+      this.focus();
     });
   }
 
@@ -191,6 +182,15 @@ class Wysiwyg extends React.Component {
     editorState = EditorState.moveFocusToEnd(editorState);
 
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
+  }
+
+  handleKeyCommand(command, editorState) {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
+    if (newState) {
+      this.onChange(newState);
+      return true;
+    }
+    return false;
   }
 
   componentDidCatch(error, info) {

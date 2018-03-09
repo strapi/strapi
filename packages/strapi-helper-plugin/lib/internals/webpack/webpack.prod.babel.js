@@ -14,7 +14,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const base = require('./webpack.base.babel');
 
-const pkg = require(path.resolve(process.cwd(), 'package.json'));
+// const pkg = require(path.resolve(process.cwd(), 'package.json'));
 // const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
 // const dllPlugin = pkg.dllPlugin;
 

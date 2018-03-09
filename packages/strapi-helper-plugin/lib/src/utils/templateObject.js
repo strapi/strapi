@@ -8,7 +8,7 @@ const templateObject = function (obj, variables) {
     const key = match.substring(0, match.length - 1).replace('${', '');
 
     return variables[key];
-  }
+  };
 
   return Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) || isArray(obj[key])) {

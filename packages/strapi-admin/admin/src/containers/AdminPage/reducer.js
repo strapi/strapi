@@ -4,17 +4,12 @@
  *
  */
 
-import { fromJS, List } from 'immutable';
-import { GET_UPLOAD_ENV_SUCCEEDED } from './constants';
+import { fromJS } from 'immutable';
 
-const initialState = fromJS({
-  appEnvironments: List([]),
-});
+const initialState = fromJS({});
 
 function adminPageReducer(state = initialState, action) {
   switch (action.type) {
-    case GET_UPLOAD_ENV_SUCCEEDED:
-      return state.update('appEnvironments', () => List(action.data));
     default:
       return state;
   }

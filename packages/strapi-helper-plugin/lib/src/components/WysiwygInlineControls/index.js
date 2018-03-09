@@ -78,8 +78,8 @@ StyleButton.propTypes = {
   handlers: PropTypes.object.isRequired,
   hideLabel: PropTypes.bool,
   label: PropTypes.string,
-  onToggle: PropTypes.func,
-  onToggleBlock: PropTypes.func,
+  // onToggle: PropTypes.func,
+  // onToggleBlock: PropTypes.func,
   style: PropTypes.string,
 };
 

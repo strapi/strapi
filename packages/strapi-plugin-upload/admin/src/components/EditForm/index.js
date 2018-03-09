@@ -72,7 +72,7 @@ class EditForm extends React.Component  {
             name="sizeLimit"
             onChange={this.props.onChange}
             type="number"
-            value={get(this.props.modifiedData, 'sizeLimit', 0) / 1000}
+            value={get(this.props.modifiedData, 'sizeLimit', 1) / 1000}
           />
         </div>
         <div className={styles.separator} style={{ marginTop: '-4px'}} />

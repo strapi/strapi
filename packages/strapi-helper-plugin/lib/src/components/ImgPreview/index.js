@@ -7,12 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, isEmpty, size } from 'lodash';
+import { get, has, isArray, isEmpty, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
 import ImgPreviewArrow from 'components/ImgPreviewArrow';
-import ImgPreviewRemoveIcon from 'components/ImgPreviewRemoveIcon';
 import ImgPreviewHint from 'components/ImgPreviewHint';
 
 import styles from './styles.scss';
@@ -22,28 +21,45 @@ class ImgPreview extends React.Component {
     imgURL: '',
     isDraging: false,
     isOver: false,
+    isOverArrow: false,
     isImg: false,
-    position: 0,
+    isInitValue: false,
   };
 
   componentDidMount() {
     // We don't need the generateImgURL function here since the compo will
     // always have an init value here
     this.setState({
-      imgURL: get(this.props.files, ['0', 'url'], ''),
-      isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
+        imgURL: get(this.props.files, ['0', 'url'], '') || get(this.props.files, 'url', ''),
+        isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
     });
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.isUploading !== this.props.isUploading) {
-      const lastFile = nextProps.files.slice(-1)[0];
+      const lastFile = this.props.multiple ? nextProps.files.slice(-1)[0] : nextProps.files[0] || nextProps.files;
       this.generateImgURL(lastFile);
-      this.updateFilePosition(nextProps.files.length - 1);
+
+      if (this.props.multiple) {
+        this.updateFilePosition(nextProps.files.length - 1);
+      }
+    }
+    // Update the preview or slide pictures or init the component
+    if (nextProps.didDeleteFile !== this.props.didDeleteFile || nextProps.position !== this.props.position || size(nextProps.files) !== size(this.props.files) && !this.state.isInitValue) {
+      const file = nextProps.files[nextProps.position] || nextProps.files || '';
+      this.generateImgURL(file)
+
+      if (!this.state.isInitValue) {
+        this.setState({ isInitValue: true });
+      }
     }
   }
 
   getFileType = (fileName) => fileName.split('.').slice(-1)[0];
+
+  componentDidCatch(error, info) {
+    console.log('An error occured in ImgPreview', info);
+  }
 
   /**
    * [generateImgURL description]
@@ -51,24 +67,28 @@ class ImgPreview extends React.Component {
    * @return {URL}
    */
   generateImgURL = (file) => {
-    if (this.isPictureType(file.name)) {
+    if (this.isPictureType(file.name) && !has(file, 'url')) {
       const reader = new FileReader();
       reader.onloadend = () => {
         this.setState({
           imgURL: reader.result,
           isImg: true,
         });
-      };
+      }
 
       reader.readAsDataURL(file);
+    } else if (has(file, 'url')) {
+      const isImg = this.isPictureType(file.name);
+      const imgURL = file.url[0] === '/' ?`${strapi.backendURL}${file.url}` :file.url;
+
+      this.setState({ isImg, imgURL });
     } else {
       this.setState({ isImg: false, imgURL: file.name });
     }
   }
 
   handleClick = (type) => {
-    const { position } = this.state;
-    const { files } = this.props;
+    const { files, position } = this.props;
     let file;
     let nextPosition;
 
@@ -85,12 +105,7 @@ class ImgPreview extends React.Component {
         // Do nothing
     }
 
-    if (!file.url) {
-      this.generateImgURL(file)
-    } else {
-      this.setState({ imgURL: file.url, isImg: this.isPictureType(file.url) });
-    }
-
+    // Update the parent position
     this.updateFilePosition(nextPosition);
   }
 
@@ -116,54 +131,8 @@ class ImgPreview extends React.Component {
     this.props.onDrop(e);
   }
 
-  handleMouseEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState({ isOver: true });
-  }
-
-  handleMouseLeave = () => this.setState({ isOver: false });
-
   // TODO change logic to depend on the type
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
-
-  removeFile = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const value = cloneDeep(this.props.files);
-    value.splice(this.state.position, 1);
-
-    const target = {
-      name: this.props.name,
-      type: 'file',
-      value,
-    };
-
-    this.props.onChange({ target });
-
-    if (size(value) === 0) {
-      this.setState({ position: 0, imgURL: '' });
-      return this.props.updateFilePosition(0);
-    }
-
-    // Display the last file
-    const nextFile = value.slice(-1)[0];
-    const nextPosition = value.length -1;
-
-    this.updateFilePosition(nextPosition);
-
-    if (!nextFile.url) {
-      this.generateImgURL(nextFile);
-    } else {
-      this.setState({ imgURL: nextFile.url });
-    }
-  }
-
-  updateFilePosition = (newPosition) => {
-    this.setState({ position: newPosition });
-    this.props.updateFilePosition(newPosition);
-  }
 
   renderContent = () => {
     const fileType = this.getFileType(this.state.imgURL);
@@ -175,14 +144,19 @@ class ImgPreview extends React.Component {
     }
 
     return (
-      <div className={styles.fileIcon}>
+      <div className={styles.fileIcon} onDrop={this.handleDrop}>
         <i className={`fa fa-file-${fileType}-o`} />
       </div>
     );
   }
 
+  updateFilePosition = (newPosition) => {
+    // this.setState({ position: newPosition });
+    this.props.updateFilePosition(newPosition);
+  }
+
   render() {
-    const { files, onBrowseClick } = this.props;
+    const { files, multiple, onBrowseClick } = this.props;
     const { imgURL } = this.state;
     const containerStyle = isEmpty(imgURL) ?
       {
@@ -193,55 +167,50 @@ class ImgPreview extends React.Component {
       } : {};
 
     return (
-      <div
-        className={cn(
-          this.state.isDraging && styles.overed,
-          this.state.isOver && styles.overed,
-          styles.imgPreviewContainer,
-        )}
-        onDragOver={this.handleDragOver}
-        onDragEnter={this.handleDragEnter}
-        onMouseEnter={this.handleMouseEnter}
-        onMouseLeave={this.handleMouseLeave}
-        style={containerStyle}
-      >
         <div
-          className={cn(this.state.isDraging && styles.overlay)}
-          onDragLeave={this.handleDragLeave}
+          className={cn(
+            styles.imgPreviewContainer,
+          )}
           onDragOver={this.handleDragOver}
-          onDrop={this.handleDrop}
-        />
+          onDragEnter={this.handleDragEnter}
+          style={containerStyle}
+        >
+          <div
+            className={cn(this.state.isDraging && styles.overlay)}
+            onDragLeave={this.handleDragLeave}
+            onDragOver={this.handleDragOver}
+            onDrop={this.handleDrop}
+          />
+          <ImgPreviewHint
+            displayHint={isEmpty(files)}
+            onClick={onBrowseClick}
+            onDrop={this.handleDrop}
+            showWhiteHint={this.state.isDraging || isEmpty(files)}
+          />
+          { !isEmpty(imgURL) && this.renderContent() }
+          <ImgPreviewArrow
+            enable={isArray(files) && size(files) > 1}
+            onClick={this.handleClick}
+            onMouseEnter={(e) => this.setState({ isOverArrow: true })}
+            onMouseLeave={(e) => this.setState({ isOverArrow: false })}
+            show={isArray(files) && size(files) > 1}
+            type="right"
+          />
+          <ImgPreviewArrow
+            enable={isArray(files) && size(files) > 1}
+            onClick={this.handleClick}
+            onMouseEnter={(e) => this.setState({ isOverArrow: true })}
+            onMouseLeave={(e) => this.setState({ isOverArrow: false })}
+            show={isArray(files) && size(files) > 1}
+          />
+        </div>
 
-        <ImgPreviewHint
-          displayHint={isEmpty(files)}
-          onClick={onBrowseClick}
-          showWhiteHint={this.state.isDraging || this.state.isOver}
-        />
-
-        { !isEmpty(imgURL) && this.renderContent() }
-
-        <ImgPreviewRemoveIcon
-          onClick={this.removeFile}
-          show={!isEmpty(files)}
-        />
-
-        <ImgPreviewArrow
-          enable={this.state.isOver && size(files) > 1}
-          onClick={this.handleClick}
-          show={size(files) > 1}
-          type="right"
-        />
-
-        <ImgPreviewArrow
-          onClick={this.handleClick}
-          show={size(files) > 1}
-        />
-      </div>
     );
   }
 }
 
 ImgPreview.defaultProps = {
+  didDeleteFile: false,
   files: [],
   isUploading: false,
   multiple: false,
@@ -249,17 +218,23 @@ ImgPreview.defaultProps = {
   onBrowseClick: () => {},
   onChange: () => {},
   onDrop: () => {},
+  position: 0,
   updateFilePosition: () => {},
 };
 
 ImgPreview.propTypes = {
-  files: PropTypes.array,
+  didDeleteFile: PropTypes.bool,
+  files: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
   isUploading: PropTypes.bool,
   multiple: PropTypes.bool,
   name: PropTypes.string,
   onBrowseClick: PropTypes.func,
   onChange: PropTypes.func,
   onDrop: PropTypes.func,
+  position: PropTypes.number,
   updateFilePosition: PropTypes.func,
 };
 
