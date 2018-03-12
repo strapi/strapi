@@ -23,6 +23,7 @@ import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
+import WysiwygEditor from 'components/WysiwygEditor';
 
 import styles from './styles.scss';
 
@@ -81,8 +82,9 @@ class Wysiwyg extends React.Component {
       editorState: EditorState.createEmpty(),
       isFocused: false,
       initialValue: '',
-      previewHTML: false,
       headerValue: '',
+      previewHTML: false,
+      toggleFullScreen: false,
     };
     this.focus = () => {
       this.setState({ isFocused: true });
@@ -181,6 +183,15 @@ class Wysiwyg extends React.Component {
     );
   }
 
+  toggleFullScreen = (e) => {
+    e.preventDefault();
+    this.setState({
+      toggleFullScreen: !this.state.toggleFullScreen,
+    }, () => {
+      this.focus();
+    });
+  }
+
   setInitialValue = (props) => {
     const contentState = ContentState.createFromText(props.value);
     let editorState = EditorState.createWithContent(contentState);
@@ -213,6 +224,7 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
+    console.log(this.state);
 
     return (
       <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>
@@ -242,7 +254,7 @@ class Wysiwyg extends React.Component {
           ))}
         </div>
         <div className={styles.editor} onClick={this.focus}>
-          <Editor
+          <WysiwygEditor
             blockStyleFn={getBlockStyle}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
@@ -250,12 +262,12 @@ class Wysiwyg extends React.Component {
             onBlur={() => this.setState({ isFocused: false })}
             onChange={this.onChange}
             placeholder={this.props.placeholder}
-            ref={(editor) => this.domEditor = editor}
+            setRef={(editor) => this.domEditor = editor}
             spellCheck
           />
           <input className={styles.editorInput} value="" tabIndex="-1" />
         </div>
-        <WysiwygBottomControls />
+        <WysiwygBottomControls onClick={this.toggleFullScreen} />
       </div>
     );
   }

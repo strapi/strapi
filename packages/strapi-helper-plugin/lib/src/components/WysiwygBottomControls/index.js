@@ -11,11 +11,11 @@ import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
-const WysiwygBottomControls = (props) => {
+const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
   return (
     <div className={styles.wysiwygBottomControlsWrapper}>
-      <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: props.charactersNumber }} /></div>
-      <div className={styles.fullScreenWrapper}>
+      <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: charactersNumber }} /></div>
+      <div className={styles.fullScreenWrapper} onClick={onClick}>
         <FormattedMessage id="components.WysiwygBottomControls.fullscreen" />
       </div>
     </div>
@@ -24,10 +24,12 @@ const WysiwygBottomControls = (props) => {
 
 WysiwygBottomControls.defaultProps = {
   charactersNumber: 0,
+  onClick: () => {},
 };
 
 WysiwygBottomControls.propTypes = {
   charactersNumber: PropTypes.number,
+  onClick: PropTypes.func,
 };
 
 export default WysiwygBottomControls;

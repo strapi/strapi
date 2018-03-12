@@ -12,6 +12,7 @@
 
 
 .fullScreenWrapper {
+  cursor: pointer;
   &:after {
     content: '\f065';
     margin-left: 8px;
