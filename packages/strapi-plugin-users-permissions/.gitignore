@@ -1,8 +1,9 @@
 # Don't check auto-generated stuff into git
+config/actions.json
+config/jwt.json
 coverage/
 node_modules/
 actions.json
-jwt.json
 package-lock.json
 stats.json
 
