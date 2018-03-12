@@ -105,6 +105,9 @@
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 
+  "components.WysiwygBottomControls.charactersIndicators": "{characters} charactères",
+  "components.WysiwygBottomControls.fullscreen": "Mode plein écran",
+
   "notification.error": "Une erreur est survenue",
 
   "Auth & Permissions": "Auth & Permissions",

@@ -104,7 +104,10 @@
   "components.Input.error.custom-error": "{errorMessage} ",
 
   "components.ListRow.empty": "There is no data to be shown.",
-  
+
+  "components.WysiwygBottomControls.charactersIndicators": "{characters} characters",
+  "components.WysiwygBottomControls.fullscreen": "Fullscreen mode",
+
   "notification.error": "An error occurred",
 
   "Users & Permissions": "Users & Permissions",

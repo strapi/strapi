@@ -20,8 +20,10 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import cn from 'classnames';
 
-import Select from 'components/InputSelect';
 import Controls from 'components/WysiwygInlineControls';
+import Select from 'components/InputSelect';
+import WysiwygBottomControls from 'components/WysiwygBottomControls';
+
 import styles from './styles.scss';
 
 const SELECT_OPTIONS = [
@@ -253,6 +255,7 @@ class Wysiwyg extends React.Component {
           />
           <input className={styles.editorInput} value="" tabIndex="-1" />
         </div>
+        <WysiwygBottomControls />
       </div>
     );
   }

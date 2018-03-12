@@ -1,0 +1,21 @@
+.wysiwygBottomControlsWrapper {
+  display: flex;
+  height: 30px;
+  width: 100%;
+  padding: 0 17px;
+  justify-content: space-between;
+  background-color: #FAFAFB;
+  line-height: 30px;
+  font-size: 12px;
+  font-family: Lato;
+}
+
+
+.fullScreenWrapper {
+  &:after {
+    content: '\f065';
+    margin-left: 8px;
+    font-family: FontAwesome;
+    font-size: 10px;
+  }
+}
