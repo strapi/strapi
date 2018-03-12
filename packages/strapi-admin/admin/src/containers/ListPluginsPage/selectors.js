@@ -34,8 +34,14 @@ const makeSelectPlugins = () => createSelector(
   (substate) => substate.get('plugins').toJS(),
 );
 
+const makeSelectCurrentEnv = () => createSelector(
+  selectListPluginsPageDomain(),
+  (substate) => substate.get('currentEnvironment'),
+);
+
 export default makeSelectListPluginsPage;
 export {
+  makeSelectCurrentEnv,
   selectListPluginsPageDomain,
   makeSelectPluginToDelete,
   makeSelectPluginDeleteAction,

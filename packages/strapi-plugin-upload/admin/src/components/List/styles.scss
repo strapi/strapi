@@ -11,6 +11,12 @@
   width: 100%;
   padding: 0 !important;
   list-style: none;
+  > li:nth-child(2) {
+    height: 57px;
+    > div {
+      line-height: 54px !important;
+    }
+  }
   > li {
     width: 100%;
     margin-top: 0;
@@ -20,6 +26,7 @@
     > div {
       border-bottom: 0 !important;
     }
+    box-shadow: 0 2px 4px #E3E9F3;
   }
 }
 

@@ -18,20 +18,19 @@ import styles from './styles.scss';
 
 class InputFile extends React.Component {
   state = {
-    isOpen: false,
+    didDeleteFile: false,
     isUploading: false,
     position: 0,
   };
 
   addFilesToProps = (files) => {
-    const initAcc = this.props.multiple ? cloneDeep(this.props.value) : [];
+    const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
     const value = Object.keys(files).reduce((acc, current) => {
 
       if (this.props.multiple) {
         acc.push(files[current]);
       } else if (current === '0') {
-
-        acc.push(files[0]);
+        acc[0] = files[0];
       }
 
       return acc;
@@ -52,7 +51,7 @@ class InputFile extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.refs.inputFile.click();
+    this.inputFile.click();
   }
 
   onDrop = (e) => {
@@ -60,7 +59,39 @@ class InputFile extends React.Component {
     this.addFilesToProps(e.dataTransfer.files);
   }
 
-  updateFilePosition = (newPosition) => this.setState({ position: newPosition });
+  handleFileDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Remove the file from props
+    const value = this.props.multiple ? cloneDeep(this.props.value) : {};
+
+    // Remove the file from the array if multiple files upload is enable
+    if (this.props.multiple) {
+      value.splice(this.state.position, 1);
+    }
+    // Update the parent's props
+    const target = {
+      name: this.props.name,
+      type: 'file',
+      value,
+    };
+
+    this.props.onChange({ target });
+
+    // Update the position of the children
+    if (this.props.multiple) {
+      const newPosition = value.length === 0 ? 0 : value.length - 1;
+      this.updateFilePosition(newPosition, value.length);
+    }
+    this.setState({ didDeleteFile: !this.state.didDeleteFile });
+  }
+
+  updateFilePosition = (newPosition, size = this.props.value.length) => {
+    const label = size === 0 ? false : newPosition + 1;
+    this.props.setLabel(label);
+    this.setState({ position: newPosition });
+  }
 
   render() {
     const {
@@ -69,10 +100,11 @@ class InputFile extends React.Component {
       onChange,
       value,
     } = this.props;
-    
+
     return (
       <div>
         <ImgPreview
+          didDeleteFile={this.state.didDeleteFile}
           files={value}
           isUploading={this.state.isUploading}
           multiple={multiple}
@@ -80,16 +112,17 @@ class InputFile extends React.Component {
           onChange={onChange}
           onBrowseClick={this.handleClick}
           onDrop={this.onDrop}
+          position={this.state.position}
           updateFilePosition={this.updateFilePosition}
         />
-        <label>
+        <label style={{ width: '100%'}}>
           <input
             className={styles.inputFile}
             multiple={multiple}
             name={name}
             onChange={this.handleChange}
             type="file"
-            ref="inputFile"
+            ref={(input) => this.inputFile = input}
           />
 
           <div className={styles.buttonContainer}>
@@ -98,10 +131,10 @@ class InputFile extends React.Component {
           </div>
         </label>
         <InputFileDetails
-          isOpen={this.state.isOpen}
+          file={value[this.state.position] || value[0] || value}
+          multiple={multiple}
           number={value.length}
-          onClick={() => { this.setState({ isOpen: !this.state.isOpen }) }}
-          position={this.state.position}
+          onFileDelete={this.handleFileDelete}
         />
       </div>
     );
@@ -110,6 +143,7 @@ class InputFile extends React.Component {
 
 InputFile.defaultProps = {
   multiple: false,
+  setLabel: () => {},
   value: [],
 };
 
@@ -117,6 +151,7 @@ InputFile.propTypes = {
   multiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  setLabel: PropTypes.func,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object,

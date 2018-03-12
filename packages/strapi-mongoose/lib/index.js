@@ -160,6 +160,8 @@ module.exports = function (strapi) {
                     });
                   });
 
+                  collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+
                   collection.schema.options.toObject = collection.schema.options.toJSON = {
                     virtuals: true,
                     transform: function (doc, returned, opts) {
@@ -464,7 +466,7 @@ module.exports = function (strapi) {
       return result;
     },
 
-    manageRelations: async function (model, params) {
+    manageRelations: async function (model, params, source) {
       const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
         _.assign(acc, strapi.plugins[current].models);
         return acc;
@@ -593,6 +595,75 @@ module.exports = function (strapi) {
               }
 
               break;
+            case 'manyMorphToMany':
+            case 'manyMorphToOne':
+              // Update the relational array.
+              acc[current] = params.values[current].map(obj => {
+                const globalId = obj.source && obj.source !== 'content-manager' ?
+                  strapi.plugins[obj.source].models[obj.ref].globalId:
+                  strapi.models[obj.ref].globalId;
+
+                // Define the object stored in database.
+                // The shape is this object is defined by the strapi-mongoose connector.
+                return {
+                  ref: obj.refId,
+                  kind: globalId,
+                  [association.filter]: obj.field
+                }
+              });
+              break;
+            case 'oneToManyMorph':
+            case 'manyToManyMorph':
+              const transformToArrayID = (array) => {
+                if (_.isArray(array)) {
+                  return array.map(value => {
+                    if (_.isObject(value)) {
+                      return value._id || value.id;
+                    }
+
+                    return value;
+                  })
+                }
+
+                if (association.type === 'model') {
+                  return _.isEmpty(array) ? [] : transformToArrayID([array]);
+                }
+
+                return [];
+              };
+
+              // Compare array of ID to find deleted files.
+              const currentValue = transformToArrayID(response[current]).map(id => id.toString());
+              const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+
+              const toAdd = _.difference(storedValue, currentValue);
+              const toRemove = _.difference(currentValue, storedValue);
+
+              // Remove relations in the other side.
+              toAdd.forEach(id => {
+                virtualFields.push(this.addRelationMorph(details.model || details.collection, {
+                  id,
+                  alias: association.via,
+                  ref: Model.globalId,
+                  refId: response._id,
+                  field: association.alias
+                }, details.plugin));
+              });
+
+              // Remove relations in the other side.
+              toRemove.forEach(id => {
+                virtualFields.push(this.removeRelationMorph(details.model || details.collection, {
+                  id,
+                  alias: association.via,
+                  ref: Model.globalId,
+                  refId: response._id,
+                  field: association.alias
+                }, details.plugin));
+              });
+              break;
+            case 'oneMorphToOne':
+            case 'oneMorphToMany':
+              break;
             default:
           }
         }
@@ -611,6 +682,89 @@ module.exports = function (strapi) {
       const process = await Promise.all(virtualFields);
 
       return process[process.length - 1];
+    },
+
+    addRelationMorph: async function (model, params, source) {
+      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
+        _.assign(acc, strapi.plugins[current].models);
+        return acc;
+      }, {}));
+
+      const Model = models[model];
+      /*
+        TODO:
+        Test this part because it has been coded during the development of the upload feature.
+        However the upload doesn't need this method. It only uses the `removeRelationMorph`.
+      */
+
+      const entry = await Model.findOne({
+        [Model.primaryKey]: params.id
+      });
+      const value = entry[params.alias] || [];
+
+      // Retrieve association.
+      const association = Model.associations.find(association => association.via === params.alias)[0];
+
+      if (!association) {
+        throw Error(`Impossible to create relationship with ${params.ref} (${params.refId})`);
+      }
+
+      // Resolve if the association is already existing.
+      const isExisting = entry[params.alias].find(obj => {
+        if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
+          return true;
+        }
+
+        return false;
+      });
+
+      // Avoid duplicate.
+      if (isExisting) {
+        return Promise.resolve();
+      }
+
+      // Push new relation to the association array.
+      value.push({
+        ref: params.refId,
+        kind: params.ref,
+        field: association.filter
+      });
+
+      entry[params.alias] = value;
+
+      return Model.update({
+        [Model.primaryKey]: params.id
+      }, entry, {
+        strict: false
+      });
+    },
+
+    removeRelationMorph: async function (model, params, source) {
+      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
+        _.assign(acc, strapi.plugins[current].models);
+        return acc;
+      }, {}));
+
+      const Model = models[model];
+
+      const entry = await Model.findOne({
+        [Model.primaryKey]: params.id
+      });
+
+      // Filter the association array and remove the association.
+      entry[params.alias] = entry[params.alias].filter(obj => {
+        if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
+          return false;
+        }
+
+        return true;
+      });
+
+      return Model.update({
+        [Model.primaryKey]: params.id
+      }, entry, {
+        strict: false
+      });
     }
   };
 
