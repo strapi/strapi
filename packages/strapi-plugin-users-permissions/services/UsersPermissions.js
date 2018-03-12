@@ -50,7 +50,7 @@ module.exports = {
     return await Promise.all(arrayOfPromises);
   },
 
-  deleteRole: async (roleID, guestID) => {
+  deleteRole: async (roleID, publicRoleID) => {
     const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
@@ -66,7 +66,7 @@ module.exports = {
       acc.push(strapi.query('user', 'users-permissions').update({
         id: user._id || user.id
       }, {
-        role: guestID
+        role: publicRoleID
       }))
 
       return acc;
@@ -243,11 +243,11 @@ module.exports = {
       };
 
       const defaultPolicy = (obj, role) => {
-        const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
-        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
@@ -308,9 +308,9 @@ module.exports = {
         type: 'registered'
       }),
       strapi.query('role', 'users-permissions').create({
-        name: 'Guest',
+        name: 'Public',
         description: 'Default role given to unauthenticated user.',
-        type: 'guest'
+        type: 'public'
       })
     ]);
 
