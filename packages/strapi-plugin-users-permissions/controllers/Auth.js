@@ -209,12 +209,14 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    if (!(await strapi.store({
+    const settings = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
-    }).get()).allow_register) {
+    }).get();
+
+    if (!settings.allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 
@@ -241,7 +243,7 @@ module.exports = {
     const hasAdmin = users.length > 0;
 
     // Check if the user is the first to register
-    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: settings.default_role }, []);
 
     if (!role) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
