@@ -13,7 +13,7 @@ import styles from './styles.scss';
 class StyleButton extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
-    this.props.handlers[this.props.handler](this.props.style);
+    this.props.handlers[this.props.handler](this.props.text);
   }
 
   render() {
@@ -55,6 +55,7 @@ const  WysiwygInlineControls = ({ buttons, editorState, handlers, onToggle, onTo
           onToggle={onToggle}
           onToggleBlock={onToggleBlock}
           style={type.style}
+          text={type.text}
         />
       ))}
     </div>

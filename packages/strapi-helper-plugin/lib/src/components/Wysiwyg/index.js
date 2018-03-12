@@ -34,15 +34,8 @@ const SELECT_OPTIONS = [
   { id: 'Title H6', value: '###### ' },
 ];
 
+// NOTE: I leave that as a reminder
 const CONTROLS = [
-  // [
-  //   { label: 'H1', style: 'header-one', handler: 'toggleBlockType' },
-  //   { label: 'H2', style: 'header-two', handler: 'toggleBlockType' },
-  //   { label: 'H3', style: 'header-three', handler: 'toggleBlockType' },
-  //   { label: 'H4', style: 'header-four', handler: 'toggleBlockType' },
-  //   { label: 'H5', style: 'header-five', handler: 'toggleBlockType' },
-  //   { label: 'H6', style: 'header-six', handler: 'toggleBlockType' },
-  // ],
   [
     {label: 'B', style: 'BOLD', handler: 'toggleInlineStyle' },
     {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'toggleInlineStyle' },
@@ -55,6 +48,17 @@ const CONTROLS = [
     {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'toggleBlockType' },
   ],
 ];
+
+const NEW_CONTROLS = [
+  [
+    {label: 'B', style: 'BOLD', handler: 'addEntity', text: '__text in bold__' },
+    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*text in italic*' },
+    {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '<u>underlined text</u>' },
+    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addEntity', text: '-' },
+    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addEntity', text: '1.' },
+  ],
+];
+
 
 function getBlockStyle(block) {
   switch (block.getType()) {
@@ -106,6 +110,7 @@ class Wysiwyg extends React.Component {
   }
 
   addEntity = (text) => {
+    console.log('text', text)
     const editorState = this.state.editorState;
     const currentContent = editorState.getCurrentContent();
 
@@ -218,12 +223,13 @@ class Wysiwyg extends React.Component {
               selectOptions={SELECT_OPTIONS}
             />
           </div>
-          {CONTROLS.map((value, key) => (
+          {NEW_CONTROLS.map((value, key) => (
             <Controls
               key={key}
               buttons={value}
               editorState={editorState}
               handlers={{
+                addEntity: this.addEntity,
                 toggleBlockType: this.toggleBlockType,
                 toggleInlineStyle: this.toggleInlineStyle,
               }}
