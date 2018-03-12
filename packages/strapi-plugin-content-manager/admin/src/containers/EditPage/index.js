@@ -54,10 +54,6 @@ import styles from './styles.scss';
 export class EditPage extends React.Component {
   componentDidMount() {
     this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
-    // this.layout = bindLayout.call(
-    //   this,
-    //   get(this.context.plugins.toJS(), `${this.getSource()}.layout`, layout),
-    // );
 
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
