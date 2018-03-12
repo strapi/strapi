@@ -195,12 +195,15 @@ module.exports = {
   },
 
   getAdvancedSettings: async (ctx) => {
-    ctx.send(await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-      key: 'advanced'
-    }).get());
+    ctx.send({
+      settings: await strapi.store({
+        environment: '',
+        type: 'plugin',
+        name: 'users-permissions',
+        key: 'advanced'
+      }).get(),
+      roles: await strapi.plugins['users-permissions'].services.userspermissions.getRoles()
+    });
   },
 
   updateAdvancedSettings: async (ctx) => {
