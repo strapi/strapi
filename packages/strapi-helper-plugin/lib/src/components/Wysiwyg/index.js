@@ -224,7 +224,7 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
-
+    console.log(this  )
     if (this.state.toggleFullScreen) {
       return (
         <div className={styles.fullscreenOverlay} onClick={this.toggleFullScreen}>
@@ -273,7 +273,6 @@ class Wysiwyg extends React.Component {
                 setRef={(editor) => this.domEditor = editor}
                 spellCheck
               />
-              <input className={styles.editorInput} value="" tabIndex="-1" />
             </div>
           </div>
           <div
@@ -292,10 +291,11 @@ class Wysiwyg extends React.Component {
             </div>
             <div className={styles.editor}>
               <WysiwygEditor
-                editorState={cloneDeep(editorState)}
+                // TODO handle preview
+                editorState={EditorState.createEmpty()}
                 onChange={() => {}}
                 placeholder={this.props.placeholder}
-                tabIndex="-1"
+                setRef={(dummyEditor) => this.dummyEditor = dummyEditor}
               />
             </div>
           </div>
