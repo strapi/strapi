@@ -17,8 +17,9 @@ import {
   RichUtils,
 } from 'draft-js';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import cn from 'classnames';
+import { FormattedMessage } from 'react-intl';
 
 import Controls from 'components/WysiwygInlineControls';
 import Select from 'components/InputSelect';
@@ -61,7 +62,6 @@ const NEW_CONTROLS = [
     {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addEntity', text: '1.' },
   ],
 ];
-
 
 function getBlockStyle(block) {
   switch (block.getType()) {
@@ -224,7 +224,84 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
-    console.log(this.state);
+
+    if (this.state.toggleFullScreen) {
+      return (
+        <div className={styles.fullscreenOverlay} onClick={this.toggleFullScreen}>
+          <div
+            className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            style={{ marginTop: '0' }}
+          >
+            <div className={styles.controlsContainer}>
+              <div style={{ minWidth: '161px', marginLeft: '8px' }}>
+                <Select
+                  name="headerSelect"
+                  onChange={this.handleChangeSelect}
+                  value={this.state.headerValue}
+                  selectOptions={SELECT_OPTIONS}
+                />
+              </div>
+              {NEW_CONTROLS.map((value, key) => (
+                <Controls
+                  key={key}
+                  buttons={value}
+                  editorState={editorState}
+                  handlers={{
+                    addEntity: this.addEntity,
+                    toggleBlockType: this.toggleBlockType,
+                    toggleInlineStyle: this.toggleInlineStyle,
+                  }}
+                  onToggle={this.toggleInlineStyle}
+                  onToggleBlock={this.toggleBlockType}
+                  previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
+                />
+              ))}
+            </div>
+            <div className={styles.editor} onClick={this.focus}>
+              <WysiwygEditor
+                blockStyleFn={getBlockStyle}
+                editorState={editorState}
+                handleKeyCommand={this.handleKeyCommand}
+                keyBindingFn={this.mapKeyToEditorCommand}
+                onBlur={() => this.setState({ isFocused: false })}
+                onChange={this.onChange}
+                placeholder={this.props.placeholder}
+                setRef={(editor) => this.domEditor = editor}
+                spellCheck
+              />
+              <input className={styles.editorInput} value="" tabIndex="-1" />
+            </div>
+          </div>
+          <div
+            className={cn(styles.editorWrapper)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            style={{ marginTop: '0' }}
+          >
+            <div className={styles.previewControlsWrapper} onClick={this.toggleFullScreen}>
+              <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: 0 }} /></div>
+              <div className={styles.wysiwygCollapse}>
+                <FormattedMessage id="components.Wysiwyg.collapse" />
+              </div>
+            </div>
+            <div className={styles.editor}>
+              <WysiwygEditor
+                editorState={cloneDeep(editorState)}
+                onChange={() => {}}
+                placeholder={this.props.placeholder}
+                tabIndex="-1"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>

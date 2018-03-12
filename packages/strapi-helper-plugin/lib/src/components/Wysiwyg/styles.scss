@@ -16,6 +16,7 @@
   line-height: 18px;
   font-size: 13px;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
+  background-color: #fff;
 }
 
 .editor {
@@ -23,6 +24,7 @@
   padding: 8px 10px 0 10px;
   font-size: 16px;
   margin-top: 10px;
+  background-color: #fff;
   cursor: text;
 }
 
@@ -48,4 +50,46 @@
   padding: 5px;
   background-color: rgba(0, 0, 0, 0.05);
   font-family: Lato;
+}
+
+
+.fullscreenOverlay {
+  position: fixed;
+  z-index: 1040;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 30px;
+  display: flex;
+  background-color: black;
+  cursor: pointer;
+  > div {
+    min-width: 50%;
+    z-index: 9999;
+  }
+}
+
+
+.previewControlsWrapper {
+  display: flex;
+  height: 49px;
+  width: 100%;
+  padding: 0 17px;
+  justify-content: space-between;
+  background-color: #FAFAFB;
+  line-height: 30px;
+  font-size: 12px;
+  font-family: Lato;
+  background-color: #fff;
+  border-bottom: 1px solid #F3F4F4;
+  line-height: 49px;
+}
+
+.wysiwygCollapse {
+  &:after {
+    content: '\f066';
+    font-family: FontAwesome;
+    margin-left: 8px;
+  }
 }

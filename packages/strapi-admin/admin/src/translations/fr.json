@@ -105,6 +105,7 @@
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 
+  "components.Wysiwyg.collapse": "Fermer",
   "components.WysiwygBottomControls.charactersIndicators": "{characters} charactères",
   "components.WysiwygBottomControls.fullscreen": "Mode plein écran",
 
