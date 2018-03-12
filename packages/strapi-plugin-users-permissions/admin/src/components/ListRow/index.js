@@ -26,7 +26,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
   protectedRoleIDs = ['root'];
 
   // Roles that can't be deleted;
-  undeletableIDs = ['guest'];
+  undeletableIDs = ['guest', 'registered'];
 
   generateContent = () => {
     let icons = [
