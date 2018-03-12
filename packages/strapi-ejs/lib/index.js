@@ -8,9 +8,9 @@
 const path = require('path');
 
 // Externals
+const _ = require('lodash');
 const co = require('co');
 const render = require('koa-ejs');
-const _ = require('lodash');
 
 /**
  * EJS hook
@@ -35,7 +35,7 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: cb => {
+    initialize: (cb) => {
       // Force cache mode in production
       if (strapi.config.environment === 'production') {
         strapi.config.hook.settings.ejs.cache = true;
