@@ -44,7 +44,6 @@ export function* submitForm(action) {
       try {
         yield call(request, 'http://localhost:1338/register', {
           method: 'POST',
-          mode: 'no-cors',
           body: omit(body, ['password', 'confirmPassword']),
         });
       } catch (e) {
