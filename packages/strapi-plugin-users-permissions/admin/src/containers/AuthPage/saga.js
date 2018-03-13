@@ -1,4 +1,4 @@
-import { get, includes, isArray, set } from 'lodash';
+import { get, includes, isArray, set, omit } from 'lodash';
 import { call, fork, takeLatest, put, select } from 'redux-saga/effects';
 import auth from 'utils/auth';
 import request from 'utils/request';
@@ -40,6 +40,17 @@ export function* submitForm(action) {
 
     if (formType === 'register') {
       action.context.updatePlugin('users-permissions', 'hasAdminUser', true);
+
+      try {
+        yield call(request, 'http://localhost:1338/register', {
+          method: 'POST',
+          mode: 'no-cors',
+          body: omit(body, ['password', 'confirmPassword']),
+        });
+      } catch (e) {
+        console.log(e);
+        // Silent.
+      }
     }
 
     yield put(submitSucceeded());

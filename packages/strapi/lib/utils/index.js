@@ -78,18 +78,27 @@ module.exports = {
   },
 
   loadConfig: function(files) {
-    const aggregate = files.filter(
-      p =>
-        intersection(p.split('/').map(p => p.replace('.json', '')), ['environments', 'database', 'security', 'request', 'response', 'server']).length === 2 ||
-        ((p.indexOf('functions') !== -1 ||
-        p.indexOf('policies') !== -1 ||
-        p.indexOf('locales') !== -1 ||
-        p.indexOf('hook') !== -1 ||
-        p.indexOf('middleware') !== -1 ||
-        p.indexOf('language') !== -1 ||
-        p.indexOf('queries') !== -1 ||
-        p.indexOf('layout') !== -1) && p.indexOf('api') === -1)
-    );
+    const aggregate = files.filter(p => {
+      if (intersection(p.split('/').map(p => p.replace('.json', '')), ['environments', 'database', 'security', 'request', 'response', 'server']).length === 2) {
+        return true;
+      }
+
+      if (
+        p.indexOf('config/functions') !== -1 ||
+        p.indexOf('config/policies') !== -1 ||
+        p.indexOf('config/locales') !== -1 ||
+        p.indexOf('config/hook') !== -1 ||
+        p.indexOf('config/middleware') !== -1 ||
+        p.indexOf('config/language') !== -1 ||
+        p.indexOf('config/queries') !== -1 ||
+        p.indexOf('config/layout') !== -1
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
     const optional = difference(files, aggregate);
 
     return Promise.all([
