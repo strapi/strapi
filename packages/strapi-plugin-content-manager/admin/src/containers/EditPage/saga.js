@@ -84,8 +84,8 @@ export function* submit() {
 
       return acc;
     }, new FormData());
-
-    const id = isCreating ? '' : record.id;
+    
+    const id = isCreating ? '' : record.id || record._id;
     const params = { source };
     // Change the request helper default headers so we can pass a FormData
     const headers = {
