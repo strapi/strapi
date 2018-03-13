@@ -200,7 +200,7 @@ module.exports = (scope, cb) => {
               prefix: '',
               name: 'authenticationDatabase',
               message: 'Authentication database:',
-              default: _.get(scope.database, 'authenticationDatabase', false)
+              default: _.get(scope.database, 'authenticationDatabase', undefined)
             },
             {
               when: !hasDatabaseConfig,
