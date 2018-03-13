@@ -11,7 +11,8 @@
         "database": "${process.env.DATABASE_NAME || 'production'}",
         "username": "${process.env.DATABASE_USERNAME || ''}",
         "password": "${process.env.DATABASE_PASSWORD || ''}",
-        "ssl": "${process.env.DATABASE_SSL || false}"
+        "ssl": "${process.env.DATABASE_SSL || false}",
+        "authenticationDatabase": "${process.env.DATABASE_AUTHENTICATION_DATABASE || ''}"
       },
       "options": {}
     }
