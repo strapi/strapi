@@ -6,34 +6,37 @@
 
 import React from 'react';
 import {
-  // CompositeDecorator,
   ContentState,
   convertFromHTML,
-  convertFromRaw,
-  // convertToRaw,
   Editor,
   EditorState,
   getDefaultKeyBinding,
   Modifier,
   RichUtils,
-  SelectionState,
 } from 'draft-js';
 import PropTypes from 'prop-types';
 import { cloneDeep, isEmpty, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
-
 import Controls from 'components/WysiwygInlineControls';
 import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
-
-import { SELECT_OPTIONS, NEW_CONTROLS } from './constants';
-import { getBlockStyle, getInnerText } from './helpers';
+import {
+  END_REPLACER,
+  NEW_CONTROLS,
+  SELECT_OPTIONS,
+  START_REPLACER,
+} from './constants';
+import {
+  getBlockStyle,
+  getInnerText,
+  getOffSets,
+} from './helpers';
 
 import styles from './styles.scss';
 
-/* eslint-disable  react/no-string-refs */
+/* eslint-disable  react/no-string-refs */ // NOTE: need to check eslint
 /* eslint-disable react/jsx-handler-names */
 class Wysiwyg extends React.Component {
   constructor(props) {
@@ -46,6 +49,7 @@ class Wysiwyg extends React.Component {
       previewHTML: false,
       toggleFullScreen: false,
     };
+
     this.focus = () => {
       this.setState({ isFocused: true });
       return this.domEditor.focus();
@@ -81,22 +85,29 @@ class Wysiwyg extends React.Component {
     const anchorKey = selection.getAnchorKey();
     const currentContentBlock = currentContent.getBlockForKey(anchorKey);
     // Range of the text we want to replace
-    const start = selection.getStartOffset();
-    const end = selection.getEndOffset();
+    const { start, end } = getOffSets(selection);
+    // Retrieve the selected text
     const selectedText = currentContentBlock.getText().slice(start, end);
     const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
 
-    // TODO const value to trim
-    const innerTextLength = trimStart(innerText, '*<u></u>-`').length;
-    const focusOffset = start === end ? trimEnd(innerText, '*</u>`').length : start + trimEnd(innerText, '*</u>`').length;
-    const anchorOffset = start + innerText.length - trimStart(innerText, '*<u>-`').length;
+    const trimedStart = trimStart(innerText, START_REPLACER).length;
+    const trimedEnd = trimEnd(innerText, END_REPLACER).length;
+    // Set the correct offset
+    const focusOffset = start === end ? trimedEnd : start + trimedEnd;
+    const anchorOffset = start + innerText.length - trimedStart;
+    // Merge the old selection with the new one so the editorState is updated
     const updateSelection = selection.merge({
 			anchorOffset,
 			focusOffset,
 		});
+
+    // Dynamically add some content to the one selected
     const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
+
+    // Push the new content to the editorState
     const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
 
+    // SetState and force focus
     this.setState({
       editorState: EditorState.forceSelection(newEditorState, updateSelection),
       headerValue: '',
@@ -104,8 +115,6 @@ class Wysiwyg extends React.Component {
       this.focus();
     });
   }
-
-  getStartOffset = (text) => text.split('innerText')[0].length;
 
 
   handleChangeSelect = ({ target }) => {
@@ -139,23 +148,24 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   }
 
-  toggleBlockType = (blockType) => {
-    this.onChange(
-      RichUtils.toggleBlockType(
-        this.state.editorState,
-        blockType
-      )
-    );
-  }
-
-  toggleInlineStyle = (inlineStyle) => {
-    this.onChange(
-      RichUtils.toggleInlineStyle(
-        this.state.editorState,
-        inlineStyle
-      )
-    );
-  }
+  // NOTE: leave these function if we change to HTML instead of markdown
+  // toggleBlockType = (blockType) => {
+  //   this.onChange(
+  //     RichUtils.toggleBlockType(
+  //       this.state.editorState,
+  //       blockType
+  //     )
+  //   );
+  // }
+  //
+  // toggleInlineStyle = (inlineStyle) => {
+  //   this.onChange(
+  //     RichUtils.toggleInlineStyle(
+  //       this.state.editorState,
+  //       inlineStyle
+  //     )
+  //   );
+  // }
 
   toggleFullScreen = (e) => {
     e.preventDefault();
@@ -166,6 +176,10 @@ class Wysiwyg extends React.Component {
     });
   }
 
+  /**
+   * Init the editor with data from
+   * @param {[type]} props [description]
+   */
   setInitialValue = (props) => {
     const contentState = ContentState.createFromText(props.value);
     let editorState = EditorState.createWithContent(contentState);
@@ -190,14 +204,17 @@ class Wysiwyg extends React.Component {
     console.log('info', info);
   }
 
+  // NOTE: this need to be changed to preview markdown
   previewHTML = () => {
     const blocksFromHTML = convertFromHTML(this.props.value);
 
+    // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
       const contentState = ContentState.createFromBlockArray(blocksFromHTML);
       return EditorState.createWithContent(contentState);
     }
 
+    // Prevent errors if value is empty
     return EditorState.createEmpty();
   }
 
@@ -205,6 +222,7 @@ class Wysiwyg extends React.Component {
     const { editorState } = this.state;
 
     if (this.state.toggleFullScreen) {
+      // NOTE: this should be a function
       return (
         <div className={styles.fullscreenOverlay} onClick={this.toggleFullScreen}>
           <div
@@ -231,8 +249,8 @@ class Wysiwyg extends React.Component {
                   editorState={editorState}
                   handlers={{
                     addEntity: this.addEntity,
-                    toggleBlockType: this.toggleBlockType,
-                    toggleInlineStyle: this.toggleInlineStyle,
+                    // toggleBlockType: this.toggleBlockType,
+                    // toggleInlineStyle: this.toggleInlineStyle,
                   }}
                   onToggle={this.toggleInlineStyle}
                   onToggleBlock={this.toggleBlockType}
@@ -270,7 +288,7 @@ class Wysiwyg extends React.Component {
             </div>
             <div className={styles.editor}>
               <WysiwygEditor
-                // TODO handle preview
+                // TODO handle markdown preview
                 editorState={this.previewHTML()}
                 onChange={() => {}}
                 placeholder={this.props.placeholder}
@@ -329,6 +347,7 @@ class Wysiwyg extends React.Component {
   }
 }
 
+// NOTE: handle defaultProps!
 Wysiwyg.defaultProps = {
   autoFocus: false,
   onChange: () => {},

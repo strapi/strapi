@@ -38,3 +38,7 @@ export const NEW_CONTROLS = [
     {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addEntity', text: '> innerText' },
   ],
 ];
+
+
+export const END_REPLACER = '*</u>`](link)';
+export const START_REPLACER = '*<u>-`>#[ ![ 1. ';

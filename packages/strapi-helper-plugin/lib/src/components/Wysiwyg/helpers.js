@@ -1,3 +1,10 @@
+import styles from './styles.scss';
+/**
+ * Override the editor css
+ * @param  {[type]} block [description]
+ * @return {[type]}       [description]
+ */
+
 export function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
@@ -8,6 +15,7 @@ export function getBlockStyle(block) {
   }
 }
 
+// TODO: this could be improved
 export function getInnerText(style) {
   let innerText;
 
@@ -62,4 +70,17 @@ export function getInnerText(style) {
   }
 
   return innerText;
+}
+
+
+/**
+ * Get the start and end offset
+ * @param  {Object} selection
+ * @return {Object}
+ */
+export function getOffSets(selection) {
+  return {
+    end: selection.getEndOffset(),
+    start: selection.getStartOffset(),
+  };
 }
