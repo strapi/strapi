@@ -17,7 +17,7 @@ import {
   RichUtils,
 } from 'draft-js';
 import PropTypes from 'prop-types';
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, isEmpty, replace } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 
@@ -26,52 +26,10 @@ import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 
+import { SELECT_OPTIONS, NEW_CONTROLS } from './constants';
+import { getBlockStyle, getInnerText } from './helpers';
+
 import styles from './styles.scss';
-
-const SELECT_OPTIONS = [
-  { id: 'Add a title', value: '' },
-  { id: 'Title H1', value: '# ' },
-  { id: 'Title H2', value: '## ' },
-  { id: 'Title H3', value: '### ' },
-  { id: 'Title H4', value: '#### '},
-  { id: 'Title H5', value: '##### ' },
-  { id: 'Title H6', value: '###### ' },
-];
-
-// NOTE: I leave that as a reminder
-const CONTROLS = [
-  [
-    {label: 'B', style: 'BOLD', handler: 'toggleInlineStyle' },
-    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'toggleInlineStyle' },
-    {label: 'U', style: 'UNDERLINE', handler: 'toggleInlineStyle' },
-    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'toggleBlockType' },
-    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'toggleBlockType' },
-  ],
-  [
-    {label: '<>', style: 'code-block', handler: 'toggleBlockType' },
-    {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'toggleBlockType' },
-  ],
-];
-
-const NEW_CONTROLS = [
-  [
-    {label: 'B', style: 'BOLD', handler: 'addEntity', text: '__text in bold__' },
-    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*text in italic*' },
-    {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '<u>underlined text</u>' },
-    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addEntity', text: '-' },
-    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addEntity', text: '1.' },
-  ],
-];
-
-function getBlockStyle(block) {
-  switch (block.getType()) {
-    case 'blockquote':
-      return styles.editorBlockquote;
-    case 'code-block':
-      return styles.editorCodeBlock;
-    default: return null;
-  }
-}
 
 /* eslint-disable  react/no-string-refs */
 /* eslint-disable react/jsx-handler-names */
@@ -113,8 +71,7 @@ class Wysiwyg extends React.Component {
     }
   }
 
-  addEntity = (text) => {
-    console.log('text', text)
+  addEntity = (text, style) => {
     const editorState = this.state.editorState;
     const currentContent = editorState.getCurrentContent();
 
@@ -125,8 +82,9 @@ class Wysiwyg extends React.Component {
     const start = selection.getStartOffset();
     const end = selection.getEndOffset();
     const selectedText = currentContentBlock.getText().slice(start, end);
+    const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
     // Replace it with the value
-    const textWithEntity = Modifier.replaceText(currentContent, selection, `${text} ${selectedText}`);
+    const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
 
     this.setState({
       editorState: EditorState.push(editorState, textWithEntity, 'insert-characters'),
@@ -138,7 +96,8 @@ class Wysiwyg extends React.Component {
 
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
-    this.addEntity(target.value);
+    const splitData = target.value.split('.');
+    this.addEntity(splitData[0], splitData[1]);
   }
 
   onChange = (editorState) => {
@@ -224,7 +183,7 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
-    console.log(this  )
+
     if (this.state.toggleFullScreen) {
       return (
         <div className={styles.fullscreenOverlay} onClick={this.toggleFullScreen}>

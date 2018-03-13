@@ -13,7 +13,7 @@ import styles from './styles.scss';
 class StyleButton extends React.Component {
   handleClick = (e) => {
     e.preventDefault();
-    this.props.handlers[this.props.handler](this.props.text);
+    this.props.handlers[this.props.handler](this.props.text, this.props.style);
   }
 
   render() {
