@@ -25,7 +25,7 @@ export const CONTROLS = [
 
 export const NEW_CONTROLS = [
   [
-    {label: 'B', style: 'BOLD', handler: 'addEntity', text: '__innerText__' },
+    {label: 'B', style: 'BOLD', handler: 'addEntity', text: '**innerText**' },
     {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*innerText*' },
     {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '<u>innerText</u>' },
     {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addEntity', text: '- innerText' },

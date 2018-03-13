@@ -9,15 +9,17 @@ import {
   // CompositeDecorator,
   ContentState,
   convertFromHTML,
+  convertFromRaw,
   // convertToRaw,
   Editor,
   EditorState,
   getDefaultKeyBinding,
   Modifier,
   RichUtils,
+  SelectionState,
 } from 'draft-js';
 import PropTypes from 'prop-types';
-import { cloneDeep, isEmpty, replace } from 'lodash';
+import { cloneDeep, isEmpty, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 
@@ -74,25 +76,37 @@ class Wysiwyg extends React.Component {
   addEntity = (text, style) => {
     const editorState = this.state.editorState;
     const currentContent = editorState.getCurrentContent();
-
     // Get the selected text
     const selection = editorState.getSelection();
     const anchorKey = selection.getAnchorKey();
     const currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    // Range of the text we want to replace
     const start = selection.getStartOffset();
     const end = selection.getEndOffset();
     const selectedText = currentContentBlock.getText().slice(start, end);
     const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
-    // Replace it with the value
+
+    // TODO const value to trim
+    const innerTextLength = trimStart(innerText, '*<u></u>-`').length;
+    const focusOffset = start === end ? trimEnd(innerText, '*</u>`').length : start + trimEnd(innerText, '*</u>`').length;
+    const anchorOffset = start + innerText.length - trimStart(innerText, '*<u>-`').length;
+    const updateSelection = selection.merge({
+			anchorOffset,
+			focusOffset,
+		});
     const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
+    const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
 
     this.setState({
-      editorState: EditorState.push(editorState, textWithEntity, 'insert-characters'),
+      editorState: EditorState.forceSelection(newEditorState, updateSelection),
       headerValue: '',
     }, () => {
       this.focus();
     });
   }
+
+  getStartOffset = (text) => text.split('innerText')[0].length;
+
 
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
@@ -121,6 +135,7 @@ class Wysiwyg extends React.Component {
       }
       return;
     }
+
     return getDefaultKeyBinding(e);
   }
 
