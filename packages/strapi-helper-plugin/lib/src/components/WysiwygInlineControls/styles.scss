@@ -73,3 +73,19 @@
     font-size: 13px;
   }
 }
+
+.styleButtonLink {
+  &:before {
+    content: '\f0c1';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+  }
+}
+
+.styleButtonImg {
+  &:before {
+    content: '\f03e';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+  }
+}

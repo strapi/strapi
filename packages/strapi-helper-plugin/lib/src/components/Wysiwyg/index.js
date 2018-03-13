@@ -177,8 +177,13 @@ class Wysiwyg extends React.Component {
 
   previewHTML = () => {
     const blocksFromHTML = convertFromHTML(this.props.value);
-    const contentState = ContentState.createFromBlockArray(blocksFromHTML);
-    return EditorState.createWithContent(contentState);
+
+    if (blocksFromHTML.contentBlocks) {
+      const contentState = ContentState.createFromBlockArray(blocksFromHTML);
+      return EditorState.createWithContent(contentState);
+    }
+
+    return EditorState.createEmpty();
   }
 
   render() {
@@ -251,7 +256,7 @@ class Wysiwyg extends React.Component {
             <div className={styles.editor}>
               <WysiwygEditor
                 // TODO handle preview
-                editorState={EditorState.createEmpty()}
+                editorState={this.previewHTML()}
                 onChange={() => {}}
                 placeholder={this.props.placeholder}
                 setRef={(dummyEditor) => this.dummyEditor = dummyEditor}
