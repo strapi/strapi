@@ -55,8 +55,8 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Select all",
 
-  "EditForm.inputSelect.label.role": "Default role for registered users",
-  "EditForm.inputSelect.description.role": "It will attach the new registered user to the selected role.",
+  "EditForm.inputSelect.label.role": "Default role for authenticated users",
+  "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
   "EditForm.inputSelect.subscriptions.label": "Manage subscription quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
   "EditForm.inputSelect.durations.label": "Duration",

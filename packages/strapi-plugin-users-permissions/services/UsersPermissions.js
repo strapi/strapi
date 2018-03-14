@@ -303,9 +303,9 @@ module.exports = {
         type: 'root'
       }),
       strapi.query('role', 'users-permissions').create({
-        name: 'Registered',
+        name: 'Authenticated',
         description: 'Default role given to authenticated user.',
-        type: 'registered'
+        type: 'authenticated'
       }),
       strapi.query('role', 'users-permissions').create({
         name: 'Public',
@@ -318,10 +318,10 @@ module.exports = {
   },
 
   updateRole: async function (roleID, body) {
-    const [role, root, registered] = await Promise.all([
+    const [role, root, authenticated] = await Promise.all([
       this.getRole(roleID, []),
       strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []),
-      strapi.query('role', 'users-permissions').findOne({ type: 'registered' }, [])
+      strapi.query('role', 'users-permissions').findOne({ type: 'authenticated' }, [])
     ]);
 
     const arrayOfPromises = Object.keys(body.permissions).reduce((acc, type) => {
@@ -365,11 +365,11 @@ module.exports = {
         arrayOfPromises.push(this.updateUserRole(user, roleID));
       })
 
-    // Remove user to this role and link him to registered.
+    // Remove user to this role and link him to authenticated.
     _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
       .filter(user => user.role !== `${root._id || root.id}`.toString())
       .forEach(user => {
-        arrayOfPromises.push(this.updateUserRole(user, registered._id || registered.id));
+        arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
 
 

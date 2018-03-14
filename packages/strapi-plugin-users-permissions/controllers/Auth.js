@@ -59,7 +59,7 @@ module.exports = {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.noAdminAccess' }] }] : `You're not an administrator.`);
       }
 
-      // The user never registered with the `local` provider.
+      // The user never authenticated with the `local` provider.
       if (!user.password) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.local' }] }] : 'This user never set a local password, please login thanks to the provider used during account creation.');
       }
