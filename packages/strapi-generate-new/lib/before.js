@@ -196,6 +196,14 @@ module.exports = (scope, cb) => {
             },
             {
               when: !hasDatabaseConfig,
+              type: 'input',
+              prefix: '',
+              name: 'authenticationDatabase',
+              message: 'Authentication database:',
+              default: _.get(scope.database, 'authenticationDatabase', undefined)
+            },
+            {
+              when: !hasDatabaseConfig,
               type: 'boolean',
               prefix: '',
               name: 'ssl',
@@ -214,6 +222,7 @@ module.exports = (scope, cb) => {
             scope.database.settings.database = answers.database;
             scope.database.settings.username = answers.username;
             scope.database.settings.password = answers.password;
+            scope.database.settings.authenticationDatabase = answers.authenticationDatabase;
             scope.database.settings.ssl = answers.ssl;
 
             logger.info('Testing database connection...');
