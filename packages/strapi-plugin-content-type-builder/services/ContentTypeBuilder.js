@@ -6,6 +6,28 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 
 module.exports = {
+  appearance: (attributes, model, source) => {
+    const layoutPath = path.join(strapi.config.appPath, 'plugins', source, 'config', 'layout.json');
+    let layout;
+
+    try {
+      layout = JSON.parse(layoutPath, 'utf8');
+    } catch (err) {
+      layout = {};
+    }
+
+    Object.keys(attributes).map(attribute => {
+      const appearances = _.get(attributes, [attribute, 'appearance'], {});
+      Object.keys(appearances).map(appearance => {
+        _.set(layout, [model, 'attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
+      });
+
+      _.unset(attributes, [attribute, 'appearance']);
+    });
+
+    fs.writeFileSync(layoutPath, JSON.stringify(layout, null, 2), 'utf8');
+  },
+
   getModels: () => {
     const models = [];
 
