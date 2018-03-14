@@ -6,15 +6,18 @@
 
 import React from 'react';
 import {
+  ContentBlock,
   ContentState,
   convertFromHTML,
   EditorState,
   getDefaultKeyBinding,
+  genKey,
   Modifier,
   RichUtils,
   // ContentBlock,
   // genKey,
 } from 'draft-js';
+import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import { isEmpty, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
@@ -24,6 +27,9 @@ import Drop from 'components/WysiwygDropUpload';
 import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
+
+import request from 'utils/request';
+
 import {
   END_REPLACER,
   NEW_CONTROLS,
@@ -128,7 +134,14 @@ class Wysiwyg extends React.Component {
     this.addEntity(splitData[0], splitData[1]);
   }
 
-  handleDragEnter = () => this.setState({ isDraging: true });
+  handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!this.state.isDraging) {
+      this.setState({ isDraging: true });
+    }
+  }
 
   handleDragLeave = () => this.setState({ isDraging: false });
 
@@ -139,11 +152,24 @@ class Wysiwyg extends React.Component {
 
   handleDrop = (e) => {
     e.preventDefault();
-    // const { dataTransfer: { files} } = e;
+    const { dataTransfer: { files} } = e;
+    const formData = new FormData();
+    formData.append('files', files[0]);
+    const headers = {
+      'X-Forwarded-Host': 'strapi',
+    };
 
-    console.log('droped');
-
-    this.setState({ isDraging: false });
+    return request('/upload', {method: 'POST', headers, body: formData }, false, false)
+      .then(response => {
+        const link = `![text](${response[0].url})`;
+        this.addLinkBlock(link);
+      })
+      .catch(err => {
+        console.log('error', err.response);
+      })
+      .finally(() => {
+        this.setState({ isDraging: false });
+      });
   }
 
   mapKeyToEditorCommand = (e) => {
@@ -160,6 +186,29 @@ class Wysiwyg extends React.Component {
     }
 
     return getDefaultKeyBinding(e);
+  }
+
+  addLinkBlock = (link) => {
+    const { editorState } = this.state;
+    const newBlock = new ContentBlock({
+      key: genKey(),
+      type: 'unstyled',
+      text: link,
+      charaterList: List([]),
+    });
+    const contentState = editorState.getCurrentContent();
+    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
+    const newContentState = ContentState
+      .createFromBlockArray(newBlockMap.toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter());
+
+    const newEditorState = EditorState.push(
+      editorState,
+      newContentState,
+    );
+
+    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
   addEntity = (text, style) => {
