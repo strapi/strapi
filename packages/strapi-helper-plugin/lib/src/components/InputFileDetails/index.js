@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, startsWith } from 'lodash';
-import cn from 'classnames';
 
 import styles from './styles.scss';
 
@@ -19,7 +18,7 @@ function InputFileDetails(props) {
 
   // TODO improve logic
   if (!get(props.file, 'name') && !props.multiple) {
-    return <div />
+    return <div />;
   }
 
   const url = startsWith(props.file.url, '/') ? `${strapi.backendURL}${props.file.url}` : props.file.url;

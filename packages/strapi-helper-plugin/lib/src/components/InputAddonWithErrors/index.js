@@ -101,7 +101,8 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerAddon,
           customBootstrapClass,
           !isEmpty(className) && className,

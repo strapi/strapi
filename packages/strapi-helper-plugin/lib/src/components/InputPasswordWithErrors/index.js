@@ -96,7 +96,8 @@ class InputPasswordWithErrors extends React.Component {
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerInputPassword,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className,

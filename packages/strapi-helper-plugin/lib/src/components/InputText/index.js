@@ -4,11 +4,12 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 import styles from './styles.scss';
 
 function InputText(props) {
   const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
-  
+
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
       {(message) => (
@@ -56,10 +57,10 @@ InputText.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

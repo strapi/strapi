@@ -70,6 +70,7 @@ StyleButton.defaultProps = {
   onToggle: () => {},
   onToggleBlock: () => {},
   style: '',
+  text: '',
 };
 
 StyleButton.propTypes = {
@@ -82,6 +83,7 @@ StyleButton.propTypes = {
   // onToggle: PropTypes.func,
   // onToggleBlock: PropTypes.func,
   style: PropTypes.string,
+  text: PropTypes.string,
 };
 
 WysiwygInlineControls.defaultProps = {

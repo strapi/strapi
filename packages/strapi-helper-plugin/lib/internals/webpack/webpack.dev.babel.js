@@ -66,10 +66,10 @@ module.exports = require('./webpack.base.babel')({
       path.join(appPath, 'admin', 'admin', 'src', 'app.js'),
     ],
   }, plugins.src.reduce((acc, current) => {
-      acc[current] = path.resolve(plugins.folders[current], 'app.js');
+    acc[current] = path.resolve(plugins.folders[current], 'app.js');
 
-      return acc;
-    }, {})
+    return acc;
+  }, {})
   ),
 
   // Don't use hashes in dev mode for better performance

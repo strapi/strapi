@@ -11,6 +11,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 class InputEmail extends React.Component {
   state = { isFocused: false };
 
@@ -41,7 +42,8 @@ class InputEmail extends React.Component {
 
     return (
       <div className={cn(styles.inputEmail, 'input-group', !isEmpty(className) && className)} style={style}>
-        <span className={cn(
+        <span
+          className={cn(
             'input-group-addon',
             styles.addonEmail,
             this.state.isFocused && styles.addonFocus,
@@ -94,10 +96,10 @@ InputEmail.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
