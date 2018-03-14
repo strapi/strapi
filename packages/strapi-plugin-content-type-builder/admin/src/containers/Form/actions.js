@@ -7,7 +7,7 @@
 /* eslint-disable new-cap */
 
 import { concat, includes, map, forEach, replace } from 'lodash';
-import { Map, List } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 import { getValidationsFromForm } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
 
@@ -170,7 +170,7 @@ export function setAttributeFormEdit(hash, contentType) {
 
   const attribute = Map({
     name: contentTypeAttribute.name,
-    params: Map(contentTypeAttribute.params),
+    params: fromJS(contentTypeAttribute.params),
   });
 
   return {
