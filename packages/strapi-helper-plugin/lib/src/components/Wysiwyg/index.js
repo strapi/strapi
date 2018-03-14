@@ -12,12 +12,15 @@ import {
   getDefaultKeyBinding,
   Modifier,
   RichUtils,
+  // ContentBlock,
+  // genKey,
 } from 'draft-js';
 import PropTypes from 'prop-types';
 import { isEmpty, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import Controls from 'components/WysiwygInlineControls';
+import Drop from 'components/WysiwygDropUpload';
 import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
@@ -44,6 +47,7 @@ class Wysiwyg extends React.Component {
       editorState: EditorState.createEmpty(),
       isFocused: false,
       initialValue: '',
+      isDraging: false,
       headerValue: '',
       previewHTML: false,
       toggleFullScreen: false,
@@ -122,6 +126,24 @@ class Wysiwyg extends React.Component {
     this.setState({ headerValue: target.value });
     const splitData = target.value.split('.');
     this.addEntity(splitData[0], splitData[1]);
+  }
+
+  handleDragEnter = () => this.setState({ isDraging: true });
+
+  handleDragLeave = () => this.setState({ isDraging: false });
+
+  handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  handleDrop = (e) => {
+    e.preventDefault();
+    // const { dataTransfer: { files} } = e;
+
+    console.log('droped');
+
+    this.setState({ isDraging: false });
   }
 
   mapKeyToEditorCommand = (e) => {
@@ -299,7 +321,18 @@ class Wysiwyg extends React.Component {
     }
 
     return (
-      <div className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}>
+      <div
+        className={cn(
+          styles.editorWrapper,
+          this.state.isFocused && styles.editorFocus,
+        )}
+        onDragEnter={this.handleDragEnter}
+
+        onDragOver={this.handleDragOver}
+      >
+        {this.state.isDraging && (
+          <Drop onDrop={this.handleDrop} onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave} />
+        )}
         <div className={styles.controlsContainer}>
           <div style={{ minWidth: '161px', marginLeft: '8px' }}>
             <Select

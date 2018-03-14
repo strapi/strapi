@@ -5,6 +5,7 @@
  *
  */
 
+/* eslint-disable no-console */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, has, isArray, isEmpty, size } from 'lodash';

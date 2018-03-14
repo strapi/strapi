@@ -1,6 +1,7 @@
 .controlsContainer {
   display: flex;
   background-color: #F3F4F4;
+
   select {
     min-height: 31px !important;
     width: 161px !important;
@@ -17,6 +18,7 @@
   font-size: 13px;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   background-color: #fff;
+  position: relative;
 }
 
 .editor {
