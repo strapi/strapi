@@ -50,7 +50,7 @@ module.exports = {
     return await Promise.all(arrayOfPromises);
   },
 
-  deleteRole: async (roleID, guestID) => {
+  deleteRole: async (roleID, publicRoleID) => {
     const role = await strapi.query('role', 'users-permissions').findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
@@ -66,7 +66,7 @@ module.exports = {
       acc.push(strapi.query('user', 'users-permissions').update({
         id: user._id || user.id
       }, {
-        role: guestID
+        role: publicRoleID
       }))
 
       return acc;
@@ -243,11 +243,11 @@ module.exports = {
       };
 
       const defaultPolicy = (obj, role) => {
-        const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
-        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
-        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'guest';
+        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
@@ -303,20 +303,25 @@ module.exports = {
         type: 'root'
       }),
       strapi.query('role', 'users-permissions').create({
-        name: 'Guest',
-        description: 'Default role given to unauthenticated user.',
-        type: 'guest'
+        name: 'Authenticated',
+        description: 'Default role given to authenticated user.',
+        type: 'authenticated'
       }),
+      strapi.query('role', 'users-permissions').create({
+        name: 'Public',
+        description: 'Default role given to unauthenticated user.',
+        type: 'public'
+      })
     ]);
 
     await this.updatePermissions(cb);
   },
 
   updateRole: async function (roleID, body) {
-    const [role, root, guest] = await Promise.all([
+    const [role, root, authenticated] = await Promise.all([
       this.getRole(roleID, []),
       strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []),
-      strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, [])
+      strapi.query('role', 'users-permissions').findOne({ type: 'authenticated' }, [])
     ]);
 
     const arrayOfPromises = Object.keys(body.permissions).reduce((acc, type) => {
@@ -339,6 +344,10 @@ module.exports = {
       return acc;
     }, []);
 
+    arrayOfPromises.push(strapi.query('role', 'users-permissions').update({
+      id: roleID,
+    }, _.pick(body, ['name', 'description'])));
+
     // stringify mongoDB _id for add/remove matching
     if (role._id ? '_id' : 'id' === '_id') {
       role.users.reduce((acc, user) => {
@@ -356,11 +365,11 @@ module.exports = {
         arrayOfPromises.push(this.updateUserRole(user, roleID));
       })
 
-    // Remove user to this role and link him to guest.
+    // Remove user to this role and link him to authenticated.
     _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
       .filter(user => user.role !== `${root._id || root.id}`.toString())
       .forEach(user => {
-        arrayOfPromises.push(this.updateUserRole(user, guest._id || guest.id));
+        arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
 
 

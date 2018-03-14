@@ -210,7 +210,7 @@ module.exports = function (strapi) {
               });
             });
 
-            // Parse every registered model.
+            // Parse every authenticated model.
             _.forEach(models, (definition, model) => {
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 

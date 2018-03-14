@@ -70,13 +70,13 @@ exports.connect = (provider, query) => {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
-        // Retrieve role `guest`.
-        const guest = await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+        // Retrieve role `public`.
+        const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
 
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
-          role: guest._id || guest.id
+          role: publicRole._id || publicRole.id
         });
 
         const createdUser = await strapi.query('user', 'users-permissions').create(params);

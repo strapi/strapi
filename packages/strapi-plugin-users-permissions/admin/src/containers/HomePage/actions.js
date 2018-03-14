@@ -12,6 +12,7 @@ import {
   FETCH_DATA,
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
+  RESET_PROPS,
   SET_DATA_TO_EDIT,
   SET_FORM,
   SET_FORM_ERRORS,
@@ -76,6 +77,12 @@ export function onChange({ target }) {
     type: ON_CHANGE,
     keys: ['modifiedData'].concat(target.name.split('.')),
     value: target.value,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }
 
