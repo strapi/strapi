@@ -57,7 +57,7 @@ class InputCheckbox extends React.Component {
       content = (
         <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
           {checkbox}
-          {label}
+          <p>{label}</p>
         </label>
       );
     }
@@ -66,7 +66,7 @@ class InputCheckbox extends React.Component {
       content = (
         <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
           {checkbox}
-          {label()}
+          <p>{label()}</p>
         </label>
       );
     }
@@ -77,7 +77,7 @@ class InputCheckbox extends React.Component {
           {(message) => (
             <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
               {checkbox}
-              {message}
+              <p>{message}</p>
             </label>
           )}
         </FormattedMessage>

@@ -10,6 +10,7 @@ export const DELETE_DATA_SUCCEEDED = 'UsersPermissions/HomePage/DELETE_DATA_SUCC
 export const FETCH_DATA = 'UsersPermissions/HomePage/FETCH_DATA';
 export const FETCH_DATA_SUCCEEDED = 'UsersPermissions/HomePage/FETCH_DATA_SUCCEEDED';
 export const ON_CHANGE = 'UsersPermissions/HomePage/ON_CHANGE';
+export const RESET_PROPS = 'UsersPermissions/HomePage/RESET_PROPS';
 export const SET_DATA_TO_EDIT = 'UsersPermissions/HomePage/SET_DATA_TO_EDIT';
 export const SET_FORM = 'UsersPermissions/HomePage/SET_FORM';
 export const SET_FORM_ERRORS = 'UsersPermissions/HomePage/SET_FORM_ERRORS';
