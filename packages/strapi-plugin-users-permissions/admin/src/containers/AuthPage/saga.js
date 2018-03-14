@@ -43,7 +43,7 @@ export function* submitForm(action) {
 
       if (body.news) {
         try {
-          yield call(request, 'http://localhost:1338/register', {
+          yield call(request, 'https://analytics.strapi.io/register', {
             method: 'POST',
             body: omit(body, ['password', 'confirmPassword']),
           });
