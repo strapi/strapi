@@ -42,7 +42,7 @@ export function* submitForm(action) {
       action.context.updatePlugin('users-permissions', 'hasAdminUser', true);
 
       try {
-        yield call(request, 'http://localhost:1338/register', {
+        yield call(request, 'https://analytics.strapi.io/register', {
           method: 'POST',
           body: omit(body, ['password', 'confirmPassword']),
         });
