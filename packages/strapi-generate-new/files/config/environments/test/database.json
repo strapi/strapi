@@ -10,7 +10,8 @@
         "database": "test",
         "username": "",
         "password": "",
-        "ssl": false
+        "ssl": false,
+        "authenticationDatabase": ""
       },
       "options": {}
     }
