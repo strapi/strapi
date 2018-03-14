@@ -121,23 +121,27 @@ module.exports = {
 
   usage: async function () {
     try {
-      const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
+      if (this.config.uuid) {
+        const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
 
-      const [usage, signedHash, required] = await Promise.all([
-        fetch('https://strapi.io/assets/images/usage.gif'),
-        fetch('https://strapi.io/hash.txt'),
-        fetch('https://strapi.io/required.txt')
-      ]);
+        const [usage, signedHash, required] = await Promise.all([
+          fetch('http://localhost:1338/usage.gif'),
+          fetch('http://localhost:1338/hash.txt'),
+          fetch('http://localhost:1338/required.txt')
+        ]);
 
-      if (usage.status === 200 && signedHash.status === 200 && this.config.uuid) {
-        const code = Buffer.from(await usage.text(), 'base64').toString();
-        const hash = crypto.createHash('sha512').update(code).digest('hex');
-        const dependencies = Buffer.from(await required.text(), 'base64').toString();
+        if (usage.status === 200 && signedHash.status === 200) {
+          const code = Buffer.from(await usage.text(), 'base64').toString();
+          const hash = crypto.createHash('sha512').update(code).digest('hex');
+          const dependencies = Buffer.from(await required.text(), 'base64').toString();
 
-        const verifier = crypto.createVerify('RSA-SHA256').update(hash);
+          const verifier = crypto.createVerify('RSA-SHA256').update(hash);
 
-        if (verifier.verify(publicKey, await signedHash.text(), 'hex')) {
-          vm.runInNewContext(code)(this.config.uuid, exposer(dependencies));
+          if (verifier.verify(publicKey, await signedHash.text(), 'hex')) {
+            return new Promise(resolve => {
+              vm.runInNewContext(code)(this.config.uuid, exposer(dependencies), resolve);
+            });
+          }
         }
       }
     } catch (e) {

@@ -31,7 +31,7 @@ export function* submitForm(action) {
 
     }
 
-    const response = yield call(request, requestURL, { method: 'POST', body });
+    const response = yield call(request, requestURL, { method: 'POST', body: omit(body, 'news') });
 
     if (response.jwt) {
       yield call(auth.setToken, response.jwt, body.rememberMe);
@@ -41,14 +41,15 @@ export function* submitForm(action) {
     if (formType === 'register') {
       action.context.updatePlugin('users-permissions', 'hasAdminUser', true);
 
-      try {
-        yield call(request, 'https://analytics.strapi.io/register', {
-          method: 'POST',
-          body: omit(body, ['password', 'confirmPassword']),
-        });
-      } catch (e) {
-        console.log(e);
-        // Silent.
+      if (body.news) {
+        try {
+          yield call(request, 'http://localhost:1338/register', {
+            method: 'POST',
+            body: omit(body, ['password', 'confirmPassword']),
+          });
+        } catch (e) {
+          // Silent.
+        }
       }
     }
 

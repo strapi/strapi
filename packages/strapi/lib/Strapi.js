@@ -116,8 +116,6 @@ class Strapi extends EventEmitter {
           cb();
         }
       });
-
-      utils.usage.call(this);
     } catch (e) {
       this.log.debug(`Server wasn't able to start properly.`);
       this.log.error(e);
@@ -162,7 +160,7 @@ class Strapi extends EventEmitter {
   async load() {
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
-        ctx.set('strapi', 'You are so French !');
+        ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {
         await next();
@@ -179,6 +177,9 @@ class Strapi extends EventEmitter {
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
+
+    // Usage.
+    await utils.usage.call(this);
 
     // Init core store manager
     await store.pre.call(this);

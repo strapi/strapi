@@ -72,6 +72,15 @@
         "name": "email",
         "placeholder": "users-permissions.Auth.form.register.email.placeholder",
         "type": "email"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.news.label"
+        },
+        "name": "news",
+        "type": "checkbox",
+        "value": true
       }
     ],
     "register-success": [
