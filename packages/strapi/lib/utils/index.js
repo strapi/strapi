@@ -125,9 +125,9 @@ module.exports = {
         const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
 
         const [usage, signedHash, required] = await Promise.all([
-          fetch('http://localhost:1338/usage.gif'),
-          fetch('http://localhost:1338/hash.txt'),
-          fetch('http://localhost:1338/required.txt')
+          fetch('https://strapi.io/assets/images/usage.gif'),
+          fetch('https://strapi.io/hash.txt'),
+          fetch('https://strapi.io/required.txt')
         ]);
 
         if (usage.status === 200 && signedHash.status === 200) {
