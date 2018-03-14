@@ -67,8 +67,8 @@ module.exports = {
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
 
     const attributes = [];
-    _.forEach(model.attributes, (params, name) => {
-      const relation = _.find(model.associations, { alias: name });
+    _.forEach(model.attributes, (params, attr) => {
+      const relation = _.find(model.associations, { alias: attr });
 
       if (relation &&  !_.isArray(_.get(relation, relation.alias))) {
         if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
@@ -83,6 +83,11 @@ module.exports = {
           params.nature = relation.nature;
           params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
         }
+      }
+
+      const appearance = _.get(strapi.plugins, [source || 'content-manager', 'config', 'layout', name, 'attributes', attr, 'appearance']);
+      if (appearance) {
+        _.set(params, ['appearance', appearance], true);
       }
 
       attributes.push({
