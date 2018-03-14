@@ -60,6 +60,7 @@ export function setForm(formType, email) {
         password: '',
         confirmPassword: '',
         email: '',
+        news: true,
       };
       break;
     case 'register-success':
