@@ -27,7 +27,7 @@ export const NEW_CONTROLS = [
   [
     {label: 'B', style: 'BOLD', handler: 'addEntity', text: '**innerText**' },
     {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*innerText*' },
-    {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '<u>innerText</u>' },
+    {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '__innerText__' },
     {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addEntity', text: '- innerText' },
     {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addEntity', text: '1. innerText' },
   ],
@@ -40,5 +40,5 @@ export const NEW_CONTROLS = [
 ];
 
 
-export const END_REPLACER = '*</u>`](link)';
-export const START_REPLACER = '*<u>-`>#[ ![ 1. ';
+export const END_REPLACER = '_*</u>`](link)';
+export const START_REPLACER = '_*<u>-`>#[ ![ 1. ';

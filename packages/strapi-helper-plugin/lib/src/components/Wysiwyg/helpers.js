@@ -27,7 +27,7 @@ export function getInnerText(style) {
       innerText = '*text in italic*';
       break;
     case 'UNDERLINE':
-      innerText = '<u>text underlined</u>';
+      innerText = '__text underlined__';
       break;
     case 'H1':
       innerText = '# ';
