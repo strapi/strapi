@@ -8,20 +8,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { cloneDeep, isArray, isObject, isEmpty, last } from 'lodash';
-import cn from 'classnames';
+import { cloneDeep } from 'lodash';
 
 import ImgPreview from 'components/ImgPreview';
 import InputFileDetails from 'components/InputFileDetails';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-handler-names */
+/* eslint-disable jsx-a11y/label-has-for */
 class InputFile extends React.Component {
   state = {
     didDeleteFile: false,
     isUploading: false,
     position: 0,
   };
+
+  onDrop = (e) => {
+    e.preventDefault();
+    this.addFilesToProps(e.dataTransfer.files);
+  }
+
+  handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.inputFile.click();
+  }
+
+  handleChange = ({ target }) => this.addFilesToProps(target.files);
 
   addFilesToProps = (files) => {
     const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
@@ -34,7 +48,7 @@ class InputFile extends React.Component {
       }
 
       return acc;
-    }, initAcc)
+    }, initAcc);
 
     const target = {
       name: this.props.name,
@@ -44,19 +58,6 @@ class InputFile extends React.Component {
 
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
-  }
-
-  handleChange = ({ target }) => this.addFilesToProps(target.files);
-
-  handleClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.refs.inputFile.click();
-  }
-
-  onDrop = (e) => {
-    e.preventDefault();
-    this.addFilesToProps(e.dataTransfer.files);
   }
 
   handleFileDelete = (e) => {
@@ -122,7 +123,7 @@ class InputFile extends React.Component {
             name={name}
             onChange={this.handleChange}
             type="file"
-            ref="inputFile"
+            ref={(input) => this.inputFile = input}
           />
 
           <div className={styles.buttonContainer}>

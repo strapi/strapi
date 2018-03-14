@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable jsx-a11y/no-autofocus */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
@@ -60,7 +61,9 @@ InputTextArea.propTypes = {
   disabled: PropTypes.bool,
   error: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

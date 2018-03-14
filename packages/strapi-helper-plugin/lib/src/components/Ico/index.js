@@ -23,11 +23,13 @@ const handleClick = (e, onClick) => {
 
 Ico.propTypes = {
   icoType: PropTypes.string,
+  id: PropTypes.string,
   onClick: PropTypes.func,
 };
 
 Ico.defaultProps = {
   icoType: 'trash',
+  id: '',
   onClick: () => {},
 };
 

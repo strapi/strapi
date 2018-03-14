@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { differenceBy, isEmpty, isObject } from 'lodash';
+import { differenceBy, isEmpty } from 'lodash';
 
 // Design
 import Label from 'components/Label';

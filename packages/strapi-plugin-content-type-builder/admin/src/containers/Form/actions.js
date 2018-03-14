@@ -46,13 +46,9 @@ export function changeInput(key, value, isEditing) {
 }
 
 export function changeInputAttribute(key, value) {
-  const keys = key.split('.');
-  const firstKey = keys[0];
-  const secondKey = keys[1];
   return {
     type: CHANGE_INPUT_ATTRIBUTE,
-    firstKey,
-    secondKey,
+    keys: ['modifiedDataAttribute'].concat(key.split('.')),
     value,
   };
 }
@@ -65,7 +61,6 @@ export function connectionsFetch() {
 
 export function connectionsFetchSucceeded(data) {
   const connections = map(data.connections, (connection) => ({ name: connection, value: connection }));
-  // connections.splice(0,0, { name: '', value: '' });
   return {
     type: CONNECTIONS_FETCH_SUCCEEDED,
     connections,
@@ -246,6 +241,9 @@ function setAttributeFormData(hash) {
   const attribute = Map({
     name: '',
     params: Map({
+      appearance: Map({
+        WYSIWYG: false,
+      }),
       type,
       required: false,
       unique: false,
