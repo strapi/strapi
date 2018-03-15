@@ -57,6 +57,7 @@ class Wysiwyg extends React.Component {
     if (!isEmpty(this.props.value)) {
       this.setInitialValue(this.props);
     }
+    document.addEventListener('keydown', this.handleTabKey);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -70,8 +71,13 @@ class Wysiwyg extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleTabKey);
+  }
+
   onChange = (editorState) => {
-    this.setState({ editorState });
+    // Update the state and force the focus
+    this.setState({ editorState }, () => { this.focus(); });
     this.props.onChange({ target: {
       value: editorState.getCurrentContent().getPlainText(),
       name: this.props.name,
@@ -108,8 +114,13 @@ class Wysiwyg extends React.Component {
 
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
-    const splitData = target.value.split('.');
-    this.addEntity(splitData[0], splitData[1]);
+    const selectedText = this.getSelectedText();
+    const title = selectedText === '' ? `${target.value} ` : `${target.value} ${selectedText}`;
+    const newBlock = this.createNewBlock(title, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, title);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState), headerValue: '' });
   }
 
   handleDragEnter = (e) => {
@@ -170,6 +181,17 @@ class Wysiwyg extends React.Component {
       return true;
     }
     return false;
+  }
+
+
+  handleTabKey = (e) => {
+    if (e.keyCode === 9 /* TAB */ && this.state.isFocused) {
+      e.preventDefault();
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), '  ');
+      const newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+
+      return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    }
   }
 
   mapKeyToEditorCommand = (e) => {
@@ -278,16 +300,6 @@ class Wysiwyg extends React.Component {
     });
   }
 
-  addUlBlock = () => {
-    const selectedText = this.getSelectedText();
-    const li = selectedText === '' ? '- ' : `- ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul');
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, li);
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
   addOlBlock = () => {
     const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
     const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
@@ -295,6 +307,16 @@ class Wysiwyg extends React.Component {
     const liNumber = isNaN(number) ? 1 : number + 1;
     const selectedText = this.getSelectedText();
     const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
+    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, li);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addUlBlock = () => {
+    const selectedText = this.getSelectedText();
+    const li = selectedText === '' ? '- ' : `- ${selectedText}`;
     const newBlock = this.createNewBlock(li, 'block-ul');
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, li);

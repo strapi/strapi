@@ -29,24 +29,6 @@ export function getInnerText(style) {
     case 'UNDERLINE':
       innerText = '__text underlined__';
       break;
-    case 'H1':
-      innerText = '# ';
-      break;
-    case 'H2':
-      innerText = '## ';
-      break;
-    case 'H3':
-      innerText = '### ';
-      break;
-    case 'H4':
-      innerText = '#### ';
-      break;
-    case 'H5':
-      innerText = '##### ';
-      break;
-    case 'H6':
-      innerText = '###### ';
-      break;
     case 'code-block':
       innerText = '```code block```';
       break;
