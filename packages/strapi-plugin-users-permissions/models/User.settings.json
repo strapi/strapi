@@ -38,6 +38,12 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "picture": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
     }
-  }
+  },
+  "collectionName": "users-permissions_user"
 }

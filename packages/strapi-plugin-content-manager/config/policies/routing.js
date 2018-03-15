@@ -9,7 +9,7 @@ module.exports = async (ctx, next) => {
     if (controller && action) {
       // Redirect to specific controller.
       if (ctx.request.body.hasOwnProperty('fields') && ctx.request.body.hasOwnProperty('files')) {
-        let {files, fields} = _.cloneDeep(ctx.request.body);
+        let {files, fields} = ctx.request.body;
 
         const parser = (value) => {
           try {
@@ -30,7 +30,7 @@ module.exports = async (ctx, next) => {
         ctx.request.body = fields;
 
         await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
-        const resBody = _.cloneDeep(ctx.body);
+        const resBody = ctx.body;
 
         await Promise.all(Object.keys(files).map(async field => {
           ctx.request.body = {
