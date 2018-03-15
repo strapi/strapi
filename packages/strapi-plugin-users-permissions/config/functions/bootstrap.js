@@ -108,7 +108,8 @@ module.exports = async cb => {
   if (!await pluginStore.get({key: 'advanced'})) {
     const value = {
       unique_email: true,
-      allow_register: true
+      allow_register: true,
+      default_role: 'authenticated'
     };
 
     await pluginStore.set({key: 'advanced', value});

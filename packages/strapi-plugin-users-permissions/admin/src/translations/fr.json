@@ -55,6 +55,8 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Tout cocher",
 
+  "EditForm.inputSelect.label.role": "Rôle par defaut pour les nouveaux utilisateurs",
+  "EditForm.inputSelect.description.role": "Choisissez le rôle qui sera lié aux utilisateurs lors de le enregistrement.",
   "EditForm.inputSelect.subscriptions.label": "Quotas de souscriptions",
   "EditForm.inputSelect.subscriptions.description": "Limitez le nombre de souscriptions par IP par heure.",
   "EditForm.inputSelect.durations.label": "Duration",
