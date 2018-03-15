@@ -29,12 +29,6 @@ export function getInnerText(style) {
     case 'UNDERLINE':
       innerText = '__text underlined__';
       break;
-    case 'code-block':
-      innerText = '```code block```';
-      break;
-    case 'blockquote':
-      innerText = '> quotes';
-      break;
     case 'LINK':
       innerText = '[text](link)';
       break;

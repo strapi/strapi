@@ -243,6 +243,18 @@ class Wysiwyg extends React.Component {
       .set('selectionAfter', contentState.getSelectionAfter())
   )
 
+  addSimpleBlock = (content, style) => {
+    const selectedText = this.getSelectedText();
+    const defaultContent = style === 'code-block' ? 'code block' : 'quote';
+    const innerContent = selectedText === '' ? replace(content, 'innerText', defaultContent) : replace(content, 'innerText', selectedText);
+    const newBlock = this.createNewBlock(innerContent);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, innerContent);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+
   addLinkMediaBlockWithSelection = () => {
     const selectedText = this.getSelectedText();
     const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
@@ -384,6 +396,7 @@ class Wysiwyg extends React.Component {
                 addEntity: this.addEntity,
                 addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
                 addOlBlock: this.addOlBlock,
+                addSimpleBlock: this.addSimpleBlock,
                 addUlBlock: this.addUlBlock,
               }}
               onToggle={this.toggleInlineStyle}
