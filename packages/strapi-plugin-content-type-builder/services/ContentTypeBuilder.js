@@ -91,7 +91,7 @@ module.exports = {
       }
 
       attributes.push({
-        name,
+        name: attr,
         params
       });
     });
