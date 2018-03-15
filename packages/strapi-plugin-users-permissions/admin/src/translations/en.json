@@ -28,6 +28,7 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Password",
   "Auth.form.register.confirmPassword.label": "Confirmation Password",
+  "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements.",
 
   "Auth.form.register-success.email.label": "Email sent with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
@@ -55,6 +56,8 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Select all",
 
+  "EditForm.inputSelect.label.role": "Default role for authenticated users",
+  "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
   "EditForm.inputSelect.subscriptions.label": "Manage subscription quotas",
   "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
   "EditForm.inputSelect.durations.label": "Duration",

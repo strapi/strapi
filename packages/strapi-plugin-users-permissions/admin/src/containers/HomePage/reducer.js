@@ -12,6 +12,7 @@ import {
   DELETE_DATA_SUCCEEDED,
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
+  RESET_PROPS,
   SET_DATA_TO_EDIT,
   SET_FORM,
   SET_FORM_ERRORS,
@@ -56,6 +57,8 @@ function homePageReducer(state = initialState, action) {
     case ON_CHANGE:
       return state
         .updateIn(action.keys, () => action.value);
+    case RESET_PROPS:
+      return initialState;
     case SET_DATA_TO_EDIT:
       return state.update('dataToEdit', () => action.dataToEdit);
     case SET_FORM:
