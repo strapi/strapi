@@ -224,46 +224,17 @@ class Wysiwyg extends React.Component {
   addLinkMediaBlockWithSelection = () => {
     const selectedText = this.getSelectedText();
     const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
-
     const newBlock = this.createNewBlock(link);
-    const contentState = this.getEditorState().getCurrentContent();
-    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
-    const newContentState = ContentState
-      .createFromBlockArray(newBlockMap.toArray())
-      .set('selectionBefore', contentState.getSelectionBefore())
-      .set('selectionAfter', contentState.getSelectionAfter());
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, link);
 
-    let newEditorState;
-
-    if (getOffSets(this.getSelection()).start !== 0) {
-      newEditorState = EditorState.push(
-        this.getEditorState(),
-        newContentState,
-      );
-    } else {
-      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
-      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
-    }
-
-    // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
   addLinkMediaBlock = (link) => {
     const { editorState } = this.state;
-    const newBlock = new ContentBlock({
-      key: genKey(),
-      type: 'unstyled',
-      text: link,
-      charaterList: List([]),
-    });
-    const contentState = editorState.getCurrentContent();
-    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
-    const newContentState = ContentState
-      .createFromBlockArray(newBlockMap.toArray())
-      .set('selectionBefore', contentState.getSelectionBefore())
-      .set('selectionAfter', contentState.getSelectionAfter());
-
+    const newBlock = this.createNewBlock(link);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = EditorState.push(
       editorState,
       newContentState,
@@ -314,7 +285,6 @@ class Wysiwyg extends React.Component {
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, li);
 
-    // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
@@ -329,7 +299,6 @@ class Wysiwyg extends React.Component {
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, li);
 
-    // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
