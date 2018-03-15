@@ -17,7 +17,7 @@ import {
 } from 'draft-js';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
-import { isEmpty, isNaN, last, replace, trimStart, trimEnd } from 'lodash';
+import { isEmpty, isNaN, last, replace, trimStart, trimEnd, words } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
@@ -96,6 +96,13 @@ class Wysiwyg extends React.Component {
     // Get the cursor at the end
     editorState = EditorState.moveFocusToEnd(editorState);
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
+  }
+
+  getCharactersNumber = (editorState = this.getEditorState()) => {
+    const plainText = editorState.getCurrentContent().getPlainText();
+    const spacesNumber = plainText.split(' ').length;
+
+    return words(plainText).join('').length + spacesNumber - 1;
   }
 
   getEditorState = () => this.state.editorState;
@@ -254,6 +261,14 @@ class Wysiwyg extends React.Component {
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
+  addLink = () => {
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? ' [text](link)' : `[text](${selectedText})`;
+    const text = Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
+    const newEditorState = EditorState.push(this.getEditorState(), text, 'insert-characters');
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
 
   addLinkMediaBlockWithSelection = () => {
     const selectedText = this.getSelectedText();
@@ -394,6 +409,7 @@ class Wysiwyg extends React.Component {
               editorState={editorState}
               handlers={{
                 addEntity: this.addEntity,
+                addLink: this.addLink,
                 addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
                 addOlBlock: this.addOlBlock,
                 addSimpleBlock: this.addSimpleBlock,
@@ -418,7 +434,7 @@ class Wysiwyg extends React.Component {
           />
           <input className={styles.editorInput} value="" tabIndex="-1" />
         </div>
-        <WysiwygBottomControls onClick={this.toggleFullScreen} />
+        <WysiwygBottomControls charactersNumber={this.getCharactersNumber()} onClick={this.toggleFullScreen} />
       </div>
     );
   }

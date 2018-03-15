@@ -19,7 +19,7 @@ export const NEW_CONTROLS = [
   [
     {label: '<>', style: 'code-block', handler: 'addSimpleBlock', text: '```innerText```' },
     {label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addLinkMediaBlockWithSelection', text: '![innerText](link)' },
-    {label: 'Link', style: 'LINK', className: 'styleButtonLink',hideLabel: true, handler: 'addEntity', text: '[innerText](link)' },
+    {label: 'Link', style: 'LINK', className: 'styleButtonLink',hideLabel: true, handler: 'addLink', text: '[text](link)' },
     {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addSimpleBlock', text: '> innerText' },
   ],
 ];
