@@ -17,7 +17,7 @@ import {
 } from 'draft-js';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
-import { isEmpty, isNaN, last, replace, trimStart, trimEnd, words } from 'lodash';
+import { isEmpty, isNaN, last, replace, words } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
@@ -25,8 +25,8 @@ import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
-import { END_REPLACER, NEW_CONTROLS, SELECT_OPTIONS, START_REPLACER } from './constants';
-import { getBlockStyle, getInnerText, getOffSets } from './helpers';
+import { NEW_CONTROLS, SELECT_OPTIONS  } from './constants';
+import { getBlockStyle, getFocusOffset, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
@@ -131,41 +131,40 @@ class Wysiwyg extends React.Component {
   }
 
   addEntity = (text, style) => {
-    const editorState = this.state.editorState;
-    const currentContent = editorState.getCurrentContent();
-    // Get the selected text
-    const selection = editorState.getSelection();
-    const anchorKey = selection.getAnchorKey();
-    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
-    // Range of the text we want to replace
-    const { start, end } = getOffSets(selection);
-    // Retrieve the selected text
-    const selectedText = currentContentBlock.getText().slice(start, end);
-    const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
-    const trimedStart = trimStart(innerText, START_REPLACER).length;
-    const trimedEnd = trimEnd(innerText, END_REPLACER).length;
-    // Set the correct offset
-    const focusOffset = start === end ? trimedEnd : start + trimedEnd;
-    const anchorOffset = start + innerText.length - trimedStart;
-    // Merge the old selection with the new one so the editorState is updated
-    const updateSelection = selection.merge({
+    const editorState = this.getEditorState();
+    const selectedText = this.getSelectedText();
+
+    // Don't handle selection
+    if (selectedText !== '') {
+      const textWithEntity = Modifier.replaceText(editorState.getCurrentContent(), this.getSelection(), replace(text, 'innerText', selectedText));
+      const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
+
+      return this.setState({
+        editorState: EditorState.moveFocusToEnd(newEditorState),
+      }, () => {
+        this.focus();
+      });
+    }
+
+    const cursorPosition = getOffSets(this.getSelection()).start;
+    const focusOffsetToAdd = getFocusOffset(style);
+    const textWithEntity = Modifier.replaceText(editorState.getCurrentContent(), this.getSelection(), getInnerText(style));
+    const anchorOffsetToAdd = style === 'ITALIC' ? 1 : 2;
+    const anchorOffset = cursorPosition + anchorOffsetToAdd;
+    const focusOffset = cursorPosition + focusOffsetToAdd;
+    const updatedSelection = this.getSelection().merge({
       anchorOffset,
       focusOffset,
     });
-    // Dynamically add some content to the one selected
-    const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
-    // Push the new content to the editorState
-    const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
-    // SetState and force focus
-    this.setState({
-      editorState: EditorState.forceSelection(newEditorState, updateSelection),
-      headerValue: '',
-    }, () => {
-      this.focus();
+    const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-character');
+
+    return this.setState({
+      editorState: EditorState.forceSelection(newEditorState, updatedSelection),
     });
   }
 
   addOlBlock = () => {
+    // NOTE need to check if this line is really necessary
     const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
     const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
     const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
@@ -325,16 +324,6 @@ class Wysiwyg extends React.Component {
     }
   }
 
-  onChange = (editorState) => {
-    // Update the state and force the focus
-    this.setState({ editorState }, () => { this.focus(); });
-    this.props.onChange({ target: {
-      value: editorState.getCurrentContent().getPlainText(),
-      name: this.props.name,
-      type: 'textarea',
-    }});
-  }
-
   mapKeyToEditorCommand = (e) => {
     if (e.keyCode === 9 /* TAB */) {
       const newEditorState = RichUtils.onTab(
@@ -349,6 +338,16 @@ class Wysiwyg extends React.Component {
     }
 
     return getDefaultKeyBinding(e);
+  }
+
+  onChange = (editorState) => {
+    // Update the state and force the focus
+    this.setState({ editorState }, () => { this.focus(); });
+    this.props.onChange({ target: {
+      value: editorState.getCurrentContent().getPlainText(),
+      name: this.props.name,
+      type: 'textarea',
+    }});
   }
 
   // NOTE: this need to be changed to preview markdown

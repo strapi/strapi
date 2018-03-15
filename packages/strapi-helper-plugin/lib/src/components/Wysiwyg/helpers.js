@@ -15,19 +15,18 @@ export function getBlockStyle(block) {
   }
 }
 
-// TODO: this could be improved
 export function getInnerText(style) {
   let innerText;
 
   switch (style) {
     case 'BOLD':
-      innerText = '**text in bold**';
+      innerText = '**bold text**';
       break;
     case 'ITALIC':
-      innerText = '*text in italic*';
+      innerText = '*italic text*';
       break;
     case 'UNDERLINE':
-      innerText = '__text underlined__';
+      innerText = '__underlined text__';
       break;
     case 'LINK':
       innerText = '[text](link)';
@@ -50,4 +49,20 @@ export function getOffSets(selection) {
     end: selection.getEndOffset(),
     start: selection.getStartOffset(),
   };
+}
+
+/**
+ * getTheFocusOffsetToAdd
+ * @param {[type]} style [description]
+ */
+
+export function getFocusOffset(style) {
+  switch (style) {
+    case 'BOLD':
+      return 11;
+    case 'ITALIC':
+      return 12;
+    default:
+      return 17;
+  }
 }
