@@ -160,7 +160,7 @@ class Wysiwyg extends React.Component {
       return true;
     }
 
-    if (currentBlock.getText().split('.').length > 1 && !isNaN(currentBlock.getText().split('.')[0]) && command === 'split-block') {
+    if (currentBlock.getText().split('.').length > 1 && !isNaN(parseInt(currentBlock.getText().split('.')[0], 10)) && command === 'split-block') {
       this.addOlBlock();
       return true;
     }
@@ -188,6 +188,21 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   }
 
+  createNewEditorState = (newContentState, text) => {
+    let newEditorState;
+
+    if (getOffSets(this.getSelection()).start !== 0) {
+      newEditorState = EditorState.push(
+        this.getEditorState(),
+        newContentState,
+      );
+    } else {
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), text);
+      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+    }
+    return newEditorState;
+  }
+
   createNewBlock = (text = '', type = 'unstyled') => (
     new ContentBlock({
       key: genKey(),
@@ -196,6 +211,15 @@ class Wysiwyg extends React.Component {
       charaterList: List([]),
     })
   );
+
+  createNewBlockMap = (newBlock, contentState) => contentState.getBlockMap().set(newBlock.key, newBlock);
+
+  createNewContentStateFromBlock = (newBlock, contentState = this.getEditorState().getCurrentContent()) => (
+    ContentState
+      .createFromBlockArray(this.createNewBlockMap(newBlock, contentState).toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter())
+  )
 
   addLinkMediaBlockWithSelection = () => {
     const selectedText = this.getSelectedText();
@@ -260,7 +284,6 @@ class Wysiwyg extends React.Component {
     // Retrieve the selected text
     const selectedText = currentContentBlock.getText().slice(start, end);
     const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
-
     const trimedStart = trimStart(innerText, START_REPLACER).length;
     const trimedEnd = trimEnd(innerText, END_REPLACER).length;
     // Set the correct offset
@@ -271,13 +294,10 @@ class Wysiwyg extends React.Component {
       anchorOffset,
       focusOffset,
     });
-
     // Dynamically add some content to the one selected
     const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
-
     // Push the new content to the editorState
     const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
-
     // SetState and force focus
     this.setState({
       editorState: EditorState.forceSelection(newEditorState, updateSelection),
@@ -289,27 +309,10 @@ class Wysiwyg extends React.Component {
 
   addUlBlock = () => {
     const selectedText = this.getSelectedText();
-    const link = selectedText === '' ? '- ' : `- ${selectedText}`;
-
-    const newBlock = this.createNewBlock(link, 'block-ul');
-    const contentState = this.getEditorState().getCurrentContent();
-    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
-    const newContentState = ContentState
-      .createFromBlockArray(newBlockMap.toArray())
-      .set('selectionBefore', contentState.getSelectionBefore())
-      .set('selectionAfter', contentState.getSelectionAfter());
-
-    let newEditorState;
-
-    if (getOffSets(this.getSelection()).start !== 0) {
-      newEditorState = EditorState.push(
-        this.getEditorState(),
-        newContentState,
-      );
-    } else {
-      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
-      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
-    }
+    const li = selectedText === '' ? '- ' : `- ${selectedText}`;
+    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, li);
 
     // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
@@ -321,26 +324,10 @@ class Wysiwyg extends React.Component {
     const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
     const liNumber = isNaN(number) ? 1 : number + 1;
     const selectedText = this.getSelectedText();
-    const link = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
-    const newBlock = this.createNewBlock(link, 'block-ul');
-    const contentState = this.getEditorState().getCurrentContent();
-    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
-    const newContentState = ContentState
-      .createFromBlockArray(newBlockMap.toArray())
-      .set('selectionBefore', contentState.getSelectionBefore())
-      .set('selectionAfter', contentState.getSelectionAfter());
-
-    let newEditorState;
-
-    if (getOffSets(this.getSelection()).start !== 0) {
-      newEditorState = EditorState.push(
-        this.getEditorState(),
-        newContentState,
-      );
-    } else {
-      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
-      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
-    }
+    const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
+    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, li);
 
     // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
@@ -363,7 +350,6 @@ class Wysiwyg extends React.Component {
   // NOTE: this need to be changed to preview markdown
   previewHTML = () => {
     const blocksFromHTML = convertFromHTML(this.props.value);
-
     // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
       const contentState = ContentState.createFromBlockArray(blocksFromHTML);
@@ -418,7 +404,6 @@ class Wysiwyg extends React.Component {
           <WysiwygEditor
             blockStyleFn={getBlockStyle}
             editorState={editorState}
-            // handleBeforeInput={this.handleBeforeInput}
             handleKeyCommand={this.handleKeyCommand}
             keyBindingFn={this.mapKeyToEditorCommand}
             onBlur={() => this.setState({ isFocused: false })}
