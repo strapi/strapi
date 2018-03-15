@@ -53,17 +53,8 @@ export function getInnerText(style) {
     case 'blockquote':
       innerText = '> quotes';
       break;
-    case 'unordered-list-item':
-      innerText = '- ul';
-      break;
-    case 'ordered-list-item':
-      innerText = '1. ol';
-      break;
     case 'LINK':
       innerText = '[text](link)';
-      break;
-    case 'IMG':
-      innerText = '![text](link)';
       break;
     default:
       innerText = '';

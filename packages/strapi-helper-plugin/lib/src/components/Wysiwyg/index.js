@@ -17,7 +17,7 @@ import {
 } from 'draft-js';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
-import { isEmpty, replace, trimStart, trimEnd } from 'lodash';
+import { isEmpty, isNaN, last, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
@@ -96,6 +96,8 @@ class Wysiwyg extends React.Component {
 
   getSelection = () => this.getEditorState().getSelection();
 
+  getCurrentBlockMap = () => this.getEditorState().getCurrentContent().getBlockMap().toJS();
+
   getCurrentContentBlock = () => this.getEditorState().getCurrentContent().getBlockForKey(this.getSelection().getAnchorKey());
 
   getSelectedText = () => {
@@ -146,6 +148,28 @@ class Wysiwyg extends React.Component {
       .finally(() => {
         this.setState({ isDraging: false });
       });
+  }
+
+  handleKeyCommand = (command, editorState) => {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
+    const selection = editorState.getSelection();
+    const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
+
+    if (currentBlock.getText().split('')[0] === '-' && command === 'split-block') {
+      this.addUlBlock();
+      return true;
+    }
+
+    if (currentBlock.getText().split('.').length > 1 && !isNaN(currentBlock.getText().split('.')[0]) && command === 'split-block') {
+      this.addOlBlock();
+      return true;
+    }
+
+    if (newState) {
+      this.onChange(newState);
+      return true;
+    }
+    return false;
   }
 
   mapKeyToEditorCommand = (e) => {
@@ -291,6 +315,37 @@ class Wysiwyg extends React.Component {
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
+  addOlBlock = () => {
+    const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
+    const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
+    const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
+    const liNumber = isNaN(number) ? 1 : number + 1;
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
+    const newBlock = this.createNewBlock(link, 'block-ul');
+    const contentState = this.getEditorState().getCurrentContent();
+    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
+    const newContentState = ContentState
+      .createFromBlockArray(newBlockMap.toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter());
+
+    let newEditorState;
+
+    if (getOffSets(this.getSelection()).start !== 0) {
+      newEditorState = EditorState.push(
+        this.getEditorState(),
+        newContentState,
+      );
+    } else {
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
+      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+    }
+
+    // TODO : handle selection
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
   toggleFullScreen = (e) => {
     e.preventDefault();
     this.setState({
@@ -298,23 +353,6 @@ class Wysiwyg extends React.Component {
     }, () => {
       this.focus();
     });
-  }
-
-  handleKeyCommand = (command, editorState) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    const selection = editorState.getSelection();
-    const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
-
-    if (currentBlock.getText().split('')[0] === '-' && command === 'split-block') {
-      this.addUlBlock();
-      return true;
-    }
-
-    if (newState) {
-      this.onChange(newState);
-      return true;
-    }
-    return false;
   }
 
   componentDidCatch(error, info) {
@@ -368,6 +406,7 @@ class Wysiwyg extends React.Component {
               handlers={{
                 addEntity: this.addEntity,
                 addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
+                addOlBlock: this.addOlBlock,
                 addUlBlock: this.addUlBlock,
               }}
               onToggle={this.toggleInlineStyle}

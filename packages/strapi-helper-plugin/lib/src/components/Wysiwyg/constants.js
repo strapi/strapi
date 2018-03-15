@@ -29,7 +29,7 @@ export const NEW_CONTROLS = [
     {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*innerText*' },
     {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '__innerText__' },
     {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addUlBlock', text: '- innerText' },
-    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addEntity', text: '1. innerText' },
+    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addOlBlock', text: '1. innerText' },
   ],
   [
     {label: '<>', style: 'code-block', handler: 'addEntity', text: '```innerText```' },
