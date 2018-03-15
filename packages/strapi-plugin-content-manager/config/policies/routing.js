@@ -9,21 +9,30 @@ module.exports = async (ctx, next) => {
     if (controller && action) {
       // Redirect to specific controller.
       if (ctx.request.body.hasOwnProperty('fields') && ctx.request.body.hasOwnProperty('files')) {
-        const {files, fields} = _.cloneDeep(ctx.request.body);
+        let {files, fields} = _.cloneDeep(ctx.request.body);
 
-        const fileAttributes = _.get(strapi.plugins, [source, 'models', ctx.params.model, 'associations'], []).filter(association => {
-          return association[association.type] === 'file' && association.via === 'related';
-        }).reduce((acc, association) => {
-          acc.push(association.alias);
+        const parser = (value) => {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            // Silent.
+          }
+
+          return _.isArray(value) ? value.map(obj => parser(obj)) : value;
+        };
+
+        fields = Object.keys(fields).reduce((acc, current) => {
+          acc[current] = parser(fields[current]);
+
           return acc;
-        }, []);
+        }, {});
 
-        ctx.request.body = _.omit(fields, fileAttributes);
+        ctx.request.body = fields;
 
         await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
         const resBody = _.cloneDeep(ctx.body);
 
-        Object.keys(files).map(async field => {
+        await Promise.all(Object.keys(files).map(async field => {
           ctx.request.body = {
             files: {
               files: files[field]
@@ -36,12 +45,13 @@ module.exports = async (ctx, next) => {
             }
           };
 
-          await strapi.plugins.upload.controllers.upload.upload(ctx);
-        });
+          return strapi.plugins.upload.controllers.upload.upload(ctx);
+        }));
+
         return ctx.send(resBody);
-      } else {
-        return await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
       }
+
+      return await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
     }
   }
 
