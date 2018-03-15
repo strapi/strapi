@@ -128,6 +128,19 @@ class Wysiwyg extends React.Component {
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
 
+  getEditorState = () => this.state.editorState;
+
+  getSelection = () => this.getEditorState().getSelection();
+
+  getCurrentContentBlock = () => this.getEditorState().getCurrentContent().getBlockForKey(this.getSelection().getAnchorKey());
+
+  getSelectedText = () => {
+    const { start, end } = getOffSets(this.getSelection());
+
+    return this.getCurrentContentBlock().getText().slice(start, end);
+  }
+
+
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
     const splitData = target.value.split('.');
@@ -162,7 +175,7 @@ class Wysiwyg extends React.Component {
     return request('/upload', {method: 'POST', headers, body: formData }, false, false)
       .then(response => {
         const link = `![text](${response[0].url})`;
-        this.addLinkBlock(link);
+        this.addLinkMediaBlock(link);
       })
       .catch(err => {
         console.log('error', err.response);
@@ -188,7 +201,57 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   }
 
-  addLinkBlock = (link) => {
+  createNewBlock = (text = '') => (
+    new ContentBlock({
+      key: genKey(),
+      type: 'unstyled',
+      text,
+      charaterList: List([]),
+    })
+  );
+
+  addLinkMediaBlockWithSelection = () => {
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
+
+    const newBlock = this.createNewBlock(link);
+    const contentState = this.getEditorState().getCurrentContent();
+    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
+    const newContentState = ContentState
+      .createFromBlockArray(newBlockMap.toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter());
+
+    let newEditorState;
+
+    if (getOffSets(this.getSelection()).start !== 0) {
+      newEditorState = EditorState.push(
+        this.getEditorState(),
+        newContentState,
+      );
+    } else {
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
+      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+    }
+
+    // TODO : selection
+    // if (selectedText === '' && getOffSets(this.getSelection()).start === 0) {
+    //   const anchorOffset = 9;
+    //   const focusOffset = link.length - 1;
+    //   const updateSelection = newEditorState.getSelection().merge({
+    //     anchorOffset,
+    //     focusOffset,
+    //   });
+    //   return this.setState({
+    //     editorState: EditorState.forceSelection(newEditorState, updateSelection),
+    //   }, () => {
+    //     this.focus();
+    //   });
+    // }
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addLinkMediaBlock = (link) => {
     const { editorState } = this.state;
     const newBlock = new ContentBlock({
       key: genKey(),
@@ -289,7 +352,7 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
-
+    
     if (this.state.toggleFullScreen) {
       // NOTE: this should be a function
       return (
@@ -398,8 +461,9 @@ class Wysiwyg extends React.Component {
               editorState={editorState}
               handlers={{
                 addEntity: this.addEntity,
-                toggleBlockType: this.toggleBlockType,
-                toggleInlineStyle: this.toggleInlineStyle,
+                addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
+                // toggleBlockType: this.toggleBlockType,
+                // toggleInlineStyle: this.toggleInlineStyle,
               }}
               onToggle={this.toggleInlineStyle}
               onToggleBlock={this.toggleBlockType}
