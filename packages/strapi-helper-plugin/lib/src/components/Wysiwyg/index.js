@@ -14,34 +14,19 @@ import {
   genKey,
   Modifier,
   RichUtils,
-  // ContentBlock,
-  // genKey,
 } from 'draft-js';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import { isEmpty, replace, trimStart, trimEnd } from 'lodash';
 import cn from 'classnames';
-import { FormattedMessage } from 'react-intl';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
 import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
-
 import request from 'utils/request';
-
-import {
-  END_REPLACER,
-  NEW_CONTROLS,
-  SELECT_OPTIONS,
-  START_REPLACER,
-} from './constants';
-import {
-  getBlockStyle,
-  getInnerText,
-  getOffSets,
-} from './helpers';
-
+import { END_REPLACER, NEW_CONTROLS, SELECT_OPTIONS, START_REPLACER } from './constants';
+import { getBlockStyle, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
 /* eslint-disable  react/no-string-refs */ // NOTE: need to check eslint
@@ -55,7 +40,6 @@ class Wysiwyg extends React.Component {
       initialValue: '',
       isDraging: false,
       headerValue: '',
-      previewHTML: false,
       toggleFullScreen: false,
     };
 
@@ -95,25 +79,6 @@ class Wysiwyg extends React.Component {
     }});
   }
 
-  // NOTE: leave these function if we change to HTML instead of markdown
-  // toggleBlockType = (blockType) => {
-  //   this.onChange(
-  //     RichUtils.toggleBlockType(
-  //       this.state.editorState,
-  //       blockType
-  //     )
-  //   );
-  // }
-  //
-  // toggleInlineStyle = (inlineStyle) => {
-  //   this.onChange(
-  //     RichUtils.toggleInlineStyle(
-  //       this.state.editorState,
-  //       inlineStyle
-  //     )
-  //   );
-  // }
-
   /**
    * Init the editor with data from
    * @param {[type]} props [description]
@@ -124,7 +89,6 @@ class Wysiwyg extends React.Component {
 
     // Get the cursor at the end
     editorState = EditorState.moveFocusToEnd(editorState);
-
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
 
@@ -234,20 +198,7 @@ class Wysiwyg extends React.Component {
       newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
     }
 
-    // TODO : selection
-    // if (selectedText === '' && getOffSets(this.getSelection()).start === 0) {
-    //   const anchorOffset = 9;
-    //   const focusOffset = link.length - 1;
-    //   const updateSelection = newEditorState.getSelection().merge({
-    //     anchorOffset,
-    //     focusOffset,
-    //   });
-    //   return this.setState({
-    //     editorState: EditorState.forceSelection(newEditorState, updateSelection),
-    //   }, () => {
-    //     this.focus();
-    //   });
-    // }
+    // TODO : handle selection
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
 
@@ -313,6 +264,34 @@ class Wysiwyg extends React.Component {
     });
   }
 
+  addUlBlock = () => {
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? '- ' : `- ${selectedText}`;
+
+    const newBlock = this.createNewBlock(link);
+    const contentState = this.getEditorState().getCurrentContent();
+    const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
+    const newContentState = ContentState
+      .createFromBlockArray(newBlockMap.toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter());
+
+    let newEditorState;
+
+    if (getOffSets(this.getSelection()).start !== 0) {
+      newEditorState = EditorState.push(
+        this.getEditorState(),
+        newContentState,
+      );
+    } else {
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
+      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+    }
+
+    // TODO : handle selection
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
   toggleFullScreen = (e) => {
     e.preventDefault();
     this.setState({
@@ -352,85 +331,6 @@ class Wysiwyg extends React.Component {
 
   render() {
     const { editorState } = this.state;
-    
-    if (this.state.toggleFullScreen) {
-      // NOTE: this should be a function
-      return (
-        <div className={styles.fullscreenOverlay} onClick={this.toggleFullScreen}>
-          <div
-            className={cn(styles.editorWrapper, this.state.isFocused && styles.editorFocus)}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            style={{ marginTop: '0' }}
-          >
-            <div className={styles.controlsContainer}>
-              <div style={{ minWidth: '161px', marginLeft: '8px' }}>
-                <Select
-                  name="headerSelect"
-                  onChange={this.handleChangeSelect}
-                  value={this.state.headerValue}
-                  selectOptions={SELECT_OPTIONS}
-                />
-              </div>
-              {NEW_CONTROLS.map((value, key) => (
-                <Controls
-                  key={key}
-                  buttons={value}
-                  editorState={editorState}
-                  handlers={{
-                    addEntity: this.addEntity,
-                    // toggleBlockType: this.toggleBlockType,
-                    // toggleInlineStyle: this.toggleInlineStyle,
-                  }}
-                  onToggle={this.toggleInlineStyle}
-                  onToggleBlock={this.toggleBlockType}
-                  previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
-                />
-              ))}
-            </div>
-            <div className={styles.editor} onClick={this.focus}>
-              <WysiwygEditor
-                blockStyleFn={getBlockStyle}
-                editorState={editorState}
-                handleKeyCommand={this.handleKeyCommand}
-                keyBindingFn={this.mapKeyToEditorCommand}
-                onBlur={() => this.setState({ isFocused: false })}
-                onChange={this.onChange}
-                placeholder={this.props.placeholder}
-                setRef={(editor) => this.domEditor = editor}
-                spellCheck
-              />
-            </div>
-          </div>
-          <div
-            className={cn(styles.editorWrapper)}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            style={{ marginTop: '0' }}
-          >
-            <div className={styles.previewControlsWrapper} onClick={this.toggleFullScreen}>
-              <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: 0 }} /></div>
-              <div className={styles.wysiwygCollapse}>
-                <FormattedMessage id="components.Wysiwyg.collapse" />
-              </div>
-            </div>
-            <div className={styles.editor}>
-              <WysiwygEditor
-                // TODO handle markdown preview
-                editorState={this.previewHTML()}
-                onChange={() => {}}
-                placeholder={this.props.placeholder}
-                setRef={(dummyEditor) => this.dummyEditor = dummyEditor}
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
 
     return (
       <div
@@ -439,7 +339,6 @@ class Wysiwyg extends React.Component {
           this.state.isFocused && styles.editorFocus,
         )}
         onDragEnter={this.handleDragEnter}
-
         onDragOver={this.handleDragOver}
       >
         {this.state.isDraging && (
@@ -462,12 +361,10 @@ class Wysiwyg extends React.Component {
               handlers={{
                 addEntity: this.addEntity,
                 addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
-                // toggleBlockType: this.toggleBlockType,
-                // toggleInlineStyle: this.toggleInlineStyle,
+                addUlBlock: this.addUlBlock,
               }}
               onToggle={this.toggleInlineStyle}
               onToggleBlock={this.toggleBlockType}
-              previewHTML={() => this.setState(prevState => ({ previewHTML: !prevState.previewHTML }))}
             />
           ))}
         </div>
