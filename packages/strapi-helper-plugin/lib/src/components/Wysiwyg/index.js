@@ -29,8 +29,8 @@ import { END_REPLACER, NEW_CONTROLS, SELECT_OPTIONS, START_REPLACER } from './co
 import { getBlockStyle, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
-/* eslint-disable  react/no-string-refs */ // NOTE: need to check eslint
 /* eslint-disable react/jsx-handler-names */
+/* eslint-disable react/sort-comp */
 class Wysiwyg extends React.Component {
   constructor(props) {
     super(props);
@@ -75,16 +75,6 @@ class Wysiwyg extends React.Component {
     document.removeEventListener('keydown', this.handleTabKey);
   }
 
-  onChange = (editorState) => {
-    // Update the state and force the focus
-    this.setState({ editorState }, () => { this.focus(); });
-    this.props.onChange({ target: {
-      value: editorState.getCurrentContent().getPlainText(),
-      name: this.props.name,
-      type: 'textarea',
-    }});
-  }
-
   /**
    * Init the editor with data from
    * @param {[type]} props [description]
@@ -97,6 +87,140 @@ class Wysiwyg extends React.Component {
     editorState = EditorState.moveFocusToEnd(editorState);
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
+
+  addSimpleBlock = (content, style) => {
+    const selectedText = this.getSelectedText();
+    const defaultContent = style === 'code-block' ? 'code block' : 'quote';
+    const innerContent = selectedText === '' ? replace(content, 'innerText', defaultContent) : replace(content, 'innerText', selectedText);
+    const newBlock = this.createNewBlock(innerContent);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, innerContent);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addLink = () => {
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? ' [text](link)' : `[text](${selectedText})`;
+    const text = Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
+    const newEditorState = EditorState.push(this.getEditorState(), text, 'insert-characters');
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addLinkMediaBlockWithSelection = () => {
+    const selectedText = this.getSelectedText();
+    const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
+    const newBlock = this.createNewBlock(link);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, link);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addLinkMediaBlock = (link) => {
+    const { editorState } = this.state;
+    const newBlock = this.createNewBlock(link);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = EditorState.push(
+      editorState,
+      newContentState,
+    );
+
+    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addEntity = (text, style) => {
+    const editorState = this.state.editorState;
+    const currentContent = editorState.getCurrentContent();
+    // Get the selected text
+    const selection = editorState.getSelection();
+    const anchorKey = selection.getAnchorKey();
+    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    // Range of the text we want to replace
+    const { start, end } = getOffSets(selection);
+    // Retrieve the selected text
+    const selectedText = currentContentBlock.getText().slice(start, end);
+    const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
+    const trimedStart = trimStart(innerText, START_REPLACER).length;
+    const trimedEnd = trimEnd(innerText, END_REPLACER).length;
+    // Set the correct offset
+    const focusOffset = start === end ? trimedEnd : start + trimedEnd;
+    const anchorOffset = start + innerText.length - trimedStart;
+    // Merge the old selection with the new one so the editorState is updated
+    const updateSelection = selection.merge({
+      anchorOffset,
+      focusOffset,
+    });
+    // Dynamically add some content to the one selected
+    const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
+    // Push the new content to the editorState
+    const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
+    // SetState and force focus
+    this.setState({
+      editorState: EditorState.forceSelection(newEditorState, updateSelection),
+      headerValue: '',
+    }, () => {
+      this.focus();
+    });
+  }
+
+  addOlBlock = () => {
+    const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
+    const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
+    const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
+    const liNumber = isNaN(number) ? 1 : number + 1;
+    const selectedText = this.getSelectedText();
+    const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
+    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, li);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  addUlBlock = () => {
+    const selectedText = this.getSelectedText();
+    const li = selectedText === '' ? '- ' : `- ${selectedText}`;
+    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const newEditorState = this.createNewEditorState(newContentState, li);
+
+    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+  }
+
+  createNewEditorState = (newContentState, text) => {
+    let newEditorState;
+
+    if (getOffSets(this.getSelection()).start !== 0) {
+      newEditorState = EditorState.push(
+        this.getEditorState(),
+        newContentState,
+      );
+    } else {
+      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), text);
+      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+    }
+    return newEditorState;
+  }
+
+  createNewBlock = (text = '', type = 'unstyled') => (
+    new ContentBlock({
+      key: genKey(),
+      type,
+      text,
+      charaterList: List([]),
+    })
+  );
+
+  createNewBlockMap = (newBlock, contentState) => contentState.getBlockMap().set(newBlock.key, newBlock);
+
+  createNewContentStateFromBlock = (newBlock, contentState = this.getEditorState().getCurrentContent()) => (
+    ContentState
+      .createFromBlockArray(this.createNewBlockMap(newBlock, contentState).toArray())
+      .set('selectionBefore', contentState.getSelectionBefore())
+      .set('selectionAfter', contentState.getSelectionAfter())
+  )
 
   getCharactersNumber = (editorState = this.getEditorState()) => {
     const plainText = editorState.getCurrentContent().getPlainText();
@@ -201,6 +325,16 @@ class Wysiwyg extends React.Component {
     }
   }
 
+  onChange = (editorState) => {
+    // Update the state and force the focus
+    this.setState({ editorState }, () => { this.focus(); });
+    this.props.onChange({ target: {
+      value: editorState.getCurrentContent().getPlainText(),
+      name: this.props.name,
+      type: 'textarea',
+    }});
+  }
+
   mapKeyToEditorCommand = (e) => {
     if (e.keyCode === 9 /* TAB */) {
       const newEditorState = RichUtils.onTab(
@@ -217,138 +351,17 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   }
 
-  createNewEditorState = (newContentState, text) => {
-    let newEditorState;
-
-    if (getOffSets(this.getSelection()).start !== 0) {
-      newEditorState = EditorState.push(
-        this.getEditorState(),
-        newContentState,
-      );
-    } else {
-      const textWithEntity =  Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), text);
-      newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
+  // NOTE: this need to be changed to preview markdown
+  previewHTML = () => {
+    const blocksFromHTML = convertFromHTML(this.props.value);
+    // Make sure blocksFromHTML.contentBlocks !== null
+    if (blocksFromHTML.contentBlocks) {
+      const contentState = ContentState.createFromBlockArray(blocksFromHTML);
+      return EditorState.createWithContent(contentState);
     }
-    return newEditorState;
-  }
 
-  createNewBlock = (text = '', type = 'unstyled') => (
-    new ContentBlock({
-      key: genKey(),
-      type,
-      text,
-      charaterList: List([]),
-    })
-  );
-
-  createNewBlockMap = (newBlock, contentState) => contentState.getBlockMap().set(newBlock.key, newBlock);
-
-  createNewContentStateFromBlock = (newBlock, contentState = this.getEditorState().getCurrentContent()) => (
-    ContentState
-      .createFromBlockArray(this.createNewBlockMap(newBlock, contentState).toArray())
-      .set('selectionBefore', contentState.getSelectionBefore())
-      .set('selectionAfter', contentState.getSelectionAfter())
-  )
-
-  addSimpleBlock = (content, style) => {
-    const selectedText = this.getSelectedText();
-    const defaultContent = style === 'code-block' ? 'code block' : 'quote';
-    const innerContent = selectedText === '' ? replace(content, 'innerText', defaultContent) : replace(content, 'innerText', selectedText);
-    const newBlock = this.createNewBlock(innerContent);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, innerContent);
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
-  addLink = () => {
-    const selectedText = this.getSelectedText();
-    const link = selectedText === '' ? ' [text](link)' : `[text](${selectedText})`;
-    const text = Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
-    const newEditorState = EditorState.push(this.getEditorState(), text, 'insert-characters');
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
-  addLinkMediaBlockWithSelection = () => {
-    const selectedText = this.getSelectedText();
-    const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
-    const newBlock = this.createNewBlock(link);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, link);
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
-  addLinkMediaBlock = (link) => {
-    const { editorState } = this.state;
-    const newBlock = this.createNewBlock(link);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = EditorState.push(
-      editorState,
-      newContentState,
-    );
-
-    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
-  addEntity = (text, style) => {
-    const editorState = this.state.editorState;
-    const currentContent = editorState.getCurrentContent();
-    // Get the selected text
-    const selection = editorState.getSelection();
-    const anchorKey = selection.getAnchorKey();
-    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
-    // Range of the text we want to replace
-    const { start, end } = getOffSets(selection);
-    // Retrieve the selected text
-    const selectedText = currentContentBlock.getText().slice(start, end);
-    const innerText = selectedText === '' ? getInnerText(style) : replace(text, 'innerText', selectedText);
-    const trimedStart = trimStart(innerText, START_REPLACER).length;
-    const trimedEnd = trimEnd(innerText, END_REPLACER).length;
-    // Set the correct offset
-    const focusOffset = start === end ? trimedEnd : start + trimedEnd;
-    const anchorOffset = start + innerText.length - trimedStart;
-    // Merge the old selection with the new one so the editorState is updated
-    const updateSelection = selection.merge({
-      anchorOffset,
-      focusOffset,
-    });
-    // Dynamically add some content to the one selected
-    const textWithEntity = Modifier.replaceText(currentContent, selection, innerText);
-    // Push the new content to the editorState
-    const newEditorState = EditorState.push(editorState, textWithEntity, 'insert-characters');
-    // SetState and force focus
-    this.setState({
-      editorState: EditorState.forceSelection(newEditorState, updateSelection),
-      headerValue: '',
-    }, () => {
-      this.focus();
-    });
-  }
-
-  addOlBlock = () => {
-    const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
-    const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
-    const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
-    const liNumber = isNaN(number) ? 1 : number + 1;
-    const selectedText = this.getSelectedText();
-    const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul');
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, li);
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
-
-  addUlBlock = () => {
-    const selectedText = this.getSelectedText();
-    const li = selectedText === '' ? '- ' : `- ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul');
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, li);
-
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    // Prevent errors if value is empty
+    return EditorState.createEmpty();
   }
 
   toggleFullScreen = (e) => {
@@ -363,19 +376,6 @@ class Wysiwyg extends React.Component {
   componentDidCatch(error, info) {
     console.log('err', error);
     console.log('info', info);
-  }
-
-  // NOTE: this need to be changed to preview markdown
-  previewHTML = () => {
-    const blocksFromHTML = convertFromHTML(this.props.value);
-    // Make sure blocksFromHTML.contentBlocks !== null
-    if (blocksFromHTML.contentBlocks) {
-      const contentState = ContentState.createFromBlockArray(blocksFromHTML);
-      return EditorState.createWithContent(contentState);
-    }
-
-    // Prevent errors if value is empty
-    return EditorState.createEmpty();
   }
 
   render() {
