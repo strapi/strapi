@@ -104,7 +104,6 @@ class Wysiwyg extends React.Component {
     return this.getCurrentContentBlock().getText().slice(start, end);
   }
 
-
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
     const splitData = target.value.split('.');
@@ -165,10 +164,10 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   }
 
-  createNewBlock = (text = '') => (
+  createNewBlock = (text = '', type = 'unstyled') => (
     new ContentBlock({
       key: genKey(),
-      type: 'unstyled',
+      type,
       text,
       charaterList: List([]),
     })
@@ -268,7 +267,7 @@ class Wysiwyg extends React.Component {
     const selectedText = this.getSelectedText();
     const link = selectedText === '' ? '- ' : `- ${selectedText}`;
 
-    const newBlock = this.createNewBlock(link);
+    const newBlock = this.createNewBlock(link, 'block-ul');
     const contentState = this.getEditorState().getCurrentContent();
     const newBlockMap = contentState.getBlockMap().set(newBlock.key, newBlock);
     const newContentState = ContentState
@@ -301,8 +300,16 @@ class Wysiwyg extends React.Component {
     });
   }
 
-  handleKeyCommand(command, editorState) {
+  handleKeyCommand = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
+    const selection = editorState.getSelection();
+    const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
+
+    if (currentBlock.getText().split('')[0] === '-' && command === 'split-block') {
+      this.addUlBlock();
+      return true;
+    }
+
     if (newState) {
       this.onChange(newState);
       return true;
@@ -372,6 +379,7 @@ class Wysiwyg extends React.Component {
           <WysiwygEditor
             blockStyleFn={getBlockStyle}
             editorState={editorState}
+            // handleBeforeInput={this.handleBeforeInput}
             handleKeyCommand={this.handleKeyCommand}
             keyBindingFn={this.mapKeyToEditorCommand}
             onBlur={() => this.setState({ isFocused: false })}
