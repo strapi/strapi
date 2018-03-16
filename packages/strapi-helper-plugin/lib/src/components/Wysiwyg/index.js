@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import showdown from 'showdown';
 import {
   ContentBlock,
   ContentState,
@@ -357,7 +358,11 @@ class Wysiwyg extends React.Component {
 
   // NOTE: this need to be changed to preview markdown
   previewHTML = () => {
-    const blocksFromHTML = convertFromHTML(this.props.value);
+    const converter = new showdown.Converter();
+    // TODO: parse html to add empty blocks
+    // TODO handle img
+    const html = converter.makeHtml(this.props.value);
+    const blocksFromHTML = convertFromHTML(html);
     // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
       const contentState = ContentState.createFromBlockArray(blocksFromHTML);
@@ -431,7 +436,7 @@ class Wysiwyg extends React.Component {
           <div className={styles.editor} onClick={this.focus}>
             <WysiwygEditor
               blockStyleFn={getBlockStyle}
-              editorState={EditorState.createEmpty()}
+              editorState={this.previewHTML()}
               onChange={() => {}}
               placeholder={this.props.placeholder}
               spellCheck
