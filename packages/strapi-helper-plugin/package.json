@@ -49,6 +49,7 @@
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.5",
     "draft-js": "^0.10.5",
+    "draft-js-import-markdown": "^1.2.1",
     "eslint": "^4.4.1",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^11.3.1",

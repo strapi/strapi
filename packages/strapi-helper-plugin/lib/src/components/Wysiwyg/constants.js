@@ -10,17 +10,17 @@ export const SELECT_OPTIONS = [
 
 export const NEW_CONTROLS = [
   [
-    {label: 'B', style: 'BOLD', handler: 'addEntity', text: '**innerText**' },
-    {label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*innerText*' },
-    {label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '__innerText__' },
-    {label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addUlBlock', text: '- innerText' },
-    {label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addOlBlock', text: '1. innerText' },
+    { label: 'B', style: 'BOLD', handler: 'addEntity', text: '**innerText**' },
+    { label: 'I', style: 'ITALIC', className: 'styleButtonItalic', handler: 'addEntity', text: '*innerText*' },
+    { label: 'U', style: 'UNDERLINE', handler: 'addEntity', text: '__innerText__' },
+    { label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addUlBlock', text: '- innerText' },
+    { label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addOlBlock', text: '1. innerText' },
   ],
   [
-    {label: '<>', style: 'code-block', handler: 'addSimpleBlock', text: '```innerText```' },
-    {label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addLinkMediaBlockWithSelection', text: '![innerText](link)' },
-    {label: 'Link', style: 'LINK', className: 'styleButtonLink',hideLabel: true, handler: 'addLink', text: '[text](link)' },
-    {label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addSimpleBlock', text: '> innerText' },
+    { label: '<>', style: 'code-block', handler: 'addSimpleBlock', text: '```innerText```' },
+    { label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addLinkMediaBlockWithSelection', text: '![innerText](link)' },
+    { label: 'Link', style: 'LINK', className: 'styleButtonLink',hideLabel: true, handler: 'addLink', text: '[text](link)' },
+    { label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addSimpleBlock', text: '> innerText' },
   ],
 ];
 

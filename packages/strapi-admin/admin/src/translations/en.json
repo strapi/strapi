@@ -106,6 +106,8 @@
   "components.ListRow.empty": "There is no data to be shown.",
 
   "components.Wysiwyg.collapse": "Collapse",
+  "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
+  "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
   "components.WysiwygBottomControls.charactersIndicators": "{characters} characters",
   "components.WysiwygBottomControls.fullscreen": "Fullscreen mode",
 

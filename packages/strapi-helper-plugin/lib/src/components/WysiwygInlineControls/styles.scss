@@ -31,15 +31,22 @@
 
 .wysiwygInlineControls {
   height: 49px;
-  width: 100%;
   display: flex;
+  padding: 8px 3px 0 10px;
+  background-color: #F3F4F4;
   user-select: none;
   > div:nth-child(even) {
     border-left: 0;
     border-right: 0;
   }
-  padding: 8px 10px 0 10px;
-  background-color: #F3F4F4;
+  > div:first-child {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+  }
+  > div:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
 }
 
 .wysiwygInlineControlsFocus {

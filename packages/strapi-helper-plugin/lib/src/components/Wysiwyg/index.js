@@ -15,6 +15,7 @@ import {
   Modifier,
   RichUtils,
 } from 'draft-js';
+// import { stateFromMarkdown } from 'draft-js-import-markdown';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import { isEmpty, isNaN, last, replace, words } from 'lodash';
@@ -25,6 +26,7 @@ import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
+import { ToggleMode } from './components';
 import { NEW_CONTROLS, SELECT_OPTIONS  } from './constants';
 import { getBlockStyle, getFocusOffset, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
@@ -39,6 +41,7 @@ class Wysiwyg extends React.Component {
       isFocused: false,
       initialValue: '',
       isDraging: false,
+      isPreviewMode: false,
       headerValue: '',
       toggleFullScreen: false,
     };
@@ -253,6 +256,8 @@ class Wysiwyg extends React.Component {
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState), headerValue: '' });
   }
 
+  handleClickPreview = () => this.setState({ isPreviewMode: !this.state.isPreviewMode });
+
   handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -378,7 +383,7 @@ class Wysiwyg extends React.Component {
   }
 
   render() {
-    const { editorState } = this.state;
+    const { editorState, isPreviewMode } = this.state;
 
     return (
       <div
@@ -393,7 +398,7 @@ class Wysiwyg extends React.Component {
           <Drop onDrop={this.handleDrop} onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave} />
         )}
         <div className={styles.controlsContainer}>
-          <div style={{ minWidth: '161px', marginLeft: '8px' }}>
+          <div style={{ minWidth: '161px', marginLeft: '8px', marginRight: '5px' }}>
             <Select
               name="headerSelect"
               onChange={this.handleChangeSelect}
@@ -418,6 +423,9 @@ class Wysiwyg extends React.Component {
               onToggleBlock={this.toggleBlockType}
             />
           ))}
+          <div className={styles.toggleModeWrapper}>
+            <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
+          </div>
         </div>
         <div className={styles.editor} onClick={this.focus}>
           <WysiwygEditor
