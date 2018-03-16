@@ -427,20 +427,33 @@ class Wysiwyg extends React.Component {
             <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
           </div>
         </div>
-        <div className={styles.editor} onClick={this.focus}>
-          <WysiwygEditor
-            blockStyleFn={getBlockStyle}
-            editorState={editorState}
-            handleKeyCommand={this.handleKeyCommand}
-            keyBindingFn={this.mapKeyToEditorCommand}
-            onBlur={() => this.setState({ isFocused: false })}
-            onChange={this.onChange}
-            placeholder={this.props.placeholder}
-            setRef={(editor) => this.domEditor = editor}
-            spellCheck
-          />
-          <input className={styles.editorInput} value="" tabIndex="-1" />
-        </div>
+        {isPreviewMode? (
+          <div className={styles.editor} onClick={this.focus}>
+            <WysiwygEditor
+              blockStyleFn={getBlockStyle}
+              editorState={EditorState.createEmpty()}
+              onChange={() => {}}
+              placeholder={this.props.placeholder}
+              spellCheck
+            />
+            <input className={styles.editorInput} value="" tabIndex="-1" />
+          </div>
+        ) : (
+          <div className={styles.editor} onClick={this.focus}>
+            <WysiwygEditor
+              blockStyleFn={getBlockStyle}
+              editorState={editorState}
+              handleKeyCommand={this.handleKeyCommand}
+              keyBindingFn={this.mapKeyToEditorCommand}
+              onBlur={() => this.setState({ isFocused: false })}
+              onChange={this.onChange}
+              placeholder={this.props.placeholder}
+              setRef={(editor) => this.domEditor = editor}
+              spellCheck
+            />
+            <input className={styles.editorInput} value="" tabIndex="-1" />
+          </div>
+        ) }
         <WysiwygBottomControls charactersNumber={this.getCharactersNumber()} onClick={this.toggleFullScreen} />
       </div>
     );
