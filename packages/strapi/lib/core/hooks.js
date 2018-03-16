@@ -91,6 +91,12 @@ const mountHooks = function (files, cwd) {
 
         });
       }),
-      resolve
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      }
     );
 };

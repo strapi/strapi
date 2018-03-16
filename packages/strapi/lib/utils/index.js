@@ -14,16 +14,10 @@ const exposer = require('./exposer');
 
 module.exports = {
   loadFile: function(url) {
-    try {
-      // Clear cache.
-      delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];
-      // Require without cache.
-      return require(path.resolve(this.config.appPath, url));
-    } catch (e) {
-      this.log.error(e);
-
-      return {};
-    }
+    // Clear cache.
+    delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];
+    // Require without cache.
+    return require(path.resolve(this.config.appPath, url));
   },
 
   setConfig: function(ctx, path, type, loader) {
