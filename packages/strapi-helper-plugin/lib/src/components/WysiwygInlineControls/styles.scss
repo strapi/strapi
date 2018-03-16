@@ -1,3 +1,7 @@
+.active {
+  background-color: red;
+}
+
 .controlsWrapper {
   display: flex;
   user-select: none;
@@ -25,8 +29,49 @@
   box-shadow: inset 0 -1px 0 0 rgba(16,22,34,0.04), inset 0 1px 0 0 rgba(16,22,34,0.04);
 }
 
+.styleButtonBold {
+  background-image: url('../../assets/icons/icon_bold.svg');
+  background-position: center;
+}
+
 .styleButtonItalic {
-  font-style: italic;
+  background-image: url('../../assets/icons/icon_italic.svg');
+  background-position: center;
+}
+
+.styleButtonUnderline {
+  background-image: url('../../assets/icons/icon_underline.svg');
+  background-position: center 11px;
+}
+
+.styleButtonUL {
+  background-image: url('../../assets/icons/icon_bullet-list.svg');
+  background-position: center;
+}
+
+.styleButtonOL {
+  background-image: url('../../assets/icons/icon_numbered-list.svg');
+  background-position: center 12px;
+}
+
+.styleButtonBlockQuote {
+  background-image: url('../../assets/icons/icon_quote-block.svg');
+  background-position: center;
+}
+
+.styleButtonCodeBlock {
+  background-image: url('../../assets/icons/icon_code-block.svg');
+  background-position: center;
+}
+
+.styleButtonLink {
+  background-image: url('../../assets/icons/icon_link.svg');
+  background-position: center;
+}
+
+.styleButtonImg {
+  background-image: url('../../assets/icons/icon_media.svg');
+  background-position: center;
 }
 
 .wysiwygInlineControls {
@@ -51,48 +96,4 @@
 
 .wysiwygInlineControlsFocus {
   border-color: #78caff;
-}
-
-.active {
-  background-color: red;
-}
-
-.styleButtonUL {
-  &:before {
-    content: '\f0ca';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-  }
-}
-
-.styleButtonOL {
-  &:before {
-    content: '\f0cb';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-  }
-}
-
-.styleButtonBlockQuote {
-  &:before {
-    content: '\f10d';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-  }
-}
-
-.styleButtonLink {
-  &:before {
-    content: '\f0c1';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-  }
-}
-
-.styleButtonImg {
-  &:before {
-    content: '\f03e';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-  }
 }
