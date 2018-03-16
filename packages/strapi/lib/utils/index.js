@@ -117,11 +117,12 @@ module.exports = {
     try {
       if (this.config.uuid) {
         const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
+        const options = { timeout: 1000 };
 
         const [usage, signedHash, required] = await Promise.all([
-          fetch('https://strapi.io/assets/images/usage.gif'),
-          fetch('https://strapi.io/hash.txt'),
-          fetch('https://strapi.io/required.txt')
+          fetch('https://strapi.io/assets/images/usage.gif', options),
+          fetch('https://strapi.io/hash.txt', options),
+          fetch('https://strapi.io/required.txt', options)
         ]);
 
         if (usage.status === 200 && signedHash.status === 200) {
