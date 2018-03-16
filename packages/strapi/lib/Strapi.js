@@ -87,6 +87,9 @@ class Strapi extends EventEmitter {
     try {
       this.config = assign(this.config, config)
 
+      // Emit starting event.
+      this.emit('server:starting');
+
       // Enhance app.
       await this.enhancer();
       // Load the app.
@@ -100,7 +103,9 @@ class Strapi extends EventEmitter {
       // Launch server.
       this.server.listen(this.config.port, err => {
         if (err) {
-          console.log(err);
+          this.log.debug(`Server wasn't able to start properly.`);
+          console.error(err);
+          return this.stop();
         }
 
         this.log.info('Server started in ' + this.config.appPath);
@@ -112,14 +117,16 @@ class Strapi extends EventEmitter {
         this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
         this.log.info('To shut down your server, press <CTRL> + C at any time');
 
+        // Emit started event.
+        this.emit('server:started');
+
         if (cb && typeof cb === 'function') {
           cb();
         }
       });
-    } catch (e) {
+    } catch (err) {
       this.log.debug(`Server wasn't able to start properly.`);
-      this.log.error(e);
-      console.error(e);
+      console.error(err);
       this.stop();
     }
   }
@@ -134,6 +141,17 @@ class Strapi extends EventEmitter {
       conn.on('close', function() {
        delete connections[key];
       });
+    });
+
+    this.server.on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        this.log.debug(`Server wasn't able to start properly.`);
+        this.log.error(`The port ${err.port} is already used by another application.`);
+        this.stop();
+        return;
+      }
+
+      console.error(err);
     });
 
     this.server.destroy = cb => {
