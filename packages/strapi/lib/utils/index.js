@@ -14,16 +14,10 @@ const exposer = require('./exposer');
 
 module.exports = {
   loadFile: function(url) {
-    try {
-      // Clear cache.
-      delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];
-      // Require without cache.
-      return require(path.resolve(this.config.appPath, url));
-    } catch (e) {
-      this.log.error(e);
-
-      return {};
-    }
+    // Clear cache.
+    delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];
+    // Require without cache.
+    return require(path.resolve(this.config.appPath, url));
   },
 
   setConfig: function(ctx, path, type, loader) {
@@ -123,11 +117,12 @@ module.exports = {
     try {
       if (this.config.uuid) {
         const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
+        const options = { timeout: 1000 };
 
         const [usage, signedHash, required] = await Promise.all([
-          fetch('https://strapi.io/assets/images/usage.gif'),
-          fetch('https://strapi.io/hash.txt'),
-          fetch('https://strapi.io/required.txt')
+          fetch('https://strapi.io/assets/images/usage.gif', options),
+          fetch('https://strapi.io/hash.txt', options),
+          fetch('https://strapi.io/required.txt', options)
         ]);
 
         if (usage.status === 200 && signedHash.status === 200) {
