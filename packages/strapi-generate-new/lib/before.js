@@ -18,6 +18,7 @@ const shell = require('shelljs');
 // Logger.
 const logger = require('strapi-utils').logger;
 
+
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -29,6 +30,16 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, cb) => {
   // App info.
   const hasDatabaseConfig = !!scope.database;
+  const standardEnvironments = [
+    'development',
+    'production',
+    'test'
+  ];
+  const nonStandardEnvironment = process.env.NODE_ENV && !standardEnvironments.includes(process.env.NODE_ENV);
+
+  if (nonStandardEnvironment) {
+    logger.warn(`A non-standard NODE_ENV has been detected (${process.env.NODE_ENV}). This may cause Strapi to behave in an unexpected manner.`);
+  }
 
   _.defaults(scope, {
     name: scope.name === '.' || !scope.name ? scope.name : path.basename(process.cwd()),
@@ -262,3 +273,4 @@ module.exports = (scope, cb) => {
 
   connectionValidation();
 };
+
