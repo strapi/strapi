@@ -18,7 +18,6 @@ const shell = require('shelljs');
 // Logger.
 const logger = require('strapi-utils').logger;
 
-
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -273,4 +272,3 @@ module.exports = (scope, cb) => {
 
   connectionValidation();
 };
-
