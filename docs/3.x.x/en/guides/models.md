@@ -651,12 +651,11 @@ module.exports = {
    * Triggered before user creation.
    */
   beforeCreate: async (model, attrs, options) => {
-      // Hash password.
-      const passwordHashed = await strapi.api.user.services.user.hashPassword(model.attributes.password);
+    // Hash password.
+    const passwordHashed = await strapi.api.user.services.user.hashPassword(model.attributes.password);
 
-      // Set the password.
-      model.set('password', passwordHashed);
-    });
+    // Set the password.
+    model.set('password', passwordHashed);
   }
 }
 ```
