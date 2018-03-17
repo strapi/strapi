@@ -19,32 +19,31 @@ module.exports = mongoose => {
   return {
     convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
-        case 'string':
-        case 'password':
-        case 'text':
-        case 'email':
-          return 'String';
-        case 'integer':
-        case 'biginteger':
-          return 'Number';
-        case 'float':
-        case 'decimal':
-          return 'Float';
-        case 'date':
-        case 'time':
-        case 'datetime':
-        case 'timestamp':
-          return Date;
         case 'boolean':
           return 'Boolean';
         case 'binary':
           return 'Buffer';
-        case 'uuid':
-          return 'ObjectId';
-        case 'enumeration':
-          return 'String';
+        case 'date':
+        case 'datetime':
+        case 'time':
+        case 'timestamp':
+          return Date;
+        case 'decimal':
+        case 'float':
+          return 'Float';
         case 'json':
           return 'Mixed';
+        case 'biginteger':
+        case 'integer':
+          return 'Number';
+        case 'uuid':
+          return 'ObjectId';
+        case 'email':
+        case 'enumeration':
+        case 'password':
+        case 'string':
+        case 'text':
+          return 'String';
         default:
 
       }
