@@ -114,7 +114,21 @@ class Wysiwyg extends React.Component {
     const text = Modifier.replaceText(this.getEditorState().getCurrentContent(), this.getSelection(), link);
     const newEditorState = EditorState.push(this.getEditorState(), text, 'insert-characters');
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    if (selectedText !== '') {
+      return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    }
+
+    const cursorPosition = getOffSets(this.getSelection()).start;
+    const anchorOffset = cursorPosition - trimStart(link, ' [text](').length + link.length;
+    const focusOffset = cursorPosition + trimEnd(link, ')').length;
+    const updatedSelection = this.getSelection().merge({
+      anchorOffset,
+      focusOffset,
+    });
+
+    return this.setState({
+      editorState: EditorState.forceSelection(newEditorState, updatedSelection),
+    });
   }
 
   addLinkMediaBlockWithSelection = () => {
