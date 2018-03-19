@@ -80,7 +80,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     if (nextProps.location.pathname !== this.props.location.pathname) {
       this.checkLogin(nextProps);
 
-      ReactGA.pageview(window.location.pathname);
+      ReactGA.pageview(nextProps.location.pathname);
     }
 
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
