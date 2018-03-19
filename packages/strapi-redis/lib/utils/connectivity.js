@@ -26,7 +26,7 @@ module.exports = (scope, success, error) => {
 
     logger.info('The app has been connected to the database successfully!');
 
-    execSync(`rm -r ${scope.tmpPath}`);
+    execSync(`rm -r "${scope.tmpPath}"`);
 
     logger.info('Copying the dashboard...');
 
