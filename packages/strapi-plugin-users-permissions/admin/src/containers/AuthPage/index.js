@@ -179,7 +179,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
                       placeholder={get(input, 'placeholder')}
                       type={get(input, 'type')}
                       validations={{ required: true }}
-                      value={get(this.props.modifiedData, get(input, 'name'))}
+                      value={get(this.props.modifiedData, get(input, 'name'), get(input, 'value'))}
                       noErrorsDescription={this.props.noErrorsDescription}
                     />
                   ))}

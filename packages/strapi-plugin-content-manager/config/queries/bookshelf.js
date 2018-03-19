@@ -140,7 +140,7 @@ module.exports = {
           case 'oneToMany':
           case 'manyToOne':
           case 'manyToMany':
-            if (details.dominant === true) {
+            if (association.nature === 'manyToMany' && details.dominant === true) {
               acc[current] = params.values[current];
             } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.

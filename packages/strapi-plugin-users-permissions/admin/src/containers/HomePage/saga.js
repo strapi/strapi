@@ -68,7 +68,7 @@ export function* dataFetch(action) {
 export function* submitData(action) {
   try {
     const body = yield select(makeSelectModifiedData());
-    const opts = { method: 'PUT', body };
+    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? body.settings : body };
 
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
     yield put(submitSucceeded());

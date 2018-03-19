@@ -10,13 +10,16 @@ const logger = require('strapi-utils').logger;
 module.exports = (scope, success, error) => {
   const Mongoose = require(path.resolve(`${scope.tmpPath}/node_modules/mongoose`));
 
-  const { username, password, ssl } = scope.database.settings
+  const { username, password, authenticationDatabase, ssl } = scope.database.settings
   const connectOptions = {}
   if (username) {
     connectOptions.user = username
     if (password) {
       connectOptions.pass = password
     }
+  }
+  if (authenticationDatabase) {
+    connectOptions.authSource = authenticationDatabase;
   }
   connectOptions.ssl = ssl ? true : false
   Mongoose.connect(`mongodb://${scope.database.settings.host}:${scope.database.settings.port}/${scope.database.settings.database}`, connectOptions, function (err) {
@@ -29,7 +32,7 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    execSync(`rm -r ${scope.tmpPath}`);
+    execSync(`rm -r "${scope.tmpPath}"`);
 
     logger.info('Copying the dashboard...');
 

@@ -31,6 +31,7 @@ module.exports = function (strapi) {
       host: 'localhost',
       port: 27017,
       database: 'strapi',
+      authenticationDatabase: '',
       ssl: false
     },
 
@@ -41,7 +42,7 @@ module.exports = function (strapi) {
     initialize: cb => {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
-        const { uri, host, port, username, password, database, ssl } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { uri, host, port, username, password, database, authenticationDatabase, ssl } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {}
@@ -50,6 +51,9 @@ module.exports = function (strapi) {
           if (!_.isEmpty(password)) {
             connectOptions.pass = password
           }
+        }
+        if (!_.isEmpty(authenticationDatabase)) {
+          connectOptions.authSource = authenticationDatabase;
         }
         connectOptions.ssl = ssl ? true : false;
 
@@ -206,7 +210,7 @@ module.exports = function (strapi) {
               });
             });
 
-            // Parse every registered model.
+            // Parse every authenticated model.
             _.forEach(models, (definition, model) => {
               definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
