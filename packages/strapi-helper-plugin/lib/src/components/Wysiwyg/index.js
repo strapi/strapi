@@ -19,7 +19,7 @@ import {
 // import { stateFromMarkdown } from 'draft-js-import-markdown';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
-import { isEmpty, isNaN, last, replace, words } from 'lodash';
+import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
@@ -173,14 +173,14 @@ class Wysiwyg extends React.Component {
   }
 
   addOlBlock = () => {
-    // NOTE need to check if this line is really necessary
-    const previousBlockKey = last(Object.keys(this.getCurrentBlockMap()));
-    const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(previousBlockKey).getText();
+    const currentBlockKey = this.getCurrentAnchorKey();
+    const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(currentBlockKey).getText();
+    const nextBlockKey = this.getNextBlockKey(currentBlockKey) || genKey();
     const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
     const liNumber = isNaN(number) ? 1 : number + 1;
     const selectedText = this.getSelectedText();
     const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newBlock = this.createNewBlock(li, 'block-ul', nextBlockKey);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, li);
 
@@ -188,9 +188,10 @@ class Wysiwyg extends React.Component {
   }
 
   addUlBlock = () => {
+    const nextBlockKey = this.getNextBlockKey(this.getCurrentAnchorKey()) || genKey();
     const selectedText = this.getSelectedText();
     const li = selectedText === '' ? '- ' : `- ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul');
+    const newBlock = this.createNewBlock(li, 'block-ul', nextBlockKey);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, li);
 
@@ -212,9 +213,9 @@ class Wysiwyg extends React.Component {
     return newEditorState;
   }
 
-  createNewBlock = (text = '', type = 'unstyled') => (
+  createNewBlock = (text = '', type = 'unstyled', key = genKey()) => (
     new ContentBlock({
-      key: genKey(),
+      key,
       type,
       text,
       charaterList: List([]),
@@ -241,9 +242,13 @@ class Wysiwyg extends React.Component {
 
   getSelection = () => this.getEditorState().getSelection();
 
+  getCurrentAnchorKey = () => this.getSelection().getAnchorKey();
+
   getCurrentBlockMap = () => this.getEditorState().getCurrentContent().getBlockMap().toJS();
 
   getCurrentContentBlock = () => this.getEditorState().getCurrentContent().getBlockForKey(this.getSelection().getAnchorKey());
+
+  getNextBlockKey = (currentBlockKey) => this.getEditorState().getCurrentContent().getKeyAfter(currentBlockKey);
 
   getSelectedText = () => {
     const { start, end } = getOffSets(this.getSelection());
@@ -453,6 +458,7 @@ class Wysiwyg extends React.Component {
             <WysiwygEditor
               blockStyleFn={getBlockStyle}
               editorState={editorState}
+              handleBeforeInput={this.handleBeforeInput}
               handleKeyCommand={this.handleKeyCommand}
               keyBindingFn={this.mapKeyToEditorCommand}
               onBlur={this.blur}
