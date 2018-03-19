@@ -44,4 +44,4 @@ Copy the fields and relations you had in your `/plugins/users-permissions/models
 Then, delete your old `plugins` folder and replace it by the new one.
 
 
-That's all, you have now upgraded to Strapi `alpha.10`.
+That's all, you have now upgraded to Strapi `alpha.11`.
