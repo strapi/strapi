@@ -32,9 +32,6 @@ import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import { checkFormValidity } from 'utils/formValidations';
 
-// Layout
-import layout from '../../../../config/layout';
-
 import {
   changeData,
   getData,
@@ -109,7 +106,7 @@ export class EditPage extends React.Component {
    * @return {[type]} [description]
    */
   getLayout = () => (
-    bindLayout.call(this, get(this.context.plugins.toJS(), `${this.getSource()}.layout`, layout))
+    bindLayout.call(this, this.props.editPage.layout)
   )
 
   /**
@@ -174,7 +171,7 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   }
 
-  layout = bindLayout.call(this, layout);
+  // layout = bindLayout.call(this, layout);
 
   componentDidCatch(error, info) {
     console.log('err', error);

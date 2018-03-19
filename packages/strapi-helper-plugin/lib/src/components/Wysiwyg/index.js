@@ -51,6 +51,11 @@ class Wysiwyg extends React.Component {
       this.setState({ isFocused: true });
       return this.domEditor.focus();
     };
+
+    this.blur = () => {
+      this.setState({ isFocused: false });
+      return this.domEditor.blur();
+    };
   }
 
   componentDidMount() {
@@ -348,7 +353,7 @@ class Wysiwyg extends React.Component {
 
   onChange = (editorState) => {
     // Update the state and force the focus
-    this.setState({ editorState }, () => { this.focus(); });
+    this.setState({ editorState });
     this.props.onChange({ target: {
       value: editorState.getCurrentContent().getPlainText(),
       name: this.props.name,
@@ -450,7 +455,7 @@ class Wysiwyg extends React.Component {
               editorState={editorState}
               handleKeyCommand={this.handleKeyCommand}
               keyBindingFn={this.mapKeyToEditorCommand}
-              onBlur={() => this.setState({ isFocused: false })}
+              onBlur={this.blur}
               onChange={this.onChange}
               placeholder={this.props.placeholder}
               setRef={(editor) => this.domEditor = editor}
