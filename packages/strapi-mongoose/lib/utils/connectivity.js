@@ -32,7 +32,7 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    execSync(`rm -r ${scope.tmpPath}`);
+    execSync(`rm -r "${scope.tmpPath}"`);
 
     logger.info('Copying the dashboard...');
 
