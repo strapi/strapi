@@ -433,7 +433,7 @@ class Wysiwyg extends React.Component {
           </div>
         </div>
         {isPreviewMode? (
-          <div className={styles.editor} onClick={this.focus}>
+          <div className={styles.editor}>
             <WysiwygEditor
               blockStyleFn={getBlockStyle}
               editorState={this.previewHTML()}
