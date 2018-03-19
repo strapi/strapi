@@ -50,19 +50,3 @@ export function getOffSets(selection) {
     start: selection.getStartOffset(),
   };
 }
-
-/**
- * getTheFocusOffsetToAdd
- * @param {[type]} style [description]
- */
-
-export function getFocusOffset(style) {
-  switch (style) {
-    case 'BOLD':
-      return 11;
-    case 'ITALIC':
-      return 12;
-    default:
-      return 17;
-  }
-}

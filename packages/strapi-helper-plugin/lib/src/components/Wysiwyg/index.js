@@ -19,7 +19,7 @@ import {
 // import { stateFromMarkdown } from 'draft-js-import-markdown';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
-import { isEmpty, isNaN, replace, words } from 'lodash';
+import { isEmpty, isNaN, replace, trimEnd, trimStart, words } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
 import Drop from 'components/WysiwygDropUpload';
@@ -29,7 +29,7 @@ import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
 import { ToggleMode } from './components';
 import { NEW_CONTROLS, SELECT_OPTIONS  } from './constants';
-import { getBlockStyle, getFocusOffset, getInnerText, getOffSets } from './helpers';
+import { getBlockStyle, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
@@ -156,11 +156,9 @@ class Wysiwyg extends React.Component {
     }
 
     const cursorPosition = getOffSets(this.getSelection()).start;
-    const focusOffsetToAdd = getFocusOffset(style);
     const textWithEntity = Modifier.replaceText(editorState.getCurrentContent(), this.getSelection(), getInnerText(style));
-    const anchorOffsetToAdd = style === 'ITALIC' ? 1 : 2;
-    const anchorOffset = cursorPosition + anchorOffsetToAdd;
-    const focusOffset = cursorPosition + focusOffsetToAdd;
+    const anchorOffset = cursorPosition - trimStart(getInnerText(style), '*_').length + getInnerText(style).length;
+    const focusOffset = cursorPosition + trimEnd(getInnerText(style), '*_').length;
     const updatedSelection = this.getSelection().merge({
       anchorOffset,
       focusOffset,
