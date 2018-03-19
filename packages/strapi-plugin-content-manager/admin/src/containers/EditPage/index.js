@@ -38,6 +38,7 @@ import layout from '../../../../config/layout';
 import {
   changeData,
   getData,
+  getLayout,
   initModelProps,
   onCancel,
   resetProps,
@@ -58,6 +59,8 @@ export class EditPage extends React.Component {
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
+    } else {
+      this.props.getLayout(this.getSource());
     }
 
     // Get all relations made with the upload plugin
@@ -275,6 +278,7 @@ EditPage.propTypes = {
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
+  getLayout: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
@@ -293,6 +297,7 @@ function mapDispatchToProps(dispatch) {
     {
       changeData,
       getData,
+      getLayout,
       initModelProps,
       onCancel,
       resetProps,
