@@ -15,6 +15,7 @@ import {
   genKey,
   Modifier,
   RichUtils,
+  SelectionState,
 } from 'draft-js';
 // import { stateFromMarkdown } from 'draft-js-import-markdown';
 import { List } from 'immutable';
@@ -27,8 +28,8 @@ import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
-import { ToggleMode } from './components';
-import { NEW_CONTROLS, SELECT_OPTIONS  } from './constants';
+// import { ToggleMode } from './components';
+import { CONTROLS, SELECT_OPTIONS  } from './constants';
 import { getBlockStyle, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
@@ -136,21 +137,27 @@ class Wysiwyg extends React.Component {
     const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
     const newBlock = this.createNewBlock(link);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, link);
+    const anchorOffset = link.length - trimStart(link, '![text](').length;
+    const focusOffset = trimEnd(link, ')`').length;
+    let newEditorState = this.createNewEditorState(newContentState, link);
+    let updatedSelection = new SelectionState({
+      anchorKey: newBlock.getKey(),
+      anchorOffset,
+      focusOffset,
+      focusKey: newBlock.getKey(),
+      isBackward: false,
+    });
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-  }
+    if (getOffSets(this.getSelection()).start === 0) {
+      updatedSelection = this.getSelection().merge({
+        anchorOffset,
+        focusOffset,
+      });
+    }
 
-  addLinkMediaBlock = (link) => {
-    const { editorState } = this.state;
-    const newBlock = this.createNewBlock(link);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = EditorState.push(
-      editorState,
-      newContentState,
-    );
+    newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
 
-    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    return this.setState({ editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()) });
   }
 
   addEntity = (text, style) => {
@@ -171,8 +178,8 @@ class Wysiwyg extends React.Component {
 
     const cursorPosition = getOffSets(this.getSelection()).start;
     const textWithEntity = Modifier.replaceText(editorState.getCurrentContent(), this.getSelection(), getInnerText(style));
-    const anchorOffset = cursorPosition - trimStart(getInnerText(style), '*_~').length + getInnerText(style).length;
-    const focusOffset = cursorPosition + trimEnd(getInnerText(style), '*_~').length;
+    const anchorOffset = cursorPosition - trimStart(getInnerText(style), '*_~`>').length + getInnerText(style).length;
+    const focusOffset = cursorPosition + trimEnd(getInnerText(style), '*_~`').length;
     const updatedSelection = this.getSelection().merge({
       anchorOffset,
       focusOffset,
@@ -308,8 +315,16 @@ class Wysiwyg extends React.Component {
 
     return request('/upload', {method: 'POST', headers, body: formData }, false, false)
       .then(response => {
+        const { editorState } = this.state;
         const link = `![text](${response[0].url})`;
-        this.addLinkMediaBlock(link);
+        const newBlock = this.createNewBlock(link);
+        const newContentState = this.createNewContentStateFromBlock(newBlock);
+        const newEditorState = EditorState.push(
+          editorState,
+          newContentState,
+        );
+
+        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
       })
       .catch(err => {
         console.log('error', err.response);
@@ -433,7 +448,7 @@ class Wysiwyg extends React.Component {
               selectOptions={SELECT_OPTIONS}
             />
           </div>
-          {NEW_CONTROLS.map((value, key) => (
+          {CONTROLS.map((value, key) => (
             <Controls
               key={key}
               buttons={value}
@@ -451,7 +466,7 @@ class Wysiwyg extends React.Component {
             />
           ))}
           <div className={styles.toggleModeWrapper}>
-            <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
+            {/*}<ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />*/}
           </div>
         </div>
         {isPreviewMode? (

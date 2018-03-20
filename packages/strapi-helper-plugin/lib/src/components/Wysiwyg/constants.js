@@ -1,14 +1,14 @@
 export const SELECT_OPTIONS = [
-  { id: 'Add a title', value: '' },
-  { id: 'Title H1', value: '#' },
-  { id: 'Title H2', value: '##' },
-  { id: 'Title H3', value: '###' },
-  { id: 'Title H4', value: '####'},
-  { id: 'Title H5', value: '#####' },
-  { id: 'Title H6', value: '######' },
+  { id: 'components.Wysiwyg.selectOptions.title', value: '' },
+  { id: 'components.Wysiwyg.selectOptions.H1', value: '#' },
+  { id: 'components.Wysiwyg.selectOptions.H2', value: '##' },
+  { id: 'components.Wysiwyg.selectOptions.H3', value: '###' },
+  { id: 'components.Wysiwyg.selectOptions.H4', value: '####'},
+  { id: 'components.Wysiwyg.selectOptions.H5', value: '#####' },
+  { id: 'components.Wysiwyg.selectOptions.H6', value: '######' },
 ];
 
-export const NEW_CONTROLS = [
+export const CONTROLS = [
   [
     { label: 'B', style: 'BOLD', className: 'styleButtonBold', hideLabel: true, handler: 'addEntity', text: '**innerText**' },
     { label: 'I', style: 'ITALIC', className: 'styleButtonItalic', hideLabel: true, handler: 'addEntity', text: '*innerText*' },
