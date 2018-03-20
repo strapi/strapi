@@ -15,32 +15,6 @@ export function getBlockStyle(block) {
   }
 }
 
-export function getInnerText(style) {
-  let innerText;
-
-  switch (style) {
-    case 'BOLD':
-      innerText = '**bold text**';
-      break;
-    case 'ITALIC':
-      innerText = '*italic text*';
-      break;
-    case 'UNDERLINE':
-      innerText = '__underlined text__';
-      break;
-    case 'LINK':
-      innerText = '[text](link)';
-      break;
-    case 'STRIKED':
-      innerText = '~~striked out~~';
-      break;
-    default:
-      innerText = '';
-  }
-
-  return innerText;
-}
-
 export function getBlockContent(style) {
   switch (style) {
     case 'IMG':
@@ -60,6 +34,36 @@ export function getBlockContent(style) {
         innerContent: 'quote',
         endReplacer: '',
         startReplacer: '> ',
+      };
+    case 'BOLD':
+      return {
+        innerContent: 'bold text',
+        endReplacer: '*',
+        startReplacer: '*',
+      };
+    case 'ITALIC':
+      return {
+        innerContent: 'italic text',
+        endReplacer: '*',
+        startReplacer: '*',
+      };
+    case 'STRIKED':
+      return {
+        innerContent: 'striked out',
+        endReplacer: '~',
+        startReplacer: '~',
+      };
+    case 'UNDERLINE':
+      return {
+        innerContent: 'underlined text',
+        endReplacer: '_',
+        startReplacer: '_',
+      };
+    case 'LINK':
+      return {
+        innerContent: 'link',
+        endReplacer: ')',
+        startReplacer: '[text](',
       };
     default:
       return {
