@@ -194,27 +194,29 @@ class Wysiwyg extends React.Component {
   addOlBlock = () => {
     const currentBlockKey = this.getCurrentAnchorKey();
     const previousContent = this.getEditorState().getCurrentContent().getBlockForKey(currentBlockKey).getText();
-    const nextBlockKey = this.getNextBlockKey(currentBlockKey) || genKey();
     const number = previousContent ? parseInt(previousContent.split('.')[0], 10) : 0;
     const liNumber = isNaN(number) ? 1 : number + 1;
     const selectedText = this.getSelectedText();
     const li = selectedText === '' ? `${liNumber}. ` : `${liNumber}. ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul', nextBlockKey);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, li);
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    return this.addBlock(li);
   }
 
   addUlBlock = () => {
-    const nextBlockKey = this.getNextBlockKey(this.getCurrentAnchorKey()) || genKey();
     const selectedText = this.getSelectedText();
     const li = selectedText === '' ? '- ' : `- ${selectedText}`;
-    const newBlock = this.createNewBlock(li, 'block-ul', nextBlockKey);
+
+    return this.addBlock(li);
+  }
+
+  addBlock = (text) => {
+    const nextBlockKey = this.getNextBlockKey(this.getCurrentAnchorKey()) || genKey();
+    const newBlock = this.createNewBlock(text, 'block-list', nextBlockKey);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, li);
+    const newEditorState = this.createNewEditorState(newContentState, text);
 
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+
   }
 
   createNewEditorState = (newContentState, text) => {
@@ -279,11 +281,9 @@ class Wysiwyg extends React.Component {
     this.setState({ headerValue: target.value });
     const selectedText = this.getSelectedText();
     const title = selectedText === '' ? `${target.value} ` : `${target.value} ${selectedText}`;
-    const newBlock = this.createNewBlock(title, 'block-ul');
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, title);
+    this.addBlock(title);
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState), headerValue: '' });
+    return this.setState({ headerValue: '' });
   }
 
   handleClickPreview = () => this.setState({ isPreviewMode: !this.state.isPreviewMode });
