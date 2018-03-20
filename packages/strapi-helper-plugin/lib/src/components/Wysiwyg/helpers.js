@@ -1,3 +1,4 @@
+import { trimEnd, trimStart } from 'lodash';
 import styles from './styles.scss';
 /**
  * Override the editor css
@@ -73,6 +74,13 @@ export function getBlockContent(style) {
       };
   }
 }
+
+export const getDefaultSelectionOffsets = (content, startReplacer, endReplacer, initPosition = 0) => (
+  {
+    anchorOffset: initPosition + content.length - trimStart(content, startReplacer).length,
+    focusOffset: initPosition + trimEnd(content, endReplacer).length,
+  }
+);
 
 /**
  * Get the start and end offset
