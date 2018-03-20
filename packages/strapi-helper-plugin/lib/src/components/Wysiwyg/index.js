@@ -30,7 +30,7 @@ import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
 // import { ToggleMode } from './components';
 import { CONTROLS, SELECT_OPTIONS  } from './constants';
-import { getBlockStyle, getInnerText, getOffSets } from './helpers';
+import { getBlockContent, getBlockStyle, getInnerText, getOffSets } from './helpers';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
@@ -98,15 +98,33 @@ class Wysiwyg extends React.Component {
     this.setState({ editorState, hasInitialValue: true, initialValue: props.value });
   }
 
-  addSimpleBlock = (content, style) => {
+  addSimpleBlockWithSelection = (content, style) => {
     const selectedText = this.getSelectedText();
-    const defaultContent = style === 'code-block' ? 'code block' : 'quote';
-    const innerContent = selectedText === '' ? replace(content, 'innerText', defaultContent) : replace(content, 'innerText', selectedText);
-    const newBlock = this.createNewBlock(innerContent);
+    const { innerContent, endReplacer, startReplacer } = getBlockContent(style);
+    const defaultContent = selectedText === '' ? replace(content, 'innerText', innerContent) : replace(content, 'innerText', selectedText);
+    const newBlock = this.createNewBlock(defaultContent);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const newEditorState = this.createNewEditorState(newContentState, innerContent);
+    const anchorOffset = defaultContent.length - trimStart(defaultContent, startReplacer).length;
+    const focusOffset = trimEnd(defaultContent, endReplacer).length;
+    let newEditorState = this.createNewEditorState(newContentState, defaultContent);
+    let updatedSelection = new SelectionState({
+      anchorKey: newBlock.getKey(),
+      anchorOffset,
+      focusOffset,
+      focusKey: newBlock.getKey(),
+      isBackward: false,
+    });
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    if (getOffSets(this.getSelection()).start === 0) {
+      updatedSelection = this.getSelection().merge({
+        anchorOffset,
+        focusOffset,
+      });
+    }
+
+    newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
+
+    return this.setState({ editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()) });
   }
 
   addLink = () => {
@@ -130,34 +148,6 @@ class Wysiwyg extends React.Component {
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, updatedSelection),
     });
-  }
-
-  addLinkMediaBlockWithSelection = () => {
-    const selectedText = this.getSelectedText();
-    const link = selectedText === '' ? '![text](link)' : `![text](${selectedText})`;
-    const newBlock = this.createNewBlock(link);
-    const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const anchorOffset = link.length - trimStart(link, '![text](').length;
-    const focusOffset = trimEnd(link, ')`').length;
-    let newEditorState = this.createNewEditorState(newContentState, link);
-    let updatedSelection = new SelectionState({
-      anchorKey: newBlock.getKey(),
-      anchorOffset,
-      focusOffset,
-      focusKey: newBlock.getKey(),
-      isBackward: false,
-    });
-
-    if (getOffSets(this.getSelection()).start === 0) {
-      updatedSelection = this.getSelection().merge({
-        anchorOffset,
-        focusOffset,
-      });
-    }
-
-    newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
-
-    return this.setState({ editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()) });
   }
 
   addEntity = (text, style) => {
@@ -456,9 +446,8 @@ class Wysiwyg extends React.Component {
               handlers={{
                 addEntity: this.addEntity,
                 addLink: this.addLink,
-                addLinkMediaBlockWithSelection: this.addLinkMediaBlockWithSelection,
                 addOlBlock: this.addOlBlock,
-                addSimpleBlock: this.addSimpleBlock,
+                addSimpleBlockWithSelection: this.addSimpleBlockWithSelection,
                 addUlBlock: this.addUlBlock,
               }}
               onToggle={this.toggleInlineStyle}

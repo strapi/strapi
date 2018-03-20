@@ -18,10 +18,11 @@ export const CONTROLS = [
     { label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addOlBlock', text: '1. innerText' },
   ],
   [
-    { label: '<>', style: 'code-block', className: 'styleButtonCodeBlock', hideLabel: true, handler: 'addSimpleBlock', text: '```innerText```' },
-    { label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addLinkMediaBlockWithSelection', text: '![innerText](link)' },
-    { label: 'Link', style: 'LINK', className: 'styleButtonLink',hideLabel: true, handler: 'addLink', text: '[text](link)' },
-    { label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addSimpleBlock', text: '> innerText' },
+    { label: '<>', style: 'code-block', className: 'styleButtonCodeBlock', hideLabel: true, handler: 'addSimpleBlockWithSelection', text: '```innerText```' },
+    { label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addSimpleBlockWithSelection', text: '![text](innerText)' },
+    // { label: 'img', style: 'IMG', className: 'styleButtonImg', hideLabel: true, handler: 'addLinkMediaBlockWithSelection', text: '![text](link)' },
+    { label: 'Link', style: 'LINK', className: 'styleButtonLink', hideLabel: true, handler: 'addLink', text: '[text](link)' },
+    { label: 'quotes', style: 'blockquote', className: 'styleButtonBlockQuote', hideLabel: true, handler: 'addSimpleBlockWithSelection', text: '> innerText' },
   ],
 ];
 

@@ -41,6 +41,34 @@ export function getInnerText(style) {
   return innerText;
 }
 
+export function getBlockContent(style) {
+  switch (style) {
+    case 'IMG':
+      return {
+        innerContent: 'link',
+        endReplacer: ')',
+        startReplacer: '![text](',
+      };
+    case 'code-block':
+      return {
+        innerContent: 'code block',
+        endReplacer: '`',
+        startReplacer: '`',
+      };
+    case 'blockquote':
+      return {
+        innerContent: 'quote',
+        endReplacer: '',
+        startReplacer: '> ',
+      };
+    default:
+      return {
+        innerContent: '',
+        endReplacer: '',
+        startReplacer: '',
+      };
+  }
+}
 
 /**
  * Get the start and end offset
