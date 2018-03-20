@@ -85,7 +85,6 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
       noErrorsDescription,
       onBlur,
       onChange,
-      onFocus,
       placeholder,
       style,
       tabIndex,
@@ -123,7 +122,6 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
           name={name}
           onBlur={handleBlur}
           onChange={onChange}
-          onFocus={onFocus}
           placeholder={placeholder}
           style={inputStyle}
           tabIndex={tabIndex}
@@ -165,7 +163,6 @@ WysiwygWithErrors.defaultProps = {
   labelStyle: {},
   noErrorsDescription: false,
   onBlur: false,
-  onFocus: () => {},
   placeholder: '',
   style: {},
   tabIndex: '0',
@@ -211,7 +208,6 @@ WysiwygWithErrors.propTypes = {
     PropTypes.func,
   ]),
   onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

@@ -205,6 +205,16 @@ class Wysiwyg extends React.Component {
 
   getSelectedText = ({ start, end } = getOffSets(this.getSelection())) => this.getCurrentContentBlock().getText().slice(start, end);
 
+  handleBlur = () => {
+    const target = {
+      name: this.props.name,
+      type: 'wysiwyg',
+      value: this.getEditorState().getCurrentContent().getPlainText(),
+    };
+    this.props.onBlur({ target });
+    this.blur();
+  }
+
   handleChangeSelect = ({ target }) => {
     this.setState({ headerValue: target.value });
     const selectedText = this.getSelectedText();
@@ -357,9 +367,12 @@ class Wysiwyg extends React.Component {
         className={cn(
           styles.editorWrapper,
           this.state.isFocused && styles.editorFocus,
+          !this.props.deactivateErrorHighlight && this.props.error && styles.editorError,
+          !isEmpty(this.props.className) && this.props.className,
         )}
         onDragEnter={this.handleDragEnter}
         onDragOver={this.handleDragOver}
+        style={this.props.style}
       >
         {this.state.isDraging && (
           <Drop onDrop={this.handleDrop} onDragOver={this.handleDragOver} onDragLeave={this.handleDragLeave} />
@@ -411,7 +424,7 @@ class Wysiwyg extends React.Component {
               handleBeforeInput={this.handleBeforeInput}
               handleKeyCommand={this.handleKeyCommand}
               keyBindingFn={this.mapKeyToEditorCommand}
-              onBlur={this.blur}
+              onBlur={this.handleBlur}
               onChange={this.onChange}
               placeholder={this.props.placeholder}
               setRef={(editor) => this.domEditor = editor}
@@ -426,19 +439,28 @@ class Wysiwyg extends React.Component {
   }
 }
 
-// NOTE: handle defaultProps!
 Wysiwyg.defaultProps = {
   autoFocus: false,
+  className: '',
+  deactivateErrorHighlight: false,
+  error: false,
+  onBlur: () => {},
   onChange: () => {},
   placeholder: '',
+  style: {},
   value: '',
 };
 
 Wysiwyg.propTypes = {
   autoFocus: PropTypes.bool,
+  className: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  error: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
+  style: PropTypes.object,
   value: PropTypes.string,
 };
 
