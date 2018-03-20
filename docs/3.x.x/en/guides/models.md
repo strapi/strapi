@@ -271,7 +271,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 {
   "attributes": {
     "categories": {
-      "collection": "product",
+      "collection": "category",
       "via": "products",
       "dominant": true
     }
@@ -286,7 +286,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 {
   "attributes": {
     "products": {
-      "collection": "category",
+      "collection": "product",
       "via": "categories"
     }
   }
