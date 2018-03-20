@@ -13,12 +13,13 @@ import styles from './styles.scss';
 
 function InputFileDetails(props) {
   if (props.number === 0 && props.multiple) {
-    return <div />;
+    console.log('fycj');
+    return <div className={styles.inputFileDetailsEmpty} />;
   }
 
   // TODO improve logic
   if (!get(props.file, 'name') && !props.multiple) {
-    return <div />;
+    return <div className={styles.inputFileDetailsEmpty} />;
   }
 
   const url = startsWith(props.file.url, '/') ? `${strapi.backendURL}${props.file.url}` : props.file.url;

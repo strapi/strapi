@@ -13,6 +13,7 @@ export const NEW_CONTROLS = [
     { label: 'B', style: 'BOLD', className: 'styleButtonBold', hideLabel: true, handler: 'addEntity', text: '**innerText**' },
     { label: 'I', style: 'ITALIC', className: 'styleButtonItalic', hideLabel: true, handler: 'addEntity', text: '*innerText*' },
     { label: 'U', style: 'UNDERLINE', className: 'styleButtonUnderline', hideLabel: true, handler: 'addEntity', text: '__innerText__' },
+    { label: 'S', style: 'STRIKED', className: 'styleButtonStrikedOut', hideLabel: true, handler: 'addEntity', text: '~~innerText~~' },
     { label: 'UL', style: 'unordered-list-item', className: 'styleButtonUL', hideLabel: true, handler: 'addUlBlock', text: '- innerText' },
     { label: 'OL', style: 'ordered-list-item', className: 'styleButtonOL', hideLabel: true, handler: 'addOlBlock', text: '1. innerText' },
   ],

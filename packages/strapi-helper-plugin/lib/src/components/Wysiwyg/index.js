@@ -171,8 +171,8 @@ class Wysiwyg extends React.Component {
 
     const cursorPosition = getOffSets(this.getSelection()).start;
     const textWithEntity = Modifier.replaceText(editorState.getCurrentContent(), this.getSelection(), getInnerText(style));
-    const anchorOffset = cursorPosition - trimStart(getInnerText(style), '*_').length + getInnerText(style).length;
-    const focusOffset = cursorPosition + trimEnd(getInnerText(style), '*_').length;
+    const anchorOffset = cursorPosition - trimStart(getInnerText(style), '*_~').length + getInnerText(style).length;
+    const focusOffset = cursorPosition + trimEnd(getInnerText(style), '*_~').length;
     const updatedSelection = this.getSelection().merge({
       anchorOffset,
       focusOffset,

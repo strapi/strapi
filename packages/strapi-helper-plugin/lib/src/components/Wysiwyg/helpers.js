@@ -31,6 +31,9 @@ export function getInnerText(style) {
     case 'LINK':
       innerText = '[text](link)';
       break;
+    case 'STRIKED':
+      innerText = '~~striked out~~';
+      break;
     default:
       innerText = '';
   }
