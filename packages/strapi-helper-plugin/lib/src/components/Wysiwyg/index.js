@@ -30,6 +30,7 @@ import { ToggleMode } from './components';
 import { CONTROLS, SELECT_OPTIONS  } from './constants';
 import converter from './converter';
 import { getBlockContent, getBlockStyle, getDefaultSelectionOffsets, getOffSets } from './helpers';
+import decorator from './decorator';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
@@ -333,8 +334,11 @@ class Wysiwyg extends React.Component {
     const blocksFromHTML = convertFromHTML(html);
     // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
-      const contentState = ContentState.createFromBlockArray(blocksFromHTML);
-      return EditorState.createWithContent(contentState);
+      const contentState = ContentState.createFromBlockArray(
+        blocksFromHTML.contentBlocks,
+        blocksFromHTML.entityMap,
+      );
+      return EditorState.createWithContent(contentState, decorator);
     }
 
     // Prevent errors if value is empty

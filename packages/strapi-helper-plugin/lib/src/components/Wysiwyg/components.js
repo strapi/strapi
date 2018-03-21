@@ -10,6 +10,44 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
+const Image = (props) => {
+  const {
+    alt,
+    height,
+    src,
+    width,
+  } = props.contentState.getEntity(props.entityKey).getData();
+
+  return (
+    <img alt={alt} src={src} height={height} width={width} style={{ maxWidth: '100%'}} />
+  );
+};
+
+Image.propTypes = {
+  contentState: PropTypes.object.isRequired,
+  entityKey: PropTypes.string.isRequired,
+};
+
+const Link = (props) => {
+  const { url } = props.contentState.getEntity(props.entityKey).getData();
+
+  return (
+    <a href={url} style={styles.link}>
+      {props.children}
+    </a>
+  );
+};
+
+Link.defaultProps = {
+  children: '',
+};
+
+Link.propTypes = {
+  children: PropTypes.node,
+  contentState: PropTypes.object.isRequired,
+  entityKey: PropTypes.string.isRequired,
+};
+
 const ToggleMode = (props) => {
   const label = props.isPreviewMode ? 'components.Wysiwyg.ToggleMode.markdown' : 'components.Wysiwyg.ToggleMode.preview';
 
@@ -31,5 +69,7 @@ ToggleMode.propTypes = {
 };
 
 export {
+  Image,
+  Link,
   ToggleMode,
 };
