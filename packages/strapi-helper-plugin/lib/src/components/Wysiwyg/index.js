@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import showdown from 'showdown';
 import {
   ContentBlock,
   ContentState,
@@ -27,8 +26,9 @@ import Select from 'components/InputSelect';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
-// import { ToggleMode } from './components';
+import { ToggleMode } from './components';
 import { CONTROLS, SELECT_OPTIONS  } from './constants';
+import converter from './converter';
 import { getBlockContent, getBlockStyle, getDefaultSelectionOffsets, getOffSets } from './helpers';
 import styles from './styles.scss';
 
@@ -328,11 +328,7 @@ class Wysiwyg extends React.Component {
     }});
   }
 
-  // NOTE: this need to be changed to preview markdown
   previewHTML = () => {
-    const converter = new showdown.Converter();
-    // TODO: parse html to add empty blocks
-    // TODO handle img
     const html = converter.makeHtml(this.props.value);
     const blocksFromHTML = convertFromHTML(html);
     // Make sure blocksFromHTML.contentBlocks !== null
@@ -402,7 +398,7 @@ class Wysiwyg extends React.Component {
             />
           ))}
           <div className={styles.toggleModeWrapper}>
-            {/*}<ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />*/}
+            <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
           </div>
         </div>
         {isPreviewMode? (
