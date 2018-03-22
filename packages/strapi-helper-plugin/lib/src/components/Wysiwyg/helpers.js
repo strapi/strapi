@@ -12,7 +12,8 @@ export function getBlockStyle(block) {
       return styles.editorBlockquote;
     case 'code-block':
       return styles.editorCodeBlock;
-    default: return null;
+    default:
+      return null;
   }
 }
 
@@ -75,12 +76,15 @@ export function getBlockContent(style) {
   }
 }
 
-export const getDefaultSelectionOffsets = (content, startReplacer, endReplacer, initPosition = 0) => (
-  {
-    anchorOffset: initPosition + content.length - trimStart(content, startReplacer).length,
-    focusOffset: initPosition + trimEnd(content, endReplacer).length,
-  }
-);
+export const getDefaultSelectionOffsets = (
+  content,
+  startReplacer,
+  endReplacer,
+  initPosition = 0,
+) => ({
+  anchorOffset: initPosition + content.length - trimStart(content, startReplacer).length,
+  focusOffset: initPosition + trimEnd(content, endReplacer).length,
+});
 
 /**
  * Get the start and end offset
