@@ -11,7 +11,9 @@ module.exports = {
     let layout;
 
     try {
-      layout = JSON.parse(layoutPath, 'utf8');
+      // NOTE: do we really need to parse the JSON?
+      // layout = JSON.parse(layoutPath, 'utf8');
+      layout = require(layoutPath);
     } catch (err) {
       layout = {};
     }
