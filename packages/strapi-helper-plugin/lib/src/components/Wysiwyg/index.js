@@ -18,6 +18,7 @@ import {
 } from 'draft-js';
 import { List } from 'immutable';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
 import Controls from 'components/WysiwygInlineControls';
@@ -430,9 +431,6 @@ class Wysiwyg extends React.Component {
     this.setState(
       {
         toggleFullScreen: !this.state.toggleFullScreen,
-      },
-      () => {
-        this.focus();
       }
     );
   };
@@ -443,88 +441,139 @@ class Wysiwyg extends React.Component {
   }
 
   render() {
-    const { editorState, isPreviewMode } = this.state;
+    const { editorState, isFocused, isPreviewMode, toggleFullScreen } = this.state;
+    const editorStyle = toggleFullScreen ? { marginTop: '0' } : this.props.style;
 
     return (
       <div
-        className={cn(
-          styles.editorWrapper,
-          this.state.isFocused && styles.editorFocus,
-          !this.props.deactivateErrorHighlight && this.props.error && styles.editorError,
-          !isEmpty(this.props.className) && this.props.className
-        )}
-        onDragEnter={this.handleDragEnter}
-        onDragOver={this.handleDragOver}
-        style={this.props.style}
+        className={cn(toggleFullScreen && styles.fullscreenOverlay)}
+        onClick={(e) => {
+          if (toggleFullScreen) {
+            this.toggleFullScreen(e);
+          }
+        }}
       >
-        {this.state.isDraging && (
-          <Drop
-            onDrop={this.handleDrop}
-            onDragOver={this.handleDragOver}
-            onDragLeave={this.handleDragLeave}
-          />
-        )}
-        <div className={styles.controlsContainer}>
-          <div style={{ minWidth: '161px', marginLeft: '8px', marginRight: '5px' }}>
-            <Select
-              disabled={isPreviewMode}
-              name="headerSelect"
-              onChange={this.handleChangeSelect}
-              value={this.state.headerValue}
-              selectOptions={SELECT_OPTIONS}
+        {/* FIRST EDITOR WITH CONTROLS} */}
+        <div
+          className={cn(
+            styles.editorWrapper,
+            this.state.isFocused && styles.editorFocus,
+            !this.props.deactivateErrorHighlight && this.props.error && styles.editorError,
+            !isEmpty(this.props.className) && this.props.className,
+            toggleFullScreen && isFocused && styles.fullscreenFocus
+          )}
+          onClick={(e) => {
+            if (toggleFullScreen) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+          onDragEnter={this.handleDragEnter}
+          onDragOver={this.handleDragOver}
+          style={editorStyle}
+        >
+          {this.state.isDraging && (
+            <Drop
+              onDrop={this.handleDrop}
+              onDragOver={this.handleDragOver}
+              onDragLeave={this.handleDragLeave}
             />
+          )}
+          <div className={styles.controlsContainer}>
+            <div style={{ minWidth: '161px', marginLeft: '8px', marginRight: '5px' }}>
+              <Select
+                disabled={isPreviewMode}
+                name="headerSelect"
+                onChange={this.handleChangeSelect}
+                value={this.state.headerValue}
+                selectOptions={SELECT_OPTIONS}
+              />
+            </div>
+            {CONTROLS.map((value, key) => (
+              <Controls
+                key={key}
+                buttons={value}
+                disabled={isPreviewMode}
+                editorState={editorState}
+                handlers={{
+                  addContent: this.addContent,
+                  addOlBlock: this.addOlBlock,
+                  addSimpleBlockWithSelection: this.addSimpleBlockWithSelection,
+                  addUlBlock: this.addUlBlock,
+                }}
+                onToggle={this.toggleInlineStyle}
+                onToggleBlock={this.toggleBlockType}
+              />
+            ))}
+            { !toggleFullScreen && (
+              <div className={styles.toggleModeWrapper}>
+                <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
+              </div>
+            )}
           </div>
-          {CONTROLS.map((value, key) => (
-            <Controls
-              key={key}
-              buttons={value}
-              disabled={isPreviewMode}
-              editorState={editorState}
-              handlers={{
-                addContent: this.addContent,
-                addOlBlock: this.addOlBlock,
-                addSimpleBlockWithSelection: this.addSimpleBlockWithSelection,
-                addUlBlock: this.addUlBlock,
-              }}
-              onToggle={this.toggleInlineStyle}
-              onToggleBlock={this.toggleBlockType}
+          {/* WYSIWYG PREVIEW NOT FULLSCREEN */}
+          {isPreviewMode ? (
+            <div className={styles.editor}>
+              <WysiwygEditor
+                blockStyleFn={getBlockStyle}
+                editorState={this.previewHTML()}
+                onChange={() => {}}
+                placeholder={this.props.placeholder}
+                spellCheck
+              />
+              <input className={styles.editorInput} value="" tabIndex="-1" />
+            </div>
+          ) : (
+            <div className={cn(styles.editor, toggleFullScreen && styles.editorFullScreen)} onClick={this.focus}>
+              <WysiwygEditor
+                blockStyleFn={getBlockStyle}
+                editorState={editorState}
+                handleBeforeInput={this.handleBeforeInput}
+                handleKeyCommand={this.handleKeyCommand}
+                keyBindingFn={this.mapKeyToEditorCommand}
+                onBlur={this.handleBlur}
+                onChange={this.onChange}
+                placeholder={this.props.placeholder}
+                setRef={editor => (this.domEditor = editor)}
+              />
+              <input className={styles.editorInput} value="" tabIndex="-1" />
+            </div>
+          )}
+          {!toggleFullScreen && (
+            <WysiwygBottomControls
+              charactersNumber={this.getCharactersNumber()}
+              onClick={this.toggleFullScreen}
             />
-          ))}
-          <div className={styles.toggleModeWrapper}>
-            <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
-          </div>
+          )}
         </div>
-        {isPreviewMode ? (
-          <div className={styles.editor}>
-            <WysiwygEditor
-              blockStyleFn={getBlockStyle}
-              editorState={this.previewHTML()}
-              onChange={() => {}}
-              placeholder={this.props.placeholder}
-              spellCheck
-            />
-            <input className={styles.editorInput} value="" tabIndex="-1" />
-          </div>
-        ) : (
-          <div className={styles.editor} onClick={this.focus}>
-            <WysiwygEditor
-              blockStyleFn={getBlockStyle}
-              editorState={editorState}
-              handleBeforeInput={this.handleBeforeInput}
-              handleKeyCommand={this.handleKeyCommand}
-              keyBindingFn={this.mapKeyToEditorCommand}
-              onBlur={this.handleBlur}
-              onChange={this.onChange}
-              placeholder={this.props.placeholder}
-              setRef={editor => (this.domEditor = editor)}
-            />
-            <input className={styles.editorInput} value="" tabIndex="-1" />
+        {/* PREVIEW WYSIWYG FULLSCREEN */}
+        {toggleFullScreen && (
+          <div
+            className={cn(styles.editorWrapper, isFocused && styles.fullscreenPreviewFocused)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            style={{ marginTop: '0'}}
+          >
+            <div className={styles.previewControlsWrapper} onClick={this.toggleFullScreen}>
+              <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: this.getCharactersNumber() }} /></div>
+              <div className={styles.wysiwygCollapse}>
+                <FormattedMessage id="components.Wysiwyg.collapse" />
+              </div>
+            </div>
+            <div className={cn(styles.editor, styles.editorFullScreen, styles.fullscreenPreviewEditor)}>
+              <WysiwygEditor
+                blockStyleFn={getBlockStyle}
+                editorState={this.previewHTML()}
+                onChange={() => {}}
+                placeholder={this.props.placeholder}
+                spellCheck
+              />
+              <input className={styles.editorInput} value="" tabIndex="-1" />
+            </div>
           </div>
         )}
-        <WysiwygBottomControls
-          charactersNumber={this.getCharactersNumber()}
-          onClick={this.toggleFullScreen}
-        />
       </div>
     );
   }

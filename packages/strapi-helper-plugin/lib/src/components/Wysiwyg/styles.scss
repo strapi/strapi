@@ -65,6 +65,10 @@
   width: 0;
 }
 
+.fullscreenPreviewFocused {
+  border-color: #78caff !important;
+  border-left-color: #E3E9F3 !important;
+}
 .editorBlockquote {
   border-left: 5px solid #eee;
   font-family: Lato;
@@ -89,15 +93,37 @@
   right: 0;
   bottom: 0;
   padding: 0 30px;
+  padding-top: calc(6rem + 99px);
+  padding-left: calc(24rem + 30px);
+  padding-right: 30px;
+  padding-bottom: 32px;
   display: flex;
-  background-color: black;
+  background-color: transparent;
   cursor: pointer;
+  z-index: 99999;
   > div {
     min-width: 50%;
-    z-index: 9999;
+  }
+  > div:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  > div:last-child {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
 }
 
+.fullscreenFocus {
+  border-right-color: #E3E9F3 !important;
+}
+
+.editorFullScreen {
+  max-height: calc(100% - 100px) !important;
+  margin-bottom: 0;
+  overflow: auto;
+}
 
 .previewControlsWrapper {
   display: flex;
@@ -112,6 +138,11 @@
   background-color: #fff;
   border-bottom: 1px solid #F3F4F4;
   line-height: 49px;
+}
+
+.fullscreenPreviewEditor {
+  margin-top: 9px;
+  padding: 0px 8px;
 }
 
 .toggleModeButton {
