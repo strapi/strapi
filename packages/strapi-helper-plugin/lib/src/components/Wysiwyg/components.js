@@ -5,30 +5,20 @@
  *
  */
 
-import React from "react";
-import { FormattedMessage } from "react-intl";
-import PropTypes from "prop-types";
-import styles from "./styles.scss";
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import PropTypes from 'prop-types';
+import styles from './styles.scss';
 
 const Image = props => {
-  const { alt, height, src, width } = props.contentState
-    .getEntity(props.entityKey)
-    .getData();
+  const { alt, height, src, width } = props.contentState.getEntity(props.entityKey).getData();
 
-  return (
-    <img
-      alt={alt}
-      src={src}
-      height={height}
-      width={width}
-      style={{ maxWidth: "100%" }}
-    />
-  );
+  return <img alt={alt} src={src} height={height} width={width} style={{ maxWidth: '100%' }} />;
 };
 
 Image.propTypes = {
   contentState: PropTypes.object.isRequired,
-  entityKey: PropTypes.string.isRequired
+  entityKey: PropTypes.string.isRequired,
 };
 
 const Link = props => {
@@ -42,26 +32,22 @@ const Link = props => {
 };
 
 Link.defaultProps = {
-  children: ""
+  children: '',
 };
 
 Link.propTypes = {
   children: PropTypes.node,
   contentState: PropTypes.object.isRequired,
-  entityKey: PropTypes.string.isRequired
+  entityKey: PropTypes.string.isRequired,
 };
 
 const ToggleMode = props => {
   const label = props.isPreviewMode
-    ? "components.Wysiwyg.ToggleMode.markdown"
-    : "components.Wysiwyg.ToggleMode.preview";
+    ? 'components.Wysiwyg.ToggleMode.markdown'
+    : 'components.Wysiwyg.ToggleMode.preview';
 
   return (
-    <button
-      type="button"
-      className={styles.toggleModeButton}
-      onClick={props.onClick}
-    >
+    <button type="button" className={styles.toggleModeButton} onClick={props.onClick}>
       <FormattedMessage id={label} />
     </button>
   );
@@ -69,12 +55,12 @@ const ToggleMode = props => {
 
 ToggleMode.defaultProps = {
   isPreviewMode: false,
-  onClick: () => {}
+  onClick: () => {},
 };
 
 ToggleMode.propTypes = {
   isPreviewMode: PropTypes.bool,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export { Image, Link, ToggleMode };

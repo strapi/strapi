@@ -34,6 +34,10 @@
   background-position: center;
 }
 
+.styleButtonDisabled {
+  cursor: not-allowed;
+}
+
 .styleButtonItalic {
   background-image: url('../../assets/icons/icon_italic.svg');
   background-position: center;

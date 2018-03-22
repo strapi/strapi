@@ -24,6 +24,7 @@ function InputSelect(props) {
         'form-control',
         !props.deactivateErrorHighlight && props.error && 'is-invalid',
         !isEmpty(props.className) && props.className,
+        props.disabled && styles.inputSelectDisabled,
       )}
       disabled={props.disabled}
       id={props.name}

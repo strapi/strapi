@@ -110,19 +110,19 @@ class Wysiwyg extends React.Component {
     const textWithEntity = Modifier.replaceText(
       this.getEditorState().getCurrentContent(),
       this.getSelection(),
-      defaultContent,
+      defaultContent
     );
     const { anchorOffset, focusOffset } = getDefaultSelectionOffsets(
       defaultContent,
       startReplacer,
       endReplacer,
-      cursorPosition,
+      cursorPosition
     );
     const updatedSelection = this.getSelection().merge({ anchorOffset, focusOffset });
     const newEditorState = EditorState.push(
       this.getEditorState(),
       textWithEntity,
-      'insert-character',
+      'insert-character'
     );
 
     // Don't handle selection
@@ -133,7 +133,7 @@ class Wysiwyg extends React.Component {
         },
         () => {
           this.focus();
-        },
+        }
       );
     }
 
@@ -184,7 +184,7 @@ class Wysiwyg extends React.Component {
     const { anchorOffset, focusOffset } = getDefaultSelectionOffsets(
       defaultContent,
       startReplacer,
-      endReplacer,
+      endReplacer
     );
     let newEditorState = this.createNewEditorState(newContentState, defaultContent);
     const updatedSelection =
@@ -214,7 +214,7 @@ class Wysiwyg extends React.Component {
       const textWithEntity = Modifier.replaceText(
         this.getEditorState().getCurrentContent(),
         this.getSelection(),
-        text,
+        text
       );
       newEditorState = EditorState.push(this.getEditorState(), textWithEntity, 'insert-characters');
     }
@@ -229,7 +229,7 @@ class Wysiwyg extends React.Component {
 
   createNewContentStateFromBlock = (
     newBlock,
-    contentState = this.getEditorState().getCurrentContent(),
+    contentState = this.getEditorState().getCurrentContent()
   ) =>
     ContentState.createFromBlockArray(this.createNewBlockMap(newBlock, contentState).toArray())
       .set('selectionBefore', contentState.getSelectionBefore())
@@ -304,6 +304,11 @@ class Wysiwyg extends React.Component {
 
   handleDrop = e => {
     e.preventDefault();
+
+    if (this.state.isPreviewMode) {
+      return this.setState({ isDraging: false });
+    }
+
     const { dataTransfer: { files } } = e;
     const formData = new FormData();
     formData.append('files', files[0]);
@@ -319,7 +324,14 @@ class Wysiwyg extends React.Component {
         const newContentState = this.createNewContentStateFromBlock(newBlock);
         const newEditorState = EditorState.push(editorState, newContentState);
 
-        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+        this.setState({ editorState: newEditorState });
+        this.props.onChange({
+          target: {
+            value: newEditorState.getCurrentContent().getPlainText(),
+            name: this.props.name,
+            type: 'textarea',
+          },
+        });
       })
       .catch(err => {
         console.log('error', err.response);
@@ -361,15 +373,14 @@ class Wysiwyg extends React.Component {
       const textWithEntity = Modifier.replaceText(
         this.getEditorState().getCurrentContent(),
         this.getSelection(),
-        '  ',
+        '  '
       );
       const newEditorState = EditorState.push(
         this.getEditorState(),
         textWithEntity,
-        'insert-characters',
+        'insert-characters'
       );
 
-      // return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
       return this.setState({ editorState: newEditorState });
     }
   };
@@ -405,7 +416,7 @@ class Wysiwyg extends React.Component {
     if (blocksFromHTML.contentBlocks) {
       const contentState = ContentState.createFromBlockArray(
         blocksFromHTML.contentBlocks,
-        blocksFromHTML.entityMap,
+        blocksFromHTML.entityMap
       );
       return EditorState.createWithContent(contentState, decorator);
     }
@@ -422,7 +433,7 @@ class Wysiwyg extends React.Component {
       },
       () => {
         this.focus();
-      },
+      }
     );
   };
 
@@ -440,7 +451,7 @@ class Wysiwyg extends React.Component {
           styles.editorWrapper,
           this.state.isFocused && styles.editorFocus,
           !this.props.deactivateErrorHighlight && this.props.error && styles.editorError,
-          !isEmpty(this.props.className) && this.props.className,
+          !isEmpty(this.props.className) && this.props.className
         )}
         onDragEnter={this.handleDragEnter}
         onDragOver={this.handleDragOver}
@@ -456,6 +467,7 @@ class Wysiwyg extends React.Component {
         <div className={styles.controlsContainer}>
           <div style={{ minWidth: '161px', marginLeft: '8px', marginRight: '5px' }}>
             <Select
+              disabled={isPreviewMode}
               name="headerSelect"
               onChange={this.handleChangeSelect}
               value={this.state.headerValue}
@@ -466,6 +478,7 @@ class Wysiwyg extends React.Component {
             <Controls
               key={key}
               buttons={value}
+              disabled={isPreviewMode}
               editorState={editorState}
               handlers={{
                 addContent: this.addContent,

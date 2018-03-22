@@ -15,3 +15,7 @@
   -webkit-appearance: none;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
 }
+
+.inputSelectDisabled {
+  cursor: not-allowed;
+}
