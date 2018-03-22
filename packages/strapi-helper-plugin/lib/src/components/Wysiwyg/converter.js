@@ -1,15 +1,16 @@
 import showdown from 'showdown';
 
 const converterOptions = {
+  backslashEscapesHTMLTags: true,
+  emoji: true,
   parseImgDimensions: true,
+  simpleLineBreaks: true,
   simplifiedAutoLink: true,
+  smoothLivePreview: true,
+  splitAdjacentBlockquotes: true,
   strikethrough: true,
   tables: true,
   tasklists: true,
-  smoothLivePreview: true,
-  simpleLineBreaks: true,
-  backslashEscapesHTMLTags: true,
-  emoji: true,
   underline: true,
 };
 

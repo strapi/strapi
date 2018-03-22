@@ -517,7 +517,6 @@ class Wysiwyg extends React.Component {
               onChange={this.onChange}
               placeholder={this.props.placeholder}
               setRef={editor => (this.domEditor = editor)}
-              spellCheck
             />
             <input className={styles.editorInput} value="" tabIndex="-1" />
           </div>
