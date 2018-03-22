@@ -443,6 +443,8 @@ class Wysiwyg extends React.Component {
   render() {
     const { editorState, isFocused, isPreviewMode, toggleFullScreen } = this.state;
     const editorStyle = toggleFullScreen ? { marginTop: '0' } : this.props.style;
+    const selectClassName = toggleFullScreen ? styles.selectFullscreen : styles.editorSelect;
+    // { minWidth: '1px', marginLeft: '8px' } : { minWidth: '161px', marginLeft: '8px', marginRight: '5px' }
 
     return (
       <div
@@ -480,7 +482,7 @@ class Wysiwyg extends React.Component {
             />
           )}
           <div className={styles.controlsContainer}>
-            <div style={{ minWidth: '161px', marginLeft: '8px', marginRight: '5px' }}>
+            <div className={selectClassName}>
               <Select
                 disabled={isPreviewMode}
                 name="headerSelect"

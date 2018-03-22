@@ -4,7 +4,7 @@
 
   select {
     min-height: 31px !important;
-    width: 161px !important;
+    min-width: 161px !important;
     font-weight: 600;
   }
 }
@@ -58,6 +58,20 @@
 
 .editorError {
   border-color: #ff203c !important;
+}
+
+.editorSelect {
+  min-width: 161px;
+  margin-left: 8px;
+  margin-right: 5px;
+}
+
+.selectFullscreen {
+  min-width: 115px;
+  margin-left: 8px;
+  > select {
+    min-width: 130px !important;
+  }
 }
 
 .editorInput {
