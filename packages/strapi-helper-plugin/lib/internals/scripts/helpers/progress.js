@@ -14,6 +14,6 @@ const animateProgress = (message) => {
     const dots = new Array(i + 1).join('.');
     process.stdout.write(message + dots);
   }, 500);
-}
+};
 
 module.exports = animateProgress;

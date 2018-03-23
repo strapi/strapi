@@ -31,6 +31,6 @@ NotFound.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func,
   }).isRequired,
-}
+};
 
 export default NotFound;

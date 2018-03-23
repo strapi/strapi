@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, upperFirst } from 'lodash';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 

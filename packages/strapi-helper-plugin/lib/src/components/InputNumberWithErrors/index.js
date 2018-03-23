@@ -94,7 +94,8 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerInputNumber,
           customBootstrapClass,
           !isEmpty(className) && className,
@@ -163,6 +164,7 @@ InputNumberWithErrors.defaultProps = {
   style: {},
   tabIndex: '0',
   validations: {},
+  value: 0,
 };
 
 InputNumberWithErrors.propTypes = {

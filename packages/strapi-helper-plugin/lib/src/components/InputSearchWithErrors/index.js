@@ -98,7 +98,8 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerSearch,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className,

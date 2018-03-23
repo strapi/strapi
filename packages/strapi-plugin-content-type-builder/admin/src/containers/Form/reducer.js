@@ -49,13 +49,8 @@ function formReducer(state = initialState, action) {
     case CHANGE_INPUT:
       return state
         .updateIn([action.objectToModify, action.key], () => action.value);
-    case CHANGE_INPUT_ATTRIBUTE: {
-      if (action.secondKey) {
-        return state.updateIn(['modifiedDataAttribute', 'params', action.secondKey], () => action.value);
-      }
-
-      return state.updateIn(['modifiedDataAttribute', action.firstKey], () => action.value);
-    }
+    case CHANGE_INPUT_ATTRIBUTE:
+      return state.updateIn(action.keys, () => action.value);
     case CONNECTIONS_FETCH_SUCCEEDED:
       return state
         .set('selectOptions', List(action.connections))
