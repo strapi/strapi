@@ -23,6 +23,7 @@
     "setup": "node ./scripts/setup.js"
   },
   "dependencies": {
+    "react-ga": "^2.4.1",
     "shelljs": "^0.7.8"
   },
   "devDependencies": {
