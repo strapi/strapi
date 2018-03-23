@@ -23,19 +23,20 @@
 
 .editor {
   min-height: 303px;
-  padding: 0px 10px 0 10px;
+  padding: 10px 20px 0 20px;
   font-size: 16px;
   margin-top: 10px;
   background-color: #fff;
   line-height: 18px !important;
   cursor: text;
+  // TODO define rules for header's margin
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
     line-height: 18px !important;
   }
   h1 {
-    margin-top: -3px !important;
-    margin-bottom: 3px;
+    margin-top: 13px !important;
+    margin-bottom: 22px;
   }
   > div {
     > div {
@@ -49,6 +50,9 @@
   }
   ul, ol {
     margin-bottom: 18px;
+  }
+  span {
+    white-space: pre-line;
   }
 }
 
@@ -165,7 +169,7 @@
 
 .fullscreenPreviewEditor {
   margin-top: 9px;
-  padding: 0px 8px;
+  padding: 10px 20px;
 }
 
 .toggleModeButton {

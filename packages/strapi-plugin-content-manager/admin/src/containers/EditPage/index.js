@@ -171,8 +171,6 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   }
 
-  // layout = bindLayout.call(this, layout);
-
   componentDidCatch(error, info) {
     console.log('err', error);
     console.log('info', info);

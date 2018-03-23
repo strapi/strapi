@@ -136,7 +136,6 @@ class ImgPreview extends React.Component {
   isPictureType = (fileName) => /\.(jpe?g|png|gif)$/i.test(fileName);
 
   updateFilePosition = (newPosition) => {
-    // this.setState({ position: newPosition });
     this.props.updateFilePosition(newPosition);
   }
 

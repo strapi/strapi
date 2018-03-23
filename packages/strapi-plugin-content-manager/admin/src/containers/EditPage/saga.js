@@ -36,14 +36,13 @@ function* dataGet(action) {
   try {
     const modelName = yield select(makeSelectModelName());
     const params = { source: action.source };
-    const response = yield [
+    const [response, layout] = yield [
       call(request, `/content-manager/explorer/${modelName}/${action.id}`, { method: 'GET', params }),
       call(request, '/content-manager/layout', { method: 'GET', params }),
     ];
-
-    const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response[0]);
-    yield put(getDataSucceeded(action.id, response[0], pluginHeaderTitle.mainField));
-    yield put(getLayoutSucceeded(response[1]));
+    const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
+    yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
+    yield put(getLayoutSucceeded(layout));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
   }

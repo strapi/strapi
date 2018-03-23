@@ -5,13 +5,10 @@
  */
 
 import React from 'react';
-/* eslint-disable jsx-a11y/label-has-for */
-// import PropTypes from 'prop-types';
-
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/label-has-for */
 const WysiwygDropUpload = (props) => {
-  // console.log(props);
   return (
     <label
       {...props}
