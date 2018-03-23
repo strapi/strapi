@@ -50,6 +50,12 @@
   &:hover {
     background-color: #F7F8F8;
   }
+
+  div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .wrapper {

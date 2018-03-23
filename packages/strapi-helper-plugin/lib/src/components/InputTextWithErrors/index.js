@@ -15,6 +15,7 @@ import validateInput from 'utils/inputsValidations';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
@@ -94,7 +95,8 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerText,
           customBootstrapClass,
           !isEmpty(className) && className,

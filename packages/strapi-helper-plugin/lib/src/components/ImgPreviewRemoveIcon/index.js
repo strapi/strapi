@@ -20,7 +20,7 @@ function ImgPreviewRemoveIcon(props) {
 }
 
 ImgPreviewRemoveIcon.defaultProps = {
-  onclick: () => {},
+  onClick: () => {},
   show: false,
 };
 

@@ -6,6 +6,8 @@ import { includes, mapKeys, reject } from 'lodash';
  * @param  {String} [type='text']    Optionnal: the input's type only for email
  * @return {Array}                  Array of errors to be displayed
  */
+
+/* eslint-disable no-useless-escape */
 const validateInput = (value, inputValidations = {}, type = 'text') => {
   let errors = [];
 
@@ -59,6 +61,6 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
   }
 
   return errors;
-}
+};
 
 export default validateInput;

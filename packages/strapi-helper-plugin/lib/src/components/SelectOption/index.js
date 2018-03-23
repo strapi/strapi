@@ -36,7 +36,7 @@ SelectOption.defaultProps = {
   id: '',
   name: '',
   params: {},
-  value: 'app.utils.SelectOption.defaultMessage'
+  value: 'app.utils.SelectOption.defaultMessage',
 };
 
 SelectOption.propTypes = {
