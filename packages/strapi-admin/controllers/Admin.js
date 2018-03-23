@@ -2,6 +2,7 @@
 
 const path = require('path');
 const exec = require('child_process').execSync;
+const _ = require('lodash');
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -12,6 +13,16 @@ module.exports = {
     try {
       ctx.send({ currentEnvironment: strapi.app.env });
     } catch(err) {
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
+  getGaConfig: async ctx =>{
+    try {
+      const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);
+      ctx.send({ allowGa });
+    } catch(err) {
+      console.log(err)
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   },
