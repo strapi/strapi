@@ -15,6 +15,12 @@
       "policies": []
     },
     {
+      "method": "GET",
+      "path": "/gaConfig",
+      "handler": "Admin.getGaConfig",
+      "policies": []
+    },
+    {
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",

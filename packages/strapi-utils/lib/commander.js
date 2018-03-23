@@ -20,9 +20,4 @@ program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = () =
   program.help();
 };
 
-// Force commander to display version information.
-program.Command.prototype.versionInformation = program.versionInformation = () => {
-  program.emit('version');
-};
-
 module.exports = program;
