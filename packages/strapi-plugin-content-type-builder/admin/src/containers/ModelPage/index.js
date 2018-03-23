@@ -180,7 +180,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const attribute = this.props.modelPage.model.attributes[index];
 
     // Display a notification if the attribute is not present in the ones that the ctb handles
-    if (!includes(availableAttributes, attribute.params.type)) {
+    if (!has(attribute.params, 'nature') && !includes(availableAttributes, attribute.params.type)) {
       return strapi.notification.info('content-type-builder.notification.info.enumeration');
     }
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
