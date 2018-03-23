@@ -52,6 +52,7 @@ import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
+import { getGaStatus } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -72,7 +73,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidMount() {
     this.checkLogin(this.props);
-
+    this.props.getGaStatus();
     ReactGA.initialize('UA-54313258-9');
   }
 
@@ -80,7 +81,9 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     if (nextProps.location.pathname !== this.props.location.pathname) {
       this.checkLogin(nextProps);
 
-      ReactGA.pageview(nextProps.location.pathname);
+      if (nextProps.adminPage.allowGa) {
+        ReactGA.pageview(nextProps.location.pathname);
+      }
     }
 
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
@@ -185,6 +188,7 @@ AdminPage.propTypes = {
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getGaStatus: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -206,6 +210,7 @@ function mapDispatchToProps(dispatch) {
   return {
     disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
     enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
+    getGaStatus: () => { dispatch(getGaStatus()); },
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
     pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
     updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
