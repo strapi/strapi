@@ -12,6 +12,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 class InputSearch extends React.Component {
  state = { isFocused: false };
 
@@ -42,7 +43,8 @@ class InputSearch extends React.Component {
 
    return (
      <div className={cn(styles.inputSearch, 'input-group', !isEmpty(className) && className)} style={style}>
-       <span className={cn(
+       <span
+         className={cn(
            'input-group-addon',
            styles.addonSearch,
            this.state.isFocused && styles.addonFocus,
@@ -77,32 +79,32 @@ class InputSearch extends React.Component {
 }
 
 InputSearch.defaultProps = {
- autoFocus: false,
- className: '',
- deactivateErrorHighlight: false,
- disabled: false,
- error: false,
- onBlur: () => {},
- onFocus: () => {},
- placeholder: 'app.utils.placeholder.defaultMessage',
- style: {},
- tabIndex: '0',
+  autoFocus: false,
+  className: '',
+  deactivateErrorHighlight: false,
+  disabled: false,
+  error: false,
+  onBlur: () => {},
+  onFocus: () => {},
+  placeholder: 'app.utils.placeholder.defaultMessage',
+  style: {},
+  tabIndex: '0',
 };
 
 InputSearch.propTypes = {
- autoFocus: PropTypes.bool,
- className: PropTypes.string,
- deactivateErrorHighlight: PropTypes.bool,
- disabled: PropTypes.bool,
- error: PropTypes.bool,
- onBlur: PropTypes.func,
- onChange: PropTypes.func.isRequired,
- onFocus: PropTypes.func,
- name: PropTypes.string.isRequired,
- placeholder: PropTypes.string,
- style: PropTypes.object,
- tabIndex: PropTypes.string,
- value: PropTypes.string.isRequired,
+  autoFocus: PropTypes.bool,
+  className: PropTypes.string,
+  deactivateErrorHighlight: PropTypes.bool,
+  disabled: PropTypes.bool,
+  error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func,
+  placeholder: PropTypes.string,
+  style: PropTypes.object,
+  tabIndex: PropTypes.string,
+  value: PropTypes.string.isRequired,
 };
 
 export default InputSearch;

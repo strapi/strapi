@@ -1,8 +1,6 @@
 // Important modules this config uses
-const _ = require('lodash');
 const path = require('path');
-
-const base = require('./webpack.base.babel');
+const _ = require('lodash');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -10,13 +8,15 @@ const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 const webpack = require('webpack');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const pkg = require(path.resolve(process.cwd(), 'package.json'));
-const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
-const dllPlugin = pkg.dllPlugin;
+const base = require('./webpack.base.babel');
+
+// const pkg = require(path.resolve(process.cwd(), 'package.json'));
+// const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
+// const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
@@ -44,21 +44,21 @@ const rootAdminpath = (() => {
 
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json'))
+    manifest: require(path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json')),
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
     sourceMap: true,
     parallel: true,
     compress: {
-      warnings: false
+      warnings: false,
     },
     uglifyOptions: {
       ecma: 8,
     },
   }),
   new webpack.LoaderOptionsPlugin({
-    minimize: true
+    minimize: true,
   }),
   new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   // new BundleAnalyzerPlugin(),
@@ -107,12 +107,12 @@ if (isAdmin) {
   }));
   plugins.push(new ExtractTextPlugin('[name].[contenthash].css'));
   plugins.push(new AddAssetHtmlPlugin({
-    filepath: path.resolve(__dirname, 'dist/*.dll.js')
+    filepath: path.resolve(__dirname, 'dist/*.dll.js'),
   }));
   plugins.push(new CopyWebpackPlugin([{
     from: 'config/plugins.json',
     context: path.resolve(adminPath, 'admin', 'src'),
-    to: 'config/plugins.json'
+    to: 'config/plugins.json',
   }]));
 }
 
@@ -129,7 +129,7 @@ const main = (() => {
 module.exports = base({
   // In production, we skip all hot-reloading stuff
   entry: {
-    main
+    main,
   },
 
   // Utilize long-term caching by adding content hashes (not compilation hashes) to compiled assets
@@ -176,7 +176,7 @@ module.exports = base({
     'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
     'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
     'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+    'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
   },
 
   devtool: 'cheap-module-source-map',
