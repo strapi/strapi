@@ -441,14 +441,7 @@ class Wysiwyg extends React.Component {
     const editorStyle = isFullscreen ? { marginTop: '0' } : this.props.style;
 
     return (
-      <div
-        className={cn(isFullscreen && styles.fullscreenOverlay)}
-        onClick={e => {
-          if (isFullscreen) {
-            this.toggleFullScreen(e);
-          }
-        }}
-      >
+      <div className={cn(isFullscreen && styles.fullscreenOverlay)}>
         {/* FIRST EDITOR WITH CONTROLS} */}
         <div
           className={cn(
