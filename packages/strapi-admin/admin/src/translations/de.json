@@ -109,8 +109,8 @@
     "components.Wysiwyg.selectOptions.H6": "Title H6",
     "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
     "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
-    "components.WysiwygBottomControls.charactersIndicators": "{characters} characters",
-    "components.WysiwygBottomControls.fullscreen": "Fullscreen mode",
+    "components.WysiwygBottomControls.charactersIndicators": "characters",
+    "components.WysiwygBottomControls.fullscreen": "Expand",
 
     "notification.error": "Ein Fehler ist aufgetreten",
 

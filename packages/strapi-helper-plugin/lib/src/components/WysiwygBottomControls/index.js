@@ -13,7 +13,10 @@ import styles from './styles.scss';
 const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
   return (
     <div className={styles.wysiwygBottomControlsWrapper}>
-      <div><FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" values={{ characters: charactersNumber }} /></div>
+      <div>
+        <span>{charactersNumber}&nbsp;</span>
+        <FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" />
+      </div>
       <div className={styles.fullScreenWrapper} onClick={onClick}>
         <FormattedMessage id="components.WysiwygBottomControls.fullscreen" />
       </div>

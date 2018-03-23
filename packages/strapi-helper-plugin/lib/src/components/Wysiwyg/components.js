@@ -10,6 +10,7 @@ import { CompositeDecorator, ContentState, convertFromHTML, EditorState } from '
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { isEmpty } from 'lodash';
 import Select from 'components/InputSelect';
 import WysiwygEditor from 'components/WysiwygEditor';
 
@@ -81,9 +82,9 @@ Link.propTypes = {
 const PreviewControl = ({ characters, onClick }) => (
   <div className={styles.previewControlsWrapper} onClick={onClick}>
     <div>
+      <span>{characters}&nbsp;</span>
       <FormattedMessage
         id="components.WysiwygBottomControls.charactersIndicators"
-        values={{ characters }}
       />
     </div>
     <div className={styles.wysiwygCollapse}>
@@ -112,7 +113,9 @@ class PreviewWysiwyg extends React.Component {
   };
 
   previewHTML = () => {
-    const html = converter.makeHtml(this.context.html);
+    const initHtml = isEmpty(this.context.html) ? '<p></p>' : this.context.html;
+    const html = converter.makeHtml(initHtml);
+    console.log('h', html);
     const decorator = new CompositeDecorator([
       {
         strategy: findLinkEntities,

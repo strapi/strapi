@@ -487,9 +487,9 @@ class Wysiwyg extends React.Component {
                 onToggleBlock={this.toggleBlockType}
               />
             ))}
-            {!isFullscreen && (
+            {!isFullscreen ? (
               <ToggleMode isPreviewMode={isPreviewMode} onClick={this.handleClickPreview} />
-            )}
+            ) : <div style={{ marginRight: '10px' }} />}
           </div>
           {/* WYSIWYG PREVIEW NOT FULLSCREEN */}
           {isPreviewMode ? (

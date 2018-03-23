@@ -2,12 +2,17 @@
   display: flex;
   height: 30px;
   width: 100%;
-  padding: 0 17px;
+  padding: 0 15px;
   justify-content: space-between;
   background-color: #FAFAFB;
   line-height: 30px;
-  font-size: 12px;
+  font-size: 13px;
   font-family: Lato;
+  > div:first-child {
+    > span:last-child {
+      font-size: 12px;
+    }
+  }
 }
 
 

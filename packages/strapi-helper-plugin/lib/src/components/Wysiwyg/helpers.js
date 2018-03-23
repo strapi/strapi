@@ -25,13 +25,13 @@ export function getBlockContent(style) {
         endReplacer: ')',
         startReplacer: '![text](',
       };
-    case 'code-block':
+    case 'CODE':
       return {
         innerContent: 'code block',
         endReplacer: '`',
         startReplacer: '`',
       };
-    case 'blockquote':
+    case 'BLOCKQUOTE':
       return {
         innerContent: 'quote',
         endReplacer: '',

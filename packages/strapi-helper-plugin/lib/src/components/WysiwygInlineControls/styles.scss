@@ -21,6 +21,9 @@
   line-height: 32px;
   text-align: center;
   cursor: pointer;
+  &:hover {
+    background-color: #F3F4F4;
+  }
 }
 
 .styleButtonActive {

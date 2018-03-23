@@ -12,7 +12,7 @@
 .editorWrapper {
   min-height: 320px;
   margin-top: .9rem;
-  border: 1px solid #E3E9F3;
+  border: 1px solid #F3F4F4;
   border-radius: 0.25rem;
   line-height: 18px!important;
   font-size: 13px;
@@ -62,15 +62,19 @@
 
 .editorSelect {
   min-width: 161px;
-  margin-left: 8px;
+  margin-left: 15px;
   margin-right: 5px;
+  > select {
+    box-shadow: 0 0 0 rgba(0,0,0,0)!important;
+  }
 }
 
 .selectFullscreen {
   min-width: 115px;
-  margin-left: 8px;
+  margin-left: 15px;
   > select {
-    min-width: 130px !important;
+    min-width: 110px !important;
+    box-shadow: 0 0 0 rgba(0,0,0,0)!important;
   }
 }
 
@@ -107,9 +111,9 @@
   right: 0;
   bottom: 0;
   padding: 0 30px;
-  padding-top: calc(6rem + 99px);
-  padding-left: calc(24rem + 30px);
-  padding-right: 30px;
+  padding-top: calc(6rem + 90px);
+  padding-left: calc(24rem + 28px);
+  padding-right: 28px;
   padding-bottom: 32px;
   display: flex;
   background-color: transparent;
@@ -152,6 +156,12 @@
   background-color: #fff;
   border-bottom: 1px solid #F3F4F4;
   line-height: 49px;
+  font-size: 13px;
+  >div:first-child {
+    >span:last-child {
+      font-size: 12px;
+    }
+  }
 }
 
 .fullscreenPreviewEditor {
@@ -175,7 +185,7 @@
 
 .toggleModeWrapper {
   margin-left: auto;
-  margin-right: 10px;
+  margin-right: 15px;
   padding-top: 8px;
 }
 

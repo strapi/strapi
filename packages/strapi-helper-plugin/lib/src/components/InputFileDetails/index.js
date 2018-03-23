@@ -13,7 +13,6 @@ import styles from './styles.scss';
 
 function InputFileDetails(props) {
   if (props.number === 0 && props.multiple) {
-    console.log('fycj');
     return <div className={styles.inputFileDetailsEmpty} />;
   }
 

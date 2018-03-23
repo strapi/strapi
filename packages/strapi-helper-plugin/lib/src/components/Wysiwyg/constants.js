@@ -62,7 +62,7 @@ export const CONTROLS = [
   [
     {
       label: '<>',
-      style: 'code-block',
+      style: 'CODE',
       className: 'styleButtonCodeBlock',
       hideLabel: true,
       handler: 'addSimpleBlockWithSelection',
@@ -86,7 +86,7 @@ export const CONTROLS = [
     },
     {
       label: 'quotes',
-      style: 'blockquote',
+      style: 'BLOCKQUOTE',
       className: 'styleButtonBlockQuote',
       hideLabel: true,
       handler: 'addSimpleBlockWithSelection',
