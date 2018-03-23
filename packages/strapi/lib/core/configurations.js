@@ -73,6 +73,7 @@ module.exports.nested = function() {
 module.exports.app = async function() {
     // Retrieve Strapi version.
     this.config.uuid = get(this.config.info, 'strapi.uuid', '');
+    this.config.info.customs = get(this.config.info, 'strapi', {});
     this.config.info.strapi = (get(this.config, 'info.dependencies.strapi') || '').replace(/(\^|~)/g, ''),
     this.config.info.node = process.versions.node;
 
