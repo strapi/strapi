@@ -38,7 +38,7 @@ process.argv = _.map(process.argv, arg => {
 program
   .command('version')
   .description('output your version of Strapi')
-  .action(program.versionInformation);
+  .action(() => { console.log(packageJSON.version); });
 
 
 // `$ strapi console`
