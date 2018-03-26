@@ -352,6 +352,31 @@ class Wysiwyg extends React.Component {
     const selection = editorState.getSelection();
     const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
 
+    if (command === 'bold' || command === 'italic' || command === 'underline') {
+      let content;
+      let style;
+
+      switch (command) {
+        case 'bold':
+          content = '**textToReplace**';
+          style = 'BOLD';
+          break;
+        case 'italic':
+          content = '*textToReplace*';
+          style = 'ITALIC';
+          break;
+        case 'underline':
+          content = '__textToReplace__';
+          style = 'UNDERLINE';
+          break;
+        default:
+          content = '';
+          style = '';
+      }
+      this.addContent(content, style);
+      return false;
+    }
+
     if (currentBlock.getText().split('')[0] === '-' && command === 'split-block') {
       this.addUlBlock();
       return true;
