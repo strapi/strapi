@@ -12,6 +12,15 @@ export function getBlockStyle(block) {
       return styles.editorBlockquote;
     case 'code-block':
       return styles.editorCodeBlock;
+    case 'paragraph':
+    case 'unordered-list-item':
+    case 'ordered-list-item':
+    case 'header-one':
+    case 'header-two':
+    case 'header-three':
+    case 'header-four':
+    case 'header-five':
+    case 'header-six':
     default:
       return null;
   }

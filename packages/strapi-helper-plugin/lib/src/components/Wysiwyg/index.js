@@ -24,7 +24,7 @@ import Drop from 'components/WysiwygDropUpload';
 import WysiwygBottomControls from 'components/WysiwygBottomControls';
 import WysiwygEditor from 'components/WysiwygEditor';
 import request from 'utils/request';
-import { CustomSelect, PreviewControl, PreviewWysiwyg, ToggleMode } from './components';
+import { CustomSelect, PreviewControl, PreviewWysiwyg, ToggleMode } from './components/index';
 import { CONTROLS } from './constants';
 import { getBlockContent, getBlockStyle, getDefaultSelectionOffsets, getOffSets } from './helpers';
 import styles from './styles.scss';
