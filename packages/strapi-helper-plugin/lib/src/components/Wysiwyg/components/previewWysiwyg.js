@@ -12,11 +12,32 @@ import { isEmpty } from 'lodash';
 
 import WysiwygEditor from 'components/WysiwygEditor';
 import converter from '../converter';
-import { getBlockStyle } from '../helpers';
 import { findLinkEntities, findImageEntities } from '../strategies';
 
 import styles from './styles.scss';
 import { Image, Link } from './index';
+
+function getBlockStyle(block) {
+  switch (block.getType()) {
+    case 'blockquote':
+      return styles.editorBlockquote;
+    case 'code-block':
+      return styles.editorCodeBlock;
+    case 'unstyled':
+      return styles.editorParagraph;
+    case 'unordered-list-item':
+      return styles.unorderedList;
+    case 'ordered-list-item':
+    case 'header-one':
+    case 'header-two':
+    case 'header-three':
+    case 'header-four':
+    case 'header-five':
+    case 'header-six':
+    default:
+      return null;
+  }
+}
 
 class PreviewWysiwyg extends React.Component {
   getClassName = () => {
@@ -40,6 +61,7 @@ class PreviewWysiwyg extends React.Component {
         component: Image,
       },
     ]);
+
     const blocksFromHTML = convertFromHTML(html);
     // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
