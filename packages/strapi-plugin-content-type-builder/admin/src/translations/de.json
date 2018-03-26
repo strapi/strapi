@@ -65,6 +65,7 @@
     "form.attribute.item.number.type.integer": "integer (ex: 10)",
     "form.attribute.item.number.type.float": "float (ex: 3.33333333)",
     "form.attribute.item.number.type.decimal": "decimal (ex: 2.22)",
+    "form.attribute.settings.default": "Default value",
 
     "form.button.cancel": "Abbrechen",
     "form.button.continue": "Weiter",

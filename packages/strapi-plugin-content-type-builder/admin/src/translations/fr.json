@@ -67,6 +67,7 @@
   "form.attribute.item.number.type.integer": "entier (ex: 10)",
   "form.attribute.item.number.type.float": "décimal approximatif (ex: 3,33333)",
   "form.attribute.item.number.type.decimal": "décimal (ex: 2,22)",
+  "form.attribute.settings.default": "Valeur par défault",
 
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continue",

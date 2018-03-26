@@ -65,6 +65,7 @@
   "form.attribute.item.number.type.integer": "całkowita (np: 10)",
   "form.attribute.item.number.type.float": "zmiennoprzecinkowa (np: 3.33333333)",
   "form.attribute.item.number.type.decimal": "dziesiętna (np: 2.22)",
+  "form.attribute.settings.default": "Default value",
 
   "form.button.cancel": "Anuluj",
   "form.button.continue": "Kontynuuj",
