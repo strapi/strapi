@@ -21,6 +21,7 @@
   line-height: 32px;
   text-align: center;
   cursor: pointer;
+
   &:hover {
     background-color: #F3F4F4;
   }
@@ -35,6 +36,7 @@
 .styleButtonBold {
   background-image: url('../../assets/icons/icon_bold.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonDisabled {
@@ -44,36 +46,43 @@
 .styleButtonItalic {
   background-image: url('../../assets/icons/icon_italic.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonUnderline {
   background-image: url('../../assets/icons/icon_underline.svg');
   background-position: center 11px;
+  background-repeat: no-repeat;
 }
 
 .styleButtonUL {
   background-image: url('../../assets/icons/icon_bullet-list.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonOL {
   background-image: url('../../assets/icons/icon_numbered-list.svg');
   background-position: center 12px;
+  background-repeat: no-repeat;
 }
 
 .styleButtonBlockQuote {
   background-image: url('../../assets/icons/icon_quote-block.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonCodeBlock {
   background-image: url('../../assets/icons/icon_code-block.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonLink {
   background-image: url('../../assets/icons/icon_link.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .styleButtonImg {
@@ -84,6 +93,7 @@
 .styleButtonStrikedOut {
   background-image: url('../../assets/icons/icon_barred.svg');
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .wysiwygInlineControls {

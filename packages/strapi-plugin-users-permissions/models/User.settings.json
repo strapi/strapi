@@ -38,6 +38,14 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "bio": {
+      "multiple": false,
+      "type": "text"
+    },
+    "about": {
+      "multiple": false,
+      "type": "text"
     }
   },
   "collectionName": "users-permissions_user"
