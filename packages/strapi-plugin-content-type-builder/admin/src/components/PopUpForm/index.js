@@ -119,7 +119,6 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   render() {
-    console.log(this.props.form.items);
     const navContainer = this.props.noNav ? '' : this.renderNavContainer();
     const modalBodyStyle = this.props.renderModalBody ? { paddingTop: '2.3rem' } : {};
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()
