@@ -66,6 +66,7 @@
   "form.attribute.item.number.type.float": "zmiennoprzecinkowa (np: 3.33333333)",
   "form.attribute.item.number.type.decimal": "dziesiętna (np: 2.22)",
   "form.attribute.settings.default": "Default value",
+  "form.attribute.settings.default.checkboxLabel": "Set to true",
 
   "form.button.cancel": "Anuluj",
   "form.button.continue": "Kontynuuj",

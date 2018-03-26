@@ -92,7 +92,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         title={item.title}
         errors={errors}
         didCheckErrors={this.props.didCheckErrors}
-        autoFocus={key === 0}
+        autoFocus={key === 0 && item.type !== 'date'}
       />
     );
   }
@@ -119,6 +119,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   render() {
+    console.log(this.props.form.items);
     const navContainer = this.props.noNav ? '' : this.renderNavContainer();
     const modalBodyStyle = this.props.renderModalBody ? { paddingTop: '2.3rem' } : {};
     const modalBody = this.props.renderModalBody ? this.props.renderModalBody()

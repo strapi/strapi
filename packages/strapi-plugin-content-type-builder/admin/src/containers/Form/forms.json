@@ -546,7 +546,7 @@
               "id": "content-type-builder.form.attribute.settings.default"
             },
             "name": "params.default",
-            "type": "string",
+            "type": "password",
             "value": "",
             "validations": {}
           },
@@ -684,8 +684,11 @@
       "advancedSettings": {
         "items": [
           {
-            "label": {
+            "title": {
               "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default.checkboxLabel"
             },
             "name": "params.default",
             "type": "checkbox",
