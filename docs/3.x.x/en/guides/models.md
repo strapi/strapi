@@ -621,7 +621,7 @@ Callbacks on `destroy`:
 
 #### Mongoose
 
-Each of these functions receives a parameter called `next`, which is the callback you should call after your logic is executed. The entry is accessible through `this`.
+The entry is available through the `model` parameter
 
 **Path —** `./api/user/models/User.js`.
 ```js
@@ -631,7 +631,7 @@ module.exports = {
   */
  beforeCreate: async (model) => {
    // Hash password.
-   const passwordHashed = await strapi.api.user.services.user.hashPassword(this.password);
+   const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
    // Set the password.
    model.password = passwordHashed;
