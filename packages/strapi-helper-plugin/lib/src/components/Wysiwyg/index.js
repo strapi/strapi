@@ -347,10 +347,28 @@ class Wysiwyg extends React.Component {
       });
   };
 
-  handleKeyCommand = (command, editorState) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
+  handleReturn = (e, editorState) => {
     const selection = editorState.getSelection();
     const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
+
+    if (currentBlock.getText().split('')[0] === '-') {
+      this.addUlBlock();
+      return true;
+    }
+
+    if (
+      currentBlock.getText().split('.').length > 1 &&
+      !isNaN(parseInt(currentBlock.getText().split('.')[0], 10))
+    ) {
+      this.addOlBlock();
+      return true;
+    }
+
+    return false;
+  }
+
+  handleKeyCommand = (command, editorState) => {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
 
     if (command === 'bold' || command === 'italic' || command === 'underline') {
       let content;
@@ -377,24 +395,11 @@ class Wysiwyg extends React.Component {
       return false;
     }
 
-    if (currentBlock.getText().split('')[0] === '-' && command === 'split-block') {
-      this.addUlBlock();
-      return true;
-    }
-
-    if (
-      currentBlock.getText().split('.').length > 1 &&
-      !isNaN(parseInt(currentBlock.getText().split('.')[0], 10)) &&
-      command === 'split-block'
-    ) {
-      this.addOlBlock();
-      return true;
-    }
-
-    if (newState) {
+    if (newState && command !== 'backspace') {
       this.onChange(newState);
       return true;
     }
+
     return false;
   };
 
@@ -522,6 +527,7 @@ class Wysiwyg extends React.Component {
                 editorState={editorState}
                 handleBeforeInput={this.handleBeforeInput}
                 handleKeyCommand={this.handleKeyCommand}
+                handleReturn={this.handleReturn}
                 keyBindingFn={this.mapKeyToEditorCommand}
                 onBlur={this.handleBlur}
                 onChange={this.onChange}
