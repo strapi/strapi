@@ -120,6 +120,10 @@ shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 watcher('🏗  Building...', 'npm run build');
 
+shell.cd('../strapi-plugin-graphql');
+shell.rm('-f', 'package-lock.json');
+watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
+
 // Log installation duration.
 const installationEndDate = new Date();
 const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
