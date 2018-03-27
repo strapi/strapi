@@ -30,12 +30,7 @@ import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
-import {
-  changeParams,
-  deleteData,
-  getData,
-  setParams,
-} from './actions';
+import { changeParams, deleteData, getData, setParams } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -64,8 +59,9 @@ export class ListPage extends React.Component {
    * Helper to retrieve the current model data
    * @return {Object} the current model
    */
-  getCurrentModel = () => get(this.props.models, ['models', this.getCurrentModelName()]) || get(this.props.models, ['plugins', this.getSource(), 'models', this.getCurrentModelName()]);
-
+  getCurrentModel = () =>
+    get(this.props.models, ['models', this.getCurrentModelName()]) ||
+    get(this.props.models, ['plugins', this.getSource(), 'models', this.getCurrentModelName()]);
 
   /**
    * Helper to retrieve the current model name
@@ -77,7 +73,7 @@ export class ListPage extends React.Component {
    * Function to fetch data
    * @param  {Object} props
    */
-  getData = (props) => {
+  getData = props => {
     const source = getQueryParameters(props.location.search, 'source');
     const limit = toInteger(getQueryParameters(props.location.search, 'limit')) || 10;
     const page = toInteger(getQueryParameters(props.location.search, 'page')) || 1;
@@ -86,7 +82,7 @@ export class ListPage extends React.Component {
 
     this.props.setParams(params);
     this.props.getData(props.match.params.slug, source);
-  }
+  };
 
   /**
    * Helper to retrieve the model's source
@@ -99,53 +95,64 @@ export class ListPage extends React.Component {
    * @return {Array}
    */
   generateTableHeaders = () => {
-    const currentSchema = get(this.props.schema, [this.getCurrentModelName()]) || get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName()]);
-    const tableHeaders = map(currentSchema.list, (value) => ({
+    const currentSchema =
+      get(this.props.schema, [this.getCurrentModelName()]) ||
+      get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName()]);
+    const tableHeaders = map(currentSchema.list, value => ({
       name: value,
       label: currentSchema.fields[value].label,
       type: currentSchema.fields[value].type,
     }));
 
-    tableHeaders.splice(0, 0, { name: this.getCurrentModel().primaryKey || 'id', label: 'Id', type: 'string' });
+    tableHeaders.splice(0, 0, {
+      name: this.getCurrentModel().primaryKey || 'id',
+      label: 'Id',
+      type: 'string',
+    });
 
     return tableHeaders;
-  }
+  };
 
   /**
    * [findPageSort description]
    * @param  {Object} props [description]
    * @return {String}      the model's primaryKey
    */
-  findPageSort = (props) => {
+  findPageSort = props => {
     const { match: { params: { slug } } } = props;
     const source = this.getSource();
-    const modelPrimaryKey = get(
-      props.models,
-      ['models', slug.toLowerCase(), 'primaryKey'],
-    );
+    const modelPrimaryKey = get(props.models, ['models', slug.toLowerCase(), 'primaryKey']);
     // Check if the model is in a plugin
-    const pluginModelPrimaryKey = get(
-      props.models.plugins,
-      [source, 'models', slug.toLowerCase(), 'primaryKey'],
+    const pluginModelPrimaryKey = get(props.models.plugins, [
+      source,
+      'models',
+      slug.toLowerCase(),
+      'primaryKey',
+    ]);
+
+    return (
+      getQueryParameters(props.location.search, 'sort') ||
+      modelPrimaryKey ||
+      pluginModelPrimaryKey ||
+      'id'
     );
+  };
 
-    return getQueryParameters(props.location.search, 'sort') || modelPrimaryKey || pluginModelPrimaryKey || 'id';
-  }
-
-  handleChangeParams = (e) => {
+  handleChangeParams = e => {
     const { history, listPage: { params } } = this.props;
-    const search = e.target.name === 'params.limit' ?
-      `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}`
-      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
+    const search =
+      e.target.name === 'params.limit'
+        ? `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}`
+        : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
     });
 
     this.props.changeParams(e);
-  }
+  };
 
-  handleChangeSort = (sort) => {
+  handleChangeSort = sort => {
     const target = {
       name: 'params.sort',
       value: sort,
@@ -158,17 +165,16 @@ export class ListPage extends React.Component {
       search: `?page=${params.page}&limit=${params.limit}&sort=${sort}&source=${this.getSource()}`,
     });
     this.props.changeParams({ target });
-  }
+  };
 
-  handleDelete = (e) => {
+  handleDelete = e => {
     e.preventDefault();
     e.stopPropagation();
     this.props.deleteData(this.state.target, this.getCurrentModelName(), this.getSource());
     this.setState({ showWarning: false });
-  }
+  };
 
-
-  toggleModalWarning = (e) => {
+  toggleModalWarning = e => {
     if (!isUndefined(e)) {
       e.preventDefault();
       e.stopPropagation();
@@ -178,7 +184,7 @@ export class ListPage extends React.Component {
     }
 
     this.setState({ showWarning: !this.state.showWarning });
-  }
+  };
 
   render() {
     const { listPage, listPage: { params } } = this.props;
@@ -189,10 +195,13 @@ export class ListPage extends React.Component {
           entity: capitalize(this.props.match.params.slug) || 'Content Manager',
         },
         kind: 'primaryAddShape',
-        onClick: () => this.props.history.push({
-          pathname: `${this.props.location.pathname}/create`,
-          search: `?source=${this.getSource()}`,
-        }),
+        onClick: () =>
+          this.props.history.push({
+            pathname: `${this.props.location.pathname}/create`,
+            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?page=${
+              params.page
+            }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`,
+          }),
       },
     ];
 
@@ -202,7 +211,10 @@ export class ListPage extends React.Component {
           <PluginHeader
             actions={pluginHeaderActions}
             description={{
-              id: listPage.count > 1 ? 'content-manager.containers.List.pluginHeaderDescription' : 'content-manager.containers.List.pluginHeaderDescription.singular',
+              id:
+                listPage.count > 1
+                  ? 'content-manager.containers.List.pluginHeaderDescription'
+                  : 'content-manager.containers.List.pluginHeaderDescription.singular',
               values: {
                 label: listPage.count,
               },
@@ -223,7 +235,9 @@ export class ListPage extends React.Component {
                 history={this.props.history}
                 primaryKey={this.getCurrentModel().primaryKey || 'id'}
                 handleDelete={this.toggleModalWarning}
-                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?page=${params.page}&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`}
+                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?page=${
+                  params.page
+                }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`}
               />
               <PopUpWarning
                 isOpen={this.state.showWarning}
@@ -287,8 +301,4 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'listPage', reducer });
 const withSaga = injectSaga({ key: 'listPage', saga });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(ListPage);
+export default compose(withReducer, withSaga, withConnect)(ListPage);
