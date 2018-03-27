@@ -195,7 +195,7 @@ module.exports = (scope, cb) => {
               default: _.get(scope.database, 'password', undefined)
             },
             {
-              when: !hasDatabaseConfig,
+              when: !hasDatabaseConfig && scope.client.database === 'mongo',
               type: 'input',
               prefix: '',
               name: 'authenticationDatabase',
@@ -203,7 +203,7 @@ module.exports = (scope, cb) => {
               default: _.get(scope.database, 'authenticationDatabase', undefined)
             },
             {
-              when: !hasDatabaseConfig,
+              when: !hasDatabaseConfig && scope.client.database === 'mongo',
               type: 'boolean',
               prefix: '',
               name: 'ssl',
