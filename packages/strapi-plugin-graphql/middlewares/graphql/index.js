@@ -6,35 +6,6 @@
 
 // Public node modules.
 const { graphqlKoa, graphiqlKoa } = require('apollo-server-koa');
-const { makeExecutableSchema } = require('graphql-tools');
-
-const books = [
-  {
-    title: "Harry Potter and the Sorcerer's stone",
-    author: 'J.K. Rowling',
-  },
-  {
-    title: 'Jurassic Park',
-    author: 'Michael Crichton',
-  },
-];
-
-// The GraphQL schema in string form
-const typeDefs = `
-  type Query { books: [Book] }
-  type Book { title: String, author: String }
-`;
-
-// The resolvers
-const resolvers = {
-  Query: { books: () => books },
-};
-
-// Put together a schema
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers,
-});
 
 module.exports = strapi => {
   return {
@@ -50,13 +21,13 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const endpoint = '/graphql';
       const router = strapi.koaMiddlewares.routerJoi();
+      const schema = strapi.plugins.graphql.services.graphql.generateSchema();
 
-      router.post(endpoint, graphqlKoa({ schema }));
-      router.get(endpoint, graphqlKoa({ schema }));
+      router.post(strapi.plugins.graphql.config.endpoint, graphqlKoa({ schema }));
+      router.get(strapi.plugins.graphql.config.endpoint, graphqlKoa({ schema }));
 
-      router.get('/graphiql', graphiqlKoa({ endpointURL: endpoint }));
+      router.get('/graphiql', graphiqlKoa({ endpointURL: strapi.plugins.graphql.config.endpoint }));
 
       strapi.app.use(router.middleware());
 
