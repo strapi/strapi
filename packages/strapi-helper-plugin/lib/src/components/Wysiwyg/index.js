@@ -347,26 +347,6 @@ class Wysiwyg extends React.Component {
       });
   };
 
-  handleReturn = (e, editorState) => {
-    const selection = editorState.getSelection();
-    const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
-
-    if (currentBlock.getText().split('')[0] === '-') {
-      this.addUlBlock();
-      return true;
-    }
-
-    if (
-      currentBlock.getText().split('.').length > 1 &&
-      !isNaN(parseInt(currentBlock.getText().split('.')[0], 10))
-    ) {
-      this.addOlBlock();
-      return true;
-    }
-
-    return false;
-  }
-
   handleKeyCommand = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
 
@@ -402,6 +382,26 @@ class Wysiwyg extends React.Component {
 
     return false;
   };
+
+  handleReturn = (e, editorState) => {
+    const selection = editorState.getSelection();
+    const currentBlock = editorState.getCurrentContent().getBlockForKey(selection.getStartKey());
+
+    if (currentBlock.getText().split('')[0] === '-') {
+      this.addUlBlock();
+      return true;
+    }
+
+    if (
+      currentBlock.getText().split('.').length > 1 &&
+      !isNaN(parseInt(currentBlock.getText().split('.')[0], 10))
+    ) {
+      this.addOlBlock();
+      return true;
+    }
+
+    return false;
+  }
 
   handleTabKey = e => {
     if (e.keyCode === 9 /* TAB */ && this.state.isFocused) {
@@ -533,6 +533,7 @@ class Wysiwyg extends React.Component {
                 onChange={this.onChange}
                 placeholder={this.props.placeholder}
                 setRef={editor => (this.domEditor = editor)}
+                stripPastedStyles
               />
               <input className={styles.editorInput} value="" tabIndex="-1" />
             </div>
