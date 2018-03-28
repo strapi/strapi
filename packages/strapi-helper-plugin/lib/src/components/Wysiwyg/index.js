@@ -30,7 +30,13 @@ import PreviewWysiwyg from './previewWysiwyg';
 import ToggleMode from './toggleMode';
 // import { CustomSelect, PreviewControl, PreviewWysiwyg, ToggleMode } from './components';
 import { CONTROLS } from './constants';
-import { getBlockContent, getBlockStyle, getDefaultSelectionOffsets, getOffSets } from './helpers';
+import {
+  getBlockContent,
+  getBlockStyle,
+  getDefaultSelectionOffsets,
+  getKeyCommandData,
+  getOffSets,
+} from './helpers';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
@@ -426,20 +432,12 @@ class Wysiwyg extends React.Component {
 
     return request('/upload', { method: 'POST', headers, body: formData }, false, false)
       .then(response => {
-        const { editorState } = this.state;
-        const link = `![text](${response[0].url})`;
-        const newBlock = this.createNewBlock(link);
-        const newContentState = this.createNewContentStateFromBlock(newBlock);
-        const newEditorState = EditorState.push(editorState, newContentState);
-
+        const newContentState = this.createNewContentStateFromBlock(
+          this.createNewBlock(`![text](${response[0].url})`),
+        );
+        const newEditorState = EditorState.push(this.getEditorState(), newContentState);
         this.setState({ editorState: newEditorState });
-        this.props.onChange({
-          target: {
-            value: newEditorState.getCurrentContent().getPlainText(),
-            name: this.props.name,
-            type: 'textarea',
-          },
-        });
+        this.sendData(newEditorState);
       })
       .catch(err => {
         console.log('error', err.response);
@@ -453,26 +451,7 @@ class Wysiwyg extends React.Component {
     const newState = RichUtils.handleKeyCommand(editorState, command);
 
     if (command === 'bold' || command === 'italic' || command === 'underline') {
-      let content;
-      let style;
-
-      switch (command) {
-        case 'bold':
-          content = '**textToReplace**';
-          style = 'BOLD';
-          break;
-        case 'italic':
-          content = '*textToReplace*';
-          style = 'ITALIC';
-          break;
-        case 'underline':
-          content = '__textToReplace__';
-          style = 'UNDERLINE';
-          break;
-        default:
-          content = '';
-          style = '';
-      }
+      const { content, style } = getKeyCommandData(command);
       this.addContent(content, style);
       return false;
     }
@@ -518,8 +497,11 @@ class Wysiwyg extends React.Component {
   };
 
   onChange = editorState => {
-    // Update the state
     this.setState({ editorState });
+    this.sendData(editorState);
+  };
+
+  sendData = editorState =>
     this.props.onChange({
       target: {
         value: editorState.getCurrentContent().getPlainText(),
@@ -527,7 +509,6 @@ class Wysiwyg extends React.Component {
         type: 'textarea',
       },
     });
-  };
 
   toggleFullScreen = e => {
     e.preventDefault();
@@ -553,7 +534,7 @@ class Wysiwyg extends React.Component {
   render() {
     const { editorState, isFocused, isPreviewMode, isFullscreen } = this.state;
     const editorStyle = isFullscreen ? { marginTop: '0' } : this.props.style;
-    // console.log(editorState.getSele().toJS());
+
     return (
       <div className={cn(isFullscreen && styles.fullscreenOverlay)}>
         {/* FIRST EDITOR WITH CONTROLS} */}

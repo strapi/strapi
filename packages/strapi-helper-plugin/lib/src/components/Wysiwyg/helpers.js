@@ -89,3 +89,28 @@ export function getOffSets(selection) {
     start: selection.getStartOffset(),
   };
 }
+
+export function getKeyCommandData(command) {
+  let content;
+  let style;
+
+  switch (command) {
+    case 'bold':
+      content = '**textToReplace**';
+      style = 'BOLD';
+      break;
+    case 'italic':
+      content = '*textToReplace*';
+      style = 'ITALIC';
+      break;
+    case 'underline':
+      content = '__textToReplace__';
+      style = 'UNDERLINE';
+      break;
+    default:
+      content = '';
+      style = '';
+  }
+
+  return { content, style };
+}
