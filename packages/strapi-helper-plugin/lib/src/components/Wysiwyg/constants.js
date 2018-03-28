@@ -94,3 +94,5 @@ export const CONTROLS = [
     },
   ],
 ];
+
+export const DEFAULT_INDENTATION = '  ';
