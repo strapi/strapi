@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import styles from './styles.scss';
+import styles from './componentsStyles.scss';
 
 const ToggleMode = props => {
   const label = props.isPreviewMode

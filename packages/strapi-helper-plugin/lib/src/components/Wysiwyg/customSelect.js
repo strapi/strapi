@@ -9,9 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Select from 'components/InputSelect';
-import { SELECT_OPTIONS } from '../constants';
+import { SELECT_OPTIONS } from './constants';
 
-import styles from './styles.scss';
+import styles from './componentsStyles.scss';
 
 class CustomSelect extends React.Component {
   render() {

@@ -11,11 +11,12 @@ import cn from 'classnames';
 import { isEmpty } from 'lodash';
 
 import WysiwygEditor from 'components/WysiwygEditor';
-import converter from '../converter';
-import { findLinkEntities, findImageEntities } from '../strategies';
+import converter from './converter';
+import { findLinkEntities, findImageEntities } from './strategies';
 
-import styles from './styles.scss';
-import { Image, Link } from './index';
+import Image from './image';
+import Link from './link';
+import styles from './componentsStyles.scss';
 
 function getBlockStyle(block) {
   switch (block.getType()) {
