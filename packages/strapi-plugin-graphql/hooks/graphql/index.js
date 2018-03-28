@@ -10,14 +10,9 @@ const { graphqlKoa, graphiqlKoa } = require('apollo-server-koa');
 module.exports = strapi => {
   return {
     beforeInitialize: function() {
-      // Try to inject this middleware just after the parser to skip the router processing.
-      const index = strapi.config.middleware.load.after.indexOf('parser');
-
-      if (index !== -1) {
-        strapi.config.middleware.load.after.splice(index + 1, 0, 'graphql');
-      } else {
-        strapi.config.middleware.load.after.push('graphql');
-      }
+      // Try to inject this hook just after the others hooks to skip the router processing.
+      strapi.config.hook.load.order = strapi.config.hook.load.order.concat(Object.keys(strapi.hook).filter(hook => hook !== 'graphql'));
+      strapi.config.hook.load.order.push('graphql');
     },
 
     initialize: function(cb) {

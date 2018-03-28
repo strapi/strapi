@@ -46,7 +46,7 @@ module.exports = {
           acc[attribute] = this.convertType(strapi.models[model].attributes[attribute].type);
 
           return acc;
-        }, { id: 'String' });
+        }, { [strapi.models[model].primaryKey]: 'String' });
 
       acc.definition += `type ${strapi.models[model].globalId} ${this.formatGQL(attributes)}\n\n`;
 
@@ -96,6 +96,9 @@ module.exports = {
   },
 
   writeGenerateSchema(schema) {
+    // Disable auto-reload.
+    strapi.reload.isWatching = false;
+
     const generatedFolder = path.resolve(strapi.config.appPath, 'plugins', 'graphql', 'config', 'generated');
 
     // Create folder if necessary.
@@ -110,6 +113,8 @@ module.exports = {
     }
 
     fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
+
+    strapi.reload.isWatching = true;
   }
 
 };

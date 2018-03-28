@@ -311,6 +311,10 @@ module.exports.app = async function() {
       } else {
         acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
+        if (this.hook[current].isPlugin) {
+          acc[current].enabled = true;
+        }
+
         if (!acc[current].hasOwnProperty('enabled')) {
           this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
         }

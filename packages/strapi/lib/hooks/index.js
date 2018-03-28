@@ -4,7 +4,7 @@ const glob = require('glob');
 const path = require('path');
 const { after, includes, indexOf, dropRight, uniq, isUndefined, get, defaultsDeep, set, merge} = require('lodash');
 
-module.exports = function() {
+module.exports = async function() {
   // Method to initialize hooks and emit an event.
   const initialize = (module, hook) => (resolve, reject) => {
     if (typeof module === 'function') {
@@ -41,6 +41,25 @@ module.exports = function() {
       resolve();
     }
   };
+
+  await Promise.all(
+    Object.keys(this.hook).map(
+      hook =>
+        new Promise((resolve, reject) => {
+          if (this.config.hook.settings[hook].enabled === false) {
+            return resolve();
+          }
+
+          const module = this.hook[hook].load;
+
+          if (module(this).beforeInitialize) {
+            module(this).beforeInitialize.call(module);
+          }
+
+          resolve();
+        })
+    )
+  );
 
   return Promise.all(
     Object.keys(this.hook).map(

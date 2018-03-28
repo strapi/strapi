@@ -47,11 +47,27 @@ module.exports = function() {
 
         mountHooks.call(this, files, cwd)(resolve, reject);
       });
+    }),
+    new Promise((resolve, reject) => {
+      const cwd = path.resolve(this.config.appPath, 'plugins');
+
+      // Load configurations.
+      glob('./*/hooks/*', {
+        cwd
+      }, (err, files) => {
+        if (err) {
+          return reject(err);
+        }
+
+        console.log(files);
+
+        mountHooks.call(this, files, cwd, true)(resolve, reject);
+      });
     })
   ]);
 };
 
-const mountHooks = function (files, cwd) {
+const mountHooks = function (files, cwd, isPlugin) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
@@ -69,9 +85,10 @@ const mountHooks = function (files, cwd) {
 
         fs.readFile(path.resolve(this.config.appPath, cwd, p, 'package.json'), (err, content) => {
           try {
-            const pkg = JSON.parse(content);
+            const pkg = isPlugin ? {} : JSON.parse(content);
 
             this.hook[name] = {
+              isPlugin,
               loaded: false,
               identity: name,
               dependencies: get(pkg, 'strapi.dependencies') || []
