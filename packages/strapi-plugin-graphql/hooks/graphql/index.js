@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+const _ = require('lodash');
 const { graphqlKoa, graphiqlKoa } = require('apollo-server-koa');
 
 module.exports = strapi => {
@@ -16,8 +17,15 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const router = strapi.koaMiddlewares.routerJoi();
       const schema = strapi.plugins.graphql.services.graphql.generateSchema();
+
+      if (_.isEmpty(schema)) {
+        strapi.log.warn(`GraphQL schema has not been generated because it's empty`);
+
+        return cb();
+      }
+
+      const router = strapi.koaMiddlewares.routerJoi();
 
       router.post(strapi.plugins.graphql.config.endpoint, graphqlKoa({ schema }));
       router.get(strapi.plugins.graphql.config.endpoint, graphqlKoa({ schema }));

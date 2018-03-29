@@ -59,8 +59,6 @@ module.exports = function() {
           return reject(err);
         }
 
-        console.log(files);
-
         mountHooks.call(this, files, cwd, true)(resolve, reject);
       });
     })

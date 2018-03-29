@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 
 const _ = require('lodash');
+const pluralize = require('pluralize');
 const { makeExecutableSchema } = require('graphql-tools');
 
 module.exports = {
@@ -29,8 +30,13 @@ module.exports = {
   },
 
   shadowCRUD: function (models) {
+    const initialState = { definition: ``, query: {}, resolver: {} };
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+
+    if (_.isEmpty(models)) {
+      return initialState;
+    }
 
     return models.reduce((acc, model) => {
       const params = {
@@ -39,6 +45,20 @@ module.exports = {
 
       const query = {};
 
+      // Setup initial state with default attribute that should be displayed
+      // but these attributes are not properly defined in the models.
+      const initialState = {
+        [strapi.models[model].primaryKey]: 'String'
+      };
+
+      // Add timestamps attributes.
+      if (strapi.models[model].options.timestamps === true) {
+        Object.assign(initialState, {
+          created_at: 'String',
+          updated_at: 'String'
+        });
+      }
+
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(strapi.models[model].attributes)
         .reduce((acc, attribute) => {
@@ -46,26 +66,25 @@ module.exports = {
           acc[attribute] = this.convertType(strapi.models[model].attributes[attribute].type);
 
           return acc;
-        }, { [strapi.models[model].primaryKey]: 'String' });
+        }, initialState);
 
       acc.definition += `type ${strapi.models[model].globalId} ${this.formatGQL(attributes)}\n\n`;
 
       Object.assign(acc.query, {
-        [`${model}s`]: `[${strapi.models[model].globalId}]`,
-        [`${model}(id: String!)`]: strapi.models[model].globalId
+        [`${pluralize.plural(model)}`]: `[${strapi.models[model].globalId}]`,
+        [`${pluralize.singular(model)}(id: String!)`]: strapi.models[model].globalId
       });
 
       // TODO
       // - Apply and execute policies first.
-      // - Use pluralize to generate shadow query.
       // - Handle mutations.
       Object.assign(acc.resolver, {
-        [`${model}s`]: (_, options) => resolvers.fetchAll(params, {...query, ...options}),
-        [`${model}`]: (_, { id }) => resolvers.fetch({ ...params, id }, query)
+        [`${pluralize.plural(model)}`]: (_, options) => resolvers.fetchAll(params, {...query, ...options}),
+        [`${pluralize.singular(model)}`]: (_, { id }) => resolvers.fetch({ ...params, id }, query)
       });
 
       return acc;
-    }, { definition: ``, query: {}, resolver: {} });
+    }, initialState);
   },
 
   generateSchema: function () {
@@ -79,6 +98,11 @@ module.exports = {
     const resolvers = {
       Query: shadowCRUD.resolver || {}
     };
+
+    // Return empty schema when there is no model.
+    if (_.isEmpty(shadowCRUD.definition)) {
+      return {};
+    }
 
     // Concatenate.
     const typeDefs = shadowCRUD.definition + `type Query ${this.formatGQL(shadowCRUD.query)}`;
