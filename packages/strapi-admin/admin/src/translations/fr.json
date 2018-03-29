@@ -116,6 +116,8 @@
   "components.Wysiwyg.ToggleMode.markdown": "Retour au markdown",
   "components.Wysiwyg.ToggleMode.preview": "Voir la preview",
   "components.WysiwygBottomControls.charactersIndicators": "charactères",
+  "components.WysiwygBottomControls.uploadFiles": "Ajouter des fichiers en les 'droppant' ou {browse}",
+  "components.WysiwygBottomControls.uploadFiles.browse": "en les selectionnant.",
   "components.WysiwygBottomControls.fullscreen": "Plein écran",
 
   "notification.error": "Une erreur est survenue",

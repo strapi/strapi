@@ -369,7 +369,7 @@ class Wysiwyg extends React.Component {
       return this.setState({ isDraging: false });
     }
 
-    const { dataTransfer: { files } } = e;
+    const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
     const formData = new FormData();
     formData.append('files', files[0]);
     const headers = {
@@ -563,8 +563,8 @@ class Wysiwyg extends React.Component {
           )}
           {!isFullscreen && (
             <WysiwygBottomControls
-              charactersNumber={this.getCharactersNumber()}
               onClick={this.toggleFullScreen}
+              onChange={this.handleDrop}
             />
           )}
         </div>

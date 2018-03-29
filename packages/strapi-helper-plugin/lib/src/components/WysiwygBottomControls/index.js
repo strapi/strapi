@@ -9,13 +9,29 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
+/* eslint-disable jsx-a11y/label-has-for */
+const WysiwygBottomControls = ({ onChange, onClick }) => {
+  const browse = (
+    <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
+      {message => (
+        <label className={styles.dropLabel}>
+          <span className={styles.underline}>{message}</span>
+          <input
+            type="file"
+            onChange={onChange}
+          />
+        </label>
+      )}
+    </FormattedMessage>
+  );
 
-const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
   return (
     <div className={styles.wysiwygBottomControlsWrapper}>
       <div>
-        <span>{charactersNumber}&nbsp;</span>
-        <FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" />
+        <FormattedMessage
+          id="components.WysiwygBottomControls.uploadFiles"
+          values={{ browse }}
+        />
       </div>
       <div className={styles.fullScreenWrapper} onClick={onClick}>
         <FormattedMessage id="components.WysiwygBottomControls.fullscreen" />
@@ -25,12 +41,12 @@ const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
 };
 
 WysiwygBottomControls.defaultProps = {
-  charactersNumber: 0,
+  onChange: () => {},
   onClick: () => {},
 };
 
 WysiwygBottomControls.propTypes = {
-  charactersNumber: PropTypes.number,
+  onChange: PropTypes.func,
   onClick: PropTypes.func,
 };
 
