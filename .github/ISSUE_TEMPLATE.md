@@ -3,10 +3,10 @@
 
 *BUG TEMPLATE* <!-- Delete this header from your issue -->
 
-<!-- ⚠️ Before write your issue be sure you are using :-->
+<!-- ⚠️ Before writing your issue make sure you are using :-->
 <!-- Node 9.x.x -->
 <!-- npm 5.x.x -->
-<!-- Latest version of Strapi -->
+<!-- The latest version of Strapi -->
 
 **Informations**
 - **Node.js version**:
@@ -31,4 +31,4 @@
 
 - [ ] I'm sure that this issue hasn't already been referenced
 <!-- ⬆️ Don't delete this checkbox from your issue and approve it.  -->
-<!-- ⚠️ Make sure you browse the opened and closed issues. -->
+<!-- ⚠️ Make sure to browse the opened and closed issues. -->
