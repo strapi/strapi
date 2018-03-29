@@ -6,7 +6,6 @@
 
 import { ContentBlock, EditorState, genKey, Modifier } from 'draft-js';
 import { List } from 'immutable';
-import detectIndent from 'detect-indent';
 import { DEFAULT_INDENTATION } from './constants';
 
 export function createNewBlock(text = '', type = 'unstyled', key = genKey()) {
@@ -48,36 +47,22 @@ export function getSelectedBlocksList(editorState) {
     .toList();
 }
 
-/**
- * Detect indentation in a text
- * @param {String} text
- * @return {String}
- */
-export function getIndentation(text) {
-  const result = detectIndent(text);
-
-  return result.indent || DEFAULT_INDENTATION;
-}
-
 export function onTab(editorState) {
   const contentState = editorState.getCurrentContent();
   const selection = editorState.getSelection();
-  const startKey = selection.getStartKey();
-  const currentBlock = contentState.getBlockForKey(startKey);
-  const indentation = getIndentation(currentBlock.getText());
   let newContentState;
 
   if (selection.isCollapsed()) {
     newContentState = Modifier.insertText(
       contentState,
       selection,
-      indentation,
+      DEFAULT_INDENTATION,
     );
   } else {
     newContentState = Modifier.replaceText(
       contentState,
       selection,
-      indentation,
+      DEFAULT_INDENTATION,
     );
   }
 
