@@ -10,18 +10,26 @@ import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 /* eslint-disable jsx-a11y/label-has-for */
-const WysiwygBottomControls = ({ onChange, onClick }) => {
+const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
   const browse = (
     <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
-      {message => (
-        <label className={styles.dropLabel}>
-          <span className={styles.underline}>{message}</span>
-          <input
-            type="file"
-            onChange={onChange}
-          />
-        </label>
-      )}
+      {message => {
+        const content = <span className={styles.underline}>{message}</span>;
+
+        if (isPreviewMode) {
+          return content;
+        }
+
+        return (
+          <label className={styles.dropLabel}>
+            {content}
+            <input
+              type="file"
+              onChange={onChange}
+            />
+          </label>
+        );
+      }}
     </FormattedMessage>
   );
 
@@ -41,11 +49,13 @@ const WysiwygBottomControls = ({ onChange, onClick }) => {
 };
 
 WysiwygBottomControls.defaultProps = {
+  isPreviewMode: false,
   onChange: () => {},
   onClick: () => {},
 };
 
 WysiwygBottomControls.propTypes = {
+  isPreviewMode: PropTypes.bool,
   onChange: PropTypes.func,
   onClick: PropTypes.func,
 };

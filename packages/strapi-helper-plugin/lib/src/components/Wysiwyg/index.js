@@ -370,34 +370,7 @@ class Wysiwyg extends React.Component {
     }
 
     const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-    const formData = new FormData();
-    formData.append('files', files[0]);
-    const headers = {
-      'X-Forwarded-Host': 'strapi',
-    };
-
-    const newContentState = this.createNewContentStateFromBlock(
-      createNewBlock(`![Uploading ${files[0].name}]()`),
-    );
-    const newEditorState = EditorState.push(this.getEditorState(), newContentState);
-    this.setState({ editorState: newEditorState });
-
-    return request('/uploade', { method: 'POST', headers, body: formData }, false, false)
-      .then(response => {
-        const lastBlock = this.getEditorState().getCurrentContent().getLastBlock();
-        const newContentState = this.createNewContentStateFromBlock(
-          createNewBlock(`![text](${response[0].url})`, 'unstyled', lastBlock.getKey()),
-        );
-        const newEditorState = EditorState.push(this.getEditorState(), newContentState);
-        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
-        this.sendData(newEditorState);
-      })
-      .catch(() => {
-        this.setState({ editorState: EditorState.undo(this.getEditorState()) });
-      })
-      .finally(() => {
-        this.setState({ isDraging: false });
-      });
+    return this.uploadFile(files);
   };
 
   handleKeyCommand = (command, editorState) => {
@@ -416,6 +389,8 @@ class Wysiwyg extends React.Component {
 
     return false;
   };
+
+  handlePastedFiles = files => this.uploadFile(files);
 
   handleReturn = (e, editorState) => {
     const selection = editorState.getSelection();
@@ -480,6 +455,37 @@ class Wysiwyg extends React.Component {
       isPreviewMode: false,
     });
   };
+
+  uploadFile = (files) => {
+    const formData = new FormData();
+    formData.append('files', files[0]);
+    const headers = {
+      'X-Forwarded-Host': 'strapi',
+    };
+
+    const newContentState = this.createNewContentStateFromBlock(
+      createNewBlock(`![Uploading ${files[0].name}]()`),
+    );
+    const newEditorState = EditorState.push(this.getEditorState(), newContentState);
+    this.setState({ editorState: newEditorState });
+
+    return request('/upload', { method: 'POST', headers, body: formData }, false, false)
+      .then(response => {
+        const lastBlock = this.getEditorState().getCurrentContent().getLastBlock();
+        const newContentState = this.createNewContentStateFromBlock(
+          createNewBlock(`![text](${response[0].url})`, 'unstyled', lastBlock.getKey()),
+        );
+        const newEditorState = EditorState.push(this.getEditorState(), newContentState);
+        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+        this.sendData(newEditorState);
+      })
+      .catch(() => {
+        this.setState({ editorState: EditorState.undo(this.getEditorState()) });
+      })
+      .finally(() => {
+        this.setState({ isDraging: false });
+      });
+  }
 
   componentDidCatch(error, info) {
     console.log('err', error);
@@ -556,6 +562,7 @@ class Wysiwyg extends React.Component {
                 blockStyleFn={getBlockStyle}
                 editorState={editorState}
                 handleKeyCommand={this.handleKeyCommand}
+                handlePastedFiles={this.handlePastedFiles}
                 handleReturn={this.handleReturn}
                 keyBindingFn={this.mapKeyToEditorCommand}
                 onBlur={this.handleBlur}
@@ -570,6 +577,7 @@ class Wysiwyg extends React.Component {
           )}
           {!isFullscreen && (
             <WysiwygBottomControls
+              isPreviewMode={isPreviewMode}
               onClick={this.toggleFullScreen}
               onChange={this.handleDrop}
             />
