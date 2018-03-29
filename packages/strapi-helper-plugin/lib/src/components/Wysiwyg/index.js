@@ -376,17 +376,24 @@ class Wysiwyg extends React.Component {
       'X-Forwarded-Host': 'strapi',
     };
 
-    return request('/upload', { method: 'POST', headers, body: formData }, false, false)
+    const newContentState = this.createNewContentStateFromBlock(
+      createNewBlock(`![Uploading ${files[0].name}]()`),
+    );
+    const newEditorState = EditorState.push(this.getEditorState(), newContentState);
+    this.setState({ editorState: newEditorState });
+
+    return request('/uploade', { method: 'POST', headers, body: formData }, false, false)
       .then(response => {
+        const lastBlock = this.getEditorState().getCurrentContent().getLastBlock();
         const newContentState = this.createNewContentStateFromBlock(
-          createNewBlock(`![text](${response[0].url})`),
+          createNewBlock(`![text](${response[0].url})`, 'unstyled', lastBlock.getKey()),
         );
         const newEditorState = EditorState.push(this.getEditorState(), newContentState);
-        this.setState({ editorState: newEditorState });
+        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
         this.sendData(newEditorState);
       })
-      .catch(err => {
-        console.log('error', err.response);
+      .catch(() => {
+        this.setState({ editorState: EditorState.undo(this.getEditorState()) });
       })
       .finally(() => {
         this.setState({ isDraging: false });
