@@ -22,7 +22,7 @@ module.exports = {
    * @return String
    */
 
-  formatGQL: function (fields, description, type = 'field') {
+  formatGQL: function (fields, description = {}, type = 'field') {
     const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
     const lines = typeFields.split('\n');
 
@@ -119,7 +119,7 @@ module.exports = {
    * @return Object
    */
 
-  shadowCRUD: function (models) {
+  shadowCRUD: function (models, plugin) {
     const initialState = { definition: ``, query: {}, resolver: {} };
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
@@ -128,38 +128,42 @@ module.exports = {
       return initialState;
     }
 
-    return models.reduce((acc, model) => {
-      const plugin = undefined;
+    return models.reduce((acc, name) => {
+      const model = plugin ?
+        strapi.plugins[plugin].models[name]:
+        strapi.models[name];
       const params = {
-        model
+        model: name
       };
 
-      const queryOpts = {};
+      const queryOpts = plugin ? { source: plugin } : {};
 
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [strapi.models[model].primaryKey]: 'String'
+        [model.primaryKey]: 'String'
       };
 
       // Add timestamps attributes.
-      if (strapi.models[model].options.timestamps === true) {
+      if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
           created_at: 'String',
           updated_at: 'String'
         });
       }
 
-      const globalId = strapi.models[model].globalId;
+      const globalId = model.globalId;
 
       // Retrieve user customisation.
-      const { resolver = {}, query, definition, _type = {} } = _.get(strapi.api, `${model}.config.schema.graphql`, {});
+      const { resolver = {}, query, definition, _type = {} } = plugin ?
+        _.get(strapi.plugins, `${plugin}.config.schema.graphql`, {}) :
+        _.get(strapi.api, `${model}.config.schema.graphql`, {});
 
       // Convert our layer Model to the GraphQL DL.
-      const attributes = Object.keys(strapi.models[model].attributes)
+      const attributes = Object.keys(model.attributes)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType(strapi.models[model].attributes[attribute].type);
+          acc[attribute] = this.convertType(model.attributes[attribute].type);
 
           return acc;
         }, initialState);
@@ -167,23 +171,23 @@ module.exports = {
       acc.definition += `${this.getDescription(_type[globalId])}type ${globalId} ${this.formatGQL(attributes, _type[globalId])}\n\n`;
 
       Object.assign(acc.query, {
-        [`${pluralize.plural(model)}`]: `[${strapi.models[model].globalId}]`,
-        [`${pluralize.singular(model)}(id: String!)`]: strapi.models[model].globalId
+        [`${pluralize.plural(name)}`]: `[${model.globalId}]`,
+        [`${pluralize.singular(name)}(id: String!)`]: model.globalId
       });
 
       // TODO
       // - Handle mutations.
       Object.assign(acc.resolver, {
-        [pluralize.plural(model)]: (obj, options, context) => this.composeResolver(
+        [pluralize.plural(name)]: (obj, options, context) => this.composeResolver(
           context,
           plugin,
-          _.get(resolver, `Query.${pluralize.plural(model)}.policy`),
+          _.get(resolver, `Query.${pluralize.plural(name)}.policy`),
           resolvers.fetchAll(params, {...queryOpts, ...options})
         ),
-        [pluralize.singular(model)]: (obj, { id }, context) => this.composeResolver(
+        [pluralize.singular(name)]: (obj, { id }, context) => this.composeResolver(
           context,
           plugin,
-          _.get(resolver, `Query.${pluralize.singular(model)}.policy`),
+          _.get(resolver, `Query.${pluralize.singular(name)}.policy`),
           resolvers.fetch({ ...params, id }, queryOpts)
         )
       });
@@ -199,11 +203,24 @@ module.exports = {
    */
 
   generateSchema: function () {
-    // Exclude core models.
-    const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
-
     // Generate type definition and query/mutation for models.
-    const shadowCRUD = strapi.plugins.graphql.config.shadowCRUD !== false ? this.shadowCRUD(models) : {};
+    const shadowCRUD = strapi.plugins.graphql.config.shadowCRUD !== false ? (() => {
+      // Exclude core models.
+      const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
+
+      // Reproduce the same pattern for each plugin.
+      return Object.keys(strapi.plugins).reduce((acc, plugin) => {
+        const { definition, query, resolver } = this.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
+
+        // We cannot put this in the merge because it's a string.
+        acc.definition += definition;
+
+        return _.merge(acc, {
+          query,
+          resolver
+        });
+      }, this.shadowCRUD(models));
+    })() : {};
 
     // Build resolvers.
     const resolvers = {
