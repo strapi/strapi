@@ -37,6 +37,7 @@ import {
   createNewBlock,
   getNextBlocksList,
   getSelectedBlocksList,
+  onTab,
   updateSelection,
 } from './utils';
 import styles from './styles.scss';
@@ -449,6 +450,13 @@ class Wysiwyg extends React.Component {
     this.sendData(editorState);
   };
 
+  handleTab = (e) => {
+    e.preventDefault();
+    const newEditorState = onTab(this.getEditorState());
+
+    return this.onChange(newEditorState);
+  }
+
   sendData = editorState =>
     this.props.onChange({
       target: {
@@ -545,6 +553,7 @@ class Wysiwyg extends React.Component {
                 keyBindingFn={this.mapKeyToEditorCommand}
                 onBlur={this.handleBlur}
                 onChange={this.onChange}
+                onTab={this.handleTab}
                 placeholder={this.props.placeholder}
                 setRef={editor => (this.domEditor = editor)}
                 stripPastedStyles

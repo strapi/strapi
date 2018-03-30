@@ -4,8 +4,9 @@
  *
  */
 
-import { ContentBlock, genKey } from 'draft-js';
+import { ContentBlock, EditorState, genKey, Modifier } from 'draft-js';
 import { List } from 'immutable';
+import { DEFAULT_INDENTATION } from './constants';
 
 export function createNewBlock(text = '', type = 'unstyled', key = genKey()) {
   return new ContentBlock({ key, type, text, charaterList: List([]) });
@@ -44,4 +45,30 @@ export function getSelectedBlocksList(editorState) {
     .takeUntil((_, k) => k === endKey)
     .concat([[endKey, blockMap.get(endKey)]])
     .toList();
+}
+
+export function onTab(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  let newContentState;
+
+  if (selection.isCollapsed()) {
+    newContentState = Modifier.insertText(
+      contentState,
+      selection,
+      DEFAULT_INDENTATION,
+    );
+  } else {
+    newContentState = Modifier.replaceText(
+      contentState,
+      selection,
+      DEFAULT_INDENTATION,
+    );
+  }
+
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'insert-characters'
+  );
 }
