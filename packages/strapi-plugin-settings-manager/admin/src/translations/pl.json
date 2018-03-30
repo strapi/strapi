@@ -81,7 +81,7 @@
   "form.security.item.csrf.angular": "Angular",
   "form.security.item.hsts.maxAge": "Max Age",
   "form.security.item.hsts.includeSubDomains": "Subdomeny",
-  "form.security.item.hsts.preload": "Preload",
+  "form.security.item.hsts.preload": "Przeładowywanie",
 
   "form.security.item.session": "Sesja",
   "form.security.item.session.key": "Sekretny klucz",
