@@ -111,6 +111,7 @@
   "form.language.choose": "Nazwa:",
 
   "request.error.database.exist": "Takie połączenie już istnieje",
+  "request.error.database.unknow": "Takie połączenie nie istnieje",
   "request.error.type.string": "Tekst jest wymagany.",
   "request.error.type.number": "Liczba jest wymagana.",
   "request.error.type.boolean": "Typ logiczny jest wymagany.",
