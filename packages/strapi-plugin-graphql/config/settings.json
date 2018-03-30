@@ -1,3 +1,4 @@
 {
-  "endpoint": "/graphql"
+  "endpoint": "/graphql",
+  "shadowCRUD": true
 }

@@ -26,7 +26,8 @@
     "apollo-server-koa": "^1.3.3",
     "graphql": "^0.13.2",
     "graphql-tools": "^2.23.1",
-    "pluralize": "^7.0.0"
+    "pluralize": "^7.0.0",
+    "strapi-utils": "3.0.0-alpha.11.1"
   },
   "devDependencies": {
     "strapi-helper-plugin": "3.0.0-alpha.11.1"
