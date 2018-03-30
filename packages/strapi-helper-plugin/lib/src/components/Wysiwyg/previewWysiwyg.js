@@ -12,10 +12,12 @@ import { isEmpty } from 'lodash';
 
 import WysiwygEditor from 'components/WysiwygEditor';
 import converter from './converter';
-import { findLinkEntities, findImageEntities } from './strategies';
+import { findLinkEntities, findImageEntities, findVideoEntities } from './strategies';
 
 import Image from './image';
 import Link from './link';
+import Video from './video';
+
 import styles from './componentsStyles.scss';
 
 function getBlockStyle(block) {
@@ -60,6 +62,10 @@ class PreviewWysiwyg extends React.Component {
       {
         strategy: findImageEntities,
         component: Image,
+      },
+      {
+        strategy: findVideoEntities,
+        component: Video,
       },
     ]);
 
