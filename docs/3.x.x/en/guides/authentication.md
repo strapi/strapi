@@ -157,6 +157,32 @@ $.ajax({
 });
 ```
 
+## User Object In Strapi Context
+The User object is available to successfully authenticated requests.
+
+#### Usage
+- The authenticated `user` object is a property of `ctx.state`.
+
+
+```js
+  create: async (ctx) => {
+
+    const { _id } = ctx.state.user
+
+    const depositObj = {
+      ...ctx.request.body,
+      depositor: _id
+    }
+
+    const data = await strapi.services.deposit.add(depositObj);
+
+    // Send 201 `created`
+    ctx.created(data);
+  }
+
+```
+
+
 ## Email templates
 
 [See the documentation on GitHub](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md)

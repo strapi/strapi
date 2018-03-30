@@ -34,7 +34,7 @@ ecosystem has been introduced. **Both versions are available, we still recommend
 
 #### Alpha
 
-The alpha has support for the latest version of Node.js (v8) and npm (v5).
+The alpha has support for the latest version of Node.js (v9) and npm (v5).
 ```bash
 npm install strapi@alpha -g
 ```
