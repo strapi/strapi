@@ -21,6 +21,8 @@
 
 **What is the expected behavior?**
 
+**Suggested solutions**
+
 ---
 
 *FEATURE REQUEST TEMPLATE*  <!-- Delete this header from your issue -->
