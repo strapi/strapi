@@ -8,18 +8,16 @@ function findLinkEntities(contentBlock, callback, contentState) {
 function findImageEntities(contentBlock, callback, contentState) {
   contentBlock.findEntityRanges(character => {
     const entityKey = character.getEntity();
-    const { src } = contentState.getEntity(entityKey).getData();
 
-    return entityKey !== null && contentState.getEntity(entityKey).getType() === 'IMAGE' && !isVideoType(src);
+    return entityKey !== null && contentState.getEntity(entityKey).getType() === 'IMAGE' && !isVideoType(contentState.getEntity(entityKey).getData().src);
   }, callback);
 }
 
 function findVideoEntities(contentBlock, cb, contentState) {
   contentBlock.findEntityRanges(character => {
     const entityKey = character.getEntity();
-    const { src } = contentState.getEntity(entityKey).getData();
 
-    return entityKey !== null && contentState.getEntity(entityKey).getType() === 'IMAGE' && isVideoType(src);
+    return entityKey !== null && contentState.getEntity(entityKey).getType() === 'IMAGE' && isVideoType(contentState.getEntity(entityKey).getData().src);
   }, cb);
 }
 

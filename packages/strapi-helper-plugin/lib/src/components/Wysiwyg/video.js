@@ -12,7 +12,7 @@ const Video = props => {
   const { height, src, width } = props.contentState.getEntity(props.entityKey).getData();
 
   return (
-    <video alt={alt} height={height} width={width} style={{ maxWidth: '100%' }} controls>
+    <video height={height} width={width} style={{ maxWidth: '100%' }} controls>
       <source src={src} />
     </video>
   );

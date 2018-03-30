@@ -13,16 +13,15 @@ import styles from './styles.scss';
 const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
   const browse = (
     <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
-      {message => {
-        const content = <span className={styles.underline}>{message}</span>;
+      {(message) => {
 
         if (isPreviewMode) {
-          return content;
+          return <span className={styles.underline}>{message}</span>;
         }
 
         return (
           <label className={styles.dropLabel}>
-            {content}
+            <span className={styles.underline}>{message}</span>
             <input
               type="file"
               onChange={onChange}
