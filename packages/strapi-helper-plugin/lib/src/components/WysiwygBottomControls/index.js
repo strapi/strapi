@@ -13,32 +13,27 @@ import styles from './styles.scss';
 const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
   const browse = (
     <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
-      {(message) => {
-
-        if (isPreviewMode) {
-          return <span className={styles.underline}>{message}</span>;
-        }
-
-        return (
-          <label className={styles.dropLabel}>
-            <span className={styles.underline}>{message}</span>
-            <input
-              type="file"
-              onChange={onChange}
-            />
-          </label>
-        );
-      }}
+      {(message) => <span className={styles.underline}>{message}</span>}
     </FormattedMessage>
   );
 
   return (
     <div className={styles.wysiwygBottomControlsWrapper}>
       <div>
-        <FormattedMessage
-          id="components.WysiwygBottomControls.uploadFiles"
-          values={{ browse }}
-        />
+        <label
+          className={styles.dropLabel}
+          onClick={(e) => {
+            if (isPreviewMode) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <FormattedMessage
+            id="components.WysiwygBottomControls.uploadFiles"
+            values={{ browse }}
+          />
+          <input type="file" onChange={onChange} />
+        </label>
       </div>
       <div className={styles.fullScreenWrapper} onClick={onClick}>
         <FormattedMessage id="components.WysiwygBottomControls.fullscreen" />
