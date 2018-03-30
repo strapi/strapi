@@ -113,7 +113,7 @@
   "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
   "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
   "components.WysiwygBottomControls.charactersIndicators": "characters",
-  "components.WysiwygBottomControls.uploadFiles": "Attach files by dragging & dropping or {browse}",
+  "components.WysiwygBottomControls.uploadFiles": "Attach files by dragging & dropping, {browse}, or pasting from the clipboard.",
   "components.WysiwygBottomControls.uploadFiles.browse": "selecting them",
   "components.WysiwygBottomControls.fullscreen": "Expand",
 
