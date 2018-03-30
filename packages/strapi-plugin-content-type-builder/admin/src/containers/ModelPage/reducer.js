@@ -37,7 +37,7 @@ const initialState = fromJS({
   showButtons: false,
   modelLoading: true,
   showButtonLoader: false,
-  tableExists: false,
+  tableExists: true,
 });
 
 function modelPageReducer(state = initialState, action) {
