@@ -59,6 +59,39 @@ module.exports = strapi => {
           });
         })
       ]);
+
+      /*
+       * Create a merge of all the GraphQL configuration.
+       */
+
+      // Set path with initial state.
+      _.set(strapi.plugins.graphql, 'config._schema.graphql', { definition: ``, query: ``, _type : {}, resolver: {} });
+
+      // Merge user API.
+      Object.keys(strapi.api).reduce((acc, current) => {
+        const { definition, query, _type, resolver } = _.get(strapi.api[current], 'config.schema.graphql', {});
+
+        acc.definition += definition || ``;
+        acc.query += query || ``;
+
+        return _.merge(acc, {
+          _type,
+          resolver
+        });
+      }, strapi.plugins.graphql.config._schema.graphql);
+
+      // Merge plugins API.
+      Object.keys(strapi.plugins).reduce((acc, current) => {
+        const { definition, query, _type, resolver } = _.get(strapi.plugins[current], 'config.schema.graphql', {});
+
+        acc.definition += definition || ``;
+        acc.query += query || ``;
+
+        return _.merge(acc, {
+          _type,
+          resolver
+        });
+      }, strapi.plugins.graphql.config._schema.graphql);
     },
 
     initialize: function(cb) {

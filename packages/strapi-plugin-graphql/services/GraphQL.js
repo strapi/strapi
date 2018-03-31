@@ -74,17 +74,37 @@ module.exports = {
    * @return String
    */
 
-  convertType: (type) => {
-    switch (type) {
-      case 'string':
-      case 'text':
-        return 'String';
-      case 'boolean':
-        return 'Boolean';
-      case 'integer':
-        return 'Int';
-      default:
-        return 'String';
+  convertType: (attr = {}) => {
+    // Type.
+    if (attr.type) {
+      switch (attr.type) {
+        case 'string':
+        case 'text':
+          return 'String';
+        case 'boolean':
+          return 'Boolean';
+        case 'integer':
+          return 'Int';
+        default:
+          return 'String';
+      }
+    }
+
+    const ref = attr.model || attr.collection;
+
+    // Association.
+    if (ref && ref !== '*') {
+      // Add bracket or not.
+      const plural = !_.isEmpty(attr.collection);
+      const globalId = attr.plugin ?
+        strapi.plugins[attr.plugin].models[ref].globalId:
+        strapi.models[ref].globalId;
+
+      if (plural) {
+        return `[${globalId}]`;
+      }
+
+      return globalId;
     }
   },
 
@@ -120,7 +140,7 @@ module.exports = {
    */
 
   shadowCRUD: function (models, plugin) {
-    const initialState = { definition: ``, query: {}, resolver: {} };
+    const initialState = { definition: ``, query: {}, resolver: { Query : {} } };
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -155,15 +175,13 @@ module.exports = {
       const globalId = model.globalId;
 
       // Retrieve user customisation.
-      const { resolver = {}, query, definition, _type = {} } = plugin ?
-        _.get(strapi.plugins, `${plugin}.config.schema.graphql`, {}) :
-        _.get(strapi.api, `${model}.config.schema.graphql`, {});
+      const { resolver = {}, query, definition, _type = {} } = _.get(strapi.plugins, `graphql.config.schema.graphql`, {});
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType(model.attributes[attribute].type);
+          acc[attribute] = this.convertType(model.attributes[attribute]);
 
           return acc;
         }, initialState);
@@ -177,19 +195,71 @@ module.exports = {
 
       // TODO
       // - Handle mutations.
-      Object.assign(acc.resolver, {
-        [pluralize.plural(name)]: (obj, options, context) => this.composeResolver(
-          context,
-          plugin,
-          _.get(resolver, `Query.${pluralize.plural(name)}.policy`),
-          resolvers.fetchAll(params, {...queryOpts, ...options})
-        ),
-        [pluralize.singular(name)]: (obj, { id }, context) => this.composeResolver(
-          context,
-          plugin,
-          _.get(resolver, `Query.${pluralize.singular(name)}.policy`),
-          resolvers.fetch({ ...params, id }, queryOpts)
-        )
+      _.merge(acc.resolver, {
+        Query : {
+          [pluralize.plural(name)]: (obj, options, context) => this.composeResolver(
+            context,
+            plugin,
+            _.get(resolver, `Query.${pluralize.plural(name)}.policy`),
+            resolvers.fetchAll(params, {...queryOpts, ...options})
+          ),
+          [pluralize.singular(name)]: (obj, { id }, context) => this.composeResolver(
+            context,
+            plugin,
+            _.get(resolver, `Query.${pluralize.singular(name)}.policy`),
+            resolvers.fetch({ ...params, id }, queryOpts)
+          )
+        }
+      });
+
+      // Build associations queries.
+      model.associations.forEach(association => {
+        if (association.nature === 'manyMorphToMany') {
+          return;
+        }
+
+        if (!acc.resolver[globalId]) {
+          acc.resolver[globalId] = {};
+        }
+
+        // TODO:
+        // - Handle limit, skip, etc options
+        _.merge(acc.resolver[globalId], {
+          [association.alias]: (obj, options, context) => {
+            // Construct parameters object to retrieve the correct related entries.
+            const params = {
+              model: association.model || association.collection,
+            };
+
+            const queryOpts = {
+              source: association.plugin
+            };
+
+            if (association.type === 'model') {
+              params.id = obj[association.alias];
+            } else {
+              // Get attribute.
+              const attr = association.plugin ?
+                strapi.plugins[association.plugin].models[association.collection].attributes[association.via]:
+                strapi.models[association.collection].attributes[association.via];
+
+              // Get refering model.
+              const ref = attr.plugin ?
+                strapi.plugins[attr.plugin].models[attr.model || attr.collection]:
+                strapi.models[attr.model || attr.collection];
+
+              // Construct the "where" query to only retrieve entries which are
+              // related to this entry.
+              queryOpts.query = {
+                [association.via]: obj[ref.primaryKey]
+              };
+            }
+
+            return association.model ?
+              resolvers.fetch(params, association.plugin):
+              resolvers.fetchAll(params, queryOpts)
+          }
+        });
       });
 
       return acc;
@@ -213,7 +283,7 @@ module.exports = {
         const { definition, query, resolver } = this.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
 
         // We cannot put this in the merge because it's a string.
-        acc.definition += definition;
+        acc.definition += definition || ``;
 
         return _.merge(acc, {
           query,
@@ -222,18 +292,21 @@ module.exports = {
       }, this.shadowCRUD(models));
     })() : {};
 
+    const { definition, query, _type, resolver } = strapi.plugins.graphql.config._schema.graphql;
+
     // Build resolvers.
-    const resolvers = {
-      Query: shadowCRUD.resolver || {}
-    };
+    const resolvers = _.omitBy(_.merge(resolver, shadowCRUD.resolver), _.isEmpty) || {};
 
     // Return empty schema when there is no model.
-    if (_.isEmpty(shadowCRUD.definition)) {
+    if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
       return {};
     }
 
     // Concatenate.
-    const typeDefs = shadowCRUD.definition + `type Query ${this.formatGQL(shadowCRUD.query, {}, 'query')}`;
+    const typeDefs =
+      definition +
+      shadowCRUD.definition +
+      `type Query ${this.formatGQL(shadowCRUD.query, {}, 'query')}\n`;
 
     console.log(typeDefs);
 
@@ -245,6 +318,9 @@ module.exports = {
       typeDefs,
       resolvers,
     });
+
+    // Temporary variable to store the entire GraphQL configuration.
+    delete strapi.plugins.graphql.config._schema.graphql;
 
     return schema;
   },

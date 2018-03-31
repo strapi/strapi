@@ -44,20 +44,17 @@ module.exports = async function() {
 
   await Promise.all(
     Object.keys(this.hook).map(
-      hook =>
-        new Promise((resolve, reject) => {
-          if (this.config.hook.settings[hook].enabled === false) {
-            return resolve();
-          }
+      async hook => {
+        if (this.config.hook.settings[hook].enabled === false) {
+          return;
+        }
 
-          const module = this.hook[hook].load;
+        const module = this.hook[hook].load;
 
-          if (module(this).beforeInitialize) {
-            module(this).beforeInitialize.call(module);
-          }
-
-          resolve();
-        })
+        if (module(this).beforeInitialize) {
+          await module(this).beforeInitialize.call(module);
+        }
+      }
     )
   );
 

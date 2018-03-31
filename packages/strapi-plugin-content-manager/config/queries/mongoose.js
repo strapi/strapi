@@ -3,7 +3,7 @@ const _ = require('lodash');
 module.exports = {
   find: async function (params) {
     return this
-      .find()
+      .find(params.query)
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip));
