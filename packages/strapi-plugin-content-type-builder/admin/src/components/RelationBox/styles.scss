@@ -11,8 +11,6 @@
   height: 3.6rem;
   width: 100%;
   padding-top: .1rem;
-  // display: flex;
-  // justify-content: center;
   position: relative;
   background-color: rgba(16, 22, 34, 0.04);
   line-height: 3.6rem;
@@ -68,6 +66,18 @@
         background-color: transparent!important;
         box-shadow: none;
         color: black;
+      }
+    }
+    > div {
+      max-height: 180px;
+      max-width: 21.5rem;
+      overflow: scroll;
+      button {
+        div {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
     }
   }
