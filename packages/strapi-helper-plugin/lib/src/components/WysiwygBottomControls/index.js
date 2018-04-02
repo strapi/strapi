@@ -9,13 +9,31 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
+/* eslint-disable jsx-a11y/label-has-for */
+const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
+  const browse = (
+    <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
+      {(message) => <span className={styles.underline}>{message}</span>}
+    </FormattedMessage>
+  );
 
-const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
   return (
     <div className={styles.wysiwygBottomControlsWrapper}>
       <div>
-        <span>{charactersNumber}&nbsp;</span>
-        <FormattedMessage id="components.WysiwygBottomControls.charactersIndicators" />
+        <label
+          className={styles.dropLabel}
+          onClick={(e) => {
+            if (isPreviewMode) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <FormattedMessage
+            id="components.WysiwygBottomControls.uploadFiles"
+            values={{ browse }}
+          />
+          <input type="file" onChange={onChange} />
+        </label>
       </div>
       <div className={styles.fullScreenWrapper} onClick={onClick}>
         <FormattedMessage id="components.WysiwygBottomControls.fullscreen" />
@@ -25,12 +43,14 @@ const WysiwygBottomControls = ({ charactersNumber, onClick }) => {
 };
 
 WysiwygBottomControls.defaultProps = {
-  charactersNumber: 0,
+  isPreviewMode: false,
+  onChange: () => {},
   onClick: () => {},
 };
 
 WysiwygBottomControls.propTypes = {
-  charactersNumber: PropTypes.number,
+  isPreviewMode: PropTypes.bool,
+  onChange: PropTypes.func,
   onClick: PropTypes.func,
 };
 

@@ -25,3 +25,15 @@
     font-size: 12px;
   }
 }
+
+.underline {
+  color: #1C5DE7;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dropLabel {
+  > input {
+    display: none;
+  }
+}
