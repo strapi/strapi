@@ -89,15 +89,10 @@
 .fullscreenOverlay {
   position: fixed;
   z-index: 1040;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 0 30px;
-  padding-top: calc(6rem + 90px);
-  padding-left: calc(24rem + 28px);
-  padding-right: 28px;
-  padding-bottom: 32px;
+  top: calc(6rem + 90px);
+  left: calc(24rem + 28px);
+  right: 28px;
+  bottom: 32px;
   display: flex;
   background-color: transparent;
   z-index: 99999;
@@ -120,7 +115,7 @@
 }
 
 .editorFullScreen {
-  max-height: calc(100% - 100px) !important;
+  max-height: calc(100% - 70px) !important;
   margin-bottom: 0;
   overflow: auto;
 }
