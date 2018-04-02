@@ -13,6 +13,8 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { makeExecutableSchema } = require('graphql-tools');
+const GraphQLJSON = require('graphql-type-json');
+
 
 module.exports = {
 
@@ -22,7 +24,7 @@ module.exports = {
    * @return String
    */
 
-  formatGQL: function (fields, description = {}, type = 'field') {
+  formatGQL: function (fields, description = {}, model = {}, type = 'field') {
     const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
     const lines = typeFields.split('\n');
 
@@ -31,12 +33,12 @@ module.exports = {
       return lines
         .map((line, index) => {
           if ([0, lines.length - 1].includes(index)) {
-            return line;
+            return ``;
           }
 
           const split = line.split(':');
           const attribute = _.trim(split[0]);
-          const info = description[attribute];
+          const info = description[attribute] || _.get(model, `attributes.${attribute}.description`);
 
           if (info) {
             return `  """\n    ${info}\n  """\n${line}`;
@@ -47,7 +49,16 @@ module.exports = {
         .join('\n');
     }
 
-    return typeFields;
+
+    return lines
+        .map((line, index) => {
+          if ([0, lines.length - 1].includes(index)) {
+            return ``;
+          }
+
+          return line;
+        })
+        .join('\n');
   },
 
   /**
@@ -56,16 +67,24 @@ module.exports = {
    * @return String
    */
 
-  getDescription: (description) => {
+  getDescription: (description, model = {}) => {
     const format = `"""\n`;
 
-    const str = _.get(description, `_description`) || description;
+    const str = _.get(description, `_description`) || description || model.description;
 
     if (str) {
       return `${format}${str}\n${format}`;
     }
 
     return ``;
+  },
+
+  convertToParams: (params) => {
+    return Object.keys(params).reduce((acc, current) => {
+      return Object.assign(acc, {
+        [`_${current}`]: params[current]
+      });
+    }, {});
   },
 
   /**
@@ -114,7 +133,50 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeResolver: async (context, plugin, policies = [], resolver) => {
+  composeResolver: async function (obj, options, context, _schema, plugin, name, isSingular) {
+    const params = {
+      model: name
+    };
+
+    const queryOpts = plugin ? { source: plugin } : {};
+
+    // Retrieve generic service from the Content Manager plugin.
+    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+
+    // Extract custom resolver or _type description.
+    const { resolver: handler = {} } = _schema;
+
+    // Retrieve policies.
+    const policies = isSingular ?
+      _.get(handler, `Query.${pluralize.singular(name)}.policy`, []):
+      _.get(handler, `Query.${pluralize.plural(name)}.policy`, []);
+
+    // Retrieve resolver. It could be the custom resolver of the user
+    // or the shadow CRUD resolver (aka Content-Manager).
+    const resolver = (() => {
+      if (isSingular) {
+        return
+          _.get(handler, `Query.${pluralize.singular(name)}.resolver`,
+            resolvers.fetch({ ...params, id: options.id }, queryOpts)
+          );
+      }
+
+      const resolver = _.get(handler, `Query.${pluralize.plural(name)}.resolver`,
+        async () => {
+          const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+          const where = strapi.utils.models.convertParams(name, options.where || {});
+
+          // Content-Manager specificity.
+          convertedParams.skip = convertedParams.start;
+          convertedParams.query = where.where;
+
+          return resolvers.fetchAll(params, {...queryOpts, ...convertedParams});
+        }
+      );
+
+      return resolver;
+    })();
+
     const policiesFn = [];
 
     // Populate policies.
@@ -130,7 +192,9 @@ module.exports = {
 
     // When everything is okay, the policy variable should be undefined
     // so it will return the resolver instead.
-    return policy || resolver;
+
+    // Note: The resolver can be a function or promise.
+    return policy || _.isFunction(resolver) ? resolver.call(null, obj, options, context) : resolver;
   },
 
   /**
@@ -141,8 +205,6 @@ module.exports = {
 
   shadowCRUD: function (models, plugin) {
     const initialState = { definition: ``, query: {}, resolver: { Query : {} } };
-    // Retrieve generic service from the Content Manager plugin.
-    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
     if (_.isEmpty(models)) {
       return initialState;
@@ -152,11 +214,6 @@ module.exports = {
       const model = plugin ?
         strapi.plugins[plugin].models[name]:
         strapi.models[name];
-      const params = {
-        model: name
-      };
-
-      const queryOpts = plugin ? { source: plugin } : {};
 
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
@@ -173,9 +230,10 @@ module.exports = {
       }
 
       const globalId = model.globalId;
+      const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
 
       // Retrieve user customisation.
-      const { resolver = {}, query, definition, _type = {} } = _.get(strapi.plugins, `graphql.config.schema.graphql`, {});
+      const { _type = {} } = _schema;
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
@@ -186,34 +244,40 @@ module.exports = {
           return acc;
         }, initialState);
 
-      acc.definition += `${this.getDescription(_type[globalId])}type ${globalId} ${this.formatGQL(attributes, _type[globalId])}\n\n`;
+      acc.definition += `${this.getDescription(_type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, _type[globalId], model)}}\n\n`;
 
       Object.assign(acc.query, {
-        [`${pluralize.plural(name)}`]: `[${model.globalId}]`,
+        [`${pluralize.plural(name)}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         [`${pluralize.singular(name)}(id: String!)`]: model.globalId
       });
 
-      // TODO
+      // TODO:
       // - Handle mutations.
       _.merge(acc.resolver, {
         Query : {
           [pluralize.plural(name)]: (obj, options, context) => this.composeResolver(
+            obj,
+            options,
             context,
+            _schema,
             plugin,
-            _.get(resolver, `Query.${pluralize.plural(name)}.policy`),
-            resolvers.fetchAll(params, {...queryOpts, ...options})
+            name,
+            false
           ),
-          [pluralize.singular(name)]: (obj, { id }, context) => this.composeResolver(
+          [pluralize.singular(name)]: (obj, options, context) => this.composeResolver(
+            obj,
+            options,
             context,
+            _schema,
             plugin,
-            _.get(resolver, `Query.${pluralize.singular(name)}.policy`),
-            resolvers.fetch({ ...params, id }, queryOpts)
+            name,
+            true
           )
         }
       });
 
       // Build associations queries.
-      model.associations.forEach(association => {
+      (model.associations || []).forEach(association => {
         if (association.nature === 'manyMorphToMany') {
           return;
         }
@@ -292,10 +356,22 @@ module.exports = {
       }, this.shadowCRUD(models));
     })() : {};
 
-    const { definition, query, _type, resolver } = strapi.plugins.graphql.config._schema.graphql;
+    // Extract custom definition, query or resolver.
+    const { definition, query, resolver } = strapi.plugins.graphql.config._schema.graphql;
 
     // Build resolvers.
     const resolvers = _.omitBy(_.merge(resolver, shadowCRUD.resolver), _.isEmpty) || {};
+
+    // Transform object to only contain function.
+    Object.keys(resolvers).reduce((acc, type) => {
+      return Object.keys(acc[type]).reduce((acc, resolver) => {
+        acc[type][resolver] = _.isFunction(acc[type][resolver]) ?
+          acc[type][resolver]:
+          acc[type][resolver].resolver;
+
+        return acc;
+      }, acc);
+    }, resolvers);
 
     // Return empty schema when there is no model.
     if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
@@ -306,7 +382,8 @@ module.exports = {
     const typeDefs =
       definition +
       shadowCRUD.definition +
-      `type Query ${this.formatGQL(shadowCRUD.query, {}, 'query')}\n`;
+      `type Query {${this.formatGQL(shadowCRUD.query, {}, null, 'query')}${query}}\n` +
+      this.addCustomScalar(resolvers);
 
     console.log(typeDefs);
 
@@ -323,6 +400,20 @@ module.exports = {
     delete strapi.plugins.graphql.config._schema.graphql;
 
     return schema;
+  },
+
+  /**
+   * Add custom scalar type such as JSON.
+   *
+   * @return void
+   */
+
+  addCustomScalar: (resolvers) => {
+    Object.assign(resolvers, {
+      JSON: GraphQLJSON
+    });
+
+    return `scalar JSON`;
   },
 
   /**

@@ -108,7 +108,10 @@ module.exports = strapi => {
       router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
       router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
 
-      router.get('/graphiql', graphiqlKoa({ endpointURL: strapi.plugins.graphql.config.endpoint }));
+      // Disable GraphiQL in production environment.
+      if (strapi.config.environment !== 'production') {
+        router.get('/graphiql', graphiqlKoa({ endpointURL: strapi.plugins.graphql.config.endpoint }));
+      }
 
       strapi.app.use(router.middleware());
 
