@@ -1,34 +1,34 @@
 {
-  "ConfigPage.title": "Upload - Settings",
-  "ConfigPage.description": "Configure the upload plugin",
+  "ConfigPage.title": "Przesyłanie - Ustawienia",
+  "ConfigPage.description": "KOnfiguracja wtyczki przesyłania plików",
 
-  "EditForm.Input.number.label": "Maximum size allowed (in MB)",
-  "EditForm.Input.select.label": "Providers",
-  "EditForm.Input.select.inputDescription": "Files can either be uploaded on your server or on external providers.",
-  "EditForm.Input.toggle.label": "Enable file upload",
+  "EditForm.Input.number.label": "Maksymalny dozwolony rozmiar (w MB)",
+  "EditForm.Input.select.label": "Dostawcy",
+  "EditForm.Input.select.inputDescription": "Pliki mogą zostać przesłane na serwer lub zewnętrzne źródła.",
+  "EditForm.Input.toggle.label": "Włącz przesyłanie plików",
 
-  "EmptyLi.message": "There are no uploaded files",
+  "EmptyLi.message": "Żaden plik nie został jeszcze przesłany",
 
-  "EntriesNumber.number": "{number} file found",
-  "EntriesNumber.number.plural": "{number} files found",
+  "EntriesNumber.number": "{number} plik znaleziony",
+  "EntriesNumber.number.plural": "{number} plików znalezionych",
 
-  "HomePage.title": "Upload",
-  "HomePage.description": "Discover all the uploaded files",
-  "HomePage.InputSearch.placeholder": "Search for a file...",
+  "HomePage.title": "Przesyłanie",
+  "HomePage.description": "Discover all the uploaded files Odkryj wszystkie ",
+  "HomePage.InputSearch.placeholder": "Szukaj...",
 
-  "Li.linkCopied": "Link copied into the clipboard",
+  "Li.linkCopied": "Link został skopiowany do schowka",
 
-  "ListHeader.type": "Type",
+  "ListHeader.type": "Typ",
   "ListHeader.hash": "Hash",
-  "ListHeader.name": "Name",
-  "ListHeader.updated": "Updated",
-  "ListHeader.size": "Size",
-  "ListHeader.related": "Related to",
+  "ListHeader.name": "Nazwa",
+  "ListHeader.updated": "Aktualizacja",
+  "ListHeader.size": "Rozmiar",
+  "ListHeader.related": "Związany z",
 
-  "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
-  "PluginInputFile.link": "browse",
+  "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania",
+  "PluginInputFile.link": "przeglądaj",
 
-  "notification.delete.success": "The file has been deleted",
-  "notification.dropFile.success": "Your file has been uploaded",
-  "notification.dropFiles.success": "{number} files have been uploaded"
+  "notification.delete.success": "Plik został usunięty",
+  "notification.dropFile.success": "Plik został przesłany",
+  "notification.dropFiles.success": "{number} plików zostało przesłanych"
 }
