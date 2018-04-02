@@ -15,7 +15,7 @@
   "components.LimitSelect.itemsPerPage": "Wpisów na stronę",
   "containers.List.errorFetchRecords": "Błąd",
 
-  "EditRelations.title": "Relational data",
+  "EditRelations.title": "Dane relacyjne",
 
   "emptyAttributes.title": "Nie ma jeszcze żadnych atrybutów",
   "emptyAttributes.description": "Dodaj swoje pierwszy atrybut do modelu",
