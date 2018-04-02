@@ -204,6 +204,9 @@ module.exports = {
    */
 
   shadowCRUD: function (models, plugin) {
+    // Retrieve generic service from the Content Manager plugin.
+    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+
     const initialState = { definition: ``, query: {}, resolver: { Query : {} } };
 
     if (_.isEmpty(models)) {
@@ -243,6 +246,15 @@ module.exports = {
 
           return acc;
         }, initialState);
+
+      // Add parameters to optimize association query.
+      (model.associations || [])
+        .filter(association => association.type === 'collection')
+        .forEach(association => {
+          attributes[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] = attributes[association.alias];
+
+          delete attributes[association.alias];
+        })
 
       acc.definition += `${this.getDescription(_type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, _type[globalId], model)}}\n\n`;
 
@@ -312,11 +324,20 @@ module.exports = {
                 strapi.plugins[attr.plugin].models[attr.model || attr.collection]:
                 strapi.models[attr.model || attr.collection];
 
-              // Construct the "where" query to only retrieve entries which are
-              // related to this entry.
+              // Apply optional arguments to make more precise nested request.
+              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+              const where = strapi.utils.models.convertParams(name, options.where || {});
+
+              Object.assign(queryOpts, convertedParams);
+
               queryOpts.query = {
-                [association.via]: obj[ref.primaryKey]
+                // Construct the "where" query to only retrieve entries which are
+                // related to this entry.
+                [association.via]: obj[ref.primaryKey],
+                ...where.where
               };
+
+              queryOpts.skip = convertedParams.start;
             }
 
             return association.model ?
