@@ -166,7 +166,7 @@ class Wysiwyg extends React.Component {
             : newEditorState.getCurrentContent().getBlockBefore(block.getKey());
         const number = previousContent ? parseInt(previousContent.getText().split('.')[0], 10) : 0;
         const liNumber = isNaN(number) ? 1 : number + 1;
-        const nextBlockText = index === 0 ? `${liNumber}.` : nextBlocks.get(index - 1).getText();
+        const nextBlockText = index === 0 ? `${liNumber}. ` : nextBlocks.get(index - 1).getText();
         const newBlock = createNewBlock(nextBlockText, 'block-list', block.getKey());
         const newContentState = this.createNewContentStateFromBlock(
           newBlock,
@@ -174,7 +174,7 @@ class Wysiwyg extends React.Component {
         );
         newEditorState = EditorState.push(newEditorState, newContentState);
       });
-      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
+      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 3);
 
       return this.setState({
         editorState: EditorState.acceptSelection(newEditorState, updatedSelection),
@@ -183,7 +183,7 @@ class Wysiwyg extends React.Component {
 
     selectedBlocksList.map((block, i) => {
       const selectedText = block.getText();
-      const li = selectedText === '' ? `${i + 1}.` : `${i + 1}. ${selectedText}`;
+      const li = selectedText === '' ? `${i + 1}. ` : `${i + 1}. ${selectedText}`;
       const newBlock = createNewBlock(li, 'block-list', block.getKey());
       const newContentState = this.createNewContentStateFromBlock(
         newBlock,
@@ -203,7 +203,7 @@ class Wysiwyg extends React.Component {
       const nextBlocks = getNextBlocksList(newEditorState, this.getSelection().getStartKey());
 
       nextBlocks.map((block, index) => {
-        const nextBlockText = index === 0 ? '-' : nextBlocks.get(index - 1).getText();
+        const nextBlockText = index === 0 ? '- ' : nextBlocks.get(index - 1).getText();
         const newBlock = createNewBlock(nextBlockText, 'block-list', block.getKey());
         const newContentState = this.createNewContentStateFromBlock(
           newBlock,
@@ -211,7 +211,7 @@ class Wysiwyg extends React.Component {
         );
         newEditorState = EditorState.push(newEditorState, newContentState);
       });
-      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 1);
+      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
 
       return this.setState({
         editorState: EditorState.acceptSelection(newEditorState, updatedSelection),
@@ -220,7 +220,7 @@ class Wysiwyg extends React.Component {
 
     selectedBlocksList.map(block => {
       const selectedText = block.getText();
-      const li = selectedText === '' ? '-' : `- ${selectedText}`;
+      const li = selectedText === '' ? '- ' : `- ${selectedText}`;
       const newBlock = createNewBlock(li, 'block-list', block.getKey());
       const newContentState = this.createNewContentStateFromBlock(
         newBlock,
