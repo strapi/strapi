@@ -15,7 +15,7 @@ module.exports = {
       limit,
       skip,
       sort,
-      query: request,
+      where: request,
       queryAttribute
     });
   },

@@ -158,10 +158,13 @@ module.exports = {
     // or the shadow CRUD resolver (aka Content-Manager).
     const resolver = (() => {
       if (isSingular) {
-        return
-          _.get(handler, `Query.${pluralize.singular(name)}.resolver`,
-            resolvers.fetch({ ...params, id: options.id }, queryOpts)
-          );
+        return _.get(handler, `Query.${pluralize.singular(name)}.resolver`,
+          async () => {
+            const value = await resolvers.fetch({ ...params, id: options.id }, queryOpts);
+
+            return value.toJSON ? value.toJSON() : value;
+          }
+        );
       }
 
       const resolver = _.get(handler, `Query.${pluralize.plural(name)}.resolver`,
@@ -173,7 +176,9 @@ module.exports = {
           convertedParams.skip = convertedParams.start;
           convertedParams.query = where.where;
 
-          return resolvers.fetchAll(params, {...queryOpts, ...convertedParams});
+          const value = await resolvers.fetchAll(params, {...queryOpts, ...convertedParams});
+
+          return value.toJSON ? value.toJSON() : value;
         }
       );
 
@@ -250,10 +255,6 @@ module.exports = {
           return acc;
         }, initialState);
 
-      // console.log(name);
-      // console.log(model.associations);
-      // console.log();
-
       // Add parameters to optimize association query.
       (model.associations || [])
         .filter(association => association.type === 'collection')
@@ -308,7 +309,7 @@ module.exports = {
         // TODO:
         // - Handle limit, skip, etc options
         _.merge(acc.resolver[globalId], {
-          [association.alias]: (obj, options, context) => {
+          [association.alias]: async (obj, options, context) => {
             // Construct parameters object to retrieve the correct related entries.
             const params = {
               model: association.model || association.collection,
@@ -335,21 +336,26 @@ module.exports = {
               const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
               const where = strapi.utils.models.convertParams(name, options.where || {});
 
+              // Limit, order, etc.
               Object.assign(queryOpts, convertedParams);
 
-              queryOpts.query = {
+              // Skip.
+              queryOpts.skip = convertedParams.start;
+
+              // Where.
+              queryOpts.query = strapi.utils.models.convertParams(name, {
                 // Construct the "where" query to only retrieve entries which are
                 // related to this entry.
                 [association.via]: obj[ref.primaryKey],
                 ...where.where
-              };
-
-              queryOpts.skip = convertedParams.start;
+              }).where;
             }
 
-            return association.model ?
+            const value = await (association.model ?
               resolvers.fetch(params, association.plugin):
-              resolvers.fetchAll(params, queryOpts)
+              resolvers.fetchAll(params, queryOpts));
+
+            return value.toJSON ? value.toJSON() : value;
           }
         });
       });
