@@ -13,7 +13,7 @@
   "attribute.email": "Email",
   "attribute.password": "Hasło",
   "attribute.relation": "Relacja",
-  "attribute.enumeration": "Enumeration",
+  "attribute.enumeration": "Wyliczenie",
 
   "contentType.temporaryDisplay": "(Nie zapisany)",
   "from": "z",
@@ -45,7 +45,7 @@
   "form.attribute.item.number.name": "Nazwa",
   "form.attribute.item.date.name": "Nazwa",
   "form.attribute.item.media.name": "Nazwa",
-  "form.attribute.item.media.multiple": "Allow multiple files",
+  "form.attribute.item.media.multiple": "Pozwalaj na wiele plików",
   "form.attribute.item.json.name": "Nazwa",
   "form.attribute.item.boolean.name": "Nazwa",
   "form.attribute.item.string.name": "Nazwa",
@@ -106,7 +106,7 @@
   "notification.success.message.contentType.edit": "Model został zmieniony",
   "notification.success.message.contentType.create": "Model został utworzony",
   "notification.success.contentTypeDeleted": "Model został usunięty",
-  "notification.info.enumeration": "This field is not editable for the moment...😮",
+  "notification.info.enumeration": "Tego pola nie można obecnie edytować... 😮",
 
   "popUpForm.attributes.string.description": "Tytuły, nazwy, paragrafy, lista nazwisk",
   "popUpForm.attributes.text.description": "Opisy, paragrafy, artykuły ",

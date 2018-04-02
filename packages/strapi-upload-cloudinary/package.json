@@ -1,13 +1,11 @@
 {
-  "name": "strapi-redis",
-  "version": "3.0.0-alpha.11.2",
-  "description": "Redis hook for the Strapi framework",
+  "name": "strapi-upload-cloudinary",
+  "version": "3.0.0-alpha.11.1",
+  "description": "Cloudinary provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
-    "redis",
-    "hook",
-    "memory",
-    "cache",
+    "upload",
+    "cloudinary",
     "strapi"
   ],
   "directories": {
@@ -15,18 +13,16 @@
   },
   "main": "./lib",
   "dependencies": {
-    "ioredis": "^3.1.2",
-    "lodash": "^4.17.4",
-    "stack-trace": "0.0.10",
-    "strapi-utils": "3.0.0-alpha.11.2"
+    "cloudinary": "^1.11.0",
+    "into-stream": "^3.1.0"
   },
   "strapi": {
-    "isHook": true
+    "isProvider": true
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "perret.luca@gmail.com",
+    "name": "Luca Perret",
+    "url": "https://github.com/lucaperret"
   },
   "maintainers": [
     {

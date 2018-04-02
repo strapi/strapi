@@ -81,7 +81,7 @@
   "form.security.item.csrf.angular": "Angular",
   "form.security.item.hsts.maxAge": "Max Age",
   "form.security.item.hsts.includeSubDomains": "Subdomeny",
-  "form.security.item.hsts.preload": "Preload",
+  "form.security.item.hsts.preload": "Przeładowywanie",
 
   "form.security.item.session": "Sesja",
   "form.security.item.session.key": "Sekretny klucz",
@@ -111,6 +111,7 @@
   "form.language.choose": "Nazwa:",
 
   "request.error.database.exist": "Takie połączenie już istnieje",
+  "request.error.database.unknow": "Takie połączenie nie istnieje",
   "request.error.type.string": "Tekst jest wymagany.",
   "request.error.type.number": "Liczba jest wymagana.",
   "request.error.type.boolean": "Typ logiczny jest wymagany.",
