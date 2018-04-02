@@ -153,11 +153,12 @@ h1+.editorParagraph{
   border-bottom: 1px solid #F3F4F4;
   line-height: 49px;
   font-size: 13px;
-  >div:first-child {
-    >span:last-child {
+  > div:first-child {
+    > span:last-child {
       font-size: 12px;
     }
   }
+  cursor: pointer;
 }
 
 .selectFullscreen {

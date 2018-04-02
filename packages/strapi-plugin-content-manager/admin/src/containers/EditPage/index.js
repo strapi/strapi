@@ -240,19 +240,21 @@ export class EditPage extends React.Component {
                   />
                 </div>
               </div>
-              <div className={cn('col-lg-3', this.isRelationComponentNull() ? 'hidden-xl-down' : '')}>
-                <div className={styles.sub_wrapper}>
-                  {!this.isRelationComponentNull() && (
-                    <EditRelations
-                      currentModelName={this.getModelName()}
-                      location={this.props.location}
-                      changeData={this.props.changeData}
-                      record={editPage.record}
-                      schema={this.getSchema()}
-                    />
-                  )}
+              {!this.isRelationComponentNull() && (
+                <div className={cn('col-lg-3')}>
+                  <div className={styles.sub_wrapper}>
+                    {!this.isRelationComponentNull() && (
+                      <EditRelations
+                        currentModelName={this.getModelName()}
+                        location={this.props.location}
+                        changeData={this.props.changeData}
+                        record={editPage.record}
+                        schema={this.getSchema()}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </form>
