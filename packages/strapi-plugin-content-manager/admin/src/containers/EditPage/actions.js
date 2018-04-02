@@ -53,12 +53,19 @@ export function initModelProps(modelName, isCreating, source, attributes) {
     Object.keys(attributes).map(attr => ({ name: attr, validations: get(attributes, attr, {}) })),
     [],
   );
+  const record = Object.keys(attributes).reduce((acc, current) => {
+    if (attributes[current].default) {
+      acc[current] = attributes[current].default;
+    }
+    return acc;
+  }, {});
 
   return {
     type: INIT_MODEL_PROPS,
     formValidations,
     isCreating,
     modelName,
+    record,
     source,
   };
 }

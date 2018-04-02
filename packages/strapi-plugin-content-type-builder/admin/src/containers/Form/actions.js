@@ -243,10 +243,17 @@ function setAttributeFormData(hash) {
   const settingsType = hashArray[2];
   const form = forms.attribute[formType][settingsType];
   const type = formType === 'number' ? 'integer' : formType;
+  let defaultValue = type === 'number' ? 0 : '';
+
+  if (type === 'checkbox') {
+    defaultValue = false;
+  }
+
   const attribute = Map({
     name: '',
     params: Map({
       type,
+      default: defaultValue,
       required: false,
       unique: false,
       maxLength: false,

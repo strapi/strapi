@@ -49,6 +49,7 @@ function editPageReducer(state = initialState, action) {
         .update('formValidations', () => List(action.formValidations))
         .update('isCreating', () => action.isCreating)
         .update('modelName', () => action.modelName)
+        .update('record', () => Map(action.record))
         .update('source', () => action.source);
     case ON_CANCEL:
       return state

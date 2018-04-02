@@ -17,6 +17,7 @@ import {
   has,
   includes,
   isEmpty,
+  isObject,
   isUndefined,
   map,
   size,
@@ -27,6 +28,7 @@ import {
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { router } from 'app';
 
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
@@ -380,7 +382,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    const value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+    let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+
+    if (isObject(target.value) && target.value._isAMomentObject === true) {
+      value = moment(target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    }
 
     if (includes(this.props.hash.split('::')[1], 'attribute')) {
       this.props.changeInputAttribute(target.name, value);
