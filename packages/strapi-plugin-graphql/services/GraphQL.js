@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
 
@@ -70,7 +71,9 @@ module.exports = {
   getDescription: (description, model = {}) => {
     const format = `"""\n`;
 
-    const str = _.get(description, `_description`) || description || model.description;
+    const str = _.get(description, `_description`) ||
+      _.isString(description) ? description : undefined ||
+      model.description;
 
     if (str) {
       return `${format}${str}\n${format}`;
@@ -406,16 +409,14 @@ module.exports = {
       `type Query {${this.formatGQL(shadowCRUD.query, {}, null, 'query')}${query}}\n` +
       this.addCustomScalar(resolvers);
 
-    console.log(typeDefs);
-
-    // Write schema.
-    this.writeGenerateSchema(typeDefs);
-
     // Build schema.
     const schema = makeExecutableSchema({
       typeDefs,
       resolvers,
     });
+
+    // Write schema.
+    this.writeGenerateSchema(graphql.printSchema(schema));
 
     // Temporary variable to store the entire GraphQL configuration.
     delete strapi.plugins.graphql.config._schema.graphql;
