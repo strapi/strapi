@@ -250,6 +250,10 @@ module.exports = {
           return acc;
         }, initialState);
 
+      // console.log(name);
+      // console.log(model.associations);
+      // console.log();
+
       // Add parameters to optimize association query.
       (model.associations || [])
         .filter(association => association.type === 'collection')

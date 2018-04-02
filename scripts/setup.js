@@ -71,6 +71,14 @@ shell.cd('../strapi-mongoose');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-mongoose...', 'npm link');
 
+shell.cd('../strapi-knex');
+watcher('📦  Linking strapi-knex...', 'npm link');
+
+shell.cd('../strapi-bookshelf');
+watcher('', 'npm install ../strapi-utils');
+watcher('', 'npm install ../strapi-knex');
+watcher('📦  Linking strapi-bookshelf...', 'npm link');
+
 shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');

@@ -2,7 +2,7 @@
 
 const glob = require('glob');
 const path = require('path');
-const { after, includes, indexOf, dropRight, uniq, isUndefined, get, defaultsDeep, set, merge} = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
 
 module.exports = async function() {
   // Method to initialize hooks and emit an event.
@@ -68,7 +68,11 @@ module.exports = async function() {
           }
 
           const module = this.hook[hook].load;
-          let dependencies =  this.hook[hook].dependencies.map(x => x.replace('strapi-', '')) || [];
+
+          const hooks = Object.keys(this.hook).filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooksBefore = get(this.config.hook, 'load.before', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooksOrder = get(this.config.hook, 'load.order', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooksAfter = get(this.config.hook, 'load.after', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.hook, `settings.${hook}`))) {
@@ -79,44 +83,61 @@ module.exports = async function() {
             defaultsDeep(this.config.hook.settings[hook], module(this).defaults[hook] || module(this).defaults);
           }
 
-          // Take care of hooks internals dependencies.
-          if (dependencies.length > 0 || includes(get(this.config.hook, 'load.order', []), hook)) {
-            const position = indexOf(get(this.config.hook, 'load.order', []), hook);
-            const previousDependencies = dropRight(get(this.config.hook, 'load.order', []), get(this.config.hook, 'load.order', []).length - (position + 1));
+          // Initialize array.
+          let previousDependencies = this.hook[hook].dependencies.map(x => x.replace('strapi-', '')) || [];;
 
-            // Remove current hook.
-            previousDependencies.splice(position, 1);
+          // Add BEFORE middlewares to load and remove the current one
+          // to avoid that it waits itself.
+          if (includes(hooksBefore, hook)) {
+            const position = indexOf(hooksBefore, hook);
 
-            if (previousDependencies.length > 0) {
-              dependencies = uniq(dependencies.concat(previousDependencies));
-            }
-
-            dependencies = dependencies.filter(x => includes(Object.keys(this.hook), x) === true);
-
-            if (dependencies.length === 0) {
-              initialize(module, hook)(resolve, reject);
-            } else {
-              // Wait until the dependencies have been loaded.
-              const queue = after(dependencies.length, () => {
-                initialize(module, hook)(resolve, reject);
-              });
-
-              dependencies.forEach(dependency => {
-                const name = dependency.replace('strapi-', '');
-
-                // Some hooks are already loaded, we won't receive
-                // any events of them, so we have to bypass the emitter.
-                if (this.hook[name].loaded === true) {
-                  return queue();
-                }
-
-                this.once('hook:' + name + ':loaded', () => {
-                  queue();
-                });
-              });
-            }
+            previousDependencies = previousDependencies.concat(dropRight(hooksBefore, hooksBefore.length - position));
           } else {
+            previousDependencies = previousDependencies.concat(hooksBefore.filter(x => x !== hook));
+
+            // Add ORDER dependencies to load and remove the current one
+            // to avoid that it waits itself.
+            if (includes(hooksOrder, hook)) {
+              const position = indexOf(hooksOrder, hook);
+
+              previousDependencies = previousDependencies.concat(dropRight(hooksOrder, hooksOrder.length - position));
+            } else {
+              // Add AFTER hooks to load and remove the current one
+              // to avoid that it waits itself.
+              if (includes(hooksAfter, hook)) {
+                const position = indexOf(hooksAfter, hook);
+                const toLoadAfter = drop(hooksAfter, position);
+
+                // Wait for every hooks.
+                previousDependencies = previousDependencies.concat(hooks);
+                // Exclude hooks which need to be loaded after this one.
+                previousDependencies = previousDependencies.filter(x => !includes(toLoadAfter, x));
+              }
+            }
+          }
+
+          // Remove duplicates.
+          previousDependencies = uniq(previousDependencies);
+
+          if (previousDependencies.length === 0) {
             initialize(module, hook)(resolve, reject);
+          } else {
+            // Wait until the dependencies have been loaded.
+            const queue = after(previousDependencies.length, () => {
+              initialize(module, hook)(resolve, reject);
+            });
+
+            previousDependencies.forEach(dependency => {
+              // Some hooks are already loaded, we won't receive
+              // any events of them, so we have to bypass the emitter.
+              if (this.hook[dependency].loaded === true) {
+                return queue();
+              }
+
+              this.once('hook:' + dependency + ':loaded', () => {
+                queue();
+              })
+            });
           }
         })
     )

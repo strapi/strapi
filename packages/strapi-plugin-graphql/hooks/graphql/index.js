@@ -14,8 +14,11 @@ module.exports = strapi => {
   return {
     beforeInitialize: async function() {
       // Try to inject this hook just after the others hooks to skip the router processing.
-      strapi.config.hook.load.order = strapi.config.hook.load.order.concat(Object.keys(strapi.hook).filter(hook => hook !== 'graphql'));
-      strapi.config.hook.load.order.push('graphql');
+      if (!_.get(strapi.config.hook.load, 'after')) {
+        _.set(strapi.config.hook.load, 'after', []);
+      }
+
+      strapi.config.hook.load.after.push('graphql');
 
       // Load core utils.
       const utils = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi', 'lib', 'utils'));
