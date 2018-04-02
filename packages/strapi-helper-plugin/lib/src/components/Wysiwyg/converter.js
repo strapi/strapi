@@ -7,7 +7,7 @@ const converterOptions = {
   simpleLineBreaks: true,
   simplifiedAutoLink: true,
   smoothLivePreview: true,
-  splitAdjacentBlockquotes: true,
+  splitAdjacentBlockquotes: false,
   strikethrough: true,
   tables: true,
   tasklists: true,
