@@ -39,17 +39,44 @@ module.exports = {
 
           const split = line.split(':');
           const attribute = _.trim(split[0]);
-          const info = description[attribute] || _.get(model, `attributes.${attribute}.description`);
+          const info = (_.isString(description[attribute]) ? description[attribute] : _.get(description[attribute], 'description')) || _.get(model, `attributes.${attribute}.description`);
+          const deprecated = _.get(description[attribute], 'deprecated') || _.get(model, `attributes.${attribute}.deprecated`);
 
           if (info) {
-            return `  """\n    ${info}\n  """\n${line}`;
+            line = `  """\n    ${info}\n  """\n${line}`;
+          }
+
+          if (deprecated) {
+            line = `${line} @deprecated(reason: "${deprecated}")`;
+          }
+
+          return line;
+        })
+        .join('\n');
+    } else if (type === 'query') {
+      return lines
+        .map((line, index) => {
+          if ([0, lines.length - 1].includes(index)) {
+            return ``;
+          }
+
+          const split = Object.keys(fields)[index - 1].split('(');
+          const attribute = _.trim(split[0]);
+          const info = _.get(description[attribute], 'description');
+          const deprecated = _.get(description[attribute], 'deprecated');
+
+          if (info) {
+            line = `  """\n    ${info}\n  """\n${line}`;
+          }
+
+          if (deprecated) {
+            line = `${line} @deprecated(reason: "${deprecated}")`;
           }
 
           return line;
         })
         .join('\n');
     }
-
 
     return lines
         .map((line, index) => {
@@ -396,7 +423,7 @@ module.exports = {
     })() : {};
 
     // Extract custom definition, query or resolver.
-    const { definition, query, resolver } = strapi.plugins.graphql.config._schema.graphql;
+    const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
 
     // Build resolvers.
     const resolvers = _.omitBy(_.merge(shadowCRUD.resolver, resolver), _.isEmpty) || {};
@@ -428,17 +455,16 @@ module.exports = {
     const typeDefs =
       definition +
       shadowCRUD.definition +
-      `type Query {${this.formatGQL(shadowCRUD.query, {}, null, 'query')}${query}}\n` +
+      `type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}\n` +
       this.addCustomScalar(resolvers);
 
-      // console.log(typeDefs);
+    // console.log(typeDefs);
 
     // Build schema.
     const schema = makeExecutableSchema({
       typeDefs,
       resolvers,
     });
-
 
     // Write schema.
     this.writeGenerateSchema(graphql.printSchema(schema));
