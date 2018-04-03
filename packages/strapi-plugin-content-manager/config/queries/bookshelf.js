@@ -14,7 +14,7 @@ module.exports = {
       });
 
       if (params.sort) {
-        qb.orderBy(convertedParams.sort.key, convertedParams.sort.order);
+        qb.orderBy(params.sort.key, params.sort.order);
       }
 
       if (params.skip) {
