@@ -603,42 +603,42 @@ module.exports = function(strapi) {
 
       switch (type) {
         case '=':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '=',
             value
           };
           break;
         case '_ne':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '!=',
             value
           };
           break;
         case '_lt':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '<',
             value
           };
           break;
         case '_gt':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '>',
             value
           };
           break;
         case '_lte':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '<=',
             value
           };
           break;
         case '_gte':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '>=',
             value
@@ -646,8 +646,10 @@ module.exports = function(strapi) {
           break;
         case '_sort':
           result.key = `sort`;
-          result.value = (_.toLower(value) === 'desc') ? '-' : '';
-          result.value += key;
+          result.value = {
+            key,
+            order: value.toUpperCase()
+          };
           break;
         case '_start':
           result.key = `start`;
