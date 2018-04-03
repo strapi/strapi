@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params) {
+  find: async function (params, populate) {
     return this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
         qb.where(key, where[0].symbol, where[0].value);
@@ -19,7 +19,7 @@ module.exports = {
         qb.limit(_.toNumber(params.limit));
       }
     }).fetchAll({
-      withRelated: this.associations.map(x => x.alias)
+      withRelated: populate || this.associations.map(x => x.alias)
     });
   },
 

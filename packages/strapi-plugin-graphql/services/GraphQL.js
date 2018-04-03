@@ -160,7 +160,7 @@ module.exports = {
       if (isSingular) {
         return _.get(handler, `Query.${pluralize.singular(name)}.resolver`,
           async () => {
-            const value = await resolvers.fetch({ ...params, id: options.id }, queryOpts);
+            const value = await resolvers.fetch({ ...params, id: options.id }, plugin, []);
 
             return value.toJSON ? value.toJSON() : value;
           }
@@ -176,7 +176,7 @@ module.exports = {
           convertedParams.skip = convertedParams.start;
           convertedParams.query = where.where;
 
-          const value = await resolvers.fetchAll(params, {...queryOpts, ...convertedParams});
+          const value = await resolvers.fetchAll(params, { ...queryOpts, ...convertedParams, populate: [] });
 
           return value.toJSON ? value.toJSON() : value;
         }
@@ -266,6 +266,11 @@ module.exports = {
 
       acc.definition += `${this.getDescription(_type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, _type[globalId], model)}}\n\n`;
 
+      // Add definition to the schema but this type won't be "queriable".
+      if (_type[model.globalId] === false || _.get(_type, `${model.globalId}.enabled`) === false) {
+        return acc;
+      }
+
       Object.assign(acc.query, {
         [`${pluralize.plural(name)}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         [`${pluralize.singular(name)}(id: String!)`]: model.globalId
@@ -352,8 +357,8 @@ module.exports = {
             }
 
             const value = await (association.model ?
-              resolvers.fetch(params, association.plugin):
-              resolvers.fetchAll(params, queryOpts));
+              resolvers.fetch(params, association.plugin, []):
+              resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
 
             return value.toJSON ? value.toJSON() : value;
           }
@@ -394,11 +399,18 @@ module.exports = {
     const { definition, query, resolver } = strapi.plugins.graphql.config._schema.graphql;
 
     // Build resolvers.
-    const resolvers = _.omitBy(_.merge(resolver, shadowCRUD.resolver), _.isEmpty) || {};
+    const resolvers = _.omitBy(_.merge(shadowCRUD.resolver, resolver), _.isEmpty) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
       return Object.keys(acc[type]).reduce((acc, resolver) => {
+        // Disabled this query.
+        if (acc[type][resolver] === false) {
+          delete acc[type][resolver];
+
+          return acc;
+        }
+
         acc[type][resolver] = _.isFunction(acc[type][resolver]) ?
           acc[type][resolver]:
           acc[type][resolver].resolver;
@@ -419,11 +431,14 @@ module.exports = {
       `type Query {${this.formatGQL(shadowCRUD.query, {}, null, 'query')}${query}}\n` +
       this.addCustomScalar(resolvers);
 
+      // console.log(typeDefs);
+
     // Build schema.
     const schema = makeExecutableSchema({
       typeDefs,
       resolvers,
     });
+
 
     // Write schema.
     this.writeGenerateSchema(graphql.printSchema(schema));

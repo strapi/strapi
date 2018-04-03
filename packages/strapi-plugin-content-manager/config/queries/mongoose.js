@@ -1,12 +1,13 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params) {
+  find: async function (params, populate) {
     return this
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
-      .skip(Number(params.skip));
+      .skip(Number(params.skip))
+      .populate(populate || this.associations.map(x => x.alias).join(' '));
   },
 
   count: async function (params) {

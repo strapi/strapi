@@ -463,6 +463,10 @@ module.exports = function (strapi) {
           result.key = `limit`;
           result.value = parseFloat(value);
           break;
+        case '_contains':
+          result.key = `where.${key}.$regex`;
+          result.value = value;
+          break;
         default:
           result = undefined;
       }

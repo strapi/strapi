@@ -657,6 +657,13 @@ module.exports = function(strapi) {
           result.key = `limit`;
           result.value = parseFloat(value);
           break;
+        case '_contains':
+          result.key = `where.${key}[0]`;
+          result.value = {
+            symbol: 'like',
+            value: `%${value}%`
+          };
+          break;
         default:
           return undefined;
       }
