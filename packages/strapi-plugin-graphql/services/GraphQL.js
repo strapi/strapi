@@ -33,7 +33,7 @@ module.exports = {
     if (type === 'field') {
       return lines
         .map((line, index) => {
-          if ([0, lines.length - 1].includes(index)) {
+          if (['{', '}'].includes(line)) {
             return ``;
           }
 
@@ -56,7 +56,7 @@ module.exports = {
     } else if (type === 'query') {
       return lines
         .map((line, index) => {
-          if ([0, lines.length - 1].includes(index)) {
+          if (['{', '}'].includes(line)) {
             return ``;
           }
 
@@ -100,7 +100,7 @@ module.exports = {
 
     const str = _.get(description, `_description`) ||
       _.isString(description) ? description : undefined ||
-      model.description;
+      _.get(model, 'info.description');
 
     if (str) {
       return `${format}${str}\n${format}`;
@@ -173,8 +173,12 @@ module.exports = {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
-    // Extract custom resolver or _type description.
+    // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
+
+    const queryName = isSingular ?
+      pluralize.singular(name):
+      pluralize.plural(name);
 
     // Retrieve policies.
     const policies = isSingular ?
@@ -215,7 +219,7 @@ module.exports = {
     const policiesFn = [];
 
     // Populate policies.
-    policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, 'GraphQL error'));
+    policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name));
 
     // Execute policies stack.
     const policy = await strapi.koaMiddlewares.compose(policiesFn)(context);
@@ -271,7 +275,7 @@ module.exports = {
       const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
 
       // Retrieve user customisation.
-      const { _type = {} } = _schema;
+      const { type = {} } = _schema;
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
@@ -291,10 +295,10 @@ module.exports = {
           delete attributes[association.alias];
         })
 
-      acc.definition += `${this.getDescription(_type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, _type[globalId], model)}}\n\n`;
+      acc.definition += `${this.getDescription(type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
       // Add definition to the schema but this type won't be "queriable".
-      if (_type[model.globalId] === false || _.get(_type, `${model.globalId}.enabled`) === false) {
+      if (type[model.globalId] === false || _.get(type, `${model.globalId}.enabled`) === false) {
         return acc;
       }
 
@@ -458,7 +462,7 @@ module.exports = {
       `type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}\n` +
       this.addCustomScalar(resolvers);
 
-    // console.log(typeDefs);
+    console.log(typeDefs);
 
     // Build schema.
     const schema = makeExecutableSchema({

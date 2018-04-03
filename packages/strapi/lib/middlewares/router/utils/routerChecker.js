@@ -67,7 +67,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
     !_.isEmpty(_.get(value, 'config.policies'))
   ) {
     _.forEach(value.config.policies, policy => {
-      policyUtils.get(policy, plugin, policies, endpoint);
+      policyUtils.get(policy, plugin, policies, endpoint, currentApiName);
     });
   }
 

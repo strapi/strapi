@@ -1,5 +1,7 @@
 # File Upload
 
+> ⚠️  This feature requires the Upload plugin (installed by default).
+
 Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as AWS S3.
 
 ## Usage

@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 module.exports = {
-  get: (policy, plugin, policies = [], endpoint) => {
+  get: (policy, plugin, policies = [], endpoint, currentApiName) => {
     // Define global policy prefix.
     const globalPolicyPrefix = 'global.';
     const pluginPolicyPrefix = 'plugins.';
@@ -79,6 +79,6 @@ module.exports = {
       );
     }
 
-    strapi.log.error(`Ignored attempt to bind route ${endpoint} with unknown policy ${policy}`);
+    strapi.log.error(`Ignored attempt to bind to ${endpoint} with unknown policy "${policy}"`);
   }
 };

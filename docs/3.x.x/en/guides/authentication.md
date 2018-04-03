@@ -1,5 +1,7 @@
 # Authentication
 
+> ⚠️  This feature requires the Users & Permissions plugin (installed by default).
+
 ## Register a new user
 
 This route lets you create new users.
