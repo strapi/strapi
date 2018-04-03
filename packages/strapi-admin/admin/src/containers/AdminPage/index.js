@@ -38,14 +38,14 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import Header from 'components/Header/index';
-import HomePage from 'containers/HomePage';
-import InstallPluginPage from 'containers/InstallPluginPage';
+import HomePage from 'containers/HomePage/Loadable';
+import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
 import LeftMenu from 'containers/LeftMenu';
-import ListPluginsPage from 'containers/ListPluginsPage';
+import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import Logout from 'components/Logout';
-import NotFoundPage from 'containers/NotFoundPage';
+import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage';
+import PluginPage from 'containers/PluginPage/Loadable';
 
 // Utils
 import auth from 'utils/auth';

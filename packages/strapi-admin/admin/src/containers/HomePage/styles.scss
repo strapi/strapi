@@ -1,3 +1,12 @@
+.containerFluid { /* stylelint-disable */
+  padding: 50px 18px 0 18px;
+  > div {
+    margin: 0;
+  }
+}
+
+// TODO delete
+
 .wrapper {
   padding: 4.4rem 20.4rem;
   font-family: Lato;
