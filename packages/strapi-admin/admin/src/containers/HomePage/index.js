@@ -16,7 +16,9 @@ import Button from 'components/Button';
 import Sub from 'components/Sub/Loadable';
 
 import BlockLink from './BlockLink';
+import CommunityContent from './CommunityContent';
 import CreateContent from './CreateContent';
+import SocialLink from './SocialLink';
 import WelcomeContent from './WelcomeContent';
 
 import styles from './styles.scss';
@@ -59,6 +61,40 @@ const FIRST_BLOCK_LINKS = [
   },
 ];
 
+const SECOND_BLOCK = {
+  title: {
+    id: 'app.components.HomePage.community',
+  },
+  content: () => <CommunityContent />,
+};
+
+const SOCIAL_LINKS = [
+  {
+    name: 'Github',
+    link: 'https://github.com/strapi/strapi/',
+  },
+  {
+    name: 'Slack',
+    link: 'https://slack.strapi.io/',
+  },
+  {
+    name: 'Medium',
+    link: 'https://medium.com/@strapi',
+  },
+  {
+    name: 'Twitter',
+    link: 'https://twitter.com/strapijs',
+  },
+  {
+    name: 'Reddit',
+    link: 'https://www.reddit.com/r/node/search?q=strapi',
+  },
+  {
+    name: 'Stack Overflow',
+    link: 'https://stackoverflow.com/questions/tagged/strapi',
+  },
+];
+
 export class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -68,14 +104,25 @@ export class HomePage extends React.Component {
         <div className="row">
           <div className="col-md-8 col-lg-8">
             <Block>
-              {FIRST_BLOCK.map((value, key) => <Sub key={key} {...value} underline={key === 0} />)}
+              {FIRST_BLOCK.map((value, key) => (
+                <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
+              ))}
               <a href="https://strapi.io/getting-started" target="_blank">
                 <Button className={styles.homePageTutorialButton} primary>
                   <FormattedMessage id="app.components.HomePage.button.quickStart" />
                 </Button>
               </a>
-              <div className={styles.homePageLinkWrapper}>
+              <div className={styles.homePageFlex}>
                 {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
+              </div>
+            </Block>
+            <Block>
+              <Sub {...SECOND_BLOCK} />
+              <div className={styles.homePageFlex}>
+                <div className="row" style={{ width: '100%', marginRight: '0' }}>
+                  {SOCIAL_LINKS.map((value, key) => <SocialLink key={key} {...value} />)}
+                </div>
+                <div className={styles.newsLetterWrapper} />
               </div>
             </Block>
           </div>
