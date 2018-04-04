@@ -12,6 +12,7 @@ import Helmet from 'react-helmet';
 import cn from 'classnames';
 
 import Block from 'components/HomePageBlock/Loadable';
+import Sub from 'components/Sub/Loadable';
 
 import styles from './styles.scss';
 
@@ -23,7 +24,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <div className="row">
           <div className="col-md-9 col-lg-9">
             <Block>
-              toto
+              <Sub />
             </Block>
           </div>
           <div className="col-lg-3 col-md-3">
