@@ -8,8 +8,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
-// import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { bindActionCreators, compose } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
+import { get, isEmpty } from 'lodash';
 import cn from 'classnames';
 
 import Block from 'components/HomePageBlock/Loadable';
@@ -17,6 +19,10 @@ import Button from 'components/Button';
 import Sub from 'components/Sub/Loadable';
 import Input from 'components/InputText';
 
+import { selectPlugins } from 'containers/App/selectors';
+
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
 import validateInput from 'utils/inputsValidations';
 
 import BlockLink from './BlockLink';
@@ -25,6 +31,10 @@ import CreateContent from './CreateContent';
 import SocialLink from './SocialLink';
 import WelcomeContent from './WelcomeContent';
 
+import { onChange, submit } from './actions';
+import makeSelectHomePage from './selectors';
+import reducer from './reducer';
+import saga from './saga';
 import styles from './styles.scss';
 
 const FIRST_BLOCK = [
@@ -99,37 +109,46 @@ const SOCIAL_LINKS = [
   },
 ];
 
-export class HomePage extends React.Component {
+export class HomePage extends React.PureComponent {
   // eslint-disable-line react/prefer-stateless-function
-  state = { value: '', errors: [] };
-
-  handleChange = ({ target }) => this.setState({ value: target.value });
+  state = { errors: [] };
 
   handleSubmit = e => {
     e.preventDefault();
-    const errors = validateInput(this.state.value, { required: true }, 'email');
+    const errors = validateInput(this.props.homePage.body.email, { required: true }, 'email');
     this.setState({ errors });
+
+    if (isEmpty(errors)) {
+      return this.props.submit();
+    }
   };
 
+  showFirstBlock = () =>
+    get(this.props.plugins.toJS(), 'content-manager.leftMenuSections.0.links', []).length === 0;
+
   render() {
+    const { homePage: { body } } = this.props;
+
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
         <Helmet title="Home Page" />
         <div className="row">
           <div className="col-md-8 col-lg-8">
-            <Block>
-              {FIRST_BLOCK.map((value, key) => (
-                <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
-              ))}
-              <a href="https://strapi.io/getting-started" target="_blank">
-                <Button className={styles.homePageTutorialButton} primary>
-                  <FormattedMessage id="app.components.HomePage.button.quickStart" />
-                </Button>
-              </a>
-              <div className={styles.homePageFlex}>
-                {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
-              </div>
-            </Block>
+            {this.showFirstBlock() && (
+              <Block>
+                {FIRST_BLOCK.map((value, key) => (
+                  <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
+                ))}
+                <a href="https://strapi.io/getting-started" target="_blank">
+                  <Button className={styles.homePageTutorialButton} primary>
+                    <FormattedMessage id="app.components.HomePage.button.quickStart" />
+                  </Button>
+                </a>
+                <div className={styles.homePageFlex}>
+                  {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
+                </div>
+              </Block>
+            )}
             <Block>
               <Sub {...SECOND_BLOCK} />
               <div className={styles.homePageFlex}>
@@ -144,8 +163,8 @@ export class HomePage extends React.Component {
                     <div className={cn(styles.homePageForm, 'row')}>
                       <div className="col-md-6">
                         <Input
-                          value={this.state.value}
-                          onChange={this.handleChange}
+                          value={body.email}
+                          onChange={this.props.onChange}
                           name=""
                           placeholder="johndoe@gmail.com"
                           error={!isEmpty(this.state.errors)}
@@ -186,13 +205,31 @@ export class HomePage extends React.Component {
 }
 
 HomePage.propTypes = {
-  // history: PropTypes.object.isRequired,
+  homePage: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  plugins: PropTypes.object.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
+const mapStateToProps = createStructuredSelector({
+  homePage: makeSelectHomePage(),
+  plugins: selectPlugins(),
+});
+
 function mapDispatchToProps(dispatch) {
-  return {
+  return bindActionCreators(
+    {
+      onChange,
+      submit,
+    },
     dispatch,
-  };
+  );
 }
 
-export default connect(mapDispatchToProps)(HomePage);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const withReducer = injectReducer({ key: 'homePage', reducer });
+const withSaga = injectSaga({ key: 'homePage', saga });
+
+// export default connect(mapDispatchToProps)(HomePage);
+export default compose(withReducer, withSaga, withConnect)(HomePage);
