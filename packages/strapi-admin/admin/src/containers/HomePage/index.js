@@ -7,7 +7,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-// import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 // import PropTypes from 'prop-types';
 import cn from 'classnames';
 
@@ -15,8 +15,9 @@ import Block from 'components/HomePageBlock/Loadable';
 import Button from 'components/Button';
 import Sub from 'components/Sub/Loadable';
 
-import WelcomeContent from './WelcomeContent';
+import BlockLink from './BlockLink';
 import CreateContent from './CreateContent';
+import WelcomeContent from './WelcomeContent';
 
 import styles from './styles.scss';
 
@@ -35,19 +36,50 @@ const FIRST_BLOCK = [
   },
 ];
 
-export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+const FIRST_BLOCK_LINKS = [
+  {
+    link: 'https://strapi.io/documentation/',
+    content: {
+      id: 'app.components.BlockLink.documentation.content',
+    },
+    isDocumentation: true,
+    title: {
+      id: 'app.components.BlockLink.documentation',
+    },
+  },
+  {
+    link: 'https://github.com/strapi/strapi-examples',
+    content: {
+      id: 'app.components.BlockLink.code.content',
+    },
+    isDocumentation: false,
+    title: {
+      id: 'app.components.BlockLink.code',
+    },
+  },
+];
+
+export class HomePage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
         <Helmet title="Home Page" />
         <div className="row">
-          <div className="col-md-9 col-lg-9">
+          <div className="col-md-8 col-lg-8">
             <Block>
               {FIRST_BLOCK.map((value, key) => <Sub key={key} {...value} underline={key === 0} />)}
-              <Button className={styles.homePageTutorialButton} primary>START THE QUICK TUTORIAL</Button>
+              <a href="https://strapi.io/getting-started" target="_blank">
+                <Button className={styles.homePageTutorialButton} primary>
+                  <FormattedMessage id="app.components.HomePage.button.quickStart" />
+                </Button>
+              </a>
+              <div className={styles.homePageLinkWrapper}>
+                {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
+              </div>
             </Block>
           </div>
-          <div className="col-lg-3 col-md-3">
+          <div className="col-lg-4 col-md-4">
             <Block>tata</Block>
           </div>
         </div>

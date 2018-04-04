@@ -1,14 +1,71 @@
-.containerFluid { /* stylelint-disable */
-  padding: 47px 18px 0 18px;
+.blockLink {
+  position: relative;
+  width: calc(50% - 6px);
+  margin-top: 41px;
+  padding: 22px 25px 28px 96px;
+  background: #F7F8F8;
+  border-radius: 3px;
+  line-height: 18px;
+  text-decoration: none;
+  > span {
+    font-family: Lato-Bold;
+    font-size: 16px;
+    color: #333740;
+    letter-spacing: 0;
+  }
+  > p {
+    font-family: Lato-Regular;
+    font-size: 13px;
+    color: #919BAE;
+    letter-spacing: 0;
+    line-height: 18px;
+  }
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.blockLinkDocumentation {
+  &:before {
+    content: '\f02d';
+    position: absolute;
+    left: 3rem;
+    top: 4rem;
+    color: #42B88E;
+    font-family: 'FontAwesome';
+    font-size: 38px;
+  }
+}
+
+.blockLinkCode {
+  &:before {
+    content: '\f121';
+    position: absolute;
+    left: 3rem;
+    top: 4rem;
+    color: #F0811E;
+    font-family: 'FontAwesome';
+    font-size: 38px;
+  }
+}
+
+.containerFluid {
+  padding: 47px 13px 0 13px;
   > div {
     margin: 0;
   }
 }
 
+.homePageLinkWrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
 .homePageTutorialButton {
   position: relative;
-  min-width: 292px;
   height: 34px;
+  margin-top: 19px;
   padding-left: 40px;
   padding-right: 20px;
   font-size: 13px;
@@ -32,6 +89,20 @@
   top: 24px;
   right: 0px;
   font-size: 60px;
+}
+
+.welcomeContentP {
+  display: block;
+  max-width: 49rem !important;
+  margin-bottom: 50px;
+}
+
+.welcomeContentA {
+  color: #005FEA;
+  text-decoration: none;
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 // TODO delete

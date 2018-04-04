@@ -16,11 +16,23 @@ function WelcomeContent() {
       <div className={styles.iconWave}>👋</div>
       <FormattedMessage id="app.components.HomePage.welcomeBlock.content">
         {message => (
-          <p style={{ marginBottom: '50px' }}>
+          <p className={styles.welcomeContentP}>
             {message}
-            <span style={{ color: '#005FEA' }}>Slack</span>
+            <a className={styles.welcomeContentA} href="https://slack.strapi.io/" target="_blank">
+              Slack
+            </a>
             <FormattedMessage id="app.components.HomePage.welcomeBlock.content.raise" />
-            <FormattedMessage id="app.components.HomePage.welcomeBlock.content.issues">{message => <span style={{ color: '#005FEA' }}>{message}</span>}</FormattedMessage>
+            <FormattedMessage id="app.components.HomePage.welcomeBlock.content.issues">
+              {message => (
+                <a
+                  className={styles.welcomeContentA}
+                  href="https://github.com/strapi/strapi/issues/new"
+                  target="_blank"
+                >
+                  {message}
+                </a>
+              )}
+            </FormattedMessage>
           </p>
         )}
       </FormattedMessage>
