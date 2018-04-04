@@ -9,7 +9,9 @@
   "app.components.DownloadInfo.text": "This could take a minute. Thanks for your patience.",
 
   "app.components.HomePage.welcome": "Welcome on board!",
+  "app.components.HomePage.cta": "CONFIRM",
   "app.components.HomePage.community": "Find the community on the web",
+  "app.components.HomePage.newsLetter": "Subscribe to the newsletter to get in touch about Strapi",
   "app.components.HomePage.community.content": "Discuss with team members, contributors and developers on different channels.",
   "app.components.HomePage.create": "Create your first Content Type",
   "app.components.HomePage.welcomeBlock.content": "We are happy to have you as one of community member. We are constantly looking for feedback so feel free to send us DM on\u0020",

@@ -9,11 +9,15 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 // import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 import cn from 'classnames';
 
 import Block from 'components/HomePageBlock/Loadable';
 import Button from 'components/Button';
 import Sub from 'components/Sub/Loadable';
+import Input from 'components/InputText';
+
+import validateInput from 'utils/inputsValidations';
 
 import BlockLink from './BlockLink';
 import CommunityContent from './CommunityContent';
@@ -97,6 +101,16 @@ const SOCIAL_LINKS = [
 
 export class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  state = { value: '', errors: [] };
+
+  handleChange = ({ target }) => this.setState({ value: target.value });
+
+  handleSubmit = e => {
+    e.preventDefault();
+    const errors = validateInput(this.state.value, { required: true }, 'email');
+    this.setState({ errors });
+  };
+
   render() {
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
@@ -122,7 +136,29 @@ export class HomePage extends React.Component {
                 <div className="row" style={{ width: '100%', marginRight: '0' }}>
                   {SOCIAL_LINKS.map((value, key) => <SocialLink key={key} {...value} />)}
                 </div>
-                <div className={styles.newsLetterWrapper} />
+                <div className={styles.newsLetterWrapper}>
+                  <div>
+                    <FormattedMessage id="app.components.HomePage.newsLetter" />
+                  </div>
+                  <form onSubmit={this.handleSubmit}>
+                    <div className={cn(styles.homePageForm, 'row')}>
+                      <div className="col-md-6">
+                        <Input
+                          value={this.state.value}
+                          onChange={this.handleChange}
+                          name=""
+                          placeholder="johndoe@gmail.com"
+                          error={!isEmpty(this.state.errors)}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <FormattedMessage id="app.components.HomePage.cta">
+                          {message => <button type="submit">{message}</button>}
+                        </FormattedMessage>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </Block>
           </div>

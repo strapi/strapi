@@ -9,6 +9,7 @@
   "app.components.DownloadInfo.text": "Cela peut prendre une minute. Merci de patienter.",
 
   "app.components.HomePage.welcome": "Bienvenue à bord!",
+  "app.components.HomePage.cta": "CONFIRMEZ",
   "app.components.HomePage.community": "Rejoignez la communauté",
   "app.components.HomePage.community.content": "Discutez avec les membres de l'équipe, contributeurs et développeurs sur différent supports.",
   "app.components.HomePage.create": "Créez votre premier Content Type",
