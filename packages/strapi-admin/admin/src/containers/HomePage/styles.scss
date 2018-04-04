@@ -5,6 +5,35 @@
   }
 }
 
+.homePageTutorialButton {
+  position: relative;
+  min-width: 292px;
+  height: 34px;
+  padding-left: 40px;
+  padding-right: 20px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.46px;
+  text-align: left;
+  &:before {
+    content: '\f105';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    font-size: 22px;
+    margin-right: 10px;
+    font-family: 'FontAwesome';
+  }
+}
+
+.iconWave {
+  position: absolute;
+  top: 24px;
+  right: 0px;
+  font-size: 60px;
+}
+
 // TODO delete
 
 .wrapper {

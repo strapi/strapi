@@ -17,27 +17,23 @@ function Sub({ content, title, underline }) {
       <FormattedMessage {...title}>
         {message => <span className={cn(underline && styles.underlinedTitle)}>{message}</span>}
       </FormattedMessage>
-      <FormattedMessage {...content}>{message => <p>{message}</p>}</FormattedMessage>
+      {content()}
     </div>
   );
 }
 
 Sub.defaultProps = {
-  content: {
-    id: 'app.utils.defaultMessage',
-    defaultMessage: 'app.utils.defaultMessage',
-    values: {},
-  },
+  content: () => '',
   title: {
     id: 'app.utils.defaultMessage',
     defaultMessage: 'app.utils.defaultMessage',
     values: {},
   },
-  underline: true,
+  underline: false,
 };
 
 Sub.propTypes = {
-  content: PropTypes.object,
+  content: PropTypes.func,
   title: PropTypes.object,
   underline: PropTypes.bool,
 };

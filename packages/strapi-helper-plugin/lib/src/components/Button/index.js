@@ -15,7 +15,7 @@ import styles from './styles.scss';
 /* eslint-disable react/require-default-props */
 function Button(props) {
   const buttonProps = Object.assign({}, props);
-  const propsToDelete = ['loader', 'primary', 'primaryAddShape', 'secondary', 'secondaryHotline', 'secondaryHotlineAdd', 'kind', 'labelValues'];
+  const propsToDelete = ['loader', 'primary', 'primaryAddShape', 'secondary', 'secondaryHotline', 'secondaryHotlineAdd', 'kind', 'labelValues', 'className'];
 
   propsToDelete.map((value) => delete buttonProps[value]);
 

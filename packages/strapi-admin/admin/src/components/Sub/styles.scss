@@ -1,10 +1,19 @@
 .subWrapper {
+  position: relative;
   line-height: 18px;
   > span {
     font-family: Lato-Bold;
     font-size: 20px;
     color: #333740;
     letter-spacing: 0;
+  }
+
+  p {
+    display: block;
+    max-width: 550px;
+    margin-top: 18px;
+    color: #333740;
+    font-size: 14px;
   }
 }
 
