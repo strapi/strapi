@@ -195,10 +195,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       case 'decimal':
         attributeType = 'number';
         break;
-      case 'email':
-      case 'password':
-        attributeType = 'string';
-        break;
       default:
         attributeType = attribute.params.type ? attribute.params.type : 'relation';
     }

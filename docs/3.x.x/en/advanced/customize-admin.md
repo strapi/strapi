@@ -91,7 +91,7 @@ Fonts can also be overridden:
 
 ### Logo
 
-To change the top-right displayed admin panel's logo, replace the image located at `./admin/admin/src/assets/images/logo-strapi.png`.
+To change the top-left displayed admin panel's logo, replace the image located at `./admin/admin/src/assets/images/logo-strapi.png`.
 
 Note: make sure the size of your image is the same as the existing one (434px x 120px).
 

@@ -105,7 +105,7 @@ class Wysiwyg extends React.Component {
     const contentState = ContentState.createFromText(props.value);
     const editorState = EditorState.createWithContent(contentState);
     this.setState({
-      editorState: EditorState.moveFocusToEnd(editorState),
+      editorState,
       hasInitialValue: true,
       initialValue: props.value,
     });
@@ -194,7 +194,7 @@ class Wysiwyg extends React.Component {
     });
 
     this.sendData(newEditorState);
-    
+
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
@@ -574,6 +574,7 @@ class Wysiwyg extends React.Component {
                 placeholder={this.props.placeholder}
                 setRef={editor => (this.domEditor = editor)}
                 stripPastedStyles
+                tabIndex={this.props.tabIndex}
               />
               <input className={styles.editorInput} value="" tabIndex="-1" />
             </div>
@@ -628,6 +629,7 @@ Wysiwyg.defaultProps = {
   onChange: () => {},
   placeholder: '',
   style: {},
+  tabIndex: '0',
   value: '',
 };
 
@@ -641,6 +643,7 @@ Wysiwyg.propTypes = {
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
   style: PropTypes.object,
+  tabIndex: PropTypes.string,
   value: PropTypes.string,
 };
 

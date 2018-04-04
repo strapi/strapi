@@ -67,6 +67,8 @@
   "form.attribute.item.number.type.integer": "整數 (ex: 10)",
   "form.attribute.item.number.type.float": "浮點數(float) (ex: 3.33333333)",
   "form.attribute.item.number.type.decimal": "浮點數(decimal) (ex: 2.22)",
+  "form.attribute.settings.default": "Default value",
+  "form.attribute.settings.default.checkboxLabel": "Set to true",
 
   "form.button.cancel": "取消",
   "form.button.continue": "繼續",

@@ -97,8 +97,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         title={item.title}
         errors={errors}
         didCheckErrors={this.props.didCheckErrors}
-        autoFocus={key === 0}
-        inputStyle={item.inputStyle || {}}
+        autoFocus={key === 0 && item.type !== 'date'}
       />
     );
   }

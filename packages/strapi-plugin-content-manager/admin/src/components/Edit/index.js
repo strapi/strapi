@@ -150,6 +150,7 @@ class Edit extends React.PureComponent {
                 label={get(layout, 'label') || details.label || ''}
                 multiple={this.fileRelationAllowMultipleUpload(attr)}
                 name={attr}
+                onBlur={this.props.onBlur}
                 onChange={this.props.onChange}
                 selectOptions={get(this.props.attributes, [attr, 'enum'])}
                 placeholder={get(layout, 'placeholder') || details.placeholder}
@@ -170,6 +171,7 @@ Edit.defaultProps = {
   formErrors: [],
   formValidations: [],
   layout: {},
+  onBlur: () => {},
   onChange: () => {},
   record: {},
   schema: {},
@@ -181,6 +183,7 @@ Edit.propTypes = {
   formErrors: PropTypes.array,
   formValidations: PropTypes.array,
   layout: PropTypes.object,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func,
   record: PropTypes.object,
   schema: PropTypes.object,
