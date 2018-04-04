@@ -133,6 +133,7 @@ class Wysiwyg extends React.Component {
       'insert-character',
     );
 
+    this.sendData(newEditorState);
     // Don't handle selection
     if (selectedText !== '') {
       return this.setState(
@@ -192,6 +193,8 @@ class Wysiwyg extends React.Component {
       newEditorState = EditorState.push(newEditorState, newContentState);
     });
 
+    this.sendData(newEditorState);
+    
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
@@ -228,7 +231,7 @@ class Wysiwyg extends React.Component {
       );
       newEditorState = EditorState.push(newEditorState, newContentState);
     });
-
+    this.sendData(newEditorState);
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
