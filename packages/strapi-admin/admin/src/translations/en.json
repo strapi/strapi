@@ -17,6 +17,10 @@
   "app.components.HomePage.createBlock.content.second": "\u0020plugin will help you to define the data structure of your models. If you’re new here, we highly recommend you to follow our\u0020",
   "app.components.HomePage.createBlock.content.tutorial": "\u0020tutorial.",
   "app.components.HomePage.button.quickStart": "START THE QUICK START TUTORIAL",
+  "app.components.HomePage.support": "SUPPORT US",
+  "app.components.HomePage.support.content": "By buying the T-shirt (25€), it will allows us to continue our work on the project to give you the best experience as possible!",
+  "app.components.HomePage.support.link": "GET YOUR T-SHIRT NOW",
+
   "app.components.BlockLink.documentation": "Read the documentation",
   "app.components.BlockLink.documentation.content": "Discover the concepts, reference guides and tutorials.",
   "app.components.BlockLink.code": "Code examples",

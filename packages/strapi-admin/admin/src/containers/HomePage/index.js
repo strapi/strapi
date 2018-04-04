@@ -80,7 +80,21 @@ export class HomePage extends React.Component {
             </Block>
           </div>
           <div className="col-lg-4 col-md-4">
-            <Block>tata</Block>
+            <Block className={styles.blockShirt}>
+              <div>
+                <FormattedMessage id="app.components.HomePage.support" />
+                <FormattedMessage id="app.components.HomePage.support.content">
+                  {message => <p>{message}</p>}
+                </FormattedMessage>
+                <FormattedMessage id="app.components.HomePage.support.link">
+                  {message => (
+                    <a href="https://strapi.io/shop" target="_blank">
+                      {message}
+                    </a>
+                  )}
+                </FormattedMessage>
+              </div>
+            </Block>
           </div>
         </div>
       </div>

@@ -49,6 +49,71 @@
   }
 }
 
+.blockShirt {
+  position: relative;
+  min-height: 34rem;
+  margin-bottom: 20px;
+  background-image: linear-gradient(45deg, #0097F6 0%, #1A67DA 100%) !important;
+  line-height: 18px;
+  > div {
+    position: absolute;
+    padding: 38px 0 62px 25px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: #FFFFFF;
+
+    > span {
+      font-size: 18px;
+      font-weight: 800;
+      &:after {
+        content: '❤️';
+        margin-left: 7px;
+        font-size: 18px;
+      }
+    }
+
+    > p {
+      margin-top: 18px;
+      margin-bottom: 125px;
+      padding-right: 35px;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    > a {
+      padding: 7px 12px 7px 20px;
+      border: 1px solid #FFFFFF;
+      border-radius: 3px;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      &:after {
+        content: '\f178';
+        font-family: 'FontAwesome';
+        margin-left: 10px;
+      }
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+  }
+  &:before {
+    content: '';
+    background-image: url('../../assets/images/bg_hp_tee_shirt.png') !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
 .containerFluid {
   padding: 47px 13px 0 13px;
   > div {

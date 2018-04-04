@@ -17,6 +17,10 @@
   "app.components.HomePage.createBlock.content.second": "\u0020plugin vous permet de définir la structure de vos modèles. Nous vous conseillons fortement de suivre notre\u0020",
   "app.components.HomePage.createBlock.content.tutorial": "\u0020tutoriel.",
   "app.components.HomePage.button.quickStart": "VOIR LE QUICK START TUTORIEL",
+  "app.components.HomePage.support": "SUPPORT US",
+  "app.components.HomePage.support.content": "En achetant notre T-shirt (25€), vous nous aidez a poursuivre à maintenir le projet pour que nouis puissons vous donner la meilleure expérience possible!",
+  "app.components.HomePage.support.link": "OBTENEZ VOTRE T-SHIRT!",
+
   "app.components.BlockLink.documentation": "Voir la documentation",
   "app.components.BlockLink.documentation.content": "Découvrez les concepts, guides et tutoriaux.",
   "app.components.BlockLink.code": "Apps d'example",
