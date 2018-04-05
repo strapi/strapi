@@ -3,7 +3,6 @@
   height: 135px;
   margin-top: 2px;
   margin-bottom: 43px;
-  border-radius: 2px;
   box-shadow: 0 2px 4px 0 rgba(0,0,0,0.20);
   line-height: 18px;
   > div {
@@ -14,6 +13,8 @@
     right: 0;
     left: 0;
     display: flex;
+    justify-content: space-between;
+    border-radius: 2px;
     z-index: 999;
     color: #FFFFFF;
     > div {
@@ -27,12 +28,13 @@
       }
     }
     > div:last-child {
-      margin-left: 50px;
+      margin-right: 260px;
       padding-top: 20px;
     }
   }
   &:before {
     content: '';
+    border-radius: 2px;
     background-image: linear-gradient(45deg, #0097F6 0%, #1A67DA 100%) !important;
     position: absolute;
     top: 0;
@@ -42,6 +44,7 @@
   }
   &:after {
     content: '';
+    border-radius: 2px;
     background-image: url('../../assets/images/banner_t-shirt.png') !important;
     background-size: contain;
     background-repeat: no-repeat;
