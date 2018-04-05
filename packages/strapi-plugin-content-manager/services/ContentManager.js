@@ -24,11 +24,10 @@ module.exports = {
     return await strapi.query(params.model, source).count();
   },
 
-  fetch: async (params, source, populate) => {
-    console.log(params, source, populate)
+  fetch: async (params, source, populate, raw = true) => {
     return await strapi.query(params.model, source).findOne({
       id: params.id
-    }, populate);
+    }, populate, raw);
   },
 
   add: async (params, values, source) => {

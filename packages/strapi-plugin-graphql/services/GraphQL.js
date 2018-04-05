@@ -123,10 +123,10 @@ module.exports = {
    * @return String
    */
 
-  convertType: (attr = {}) => {
+  convertType: (definition = {}) => {
     // Type.
-    if (attr.type) {
-      switch (attr.type) {
+    if (definition.type) {
+      switch (definition.type) {
         case 'string':
         case 'text':
           return 'String';
@@ -134,20 +134,22 @@ module.exports = {
           return 'Boolean';
         case 'integer':
           return 'Int';
+        case 'float':
+          return 'Float';
         default:
           return 'String';
       }
     }
 
-    const ref = attr.model || attr.collection;
+    const ref = definition.model || definition.collection;
 
     // Association.
     if (ref && ref !== '*') {
       // Add bracket or not.
-      const plural = !_.isEmpty(attr.collection);
-      const globalId = attr.plugin ?
-        strapi.plugins[attr.plugin].models[ref].globalId:
-        strapi.models[ref].globalId;
+      const globalId = definition.plugin ?
+        strapi.plugins[definition.plugin].models[ref].globalId:
+        strapi.models[definition.plugin].globalId;
+      const plural = !_.isEmpty(definition.collection);
 
       if (plural) {
         return `[${globalId}]`;
@@ -155,6 +157,8 @@ module.exports = {
 
       return globalId;
     }
+
+    return definition.model ? `Morph` : `[Morph]`;
   },
 
   /**
@@ -334,12 +338,35 @@ module.exports = {
 
       // Build associations queries.
       (model.associations || []).forEach(association => {
-        if (association.nature === 'manyMorphToMany') {
-          return;
-        }
-
         if (!acc.resolver[globalId]) {
           acc.resolver[globalId] = {};
+        }
+
+        if (association.nature === 'manyMorphToMany') {
+          return _.merge(acc.resolver[globalId], {
+            [association.alias]: async (obj, options, context) => {
+              const [ withRelated, withoutRelated ] = await Promise.all([
+                resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [association.alias], false),
+                resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [])
+              ]);
+
+              const entry = withRelated.toJSON ? withRelated.toJSON() : withRelated;
+
+              entry[association.alias].map((entry, index) => {
+                entry._type = withoutRelated[association.alias][index].kind;
+
+                return entry;
+              });
+
+              return entry[association.alias];
+            }
+          });
         }
 
         // TODO:
@@ -429,8 +456,11 @@ module.exports = {
     // Extract custom definition, query or resolver.
     const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
 
+    // Polymorphic.
+    const { polymorphicDef, polymorphicResolver } = this.addPolymorphicUnionType(definition, shadowCRUD.definition);
+
     // Build resolvers.
-    const resolvers = _.omitBy(_.merge(shadowCRUD.resolver, resolver), _.isEmpty) || {};
+    const resolvers = _.omitBy(_.merge(shadowCRUD.resolver, resolver, polymorphicResolver), _.isEmpty) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
@@ -456,13 +486,13 @@ module.exports = {
     }
 
     // Concatenate.
-    const typeDefs =
-      definition +
-      shadowCRUD.definition +
-      `type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}\n` +
-      this.addCustomScalar(resolvers);
-
-    console.log(typeDefs);
+    const typeDefs = `
+      ${definition}
+      ${shadowCRUD.definition}
+      type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+      ${this.addCustomScalar(resolvers)}
+      ${polymorphicDef}
+    `;
 
     // Build schema.
     const schema = makeExecutableSchema({
@@ -491,6 +521,29 @@ module.exports = {
     });
 
     return `scalar JSON`;
+  },
+
+  /**
+   * Add Union Type that contains the types defined by the user.
+   *
+   * @return string
+   */
+
+  addPolymorphicUnionType: (customDefs, defs) => {
+    const types = graphql.parse(customDefs + defs).definitions
+      .filter(def => def.name.value !== 'Query')
+      .map(def => def.name.value);
+
+    return {
+      polymorphicDef: `union Morph = ${types.join(' | ')}`,
+      polymorphicResolver: {
+        Morph: {
+          __resolveType(obj, context, info){
+            return obj.kind || obj._type;
+          }
+        }
+      }
+    }
   },
 
   /**

@@ -170,19 +170,20 @@ module.exports = function (strapi) {
                     virtuals: true,
                     transform: function (doc, returned, opts) {
                       morphAssociations.forEach(association => {
+                        console.log(association);
                         if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
                           // Reformat data by bypassing the many-to-many relationship.
                           switch (association.nature) {
                             case 'oneMorphToOne':
                               returned[association.alias] = returned[association.alias][0].ref;
                               break;
+                            case 'manyMorphToMany':
                             case 'manyMorphToOne':
                               returned[association.alias] = returned[association.alias].map(obj => obj.ref);
                               break;
                             default:
 
                           }
-
                         }
                       });
                     }

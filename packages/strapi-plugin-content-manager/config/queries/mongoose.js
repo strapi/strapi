@@ -15,13 +15,14 @@ module.exports = {
       .count());
   },
 
-  findOne: async function (params, populate) {
-    return this
+  findOne: async function (params, populate, raw = true) {
+    const query = this
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();
+      .populate(populate || this.associations.map(x => x.alias).join(' '));
+
+    return raw ? query.lean() : query;
   },
 
   create: async function (params) {
