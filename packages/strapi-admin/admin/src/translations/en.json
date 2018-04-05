@@ -124,6 +124,7 @@
   "HomePage.notification.newsLetter.success": "Successfully subscribed to the newsletter",
 
   "notification.error": "An error occurred",
+  "notification.error.layout": "Couldn't retrieve the layout",
 
   "Users & Permissions": "Users & Permissions",
   "Content Manager": "Content Manager",

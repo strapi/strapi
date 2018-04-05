@@ -123,6 +123,7 @@
   "HomePage.notification.newsLetter.success": "Vous avez souscrit à la newsletter",
 
   "notification.error": "Une erreur est survenue",
+  "notification.error.layout": "Impossible de récupérer le layout de l'admin",
 
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",
