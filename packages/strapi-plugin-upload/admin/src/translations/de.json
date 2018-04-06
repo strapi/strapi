@@ -11,7 +11,7 @@
   "EmptyLi.message": "Es gibt keine hochgeladenen Dateien",
 
   "EntriesNumber.number": "{number} Datei gefunden",
-  "EntriesNumber.number.plural": "{number} Dateien found",
+  "EntriesNumber.number.plural": "{number} Dateien gefunden",
 
   "HomePage.title": "Hochladen",
   "HomePage.description": "Übersicht über alle hochgeladenen Dateien",
