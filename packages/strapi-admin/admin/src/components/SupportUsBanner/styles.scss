@@ -35,7 +35,7 @@
   &:before {
     content: '';
     border-radius: 2px;
-    background-image: linear-gradient(45deg, #0097F6 0%, #1A67DA 100%) !important;
+    background-image: linear-gradient(45deg, #1A67DA 0%, #0097F6 100%) !important;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -43,6 +43,7 @@
     right: 0;
   }
   &:after {
+    opacity: 0.8;
     content: '';
     border-radius: 2px;
     background-image: url('../../assets/images/banner_t-shirt.png') !important;

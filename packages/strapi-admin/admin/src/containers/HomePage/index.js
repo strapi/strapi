@@ -86,7 +86,7 @@ const SECOND_BLOCK = {
 
 const SOCIAL_LINKS = [
   {
-    name: 'Github',
+    name: 'GitHub',
     link: 'https://github.com/strapi/strapi/',
   },
   {

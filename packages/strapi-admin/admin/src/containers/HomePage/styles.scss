@@ -1,8 +1,9 @@
 .blockLink {
   position: relative;
   width: calc(50% - 6px);
+  height: 99px;
   margin-top: 41px;
-  padding: 22px 25px 28px 96px;
+  padding: 22px 25px 0 96px;
   background: #F7F8F8;
   border-radius: 3px;
   line-height: 18px;
@@ -19,6 +20,7 @@
     color: #919BAE;
     letter-spacing: 0;
     line-height: 18px;
+    margin: 0;
   }
   &:hover {
     text-decoration: none;
@@ -53,7 +55,7 @@
   position: relative;
   min-height: 34rem;
   margin-bottom: 20px;
-  background-image: linear-gradient(45deg, #0097F6 0%, #1A67DA 100%) !important;
+  background-image: linear-gradient(45deg, #1A67DA 0%, #0097F6 100%) !important;
   line-height: 18px;
   > div {
     position: absolute;
@@ -65,6 +67,7 @@
     color: #FFFFFF;
 
     > p {
+      max-width: 400px;
       margin-top: 18px;
       margin-bottom: 125px;
       padding-right: 35px;
@@ -73,6 +76,7 @@
     }
   }
   &:before {
+    opacity: 0.7;
     content: '';
     background-image: url('../../assets/images/bg_hp_tee_shirt.png') !important;
     background-size: contain;
@@ -88,7 +92,7 @@
   display: block;
   max-width: 49rem !important;
   margin-top: 0 !important;
-  margin-bottom: 53px;
+  margin-bottom: 51px;
   color: #919BAE !important;
 }
 
@@ -111,12 +115,17 @@
   div {
     padding: 0;
   }
+
   input {
     min-width: 18.6rem;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     &:focus {
       border-color: #E3E9F3;
+    }
+
+    &::-webkit-input-placeholder {
+      font-style: italic;
     }
   }
 
@@ -129,7 +138,7 @@
     color: #FFFFFF;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.5px;
   }
@@ -138,11 +147,13 @@
 .homePageTutorialButton {
   position: relative;
   height: 34px;
-  margin-top: 19px;
+  margin-top: 17px;
+  margin-bottom: 1px;
   padding-left: 40px;
   padding-right: 20px;
   font-size: 13px;
   font-weight: 800;
+  line-height: 33px;
   letter-spacing: 0.46px;
   text-align: left;
   &:before {
@@ -161,20 +172,20 @@
   position: absolute;
   top: 24px;
   right: 0px;
-  font-size: 60px;
+  font-size: 50px;
 }
 
 .newsLetterWrapper {
   min-height: 14.1rem;
   min-width: 50%;
-  padding: 19px 20px;
+  padding: 20px 20px;
   background: #F7F8F8;
   border-radius: 3px;
   line-height: 18px;
   > div {
     padding-right: 50px;
     > span {
-      font-weight: 600;
+      font-weight: 500;
       font-size: 14px;
     }
   }
@@ -190,15 +201,20 @@
     text-decoration: none;
     line-height: 18px;
 
+    div {
+      display: inline-block;
+      height: 25px;
+      width: 25px;
+      text-align: center;
+      vertical-align: top;
+    }
+
     img {
-      position: absolute;
       max-height: 25px;
       max-width: 25px;
-      top: -.5rem;
-      bottom: 0;
     }
     span {
-      margin-left: 36px;
+      margin-left: 11px;
     }
     &:hover {
       text-decoration: none;
