@@ -94,7 +94,7 @@ class PreviewWysiwyg extends React.PureComponent {
     }
   }
 
-  previewHTML = (rawContent) => {
+  previewHTML = rawContent => {
     const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
     const html = converter.makeHtml(initHtml);
     const blocksFromHTML = convertFromHTML(html);

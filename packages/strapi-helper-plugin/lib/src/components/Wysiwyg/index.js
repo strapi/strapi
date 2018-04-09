@@ -123,7 +123,6 @@ class Wysiwyg extends React.Component {
     }
   }
 
-
   /**
    * Init the editor with data from
    * @param {[type]} props [description]
@@ -131,7 +130,9 @@ class Wysiwyg extends React.Component {
   setInitialValue = props => {
     const contentState = ContentState.createFromText(props.value);
     const newEditorState = EditorState.createWithContent(contentState);
-    const editorState = this.state.isFocused ? EditorState.moveFocusToEnd(newEditorState) : newEditorState;
+    const editorState = this.state.isFocused
+      ? EditorState.moveFocusToEnd(newEditorState)
+      : newEditorState;
     return this.setState({ editorState });
   };
 
@@ -394,7 +395,7 @@ class Wysiwyg extends React.Component {
 
   handleDrop = e => {
     e.preventDefault();
-    console.log('kkks');
+
     if (this.state.isPreviewMode) {
       return this.setState({ isDraging: false });
     }
@@ -462,12 +463,12 @@ class Wysiwyg extends React.Component {
     this.sendData(editorState);
   };
 
-  handleTab = (e) => {
+  handleTab = e => {
     e.preventDefault();
     const newEditorState = onTab(this.getEditorState());
 
     return this.onChange(newEditorState);
-  }
+  };
 
   sendData = editorState =>
     this.props.onChange({
@@ -486,7 +487,7 @@ class Wysiwyg extends React.Component {
     });
   };
 
-  uploadFile = (files) => {
+  uploadFile = files => {
     const formData = new FormData();
     formData.append('files', files[0]);
     const headers = {
@@ -501,7 +502,9 @@ class Wysiwyg extends React.Component {
 
     return request('/upload', { method: 'POST', headers, body: formData }, false, false)
       .then(response => {
-        const lastBlock = this.getEditorState().getCurrentContent().getLastBlock();
+        const lastBlock = this.getEditorState()
+          .getCurrentContent()
+          .getLastBlock();
         const newContentState = this.createNewContentStateFromBlock(
           createNewBlock(`![text](${response[0].url})`, 'unstyled', lastBlock.getKey()),
         );
@@ -515,7 +518,7 @@ class Wysiwyg extends React.Component {
       .finally(() => {
         this.setState({ isDraging: false });
       });
-  }
+  };
 
   componentDidCatch(error, info) {
     console.log('err', error);
