@@ -51,14 +51,17 @@ class Wysiwyg extends React.Component {
       editorState: EditorState.createEmpty(),
       initialValue: '',
       isDraging: false,
+      isFocused: false,
       isPreviewMode: false,
       headerValue: '',
       isFullscreen: false,
     };
     this.focus = () => {
+      this.setState({ isFocused: true });
       return this.domEditor.focus();
     };
     this.blur = () => {
+      this.setState({ isFocused: false });
       return this.domEditor.blur();
     };
   }
@@ -99,7 +102,9 @@ class Wysiwyg extends React.Component {
    */
   setInitialValue = props => {
     const contentState = ContentState.createFromText(props.value);
-    const editorState = EditorState.createWithContent(contentState);
+    const newEditorState = EditorState.createWithContent(contentState);
+    const editorState = this.state.isFocused ? EditorState.moveFocusToEnd(newEditorState) : newEditorState;
+
     this.setState({
       editorState,
       hasInitialValue: true,
@@ -153,6 +158,7 @@ class Wysiwyg extends React.Component {
 
     if (getOffSets(this.getSelection()).start !== 0) {
       const nextBlocks = getNextBlocksList(newEditorState, this.getSelection().getStartKey());
+      let liNumber = 1;
 
       nextBlocks.map((block, index) => {
         const previousContent =
@@ -162,7 +168,8 @@ class Wysiwyg extends React.Component {
               .getBlockForKey(this.getCurrentAnchorKey())
             : newEditorState.getCurrentContent().getBlockBefore(block.getKey());
         const number = previousContent ? parseInt(previousContent.getText().split('.')[0], 10) : 0;
-        const liNumber = isNaN(number) ? 1 : number + 1;
+        // const liNumber = isNaN(number) ? 1 : number + 1;
+        liNumber = isNaN(number) ? 1 : number + 1;
         const nextBlockText = index === 0 ? `${liNumber}. ` : nextBlocks.get(index - 1).getText();
         const newBlock = createNewBlock(nextBlockText, 'block-list', block.getKey());
         const newContentState = this.createNewContentStateFromBlock(
@@ -171,7 +178,8 @@ class Wysiwyg extends React.Component {
         );
         newEditorState = EditorState.push(newEditorState, newContentState);
       });
-      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 3);
+      const offset = 2 + liNumber.toString().length;
+      const updatedSelection = updateSelection(this.getSelection(), nextBlocks, offset);
 
       return this.setState({
         editorState: EditorState.acceptSelection(newEditorState, updatedSelection),
