@@ -53,10 +53,6 @@
   }
 }
 
-.editorFocus {
-  border-color: #78caff !important;
-}
-
 .editorError {
   border-color: #ff203c !important;
 }
@@ -66,10 +62,6 @@
   width: 0;
 }
 
-.fullscreenPreviewFocused {
-  border-color: #78caff !important;
-  border-left-color: #E3E9F3 !important;
-}
 .editorBlockquote {
   border-left: 5px solid #eee;
   font-family: Lato;
@@ -108,10 +100,6 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
-}
-
-.fullscreenFocus {
-  border-right-color: #E3E9F3 !important;
 }
 
 .editorFullScreen {

@@ -49,7 +49,6 @@ class Wysiwyg extends React.Component {
     super(props);
     this.state = {
       editorState: EditorState.createEmpty(),
-      isFocused: false,
       initialValue: '',
       isDraging: false,
       isPreviewMode: false,
@@ -57,11 +56,9 @@ class Wysiwyg extends React.Component {
       isFullscreen: false,
     };
     this.focus = () => {
-      this.setState({ isFocused: true });
       return this.domEditor.focus();
     };
     this.blur = () => {
-      this.setState({ isFocused: false });
       return this.domEditor.blur();
     };
   }
@@ -70,7 +67,6 @@ class Wysiwyg extends React.Component {
     handleChangeSelect: this.handleChangeSelect,
     headerValue: this.state.headerValue,
     html: this.props.value,
-    isFocused: this.state.isFocused,
     isPreviewMode: this.state.isPreviewMode,
     isFullscreen: this.state.isFullscreen,
     placeholder: this.props.placeholder,
@@ -504,7 +500,7 @@ class Wysiwyg extends React.Component {
   );
 
   render() {
-    const { editorState, isFocused, isPreviewMode, isFullscreen } = this.state;
+    const { editorState, isPreviewMode, isFullscreen } = this.state;
     const editorStyle = isFullscreen ? { marginTop: '0' } : this.props.style;
 
     return (
@@ -513,10 +509,8 @@ class Wysiwyg extends React.Component {
         <div
           className={cn(
             styles.editorWrapper,
-            this.state.isFocused && styles.editorFocus,
             !this.props.deactivateErrorHighlight && this.props.error && styles.editorError,
             !isEmpty(this.props.className) && this.props.className,
-            isFullscreen && isFocused && styles.fullscreenFocus,
           )}
           onClick={e => {
             if (isFullscreen) {
@@ -590,7 +584,7 @@ class Wysiwyg extends React.Component {
         {/* PREVIEW WYSIWYG FULLSCREEN */}
         {isFullscreen && (
           <div
-            className={cn(styles.editorWrapper, isFocused && styles.fullscreenPreviewFocused)}
+            className={cn(styles.editorWrapper)}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -613,7 +607,6 @@ Wysiwyg.childContextTypes = {
   handleChangeSelect: PropTypes.func,
   headerValue: PropTypes.string,
   html: PropTypes.string,
-  isFocused: PropTypes.bool,
   isFullscreen: PropTypes.bool,
   isPreviewMode: PropTypes.bool,
   placeholder: PropTypes.string,

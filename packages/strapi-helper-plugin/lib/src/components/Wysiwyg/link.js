@@ -11,7 +11,13 @@ const Link = props => {
   const { url } = props.contentState.getEntity(props.entityKey).getData();
 
   return (
-    <a href={url}>
+    <a
+      href={url}
+      onClick={() => {
+        window.open(url, '_blank');
+      }}
+      style={{ cursor: 'pointer' }}
+    >
       {props.children}
     </a>
   );
