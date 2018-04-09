@@ -57,7 +57,7 @@ const decorator = new CompositeDecorator([
   },
 ]);
 
-class PreviewWysiwyg extends React.Component {
+class PreviewWysiwyg extends React.PureComponent {
   state = { editorState: EditorState.createEmpty(), isMounted: false };
 
   componentDidMount() {

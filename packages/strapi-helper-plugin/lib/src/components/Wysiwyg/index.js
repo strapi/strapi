@@ -51,9 +51,9 @@ class Wysiwyg extends React.Component {
       editorState: EditorState.createEmpty(),
       isDraging: false,
       isFocused: false,
+      isFullscreen: false,
       isPreviewMode: false,
       headerValue: '',
-      isFullscreen: false,
     };
     this.focus = () => {
       this.setState({ isFocused: true });
@@ -82,6 +82,38 @@ class Wysiwyg extends React.Component {
     if (!isEmpty(this.props.value)) {
       this.setInitialValue(this.props);
     }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextState.editorState !== this.state.editorState) {
+      return true;
+    }
+
+    if (nextProps.resetProps !== this.props.resetProps) {
+      return true;
+    }
+
+    if (nextState.isDraging !== this.state.isDraging) {
+      return true;
+    }
+
+    if (nextState.isFocused !== this.state.isFocused) {
+      return true;
+    }
+
+    if (nextState.isFullscreen !== this.state.isFullscreen) {
+      return true;
+    }
+
+    if (nextState.isPreviewMode !== this.state.isPreviewMode) {
+      return true;
+    }
+
+    if (nextState.headerValue !== this.state.headerValue) {
+      return true;
+    }
+
+    return false;
   }
 
   componentDidUpdate(prevProps) {
@@ -362,7 +394,7 @@ class Wysiwyg extends React.Component {
 
   handleDrop = e => {
     e.preventDefault();
-
+    console.log('kkks');
     if (this.state.isPreviewMode) {
       return this.setState({ isDraging: false });
     }
