@@ -86,6 +86,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
       onBlur,
       onChange,
       placeholder,
+      resetProps,
       style,
       tabIndex,
       value,
@@ -123,6 +124,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
           onBlur={handleBlur}
           onChange={onChange}
           placeholder={placeholder}
+          resetProps={resetProps}
           style={inputStyle}
           tabIndex={tabIndex}
           value={value}
@@ -164,6 +166,7 @@ WysiwygWithErrors.defaultProps = {
   noErrorsDescription: false,
   onBlur: false,
   placeholder: '',
+  resetProps: false,
   style: {},
   tabIndex: '0',
   validations: {},
@@ -209,6 +212,7 @@ WysiwygWithErrors.propTypes = {
   ]),
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  resetProps: PropTypes.bool,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,

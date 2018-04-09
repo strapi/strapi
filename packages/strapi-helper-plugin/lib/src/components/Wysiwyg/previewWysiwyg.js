@@ -42,7 +42,37 @@ function getBlockStyle(block) {
   }
 }
 
+const decorator = new CompositeDecorator([
+  {
+    strategy: findLinkEntities,
+    component: Link,
+  },
+  {
+    strategy: findImageEntities,
+    component: Image,
+  },
+  {
+    strategy: findVideoEntities,
+    component: Video,
+  },
+]);
+
 class PreviewWysiwyg extends React.Component {
+  state = { editorState: EditorState.createEmpty(), isMounted: false };
+
+  componentDidMount() {
+    const { data } = this.props;
+    this.setState({ isMounted: true });
+
+    if (!isEmpty(data)) {
+      this.previewHTML(data);
+    }
+  }
+
+  componentWillUnmount() {
+    this.setState({ isMounted: false });
+  }
+
   getClassName = () => {
     if (this.context.isFullscreen) {
       return cn(styles.editor, styles.editorFullScreen, styles.fullscreenPreviewEditor);
@@ -51,36 +81,35 @@ class PreviewWysiwyg extends React.Component {
     return styles.editor;
   };
 
-  previewHTML = () => {
-    const initHtml = isEmpty(this.context.html) ? '<p></p>' : this.context.html;
-    const html = converter.makeHtml(initHtml);
-    const decorator = new CompositeDecorator([
-      {
-        strategy: findLinkEntities,
-        component: Link,
-      },
-      {
-        strategy: findImageEntities,
-        component: Image,
-      },
-      {
-        strategy: findVideoEntities,
-        component: Video,
-      },
-    ]);
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
+    if (nextProps.data !== this.props.data) {
+      new Promise(resolve => {
+        setTimeout(() => {
+          if (nextProps.data === this.props.data && nextState.isMounted) {
+            this.previewHTML(nextProps.data);
+          }
+          resolve();
+        }, 300);
+      });
+    }
+  }
 
+  previewHTML = (rawContent) => {
+    const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
+    const html = converter.makeHtml(initHtml);
     const blocksFromHTML = convertFromHTML(html);
+
     // Make sure blocksFromHTML.contentBlocks !== null
     if (blocksFromHTML.contentBlocks) {
       const contentState = ContentState.createFromBlockArray(
         blocksFromHTML.contentBlocks,
         blocksFromHTML.entityMap,
       );
-      return EditorState.createWithContent(contentState, decorator);
+      return this.setState({ editorState: EditorState.createWithContent(contentState, decorator) });
     }
 
     // Prevent errors if value is empty
-    return EditorState.createEmpty();
+    return this.setState({ editorState: EditorState.createEmpty() });
   };
 
   render() {
@@ -90,7 +119,7 @@ class PreviewWysiwyg extends React.Component {
       <div className={this.getClassName()}>
         <WysiwygEditor
           blockStyleFn={getBlockStyle}
-          editorState={this.previewHTML()}
+          editorState={this.state.editorState}
           onChange={() => {}}
           placeholder={placeholder}
           spellCheck
@@ -102,10 +131,16 @@ class PreviewWysiwyg extends React.Component {
 }
 
 PreviewWysiwyg.contextTypes = {
-  editorState: PropTypes.func,
-  html: PropTypes.string,
   isFullscreen: PropTypes.bool,
   placeholder: PropTypes.string,
+};
+
+PreviewWysiwyg.defaultProps = {
+  data: '',
+};
+
+PreviewWysiwyg.propTypes = {
+  data: PropTypes.string,
 };
 
 export default PreviewWysiwyg;

@@ -9,14 +9,9 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styles from './componentsStyles.scss';
 
-const PreviewControl = ({ characters, onClick }) => (
+const PreviewControl = ({ onClick }) => (
   <div className={styles.previewControlsWrapper} onClick={onClick}>
-    <div>
-      <span>{characters}&nbsp;</span>
-      <FormattedMessage
-        id="components.WysiwygBottomControls.charactersIndicators"
-      />
-    </div>
+    <div />
     <div className={styles.wysiwygCollapse}>
       <FormattedMessage id="components.Wysiwyg.collapse" />
     </div>
@@ -24,12 +19,10 @@ const PreviewControl = ({ characters, onClick }) => (
 );
 
 PreviewControl.defaultProps = {
-  characters: 0,
   onClick: () => {},
 };
 
 PreviewControl.propTypes = {
-  characters: PropTypes.number,
   onClick: PropTypes.func,
 };
 

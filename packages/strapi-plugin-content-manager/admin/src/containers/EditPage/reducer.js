@@ -31,6 +31,7 @@ const initialState = fromJS({
   modelName: '',
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
+  resetProps: false,
   showLoader: false,
   source: 'content-manager',
   submitSuccess: false,
@@ -59,7 +60,8 @@ function editPageReducer(state = initialState, action) {
       return state
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List([]))
-        .update('record', () => state.get('initialRecord'));
+        .update('record', () => state.get('initialRecord'))
+        .update('resetProps', (v) => v = !v);
     case RESET_PROPS:
       return initialState;
     case SET_FILE_RELATIONS:

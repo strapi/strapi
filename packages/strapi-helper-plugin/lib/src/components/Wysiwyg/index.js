@@ -49,7 +49,6 @@ class Wysiwyg extends React.Component {
     super(props);
     this.state = {
       editorState: EditorState.createEmpty(),
-      initialValue: '',
       isDraging: false,
       isFocused: false,
       isPreviewMode: false,
@@ -85,16 +84,13 @@ class Wysiwyg extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.props.value && !this.state.hasInitialValue) {
-      this.setInitialValue(nextProps);
-    }
-
-    // Handle reset props
-    if (nextProps.value === this.state.initialValue && this.state.hasInitialValue) {
-      this.setInitialValue(nextProps);
+  componentDidUpdate(prevProps) {
+    // Handle resetProps
+    if (prevProps.resetProps !== this.props.resetProps) {
+      this.setInitialValue(this.props);
     }
   }
+
 
   /**
    * Init the editor with data from
@@ -104,12 +100,7 @@ class Wysiwyg extends React.Component {
     const contentState = ContentState.createFromText(props.value);
     const newEditorState = EditorState.createWithContent(contentState);
     const editorState = this.state.isFocused ? EditorState.moveFocusToEnd(newEditorState) : newEditorState;
-
-    this.setState({
-      editorState,
-      hasInitialValue: true,
-      initialValue: props.value,
-    });
+    return this.setState({ editorState });
   };
 
   addContent = (content, style) => {
@@ -557,7 +548,7 @@ class Wysiwyg extends React.Component {
           </div>
           {/* WYSIWYG PREVIEW NOT FULLSCREEN */}
           {isPreviewMode ? (
-            <PreviewWysiwyg />
+            <PreviewWysiwyg data={this.props.value} />
           ) : (
             <div
               className={cn(styles.editor, isFullscreen && styles.editorFullScreen)}
@@ -603,7 +594,7 @@ class Wysiwyg extends React.Component {
               onClick={this.toggleFullScreen}
               characters={this.getCharactersNumber()}
             />
-            <PreviewWysiwyg />
+            <PreviewWysiwyg data={this.props.value} />
           </div>
         )}
       </div>
@@ -629,6 +620,7 @@ Wysiwyg.defaultProps = {
   onBlur: () => {},
   onChange: () => {},
   placeholder: '',
+  resetProps: false,
   style: {},
   tabIndex: '0',
   value: '',
@@ -643,6 +635,7 @@ Wysiwyg.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
+  resetProps: PropTypes.bool,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   value: PropTypes.string,

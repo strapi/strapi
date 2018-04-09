@@ -280,6 +280,7 @@ export class EditPage extends React.Component {
                     onBlur={this.handleBlur}
                     onChange={this.handleChange}
                     record={editPage.record}
+                    resetProps={editPage.resetProps}
                     schema={this.getSchema()}
                   />
                 </div>
