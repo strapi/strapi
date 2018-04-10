@@ -27,7 +27,7 @@ module.exports = strapi => {
       await Promise.all([
         // Load root configurations.
         new Promise((resolve, reject) => {
-          glob('./config/**/*.*(graphql)', {
+          glob('./config/*.graphql', {
             cwd: strapi.config.appPath
           }, (err, files) => {
             if (err) {
@@ -39,7 +39,7 @@ module.exports = strapi => {
         }),
         // Load APIs configurations.
         new Promise((resolve, reject) => {
-          glob('./api/*/config/**/*.*(graphql)', {
+          glob('./api/*/config/*.graphql', {
             cwd: strapi.config.appPath
           }, (err, files) => {
             if (err) {
@@ -51,7 +51,7 @@ module.exports = strapi => {
         }),
         // Load plugins configurations.
         new Promise((resolve, reject) => {
-          glob('./plugins/*/config/!(generated)/*.*(graphql)', {
+          glob('./plugins/*/config/*.graphql', {
             cwd: strapi.config.appPath
           }, (err, files) => {
             if (err) {
@@ -95,8 +95,6 @@ module.exports = strapi => {
           resolver
         });
       }, strapi.plugins.graphql.config._schema.graphql);
-
-      const { Query = {}, Mutation = {} } = _.get(strapi.plugins.graphql, 'config._schema.graphql.resolver', {});
     },
 
     initialize: function(cb) {

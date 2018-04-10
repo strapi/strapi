@@ -192,6 +192,8 @@ module.exports = {
       _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
       _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
 
+    const policiesFn = [];
+
     // Boolean to define if the resolver is going to be a resolver or not.
     let isController = false;
 
@@ -207,7 +209,9 @@ module.exports = {
         // Retrieve the controller's action to be executed.
         const [ name, action ] = resolver.split('.');
 
-        const controller = _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
+        const controller = plugin ?
+          _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`):
+          _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
           return new Error(`Cannot find the controller's action ${name}.${action}`);
@@ -215,6 +219,13 @@ module.exports = {
 
         // We're going to return a controller instead.
         isController = true;
+
+        // Push global policy to make sure the permissions will work as expected.
+        policiesFn.push(
+          policyUtils.globalPolicy(undefined, {
+            handler: `${name}.${action}`
+          }, undefined, plugin)
+        );
 
         return async (ctx, next) => {
           ctx.query = this.convertToParams(options);
@@ -240,6 +251,14 @@ module.exports = {
         return new Error(`Cannot find the controller's action ${name}.${isSingular ? 'findOne' : 'find'}`);
       }
 
+      // Push global policy to make sure the permissions will work as expected.
+      // We're trying to detect the controller name.
+      policiesFn.push(
+        policyUtils.globalPolicy(undefined, {
+          handler: `${name}.${isSingular ? 'findOne' : 'find'}`
+        }, undefined, plugin)
+      );
+
       // Make the query compatible with our controller by
       // setting in the context the parameters.
       if (isSingular) {
@@ -262,16 +281,6 @@ module.exports = {
         return controller(ctx, next);
       }
     })();
-
-    const policiesFn = [];
-
-    // Push global policy to make sure the permissions will work as expected.
-    // We're trying to detect the controller name.
-    policiesFn.push(
-      policyUtils.globalPolicy(undefined, {
-        handler: `${name}.${isSingular ? 'findOne' : 'find'}`
-      }, undefined, plugin)
-    );
 
     if (strapi.plugins['users-permissions']) {
       policies.push('plugins.users-permissions.permissions');
@@ -302,9 +311,17 @@ module.exports = {
 
     // Resolver can be a function. Be also a native resolver or a controller's action.
     if (_.isFunction(resolver)) {
-      return isController ?
-        resolver.call(null, context):
-        resolver.call(null, obj, options, context);
+      if (isController) {
+        const values = await resolver.call(null, context);
+
+        if (ctx.body) {
+          return ctx.body;
+        }
+
+        return values;
+      }
+
+      return resolver.bind(null, obj, options, context);
     }
 
     // Resolver can be a promise.
