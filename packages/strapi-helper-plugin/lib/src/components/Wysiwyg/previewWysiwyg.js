@@ -81,6 +81,8 @@ class PreviewWysiwyg extends React.PureComponent {
     return styles.editor;
   };
 
+  // NOTE: This is not optimal and this lifecycle should be removed
+  // I could find a better way to increase the fullscreen preview convert time
   UNSAFE_componentWillUpdate(nextProps, nextState) {
     if (nextProps.data !== this.props.data) {
       new Promise(resolve => {
