@@ -225,7 +225,8 @@ export class EditPage extends React.Component {
 
   isRelationComponentNull = () => (
     Object.keys(get(this.getSchema(), 'relations', {})).filter(relation => (
-      get(this.getSchema(), ['relations', relation, 'plugin']) !== 'upload'
+      get(this.getSchema(), ['relations', relation, 'plugin']) !== 'upload' &&
+      (!get(this.getSchema(), ['relations', relation, 'nature'], '').toLowerCase().includes('morph') || !get(this.getSchema(), ['relations', relation, relation]))
     )).length === 0
   )
 

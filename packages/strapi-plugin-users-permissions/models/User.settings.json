@@ -38,6 +38,14 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "poly": {
+      "model": "polymorphic",
+      "via": "user"
+    },
+    "articles": {
+      "collection": "article",
+      "via": "author"
     }
   }
 }
