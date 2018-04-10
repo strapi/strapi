@@ -103,8 +103,6 @@ module.exports = {
         plugin
       };
 
-      console.log("CTX", ctx.request.route);
-
       await next();
     };
   }

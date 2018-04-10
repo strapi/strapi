@@ -181,9 +181,7 @@ module.exports = {
       },
       postsByAuthor: {
         description: 'Return the posts published by the author',
-        resolver: (obj, options, context) => {
-          return strapi.api.post.services.post.fetchAll({ where: { author: obj.id }, limit: obj.limit || 20 });
-        }
+        resolver: 'Post.findByAuthor'
       }
     }
   }
@@ -242,17 +240,7 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: (obj, options, context) => {
-          // This is where you can the function that will resolve the query
-
-          return {
-            id: 1,
-            firstname: 'John',
-            lastname: 'Doe',
-            age: 21,
-            children: []
-          }
-        }
+        resolver: 'Person.findOne'
       }
     }
   }
@@ -329,6 +317,51 @@ module.exports = {
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
 > Note: There is no custom resolver in that case, so it will execute the default resolver provided by the "Shadow CRUD" feature.
+
+### Link a query to a controller action.
+
+By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happens that you want to execute another action or a custom logic for one of your query.
+
+```
+module.exports = {
+  resolver: {
+    Query: {
+      posts: {
+        description: 'Return a list of posts by author',
+        resolver: 'Post.findByAuthor'
+      }
+    }
+  }
+};
+```
+
+In this example, it will execute the `findByAuthor` action of the `Post` controller. It also means that the resolver will apply on the `posts` query the permissions defined on the `findByAuthor` action (through the administration panel).
+
+> Note: The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
+
+### Define a custom resolver
+
+```
+module.exports = {
+  resolver: {
+    Query: {
+      posts: {
+        description: 'Return a list of posts by author',
+        resolver: (obj, options, context) => {
+          // You can return a raw JSON object or a promise.
+
+          return [{
+            title: 'My first blog post',
+            content: 'Whatever you want...'
+          }];
+        }
+      }
+    }
+  }
+};
+```
+
+You can also execute a custom logic like above. However, the roles and permissions layers won't work.
 
 ## FAQ
 

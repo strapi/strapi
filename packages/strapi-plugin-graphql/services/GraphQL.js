@@ -203,7 +203,28 @@ module.exports = {
         _.get(handler, `Query.${pluralize.singular(name)}.resolver`):
         _.get(handler, `Query.${pluralize.plural(name)}.resolver`);
 
-      if (resolver) {
+      if (_.isString(resolver)) {
+        // Retrieve the controller's action to be executed.
+        const [ name, action ] = resolver.split('.');
+
+        const controller = _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
+
+        if (!controller) {
+          return new Error(`Cannot find the controller's action ${name}.${action}`);
+        }
+
+        // We're going to return a controller instead.
+        isController = true;
+
+        return async (ctx, next) => {
+          ctx.query = this.convertToParams(options);
+          ctx.params = obj;
+
+          // Return the controller.
+          return controller(ctx, next);
+        }
+      } else {
+        // Function.
         return resolver;
       }
 
@@ -261,9 +282,9 @@ module.exports = {
 
     // Hack to be able to handle permissions for each query.
     const ctx = Object.assign(_.clone(context), {
-      request: {
+      request: Object.assign(_.clone(context.request), {
         graphql: null
-      }
+      })
     });
 
     // Execute policies stack.
