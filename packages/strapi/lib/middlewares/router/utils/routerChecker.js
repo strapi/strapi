@@ -56,13 +56,11 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
 
   policies.push(async (ctx, next) => {
     // Set body.
-    console.log("coucou");
     const values = await next();
 
     if (!ctx.body) {
       ctx.body = values
     }
-    console.log(ctx.body);
   });
 
   // Init validate.

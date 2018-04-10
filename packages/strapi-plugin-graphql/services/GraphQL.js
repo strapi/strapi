@@ -192,6 +192,11 @@ module.exports = {
       _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
       _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
 
+    // Retrieve resolverOf.
+    const resolverOf = isSingular ?
+      _.get(handler, `Query.${pluralize.singular(name)}.resolverOf`, ''):
+      _.get(handler, `Query.${pluralize.plural(name)}.resolverOf`, '');
+
     const policiesFn = [];
 
     // Boolean to define if the resolver is going to be a resolver or not.
@@ -229,12 +234,15 @@ module.exports = {
 
         return async (ctx, next) => {
           ctx.query = this.convertToParams(options);
-          ctx.params = obj;
+          ctx.params = options;
 
           // Return the controller.
           return controller(ctx, next);
         }
-      } else {
+      } else if (resolver) {
+        context.query = this.convertToParams(options);
+        context.params = options;
+
         // Function.
         return resolver;
       }
@@ -242,10 +250,12 @@ module.exports = {
       // We're going to return a controller instead.
       isController = true;
 
+      const controllers = plugin ? strapi.plugins[plugin].controllers : strapi.controllers;
+
       // Try to find the controller that should be related to this model.
       const controller = isSingular ?
-        _.get(strapi.controllers, `${name}.findOne`):
-        _.get(strapi.controllers, `${name}.find`);
+        _.get(controllers, `${name}.findOne`):
+        _.get(controllers, `${name}.find`);
 
       if (!controller) {
         return new Error(`Cannot find the controller's action ${name}.${isSingular ? 'findOne' : 'find'}`);
@@ -281,6 +291,29 @@ module.exports = {
         return controller(ctx, next);
       }
     })();
+
+    // The controller hasn't been found.
+    if (_.isError(resolver)) {
+      return resolver;
+    }
+
+    // Force policies of another action on a custom resolver.
+    if (_.isString(resolverOf) && !_.isEmpty(resolverOf)) {
+      // Retrieve the controller's action to be executed.
+      const [ name, action ] = resolverOf.split('.');
+
+      const controller = plugin ?
+        _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`):
+        _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
+
+      if (!controller) {
+        return new Error(`Cannot find the controller's action ${name}.${action}`);
+      }
+
+      policiesFn[0] = policyUtils.globalPolicy(undefined, {
+        handler: `${name}.${action}`
+      }, undefined, plugin);
+    }
 
     if (strapi.plugins['users-permissions']) {
       policies.push('plugins.users-permissions.permissions');
@@ -321,7 +354,7 @@ module.exports = {
         return values;
       }
 
-      return resolver.bind(null, obj, options, context);
+      return resolver.call(null, obj, options, context);
     }
 
     // Resolver can be a promise.
