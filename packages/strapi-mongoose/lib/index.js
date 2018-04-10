@@ -464,6 +464,10 @@ module.exports = function (strapi) {
           result.value = parseFloat(value);
           break;
         case '_contains':
+          result.key = `where.${key}`;
+          result.value = new RegExp('\\b' + value + '\\b', 'i');
+          break;
+        case '_containss':
           result.key = `where.${key}.$regex`;
           result.value = value;
           break;

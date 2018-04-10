@@ -166,7 +166,7 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeResolver: async function (obj, options, context, _schema, plugin, name, isSingular) {
+  composeResolver: function (_schema, plugin, name, isSingular) {
     const params = {
       model: name
     };
@@ -232,17 +232,9 @@ module.exports = {
           }, undefined, plugin)
         );
 
-        return async (ctx, next) => {
-          ctx.query = this.convertToParams(options);
-          ctx.params = options;
-
-          // Return the controller.
-          return controller(ctx, next);
-        }
+        // Return the controller.
+        return controller;
       } else if (resolver) {
-        context.query = this.convertToParams(options);
-        context.params = options;
-
         // Function.
         return resolver;
       }
@@ -285,8 +277,10 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
-        ctx.query = this.convertToParams(options);
-        // console.log(strapi.utils.models.convertParams(name, options.where || {}));
+        ctx.query = Object.assign(
+          this.convertToParams(_.omit(ctx.params, 'where')),
+          ctx.params.where
+        );
 
         return controller(ctx, next);
       }
@@ -322,43 +316,48 @@ module.exports = {
     // Populate policies.
     policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name));
 
-    // Hack to be able to handle permissions for each query.
-    const ctx = Object.assign(_.clone(context), {
-      request: Object.assign(_.clone(context.request), {
-        graphql: null
-      })
-    });
+    return async (obj, options, context) => {
+      // Hack to be able to handle permissions for each query.
+      const ctx = Object.assign(context, {
+        request: Object.assign(_.clone(context.request), {
+          graphql: null
+        })
+      });
 
-    // Execute policies stack.
-    const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      // Execute policies stack.
+      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
 
-    // Policy doesn't always return errors but they update the current context.
-    if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
-      return ctx.request.graphql;
-    }
-
-    // Something went wrong in the policy.
-    if (policy) {
-      return policy;
-    }
-
-    // Resolver can be a function. Be also a native resolver or a controller's action.
-    if (_.isFunction(resolver)) {
-      if (isController) {
-        const values = await resolver.call(null, context);
-
-        if (ctx.body) {
-          return ctx.body;
-        }
-
-        return values;
+      // Policy doesn't always return errors but they update the current context.
+      if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
+        return ctx.request.graphql;
       }
 
-      return resolver.call(null, obj, options, context);
-    }
+      // Something went wrong in the policy.
+      if (policy) {
+        return policy;
+      }
 
-    // Resolver can be a promise.
-    return resolver;
+      // Resolver can be a function. Be also a native resolver or a controller's action.
+      if (_.isFunction(resolver)) {
+        if (isController) {
+          context.query = this.convertToParams(options);
+          context.params = options;
+
+          const values = await resolver.call(null, context);
+
+          if (ctx.body) {
+            return ctx.body;
+          }
+
+          return values.toJSON ? values.toJSON() : values;
+        }
+
+        return resolver.call(null, obj, options, context)
+      }
+
+      // Resolver can be a promise.
+      return resolver;
+    };
   },
 
   /**
@@ -400,7 +399,7 @@ module.exports = {
       const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
 
       // Retrieve user customisation.
-      const { type = {} } = _schema;
+      const { type = {}, resolver = {} } = _schema;
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
@@ -427,33 +426,46 @@ module.exports = {
         return acc;
       }
 
-      Object.assign(acc.query, {
-        [`${pluralize.plural(name)}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
-        [`${pluralize.singular(name)}(id: String!)`]: model.globalId
-      });
+      // Build resolvers.
+      const queries = {
+        singular: _.get(resolver, `Query.${pluralize.singular(name)}`) !== false ? this.composeResolver(
+          _schema,
+          plugin,
+          name,
+          true
+        ) : null,
+        plural: _.get(resolver, `Query.${pluralize.plural(name)}`) !== false ? this.composeResolver(
+          _schema,
+          plugin,
+          name,
+          false
+        ) : null
+      };
 
       // TODO:
       // - Handle mutations.
-      _.merge(acc.resolver, {
-        Query : {
-          [pluralize.plural(name)]: (obj, options, context) => this.composeResolver(
-            obj,
-            options,
-            context,
-            _schema,
-            plugin,
-            name,
-            false
-          ),
-          [pluralize.singular(name)]: (obj, options, context) => this.composeResolver(
-            obj,
-            options,
-            context,
-            _schema,
-            plugin,
-            name,
-            true
-          )
+      Object.keys(queries).forEach(type => {
+        // The query cannot be built.
+        if (_.isError(queries[type])) {
+          console.error(queries[type]);
+          strapi.stop();
+        }
+
+        // Only create query if the function is available.
+        if (_.isFunction(queries[type])) {
+          if (type === 'singular') {
+            Object.assign(acc.query, {
+              [`${pluralize.singular(name)}(id: String!)`]: model.globalId
+            });
+          } else {
+            Object.assign(acc.query, {
+              [`${pluralize.plural(name)}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`
+            });
+          }
+
+          _.merge(acc.resolver.Query, {
+            [type === 'singular' ? pluralize.singular(name) : pluralize.plural(name)]: queries[type]
+          });
         }
       });
 
