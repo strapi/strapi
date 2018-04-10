@@ -13,23 +13,6 @@ const regex = require('strapi-utils').regex;
 const joijson = require('strapi-utils').joijson;
 const policyUtils = require('strapi-utils').policy;
 
-// Middleware used for every routes.
-// Expose the endpoint in `this`.
-function globalPolicy(endpoint, value, route, plugin) {
-  return async (ctx, next) => {
-    ctx.request.route = {
-      endpoint: _.trim(endpoint),
-      controller: value.handler.split('.')[0].toLowerCase(),
-      action: value.handler.split('.')[1].toLowerCase(),
-      splittedEndpoint: _.trim(route.endpoint),
-      verb: route.verb && _.trim(route.verb.toLowerCase()),
-      plugin
-    };
-
-    await next();
-  };
-}
-
 module.exports = strapi => function routerChecker(value, endpoint, plugin) {
   const Joi = strapi.koaMiddlewares.routerJoi.Joi;
   const builder = joijson.builder(Joi);
@@ -52,7 +35,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
   const policies = [];
 
   // Add the `globalPolicy`.
-  policies.push(globalPolicy(endpoint, value, route, plugin));
+  policies.push(policyUtils.globalPolicy(endpoint, value, route, plugin));
 
   // Allow string instead of array of policies.
   if (
@@ -70,6 +53,17 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
       policyUtils.get(policy, plugin, policies, endpoint, currentApiName);
     });
   }
+
+  policies.push(async (ctx, next) => {
+    // Set body.
+    console.log("coucou");
+    const values = await next();
+
+    if (!ctx.body) {
+      ctx.body = values
+    }
+    console.log(ctx.body);
+  });
 
   // Init validate.
   const validate = {};

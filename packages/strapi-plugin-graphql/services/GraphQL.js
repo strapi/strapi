@@ -16,7 +16,6 @@ const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
 
-
 module.exports = {
 
   /**
@@ -174,6 +173,10 @@ module.exports = {
 
     const queryOpts = plugin ? { source: plugin } : {};
 
+    const model = plugin ?
+      strapi.plugins[plugin].models[name]:
+      strapi.models[name];
+
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -186,58 +189,105 @@ module.exports = {
 
     // Retrieve policies.
     const policies = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.policy`, []):
-      _.get(handler, `Query.${pluralize.plural(name)}.policy`, []);
+      _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
+      _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
+
+    // Boolean to define if the resolver is going to be a resolver or not.
+    let isController = false;
 
     // Retrieve resolver. It could be the custom resolver of the user
     // or the shadow CRUD resolver (aka Content-Manager).
     const resolver = (() => {
-      if (isSingular) {
-        return _.get(handler, `Query.${pluralize.singular(name)}.resolver`,
-          async () => {
-            const value = await resolvers.fetch({ ...params, id: options.id }, plugin, []);
+      // Try to retrieve custom resolver.
+      const resolver = isSingular ?
+        _.get(handler, `Query.${pluralize.singular(name)}.resolver`):
+        _.get(handler, `Query.${pluralize.plural(name)}.resolver`);
 
-            return value.toJSON ? value.toJSON() : value;
-          }
-        );
+      if (resolver) {
+        return resolver;
       }
 
-      const resolver = _.get(handler, `Query.${pluralize.plural(name)}.resolver`,
-        async () => {
-          const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
-          const where = strapi.utils.models.convertParams(name, options.where || {});
+      // We're going to return a controller instead.
+      isController = true;
 
-          // Content-Manager specificity.
-          convertedParams.skip = convertedParams.start;
-          convertedParams.query = where.where;
+      // Try to find the controller that should be related to this model.
+      const controller = isSingular ?
+        _.get(strapi.controllers, `${name}.findOne`):
+        _.get(strapi.controllers, `${name}.find`);
 
-          const value = await resolvers.fetchAll(params, { ...queryOpts, ...convertedParams, populate: [] });
+      if (!controller) {
+        return new Error(`Cannot find the controller's action ${name}.${isSingular ? 'findOne' : 'find'}`);
+      }
 
-          return value.toJSON ? value.toJSON() : value;
+      // Make the query compatible with our controller by
+      // setting in the context the parameters.
+      if (isSingular) {
+        return async (ctx, next) => {
+          ctx.params = {
+            ...params,
+            [model.primaryKey]: options.id
+          };
+
+          // Return the controller.
+          return controller(ctx, next);
         }
-      );
+      }
 
-      return resolver;
+      // Plural.
+      return async (ctx, next) => {
+        ctx.query = this.convertToParams(options);
+        // console.log(strapi.utils.models.convertParams(name, options.where || {}));
+
+        return controller(ctx, next);
+      }
     })();
 
     const policiesFn = [];
 
+    // Push global policy to make sure the permissions will work as expected.
+    // We're trying to detect the controller name.
+    policiesFn.push(
+      policyUtils.globalPolicy(undefined, {
+        handler: `${name}.${isSingular ? 'findOne' : 'find'}`
+      }, undefined, plugin)
+    );
+
+    if (strapi.plugins['users-permissions']) {
+      policies.push('plugins.users-permissions.permissions');
+    }
+
     // Populate policies.
     policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name));
 
+    // Hack to be able to handle permissions for each query.
+    const ctx = Object.assign(_.clone(context), {
+      request: {
+        graphql: null
+      }
+    });
+
     // Execute policies stack.
-    const policy = await strapi.koaMiddlewares.compose(policiesFn)(context);
+    const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
 
     // Policy doesn't always return errors but they update the current context.
-    if (_.isError(context.response.body) || _.get(context.response.body, 'isBoom')) {
-      return context.response.body;
+    if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
+      return ctx.request.graphql;
     }
 
-    // When everything is okay, the policy variable should be undefined
-    // so it will return the resolver instead.
+    // Something went wrong in the policy.
+    if (policy) {
+      return policy;
+    }
 
-    // Note: The resolver can be a function or promise.
-    return policy || _.isFunction(resolver) ? resolver.call(null, obj, options, context) : resolver;
+    // Resolver can be a function. Be also a native resolver or a controller's action.
+    if (_.isFunction(resolver)) {
+      return isController ?
+        resolver.call(null, context):
+        resolver.call(null, obj, options, context);
+    }
+
+    // Resolver can be a promise.
+    return resolver;
   },
 
   /**
@@ -502,9 +552,6 @@ module.exports = {
 
     // Write schema.
     this.writeGenerateSchema(graphql.printSchema(schema));
-
-    // Temporary variable to store the entire GraphQL configuration.
-    delete strapi.plugins.graphql.config._schema.graphql;
 
     return schema;
   },

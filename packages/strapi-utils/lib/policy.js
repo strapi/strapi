@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 module.exports = {
-  get: (policy, plugin, policies = [], endpoint, currentApiName) => {
+  get: function (policy, plugin, policies = [], endpoint, currentApiName) {
     // Define global policy prefix.
     const globalPolicyPrefix = 'global.';
     const pluginPolicyPrefix = 'plugins.';
@@ -19,9 +19,9 @@ module.exports = {
     ) {
       // Global policy.
       return policies.push(
-        strapi.config.policies[
+        this.parsePolicy(strapi.config.policies[
           policy.replace(globalPolicyPrefix, '').toLowerCase()
-        ]
+        ])
       );
     } else if (
       _.startsWith(policy, pluginPolicyPrefix, 0) &&
@@ -37,12 +37,12 @@ module.exports = {
     ) {
       // Plugin's policies can be used from app APIs with a specific syntax (`plugins.pluginName.policyName`).
       return policies.push(
-        _.get(
+        this.parsePolicy(_.get(
           strapi.plugins,
           policySplited[1] +
             '.config.policies.' +
             policySplited[2].toLowerCase()
-        )
+        ))
       );
     } else if (
       !_.startsWith(policy, globalPolicyPrefix, 0) &&
@@ -56,10 +56,10 @@ module.exports = {
     ) {
       // Plugin policy used in the plugin itself.
       return policies.push(
-        _.get(
+        this.parsePolicy(_.get(
           strapi.plugins,
           plugin + '.config.policies.' + policy.toLowerCase()
-        )
+        ))
       );
     } else if (
       !_.startsWith(policy, globalPolicyPrefix, 0) &&
@@ -72,13 +72,40 @@ module.exports = {
     ) {
       // API policy used in the API itself.
       return policies.push(
-        _.get(
+        this.parsePolicy(_.get(
           strapi.api,
           currentApiName + '.config.policies.' + policy.toLowerCase()
-        )
+        ))
       );
     }
 
     strapi.log.error(`Ignored attempt to bind to ${endpoint} with unknown policy "${policy}"`);
+  },
+
+  parsePolicy: (policy) => {
+    if (_.isFunction(policy)) {
+      return policy;
+    }
+
+    return policy.handler;
+  },
+
+  // Middleware used for every routes.
+  // Expose the endpoint in `this`.
+  globalPolicy: (endpoint, value, route = {}, plugin) => {
+    return async (ctx, next) => {
+      ctx.request.route = {
+        endpoint: _.trim(endpoint),
+        controller: value.handler.split('.')[0].toLowerCase(),
+        action: value.handler.split('.')[1].toLowerCase(),
+        splittedEndpoint: _.trim(route.endpoint),
+        verb: route.verb && _.trim(route.verb.toLowerCase()),
+        plugin
+      };
+
+      console.log("CTX", ctx.request.route);
+
+      await next();
+    };
   }
 };

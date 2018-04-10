@@ -95,6 +95,8 @@ module.exports = strapi => {
           resolver
         });
       }, strapi.plugins.graphql.config._schema.graphql);
+
+      const { Query = {}, Mutation = {} } = _.get(strapi.plugins.graphql, 'config._schema.graphql.resolver', {});
     },
 
     initialize: function(cb) {
