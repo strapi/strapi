@@ -11,6 +11,7 @@
 
 .editorWrapper {
   min-height: 320px;
+  max-height: calc(100vh - 30rem) !important;
   margin-top: .9rem;
   border: 1px solid #F3F4F4;
   border-radius: 0.25rem;
@@ -19,16 +20,19 @@
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   background-color: #fff;
   position: relative;
+  overflow: auto;
 }
 
 .editor {
   min-height: 303px;
+  max-height: calc(100vh - 30rem)!important;
   padding: 10px 20px 0 20px;
   font-size: 16px;
   margin-top: 10px;
   background-color: #fff;
   line-height: 18px !important;
   cursor: text;
+  overflow: auto;
   // TODO define rules for header's margin
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
