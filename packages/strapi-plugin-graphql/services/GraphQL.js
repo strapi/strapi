@@ -267,7 +267,7 @@ module.exports = {
         return async (ctx, next) => {
           ctx.params = {
             ...params,
-            [model.primaryKey]: options.id
+            [model.primaryKey]: ctx.params.id
           };
 
           // Return the controller.
@@ -339,10 +339,10 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        if (isController) {
-          context.query = this.convertToParams(options);
-          context.params = options;
+        context.query = this.convertToParams(options);
+        context.params = options;
 
+        if (isController) {
           const values = await resolver.call(null, context);
 
           if (ctx.body) {
