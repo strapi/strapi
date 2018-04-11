@@ -6,6 +6,11 @@
     min-height: 31px !important;
     min-width: 161px !important;
     font-weight: 600;
+    outline: none;
+
+    &:focus, &:active{
+      border: 1px solid #E3E9F3;
+    }
   }
 }
 
@@ -24,9 +29,8 @@
 .editor {
   min-height: 303px;
   max-height: 555px;
-  padding: 10px 20px 0 20px;
+  padding: 20px 20px 0 20px;
   font-size: 16px;
-  margin-top: 10px;
   background-color: #fff;
   line-height: 18px !important;
   cursor: text;

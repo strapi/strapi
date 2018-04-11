@@ -128,7 +128,6 @@ class PreviewWysiwyg extends React.PureComponent {
           editorState={this.state.editorState}
           onChange={() => {}}
           placeholder={placeholder}
-          spellCheck
         />
         <input className={styles.editorInput} value="" tabIndex="-1" />
       </div>

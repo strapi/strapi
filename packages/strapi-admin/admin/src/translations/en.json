@@ -133,12 +133,12 @@
   "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
   "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
   "components.WysiwygBottomControls.charactersIndicators": "characters",
-  "components.WysiwygBottomControls.uploadFiles": "Attach files by dragging & dropping, {browse}, or pasting from the clipboard.",
-  "components.WysiwygBottomControls.uploadFiles.browse": "selecting them",
+  "components.WysiwygBottomControls.uploadFiles": "Drag & drop files, paste from the clipboard or {browse}.",
+  "components.WysiwygBottomControls.uploadFiles.browse": "select them",
   "components.WysiwygBottomControls.fullscreen": "Expand",
 
   "HomePage.notification.newsLetter.success": "Successfully subscribed to the newsletter",
-  
+
   "notification.error": "An error occurred",
   "notification.error.layout": "Couldn't retrieve the layout",
 

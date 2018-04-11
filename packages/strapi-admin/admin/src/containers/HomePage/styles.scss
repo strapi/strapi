@@ -112,14 +112,17 @@
 .homePageForm {
   padding-top: 19px;
   padding-left: 15px;
+
   div {
     padding: 0;
   }
 
   input {
-    min-width: 18.6rem;
+    float: left;
+    width: calc(100% - 120px);
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+
     &:focus {
       border-color: #E3E9F3;
     }
@@ -130,6 +133,8 @@
   }
 
   button {
+    float: left;
+    width: 100px;
     height: 3.4rem;
     margin-top: .9rem;
     padding-left: 20px;
@@ -176,7 +181,7 @@
 }
 
 .newsLetterWrapper {
-  min-height: 14.1rem;
+  height: auto;
   min-width: 50%;
   padding: 20px 20px;
   background: #F7F8F8;
