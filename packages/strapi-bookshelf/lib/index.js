@@ -89,9 +89,16 @@ module.exports = function(strapi) {
                 tableName: definition.collectionName,
                 hasTimestamps: _.get(definition, 'options.timestamps') === true,
                 idAttribute: _.get(definition, 'options.idAttribute', 'id'),
-                associations: []
-              }, definition.options);
+                associations: [],
+                defaults: Object.keys(definition.attributes).reduce((acc, current) => {
+                  if (definition.attributes[current].type && definition.attributes[current].default) {
+                    acc[current] = definition.attributes[current].default;
+                  }
 
+                  return acc;
+                }, {})
+              }, definition.options);
+              
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;

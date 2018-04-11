@@ -55,9 +55,9 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Alle auswählen",
 
-  "EditForm.inputSelect.label.role": "Default role for authenticated users",
-  "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
-  "EditForm.inputSelect.subscriptions.label": "Manage subscriptions quotas",
+  "EditForm.inputSelect.label.role": "Standardrolle für authentifizierte Benutzer",
+  "EditForm.inputSelect.description.role": "Es wird den neuen authentifizierten Benutzer an die ausgewählte Rolle anhängen.",
+  "EditForm.inputSelect.subscriptions.label": "Abonnementkontingente verwalten",
   "EditForm.inputSelect.subscriptions.description": "Lege die Anzahl an subscriptions pro Stunde und IP fest.",
   "EditForm.inputSelect.durations.label": "Dauer",
   "EditForm.inputSelect.durations.description": "Anzahl Stunden, während derer eine Registration unmöglich ist.",
