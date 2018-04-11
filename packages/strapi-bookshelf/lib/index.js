@@ -176,6 +176,7 @@ module.exports = function(strapi) {
                           attrs[association.alias] = attrs[association.alias].related;
                           break;
                         case 'manyMorphToOne':
+                        case 'manyMorphToMany':
                           attrs[association.alias] = attrs[association.alias].map(obj => obj.related);
                           break;
                         default:
@@ -226,7 +227,6 @@ module.exports = function(strapi) {
                         const association = definition.associations
                           .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
                           .filter(association => association.alias === path || association.via === path)[0];
-
                         if (association) {
                           // Override on polymorphic path only.
                           if (_.isString(path) && path === association.via) {

@@ -29,16 +29,37 @@ module.exports = {
       .count();
   },
 
-  findOne: async function (params) {
+  findOne: async function (params, populate, raw = true) {
     const record = await this
       .forge({
         [this.primaryKey]: params[this.primaryKey]
       })
       .fetch({
-        withRelated: this.associations.map(x => x.alias)
+        withRelated: populate || this.associations.map(x => x.alias)
       });
 
-    return record ? record.toJSON() : record;
+    const data = record ? record.toJSON() : record;
+
+    // Retrieve data manually.
+    if (_.isEmpty(populate)) {
+      const arrayOfPromises = this.associations
+        .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
+        .map(association => {
+          return this.morph.forge()
+            .where({
+              [`${this.collectionName}_id`]: params[this.primaryKey]
+            })
+            .fetchAll()
+        });
+
+      const related = await Promise.all(arrayOfPromises);
+
+      related.forEach((value, index) => {
+        data[this.associations[index].alias] = value ? value.toJSON() : value;
+      });
+    }
+
+    return data;
   },
 
   create: async function (params) {

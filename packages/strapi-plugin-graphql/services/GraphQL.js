@@ -475,31 +475,38 @@ module.exports = {
           acc.resolver[globalId] = {};
         }
 
-        if (association.nature === 'manyMorphToMany') {
-          return _.merge(acc.resolver[globalId], {
-            [association.alias]: async (obj, options, context) => {
-              const [ withRelated, withoutRelated ] = await Promise.all([
-                resolvers.fetch({
-                  id: obj[model.primaryKey],
-                  model: name
-                }, plugin, [association.alias], false),
-                resolvers.fetch({
-                  id: obj[model.primaryKey],
-                  model: name
-                }, plugin, [])
-              ]);
+        switch (association.nature) {
+          case 'manyMorphToOne':
+          case 'manyMorphToMany':
+            return _.merge(acc.resolver[globalId], {
+              [association.alias]: async (obj, options, context) => {
+                const [ withRelated, withoutRelated ] = await Promise.all([
+                  resolvers.fetch({
+                    id: obj[model.primaryKey],
+                    model: name
+                  }, plugin, [association.alias], false),
+                  resolvers.fetch({
+                    id: obj[model.primaryKey],
+                    model: name
+                  }, plugin, [])
+                ]);
 
-              const entry = withRelated.toJSON ? withRelated.toJSON() : withRelated;
+                const entry = withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
-              entry[association.alias].map((entry, index) => {
-                entry._type = withoutRelated[association.alias][index].kind;
+                entry[association.alias].map((entry, index) => {
+                  const type = withoutRelated[association.alias][index].kind ||
+                  _.upperFirst(_.camelCase(withoutRelated[association.alias][index][`${association.alias}_type`]));
 
-                return entry;
-              });
+                  entry._type = type;
 
-              return entry[association.alias];
-            }
-          });
+                  return entry;
+                });
+
+                return entry[association.alias];
+              }
+            });
+            break;
+          default:
         }
 
         // TODO:
@@ -520,13 +527,13 @@ module.exports = {
             } else {
               // Get attribute.
               const attr = association.plugin ?
-                strapi.plugins[association.plugin].models[association.collection].attributes[association.via]:
-                strapi.models[association.collection].attributes[association.via];
+                strapi.plugins[association.plugin].models[params.model].attributes[association.via]:
+                strapi.models[params.model].attributes[association.via];
 
               // Get refering model.
               const ref = attr.plugin ?
-                strapi.plugins[attr.plugin].models[attr.model || attr.collection]:
-                strapi.models[attr.model || attr.collection];
+                strapi.plugins[attr.plugin].models[params.model]:
+                strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
               const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
@@ -668,7 +675,7 @@ module.exports = {
       polymorphicDef: `union Morph = ${types.join(' | ')}`,
       polymorphicResolver: {
         Morph: {
-          __resolveType(obj, context, info){
+          __resolveType(obj, context, info) {
             return obj.kind || obj._type;
           }
         }
