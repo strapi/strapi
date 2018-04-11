@@ -6,13 +6,28 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CompositeDecorator, ContentState, convertFromHTML, EditorState } from 'draft-js';
+import {
+  CompositeDecorator,
+  ContentState,
+  convertFromHTML,
+  EditorState,
+  ContentBlock,
+  genKey,
+  Entity,
+  CharacterMetadata,
+} from 'draft-js';
+import { List, OrderedSet, Repeat, fromJS } from 'immutable';
 import cn from 'classnames';
-import { isEmpty } from 'lodash';
+import { isEmpty, toArray } from 'lodash';
 
 import WysiwygEditor from 'components/WysiwygEditor';
 import converter from './converter';
-import { findLinkEntities, findImageEntities, findVideoEntities } from './strategies';
+import {
+  findAtomicEntities,
+  findLinkEntities,
+  findImageEntities,
+  findVideoEntities,
+} from './strategies';
 
 import Image from './image';
 import Link from './link';
@@ -55,7 +70,71 @@ const decorator = new CompositeDecorator([
     strategy: findVideoEntities,
     component: Video,
   },
+  {
+    strategy: findAtomicEntities,
+    component: Link,
+  },
 ]);
+
+const getBlockSpecForElement = aElement => ({
+  contentType: 'link',
+  aHref: aElement.href,
+  aInnerHTML: aElement.innerHTML,
+});
+
+const elementToBlockSpecElement = element => wrapBlockSpec(getBlockSpecForElement(element));
+
+const wrapBlockSpec = blockSpec => {
+  if (blockSpec == null) {
+    return null;
+  }
+  const tempEl = document.createElement('blockquote');
+  // stringify meta data and insert it as text content of temp HTML element. We will later extract
+  // and parse it.
+  tempEl.innerText = JSON.stringify(blockSpec);
+  return tempEl;
+};
+
+const replaceElement = (oldEl, newEl) => {
+  if (!(newEl instanceof HTMLElement)) {
+    return;
+  }
+  const parentNode = oldEl.parentNode;
+  return parentNode.replaceChild(newEl, oldEl);
+};
+
+const aReplacer = aElement => replaceElement(aElement, elementToBlockSpecElement(aElement));
+
+const createContentBlock = (blockData = {}) => {
+  const { key, type, text, data, inlineStyles, entityData } = blockData;
+
+  let blockSpec = {
+    type: type !== null && type !== undefined ? type : 'unstyled',
+    text: text !== null && text !== undefined ? text : '',
+    key: key !== null && key !== undefined ? key : genKey(),
+  };
+
+  if (data) {
+    blockSpec.data = fromJS(data);
+  }
+
+  if (inlineStyles || entityData) {
+    let entityKey;
+    if (entityData) {
+      const { type, mutability, data } = entityData;
+      entityKey = Entity.create(type, mutability, data);
+    } else {
+      entityKey = null;
+    }
+    const style = OrderedSet(inlineStyles || ['LINK']);
+    const charData = CharacterMetadata.applyEntity(
+      CharacterMetadata.create({ style, entityKey }),
+      entityKey,
+    );
+    blockSpec.characterList = List(Repeat(charData, text.length));
+  }
+  return new ContentBlock(blockSpec);
+};
 
 class PreviewWysiwyg extends React.PureComponent {
   state = { editorState: EditorState.createEmpty(), isMounted: false };
@@ -101,26 +180,51 @@ class PreviewWysiwyg extends React.PureComponent {
 
   previewHTML = rawContent => {
     const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
-    const html = converter.makeHtml(initHtml);
-    // This action takes a long time
-    const blocksFromHTML = convertFromHTML(html);
+    const html = new DOMParser().parseFromString(converter.makeHtml(initHtml), 'text/html');
+    toArray(html.querySelectorAll('a')).forEach(aReplacer);
 
-    // Make sure blocksFromHTML.contentBlocks !== null
+    let blocksFromHTML = convertFromHTML(html.body.innerHTML);
+
     if (blocksFromHTML.contentBlocks) {
-      const contentState = ContentState.createFromBlockArray(
-        blocksFromHTML.contentBlocks,
-        blocksFromHTML.entityMap,
-      );
+      blocksFromHTML = blocksFromHTML.contentBlocks.reduce((acc, block) => {
+        if (block.getType() === 'blockquote') {
+          try {
+            const { aHref, aInnerHTML } = JSON.parse(block.getText());
+            const entityData = {
+              type: 'LINK',
+              mutability: 'IMMUTABLE',
+              data: {
+                aHref,
+                aInnerHTML,
+              },
+            };
+
+            const blockSpec = Object.assign(
+              { type: 'atomic', text: ' ', key: block.getKey() },
+              { entityData },
+            );
+            const atomicBlock = createContentBlock(blockSpec);
+
+            return acc.concat([atomicBlock]);
+          } catch (err) {
+            return acc.concat(block);
+          }
+        }
+
+        return acc.concat(block);
+      }, []);
+
+      const contentState = ContentState.createFromBlockArray(blocksFromHTML);
+
       return this.setState({ editorState: EditorState.createWithContent(contentState, decorator) });
     }
 
-    // Prevent errors if value is empty
     return this.setState({ editorState: EditorState.createEmpty() });
   };
 
   render() {
     const { placeholder } = this.context;
-
+    // this.previewHTML2(this.props.data);
     return (
       <div className={this.getClassName()}>
         <WysiwygEditor

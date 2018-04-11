@@ -1,7 +1,16 @@
+/* eslint-disable no-unused-vars */
+
 function findLinkEntities(contentBlock, callback, contentState) {
   contentBlock.findEntityRanges(character => {
     const entityKey = character.getEntity();
     return entityKey !== null && contentState.getEntity(entityKey).getType() === 'LINK';
+  }, callback);
+}
+
+function findAtomicEntities(contentBlock, callback, contentState) {
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
+    return entityKey !== null && contentBlock.getType() === 'atomic';
   }, callback);
 }
 
@@ -23,4 +32,4 @@ function findVideoEntities(contentBlock, cb, contentState) {
 
 const isVideoType = (fileName) => /\.(mp4|mpg|mpeg|mov|avi)$/i.test(fileName);
 
-export { findLinkEntities, findImageEntities, findVideoEntities };
+export { findAtomicEntities, findLinkEntities, findImageEntities, findVideoEntities };

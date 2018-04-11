@@ -6,19 +6,26 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { includes } from 'lodash';
 
 const Link = props => {
-  const { url } = props.contentState.getEntity(props.entityKey).getData();
+  const { url, aHref, aInnerHTML } = props.contentState.getEntity(props.entityKey).getData();
+  let content = aInnerHTML;
+
+  if (includes(aInnerHTML, '<img', 'src=')) {
+    const src = aInnerHTML.split('src="')[1].split('" ')[0];
+    content = <img src={src} alt="img" />;
+  }
 
   return (
     <a
-      href={url}
+      href={url || aHref}
       onClick={() => {
-        window.open(url, '_blank');
+        window.open(url || aHref, '_blank');
       }}
       style={{ cursor: 'pointer' }}
     >
-      {props.children}
+      {content || props.children}
     </a>
   );
 };
