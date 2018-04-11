@@ -18,6 +18,8 @@ import Block from 'components/HomePageBlock/Loadable';
 import Button from 'components/Button';
 import Sub from 'components/Sub/Loadable';
 import Input from 'components/InputText';
+import SupportUsCta from 'components/SupportUsCta/Loadable';
+import SupportUsTitle from 'components/SupportUsTitle/Loadable';
 
 import { selectPlugins } from 'containers/App/selectors';
 
@@ -84,7 +86,7 @@ const SECOND_BLOCK = {
 
 const SOCIAL_LINKS = [
   {
-    name: 'Github',
+    name: 'GitHub',
     link: 'https://github.com/strapi/strapi/',
   },
   {
@@ -184,17 +186,11 @@ export class HomePage extends React.PureComponent {
           <div className="col-lg-4 col-md-4">
             <Block className={styles.blockShirt}>
               <div>
-                <FormattedMessage id="app.components.HomePage.support" />
+                <SupportUsTitle />
                 <FormattedMessage id="app.components.HomePage.support.content">
                   {message => <p>{message}</p>}
                 </FormattedMessage>
-                <FormattedMessage id="app.components.HomePage.support.link">
-                  {message => (
-                    <a href="https://strapi.io/shop" target="_blank">
-                      {message}
-                    </a>
-                  )}
-                </FormattedMessage>
+                <SupportUsCta />
               </div>
             </Block>
           </div>

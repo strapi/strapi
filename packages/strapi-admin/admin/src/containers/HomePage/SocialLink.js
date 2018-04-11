@@ -19,7 +19,7 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/alt-text */
 function getSrc(name) {
   switch (name) {
-    case 'Github':
+    case 'GitHub':
       return Gh;
     case 'Reddit':
       return Reddit;
@@ -40,7 +40,7 @@ function SocialLink({ link, name }) {
   return (
     <div className={cn(styles.socialLink, 'col-md-6 col-lg-6')}>
       <a href={link} target="_blank">
-        <img src={getSrc(name)} />
+        <div><img src={getSrc(name)} /></div>
         <span>{name}</span>
       </a>
     </div>
