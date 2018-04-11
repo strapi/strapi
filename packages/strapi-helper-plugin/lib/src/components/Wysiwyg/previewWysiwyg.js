@@ -183,6 +183,11 @@ class PreviewWysiwyg extends React.PureComponent {
     const html = new DOMParser().parseFromString(converter.makeHtml(initHtml), 'text/html');
     toArray(html.querySelectorAll('a')).forEach(aReplacer);
 
+    // const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
+    // const html = new DOMParser().parseFromString(converter.makeHtml(initHtml), 'text/html');
+    // toArray(html.getElementsByTagName('a'))
+    //   .filter((value) => value.getElementsByTagName('img').length > 0)
+    //   .forEach(aReplacer);
     let blocksFromHTML = convertFromHTML(html.body.innerHTML);
 
     if (blocksFromHTML.contentBlocks) {
