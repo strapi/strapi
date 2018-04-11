@@ -11,7 +11,6 @@
 
 .editorWrapper {
   min-height: 320px;
-  max-height: calc(100vh - 30rem) !important;
   margin-top: .9rem;
   border: 1px solid #F3F4F4;
   border-radius: 0.25rem;
@@ -24,7 +23,7 @@
 
 .editor {
   min-height: 303px;
-  max-height: calc(100vh - 37rem)!important;
+  max-height: 555px;
   padding: 10px 20px 0 20px;
   font-size: 16px;
   margin-top: 10px;
@@ -32,7 +31,7 @@
   line-height: 18px !important;
   cursor: text;
   overflow: auto;
-  
+
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
     line-height: 18px !important;

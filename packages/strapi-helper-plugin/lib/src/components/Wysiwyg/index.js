@@ -136,33 +136,45 @@ class Wysiwyg extends React.Component {
     return this.setState({ editorState });
   };
 
+  /**
+   * Handler to add B, I, Strike, U, link
+   * @param {String} content usually something like **textToReplace**
+   * @param {String} style
+   */
   addContent = (content, style) => {
     const selectedText = this.getSelectedText();
+    // Retrieve the associated data for the type to add
     const { innerContent, endReplacer, startReplacer } = getBlockContent(style);
+    // Replace the selected text by the markdown command or insert default text
     const defaultContent =
       selectedText === ''
         ? replace(content, 'textToReplace', innerContent)
         : replace(content, 'textToReplace', selectedText);
+    // Get the current cursor position
     const cursorPosition = getOffSets(this.getSelection()).start;
     const textWithEntity = this.modifyBlockContent(defaultContent);
+    // Highlight the text
     const { anchorOffset, focusOffset } = getDefaultSelectionOffsets(
       defaultContent,
       startReplacer,
       endReplacer,
       cursorPosition,
     );
+    // Merge the current selection with the new one
     const updatedSelection = this.getSelection().merge({ anchorOffset, focusOffset });
     const newEditorState = EditorState.push(
       this.getEditorState(),
       textWithEntity,
       'insert-character',
     );
-
+    // Update the parent reducer
     this.sendData(newEditorState);
-    // Don't handle selection
+    // Don't handle selection : the user has selected some text to be changed with the appropriate markdown
     if (selectedText !== '') {
       return this.setState(
         {
+          // Move the cursor to the end (this line forces the cursor to be at the end of the content)
+          // It may go at the end of the last block
           editorState: EditorState.moveFocusToEnd(newEditorState),
         },
         () => {
@@ -172,18 +184,28 @@ class Wysiwyg extends React.Component {
     }
 
     return this.setState({
+      // Highlight the text if the selection wad empty
       editorState: EditorState.forceSelection(newEditorState, updatedSelection),
     });
   };
 
+  /**
+   * Create an ordered list block
+   * @return ContentBlock
+   */
   addOlBlock = () => {
+    // Get all the selected blocks
     const selectedBlocksList = getSelectedBlocksList(this.getEditorState());
     let newEditorState = this.getEditorState();
 
+    // Check if the cursor is NOT at the beginning of a new line
+    // So we need to move all the next blocks
     if (getOffSets(this.getSelection()).start !== 0) {
+      // Retrieve all the blocks after the current position
       const nextBlocks = getNextBlocksList(newEditorState, this.getSelection().getStartKey());
       let liNumber = 1;
 
+      // Loop to update each block after the inserted li
       nextBlocks.map((block, index) => {
         const previousContent =
           index === 0
@@ -191,17 +213,22 @@ class Wysiwyg extends React.Component {
               .getCurrentContent()
               .getBlockForKey(this.getCurrentAnchorKey())
             : newEditorState.getCurrentContent().getBlockBefore(block.getKey());
+        // Check if there was an li before the position so we update the entire list bullets
         const number = previousContent ? parseInt(previousContent.getText().split('.')[0], 10) : 0;
-        // const liNumber = isNaN(number) ? 1 : number + 1;
         liNumber = isNaN(number) ? 1 : number + 1;
         const nextBlockText = index === 0 ? `${liNumber}. ` : nextBlocks.get(index - 1).getText();
+        // Update the current block
         const newBlock = createNewBlock(nextBlockText, 'block-list', block.getKey());
+        // Update the contentState
         const newContentState = this.createNewContentStateFromBlock(
           newBlock,
           newEditorState.getCurrentContent(),
         );
         newEditorState = EditorState.push(newEditorState, newContentState);
       });
+
+      // Move the cursor to the correct position and add a space after '.'
+      // 2 for the dot and the space after, we add the number length (10 = offset of 2)
       const offset = 2 + liNumber.toString().length;
       const updatedSelection = updateSelection(this.getSelection(), nextBlocks, offset);
 
@@ -210,6 +237,7 @@ class Wysiwyg extends React.Component {
       });
     }
 
+    // If the cursor is at the beginning we need to move all the content after the cursor so we don't loose the data
     selectedBlocksList.map((block, i) => {
       const selectedText = block.getText();
       const li = selectedText === '' ? `${i + 1}. ` : `${i + 1}. ${selectedText}`;
@@ -221,11 +249,19 @@ class Wysiwyg extends React.Component {
       newEditorState = EditorState.push(newEditorState, newContentState);
     });
 
+    // Update the parent reducer
     this.sendData(newEditorState);
 
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
+  /**
+   * Create an unordered list
+   * @return ContentBlock
+   */
+  // NOTE: it's pretty much the same dynamic as above
+  // We don't use the same handler because it needs less logic than a ordered list
+  // so it's easier to maintain the code
   addUlBlock = () => {
     const selectedBlocksList = getSelectedBlocksList(this.getEditorState());
     let newEditorState = this.getEditorState();
@@ -263,15 +299,24 @@ class Wysiwyg extends React.Component {
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
+  /**
+   * Handler to create header
+   * @param {String} text header content
+   */
   addBlock = text => {
     const nextBlockKey = this.getNextBlockKey(this.getCurrentAnchorKey()) || genKey();
-    const newBlock = createNewBlock(text, 'block-list', nextBlockKey);
+    const newBlock = createNewBlock(text, 'header', nextBlockKey);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, text);
 
     return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   };
 
+  /**
+   * Handler used for code block and Img controls
+   * @param {String} content the text that will be added
+   * @param {String} style   the type
+   */
   addSimpleBlockWithSelection = (content, style) => {
     const selectedText = this.getSelectedText();
     const { innerContent, endReplacer, startReplacer } = getBlockContent(style);
@@ -305,6 +350,12 @@ class Wysiwyg extends React.Component {
     });
   };
 
+  /**
+   * Update the current editorState
+   * @param  {Map} newContentState
+   * @param  {String} text            The text to add
+   * @return {Map}                 EditorState
+   */
   createNewEditorState = (newContentState, text) => {
     let newEditorState;
 
@@ -317,6 +368,12 @@ class Wysiwyg extends React.Component {
     return newEditorState;
   };
 
+  /**
+   * Update the content of a block
+   * @param  {Map} newBlock     The new block
+   * @param  {Map} contentState The ContentState
+   * @return {Map}              The updated block
+   */
   createNewBlockMap = (newBlock, contentState) =>
     contentState.getBlockMap().set(newBlock.key, newBlock);
 
@@ -337,15 +394,33 @@ class Wysiwyg extends React.Component {
 
   getEditorState = () => this.state.editorState;
 
+  /**
+   * Retrieve the selected text
+   * @return {Map}
+   */
   getSelection = () => this.getEditorState().getSelection();
 
+  /**
+   * Retrieve the cursor anchor key
+   * @return {String}
+   */
   getCurrentAnchorKey = () => this.getSelection().getAnchorKey();
 
+  /**
+   * Retrieve the current content block
+   * @return {Map} ContentBlock
+   */
   getCurrentContentBlock = () =>
     this.getEditorState()
       .getCurrentContent()
       .getBlockForKey(this.getSelection().getAnchorKey());
 
+  /**
+   * Retrieve the block key after a specific one
+   * @param  {String} currentBlockKey
+   * @param  {Map} [editorState=this.getEditorState()]  The current EditorState or the updated one
+   * @return {String}                                    The next block key
+   */
   getNextBlockKey = (currentBlockKey, editorState = this.getEditorState()) =>
     editorState.getCurrentContent().getKeyAfter(currentBlockKey);
 
@@ -404,6 +479,12 @@ class Wysiwyg extends React.Component {
     return this.uploadFile(files);
   };
 
+  /**
+   * Handler that listens for specific key commands
+   * @param  {String} command
+   * @param  {Map} editorState
+   * @return {Bool}
+   */
   handleKeyCommand = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
 
@@ -421,6 +502,11 @@ class Wysiwyg extends React.Component {
     return false;
   };
 
+  /**
+   * Handler to upload files on paste
+   * @param  {Array<Blob>} files [description]
+   * @return {}                  DraftHandleValue
+   */
   handlePastedFiles = files => this.uploadFile(files);
 
   handleReturn = (e, editorState) => {
@@ -455,6 +541,12 @@ class Wysiwyg extends React.Component {
     return getDefaultKeyBinding(e);
   };
 
+  /**
+   * Change the content of a block
+   * @param  {String]} text
+   * @param  {Map} [contentState=this.getEditorState().getCurrentContent()]
+   * @return {Map}
+   */
   modifyBlockContent = (text, contentState = this.getEditorState().getCurrentContent()) =>
     Modifier.replaceText(contentState, this.getSelection(), text);
 
@@ -470,6 +562,10 @@ class Wysiwyg extends React.Component {
     return this.onChange(newEditorState);
   };
 
+  /**
+   * Update the parent reducer
+   * @param  {Map} editorState [description]
+   */
   sendData = editorState =>
     this.props.onChange({
       target: {
