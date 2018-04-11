@@ -67,22 +67,7 @@ export function* pluginsGet() {
     // Retrieve plugins list.
     const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
 
-    // Add support us card to the plugins list.
-    const supportUs = {
-      description: {
-        short: 'app.components.InstallPluginPage.plugin.support-us.description',
-        long: 'app.components.InstallPluginPage.plugin.support-us.description',
-      },
-      id: 'support-us',
-      icon: '',
-      logo: '',
-      name: 'buy a t-shirt',
-      price: 30,
-      ratings: 5,
-      isCompatible: true,
-    };
-
-    yield put(getPluginsSucceeded(availablePlugins.concat([supportUs])));
+    yield put(getPluginsSucceeded(availablePlugins));
   } catch(err) {
     strapi.notification.error('notification.error');
   }

@@ -9,10 +9,25 @@
   "app.components.DownloadInfo.text": "Cela peut prendre une minute. Merci de patienter.",
 
   "app.components.HomePage.welcome": "Bienvenue à bord!",
-  "app.components.HomePage.description.part1": "Nous somme heureux de vous compter parmi nos utilisateurs",
-  "app.components.HomePage.description.part2": "Vous faites désormais parti de notre communauté qui peut vous aider à développer votre application.",
-  "app.components.HomePage.button": "Créez votre premier type de contenu",
-  "app.components.HomePage.feedback": "N'hésitez pas à utiliser un des channels ci-dessous pour poser vos questions ou nous donner vos retours.",
+  "app.components.HomePage.cta": "CONFIRMEZ",
+  "app.components.HomePage.community": "Rejoignez la communauté",
+  "app.components.HomePage.community.content": "Discutez avec les membres de l'équipe, contributeurs et développeurs sur différent supports.",
+  "app.components.HomePage.create": "Créez votre premier Content Type",
+  "app.components.HomePage.welcomeBlock.content": "Nous sommes heureux de vous compter parmi nos membres. Nous sommes à l'écoute de vos retours alors, n'hésitez pas à nous envoyer des DM sur\u0020",
+  "app.components.HomePage.welcomeBlock.content.issues": "issues",
+  "app.components.HomePage.welcomeBlock.content.raise": "\u0020ou soumetez des\u0020",
+  "app.components.HomePage.createBlock.content.first": "Le\u0020",
+  "app.components.HomePage.createBlock.content.second": "\u0020plugin vous permet de définir la structure de vos modèles. Nous vous conseillons fortement de suivre notre\u0020",
+  "app.components.HomePage.createBlock.content.tutorial": "\u0020tutoriel.",
+  "app.components.HomePage.button.quickStart": "VOIR LE QUICK START TUTORIEL",
+  "app.components.HomePage.support": "SUPPORT US",
+  "app.components.HomePage.support.content": "En achetant notre T-shirt (25€), vous nous aidez à poursuivre à maintenir le projet pour que nous puissions vous donner la meilleure expérience possible!",
+  "app.components.HomePage.support.link": "OBTENEZ VOTRE T-SHIRT!",
+
+  "app.components.BlockLink.documentation": "Voir la documentation",
+  "app.components.BlockLink.documentation.content": "Découvrez les concepts, guides et tutoriaux.",
+  "app.components.BlockLink.code": "Apps d'exemple",
+  "app.components.BlockLink.code.content": "Apprenez en testant les projets développés par la communauté.",
 
   "app.components.ImgPreview.hint": "Drag & drop dans cette zone ou {browse} un fichier à télécharger",
   "app.components.ImgPreview.hint.browse": "recherchez",
@@ -120,7 +135,10 @@
   "components.WysiwygBottomControls.uploadFiles.browse": "en les selectionnant",
   "components.WysiwygBottomControls.fullscreen": "Plein écran",
 
+  "HomePage.notification.newsLetter.success": "Vous avez souscrit à la newsletter",
+
   "notification.error": "Une erreur est survenue",
+  "notification.error.layout": "Impossible de récupérer le layout de l'admin",
 
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",

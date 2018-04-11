@@ -38,21 +38,21 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import Header from 'components/Header/index';
-import HomePage from 'containers/HomePage';
-import InstallPluginPage from 'containers/InstallPluginPage';
+import HomePage from 'containers/HomePage/Loadable';
+import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
 import LeftMenu from 'containers/LeftMenu';
-import ListPluginsPage from 'containers/ListPluginsPage';
+import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import Logout from 'components/Logout';
-import NotFoundPage from 'containers/NotFoundPage';
+import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage';
+import PluginPage from 'containers/PluginPage/Loadable';
 
 // Utils
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
-import { getGaStatus } from './actions';
+import { getGaStatus, getLayout } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -74,6 +74,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   componentDidMount() {
     this.checkLogin(this.props);
     this.props.getGaStatus();
+    this.props.getLayout();
     ReactGA.initialize('UA-54313258-9');
   }
 
@@ -136,7 +137,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   render() {
-    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
+    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} layout={this.props.adminPage.layout} /> : '';
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
 
@@ -189,6 +190,7 @@ AdminPage.propTypes = {
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getGaStatus: PropTypes.func.isRequired,
+  getLayout: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -211,6 +213,7 @@ function mapDispatchToProps(dispatch) {
     disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
     enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
     getGaStatus: () => { dispatch(getGaStatus()); },
+    getLayout: () => { dispatch(getLayout()); },
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
     pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
     updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
