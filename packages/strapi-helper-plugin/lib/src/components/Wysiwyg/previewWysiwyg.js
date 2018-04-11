@@ -181,13 +181,9 @@ class PreviewWysiwyg extends React.PureComponent {
   previewHTML = rawContent => {
     const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
     const html = new DOMParser().parseFromString(converter.makeHtml(initHtml), 'text/html');
-    toArray(html.querySelectorAll('a')).forEach(aReplacer);
-
-    // const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
-    // const html = new DOMParser().parseFromString(converter.makeHtml(initHtml), 'text/html');
-    // toArray(html.getElementsByTagName('a'))
-    //   .filter((value) => value.getElementsByTagName('img').length > 0)
-    //   .forEach(aReplacer);
+    toArray(html.getElementsByTagName('a')) // Retrieve all the links <a> tags
+      .filter((value) => value.getElementsByTagName('img').length > 0) // Filter by checking if they have any <img> children
+      .forEach(aReplacer); // Change those links into <blockquote> elements so we can set some metacharacters with the img content
     let blocksFromHTML = convertFromHTML(html.body.innerHTML);
 
     if (blocksFromHTML.contentBlocks) {
@@ -208,7 +204,7 @@ class PreviewWysiwyg extends React.PureComponent {
               { type: 'atomic', text: ' ', key: block.getKey() },
               { entityData },
             );
-            const atomicBlock = createContentBlock(blockSpec);
+            const atomicBlock = createContentBlock(blockSpec); // Create an atomic block so we can identify it easily
 
             return acc.concat([atomicBlock]);
           } catch (err) {

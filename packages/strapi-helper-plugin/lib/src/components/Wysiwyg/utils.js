@@ -9,7 +9,7 @@ import { List } from 'immutable';
 import { DEFAULT_INDENTATION } from './constants';
 
 export function createNewBlock(text = '', type = 'unstyled', key = genKey()) {
-  return new ContentBlock({ key, type, text, characterList: List([]) });
+  return new ContentBlock({ key, type, text, charaterList: List([]) });
 }
 
 export function getNextBlocksList(editorState, startKey) {
