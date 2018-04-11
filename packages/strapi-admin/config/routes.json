@@ -21,6 +21,12 @@
       "policies": []
     },
     {
+      "method": "GET",
+      "path": "/layout",
+      "handler": "Admin.getLayout",
+      "policies": []
+    },
+    {
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",
