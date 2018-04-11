@@ -17,13 +17,22 @@ module.exports = {
     }
   },
 
-  getGaConfig: async ctx =>{
+  getGaConfig: async ctx => {
     try {
       const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);
       ctx.send({ allowGa });
     } catch(err) {
-      console.log(err)
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+    }
+  },
+
+  getLayout: async ctx => {
+    try {
+      const layout = require('../config/layout.js');
+
+      return ctx.send({ layout });
+    } catch(err) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   },
 

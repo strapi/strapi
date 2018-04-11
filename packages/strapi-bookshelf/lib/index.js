@@ -89,9 +89,16 @@ module.exports = function(strapi) {
                 tableName: definition.collectionName,
                 hasTimestamps: _.get(definition, 'options.timestamps') === true,
                 idAttribute: _.get(definition, 'options.idAttribute', 'id'),
-                associations: []
-              }, definition.options);
+                associations: [],
+                defaults: Object.keys(definition.attributes).reduce((acc, current) => {
+                  if (definition.attributes[current].type && definition.attributes[current].default) {
+                    acc[current] = definition.attributes[current].default;
+                  }
 
+                  return acc;
+                }, {})
+              }, definition.options);
+              
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;
@@ -603,42 +610,42 @@ module.exports = function(strapi) {
 
       switch (type) {
         case '=':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '=',
             value
           };
           break;
         case '_ne':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '!=',
             value
           };
           break;
         case '_lt':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '<',
             value
           };
           break;
         case '_gt':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '>',
             value
           };
           break;
         case '_lte':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '<=',
             value
           };
           break;
         case '_gte':
-          result.key = `where.${key}[0]`;
+          result.key = `where.${key}`;
           result.value = {
             symbol: '>=',
             value
@@ -646,8 +653,10 @@ module.exports = function(strapi) {
           break;
         case '_sort':
           result.key = `sort`;
-          result.value = (_.toLower(value) === 'desc') ? '-' : '';
-          result.value += key;
+          result.value = {
+            key,
+            order: value.toUpperCase()
+          };
           break;
         case '_start':
           result.key = `start`;
