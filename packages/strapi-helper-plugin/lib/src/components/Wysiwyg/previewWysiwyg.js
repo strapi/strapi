@@ -126,7 +126,7 @@ const createContentBlock = (blockData = {}) => {
     } else {
       entityKey = null;
     }
-    const style = OrderedSet(inlineStyles || ['LINK']);
+    const style = OrderedSet(inlineStyles || []);
     const charData = CharacterMetadata.applyEntity(
       CharacterMetadata.create({ style, entityKey }),
       entityKey,
@@ -184,6 +184,11 @@ class PreviewWysiwyg extends React.PureComponent {
     toArray(html.getElementsByTagName('a')) // Retrieve all the links <a> tags
       .filter((value) => value.getElementsByTagName('img').length > 0) // Filter by checking if they have any <img> children
       .forEach(aReplacer); // Change those links into <blockquote> elements so we can set some metacharacters with the img content
+
+    // TODO:
+    // in the same way, retrieve all <pre> tags
+    // create custom atomic block
+    // create
     let blocksFromHTML = convertFromHTML(html.body.innerHTML);
 
     if (blocksFromHTML.contentBlocks) {
