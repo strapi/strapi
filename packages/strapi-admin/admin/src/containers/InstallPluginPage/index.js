@@ -24,6 +24,7 @@ import DownloadInfo from 'components/DownloadInfo';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
+import SupportUsBanner from 'components/SupportUsBanner/Loadable';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -82,6 +83,11 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
             description={{ id: 'app.components.InstallPluginPage.description' }}
             actions={[]}
           />
+          <div className="row">
+            <div className="col-md-12 col-lg-12">
+              <SupportUsBanner />
+            </div>
+          </div>
           {/*}<div className={cn('row', styles.inputContainer)}>
             <Input
               customBootstrapClass="col-md-12"

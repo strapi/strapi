@@ -123,6 +123,15 @@ module.exports = {
     }));
   },
 
+  findOne: async (ctx) => {
+    const data = await strapi.plugins['upload'].services.upload.fetch(ctx.params);
+
+    data.url = strapi.config.url + data.url;
+
+    // Send 200 `ok`
+    ctx.send(data);
+  },
+
   count: async (ctx, next) => {
     const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
 
