@@ -33,12 +33,14 @@ function ImgPreviewArrow(props) {
       onMouseEnter={props.onMouseEnter}
       onMouseLeave={props.onMouseLeave}
     />
-  )
+  );
 }
 
 ImgPreviewArrow.defaultProps = {
   enable: false,
   onClick: () => {},
+  onMouseEnter: () => {},
+  onMouseLeave: () => {},
   show: false,
   type: 'left',
 };
@@ -46,6 +48,8 @@ ImgPreviewArrow.defaultProps = {
 ImgPreviewArrow.propTypes = {
   enable: PropTypes.bool,
   onClick: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
   show: PropTypes.bool,
   type: PropTypes.string,
 };

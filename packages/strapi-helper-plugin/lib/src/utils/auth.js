@@ -81,6 +81,6 @@ const auth = {
   setUserInfo(value = '', isLocalStorage = false, userInfo = USER_INFO) {
     return auth.set(value, userInfo, isLocalStorage);
   },
-}
+};
 
 export default auth;

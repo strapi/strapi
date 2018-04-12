@@ -14,6 +14,7 @@ import SelectOption from 'components/SelectOption';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 function InputSelect(props) {
   return (
     <select
@@ -23,6 +24,7 @@ function InputSelect(props) {
         'form-control',
         !props.deactivateErrorHighlight && props.error && 'is-invalid',
         !isEmpty(props.className) && props.className,
+        props.disabled && styles.inputSelectDisabled,
       )}
       disabled={props.disabled}
       id={props.name}
@@ -39,7 +41,7 @@ function InputSelect(props) {
           return <SelectOption key={key} {...option} />;
         }
 
-        return <option key={key} value={option}>{option}</option>
+        return <option key={key} value={option}>{option}</option>;
       })}
     </select>
   );

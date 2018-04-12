@@ -6,6 +6,30 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 
 module.exports = {
+  appearance: (attributes, model, source) => {
+    const layoutPath = path.join(strapi.config.appPath, 'plugins', source, 'config', 'layout.json');
+    let layout;
+
+    try {
+      // NOTE: do we really need to parse the JSON?
+      // layout = JSON.parse(layoutPath, 'utf8');
+      layout = require(layoutPath);
+    } catch (err) {
+      layout = {};
+    }
+
+    Object.keys(attributes).map(attribute => {
+      const appearances = _.get(attributes, [attribute, 'appearance'], {});
+      Object.keys(appearances).map(appearance => {
+        _.set(layout, [model, 'attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
+      });
+
+      _.unset(attributes, [attribute, 'appearance']);
+    });
+
+    fs.writeFileSync(layoutPath, JSON.stringify(layout, null, 2), 'utf8');
+  },
+
   getModels: () => {
     const models = [];
 
@@ -45,8 +69,8 @@ module.exports = {
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
 
     const attributes = [];
-    _.forEach(model.attributes, (params, name) => {
-      const relation = _.find(model.associations, { alias: name });
+    _.forEach(model.attributes, (params, attr) => {
+      const relation = _.find(model.associations, { alias: attr });
 
       if (relation &&  !_.isArray(_.get(relation, relation.alias))) {
         if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
@@ -63,8 +87,13 @@ module.exports = {
         }
       }
 
+      const appearance = _.get(strapi.plugins, [source || 'content-manager', 'config', 'layout', name, 'attributes', attr, 'appearance']);
+      if (appearance) {
+        _.set(params, ['appearance', appearance], true);
+      }
+
       attributes.push({
-        name,
+        name: attr,
         params
       });
     });

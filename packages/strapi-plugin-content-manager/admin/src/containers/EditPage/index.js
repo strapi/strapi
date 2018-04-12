@@ -34,12 +34,10 @@ import inputValidations from 'utils/inputsValidations';
 
 import { checkFormValidity } from 'utils/formValidations';
 
-// Layout
-import layout from '../../../../config/layout';
-
 import {
   changeData,
   getData,
+  getLayout,
   initModelProps,
   onCancel,
   resetProps,
@@ -60,6 +58,8 @@ export class EditPage extends React.Component {
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
+    } else {
+      this.props.getLayout(this.getSource());
     }
 
     // Get all relations made with the upload plugin
@@ -108,7 +108,7 @@ export class EditPage extends React.Component {
    * @return {[type]} [description]
    */
   getLayout = () => (
-    bindLayout.call(this, get(this.context.plugins.toJS(), `${this.getSource()}.layout`, layout))
+    bindLayout.call(this, this.props.editPage.layout)
   )
 
   /**
@@ -214,8 +214,6 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   }
 
-  layout = bindLayout.call(this, layout);
-
   componentDidCatch(error, info) {
     console.log('err', error);
     console.log('info', info);
@@ -283,23 +281,26 @@ export class EditPage extends React.Component {
                     onBlur={this.handleBlur}
                     onChange={this.handleChange}
                     record={editPage.record}
+                    resetProps={editPage.resetProps}
                     schema={this.getSchema()}
                   />
                 </div>
               </div>
-              <div className={cn('col-lg-3', this.isRelationComponentNull() ? 'hidden-xl-down' : '')}>
-                <div className={styles.sub_wrapper}>
-                  {!this.isRelationComponentNull() && (
-                    <EditRelations
-                      currentModelName={this.getModelName()}
-                      location={this.props.location}
-                      changeData={this.props.changeData}
-                      record={editPage.record}
-                      schema={this.getSchema()}
-                    />
-                  )}
+              {!this.isRelationComponentNull() && (
+                <div className={cn('col-lg-3')}>
+                  <div className={styles.sub_wrapper}>
+                    {!this.isRelationComponentNull() && (
+                      <EditRelations
+                        currentModelName={this.getModelName()}
+                        location={this.props.location}
+                        changeData={this.props.changeData}
+                        record={editPage.record}
+                        schema={this.getSchema()}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </form>
@@ -320,6 +321,7 @@ EditPage.propTypes = {
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
+  getLayout: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
@@ -338,6 +340,7 @@ function mapDispatchToProps(dispatch) {
     {
       changeData,
       getData,
+      getLayout,
       initModelProps,
       onCancel,
       resetProps,

@@ -13,7 +13,7 @@ import cn from 'classnames';
 import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
-import InputSelect from 'components/InputSelect'
+import InputSelect from 'components/InputSelect';
 
 import styles  from './styles.scss';
 
@@ -59,7 +59,6 @@ class InputSelectWithErrors extends React.Component {
       customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
-      errors,
       errorsClassName,
       errorsStyle,
       inputClassName,
@@ -81,7 +80,8 @@ class InputSelectWithErrors extends React.Component {
     } = this.props;
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerSelect,
           customBootstrapClass,
           !isEmpty(className) && className,
@@ -202,7 +202,7 @@ InputSelectWithErrors.propTypes = {
   ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  validation: PropTypes.object,
+  validations: PropTypes.object,
   value: PropTypes.string.isRequired,
 };
 

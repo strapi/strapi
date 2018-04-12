@@ -9,10 +9,13 @@
   "app.components.DownloadInfo.text": "To może chwilę potrwać. Dziękujemy za cierpliwość.",
 
   "app.components.HomePage.welcome": "Witaj na pokładzie!",
-  "app.components.HomePage.description.part1": "Cieszymy się, że jesteś jednym z naszych użytkowników!",
-  "app.components.HomePage.description.part2": "Należysz teraz do społeczności która pomoże ci zbudować wymarzoną aplikację.",
-  "app.components.HomePage.button": "Stwórz swój pierwszy model",
-  "app.components.HomePage.feedback": "Możesz zadawać pytania lub przesyłać nam opinie, korzystając z jednego z poniższych kanałów pomocy.",
+  "app.components.HomePage.create": "Create your first Content Type",
+  "app.components.HomePage.welcomeBlock.content": "We are happy to have you as one of community member. We are constantly looking for feedback so feel free to send us DM on\u0020",
+  "app.components.HomePage.welcomeBlock.content.issues": "issues",
+  "app.components.HomePage.welcomeBlock.content.raise": "\u0020or raise\u0020",
+  "app.components.HomePage.createBlock.content.first": "The\u0020",
+  "app.components.HomePage.createBlock.content.second": "\u0020plugin will help you to define the data structure of your models. If you’re new here, we highly recommend you to follow our\u0020",
+  "app.components.HomePage.createBlock.content.tutorial": "\u0020tutorial.",
 
   "app.components.InputFile.newFile": "DODAJ NOWY PLIK",
   "app.components.InputFileDetails.open": "Otwórz w nowej karcie",
@@ -101,6 +104,21 @@
   "components.Input.error.custom-error": "{errorMessage} ",
 
   "components.ListRow.empty": "Nie ma żadnych danych do wyświetlenia.",
+
+  "components.Wysiwyg.collapse": "Collapse",
+  "components.Wysiwyg.selectOptions.title": "Add a title",
+  "components.Wysiwyg.selectOptions.H1": "Title H1",
+  "components.Wysiwyg.selectOptions.H2": "Title H2",
+  "components.Wysiwyg.selectOptions.H3": "Title H3",
+  "components.Wysiwyg.selectOptions.H4": "Title H4",
+  "components.Wysiwyg.selectOptions.H5": "Title H5",
+  "components.Wysiwyg.selectOptions.H6": "Title H6",
+  "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
+  "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
+  "components.WysiwygBottomControls.charactersIndicators": "characters",
+  "components.WysiwygBottomControls.uploadFiles": "Attach files by dragging & dropping, {browse}, or pasting from the clipboard.",
+  "components.WysiwygBottomControls.uploadFiles.browse": "selecting them",
+  "components.WysiwygBottomControls.fullscreen": "Expand",
 
   "notification.error": "Wystąpił błąd",
 

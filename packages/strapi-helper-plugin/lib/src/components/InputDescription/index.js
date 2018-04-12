@@ -21,7 +21,8 @@ function InputDescription(props) {
     content = props.message();
   }
   return (
-    <div className={cn(
+    <div
+      className={cn(
         styles.inputDescriptionContainer,
         !isEmpty(props.className) && props.className
       )}

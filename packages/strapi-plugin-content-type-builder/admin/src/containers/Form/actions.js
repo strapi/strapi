@@ -7,7 +7,7 @@
 /* eslint-disable new-cap */
 
 import { concat, includes, map, forEach, replace } from 'lodash';
-import { Map, List } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 import { getValidationsFromForm } from '../../utils/formValidations';
 import { storeData } from '../../utils/storeData';
 
@@ -46,13 +46,9 @@ export function changeInput(key, value, isEditing) {
 }
 
 export function changeInputAttribute(key, value) {
-  const keys = key.split('.');
-  const firstKey = keys[0];
-  const secondKey = keys[1];
   return {
     type: CHANGE_INPUT_ATTRIBUTE,
-    firstKey,
-    secondKey,
+    keys: ['modifiedDataAttribute'].concat(key.split('.')),
     value,
   };
 }
@@ -65,7 +61,6 @@ export function connectionsFetch() {
 
 export function connectionsFetchSucceeded(data) {
   const connections = map(data.connections, (connection) => ({ name: connection, value: connection }));
-  // connections.splice(0,0, { name: '', value: '' });
   return {
     type: CONNECTIONS_FETCH_SUCCEEDED,
     connections,
@@ -175,7 +170,7 @@ export function setAttributeFormEdit(hash, contentType) {
 
   const attribute = Map({
     name: contentTypeAttribute.name,
-    params: Map(contentTypeAttribute.params),
+    params: fromJS(contentTypeAttribute.params),
   });
 
   return {
@@ -252,6 +247,9 @@ function setAttributeFormData(hash) {
   const attribute = Map({
     name: '',
     params: Map({
+      appearance: Map({
+        WYSIWYG: false,
+      }),
       type,
       default: defaultValue,
       required: false,

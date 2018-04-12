@@ -90,28 +90,46 @@ module.exports = {
                 strapi.query(details.model || details.collection, details.plugin).findOne({ id : recordId })
                   .then(record => {
                     if (record && _.isObject(record[details.via])) {
-                      return module.exports.update.call(this, {
-                        id: record[details.via][this.primaryKey] || record[details.via].id,
-                        values: {
-                          [current]: null
-                        },
-                        parseRelationships: false
-                      });
+                      virtualFields.push(
+                        module.exports.update.call(this, {
+                          id: record[details.via][this.primaryKey] || record[details.via].id,
+                          values: {
+                            [current]: null
+                          },
+                          parseRelationships: false
+                        })
+                      );
                     }
-
                     return Promise.resolve();
                   })
-              );
+                  .then(response => {
+                    // Updating the new relations
+                    // When params.values[current] is null this means that we are removing the relation.
+                    // Recreate relation on the first side
+                    virtualFields.push(
+                      strapi.query(details.model || details.collection, details.plugin).update({
+                        id: recordId,
+                        values: {
+                          [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
+                        },
+                        parseRelationships: false
+                      })
+                    );
 
-              // Update the record on the other side.
-              // When params.values[current] is null this means that we are removing the relation.
-              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).update({
-                id: recordId,
-                values: {
-                  [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
-                },
-                parseRelationships: false
-              }));
+                    // Recreate relation on the other side if the value is not null
+                    if (!_.isNull(params.values[current])) {
+                      virtualFields.push(
+                        module.exports.update.call(this, {
+                          id: value[this.primaryKey] || value.id || value._id,
+                          values: {
+                            [current]: recordId
+                          },
+                          parseRelationships: false
+                        })
+                      );
+                    }
+                  })
+              );
 
               acc[current] = _.isNull(params.values[current]) ? null : value[current];
             }
