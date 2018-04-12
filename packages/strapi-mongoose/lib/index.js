@@ -55,7 +55,7 @@ module.exports = function (strapi) {
         if (!_.isEmpty(authenticationDatabase)) {
           connectOptions.authSource = authenticationDatabase;
         }
-        connectOptions.ssl = (_.isBoolean(ssl) && ssl) || ssl === 'true';
+        connectOptions.ssl = ssl === true || ssl === 'true';
 
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 
