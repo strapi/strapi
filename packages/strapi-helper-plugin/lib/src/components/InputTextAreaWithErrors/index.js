@@ -94,7 +94,8 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerTextArea,
           customBootstrapClass,
           !isEmpty(className) && className,

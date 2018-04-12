@@ -137,6 +137,8 @@ class Edit extends React.PureComponent {
             const details = this.state.displayedFields[attr];
             // Retrieve the input's bootstrapClass from the layout
             const layout = this.getInputLayout(attr);
+            const appearance = get(layout, 'appearance');
+            const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
 
             return (
               <Input
@@ -150,9 +152,10 @@ class Edit extends React.PureComponent {
                 name={attr}
                 onBlur={this.props.onBlur}
                 onChange={this.props.onChange}
-                selectOptions={get(this.props.attributes, [attr, 'enum'])}
                 placeholder={get(layout, 'placeholder') || details.placeholder}
-                type={get(layout, 'type', getInputType(details.type))}
+                resetProps={this.props.resetProps}
+                selectOptions={get(this.props.attributes, [attr, 'enum'])}
+                type={type}
                 validations={this.getInputValidations(attr)}
                 value={this.props.record[attr]}
               />
@@ -172,6 +175,7 @@ Edit.defaultProps = {
   onBlur: () => {},
   onChange: () => {},
   record: {},
+  resetProps: false,
   schema: {},
 };
 
@@ -184,6 +188,7 @@ Edit.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
   record: PropTypes.object,
+  resetProps: PropTypes.bool,
   schema: PropTypes.object,
 };
 

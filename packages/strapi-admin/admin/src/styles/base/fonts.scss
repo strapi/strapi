@@ -143,10 +143,95 @@
   src: url("styles/fonts/lato/lato-black-italic/lato-black-italic.woff2") format("woff2"), url("styles/fonts/lato/lato-black-italic/lato-black-italic.woff") format("woff");
 }
 
+
+
+
 @font-face {
   font-family: 'FontAwesome';
   src: url('styles/fonts/fontawesome/fontawesome-webfont.eot?v=4.7.0');
   src: url('styles/fonts/fontawesome/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'), url('styles/fonts/fontawesome/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), url('styles/fonts/fontawesome/fontawesome-webfont.woff?v=4.7.0') format('woff'), url('styles/fonts/fontawesome/fontawesome-webfont.ttf?v=4.7.0') format('truetype'), url('styles/fonts/fontawesome/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
   font-weight: normal;
   font-style: normal;
+}
+
+
+/* OpenSans (light, regular) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 300;
+  font-style: normal;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-light/open-sans-light.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-light/open-sans-light.woff") format("woff");
+}
+/* OpenSans (light, italic) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 300;
+  font-style: italic;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-light-italic/open-sans-light-italic.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-light-italic/open-sans-light-italic.woff") format("woff");
+}
+/* OpenSans (normal, regular) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 400;
+  font-style: normal;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-regular/open-sans-regular.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-regular/open-sans-regular.woff") format("woff");
+}
+/* OpenSans (normal, italic) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 400;
+  font-style: italic;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-regular-italic/open-sans-regular-italic.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-regular-italic/open-sans-regular-italic.woff") format("woff");
+}
+/* OpenSans (semibold, regular) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 500;
+  font-style: normal;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-semi-bold/open-sans-semi-bold.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-semi-bold/open-sans-semi-bold.woff") format("woff");
+}
+/* OpenSans (semibold, italic) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 500;
+  font-style: italic;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-semi-bold-italic/open-sans-semi-bold-italic.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-semi-bold-italic/open-sans-semi-bold-italic.woff") format("woff");
+}
+/* OpenSans (bold, regular) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 600;
+  font-style: normal;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-bold/open-sans-bold.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-bold/open-sans-bold.woff") format("woff");
+}
+/* OpenSans (bold, italic) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 600;
+  font-style: italic;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-bold-italic/open-sans-bold-italic.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-bold-italic/open-sans-bold-italic.woff") format("woff");
+}
+/* OpenSans (heavy, regular) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 800;
+  font-style: normal;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-extra-bold/open-sans-extra-bold.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-extra-bold/open-sans-extra-bold.woff") format("woff");
+}
+/* OpenSans (heavy, italic) */
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 800;
+  font-style: italic;
+  text-rendering: optimizeLegibility;
+  src: url("styles/fonts/open-sans/open-sans-extra-bold-italic/open-sans-extra-bold-italic.woff2") format("woff2"), url("styles/fonts/open-sans/open-sans-extra-bold-italic/open-sans-extra-bold-italic.woff") format("woff");
 }

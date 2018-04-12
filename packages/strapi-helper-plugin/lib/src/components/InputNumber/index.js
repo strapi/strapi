@@ -6,6 +6,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 function InputNumber(props) {
   return (
     <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
@@ -32,7 +33,7 @@ function InputNumber(props) {
         />
       )}
     </FormattedMessage>
-  )
+  );
 }
 
 InputNumber.defaultProps = {
@@ -54,10 +55,10 @@ InputNumber.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

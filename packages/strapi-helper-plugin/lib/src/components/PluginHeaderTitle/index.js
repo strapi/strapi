@@ -37,7 +37,7 @@ const formatData = (data) => {
   }
 
   return data;
-}
+};
 
 
 PluginHeaderTitle.defaultProps = {

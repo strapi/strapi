@@ -2,6 +2,7 @@
 coverage
 node_modules
 stats.json
+layout.json
 package-lock.json
 
 # Cruft

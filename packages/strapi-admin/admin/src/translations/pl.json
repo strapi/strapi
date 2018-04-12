@@ -105,6 +105,21 @@
 
   "components.ListRow.empty": "Nie ma żadnych danych do wyświetlenia.",
 
+  "components.Wysiwyg.collapse": "Collapse",
+  "components.Wysiwyg.selectOptions.title": "Add a title",
+  "components.Wysiwyg.selectOptions.H1": "Title H1",
+  "components.Wysiwyg.selectOptions.H2": "Title H2",
+  "components.Wysiwyg.selectOptions.H3": "Title H3",
+  "components.Wysiwyg.selectOptions.H4": "Title H4",
+  "components.Wysiwyg.selectOptions.H5": "Title H5",
+  "components.Wysiwyg.selectOptions.H6": "Title H6",
+  "components.Wysiwyg.ToggleMode.markdown": "Switch to markdown",
+  "components.Wysiwyg.ToggleMode.preview": "Switch to preview",
+  "components.WysiwygBottomControls.charactersIndicators": "characters",
+  "components.WysiwygBottomControls.uploadFiles": "Attach files by dragging & dropping, {browse}, or pasting from the clipboard.",
+  "components.WysiwygBottomControls.uploadFiles.browse": "selecting them",
+  "components.WysiwygBottomControls.fullscreen": "Expand",
+
   "notification.error": "Wystąpił błąd",
 
   "Auth & Permissions": "Użytkownicy & Uprawnienia",

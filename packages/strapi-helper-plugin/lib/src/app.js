@@ -4,19 +4,19 @@
  * This is the entry file for the application,
  * only setup and plugin code.
  */
-import './public-path.js'; // eslint-disabled-line
 
 import React from 'react';
 import { Provider } from 'react-redux';
 
 import App from 'containers/App'; // eslint-disable-line
 
+import './public-path.js'; // eslint-disable-line import/extensions
 import configureStore from './store';
 import { translationMessages } from './i18n';
 
 const tryRequireRoot = (source) => {
   try {
-    return require('../../../../admin/src/' + source + '.js').default;
+    return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
   } catch(err) {
     return null;
   }
@@ -27,7 +27,7 @@ const pluginRequirements = tryRequireRoot('requirements');
 
 const layout = (() => {
   try {
-    return require('../../../../config/layout.js');
+    return require('../../../../config/layout.js'); // eslint-disable-line import/no-unresolved
   } catch(err) {
     return null;
   }
@@ -35,7 +35,7 @@ const layout = (() => {
 
 const injectedComponents = (() => {
   try {
-    return require('injectedComponents').default;
+    return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
   } catch(err) {
     return [];
   }

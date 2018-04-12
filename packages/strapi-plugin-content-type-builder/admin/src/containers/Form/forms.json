@@ -148,6 +148,22 @@
           },
           {
             "title": {
+              "id": "content-type-builder.form.attribute.item.appearance.name"
+            },
+            "label": {
+              "id": "content-type-builder.form.attribute.item.appearance.label"
+            },
+            "name": "params.appearance.WYSIWYG",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": {
+              "id": "content-type-builder.form.attribute.item.appearance.description"
+            },
+            "inputStyle": { "fontWeight": "500" }
+          },
+          {
+            "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
             },
             "label": {
