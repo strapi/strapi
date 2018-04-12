@@ -55,6 +55,7 @@ You can also apply different parameters to the query to make more complex querie
   - `<field>_gt`: Greater than.
   - `<field>_gte`: Lower than or equal to.
   - `<field>_contains`: Contains.
+  - `<field>_containss`: Contains sensitive.
 
 Return the second decade of users which have an email that contains `@strapi.io` ordered by username.
 ```
@@ -127,6 +128,8 @@ type Query {
 }
 ```
 
+The query will use the generated controller's actions as resolvers. It means that the `posts` query will execute the `Post.find` action and the `post` query will use the `Post.findOne` action.
+
 ## Customise the GraphQL schema
 
 If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
@@ -182,6 +185,16 @@ module.exports = {
       postsByAuthor: {
         description: 'Return the posts published by the author',
         resolver: 'Post.findByAuthor'
+      },
+      postsByTags: {
+        description: 'Return the posts published by the author',
+        resolverOf: 'Post.findByTags', // Will apply the same policy on the custom resolver than the controller's action `findByTags`.
+        resolver: (obj, options, ctx) => {
+          // ctx is the context of the Koa request.
+          await strapi.controllers.posts.findByTags(ctx);
+
+          return ctx.body.posts || `There is no post.`;
+        }
       }
     }
   }
@@ -240,7 +253,7 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: 'Person.findOne'
+        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller.
       }
     }
   }
@@ -318,7 +331,7 @@ In this example, the policy `isAuthenticated` located in `./plugins/users-permis
 
 > Note: There is no custom resolver in that case, so it will execute the default resolver provided by the "Shadow CRUD" feature.
 
-### Link a query to a controller action.
+### Link a query to a controller action
 
 By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happens that you want to execute another action or a custom logic for one of your query.
 
@@ -362,6 +375,47 @@ module.exports = {
 ```
 
 You can also execute a custom logic like above. However, the roles and permissions layers won't work.
+
+### Apply permissions on a query
+
+It might happens that you want apply our permissions layer on a query. That's why, we created the `resolverOf` attribute. This attribute defines which are the permissions that should be applied to this resolver. By targeting an action it means that you're able to edit permissions for this resolver directly from the administration panel.
+
+```
+module.exports = {
+  resolver: {
+    Query: {
+      posts: {
+        description: 'Return a list of posts by author',
+        resolverOf: 'Post.find',
+        resolver: (obj, options, context) => {
+          // You can return a raw JSON object or a promise.
+
+          return [{
+            title: 'My first blog post',
+            content: 'Whatever you want...'
+          }];
+        }
+      }
+    }
+  }
+};
+```
+
+### Disable a query or a type
+
+To do that, we need to use the `schema.graphql` like below:
+```
+module.exports = {
+  type: {
+    Post: false // The Post type won't be "queriable".
+  }
+  resolver: {
+    Query: {
+      posts: false // The `posts` query will no longer be in the GraphQL schema.
+    }
+  }
+};
+```
 
 ## FAQ
 
