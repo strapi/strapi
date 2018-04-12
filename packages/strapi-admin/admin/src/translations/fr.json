@@ -120,6 +120,21 @@
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 
+  "components.Wysiwyg.collapse": "Fermer",
+  "components.Wysiwyg.selectOptions.title": "Ajouter un titre",
+  "components.Wysiwyg.selectOptions.H1": "Titre H1",
+  "components.Wysiwyg.selectOptions.H2": "Titre H2",
+  "components.Wysiwyg.selectOptions.H3": "Titre H3",
+  "components.Wysiwyg.selectOptions.H4": "Titre H4",
+  "components.Wysiwyg.selectOptions.H5": "Titre H5",
+  "components.Wysiwyg.selectOptions.H6": "Titre H6",
+  "components.Wysiwyg.ToggleMode.markdown": "Retour au markdown",
+  "components.Wysiwyg.ToggleMode.preview": "Voir la preview",
+  "components.WysiwygBottomControls.charactersIndicators": "charactères",
+  "components.WysiwygBottomControls.uploadFiles": "Ajouter des fichiers en les 'droppant', {browse}, ou en les collant depuis le presse-papier",
+  "components.WysiwygBottomControls.uploadFiles.browse": "en les selectionnant",
+  "components.WysiwygBottomControls.fullscreen": "Plein écran",
+
   "HomePage.notification.newsLetter.success": "Vous avez souscrit à la newsletter",
 
   "notification.error": "Une erreur est survenue",

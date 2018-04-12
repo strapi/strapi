@@ -3,10 +3,11 @@
  * InputsIndex references all the input with errors available
  */
 
+/* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
-
+import Loadable from 'react-loadable';
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
@@ -20,8 +21,14 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
+// import WysiwygWithErrors from 'components/WysiwygWithErrors';
+const Loading = () => <div>Loading ...</div>;
+const LoadableWysiwyg = Loadable({
+  loader: () => import('components/WysiwygWithErrors'),
+  loading: Loading,
+});
 
-const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
+const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
 
 const inputs = {
   addon: InputAddonWithErrors,
@@ -37,6 +44,7 @@ const inputs = {
   text: InputTextWithErrors,
   textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
+  wysiwyg: LoadableWysiwyg,
 };
 
 function InputsIndex(props) {
@@ -48,7 +56,7 @@ function InputsIndex(props) {
       inputValue = props.value || false;
       break;
     case 'number':
-      inputValue = props.value === 0 ? props.values : props.value || '';
+      inputValue = props.value === 0 ? props.value : props.value || '';
       break;
     case 'file':
       inputValue = props.value || [];
@@ -56,15 +64,19 @@ function InputsIndex(props) {
     default:
       inputValue = props.value || '';
   }
-  
+
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
 }
 
+DefaultInputError.propTypes = {
+  type: PropTypes.string.isRequired,
+};
+
 InputsIndex.defaultProps = {
   addon: false,
-}
+};
 
 InputsIndex.propTypes = {
   addon: PropTypes.oneOfType([
@@ -72,6 +84,7 @@ InputsIndex.propTypes = {
     PropTypes.string,
   ]),
   type: PropTypes.string.isRequired,
+  value: PropTypes.any,
 };
 
 export default InputsIndex;

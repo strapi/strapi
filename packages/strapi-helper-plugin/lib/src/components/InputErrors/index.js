@@ -16,7 +16,8 @@ function InputErrors(props) {
           <FormattedMessage {...error} values={{ errorMessage: error.errorMessage }} /> : error;
 
         return (
-          <div className={cn(
+          <div
+            className={cn(
               'form-control-feedback',
               'invalid-feedback',
               styles.errorContainer,
@@ -24,10 +25,10 @@ function InputErrors(props) {
             )}
             key={key}
             style={divStyle}
-            >
+          >
             {displayError}
           </div>
-        )
+        );
       })}
     </div>
   );

@@ -5,6 +5,7 @@
  *
  */
 
+/* eslint-disable no-console */
 import { reduce } from 'lodash';
 
 // Plugin identifier based on the package.json `name` value
@@ -23,7 +24,7 @@ const pluginId = pluginPkg.name.replace(
  */
 const formatMessages = messages => reduce(messages, (result, value, key) => {
   result[`${pluginId}.${key}`] = value;
-  
+
   return result;
 }, {});
 
