@@ -17,6 +17,15 @@ module.exports = {
     }
   },
 
+  getStrapiVersion: async ctx => {
+    try {
+      const strapiVersion = _.get(strapi.config, 'info.strapi', null);
+      return ctx.send({ strapiVersion });
+    } catch(err) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'The version is not available' }] }]);
+    }
+  },
+
   getGaConfig: async ctx => {
     try {
       const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);

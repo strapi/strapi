@@ -22,6 +22,12 @@
     },
     {
       "method": "GET",
+      "path": "/strapiVersion",
+      "handler": "Admin.getStrapiVersion",
+      "policies": []
+    },
+    {
+      "method": "GET",
       "path": "/layout",
       "handler": "Admin.getLayout",
       "policies": []
