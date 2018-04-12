@@ -163,7 +163,7 @@ export class HomePage extends React.PureComponent {
                   </div>
                   <form onSubmit={this.handleSubmit}>
                     <div className={cn(styles.homePageForm, 'row')}>
-                      <div className="col-md-6">
+                      <div className="col-md-12">
                         <Input
                           value={body.email}
                           onChange={this.props.onChange}
@@ -171,8 +171,6 @@ export class HomePage extends React.PureComponent {
                           placeholder="johndoe@gmail.com"
                           error={!isEmpty(this.state.errors)}
                         />
-                      </div>
-                      <div className="col-md-6">
                         <FormattedMessage id="app.components.HomePage.cta">
                           {message => <button type="submit">{message}</button>}
                         </FormattedMessage>

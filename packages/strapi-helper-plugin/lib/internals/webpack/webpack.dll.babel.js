@@ -32,7 +32,7 @@ const rootAdminpath = (() => {
 module.exports = {
   context: appPath,
   entry: {
-    vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash', 'babel-polyfill'] // Shared dependencies accross the admin and plugins.
+    vendor: ['react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash', 'babel-polyfill'], // Shared dependencies accross the admin and plugins.
   },
   devtool: 'cheap-module-source-map',
   output: {
@@ -47,7 +47,7 @@ module.exports = {
     new webpack.DllPlugin({
       name: '[name]_lib',
       path: path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json'),
-    })
+    }),
   ],
   resolve: {
     modules: [
@@ -65,7 +65,7 @@ module.exports = {
       'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
       'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
       'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-      'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap')
+      'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
     },
     symlinks: false,
     extensions: [

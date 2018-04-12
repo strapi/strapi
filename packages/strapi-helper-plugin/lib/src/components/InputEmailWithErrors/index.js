@@ -98,7 +98,8 @@ class InputEmailWithErrors extends React.Component { // eslint-disable-line reac
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerEmail,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className,

@@ -2,10 +2,11 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
-const _ = require('lodash');
+/* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+const _ = require('lodash');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
@@ -37,7 +38,7 @@ if (!isSetup) {
 
     (async () => {
       await strapi.load({
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
       });
     })();
   } catch (e) {
@@ -51,7 +52,7 @@ const URLs = {
   host: '/admin',
   backend: '/',
   publicPath: null,
-  mode: 'host'
+  mode: 'host',
 };
 
 if (isAdmin && !isSetup) {
@@ -80,7 +81,7 @@ if (isAdmin && !isSetup) {
       }
     }
   } catch (e) {
-    throw new Error(`Impossible to access to ${serverConfig}`)
+    throw new Error(`Impossible to access to ${serverConfig}`);
   }
 }
 
@@ -88,7 +89,7 @@ if (isAdmin && !isSetup) {
 const plugins = {
   exist: false,
   src: [],
-  folders: {}
+  folders: {},
 };
 
 if (process.env.npm_lifecycle_event === 'start') {
@@ -113,7 +114,7 @@ if (process.env.npm_lifecycle_event === 'start') {
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.join(adminPath, 'admin', 'build')
+    path: path.join(adminPath, 'admin', 'build'),
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -147,7 +148,7 @@ module.exports = (options) => ({
 
           return acc;
         }, []))
-        .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')])
+        .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]),
     }, {
       // Transform our own .scss files
       test: /\.scss$/,
@@ -160,7 +161,7 @@ module.exports = (options) => ({
           modules: true,
           importLoaders: 1,
           sourceMap: true,
-          minimize: process.env.NODE_ENV === 'production'
+          minimize: process.env.NODE_ENV === 'production',
         },
       }, {
         loader: 'postcss-loader',
@@ -185,7 +186,7 @@ module.exports = (options) => ({
         options: {
           minimize: process.env.NODE_ENV === 'production',
           sourceMap: true,
-        }
+        },
       }],
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
@@ -238,7 +239,7 @@ module.exports = (options) => ({
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
       },
     }),
-    new webpack.NamedModulesPlugin()
+    new webpack.NamedModulesPlugin(),
   ].concat(options.plugins),
   resolve: {
     modules: [

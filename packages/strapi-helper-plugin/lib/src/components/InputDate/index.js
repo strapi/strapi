@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import DateTimeStyle from 'react-datetime/css/react-datetime.css';
+// import DateTimeStyle from 'react-datetime/css/react-datetime.css';
 import DateTime from 'react-datetime';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject } from 'lodash';
@@ -15,6 +15,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/jsx-boolean-value */
 function InputDate(props) {
   const value = isObject(props.value) && props.value._isAMomentObject === true ? props.value : moment(props.value);
 
@@ -76,10 +77,10 @@ InputDate.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

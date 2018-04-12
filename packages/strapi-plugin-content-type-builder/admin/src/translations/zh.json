@@ -14,14 +14,14 @@
   "attribute.email": "Email",
   "attribute.password": "密碼",
   "attribute.relation": "關聯其他結構",
+  "attribute.WYSIWYG": "Text (WYSIWYG)",
 
   "contentType.temporaryDisplay": "(未儲存)",
   "from": "從",
   "home.contentTypeBuilder.name": "資料結構",
   "home.contentTypeBuilder.description": "建立和更新資料結構.",
   "home.emptyContentType.title": "沒有任何資料結構",
-  "home.emptyContentType.description":
-    "建立您第一個資料結構，讓您能夠從 API 擷取資料。",
+  "home.emptyContentType.description": "建立您第一個資料結構，讓您能夠從 API 擷取資料。",
 
   "home.emptyAttributes.title": "目前沒有任何欄位",
   "home.emptyAttributes.description": "新增您第一個欄位到您的資料結構",
@@ -56,8 +56,7 @@
   "form.attribute.item.minimumLength": "最小長度",
   "form.attribute.item.maximumLength": "最大長度",
   "form.attribute.item.maximum": "最大數值",
-  "form.attribute.item.requiredField.description":
-    "如果這個欄位留空，您將不能建立進入點。",
+  "form.attribute.item.requiredField.description": "如果這個欄位留空，您將不能建立進入點。",
   "form.attribute.item.uniqueField.description":
     "如果已存在的進入點有一模一樣的內容，您將不能建立進入點。",
   "form.attribute.item.defineRelation.fieldName": "欄位名稱",
@@ -93,8 +92,7 @@
   "menu.section.documentation.tutorial": "請看看我們的",
   "menu.section.documentation.tutorialLink": "教學影片",
 
-  "modelPage.contentHeader.emptyDescription.description":
-    "這個資料結構沒有任何說明",
+  "modelPage.contentHeader.emptyDescription.description": "這個資料結構沒有任何說明",
   "modelPage.contentType.list.title.plural": "欄位",
   "modelPage.contentType.list.title.singular": "欄位",
   "modelPage.contentType.list.title.including": "包含",
@@ -106,8 +104,7 @@
   "noTableWarning.infos": "更多資訊",
 
   "notification.error.message": "有錯誤發生了",
-  "notification.info.contentType.creating.notSaved":
-    "建立新的資料結構前，請先儲存現在的。",
+  "notification.info.contentType.creating.notSaved": "建立新的資料結構前，請先儲存現在的。",
   "notification.info.optimized": "這個擴充功能使用您的 localstorage 來最佳化",
   "notification.success.message.contentType.edit": "您的資料結構已更新",
   "notification.success.message.contentType.create": "您的資料結構已建立",

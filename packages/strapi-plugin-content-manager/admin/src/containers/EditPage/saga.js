@@ -17,12 +17,13 @@ import templateObject from 'utils/templateObject';
 
 import {
   getDataSucceeded,
+  getLayoutSucceeded,
   setFormErrors,
   setLoader,
   submitSuccess,
   unsetLoader,
 } from './actions';
-import { GET_DATA,SUBMIT } from './constants';
+import { GET_DATA, GET_LAYOUT, SUBMIT } from './constants';
 import {
   makeSelectFileRelations,
   makeSelectIsCreating,
@@ -35,16 +36,25 @@ function* dataGet(action) {
   try {
     const modelName = yield select(makeSelectModelName());
     const params = { source: action.source };
-    const response = yield call(
-      request,
-      `/content-manager/explorer/${modelName}/${action.id}`,
-      { method: 'GET', params },
-    );
-
+    const [response, layout] = yield [
+      call(request, `/content-manager/explorer/${modelName}/${action.id}`, { method: 'GET', params }),
+      call(request, '/content-manager/layout', { method: 'GET', params }),
+    ];
     const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
+    yield put(getLayoutSucceeded(layout));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
+  }
+}
+
+function* layoutGet(action) {
+  try {
+    const params = { source: action.source };
+    const response = yield call(request, '/content-manager/layout', { method: 'GET', params });
+    yield put(getLayoutSucceeded(response));
+  } catch(err) {
+    strapi.notification('notification.error');
   }
 }
 
@@ -84,7 +94,7 @@ export function* submit() {
 
       return acc;
     }, new FormData());
-    
+
     const id = isCreating ? '' : record.id || record._id;
     const params = { source };
     // Change the request helper default headers so we can pass a FormData
@@ -133,6 +143,7 @@ export function* submit() {
 
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_LAYOUT, layoutGet);
   yield fork(takeLatest, SUBMIT, submit);
 
   yield take(LOCATION_CHANGE);

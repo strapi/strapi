@@ -8,6 +8,6 @@ const cleanData = (value, key, secondKey) => {
   } else {
     return value;
   }
-}
+};
 
 export default cleanData;

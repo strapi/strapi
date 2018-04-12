@@ -11,7 +11,6 @@ import { isEmpty, isObject, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputCheckbox from 'components/InputCheckbox';
@@ -44,7 +43,6 @@ class InputCheckboxWithErrors extends React.Component {
       autoFocus,
       className,
       customBootstrapClass,
-      deactivateErrorHighlight,
       disabled,
       errorsClassName,
       errorsStyle,
@@ -54,8 +52,6 @@ class InputCheckboxWithErrors extends React.Component {
       inputDescriptionStyle,
       inputStyle,
       label,
-      labelClassName,
-      labelStyle,
       name,
       noErrorsDescription,
       onBlur,
@@ -90,7 +86,8 @@ class InputCheckboxWithErrors extends React.Component {
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.container,
           customBootstrapClass,
           !isEmpty(className) && className,
@@ -122,7 +119,7 @@ class InputCheckboxWithErrors extends React.Component {
           errors={this.state.errors}
           style={errorsStyle}
         />
-      {spacer}
+        {spacer}
       </div>
     );
   }
@@ -132,7 +129,6 @@ InputCheckboxWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-3',
-  deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
   onBlur: () => {},
@@ -146,21 +142,17 @@ InputCheckboxWithErrors.defaultProps = {
   inputDescriptionStyle: {},
   inputStyle: {},
   label: '',
-  labelClassName: '',
-  labelStyle: {},
   noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
   title: '',
-  validations: {},
   value: false,
 };
 InputCheckboxWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
-  deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
   errors: PropTypes.array,
@@ -186,8 +178,6 @@ InputCheckboxWithErrors.propTypes = {
       params: PropTypes.object,
     }),
   ]),
-  labelClassName: PropTypes.string,
-  labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([
@@ -207,7 +197,6 @@ InputCheckboxWithErrors.propTypes = {
       params: PropTypes.object,
     }),
   ]),
-  validations: PropTypes.object,
   value: PropTypes.bool,
 };
 
