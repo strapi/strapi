@@ -11,13 +11,12 @@ import { includes } from 'lodash';
 const Link = props => {
   const { url, aHref, aInnerHTML } = props.contentState.getEntity(props.entityKey).getData();
   let content = aInnerHTML;
-  console.log(aInnerHTML);
 
   if (includes(aInnerHTML, '<img', 'src=')) {
     const src = aInnerHTML.split('src="')[1].split('" ')[0];
     const width = includes(aInnerHTML, 'width=') ? aInnerHTML.split('width="')[1].split('" ')[0] : '';
     const height = includes(aInnerHTML, 'height=') ? aInnerHTML.split('height="')[1].split('" ')[0] : '';
-    content = <img src={src} alt="img" width={width} height={height} style={{ maxWidth: '100%' }} />;
+    content = <img src={src} alt="img" width={width} height={height} style={{ marginTop: '27px', maxWidth: '100%' }} />;
   }
 
   return (

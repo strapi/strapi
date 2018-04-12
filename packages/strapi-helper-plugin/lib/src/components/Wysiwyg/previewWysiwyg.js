@@ -188,7 +188,7 @@ class PreviewWysiwyg extends React.PureComponent {
     // TODO:
     // in the same way, retrieve all <pre> tags
     // create custom atomic block
-    // create
+    // create custom code block
     let blocksFromHTML = convertFromHTML(html.body.innerHTML);
 
     if (blocksFromHTML.contentBlocks) {

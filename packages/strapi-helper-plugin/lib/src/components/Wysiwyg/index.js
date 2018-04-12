@@ -616,11 +616,6 @@ class Wysiwyg extends React.Component {
       });
   };
 
-  componentDidCatch(error, info) {
-    console.log('err', error);
-    console.log('info', info);
-  }
-
   renderDrop = () => (
     <Drop
       onDrop={this.handleDrop}
