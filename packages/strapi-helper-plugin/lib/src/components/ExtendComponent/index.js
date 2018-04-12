@@ -40,12 +40,12 @@ ExtendComponent.contextTypes = {
   plugins: PropTypes.object,
   router: PropTypes.object,
   updatePlugin: PropTypes.func,
-}
+};
 
 ExtendComponent.propTypes = {
   area: PropTypes.string.isRequired,
-  container: PropTypes.string.isRequired,
   children: PropTypes.node,
+  container: PropTypes.string.isRequired,
   plugin: PropTypes.string.isRequired,
 };
 

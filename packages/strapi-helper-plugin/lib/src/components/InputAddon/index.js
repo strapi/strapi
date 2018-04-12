@@ -11,6 +11,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/no-autofocus */
 class InputAddon extends React.Component {
   state = { isFocused: false };
 
@@ -47,7 +48,8 @@ class InputAddon extends React.Component {
       <div className={cn(styles.inputAddon, 'input-group', !isEmpty(className) && className)} style={style}>
         <FormattedMessage id={addon} defaultMessage={upperFirst(addon)}>
           {(message) => (
-            <span className={cn(
+            <span
+              className={cn(
                 'input-group-addon',
                 styles.addon,
                 this.state.isFocused && styles.addonFocus,
@@ -106,13 +108,13 @@ InputAddon.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onBlur: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.bool,
   ]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
-  name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,

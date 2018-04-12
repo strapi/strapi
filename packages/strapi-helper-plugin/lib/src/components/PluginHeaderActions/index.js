@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { isArray, isFunction } from 'lodash';
 
 import Button from 'components/Button';

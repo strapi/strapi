@@ -27,15 +27,17 @@ const initialState = fromJS({
 function listPageReducer(state = initialState, action) {
   switch (action.type) {
     case DELETE_DATA_SUCCESS:
-      return state.update('records', (list) => (
-        list.filter(obj => {
-          if (obj._id) {
-            return obj._id !== action.id;
-          }
+      return state
+        .update('records', (list) => (
+          list.filter(obj => {
+            if (obj._id) {
+              return obj._id !== action.id;
+            }
 
-          return obj.id !== parseInt(action.id, 10);
-        })
-      ));
+            return obj.id !== parseInt(action.id, 10);
+          })
+        ))
+        .update('count', (v) => v = v - 1);
     case CHANGE_PARAMS:
       return state.updateIn(action.keys, () => action.value);
     case GET_DATA_SUCCEEDED:

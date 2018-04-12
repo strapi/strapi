@@ -31,21 +31,27 @@ class Li extends React.Component {
 
   getUnit = (value) => {
     let unit;
+    let divider;
+    
     switch (true) {
       case value > 10000:
         unit = 'GB';
+        divider = 1000;
         break;
       case value < 1:
         unit = 'B';
+        divider = 1;
         break;
       case value > 1000:
         unit = 'MB';
+        divider = 1000;
         break;
       default:
         unit = 'KB';
+        divider = 1;
     }
 
-    return unit;
+    return { divider, unit };
   }
 
   handleClick = (e) => {
@@ -111,10 +117,11 @@ class Li extends React.Component {
               }
 
               if (value === 'size') {
-                const unit = this.getUnit(item[value]);
+                const { divider, unit } = this.getUnit(item[value]);
+                const size = item[value]/divider;
 
                 return (
-                  <div key={key} className={styles.truncate}>{item[value]}&nbsp;{unit}</div>
+                  <div key={key} className={styles.truncate}>{Math.round(size * 100) / 100 }&nbsp;{unit}</div>
                 );
               }
 
