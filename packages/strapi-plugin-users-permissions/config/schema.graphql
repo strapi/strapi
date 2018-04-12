@@ -13,6 +13,7 @@ module.exports = {
         }
       },
       roles: {
+        description: `Retrieve all the existing roles. You can't apply filters on this query.`,
         resolverOf: 'UsersPermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
         resolver: async (obj, options, ctx) => {
           await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(ctx);
