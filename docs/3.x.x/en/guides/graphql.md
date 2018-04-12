@@ -12,9 +12,21 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphiql](http://localhost:1337/graphiql). You should see the interface (GraphiQL) that will help you to write GraphQL query to explore your data.
 
+## Configurations
+
+By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL is set to `/graphql`. You can edit these configurations in the following files.
+
+**Path —** `./plugins/graphql/config/settings.json`.
+```
+{
+  "endpoint": "/graphql",
+  "shadowCRUD": true
+}
+```
+
 ### Query API
 
-In the section, we assume that the "Shadow CRUD" feature is enabled. For each model, the plugin auto-generates queries which just fit to your needs.
+In the section, we assume that the Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries which just fit to your needs.
 
 ##### Fetch a single entry
 
@@ -81,9 +93,10 @@ query {
 }
 ```
 
+
 ## Shadow CRUD
 
-To simplify and automate the build of the GraphQL schema, we introduced the "Shadow CRUD" feature. It automatically generates the type definition, queries and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
+To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
 
 #### Example
@@ -135,7 +148,7 @@ The query will use the generated controller's actions as resolvers. It means tha
 If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
 
 **Structure —** `schema.graphql`.
-```
+```js
 module.exports = {
   definition: ``,
   query: ``,
@@ -148,7 +161,7 @@ module.exports = {
 
 - `definition` (string): let's you define new type, input, etc.
 - `query` (string): where you add custom query.
-- `type` (object): allows you to add description, deprecated field or disable the "Shadow CRUD" feature on a specific type.
+- `type` (object): allows you to add description, deprecated field or disable the [Shadow CRUD](#shadow-crud) feature on a specific type.
 - `resolver` (object):
   - `Query` (object): let's you define custom resolver, policies for a query.
 
@@ -158,7 +171,7 @@ module.exports = {
 Let say we are using the same previous `Post` model.
 
 **Path —** `./api/post/config/schema.graphql`.
-```
+```js
 module.exports = {
   definition: `
     enum PostStatusInput {
@@ -207,7 +220,7 @@ Edit the `definition` attribute in one of the `schema.graphql` files of your pro
 
 > Note: The easiest way is to create a new model using the CLI `strapi generate:model category --api post`, so you don't need to customise anything.
 
-```
+```js
 module.exports = {
   definition: `
     type Person {
@@ -223,7 +236,7 @@ module.exports = {
 
 To explore the data of the new type `Person`, you need to define a query and associate a resolver to this query.
 
-```
+```js
 module.exports = {
   definition: `
     type Person {
@@ -297,7 +310,7 @@ It might happens that you want to add a description to a query or deprecate it. 
 > Remember: The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
 
 **Path —** `./api/post/config/schema.graphql`.
-```
+```js
 module.exports = {
   resolver: {
     Query: {
@@ -310,11 +323,11 @@ module.exports = {
 };
 ```
 
-### Add/execute a policy before a resolver
+### Execute a policy before a resolver
 
 Sometimes a query needs to be only accessible to authenticated user. To handle this, Strapi provides a solid policy system. A policy is a function executed before the final action (the resolver). You can define an array of policy that will be executed in order.
 
-```
+```js
 module.exports = {
   resolver: {
     Query: {
@@ -329,13 +342,13 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-> Note: There is no custom resolver in that case, so it will execute the default resolver provided by the "Shadow CRUD" feature.
+> Note: There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
 
 ### Link a query to a controller action
 
 By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happens that you want to execute another action or a custom logic for one of your query.
 
-```
+```js
 module.exports = {
   resolver: {
     Query: {
@@ -354,7 +367,7 @@ In this example, it will execute the `findByAuthor` action of the `Post` control
 
 ### Define a custom resolver
 
-```
+```js
 module.exports = {
   resolver: {
     Query: {
@@ -380,13 +393,13 @@ You can also execute a custom logic like above. However, the roles and permissio
 
 It might happens that you want apply our permissions layer on a query. That's why, we created the `resolverOf` attribute. This attribute defines which are the permissions that should be applied to this resolver. By targeting an action it means that you're able to edit permissions for this resolver directly from the administration panel.
 
-```
+```js
 module.exports = {
   resolver: {
     Query: {
       posts: {
         description: 'Return a list of posts by author',
-        resolverOf: 'Post.find',
+        resolverOf: 'Post.find', // Will apply the same policy on the custom resolver than the controller's action `find` located in `Post.js`.
         resolver: (obj, options, context) => {
           // You can return a raw JSON object or a promise.
 
@@ -404,7 +417,8 @@ module.exports = {
 ### Disable a query or a type
 
 To do that, we need to use the `schema.graphql` like below:
-```
+
+```js
 module.exports = {
   type: {
     Post: false // The Post type won't be "queriable".
