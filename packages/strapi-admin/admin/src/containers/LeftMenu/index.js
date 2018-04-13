@@ -27,7 +27,7 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
 }
 
 LeftMenu.defaultProps = {
-  version: '3.0.0-alpha',
+  version: '3',
 };
 
 LeftMenu.propTypes = {

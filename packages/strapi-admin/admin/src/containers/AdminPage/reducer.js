@@ -15,7 +15,7 @@ import {
 const initialState = fromJS({
   allowGa: true,
   layout: Map({}),
-  strapiVersion: '3.0.0-alpha',
+  strapiVersion: '3',
 });
 
 function adminPageReducer(state = initialState, action) {
