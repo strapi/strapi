@@ -137,13 +137,19 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   render() {
-    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} layout={this.props.adminPage.layout} /> : '';
+    const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
 
     return (
       <div className={styles.adminPage}>
-        {leftMenu}
+        {this.showLeftMenu() && (
+          <LeftMenu
+            plugins={this.props.plugins}
+            layout={adminPage.layout}
+            version={adminPage.strapiVersion}
+          />
+        )}
         { auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props) ? (
           <Logout />
         ) : ''}
