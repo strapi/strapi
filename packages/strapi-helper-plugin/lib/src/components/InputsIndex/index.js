@@ -6,7 +6,7 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 import Loadable from 'react-loadable';
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
@@ -65,6 +65,8 @@ function InputsIndex(props) {
       inputValue = props.value || '';
   }
 
+  merge(inputs, props.customInputs);
+  
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
@@ -76,6 +78,7 @@ DefaultInputError.propTypes = {
 
 InputsIndex.defaultProps = {
   addon: false,
+  customInputs: {},
 };
 
 InputsIndex.propTypes = {
@@ -83,6 +86,7 @@ InputsIndex.propTypes = {
     PropTypes.bool,
     PropTypes.string,
   ]),
+  customInputs: PropTypes.object,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
 };

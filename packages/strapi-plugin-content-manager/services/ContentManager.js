@@ -59,7 +59,7 @@ module.exports = {
       });
 
       // Then, request plugin upload.
-      if (strapi.plugins.upload) {
+      if (strapi.plugins.upload && !_.isEmpty(values.files)) {
         // Upload new files and attach them to this entity.
         await strapi.plugins.upload.services.upload.uploadToEntity({
           id: entry.id || entry._id,
