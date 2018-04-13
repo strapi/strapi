@@ -30,8 +30,9 @@ function EditRelations(props) {
         {(message) => <h3>{message}</h3>}
       </FormattedMessage>
       {map(filterRelationsUpload(props.schema.relations), (relation, key) => {
+        if (relation.nature.toLowerCase().includes('morph') && relation[key]) return '';
 
-        const Select = ['oneWay', 'oneToOne', 'manyToOne'].includes(relation.nature) && relation.dominant ? SelectOne : SelectMany;
+        const Select = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature) && relation.dominant ? SelectOne : SelectMany;
 
         return (
           <Select
