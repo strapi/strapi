@@ -14,13 +14,14 @@ module.exports = {
       .count());
   },
 
-  findOne: async function (params, populate) {
-    return this
+  findOne: async function (params, populate, raw = true) {
+    const query = this
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();
+      .populate(populate || this.associations.map(x => x.alias).join(' '));
+
+    return raw ? query.lean() : query;
   },
 
   create: async function (params) {
@@ -300,18 +301,18 @@ module.exports = {
       However the upload doesn't need this method. It only uses the `removeRelationMorph`.
     */
 
-    const entry = await module.exports.findOne.call(this, params, []);
-    const value = entry[params.alias] || [];
+    const entry = (await module.exports.findOne.call(this, params, [], false)).toJSON();
+    const value = [];
 
     // Retrieve association.
-    const association = this.associations.find(association => association.via === params.alias)[0];
+    const association = this.associations.find(association => association.alias === params.alias);
 
     if (!association) {
       throw Error(`Impossible to create relationship with ${params.ref} (${params.refId})`);
     }
 
     // Resolve if the association is already existing.
-    const isExisting = entry[params.alias].find(obj => {
+    const isExisting = value.find(obj => {
       if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
         return true;
       }
@@ -326,9 +327,10 @@ module.exports = {
 
     // Push new relation to the association array.
     value.push({
-      ref: params.refId,
+      ref: params.ref,
+      refId: params.refId,
       kind: params.ref,
-      field: association.filter
+      field: params.field
     });
 
     entry[params.alias] = value;
