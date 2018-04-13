@@ -141,7 +141,7 @@ export class HomePage extends React.PureComponent {
                 {FIRST_BLOCK.map((value, key) => (
                   <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
                 ))}
-                <a href="https://strapi.io/getting-started" target="_blank">
+                <a href="https://strapi.io/documentation/getting-started/quick-start.html" target="_blank">
                   <Button className={styles.homePageTutorialButton} primary>
                     <FormattedMessage id="app.components.HomePage.button.quickStart" />
                   </Button>
