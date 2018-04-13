@@ -34,6 +34,14 @@
     },
     {
       "method": "GET",
+      "path": "/files/count",
+      "handler": "Upload.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/files",
       "handler": "Upload.find",
       "config": {
@@ -44,14 +52,6 @@
       "method": "GET",
       "path": "/files/:_id",
       "handler": "Upload.findOne",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/files/count",
-      "handler": "Upload.count",
       "config": {
         "policies": []
       }
