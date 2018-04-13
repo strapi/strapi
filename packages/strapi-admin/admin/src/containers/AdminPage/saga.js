@@ -1,13 +1,23 @@
+import { take } from 'lodash';
 import { fork, call, put, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
-import { getGaStatusSucceeded, getLayoutSucceeded } from './actions';
+import {
+  getGaStatusSucceeded,
+  getLayoutSucceeded,
+  getStrapiVersionSucceeded,
+} from './actions';
 import { GET_GA_STATUS, GET_LAYOUT } from './constants';
 
 function* getGaStatus() {
   try {
-    const response = yield call(request, '/admin/gaConfig', { method: 'GET' });
-    yield put(getGaStatusSucceeded(response.allowGa));
+    const [allowGa, strapiVersion] = yield [
+      call(request, '/admin/gaConfig', { method: 'GET' }),
+      call(request, '/admin/strapiVersion', { method: 'GET' }),
+    ];
+    yield put(getGaStatusSucceeded(allowGa));
+    const version = take(`${strapiVersion.strapiVersion.split('.')[0]}${strapiVersion.strapiVersion.split('alpha')[1]}`, 4).join('');
+    yield put(getStrapiVersionSucceeded(version));
   } catch(err) {
     strapi.notification.error('notification.error');
   }
