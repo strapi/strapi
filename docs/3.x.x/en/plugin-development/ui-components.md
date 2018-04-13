@@ -185,7 +185,7 @@ export default FooPage;
 
 ***
 
-## Input
+## InputsIndex
 
 Strapi provides a built-in input library which includes :
   - All kind of inputs
@@ -193,7 +193,6 @@ Strapi provides a built-in input library which includes :
   - Error highlight
   - i18n
 
-> This component is likely to be deprecated in favor of InputsWithIndex
 
 ### Usage
 
@@ -202,6 +201,7 @@ Strapi provides a built-in input library which includes :
 | `addon` | string | no | Allows to add a string addon in your input, based on [Bootstrap](https://v4-alpha.getbootstrap.com/components/input-group/#basic-example). Ex: `<Input {...this.props} addon="@" />` |
 | `addRequiredInputDesign` | bool | no | Allows to add an asterix on the input. Ex: `<Input {...this.props} addRequiredInputDesign />` |
 | `customBootstrapClass` | string | no | Allows to override the input bootstrap col system. Ex: `<Input {...this.props} customBootstrapClass="col-md-6 offset-md-6 pull-md-6" />` |
+| customInputs | Object | no | Allows to add a new input type |
 | `deactivateErrorHighlight` | bool | no | Prevents from displaying error highlight in the input: Ex: `<Input {...this.props} deactivateErrorHighlight />` |
 | `didCheckErrors` | bool | no | Use this props to display errors after submitting a form. Ex: `<Input {...this.props} didCheckErrors={this.state.error} />` |
 | `disabled` | bool | no | Disable the input. Ex: `<Input {...this.props} disabled />` |
@@ -228,7 +228,15 @@ Strapi provides a built-in input library which includes :
 import React from 'react';
 // Make sure you don't have a component called Input inside your ./components folder
 // It will import the one in your components folder instead.
-import Input from 'components/Input';
+import Input from 'components/InputsIndex';
+
+const CustomInput = (props) => {
+  return (
+    <div>
+      Some custom input
+    </div>
+  );
+}
 
 class FooPage extends React.Component {
   constructor(props) {
@@ -256,17 +264,32 @@ class FooPage extends React.Component {
   }
 
   render() {
+    const inputs = [
+      {
+        label: 'This is a string input',
+        name: 'foo',
+        type: 'string',
+        validations: { required: true },
+        value: this.state.data.foo,
+      },
+      {
+        label: 'This is a custom input',
+        name: 'custom',
+        type: 'newType',
+        validations: {},
+        value: '',
+      }
+    ]
     return (
       <div className={styles.fooPage}>
-        <Input
-          type="string"
-          value={this.state.data.foo}
-          label="This is a string input"
-          name="foo"
-          onChange={this.handleChange}
-          validations={{ required: true }}
-          didCheckErrors={this.state.error}
-        />
+        {inputs.map(input => (
+          <Input
+            key={input.name}
+            didCheckErrors={this.state.error}
+            onChange={this.handleChange}
+            {...input}
+          />
+        ))}
       </div>
     );
   }
