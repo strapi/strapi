@@ -12,6 +12,8 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphiql](http://localhost:1337/graphiql). You should see the interface (GraphiQL) that will help you to write GraphQL query to explore your data.
 
+> Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
+
 ## Configurations
 
 By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL is set to `/graphql`. You can edit these configurations in the following files.

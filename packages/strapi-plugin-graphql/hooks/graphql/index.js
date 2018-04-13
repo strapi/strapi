@@ -71,7 +71,7 @@ module.exports = strapi => {
       _.set(strapi.plugins.graphql, 'config._schema.graphql', { definition: ``, query: ``, type : {}, resolver: {} });
 
       // Merge user API.
-      Object.keys(strapi.api).reduce((acc, current) => {
+      Object.keys(strapi.api || {}).reduce((acc, current) => {
         const { definition, query, type, resolver } = _.get(strapi.api[current], 'config.schema.graphql', {});
 
         acc.definition += definition || ``;
@@ -84,7 +84,7 @@ module.exports = strapi => {
       }, strapi.plugins.graphql.config._schema.graphql);
 
       // Merge plugins API.
-      Object.keys(strapi.plugins).reduce((acc, current) => {
+      Object.keys(strapi.plugins || {}).reduce((acc, current) => {
         const { definition, query, type, resolver } = _.get(strapi.plugins[current], 'config.schema.graphql', {});
 
         acc.definition += definition || ``;

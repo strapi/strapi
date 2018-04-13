@@ -8,5 +8,12 @@
         "appearance": "WYSIWYG"
       }
     }
+  },
+  "product": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
   }
 }
