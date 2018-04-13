@@ -509,8 +509,6 @@ module.exports = {
           default:
         }
 
-        // TODO:
-        // - Handle limit, skip, etc options
         _.merge(acc.resolver[globalId], {
           [association.alias]: async (obj, options, context) => {
             // Construct parameters object to retrieve the correct related entries.
