@@ -1,0 +1,37 @@
+{
+    "ConfigPage.title": "Загрузка файлов - Настройки",
+    "ConfigPage.description": "Настройте плагин загрузок",
+  
+    "EditForm.Input.number.label": "Максимальный размер файлов (в MB)",
+    "EditForm.Input.select.label": "Провайдеры",
+    "EditForm.Input.select.inputDescription": "Файлы могут быть загружены как на ваш сервер так и стороннему провайдеру.",
+    "EditForm.Input.toggle.label": "Включить загрузку файлов",
+  
+    "EmptyLi.message": "Нет загруженных файлов",
+  
+    "EntriesNumber.number": "{number} файл найден",
+    "EntriesNumber.number.plural": "Количество найденных файлов: {number}",
+  
+    "HomePage.title": "Загрузка файлов",
+    "HomePage.description": "Посмотреть все загруженные файлы",
+    "HomePage.InputSearch.placeholder": "Искать файл...",
+  
+    "Li.linkCopied": "Ссылка скопирована в буфер обмена",
+  
+    "ListHeader.type": "Тип",
+    "ListHeader.hash": "Хеш",
+    "ListHeader.name": "Название",
+    "ListHeader.updated": "Обновлен",
+    "ListHeader.size": "Размер",
+    "ListHeader.related": "Связан с",
+  
+    "PluginInputFile.text": "Претащите файлы на эту область или {link} локальный файл",
+    "PluginInputFile.link": "выберите",
+    "PluginInputFile.loading": "Ваши файлы загружаются...",
+  
+    "notification.config.success": "Настройки обновлены",
+    "notification.delete.success": "Файл удален",
+    "notification.dropFile.success": "Ваш файл загружен",
+    "notification.dropFiles.success": "Файлов загружено: {number}"
+  }
+  
