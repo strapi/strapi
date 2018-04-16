@@ -9,11 +9,13 @@
   "app.components.DownloadInfo.text": "Cela peut prendre une minute. Merci de patienter.",
 
   "app.components.HomePage.welcome": "Bienvenue à bord!",
+  "app.components.HomePage.welcome.again": "Bienvenue ",
   "app.components.HomePage.cta": "CONFIRMEZ",
   "app.components.HomePage.community": "Rejoignez la communauté",
   "app.components.HomePage.community.content": "Discutez avec les membres de l'équipe, contributeurs et développeurs sur différent supports.",
   "app.components.HomePage.create": "Créez votre premier Content Type",
   "app.components.HomePage.welcomeBlock.content": "Nous sommes heureux de vous compter parmi nos membres. Nous sommes à l'écoute de vos retours alors, n'hésitez pas à nous envoyer des DM sur\u0020",
+  "app.components.HomePage.welcomeBlock.content.again": "Nous espérons que votre projet avance bien... Découvrez les derniers articles à propos de Strapi. Nous faisons de notre mieux pour améliorer le produit selon vos retours.",
   "app.components.HomePage.welcomeBlock.content.issues": "issues",
   "app.components.HomePage.welcomeBlock.content.raise": "\u0020ou soumetez des\u0020",
   "app.components.HomePage.createBlock.content.first": "Le\u0020",

@@ -7,17 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { isObject } from 'lodash';
+import { isFunction, isObject } from 'lodash';
 import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function Sub({ bordered, content, style, title, underline }) {
+function Sub({ bordered, content, name, style, title, underline }) {
   if (isObject(title)) {
     return (
       <div className={cn(styles.subWrapper, bordered && styles.subBordered)}>
         <FormattedMessage {...title}>
-          {message => <span className={cn(underline && styles.underlinedTitle)}>{message}</span>}
+          {message => <span className={cn(underline && styles.underlinedTitle)}>{message}{name}</span>}
         </FormattedMessage>
         {content()}
       </div>
@@ -28,7 +28,7 @@ function Sub({ bordered, content, style, title, underline }) {
     <div className={cn(styles.subWrapper, bordered && styles.subBordered)}>
       <span>{title}</span>
       <p style={style}>
-        {content}
+        {isFunction(content) ? content() : content}
       </p>
     </div>
   );
@@ -37,6 +37,7 @@ function Sub({ bordered, content, style, title, underline }) {
 Sub.defaultProps = {
   bordered: false,
   content: () => '',
+  name: '',
   style: {},
   title: {
     id: 'app.utils.defaultMessage',
@@ -52,6 +53,7 @@ Sub.propTypes = {
     PropTypes.func,
     PropTypes.string,
   ]),
+  name: PropTypes.string,
   style: PropTypes.object,
   title: PropTypes.oneOfType([
     PropTypes.object,

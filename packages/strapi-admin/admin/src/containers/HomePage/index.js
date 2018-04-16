@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
 import Block from 'components/HomePageBlock/Loadable';
@@ -23,6 +23,7 @@ import SupportUsTitle from 'components/SupportUsTitle/Loadable';
 
 import { selectPlugins } from 'containers/App/selectors';
 
+import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import validateInput from 'utils/inputsValidations';
@@ -51,6 +52,16 @@ const FIRST_BLOCK = [
       id: 'app.components.HomePage.create',
     },
     content: () => <CreateContent />,
+  },
+];
+
+const WELCOME_AGAIN_BLOCK = [
+  {
+    title: {
+      id: 'app.components.HomePage.welcome.again',
+    },
+    name: upperFirst(`${get(auth.getUserInfo(), 'username')}!`),
+    content: () => <WelcomeContent hasContent />,
   },
 ];
 
@@ -170,12 +181,13 @@ export class HomePage extends React.PureComponent {
                   <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
                 ))}
               {!this.showFirstBlock() &&
-                articles.map((value, key) => (
+                WELCOME_AGAIN_BLOCK.concat(articles).map((value, key) => (
                   <Sub
                     key={key}
                     {...value}
                     bordered={key === 0}
-                    style={key === 0 ? { marginBottom: '31px' } : {}}
+                    style={key === 1 ? { marginBottom: '33px' } : {}}
+                    underline={key === 0}
                   />
                 ))}
               {this.renderButton()}
