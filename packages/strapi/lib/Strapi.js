@@ -87,6 +87,9 @@ class Strapi extends EventEmitter {
     try {
       this.config = assign(this.config, config)
 
+      // Emit starting event.
+      this.emit('server:starting');
+
       // Enhance app.
       await this.enhancer();
       // Load the app.
@@ -100,7 +103,9 @@ class Strapi extends EventEmitter {
       // Launch server.
       this.server.listen(this.config.port, err => {
         if (err) {
-          console.log(err);
+          this.log.debug(`Server wasn't able to start properly.`);
+          console.error(err);
+          return this.stop();
         }
 
         this.log.info('Server started in ' + this.config.appPath);
@@ -112,15 +117,16 @@ class Strapi extends EventEmitter {
         this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
         this.log.info('To shut down your server, press <CTRL> + C at any time');
 
+        // Emit started event.
+        this.emit('server:started');
+
         if (cb && typeof cb === 'function') {
           cb();
         }
       });
-
-      utils.usage.call(this);
-    } catch (e) {
+    } catch (err) {
       this.log.debug(`Server wasn't able to start properly.`);
-      this.log.error(e);
+      console.error(err);
       this.stop();
     }
   }
@@ -135,6 +141,17 @@ class Strapi extends EventEmitter {
       conn.on('close', function() {
        delete connections[key];
       });
+    });
+
+    this.server.on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        this.log.debug(`Server wasn't able to start properly.`);
+        this.log.error(`The port ${err.port} is already used by another application.`);
+        this.stop();
+        return;
+      }
+
+      console.error(err);
     });
 
     this.server.destroy = cb => {
@@ -161,7 +178,7 @@ class Strapi extends EventEmitter {
   async load() {
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
-        ctx.set('strapi', 'You are so French !');
+        ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {
         await next();
@@ -178,6 +195,9 @@ class Strapi extends EventEmitter {
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
+
+    // Usage.
+    await utils.usage.call(this);
 
     // Init core store manager
     await store.pre.call(this);
@@ -315,10 +335,10 @@ class Strapi extends EventEmitter {
     // Bind queries with the current model to allow the use of `this`.
     const bindQueries = Object.keys(queries).reduce((acc, current) => {
       return acc[current] = queries[current].bind(Model), acc;
-    }, {});
-
-    // Send ORM to the called function.
-    bindQueries.orm = connector;
+    }, {
+      orm: connector,
+      primaryKey: Model.primaryKey
+    });
 
     return bindQueries;
   }

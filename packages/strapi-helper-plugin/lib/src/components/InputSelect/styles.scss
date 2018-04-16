@@ -1,5 +1,5 @@
 .inputSelect {
-  min-height: 3.4rem !important;
+  min-height: 3.4rem;
   margin-top: .9rem;
   padding-top: 0rem;
   padding-left: 1rem;
@@ -14,4 +14,10 @@
   -moz-appearance: none;
   -webkit-appearance: none;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
+}
+
+.inputSelectDisabled {
+  background-color: #fff !important;
+  opacity: 0.7 !important;
+  cursor: not-allowed;
 }

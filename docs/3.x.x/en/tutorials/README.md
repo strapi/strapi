@@ -1,6 +1,11 @@
 ## Tutorials
 
-After having realized the [Getting Started guide](https://strapi.io/getting-started), it is time to go further with Strapi. Official and community tutorials are here to help you:
+Go further with Strapi, official and community tutorials are here to help you:
+
+### Getting Started
+
+ - [Getting Started guide](https://strapi.io/getting-started)
+ - [Quickstart with Docker](https://medium.com/strapi/strapi-quickstart-with-docker-d77ca7c86c1f)
 
 ### Development
 

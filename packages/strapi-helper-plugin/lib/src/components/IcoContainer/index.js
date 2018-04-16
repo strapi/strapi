@@ -13,7 +13,7 @@ function IcoContainer({ icons }) {
   );
 }
 
-IcoContainer.proptypes = {
+IcoContainer.propTypes = {
   icons: PropTypes.array,
 };
 

@@ -26,6 +26,8 @@ import List from 'components/List';
 import NoTableWarning from 'components/NoTableWarning';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 
+import forms from 'containers/Form/forms.json';
+
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
@@ -45,6 +47,9 @@ import saga from './sagas';
 import reducer from './reducer';
 import selectModelPage from './selectors';
 import styles from './styles.scss';
+
+// Array of attributes that the ctb can handle at the moment
+const availableAttributes = Object.keys(forms.attribute);
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
@@ -173,6 +178,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   handleEditAttribute = (attributeName) => {
     const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
     const attribute = this.props.modelPage.model.attributes[index];
+
+    // Display a notification if the attribute is not present in the ones that the ctb handles
+    if (!has(attribute.params, 'nature') && !includes(availableAttributes, attribute.params.type)) {
+      return strapi.notification.info('content-type-builder.notification.info.enumeration');
+    }
     const settingsType = attribute.params.type ? 'baseSettings' : 'defineRelation';
     const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, ['name', attribute.params.key]);
     const hasParallelAttribute = settingsType === 'defineRelation' && parallelAttributeIndex !== -1 ? `::${parallelAttributeIndex}` : '';
@@ -184,10 +194,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       case 'float':
       case 'decimal':
         attributeType = 'number';
-        break;
-      case 'email':
-      case 'password':
-        attributeType = 'string';
         break;
       default:
         attributeType = attribute.params.type ? attribute.params.type : 'relation';
@@ -289,6 +295,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         onButtonClick={this.handleClickAddAttribute}
       />;
     const icoType = includes(this.props.match.params.modelName, '&source=') ? '' : 'pencil';
+
     return (
       <div className={styles.modelPage}>
         <div className="container-fluid">

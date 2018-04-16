@@ -13,17 +13,41 @@ import Input from 'components/InputsIndex';
 import styles from './styles.scss';
 
 class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  generateSelectOptions = () => (
+    Object.keys(get(this.props.values, 'roles', [])).reduce((acc, current) => {
+      const option = {
+        id: get(this.props.values.roles, [current, 'name']),
+        value: get(this.props.values.roles, [current, 'type']),
+      };
+      acc.push(option);
+      return acc;
+    }, [])
+  )
+
   render() {
     return (
       <div className={styles.editForm}>
         <div className="row">
           <Input
+            inputDescription={{ id: 'users-permissions.EditForm.inputSelect.description.role' }}
+            inputClassName={styles.inputStyle}
+            label={{ id: 'users-permissions.EditForm.inputSelect.label.role' }}
+            name="settings.default_role"
+            onChange={this.props.onChange}
+            selectOptions={this.generateSelectOptions()}
+            type="select"
+            value={get(this.props.values.settings, 'default_role')}
+          />
+        </div>
+        <div className={styles.separator} />
+        <div className="row">
+          <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.email' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email' }}
-            name="unique_email"
+            name="settings.unique_email"
             onChange={this.props.onChange}
             type="toggle"
-            value={get(this.props.values, 'unique_email')}
+            value={get(this.props.values.settings, 'unique_email')}
           />
         </div>
         <div className={styles.separator} />
@@ -57,10 +81,10 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.sign-up' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.sign-up' }}
-            name="allow_register"
+            name="settings.allow_register"
             onChange={this.props.onChange}
             type="toggle"
-            value={get(this.props.values, 'allow_register')}
+            value={get(this.props.values.settings, 'allow_register')}
           />
         </div>
       </div>

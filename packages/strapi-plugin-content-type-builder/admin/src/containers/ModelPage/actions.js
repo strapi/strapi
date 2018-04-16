@@ -120,7 +120,7 @@ export function modelFetch(modelName) {
 
 export function modelFetchSucceeded(data) {
   const model = data;
-  const defaultKeys = ['required', 'unique', 'type', 'key', 'target', 'nature', 'targetColumnName', 'columnName'];
+  const defaultKeys = ['required', 'unique', 'type', 'key', 'target', 'nature', 'targetColumnName', 'columnName', 'multiple', 'default', 'appearance'];
 
   forEach(model.model.attributes, (attribute, index) => {
     map(attribute.params, (value, key) => {

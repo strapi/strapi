@@ -109,6 +109,10 @@
         "description": "content-type-builder.popUpForm.attributes.password.description"
       },
       {
+        "type": "media",
+        "description": "content-type-builder.popUpForm.attributes.media.description"
+      },
+      {
         "type": "relation",
         "description": "content-type-builder.popUpForm.attributes.relation.description"
       }
@@ -133,6 +137,31 @@
       },
       "advancedSettings": {
         "items": [
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "textarea",
+            "value": "",
+            "validations": {}
+          },
+          {
+            "title": {
+              "id": "content-type-builder.form.attribute.item.appearance.name"
+            },
+            "label": {
+              "id": "content-type-builder.form.attribute.item.appearance.label"
+            },
+            "name": "params.appearance.WYSIWYG",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": {
+              "id": "content-type-builder.form.attribute.item.appearance.description"
+            },
+            "inputStyle": { "fontWeight": "500" }
+          },
           {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
@@ -238,6 +267,15 @@
       "advancedSettings": {
         "items": [
           {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "number",
+            "value": 0,
+            "validations": {}
+          },
+          {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
             },
@@ -325,6 +363,15 @@
       },
       "advancedSettings": {
         "items": [
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "string",
+            "value": "",
+            "validations": {}
+          },
           {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
@@ -414,6 +461,15 @@
       "advancedSettings": {
         "items": [
           {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "email",
+            "value": "",
+            "validations": {}
+          },
+          {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
             },
@@ -502,6 +558,15 @@
       "advancedSettings": {
         "items": [
           {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "password",
+            "value": "",
+            "validations": {}
+          },
+          {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
             },
@@ -578,6 +643,15 @@
       "advancedSettings": {
         "items": [
           {
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "name": "params.default",
+            "type": "date",
+            "value": "",
+            "validations": {}
+          },
+          {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
             },
@@ -625,6 +699,18 @@
       },
       "advancedSettings": {
         "items": [
+          {
+            "title": {
+              "id": "content-type-builder.form.attribute.settings.default"
+            },
+            "label": {
+              "id": "content-type-builder.form.attribute.settings.default.checkboxLabel"
+            },
+            "name": "params.default",
+            "type": "checkbox",
+            "value": false,
+            "validations": {}
+          },
           {
             "title": {
               "id": "content-type-builder.form.attribute.item.settings.name"
@@ -713,6 +799,17 @@
             "name": "name",
             "type": "string",
             "value": "",
+            "validations": {
+              "required": true
+            }
+          },
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.item.media.multiple"
+            },
+            "name": "params.multiple",
+            "type": "checkbox",
+            "value": false,
             "validations": {
               "required": true
             }

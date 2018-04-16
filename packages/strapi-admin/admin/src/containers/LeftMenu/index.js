@@ -18,16 +18,21 @@ export class LeftMenu extends React.Component { // eslint-disable-line react/pre
   render() {
     return (
       <div className={styles.leftMenu}>
-        <LeftMenuHeader></LeftMenuHeader>
-        <LeftMenuLinkContainer {...this.props}></LeftMenuLinkContainer>
-        <LeftMenuFooter plugins={this.props.plugins}></LeftMenuFooter>
+        <LeftMenuHeader />
+        <LeftMenuLinkContainer {...this.props} />
+        <LeftMenuFooter plugins={this.props.plugins} version={this.props.version} />
       </div>
     );
   }
 }
 
+LeftMenu.defaultProps = {
+  version: '3',
+};
+
 LeftMenu.propTypes = {
   plugins: PropTypes.object.isRequired,
+  version: PropTypes.string,
 };
 
 function mapDispatchToProps(dispatch) {

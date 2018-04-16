@@ -12,6 +12,7 @@ import { Switch, Route } from 'react-router-dom';
 import { pluginId } from 'app';
 
 // Containers
+import ConfigPage from 'containers/ConfigPage';
 import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';
 
@@ -19,6 +20,7 @@ function App() {
   return (
     <div className={pluginId}>
       <Switch>
+        <Route path={`/plugins/${pluginId}/configurations/:env`} component={ConfigPage} exact />
         <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
         <Route component={NotFoundPage} />
       </Switch>

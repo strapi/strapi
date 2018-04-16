@@ -14,8 +14,10 @@ import {
   findIndex,
   filter,
   get,
+  has,
   includes,
   isEmpty,
+  isObject,
   isUndefined,
   map,
   size,
@@ -26,6 +28,7 @@ import {
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { router } from 'app';
 
 import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
@@ -379,7 +382,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   handleChange = ({ target }) => {
-    const value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+    let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+
+    if (isObject(target.value) && target.value._isAMomentObject === true) {
+      value = moment(target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    }
 
     if (includes(this.props.hash.split('::')[1], 'attribute')) {
       this.props.changeInputAttribute(target.name, value);
@@ -455,16 +462,27 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  renderModalBodyChooseAttributes = () => (
-    map(forms.attributesDisplay.items, (attribute, key) => (
-      <AttributeCard
-        key={key}
-        attribute={attribute}
-        routePath={this.props.routePath}
-        handleClick={this.goToAttributeTypeView}
-      />
-    ))
-  )
+  renderModalBodyChooseAttributes = () => {
+    const attributesDisplay = forms.attributesDisplay.items;
+
+    // Don't display the media field if the upload plugin isn't installed
+    if (!has(this.context.plugins.toJS(), 'upload')) {
+      attributesDisplay.splice(8, 1);
+    }
+
+    return (
+      map(attributesDisplay, (attribute, key) => (
+        <AttributeCard
+          key={key}
+          attribute={attribute}
+          autoFocus={key === 0}
+          routePath={this.props.routePath}
+          handleClick={this.goToAttributeTypeView}
+          tabIndex={key}
+        />
+      ))
+    );
+  }
 
   testContentType = (contentTypeName, cbSuccess, successData, cbFail, failData) => {
     // Check if the content type is in the localStorage (not saved) to prevent request error

@@ -3,7 +3,15 @@
     {
       "method": "POST",
       "path": "/",
-      "handler": "Upload.index",
+      "handler": "Upload.upload",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/environments",
+      "handler": "Upload.getEnvironments",
       "config": {
         "policies": []
       }
@@ -26,6 +34,14 @@
     },
     {
       "method": "GET",
+      "path": "/files/count",
+      "handler": "Upload.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/files",
       "handler": "Upload.find",
       "config": {
@@ -34,8 +50,8 @@
     },
     {
       "method": "GET",
-      "path": "/files/count",
-      "handler": "Upload.count",
+      "path": "/files/:_id",
+      "handler": "Upload.findOne",
       "config": {
         "policies": []
       }

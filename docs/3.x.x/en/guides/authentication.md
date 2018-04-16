@@ -63,8 +63,8 @@ Strapi comes with four providers:
 - Github
 - Linkedin2 (Oauth2 Provider for Linkedin)
 
-To use the providers authentication, set your credentials in
-`./plugins/users-permissions/config/environments/development/grant.json`.
+To use the providers authentication, set your credentials in the admin interface (Plugin Users & Permissions > Providers).
+Then update and enable the provider you want use.
 
 Redirect your user to: `GET /connect/:provider`. eg: `GET /connect/facebook`
 
@@ -156,6 +156,32 @@ $.ajax({
   }
 });
 ```
+
+## User Object In Strapi Context
+The User object is available to successfully authenticated requests.
+
+#### Usage
+- The authenticated `user` object is a property of `ctx.state`.
+
+
+```js
+  create: async (ctx) => {
+
+    const { _id } = ctx.state.user
+
+    const depositObj = {
+      ...ctx.request.body,
+      depositor: _id
+    }
+
+    const data = await strapi.services.deposit.add(depositObj);
+
+    // Send 201 `created`
+    ctx.created(data);
+  }
+
+```
+
 
 ## Email templates
 

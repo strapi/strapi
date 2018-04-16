@@ -13,4 +13,6 @@ export const GET_DATA_SUCCESS = 'Upload/HomePage/GET_DATA_SUCCESS';
 export const ON_DROP = 'Upload/HomePage/ON_DROP';
 export const ON_SEARCH = 'Upload/HomePage/ON_SEARCH';
 export const ON_SEARCH_SUCCESS = 'Upload/HomePage/ON_SEARCH_SUCCESS';
+export const SET_LOADING = 'Upload/HomePage/SET_LOADING';
 export const SET_PARAMS = 'Upload/HomePage/SET_PARAMS';
+export const UNSET_LOADING = 'Upload/HomePage/UNSET_LOADING';

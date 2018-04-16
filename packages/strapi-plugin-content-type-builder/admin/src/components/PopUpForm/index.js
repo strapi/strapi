@@ -64,7 +64,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     }
 
     const shouldOverrideHandleBlur = this.props.overrideHandleBlurCondition ? this.props.overrideHandleBlurCondition(item) : false;
-    const value = !isEmpty(this.props.values) && includes(item.name, '.') ? get(this.props.values, [split(item.name, '.')[0], split(item.name, '.')[1]]) : this.props.values[item.name];
+    // TODO: refacto this line..
+    let value = !isEmpty(this.props.values) && includes(item.name, '.') ? get(this.props.values, [split(item.name, '.')[0], split(item.name, '.')[1]]) : this.props.values[item.name];
     const handleBlur = shouldOverrideHandleBlur ? this.props.onBlur : false;
     const errorIndex = findIndex(this.props.formErrors, ['name', item.name]);
     const errors = errorIndex !== -1 ? this.props.formErrors[errorIndex].errors : [];
@@ -74,6 +75,10 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         link: this.createComponent(item),
       },
     };
+
+    if (item.name === 'params.appearance.WYSIWYG') {
+      value = get(this.props.values, item.name, false);
+    }
 
     return (
       <Input
@@ -92,7 +97,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         title={item.title}
         errors={errors}
         didCheckErrors={this.props.didCheckErrors}
-        autoFocus={key === 0}
+        autoFocus={key === 0 && item.type !== 'date'}
       />
     );
   }

@@ -24,7 +24,7 @@ class InputToggleWithErrors extends React.Component {
 
     // Display input error if it already has some
     if (!isEmpty(errors)) {
-      this.setState({ errors })
+      this.setState({ errors });
     }
   }
 
@@ -69,7 +69,8 @@ class InputToggleWithErrors extends React.Component {
     }
 
     return (
-      <div className={cn(
+      <div
+        className={cn(
           styles.containerToggleErrors,
           customBootstrapClass,
           !isEmpty(className) && className,
@@ -82,7 +83,7 @@ class InputToggleWithErrors extends React.Component {
             htmlFor={name}
             message={label}
             style={labelStyle}
-            />
+          />
         </div>
         <InputToggle
           autoFocus={autoFocus}

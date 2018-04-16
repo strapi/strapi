@@ -3,10 +3,11 @@
  * InputsIndex references all the input with errors available
  */
 
+/* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
-
+import { isEmpty, merge } from 'lodash';
+import Loadable from 'react-loadable';
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
@@ -20,8 +21,14 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
+// import WysiwygWithErrors from 'components/WysiwygWithErrors';
+const Loading = () => <div>Loading ...</div>;
+const LoadableWysiwyg = Loadable({
+  loader: () => import('components/WysiwygWithErrors'),
+  loading: Loading,
+});
 
-const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>
+const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
 
 const inputs = {
   addon: InputAddonWithErrors,
@@ -37,26 +44,51 @@ const inputs = {
   text: InputTextWithErrors,
   textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
+  wysiwyg: LoadableWysiwyg,
 };
 
 function InputsIndex(props) {
   const type = props.type && !isEmpty(props.addon) ? 'addon' : props.type;
-  const inputValue = props.type === 'checkbox' || props.type === 'toggle' ? props.value || false : (props.value === 0 ? props.value : props.value || '');
+  let inputValue;
+  switch (props.type) {
+    case 'checkbox':
+    case 'toggle':
+      inputValue = props.value || false;
+      break;
+    case 'number':
+      inputValue = props.value === 0 ? props.value : props.value || '';
+      break;
+    case 'file':
+      inputValue = props.value || [];
+      break;
+    default:
+      inputValue = props.value || '';
+  }
+
+  merge(inputs, props.customInputs);
+  
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
 }
 
+DefaultInputError.propTypes = {
+  type: PropTypes.string.isRequired,
+};
+
 InputsIndex.defaultProps = {
   addon: false,
-}
+  customInputs: {},
+};
 
 InputsIndex.propTypes = {
   addon: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
   ]),
+  customInputs: PropTypes.object,
   type: PropTypes.string.isRequired,
+  value: PropTypes.any,
 };
 
 export default InputsIndex;

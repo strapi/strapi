@@ -6,6 +6,30 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 
 module.exports = {
+  appearance: (attributes, model, source) => {
+    const layoutPath = path.join(strapi.config.appPath, 'plugins', source, 'config', 'layout.json');
+    let layout;
+
+    try {
+      // NOTE: do we really need to parse the JSON?
+      // layout = JSON.parse(layoutPath, 'utf8');
+      layout = require(layoutPath);
+    } catch (err) {
+      layout = {};
+    }
+
+    Object.keys(attributes).map(attribute => {
+      const appearances = _.get(attributes, [attribute, 'appearance'], {});
+      Object.keys(appearances).map(appearance => {
+        _.set(layout, [model, 'attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
+      });
+
+      _.unset(attributes, [attribute, 'appearance']);
+    });
+
+    fs.writeFileSync(layoutPath, JSON.stringify(layout, null, 2), 'utf8');
+  },
+
   getModels: () => {
     const models = [];
 
@@ -44,22 +68,32 @@ module.exports = {
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
 
-    // const model = _.get(strapi.models, name);
-
     const attributes = [];
-    _.forEach(model.attributes, (params, name) => {
-      const relation = _.find(model.associations, { alias: name });
+    _.forEach(model.attributes, (params, attr) => {
+      const relation = _.find(model.associations, { alias: attr });
 
-      if (relation) {
-        params = _.omit(params, ['collection', 'model', 'via']);
-        params.target = relation.model || relation.collection;
-        params.key = relation.via;
-        params.nature = relation.nature;
-        params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
+      if (relation &&  !_.isArray(_.get(relation, relation.alias))) {
+        if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
+          params = {
+            type: 'media',
+            multiple: params.collection ? true : false
+          };
+        } else {
+          params = _.omit(params, ['collection', 'model', 'via']);
+          params.target = relation.model || relation.collection;
+          params.key = relation.via;
+          params.nature = relation.nature;
+          params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
+        }
+      }
+
+      const appearance = _.get(strapi.plugins, [source || 'content-manager', 'config', 'layout', name, 'attributes', attr, 'appearance']);
+      if (appearance) {
+        _.set(params, ['appearance', appearance], true);
       }
 
       attributes.push({
-        name,
+        name: attr,
         params
       });
     });
@@ -144,6 +178,16 @@ module.exports = {
     _.forEach(attributesConfigurable, attribute => {
       if (_.has(attribute, 'params.type')) {
         attrs[attribute.name] = attribute.params;
+
+        if (attribute.params.type === 'media') {
+          const via = _.findKey(strapi.plugins.upload.models.file.attributes, {collection: '*'});
+
+          attrs[attribute.name] = {
+            [attribute.params.multiple ? 'collection' : 'model']: 'file',
+            via,
+            plugin: 'upload'
+          }
+        }
       } else if (_.has(attribute, 'params.target')) {
         const relation = attribute.params;
         const attr = {

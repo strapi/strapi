@@ -1,6 +1,7 @@
 {
   "plugin.description.short": "Servisinizin veri yapısını modelleyin.",
-  "plugin.description.long": "Servisinizin veri yapısını modelleyin. Bir dakika içinde yeni alanlar ve ilişkiler yaratın. Dosyalar, projenizde otomatik olarak oluşturulur ve güncellenir.",
+  "plugin.description.long":
+    "Servisinizin veri yapısını modelleyin. Bir dakika içinde yeni alanlar ve ilişkiler yaratın. Dosyalar, projenizde otomatik olarak oluşturulur ve güncellenir.",
   "attribute.string": "String",
   "attribute.text": "Yazı",
   "attribute.boolean": "Mantıksal",
@@ -13,13 +14,16 @@
   "attribute.email": "E-posta",
   "attribute.password": "Parola",
   "attribute.relation": "İlişki",
+  "attribute.enumeration": "Enumeration",
+  "attribute.WYSIWYG": "Text (WYSIWYG)",
 
   "contentType.temporaryDisplay": "(Kaydedilmedi)",
   "from": "kimden",
   "home.contentTypeBuilder.name": "İçerik Türleri",
   "home.contentTypeBuilder.description": "Kendi İçerik Türlerinizi oluşturun ve güncelleyin.",
   "home.emptyContentType.title": "Kullanılabilir İçerik Türü bulunmamaktadır.",
-  "home.emptyContentType.description": "Servisinizden veri alabilmek için ilk İçerik Türünüzü oluşturun.",
+  "home.emptyContentType.description":
+    "Servisinizden veri alabilmek için ilk İçerik Türünüzü oluşturun.",
 
   "home.emptyAttributes.title": "Henüz bir alan bulunmamaktadır.",
   "home.emptyAttributes.description": "İçerik Türünüze ilk alanınızı ekleyin",
@@ -44,6 +48,7 @@
   "form.attribute.item.number.name": "İsim",
   "form.attribute.item.date.name": "İsim",
   "form.attribute.item.media.name": "İsim",
+  "form.attribute.item.media.multiple": "Allow multiple files",
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.boolean.name": "İsim",
   "form.attribute.item.string.name": "İsim",
@@ -55,14 +60,18 @@
   "form.attribute.item.maximumLength": "En yüksek uzunluk",
   "form.attribute.item.maximum": "En yüksek değer",
   "form.attribute.item.requiredField.description": "Bu alan boşsa kayıt oluşturamazsınız",
-  "form.attribute.item.uniqueField.description": "Aynı içeriğe sahip bir kayıt varsa kayıt oluşturamazsınız.",
+  "form.attribute.item.uniqueField.description":
+    "Aynı içeriğe sahip bir kayıt varsa kayıt oluşturamazsınız.",
   "form.attribute.item.defineRelation.fieldName": "Alan adı",
   "form.attribute.item.customColumnName": "Özel kolon isimleri",
-  "form.attribute.item.customColumnName.description": "Bu veritabanı sütun isimleri servis yanıtları için daha kapsamlı bir biçimde yeniden adlandırmak için kullanışlıdır",
+  "form.attribute.item.customColumnName.description":
+    "Bu veritabanı sütun isimleri servis yanıtları için daha kapsamlı bir biçimde yeniden adlandırmak için kullanışlıdır",
   "form.attribute.item.number.type": "Sayı biçimi",
   "form.attribute.item.number.type.integer": "tamsayı (ex: 10)",
   "form.attribute.item.number.type.float": "float (ex: 3.33333333)",
   "form.attribute.item.number.type.decimal": "ondalık (ex: 2.22)",
+  "form.attribute.settings.default": "Default value",
+  "form.attribute.settings.default.checkboxLabel": "Set to true",
 
   "form.button.cancel": "İptal",
   "form.button.continue": "Devam",
@@ -75,7 +84,8 @@
   "form.contentType.item.description": "Açıklama",
   "form.contentType.item.description.placeholder": "Küçük açıklama yaz...",
   "form.contentType.item.collectionName": "Koleksiyon Adı",
-  "form.contentType.item.collectionName.inputDescription": "İçerik Türünüzün adı ve tablonuzun adı farklı olduğunda kullanışlıdır.",
+  "form.contentType.item.collectionName.inputDescription":
+    "İçerik Türünüzün adı ve tablonuzun adı farklı olduğunda kullanışlıdır.",
 
   "menu.section.contentTypeBuilder.name.plural": "İçerik Türleri",
   "menu.section.contentTypeBuilder.name.singular": "İçerik Türü",
@@ -85,7 +95,8 @@
   "menu.section.documentation.tutorial": "İnceleyin",
   "menu.section.documentation.tutorialLink": "Öğretici video.",
 
-  "modelPage.contentHeader.emptyDescription.description": "Bu İçerik Türü için açıklama bulunmamaktadır.",
+  "modelPage.contentHeader.emptyDescription.description":
+    "Bu İçerik Türü için açıklama bulunmamaktadır.",
   "modelPage.contentType.list.title.plural": "alanlar",
   "modelPage.contentType.list.title.singular": "alan",
   "modelPage.contentType.list.title.including": "içeren",
@@ -97,11 +108,13 @@
   "noTableWarning.infos": "Daha fazla bilgi",
 
   "notification.error.message": "Bir hata oluştu.",
-  "notification.info.contentType.creating.notSaved": "Lütfen yeni bir tane oluşturmadan önce mevcut İçerik Türünüzü kaydedin",
+  "notification.info.contentType.creating.notSaved":
+    "Lütfen yeni bir tane oluşturmadan önce mevcut İçerik Türünüzü kaydedin",
   "notification.info.optimized": "Bu eklenti, localStorage ile optimize edilmiştir",
   "notification.success.message.contentType.edit": "İçerik Türünüz güncellendi",
   "notification.success.message.contentType.create": "İçerik Türünüz oluşturuldu",
   "notification.success.contentTypeDeleted": "İçerik Türü silindi",
+  "notification.info.enumeration": "This field is not editable for the moment...😮",
 
   "popUpForm.attributes.string.description": "Başlıklar, adlar, paragraflar, isim listesi",
   "popUpForm.attributes.text.description": "Tanımlar, metin paragrafları, makaleler ",
@@ -140,9 +153,9 @@
   "popUpWarning.button.cancel": "İptal",
   "popUpWarning.button.confirm": "Onaylar",
   "popUpWarning.title": "Lütfen onaylayın",
-  "popUpWarning.bodyMessage.contentType.delete": "Bu İçerik Türünü silmek istediğinizden emin misiniz?",
+  "popUpWarning.bodyMessage.contentType.delete":
+    "Bu İçerik Türünü silmek istediğinizden emin misiniz?",
   "popUpWarning.bodyMessage.attribute.delete": "Bu alanı silmek istediğinizden emin misiniz?",
-
 
   "table.contentType.title.plural": "İçerik Türleri kullanılabilir",
   "table.contentType.title.singular": "İçerik Türü kullanılabilir",
@@ -155,5 +168,4 @@
   "relation.manyToOne": "Birçok var",
   "relation.manyToMany": "birçok kişiye ait ve ait",
   "relation.attributeName.placeholder": "Örnek: yazar, katagori, etiket"
-
 }

@@ -1,15 +1,15 @@
-.popUpWarning { /* stylelint-disable */
+.popUpWarningHelper { /* stylelint-disable */
   width: 37.5rem!important;
   -webkit-font-smoothing: antialiased !important;
 }
 
-.header {
+.popUpWarningHeader {
   margin-left: 30px;
   margin-right: 30px;
   padding-bottom: 11px !important;
   border-bottom: 1px solid #F6F6F6;
 
-  > h4 {
+  > h5 {
     width: 100%;
     text-align: center;
     font-family: Lato;
@@ -56,7 +56,7 @@
   }
 }
 
-.modalBodyContainer {
+.modalBodyContainerHelper {
   padding: .1rem;
   color: #F64D0A;
   text-align: center;
@@ -73,12 +73,12 @@
   }
 }
 
-.modalBody {
+.modalBodyHelper {
   padding: 16px 30px 15px 30px !important;
 }
 
 
-.buttonContainer {
+.popUpWarningButtonContainer {
   display: flex;
   width: 100%;
   margin-top: 37px;

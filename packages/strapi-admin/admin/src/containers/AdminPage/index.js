@@ -10,11 +10,13 @@
  */
 
 import React from 'react';
+import ReactGA from 'react-ga';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
+import { compose } from 'redux';
 
 // Actions required for disabling and enabling the OverlayBlocker
 import {
@@ -36,16 +38,24 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import Header from 'components/Header/index';
-import HomePage from 'containers/HomePage';
-import InstallPluginPage from 'containers/InstallPluginPage';
+import HomePage from 'containers/HomePage/Loadable';
+import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
 import LeftMenu from 'containers/LeftMenu';
-import ListPluginsPage from 'containers/ListPluginsPage';
+import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import Logout from 'components/Logout';
-import NotFoundPage from 'containers/NotFoundPage';
+import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage';
+import PluginPage from 'containers/PluginPage/Loadable';
 
+// Utils
 import auth from 'utils/auth';
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
+
+import { getGaStatus, getLayout } from './actions';
+import reducer from './reducer';
+import saga from './saga';
+import selectAdminPage from './selectors';
 
 import styles from './styles.scss';
 
@@ -63,11 +73,18 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   componentDidMount() {
     this.checkLogin(this.props);
+    this.props.getGaStatus();
+    this.props.getLayout();
+    ReactGA.initialize('UA-54313258-9');
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
       this.checkLogin(nextProps);
+
+      if (nextProps.adminPage.allowGa) {
+        ReactGA.pageview(nextProps.location.pathname);
+      }
     }
 
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
@@ -120,13 +137,19 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   render() {
-    const leftMenu = this.showLeftMenu() ? <LeftMenu plugins={this.props.plugins} /> : '';
+    const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
 
     return (
       <div className={styles.adminPage}>
-        {leftMenu}
+        {this.showLeftMenu() && (
+          <LeftMenu
+            plugins={this.props.plugins}
+            layout={adminPage.layout}
+            version={adminPage.strapiVersion}
+          />
+        )}
         { auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props) ? (
           <Logout />
         ) : ''}
@@ -163,13 +186,17 @@ AdminPage.contextTypes = {
 };
 
 AdminPage.defaultProps = {
+  adminPage: {},
   hasUserPlugin: true,
 };
 
 AdminPage.propTypes = {
+  adminPage: PropTypes.object,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getGaStatus: PropTypes.func.isRequired,
+  getLayout: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
@@ -180,6 +207,7 @@ AdminPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
+  adminPage: selectAdminPage(),
   blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
   plugins: selectPlugins(),
@@ -190,6 +218,8 @@ function mapDispatchToProps(dispatch) {
   return {
     disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
     enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
+    getGaStatus: () => { dispatch(getGaStatus()); },
+    getLayout: () => { dispatch(getLayout()); },
     onHideNotification: (id) => { dispatch(hideNotification(id)); },
     pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
     updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
@@ -197,4 +227,14 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'adminPage', reducer });
+const withSaga = injectSaga({ key: 'adminPage', saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(AdminPage);
+
+// export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);

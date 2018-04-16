@@ -59,7 +59,7 @@ module.exports = {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.noAdminAccess' }] }] : `You're not an administrator.`);
       }
 
-      // The user never registered with the `local` provider.
+      // The user never authenticated with the `local` provider.
       if (!user.password) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.local' }] }] : 'This user never set a local password, please login thanks to the provider used during account creation.');
       }
@@ -209,12 +209,14 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    if (!(await strapi.store({
+    const settings = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
-    }).get()).allow_register) {
+    }).get();
+
+    if (!settings.allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
     }
 
@@ -235,12 +237,13 @@ module.exports = {
 
     // Retrieve root role.
     const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+    const users = root.users || [];
 
     // First, check if the user is the first one to register as admin.
-    const hasAdmin = root.users.length > 0;
+    const hasAdmin = users.length > 0;
 
     // Check if the user is the first to register
-    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: 'guest' }, []);
+    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: settings.default_role }, []);
 
     if (!role) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');

@@ -139,14 +139,14 @@ In order to do so, you'll need to allow access to other users (identified as 'Gu
 
 To retrieve the list of products, use the `GET /your-content-type` route.
 
-Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_order=price:asc`. For more informations, read the [filters documentation](../guides/filters.md)
+Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md)
 
 Here is an example using jQuery.
 
 ```js
 $.ajax({
   type: 'GET',
-  url: 'http://localhost:1337/product?_order=price:asc', // Order by price.
+  url: 'http://localhost:1337/product?_sort=price:asc', // Order by price.
   done: function(products) {
     console.log('Well done, here is the list of products: ', products);
   },

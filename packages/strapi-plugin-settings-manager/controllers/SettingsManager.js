@@ -27,7 +27,7 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { env } = ctx.params;
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
     ctx.send({ databases: Service.getDatabases(env) });
   },
@@ -36,7 +36,7 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { name, env } = ctx.params;
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
     if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
 
     const model = Service.databases(name, env);
@@ -57,7 +57,7 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { slug, env } = ctx.params;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
     _.has(Service, slug) ? ctx.send(await Service[slug](env)) : ctx.badRequest(null, [{ messages: [{ id: 'request.error.config' }] }]);
   },
@@ -67,7 +67,7 @@ module.exports = {
     const { slug, env } = ctx.params;
     let params = ctx.request.body;
 
-    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (env && _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
     let model;
     if (_.has(Service, slug)) {
@@ -153,7 +153,7 @@ module.exports = {
     const { env } = ctx.params;
     let params = ctx.request.body;
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
 
     const [name] = _.keys(params.database.connections);
 
@@ -196,7 +196,7 @@ module.exports = {
     const { name, env } = ctx.params;
     let params = ctx.request.body;
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
     if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
 
     const model = Service.databases(name, env);
@@ -304,7 +304,7 @@ module.exports = {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
     const { name, env } = ctx.params;
 
-    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknown' }] }]);
+    if (!env || _.isEmpty(_.find(Service.getEnvironments(), { name: env }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.environment.unknow' }] }]);
     if (!name || _.isEmpty(_.find(Service.getDatabases(env), { name }))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.database.unknow' }] }]);
 
     const connections = _.clone(strapi.config.environments[env].database.connections);

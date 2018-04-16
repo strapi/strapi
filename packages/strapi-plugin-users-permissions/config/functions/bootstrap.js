@@ -90,7 +90,7 @@ module.exports = async cb => {
             email: 'no-reply@strapi.io'
           },
           response_email: '',
-          object: '­Reset password 🔑 ',
+          object: '­Reset password',
           message: `<p>We heard that you lost your password. Sorry about that!</p>
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
@@ -108,7 +108,8 @@ module.exports = async cb => {
   if (!await pluginStore.get({key: 'advanced'})) {
     const value = {
       unique_email: true,
-      allow_register: true
+      allow_register: true,
+      default_role: 'authenticated'
     };
 
     await pluginStore.set({key: 'advanced', value});

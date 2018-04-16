@@ -18,7 +18,7 @@ module.exports = (scope, success, error) => {
   knex.raw('select 1+1 as result').then(() => {
     logger.info('The app has been connected to the database successfully');
     knex.destroy();
-    execSync(`rm -r ${scope.tmpPath}`);
+    execSync(`rm -r "${scope.tmpPath}"`);
 
     logger.info('Copying the dashboard...');
 

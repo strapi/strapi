@@ -1,13 +1,13 @@
 /**
-*
-* AttributeRow
-*
-*/
+ *
+ * AttributeRow
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { capitalize, has } from 'lodash';
+import { capitalize, get, has } from 'lodash';
 
 import PopUpWarning from 'components/PopUpWarning';
 import IcoContainer from 'components/IcoContainer';
@@ -25,23 +25,26 @@ import IcoText from '../../assets/images/icon_text.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-class AttributeRow extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class AttributeRow extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.asset = {
-      'boolean': IcoBoolean,
-      'date': IcoDate,
-      'media': IcoImage,
-      'number': IcoNumber,
-      'json': IcoJson,
-      'relation': IcoRelation,
-      'string': IcoString,
-      'text': IcoText,
-      'integer': IcoNumber,
-      'float': IcoNumber,
-      'decimal': IcoNumber,
-      'email': IcoEmail,
-      'password': IcoPassword,
+      boolean: IcoBoolean,
+      date: IcoDate,
+      media: IcoImage,
+      number: IcoNumber,
+      json: IcoJson,
+      relation: IcoRelation,
+      string: IcoString,
+      text: IcoText,
+      integer: IcoNumber,
+      float: IcoNumber,
+      decimal: IcoNumber,
+      email: IcoEmail,
+      password: IcoPassword,
+      // TODO add Enumeration icon
+      enumeration: IcoJson,
     };
     this.state = {
       showWarning: false,
@@ -53,7 +56,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
   handleDelete = () => {
     this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
-  }
+  };
 
   handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
@@ -63,34 +66,46 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
     const attributeType = this.props.row.params.type || 'relation';
     const src = this.asset[attributeType];
     return <img src={src} alt="ico" />;
-  }
+  };
 
   render() {
-    const isNotEditable = has(this.props.row.params, 'configurable') && !this.props.row.params.configurable;
-    const relationType = this.props.row.params.type ?
-      <FormattedMessage id={`content-type-builder.attribute.${this.props.row.params.type}`} />
-      : (
-        <div>
-          <FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" />
-          &nbsp;
-          <FormattedMessage id="content-type-builder.from">
-            {(message) => (
-              <span style={{ fontStyle: 'italic' }}>
-                {capitalize(this.props.row.params.target)}&nbsp;
-                {this.props.row.params.pluginValue ? (
-                  `(${message}: ${this.props.row.params.pluginValue})`
-                ) : ''}
-              </span>
-
-            )}
-          </FormattedMessage>
-        </div>
-      );
-
+    const isNotEditable =
+      has(this.props.row.params, 'configurable') && !this.props.row.params.configurable;
+    const type =
+      get(this.props.row, 'params.type') === 'text' &&
+      get(this.props.row, 'params.appearance.WYSIWYG') === true
+        ? 'WYSIWYG'
+        : this.props.row.params.type;
+    const relationType = this.props.row.params.type ? (
+      <FormattedMessage id={`content-type-builder.attribute.${type}`} />
+    ) : (
+      <div>
+        <FormattedMessage id="content-type-builder.modelPage.attribute.relationWith" />
+        &nbsp;
+        <FormattedMessage id="content-type-builder.from">
+          {message => (
+            <span style={{ fontStyle: 'italic' }}>
+              {capitalize(this.props.row.params.target)}&nbsp;
+              {this.props.row.params.pluginValue
+                ? `(${message}: ${this.props.row.params.pluginValue})`
+                : ''}
+            </span>
+          )}
+        </FormattedMessage>
+      </div>
+    );
     const relationStyle = !this.props.row.params.type ? styles.relation : '';
-    const icons = isNotEditable ? [{ icoType: 'lock' }] : [{ icoType: 'pencil', onClick: this.handleEdit }, { icoType: 'trash', onClick: () => this.setState({ showWarning: !this.state.showWarning }) }];
+    const icons = isNotEditable
+      ? [{ icoType: 'lock' }]
+      : [
+        { icoType: 'pencil', onClick: this.handleEdit },
+        {
+          icoType: 'trash',
+          onClick: () => this.setState({ showWarning: !this.state.showWarning }),
+        },
+      ];
     const editableStyle = isNotEditable ? '' : styles.editable;
-    
+
     return (
       <li
         className={`${styles.attributeRow} ${editableStyle} ${relationStyle}`}
@@ -104,7 +119,7 @@ class AttributeRow extends React.Component { // eslint-disable-line react/prefer
             <div>{this.props.row.name}</div>
           </div>
           <div className={styles.relationContainer}>{relationType}</div>
-          <div className={styles.mainField}></div>
+          <div className={styles.mainField} />
           <IcoContainer icons={icons} />
         </div>
         <PopUpWarning

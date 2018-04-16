@@ -1,6 +1,7 @@
 {
   "plugin.description.short": "Modelisez la structure de données de votre API.",
-  "plugin.description.long": "Modelisez la structure de données de votre API. Créer des nouveaux champs et relations en un instant. Les fichiers se créent et se mettent à jour automatiquement.",
+  "plugin.description.long":
+    "Modelisez la structure de données de votre API. Créer des nouveaux champs et relations en un instant. Les fichiers se créent et se mettent à jour automatiquement.",
   "attribute.string": "Chaîne de caractères",
   "attribute.text": "Text",
   "attribute.boolean": "Booléen",
@@ -13,6 +14,8 @@
   "attribute.password": "Mot de passe",
   "attribute.email": "Email",
   "attribute.relation": "Relation",
+  "attribute.enumeration": "Enumération",
+  "attribute.WYSIWYG": "Text (WYSIWYG)",
 
   "contentType.temporaryDisplay": "(Non sauvegardé)",
 
@@ -48,7 +51,12 @@
   "form.attribute.item.number.name": "Nom",
   "form.attribute.item.json.name": "Nom",
   "form.attribute.item.media.name": "Nom",
+  "form.attribute.item.media.multiple": "Peut être relié à plusieurs fichiers",
   "form.attribute.item.string.name": "Nom",
+  "form.attribute.item.appearance.name": "Apparence",
+  "form.attribute.item.appearance.label": "Editable avec un WYSIWYG",
+  "form.attribute.item.appearance.description":
+    "Sinon, il sera editable à partir d'une simple textarea",
   "form.attribute.item.settings.name": "Paramètres",
   "form.attribute.item.requiredField": "Champ obligatoire",
   "form.attribute.item.uniqueField": "Champ unique",
@@ -56,15 +64,20 @@
   "form.attribute.item.minimum": "Valeur minimun",
   "form.attribute.item.maximum": "Valeur maximum",
   "form.attribute.item.maximumLength": "Taille maximum",
-  "form.attribute.item.requiredField.description": "Vous ne pourrez pas créer une entrée si ce champ est vide",
-  "form.attribute.item.uniqueField.description": "Vous ne pourrez pas créer une entrée s'il existe un champ similaire",
+  "form.attribute.item.requiredField.description":
+    "Vous ne pourrez pas créer une entrée si ce champ est vide",
+  "form.attribute.item.uniqueField.description":
+    "Vous ne pourrez pas créer une entrée s'il existe un champ similaire",
   "form.attribute.item.defineRelation.fieldName": "Nom du Champ",
   "form.attribute.item.customColumnName": "Nom de colonne custom",
-  "form.attribute.item.customColumnName.description": "Pratique pour renommer la colonne de la db dans un format plus comprehensible pour les responses de l'API",
+  "form.attribute.item.customColumnName.description":
+    "Pratique pour renommer la colonne de la db dans un format plus comprehensible pour les responses de l'API",
   "form.attribute.item.number.type": "Format nombre",
   "form.attribute.item.number.type.integer": "entier (ex: 10)",
   "form.attribute.item.number.type.float": "décimal approximatif (ex: 3,33333)",
   "form.attribute.item.number.type.decimal": "décimal (ex: 2,22)",
+  "form.attribute.settings.default": "Valeur par défault",
+  "form.attribute.settings.default.checkboxLabel": "Définir à true",
 
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continue",
@@ -77,7 +90,8 @@
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Ecrivez votre petite description ici...",
   "form.contentType.item.collectionName": "Nom de la Collection",
-  "form.contentType.item.collectionName.inputDescription": "Pratique quand le Nom de votre Modèle et de votre table sont différents",
+  "form.contentType.item.collectionName.inputDescription":
+    "Pratique quand le Nom de votre Modèle et de votre table sont différents",
 
   "menu.section.contentTypeBuilder.name.plural": "Modèles",
   "menu.section.contentTypeBuilder.name.singular": "Modèle",
@@ -87,7 +101,8 @@
   "menu.section.documentation.tutorial": "Découvrez notre",
   "menu.section.documentation.tutorialLink": "tuto vidéo.",
 
-  "modelPage.contentHeader.emptyDescription.description": "Il n'y a pas de description pour ce modèle",
+  "modelPage.contentHeader.emptyDescription.description":
+    "Il n'y a pas de description pour ce modèle",
   "modelPage.contentType.list.title.plural": "champs",
   "modelPage.contentType.list.title.singular": "champ",
   "modelPage.contentType.list.title.including": "dont",
@@ -100,11 +115,13 @@
   "noTableWarning.infos": "Plus d'infos",
 
   "notification.error.message": "Une erreur est survenue",
-  "notification.info.contentType.creating.notSaved": "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
+  "notification.info.contentType.creating.notSaved":
+    "Sauvegardez votre Modèle en cours avant d'en créer un nouveau",
   "notification.info.optimized": "Ce plugin est optimisé pour votre localStorage",
   "notification.success.message.contentType.edit": "Votre modèle a bien été modifié",
   "notification.success.message.contentType.create": "Votre modèle a bien été créée",
   "notification.success.contentTypeDeleted": "Le modèle a bien été supprimé.",
+  "notification.info.enumeration": "Ce champs n'est pas modifiable pour le moment...😮",
 
   "popUpForm.attributes.string.description": "Titres, noms,...",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
@@ -156,5 +173,4 @@
   "relation.manyToOne": "a plusieurs",
   "relation.manyToMany": "a plusieurs",
   "relation.attributeName.placeholder": "Ex: auteur, catégorie, tag"
-
 }
