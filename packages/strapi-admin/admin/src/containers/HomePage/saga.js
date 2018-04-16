@@ -1,3 +1,6 @@
+import 'whatwg-fetch';
+import { padEnd, take } from 'lodash';
+import removeMd from 'remove-markdown';
 import {
   call,
   fork,
@@ -8,9 +11,29 @@ import {
 
 import request from 'utils/request';
 
-import { submitSucceeded } from './actions';
-import { SUBMIT } from './constants';
+import { getArticlesSucceeded, submitSucceeded } from './actions';
+import { GET_ARTICLES, SUBMIT } from './constants';
 import { makeSelectBody } from './selectors';
+
+function* getArticles() {
+  try {
+    const articles = yield call(fetchArticles);
+    const posts = articles.posts.reduce((acc, curr) => {
+      const post = {
+        title: curr.title,
+        content: padEnd(take(removeMd(curr.markdown), 200).join(''), 203, '...'),
+      };
+      acc.push(post);
+
+      return acc;
+    }, []);
+
+    yield put(getArticlesSucceeded(posts));
+  } catch(err) {
+    // Silent
+  }
+}
+
 
 function* submit() {
   try {
@@ -26,6 +49,14 @@ function* submit() {
 
 function* defaultSaga() {
   yield fork(takeLatest, SUBMIT, submit);
+  yield fork(takeLatest, GET_ARTICLES, getArticles);
 }
 
+
+function fetchArticles() {
+  return fetch('https://blog.strapi.io/ghost/api/v0.1/posts/?client_id=ghost-frontend&client_secret=1f260788b4ec&limit=2', {})
+    .then(resp => {
+      return resp.json ? resp.json() : resp;
+    });
+}
 export default defaultSaga;

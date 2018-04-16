@@ -33,7 +33,7 @@ import CreateContent from './CreateContent';
 import SocialLink from './SocialLink';
 import WelcomeContent from './WelcomeContent';
 
-import { onChange, submit } from './actions';
+import { getArticles, onChange, submit } from './actions';
 import makeSelectHomePage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
@@ -115,6 +115,10 @@ export class HomePage extends React.PureComponent {
   // eslint-disable-line react/prefer-stateless-function
   state = { errors: [] };
 
+  componentDidMount() {
+    this.props.getArticles();
+  }
+
   handleSubmit = e => {
     e.preventDefault();
     const errors = validateInput(this.props.homePage.body.email, { required: true }, 'email');
@@ -128,29 +132,57 @@ export class HomePage extends React.PureComponent {
   showFirstBlock = () =>
     get(this.props.plugins.toJS(), 'content-manager.leftMenuSections.0.links', []).length === 0;
 
+  renderButton = () => {
+    const data = this.showFirstBlock()
+      ? {
+        className: styles.homePageTutorialButton,
+        href: 'https://strapi.io/documentation/getting-started/quick-start.html',
+        id: 'app.components.HomePage.button.quickStart',
+        primary: true,
+      }
+      : {
+        className: styles.homePageBlogButton,
+        id: 'app.components.HomePage.button.blog',
+        href: 'https://blog.strapi.io/',
+        primary: false,
+      };
+
+    return (
+      <a href={data.href} target="_blank">
+        <Button className={data.className} primary={data.primary}>
+          <FormattedMessage id={data.id} />
+        </Button>
+      </a>
+    );
+  };
+
   render() {
-    const { homePage: { body } } = this.props;
+    const { homePage: { articles, body } } = this.props;
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
         <Helmet title="Home Page" />
         <div className="row">
           <div className="col-md-8 col-lg-8">
-            {this.showFirstBlock() && (
-              <Block>
-                {FIRST_BLOCK.map((value, key) => (
+            <Block>
+              {this.showFirstBlock() &&
+                FIRST_BLOCK.map((value, key) => (
                   <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
                 ))}
-                <a href="https://strapi.io/documentation/getting-started/quick-start.html" target="_blank">
-                  <Button className={styles.homePageTutorialButton} primary>
-                    <FormattedMessage id="app.components.HomePage.button.quickStart" />
-                  </Button>
-                </a>
-                <div className={styles.homePageFlex}>
-                  {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
-                </div>
-              </Block>
-            )}
+              {!this.showFirstBlock() &&
+                articles.map((value, key) => (
+                  <Sub
+                    key={key}
+                    {...value}
+                    bordered={key === 0}
+                    style={key === 0 ? { marginBottom: '31px' } : {}}
+                  />
+                ))}
+              {this.renderButton()}
+              <div className={styles.homePageFlex}>
+                {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
+              </div>
+            </Block>
             <Block>
               <Sub {...SECOND_BLOCK} />
               <div className={styles.homePageFlex}>
@@ -199,6 +231,7 @@ export class HomePage extends React.PureComponent {
 }
 
 HomePage.propTypes = {
+  getArticles: PropTypes.func.isRequired,
   homePage: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
@@ -213,6 +246,7 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      getArticles,
       onChange,
       submit,
     },
