@@ -1,0 +1,56 @@
+{
+    "plugin.description.short": "Быстрый способ увидеть, отредактировать и удалить данные в вашей базе данных.",
+    "plugin.description.long": "Быстрый способ увидеть, отредактировать и удалить данные в вашей базе данных.",
+    "containers.Home.pluginHeaderTitle": "Редактор контента",
+    "containers.Home.introduction": "Для того чтобы отредактировать ваши записи используйте соответствующую ссылку в меню слева. У плагина отсутствует полноценная возможность редактировать настройки и он все еще находится в стадии активной разработки.",
+    "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
+    "containers.Edit.submit": "Сохранить",
+    "containers.Edit.editing": "Редактирование...",
+    "containers.Edit.delete": "Удалить",
+    "containers.Edit.reset": "Сбросить",
+    "containers.Edit.returnList": "Вернуться к списку",
+    "containers.List.addAnEntry": "Добавить новую {entity}",
+    "containers.List.pluginHeaderDescription": "{label} записей найдено",
+    "containers.List.pluginHeaderDescription.singular": "{label} запись найдена",
+    "components.LimitSelect.itemsPerPage": "Элементов на странице",
+    "containers.List.errorFetchRecords": "Ошибка",
+  
+    "EditRelations.title": "Связанные данные",
+    
+    "emptyAttributes.title": "Пока нет полей",
+    "emptyAttributes.description": "Добавте новое поле в ваш Тип Данных",
+    "emptyAttributes.button": "Перейти в редактор контента",
+  
+    "error.schema.generation": "Возникла ошибка во время генерации структуры.",
+    "error.records.count": "Произошла ошибка при подсчете количества записей.",
+    "error.records.fetch": "Произошла ошибка при извлечении записей.",
+    "error.record.fetch": "Произошла ошибка при извлечении записи.",
+    "error.record.create": "Произошла ошибка при создании записи.",
+    "error.record.update": "Произошла ошибка при обновлении записи.",
+    "error.record.delete": "Произошла ошибка при удалении записи.",
+    "error.model.fetch": "Произошла ошибка во время настройки конфигурации модели.",
+    "error.validation.required": "Обязательное значение.",
+    "error.validation.regex": "Значение не соответствует регулярному выражению.",
+    "error.validation.max": "Слишком большое.",
+    "error.validation.min": "Слишком маленькое.",
+    "error.validation.maxLength": "Слишком длинное.",
+    "error.validation.minLength": "Слишком короткое.",
+    "error.contentTypeName.taken": "Это название уже существует",
+    "error.attribute.taken": "Поле с таким названием уже существует",
+    "error.attribute.key.taken": "Это значение уже существует",
+    "error.attribute.sameKeyAndName": "Не может быть одинаковым",
+    "error.validation.minSupMax": "Не может быть выше",
+  
+    "notification.error.relationship.fetch": "Возникла ошибка при получении связей.",
+  
+    "success.record.delete": "Удалено",
+    "success.record.save": "Сохранено",
+  
+    "pageNotFound": "Страница не найдена",
+  
+    "popUpWarning.button.cancel": "Отменить",
+    "popUpWarning.button.confirm": "Подтвердить",
+    "popUpWarning.title": "Пожалуйста подтвердите",
+    "popUpWarning.bodyMessage.contentType.delete": "Вы уверены, что хотите удалить эту запись?"
+  }
+  
