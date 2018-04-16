@@ -130,7 +130,6 @@ watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-graphql');
 watcher('', 'npm install ../strapi-utils --no-optional');
-watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
 

@@ -113,7 +113,20 @@ module.exports = function() {
             }
 
             // Create `plugins.json` file.
-            const data =  Object.keys(this.plugins).map(name => ({
+            // Don't inject the plugins without an Admin
+            const data =  Object.keys(this.plugins)
+              .filter(plugin => {
+                let hasAdminFolder;
+
+                try {
+                  fs.accessSync(path.resolve(this.config.appPath, 'plugins', plugin, 'admin', 'src', 'containers', 'App'));
+                  hasAdminFolder = true;
+                } catch(err) {
+                  hasAdminFolder = false;
+                }
+                return hasAdminFolder;
+              })
+              .map(name => ({
               id: name,
               source: Object.keys(this.config.environments).reduce((acc, current) => {
                 const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
