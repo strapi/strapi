@@ -1,8 +1,23 @@
 import {
+  GET_ARTICLES,
+  GET_ARTICLES_SUCCEEDED,
   ON_CHANGE,
   SUBMIT,
   SUBMIT_SUCCEEDED,
 } from './constants';
+
+export function getArticles() {
+  return {
+    type: GET_ARTICLES,
+  };
+}
+
+export function getArticlesSucceeded(articles) {
+  return {
+    type: GET_ARTICLES_SUCCEEDED,
+    articles,
+  };
+}
 
 export function onChange({ target }) {
   return {
