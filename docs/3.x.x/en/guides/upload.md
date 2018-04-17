@@ -120,3 +120,17 @@ Here the request to make to associate the file (/path/to/pictures/avatar.jpg) to
 ```
 curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf45c&ref=user&source=users-permissions&field=avatar' http://localhost:1337/upload
 ```
+
+## Install providers
+
+By default Strapi provides a local file upload system. You might want to upload your files on AWS S3 or another provider.
+
+To install a new provider run:
+
+```
+$ npm install strapi-upload-aws-s3@alpha --save
+```
+
+We have two providers available `strapi-upload-aws-s3` and `strapi-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` and configure the provider.
+
+If you want to create your own, make sure the name starts with `strapi-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
