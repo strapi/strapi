@@ -147,7 +147,7 @@ module.exports = {
       // Add bracket or not.
       const globalId = definition.plugin ?
         strapi.plugins[definition.plugin].models[ref].globalId:
-        strapi.models[definition.plugin].globalId;
+        strapi.models[ref].globalId;
       const plural = !_.isEmpty(definition.collection);
 
       if (plural) {
@@ -349,7 +349,7 @@ module.exports = {
             return ctx.body;
           }
 
-          return values.toJSON ? values.toJSON() : values;
+          return values && values.toJSON ? values.toJSON() : values;
         }
 
         return resolver.call(null, obj, options, context)
@@ -478,6 +478,7 @@ module.exports = {
         switch (association.nature) {
           case 'manyMorphToOne':
           case 'manyMorphToMany':
+          case 'manyToManyMorph':
             return _.merge(acc.resolver[globalId], {
               [association.alias]: async (obj, options, context) => {
                 const [ withRelated, withoutRelated ] = await Promise.all([
@@ -491,11 +492,12 @@ module.exports = {
                   }, plugin, [])
                 ]);
 
-                const entry = withRelated.toJSON ? withRelated.toJSON() : withRelated;
+                const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
                 entry[association.alias].map((entry, index) => {
-                  const type = withoutRelated[association.alias][index].kind ||
-                  _.upperFirst(_.camelCase(withoutRelated[association.alias][index][`${association.alias}_type`]));
+                  const type = _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
+                  _.upperFirst(_.camelCase(_.get(withoutRelated, `${association.alias}.${index}.${association.alias}_type`))) ||
+                  _.upperFirst(_.camelCase(association[association.type]));
 
                   entry._type = type;
 
@@ -543,20 +545,36 @@ module.exports = {
               // Skip.
               queryOpts.skip = convertedParams.start;
 
-              // Where.
-              queryOpts.query = strapi.utils.models.convertParams(name, {
-                // Construct the "where" query to only retrieve entries which are
-                // related to this entry.
-                [association.via]: obj[ref.primaryKey],
-                ...where.where
-              }).where;
+              switch (association.nature) {
+                case 'manyToMany':
+                  const arrayOfIds = obj[association.alias].map(related => {
+                    return related[ref.primaryKey] || related;
+                  });
+
+                  // Where.
+                  queryOpts.query = strapi.utils.models.convertParams(name, {
+                    // Construct the "where" query to only retrieve entries which are
+                    // related to this entry.
+                    [ref.primaryKey]: arrayOfIds,
+                    ...where.where
+                  }).where;
+                  break;
+                default:
+                  // Where.
+                  queryOpts.query = strapi.utils.models.convertParams(name, {
+                    // Construct the "where" query to only retrieve entries which are
+                    // related to this entry.
+                    [association.via]: obj[ref.primaryKey],
+                    ...where.where
+                  }).where;
+              }
             }
 
             const value = await (association.model ?
               resolvers.fetch(params, association.plugin, []):
               resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
 
-            return value.toJSON ? value.toJSON() : value;
+            return value && value.toJSON ? value.toJSON() : value;
           }
         });
       });
