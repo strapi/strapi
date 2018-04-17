@@ -387,16 +387,29 @@ module.exports = {
         [model.primaryKey]: 'String'
       };
 
+      const globalId = model.globalId;
+      const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
+
+      if (!acc.resolver[globalId]) {
+        acc.resolver[globalId] = {};
+      }
+
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
           created_at: 'String',
           updated_at: 'String'
         });
-      }
 
-      const globalId = model.globalId;
-      const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
+        Object.assign(acc.resolver[globalId], {
+          created_at: (obj, options, context) => {
+            return obj.createdAt || obj.created_at;
+          },
+          updated_at: (obj, options, context) => {
+            return obj.updatedAt || obj.updated_at;
+          }
+        });
+      }
 
       // Retrieve user customisation.
       const { type = {}, resolver = {} } = _schema;
@@ -471,10 +484,6 @@ module.exports = {
 
       // Build associations queries.
       (model.associations || []).forEach(association => {
-        if (!acc.resolver[globalId]) {
-          acc.resolver[globalId] = {};
-        }
-
         switch (association.nature) {
           case 'manyMorphToOne':
           case 'manyMorphToMany':
