@@ -218,6 +218,10 @@ module.exports = {
                   return value;
                 })
               }
+              
+              if (!_.isArray(array) && typeof array === 'object') {
+                return transformToArrayID([array]);
+              }
 
               if (association.type === 'model') {
                 return _.isEmpty(array) ? [] : transformToArrayID([array]);
