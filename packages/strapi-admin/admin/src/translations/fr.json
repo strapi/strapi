@@ -55,7 +55,7 @@
   "app.components.InstallPluginPopup.navLink.changelog": "changelog",
   "app.components.InstallPluginPopup.noDescription": "Aucune description disponible",
 
-  "app.components.LeftMenuFooter.poweredBy": "Propulsé par",
+  "app.components.LeftMenuFooter.poweredBy": "Propulsé par ",
   "app.components.LeftMenuLinkContainer.configuration": "Configurations",
   "app.components.LeftMenuLinkContainer.general": "Général",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplaces",

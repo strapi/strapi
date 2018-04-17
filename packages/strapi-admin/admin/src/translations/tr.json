@@ -41,7 +41,7 @@
   "app.components.InstallPluginPopup.navLink.changelog": "Değişim Günlüğü",
   "app.components.InstallPluginPopup.noDescription": "Açıklama bulunmamaktadır.",
 
-  "app.components.LeftMenuFooter.poweredBy": "Gururla sunar",
+  "app.components.LeftMenuFooter.poweredBy": "Gururla sunar ",
   "app.components.LeftMenuLinkContainer.configuration": "Yapılandırma",
   "app.components.LeftMenuLinkContainer.general": "Genel",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Pazar Yeri",
