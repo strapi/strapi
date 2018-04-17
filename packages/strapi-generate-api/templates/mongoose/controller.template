@@ -1,79 +1,74 @@
 'use strict';
-
 /**
  * <%= filename %> controller
  *
  * @description: A set of functions called "actions" for managing `<%= globalID %>`.
  */
-
+ const normalize = (data) => {
+  if (data.constructor.name == "Array") {
+    return data.map(value => value = normalize(value));
+  }
+  else {
+    var id = data.id;
+    var clone = Object.assign({}, data._doc);
+    delete clone._id;
+    if (!clone.id)
+      clone.id = id;
+    return clone;
+  }
+}
 module.exports = {
-
   /**
    * Retrieve <%= id %> records.
    *
    * @return {Object|Array}
    */
-
   find: async (ctx) => {
     const data = await strapi.services.<%= id %>.fetchAll(ctx.query);
-
     // Send 200 `ok`
-    ctx.send(data);
+    ctx.send(normalize(data));
   },
-
   /**
    * Retrieve a <%= id %> record.
    *
    * @return {Object}
    */
-
   findOne: async (ctx) => {
     if (!ctx.params._id.match(/^[0-9a-fA-F]{24}$/)) {
       return ctx.notFound();
     }
-
     const data = await strapi.services.<%= id %>.fetch(ctx.params);
-
     // Send 200 `ok`
-    ctx.send(data);
+    ctx.send(normalize(data));
   },
-
   /**
    * Create a/an <%= id %> record.
    *
    * @return {Object}
    */
-
   create: async (ctx) => {
     const data = await strapi.services.<%= id %>.add(ctx.request.body);
-
     // Send 201 `created`
-    ctx.created(data);
+    ctx.created(normalize(data));
   },
-
   /**
    * Update a/an <%= id %> record.
    *
    * @return {Object}
    */
-
   update: async (ctx, next) => {
     const data = await strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
-
     // Send 200 `ok`
     ctx.send(data);
   },
-
   /**
    * Destroy a/an <%= id %> record.
    *
    * @return {Object}
    */
-
   destroy: async (ctx, next) => {
     const data = await strapi.services.<%= id %>.remove(ctx.params);
-
     // Send 200 `ok`
-    ctx.send(data);
+    ctx.send(normalize(data));
   }
 };
