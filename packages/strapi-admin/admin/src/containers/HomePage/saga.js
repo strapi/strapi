@@ -1,5 +1,5 @@
 import 'whatwg-fetch';
-import { padEnd, take } from 'lodash';
+import { dropRight, take } from 'lodash';
 import removeMd from 'remove-markdown';
 import {
   call,
@@ -19,11 +19,14 @@ function* getArticles() {
   try {
     const articles = yield call(fetchArticles);
     const posts = articles.posts.reduce((acc, curr) => {
-      const post = {
+      // Limit to 200 characters and remove last word.
+      const content = dropRight(take(removeMd(curr.markdown), 250).join('').split(' ')).join(' ');
+
+      acc.push({
         title: curr.title,
-        content: padEnd(take(removeMd(curr.markdown), 200).join(''), 203, '...'),
-      };
-      acc.push(post);
+        link: curr.slug,
+        content: `${content} [...]`,
+      });
 
       return acc;
     }, []);

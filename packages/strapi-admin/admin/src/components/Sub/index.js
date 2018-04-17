@@ -12,7 +12,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function Sub({ bordered, content, name, style, title, underline }) {
+function Sub({ bordered, content, link, name, style, title, underline }) {
   if (isObject(title)) {
     return (
       <div className={cn(styles.subWrapper, bordered && styles.subBordered)}>
@@ -25,18 +25,19 @@ function Sub({ bordered, content, name, style, title, underline }) {
   }
 
   return (
-    <div className={cn(styles.subWrapper, bordered && styles.subBordered)}>
+    <a className={cn(styles.subWrapper, bordered && styles.subBordered, styles.link)} href={`https://blog.strapi.io/${link}`} target="_blank">
       <span>{title}</span>
       <p style={style}>
         {isFunction(content) ? content() : content}
       </p>
-    </div>
+    </a>
   );
 }
 
 Sub.defaultProps = {
   bordered: false,
   content: () => '',
+  link: '',
   name: '',
   style: {},
   title: {
@@ -53,6 +54,7 @@ Sub.propTypes = {
     PropTypes.func,
     PropTypes.string,
   ]),
+  link: PropTypes.string,
   name: PropTypes.string,
   style: PropTypes.object,
   title: PropTypes.oneOfType([
