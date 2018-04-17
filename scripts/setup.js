@@ -84,10 +84,8 @@ watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-g
 watcher('📦  Linking strapi...', 'npm link');
 
 shell.cd('../strapi-plugin-email');
-watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
-watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-users-permissions');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
