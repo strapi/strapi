@@ -37,7 +37,7 @@
     "app.components.InstallPluginPopup.navLink.changelog": "Änderungsprotokoll",
     "app.components.InstallPluginPopup.noDescription": "Keine Beschreibung verfügbar",
 
-    "app.components.LeftMenuFooter.poweredBy": "Stolz präsentiert von",
+    "app.components.LeftMenuFooter.poweredBy": "Stolz präsentiert von ",
     "app.components.LeftMenuLinkContainer.configuration": "Konfiguration",
     "app.components.LeftMenuLinkContainer.general": "Allgemein",
     "app.components.LeftMenuLinkContainer.installNewPlugin": "Marktplatz",

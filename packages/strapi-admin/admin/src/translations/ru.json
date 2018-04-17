@@ -1,13 +1,13 @@
 {
     "app.components.Button.save": "Сохранить",
     "app.components.Button.cancel": "Отменить",
-  
+
     "app.components.ComingSoonPage.comingSoon": "Скоро",
     "app.components.ComingSoonPage.featuresNotAvailable": "Этот функционал все еще находится в стадии активной разработки.",
-  
+
     "app.components.DownloadInfo.download": "Выполняется загрузка...",
     "app.components.DownloadInfo.text": "Это может занять около минуты. Спасибо за ваше терпение.",
-  
+
     "app.components.HomePage.welcome": "Добро пожаловать!",
     "app.components.HomePage.cta": "ПОДТВЕРДИТЬ",
     "app.components.HomePage.community": "Найти сообщество в интернете",
@@ -24,22 +24,22 @@
     "app.components.HomePage.support": "ПОДДЕРЖИТЕ НАС",
     "app.components.HomePage.support.content": "Купите футболку (25€), это поможет нам продолжать работу над проектом, чтобы предоставить вам наилучшее из возможных решений!",
     "app.components.HomePage.support.link": "ЗАКАЗАТЬ НАШУ ФУТБОЛКУ СЕЙЧАС",
-  
+
     "app.components.BlockLink.documentation": "Прочитать документацию",
     "app.components.BlockLink.documentation.content": "Ознакомтесь с концепциями, документацией и обучающими материалами.",
     "app.components.BlockLink.code": "Примеры кода",
     "app.components.BlockLink.code.content": "Обучайтесь на реальных проектах разработанных в сообществе.",
-  
-  
+
+
     "app.components.InputFile.newFile": "Добавить новый файл",
     "app.components.InputFileDetails.open": "Открыть в новой вкладке",
     "app.components.InputFileDetails.remove": "Удалить этот файл",
     "app.components.InputFileDetails.originalName": "Первоначальное название:",
     "app.components.InputFileDetails.size": "Размер:",
-  
+
     "app.components.ImgPreview.hint": "Перетащите файл в эту область или {browse} для загрузки файла",
     "app.components.ImgPreview.hint.browse": "просмотреть",
-  
+
     "app.components.InstallPluginPage.helmet": "Магазин - Плагины",
     "app.components.InstallPluginPage.title": "Магазин - Плагины",
     "app.components.InstallPluginPage.description": "Расширяйте ваше приложение без усилий.",
@@ -53,15 +53,15 @@
     "app.components.InstallPluginPopup.navLink.faq": "faq",
     "app.components.InstallPluginPopup.navLink.changelog": "журнал изменений",
     "app.components.InstallPluginPopup.noDescription": "Нет описания",
-  
-    "app.components.LeftMenuFooter.poweredBy": "С гордостью предоставлено",
+
+    "app.components.LeftMenuFooter.poweredBy": "С гордостью предоставлено ",
     "app.components.LeftMenuLinkContainer.configuration": "Настройки",
     "app.components.LeftMenuLinkContainer.general": "Общие",
     "app.components.LeftMenuLinkContainer.installNewPlugin": "Магазин",
     "app.components.LeftMenuLinkContainer.listPlugins": "Плагины",
     "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Нет установленых плагинов",
     "app.components.LeftMenuLinkContainer.plugins": "Плагины",
-  
+
     "app.components.ListPluginsPage.helmet.title": "Список плагинов",
     "app.components.ListPluginsPage.title": "Плагины",
     "app.components.ListPluginsPage.description": "Список установленых плагинов.",
@@ -70,12 +70,12 @@
     "app.components.listPlugins.title.plural": "{number} плагинов установленно",
     "app.components.listPlugins.title.none": "Нет установленых плагинов",
     "app.components.listPlugins.button": "Добавить новый плагин",
-  
+
     "app.components.NotFoundPage.description": "Не найдено",
     "app.components.NotFoundPage.back": "Вернуться на главную",
-  
+
     "app.components.Official": "Официальный",
-  
+
     "app.components.PluginCard.compatible": "Совместимо с вашим приложением",
     "app.components.PluginCard.compatibleCommunity": "Совместимо с сообществом",
     "app.components.PluginCard.Button.label.download": "Скачать",
@@ -83,29 +83,29 @@
     "app.components.PluginCard.Button.label.support": "Поддержать нас",
     "app.components.PluginCard.price.free": "Бесплатно",
     "app.components.PluginCard.more-details": "Больше деталей",
-  
+
     "app.utils.placeholder.defaultMessage": "\u0020",
     "app.utils.SelectOption.defaultMessage": "\u0020",
     "app.utils.defaultMessage": "\u0020",
-  
+
     "components.AutoReloadBlocker.header": "Функционал перезапуска необходим для этого плагина.",
     "components.AutoReloadBlocker.description": "Откройте соответствующий файл и активируйте функционал.",
-  
+
     "components.ErrorBoundary.title": "Что-то пошло не так...",
-  
+
     "components.OverlayBlocker.title": "Ожидание перезапуска...",
     "components.OverlayBlocker.description": "Вы воспользовались функционалом который требует перезапуска сервера. Пожалуста подождете пока подниметься сервер.",
-  
+
     "components.PageFooter.select": "записей на странице",
-  
+
     "components.ProductionBlocker.header": "Этот плагин доступен только на стадии разработки.",
     "components.ProductionBlocker.description": "Для безопасности мы должны заблокировать его для других вариантов.",
-  
+
     "components.popUpWarning.button.cancel": "Отменить",
     "components.popUpWarning.button.confirm": "Подтвердить",
     "components.popUpWarning.title": "Пожалуйста подтвердите",
     "components.popUpWarning.message": "Вы уверены, что хотите удалить это?",
-  
+
     "components.Input.error.validation.email": "Это не адрес электронной почты",
     "components.Input.error.validation.required": "Необходимое поле для заполнение.",
     "components.Input.error.validation.regex": "Не соответствует регулярному выражению.",
@@ -119,9 +119,9 @@
     "components.Input.error.attribute.sameKeyAndName": "Не может быть одинаковым",
     "components.Input.error.validation.minSupMax": "Не может быть выше",
     "components.Input.error.custom-error": "{errorMessage} ",
-  
+
     "components.ListRow.empty": "Нет данных для отображения.",
-  
+
     "components.Wysiwyg.collapse": "Свернуть",
     "components.Wysiwyg.selectOptions.title": "Добавить заголовок",
     "components.Wysiwyg.selectOptions.H1": "Заголовок H1",
@@ -136,12 +136,12 @@
     "components.WysiwygBottomControls.uploadFiles": "Перетащите файлы в эту область, добавляйте из буфер обмена или {browse}.",
     "components.WysiwygBottomControls.uploadFiles.browse": "выделите их",
     "components.WysiwygBottomControls.fullscreen": "Развернуть",
-  
+
     "HomePage.notification.newsLetter.success": "Успешная подписка на рассылку новостей",
-  
+
     "notification.error": "Произошла ошибка",
     "notification.error.layout": "Не удалось получить макет",
-  
+
     "Users & Permissions": "Пользователи & Доступы",
     "Content Manager": "Редактор контента",
     "Content Type Builder": "Конструктор Типов Контента",
@@ -157,4 +157,3 @@
     "Users": "Пользователи",
     "Analytics": "Аналитика"
   }
-  

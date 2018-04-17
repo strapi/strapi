@@ -1,0 +1,10 @@
+module.exports = {
+  resolver: {
+    Query: {
+      file: false,
+      files: {
+        resolver: 'Upload.find'
+      }
+    }
+  }
+};

@@ -36,7 +36,7 @@
   "app.components.InstallPluginPopup.navLink.changelog": "更新紀錄",
   "app.components.InstallPluginPopup.noDescription": "目前沒有說明",
 
-  "app.components.LeftMenuFooter.poweredBy": "Proudly powered by",
+  "app.components.LeftMenuFooter.poweredBy": "Powered by ",
   "app.components.LeftMenuLinkContainer.configuration": "設定",
   "app.components.LeftMenuLinkContainer.general": "一般",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "市集",
