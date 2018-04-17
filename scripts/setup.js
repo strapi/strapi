@@ -15,6 +15,7 @@ if (parseFloat(nodeVersion) < 8.6) {
 // Store installation start date.
 const silent = process.env.npm_config_debug !== 'true';
 const installationStartDate = new Date();
+
 const watcher = (label, cmd, withSuccess = true) => {
   if (label.length > 0) {
     shell.echo(label);
@@ -34,6 +35,29 @@ const watcher = (label, cmd, withSuccess = true) => {
     shell.echo('');
   }
 
+};
+
+const asyncWatcher = (label, cmd, withSuccess = true) => {
+  if (label.length > 0) {
+    shell.echo(label);
+  }
+
+  const child = shell.exec(cmd, {
+    silent,
+    async: true,
+  });
+
+  child.stdout.on('data', data => {
+    if (data.stderr && data.code !== 0) {
+      console.error(data.stderr);
+      process.exit(1);
+    }
+
+    if (label.length > 0 && withSuccess) {
+      shell.echo('✅  Success');
+      shell.echo('');
+    }
+  });
 };
 
 shell.echo('');
@@ -132,16 +156,37 @@ watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-op
 
 const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'email', 'upload', 'users-permissions'];
 
-if (process.env.npm_config_build) {
-  pluginsToBuild.map(name => {
-    const pluginName = name === 'admin' ? name : `plugin-${name}`;
-    shell.cd(`../strapi-${pluginName}`);
-    return watcher(`🏗  Building ${pluginName}...`, 'npm run build');
-  });
-}
+const buildPlugins = async () => {
+  const build = (pckgName) => {
+    return new Promise(async (resolve) => {
+      const name = pckgName === 'admin' ? pckgName: `plugin-${pckgName}`;
+      asyncWatcher(`🏗  Building ${name}...`, `cd ../strapi-${name} && npm run build`, false);
+      resolve();
+    });
+  };
 
-// Log installation duration.
-const installationEndDate = new Date();
-const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
-shell.echo('✅  Strapi has been succesfully installed.');
-shell.echo(`⏳  The installation took ${Math.floor(duration / 60) > 0 ? `${Math.floor(duration / 60)} minutes and ` : ''}${Math.floor(duration % 60)} seconds.`);
+  return Promise.all(pluginsToBuild.map(plugin => build(plugin)));
+};
+
+const setup = async () => {
+  if (process.env.npm_config_build) {
+    if (process.platform === 'darwin') { // Allow async build for darwin platform
+      await buildPlugins();
+    } else {
+      pluginsToBuild.map(name => {
+        const pluginName = name === 'admin' ? name : `plugin-${name}`;
+        shell.cd(`../strapi-${pluginName}`);
+
+        return watcher(`🏗  Building ${pluginName}...`, 'npm run build');
+      });
+    }
+  }
+
+  // Log installation duration.
+  const installationEndDate = new Date();
+  const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
+  shell.echo('✅  Strapi has been succesfully installed.');
+  shell.echo(`⏳  The installation took ${Math.floor(duration / 60) > 0 ? `${Math.floor(duration / 60)} minutes and ` : ''}${Math.floor(duration % 60)} seconds.`);
+};
+
+setup();
