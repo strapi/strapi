@@ -40,7 +40,7 @@
   "app.components.InstallPluginPopup.navLink.changelog": "dziennik zmian",
   "app.components.InstallPluginPopup.noDescription": "Brak dostępnego opisu",
 
-  "app.components.LeftMenuFooter.poweredBy": "Dumnie wspierane przez",
+  "app.components.LeftMenuFooter.poweredBy": "Dumnie wspierane przez ",
   "app.components.LeftMenuLinkContainer.configuration": "Konfiguracje",
   "app.components.LeftMenuLinkContainer.general": "Ogólne",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Sklep",

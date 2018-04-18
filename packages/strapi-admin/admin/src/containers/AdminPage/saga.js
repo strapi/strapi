@@ -1,4 +1,3 @@
-import { take } from 'lodash';
 import { fork, call, put, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
@@ -15,9 +14,9 @@ function* getGaStatus() {
       call(request, '/admin/gaConfig', { method: 'GET' }),
       call(request, '/admin/strapiVersion', { method: 'GET' }),
     ];
+
     yield put(getGaStatusSucceeded(allowGa));
-    const version = take(`${strapiVersion.strapiVersion.split('.')[0]}${strapiVersion.strapiVersion.split('alpha')[1]}`, 4).join('');
-    yield put(getStrapiVersionSucceeded(version));
+    yield put(getStrapiVersionSucceeded(strapiVersion.strapiVersion));
   } catch(err) {
     strapi.notification.error('notification.error');
   }

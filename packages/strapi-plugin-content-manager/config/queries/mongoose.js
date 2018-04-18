@@ -1,12 +1,13 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params) {
+  find: async function (params, populate) {
     return this
-      .find()
+      .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
-      .skip(Number(params.skip));
+      .skip(Number(params.skip))
+      .populate(populate || this.associations.map(x => x.alias).join(' '));
   },
 
   count: async function (params) {
@@ -210,37 +211,37 @@ module.exports = {
           case 'manyToManyMorph':
             const transformToArrayID = (array) => {
               if (_.isArray(array)) {
-                return array.map(value => {
-                  if (_.isPlainObject(value)) {
-                    return value._id || value.id;
-                  }
+                  return array.map(value => {
+                    if (_.isPlainObject(value)) {
+                      return value._id || value.id;
+                    }
 
-                  return value;
-                })
-              }
+                    return value;
+                  })
+                }
 
-              if (association.type === 'model') {
-                return _.isEmpty(array) ? [] : transformToArrayID([array]);
-              }
+                if (association.type === 'model') {
+                  return _.isEmpty(array) ? [] : transformToArrayID([array]);
+                }
 
-              return [];
-            };
+                return [];
+              };
 
-            // Compare array of ID to find deleted files.
-            const currentValue = transformToArrayID(response[current]).map(id => id.toString());
-            const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+              // Compare array of ID to find deleted files.
+              const currentValue = transformToArrayID(response[current]).map(id => id.toString());
+              const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
 
-            const toAdd = _.difference(storedValue, currentValue);
-            const toRemove = _.difference(currentValue, storedValue);
+              const toAdd = _.difference(storedValue, currentValue);
+              const toRemove = _.difference(currentValue, storedValue);
 
-            // Remove relations in the other side.
-            toAdd.forEach(id => {
-              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelationMorph({
-                id,
-                alias: association.via,
-                ref: this.globalId,
-                refId: response._id,
-                field: association.alias
+              // Remove relations in the other side.
+              toAdd.forEach(id => {
+                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelationMorph({
+                  id,
+                  alias: association.via,
+                  ref: this.globalId,
+                  refId: response._id,
+                  field: association.alias
               }));
             });
 

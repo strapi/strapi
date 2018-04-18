@@ -18,8 +18,7 @@ function LeftMenuFooter({ version }) { // eslint-disable-line react/prefer-state
   return (
     <div className={styles.leftMenuFooter}>
       <FormattedMessage {...messages.poweredBy} />
-      <a href="http://strapi.io" target="_blank"> Strapi</a>
-      <span>&nbsp;(v{version})</span>
+      <a href="https://strapi.io" target="_blank">v{version}</a>
       <LocaleToggle />
     </div>
   );
