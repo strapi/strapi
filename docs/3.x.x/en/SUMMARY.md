@@ -22,6 +22,7 @@
 * [Deployment](guides/deployment.md)
 * [File Upload](guides/upload.md)
 * [Filters](guides/filters.md)
+* [GraphQL](guides/graphql.md)
 * [Internationalization](guides/i18n.md)
 * [Models](guides/models.md)
 * [Policies](guides/policies.md)
