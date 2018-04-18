@@ -460,8 +460,8 @@ CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
   role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
   ${quote}resetPasswordToken${quote} text,
   password text,
-  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'},
+  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP'}
 );`);
             break;
           case 'role':
