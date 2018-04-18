@@ -57,8 +57,8 @@ module.exports = scope => {
       'uuid': uuid()
     },
     'engines': {
-      'node': '>= 7.0.0',
-      'npm': '>= 3.0.0'
+      'node': '>= 9.0.0',
+      'npm': '>= 5.0.0'
     },
     'license': scope.license || 'MIT'
   });
