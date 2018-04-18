@@ -28,7 +28,7 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 
 ### Query API
 
-In the section, we assume that the Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries which just fit to your needs.
+In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries which just fit to your needs.
 
 ##### Fetch a single entry
 
