@@ -39,7 +39,9 @@ module.exports = async (ctx, next) => {
   }, []);
 
   if (!permission) {
-    return ctx.unauthorized();
+    ctx.unauthorized();
+
+    return ctx.request.graphql = ctx.body;
   }
 
   // Execute the policies.

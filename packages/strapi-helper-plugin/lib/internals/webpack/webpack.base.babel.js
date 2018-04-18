@@ -100,8 +100,18 @@ if (process.env.npm_lifecycle_event === 'start') {
     plugins.exist = true;
   }
 
-  // Read `plugins` directory.
-  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => x[0] !== '.') : [];
+  // Read `plugins` directory and check if the plugin comes with an UI.
+  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
+    let hasAdminFolder;
+
+    try {
+      fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+      hasAdminFolder = true;
+    } catch(err) {
+      hasAdminFolder = false;
+    }
+    return x[0] !== '.' && hasAdminFolder;
+  }) : [];
 
   // Construct object of plugin' paths.
   plugins.folders = plugins.src.reduce((acc, current) => {

@@ -176,13 +176,13 @@ module.exports = function (strapi) {
                             case 'oneMorphToOne':
                               returned[association.alias] = returned[association.alias][0].ref;
                               break;
+                            case 'manyMorphToMany':
                             case 'manyMorphToOne':
                               returned[association.alias] = returned[association.alias].map(obj => obj.ref);
                               break;
                             default:
 
                           }
-
                         }
                       });
                     }
@@ -462,6 +462,14 @@ module.exports = function (strapi) {
         case '_limit':
           result.key = `limit`;
           result.value = parseFloat(value);
+          break;
+        case '_contains':
+          result.key = `where.${key}`;
+          result.value = new RegExp('\\b' + value + '\\b', 'i');
+          break;
+        case '_containss':
+          result.key = `where.${key}.$regex`;
+          result.value = value;
           break;
         default:
           result = undefined;

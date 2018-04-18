@@ -71,8 +71,12 @@ module.exports = {
       .toLowerCase();
   },
 
-  loadConfig: function(files) {
+  loadConfig: function(files, shouldBeAggregated = false) {
     const aggregate = files.filter(p => {
+      if (shouldBeAggregated) {
+        return true;
+      }
+
       if (intersection(p.split('/').map(p => p.replace('.json', '')), ['environments', 'database', 'security', 'request', 'response', 'server']).length === 2) {
         return true;
       }

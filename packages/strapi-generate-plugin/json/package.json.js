@@ -55,8 +55,8 @@ module.exports = scope => {
       'url': scope.website || ''
     }],
     'engines': {
-      'node': '>= 7.0.0',
-      'npm': '>= 3.0.0'
+      'node': '>= 9.0.0',
+      'npm': '>= 5.3.0'
     },
     'license': scope.license || 'MIT'
   });

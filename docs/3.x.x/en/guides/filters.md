@@ -22,6 +22,8 @@ Easily filter results according to fields values.
  - `_gt`: Greater than
  - `_lte`: Lower than or equal to
  - `_gte`: Greater than or equal to
+ - `_contains`: Contains
+ - `_containss`: Contains case sensitive
 
 #### Examples
 
