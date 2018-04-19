@@ -38,6 +38,14 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "repos": {
+      "collection": "repo",
+      "via": "user"
+    },
+    "participations": {
+      "collection": "issue",
+      "via": "author"
     }
   }
 }

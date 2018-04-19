@@ -26,18 +26,17 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
   getOptions = (query) => {
     const params = {
-      limit: 20,
+      _limit: 20,
       source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary
     if (query) {
-      params.query = query;
-      params.queryAttribute = this.props.relation.displayedAttribute;
+      params[`${this.props.relation.displayedAttribute}_contains`] = query;
     }
 
     // Request URL
-    const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
+    const requestUrlSuffix = query && get(this.props.record, [this.props.relation.alias]) ? get(this.props.record, [this.props.relation.alias]) : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
@@ -56,7 +55,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
             label: templateObject({ mainField: this.props.relation.displayedAttribute }, response).mainField,
           }];
 
-        return {options};
+        return { options };
       })
       .catch(() => {
         strapi.notification.error('content-manager.notification.relationship.fetch');
@@ -71,8 +70,6 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     };
 
     this.props.setRecordAttribute({ target });
-    // NOTE: keep this line if we rollback to the old container
-    // this.props.setRecordAttribute(this.props.relation.alias, value);
   }
 
   render() {
@@ -81,8 +78,6 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       : '';
 
     const value = get(this.props.record, this.props.relation.alias);
-    // NOTE: keep this line if we rollback to the old container
-    // const value = this.props.record.get(this.props.relation.alias);
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
