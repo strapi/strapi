@@ -54,7 +54,7 @@ module.exports = {
 
       strapi.log.info(`Installing ${plugin}...`);
 
-      exec(`node ${strapiBin} install ${plugin} ${port === '4000' ? '--dev' : ''}`);
+      exec(`node "${strapiBin}" install ${plugin} ${port === '4000' ? '--dev' : ''}`);
 
       ctx.send({ ok: true });
 
