@@ -87,7 +87,7 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      exec(`node ${strapiBin} uninstall ${plugin}`);
+      exec(`node "${strapiBin}" uninstall ${plugin}`);
 
       ctx.send({ ok: true });
 
