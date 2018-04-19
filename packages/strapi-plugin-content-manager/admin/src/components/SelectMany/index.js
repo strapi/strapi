@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
-import { isArray, isNull, isUndefined, get, findIndex } from 'lodash';
+import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -22,17 +22,32 @@ class SelectMany extends React.Component {
 
     this.state = {
       isLoading: true,
+      options: [],
+      toSkip: 0,
     };
+  }
+
+  componentDidMount() {
+    this.getOptions('');
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.toSkip !== this.state.toSkip) {
+      this.getOptions('');
+    }
   }
 
   getOptions = query => {
     const params = {
-      _limit: 20,
+      limit: 20,
+      skip: this.state.toSkip,
       source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary
     if (query) {
+      delete params.limit,
+      delete params.skip,
       params[`${this.props.relation.displayedAttribute}_contains`] = query;
     }
 
@@ -63,7 +78,18 @@ class SelectMany extends React.Component {
             },
           ];
 
-        return { options };
+        const newOptions = cloneDeep(this.state.options);
+        options.map(option => {
+          // Don't add the values when searching
+          if (findIndex(newOptions, o => o.value.id === option.value.id) === -1) {
+            return newOptions.push(option);
+          }
+        });
+
+        return this.setState({
+          options: newOptions,
+          isLoading: false,
+        });
       })
       .catch(() => {
         strapi.notification.error('content-manager.notification.error.relationship.fetch');
@@ -72,7 +98,7 @@ class SelectMany extends React.Component {
 
   handleChange = value => {
     const filteredValue = value.filter(
-      (data, index) => findIndex(value, o => o.value.id === data.value.id) === index,
+      (data, index) => findIndex(value, o => o.value.id === data.value.id) === index
     );
     const target = {
       name: `record.${this.props.relation.alias}`,
@@ -82,6 +108,23 @@ class SelectMany extends React.Component {
 
     this.props.setRecordAttribute({ target });
   };
+
+  handleBottomScroll = () => {
+    this.setState(prevState => {
+      return {
+        toSkip: prevState.toSkip + 20,
+      };
+    });
+  }
+
+  handleInputChange = (value) => {
+    const clonedOptions = this.state.options;
+    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
+
+    if (filteredValues.length === 0) {
+      return this.getOptions(value);
+    }
+  }
 
   render() {
     const description = this.props.relation.description ? (
@@ -96,10 +139,13 @@ class SelectMany extends React.Component {
       <div className={`form-group ${styles.selectMany}`}>
         <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
         {description}
-        <Select.Async
+        <Select
           onChange={this.handleChange}
-          loadOptions={this.getOptions}
+          options={this.state.options}
           id={this.props.relation.alias}
+          isLoading={this.state.isLoading}
+          onMenuScrollToBottom={this.handleBottomScroll}
+          onInputChange={this.handleInputChange}
           multi
           value={
             isNull(value) || isUndefined(value) || value.size === 0
