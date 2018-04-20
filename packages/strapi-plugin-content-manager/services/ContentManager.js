@@ -8,26 +8,26 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip = 0, sort, query : request, queryAttribute, source, page } = query;
+    const { limit, skip = 0, sort, query : request, queryAttribute, source, page, populate = [] } = query;
 
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
       limit,
       skip,
       sort,
-      query: request,
-      queryAttribute
-    });
+      where: request,
+      queryAttribute,
+    }, populate);
   },
 
   count: async (params, source) => {
     return await strapi.query(params.model, source).count();
   },
 
-  fetch: async (params, source) => {
+  fetch: async (params, source, populate, raw = true) => {
     return await strapi.query(params.model, source).findOne({
       id: params.id
-    });
+    }, populate, raw);
   },
 
   add: async (params, values, source) => {
@@ -59,7 +59,7 @@ module.exports = {
       });
 
       // Then, request plugin upload.
-      if (strapi.plugins.upload && !_.isEmpty(values.files)) {
+      if (strapi.plugins.upload && Object.keys(files).length > 0) {
         // Upload new files and attach them to this entity.
         await strapi.plugins.upload.services.upload.uploadToEntity({
           id: entry.id || entry._id,

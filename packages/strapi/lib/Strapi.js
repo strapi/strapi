@@ -6,7 +6,7 @@ const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get, assign, forEach } = require('lodash');
+const { includes, get, assign, forEach, cloneDeep, toLower } = require('lodash');
 const { logger, models } = require('strapi-utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, store } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -57,7 +57,7 @@ class Strapi extends EventEmitter {
       appPath: process.cwd(),
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
-      environment: process.env.NODE_ENV || 'development',
+      environment: toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       paths: {
         admin: 'admin',
@@ -216,11 +216,31 @@ class Strapi extends EventEmitter {
   }
 
   reload() {
+    const state = {
+      shouldReload: true
+    };
+
     const reload = function () {
+      if (state.shouldReload === false) {
+        return;
+      }
+
       if (cluster.isWorker && this.config.environment === 'development' && get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true) {
         process.send('reload');
       }
     };
+
+    Object.defineProperty(reload, 'isWatching', {
+      configurable: true,
+      enumerable: true,
+      set: (value) => {
+        // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
+        state.shouldReload = !(state.isWatching === false && value === true);
+        state.isWatching = value;
+
+        return value;
+      }
+    });
 
     reload.isReloading = false;
     reload.isWatching = true;

@@ -98,7 +98,7 @@ module.exports = function(strapi) {
                   return acc;
                 }, {})
               }, definition.options);
-              
+
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;
@@ -183,6 +183,7 @@ module.exports = function(strapi) {
                           attrs[association.alias] = attrs[association.alias].related;
                           break;
                         case 'manyMorphToOne':
+                        case 'manyMorphToMany':
                           attrs[association.alias] = attrs[association.alias].map(obj => obj.related);
                           break;
                         default:
@@ -233,7 +234,6 @@ module.exports = function(strapi) {
                         const association = definition.associations
                           .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
                           .filter(association => association.alias === path || association.via === path)[0];
-
                         if (association) {
                           // Override on polymorphic path only.
                           if (_.isString(path) && path === association.via) {
@@ -665,6 +665,14 @@ module.exports = function(strapi) {
         case '_limit':
           result.key = `limit`;
           result.value = parseFloat(value);
+          break;
+        case '_contains':
+        case '_containss':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'like',
+            value: `%${value}%`
+          };
           break;
         default:
           return undefined;

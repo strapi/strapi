@@ -46,7 +46,18 @@ if (process.env.npm_lifecycle_event === 'start') {
     plugins.exist = true;
   }
 
-  plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => x[0] !== '.') : [];
+  plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
+    let hasAdminFolder;
+    
+    try {
+      fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+      hasAdminFolder = true;
+    } catch(err) {
+      hasAdminFolder = false;
+    }
+
+    return x[0] !== '.' && hasAdminFolder;
+  }) : [];
 
   plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(appPath, 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');

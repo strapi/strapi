@@ -1,6 +1,6 @@
 {
   "session": {
-    "enabled": false,
+    "enabled": true,
     "client": "cookie",
     "key": "strapi.sid",
     "prefix": "strapi:sess:",
@@ -12,7 +12,7 @@
     "rolling": false
   },
   "logger": {
-    "level": "silent",
+    "level": "info",
     "exposeInContext": true,
     "requests": false
   },

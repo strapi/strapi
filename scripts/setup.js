@@ -71,15 +71,21 @@ shell.cd('../strapi-mongoose');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-mongoose...', 'npm link');
 
+shell.cd('../strapi-knex');
+watcher('📦  Linking strapi-knex...', 'npm link');
+
+shell.cd('../strapi-bookshelf');
+watcher('', 'npm install ../strapi-utils');
+watcher('', 'npm install ../strapi-knex');
+watcher('📦  Linking strapi-bookshelf...', 'npm link');
+
 shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');
 
 shell.cd('../strapi-plugin-email');
-watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
-watcher('🏗  Building...', 'npm run build');
 
 shell.cd('../strapi-plugin-users-permissions');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
@@ -119,6 +125,11 @@ watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 watcher('🏗  Building...', 'npm run build');
+
+shell.cd('../strapi-plugin-graphql');
+watcher('', 'npm install ../strapi-utils --no-optional');
+shell.rm('-f', 'package-lock.json');
+watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
 
 // Log installation duration.
 const installationEndDate = new Date();

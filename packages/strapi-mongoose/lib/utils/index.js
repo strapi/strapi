@@ -32,7 +32,7 @@ module.exports = mongoose => {
           return Date;
         case 'decimal':
         case 'float':
-          return 'Float';
+          return 'Number';
         case 'json':
           return 'Mixed';
         case 'biginteger':
