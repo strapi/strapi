@@ -1,6 +1,6 @@
-# Migrating from 3.0.0-alpha.10 to 3.0.0-alpha.11
+# Migrating from 3.0.0-alpha.11 to 3.0.0-alpha.12
 
-This migration guide is a mix of migrations from 3.0.0-alpha.10.1 to 3.0.0-alpha.10.2, 3.0.0-alpha.10.2 to 3.0.0-alpha.10.3 and from 3.0.0-alpha.10.3 to 3.0.0-alpha.12.
+This migration guide is a mix of migrations from 3.0.0-alpha.11.1 to 3.0.0-alpha.11.2, 3.0.0-alpha.11.2 to 3.0.0-alpha.11.3 and from 3.0.0-alpha.11.3 to 3.0.0-alpha.12.
 
 > Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 
