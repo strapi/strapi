@@ -16,6 +16,19 @@ const uuid = require('uuid/v4');
 module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
 
+  // Let us install additional dependencies on a specific version.
+  // Ex: it allows us to install the right version of knex.
+  const additionalsDependencies = _.isArray(scope.additionalsDependencies) ?
+    scope.additionalsDependencies.reduce((acc, current) => {
+      const pkg = current.split('@');
+      const name = pkg[0];
+      const version = pkg[1] || 'latest';
+
+      acc[name] = name.indexOf('strapi') !== -1 ? getDependencyVersion(cliPkg, 'strapi') : version;
+
+      return acc;
+    }, {}) : {};
+
   // Finally, return the JSON.
   return _.merge(scope.appPackageJSON || {}, {
     'name': scope.name,
@@ -37,12 +50,13 @@ module.exports = scope => {
       'eslint-plugin-import': '^2.2.0',
       'eslint-plugin-react': '^6.8.0'
     },
-    'dependencies': {
+    'dependencies': Object.assign({}, {
       'lodash': '4.x.x',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
+    }, additionalsDependencies, {
       [scope.client.module]: scope.client.version
-    },
+    }),
     'author': {
       'name': scope.author || 'A Strapi developer',
       'email': scope.email || '',
