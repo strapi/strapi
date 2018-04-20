@@ -237,7 +237,7 @@ module.exports = (scope, cb) => {
             cmd += ` ${scope.client.module}`;
           }
 
-          if (scope.client.connector === 'strapi-bookshelf') {
+          if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
             cmd += ` strapi-knex@alpha`;
 
             scope.additionalsDependencies = ['strapi-knex', 'knex'];
@@ -248,7 +248,7 @@ module.exports = (scope, cb) => {
               const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
               scope.client.version = lock.version;
 
-              if (scope.client.connector === 'strapi-bookshelf') {
+              if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
                 const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
                 scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
               }
