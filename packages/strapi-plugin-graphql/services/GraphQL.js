@@ -41,6 +41,11 @@ module.exports = {
           const info = (_.isString(description[attribute]) ? description[attribute] : _.get(description[attribute], 'description')) || _.get(model, `attributes.${attribute}.description`);
           const deprecated = _.get(description[attribute], 'deprecated') || _.get(model, `attributes.${attribute}.deprecated`);
 
+          // Snakecase an attribute when we find a dash.
+          if (attribute.indexOf('-') !== -1) {
+            line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
+          }
+
           if (info) {
             line = `  """\n    ${info}\n  """\n${line}`;
           }
@@ -63,6 +68,11 @@ module.exports = {
           const attribute = _.trim(split[0]);
           const info = _.get(description[attribute], 'description');
           const deprecated = _.get(description[attribute], 'deprecated');
+
+          // Snakecase an attribute when we find a dash.
+          if (attribute.indexOf('-') !== -1) {
+            line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
+          }
 
           if (info) {
             line = `  """\n    ${info}\n  """\n${line}`;
