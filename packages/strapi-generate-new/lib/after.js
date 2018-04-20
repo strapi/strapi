@@ -35,8 +35,8 @@ module.exports = (scope, cb) => {
 
   const availableDependencies = [];
   const dependencies = _.get(packageJSON, 'dependencies');
-  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1 && key.indexOf('strapi-bookshelf') === -1);
-  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1  || key.indexOf('strapi-bookshelf') !== -1);
+  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
+  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
@@ -56,6 +56,7 @@ module.exports = (scope, cb) => {
   logger.info('Installing dependencies...');
   if (!_.isEmpty(othersDependencies)) {
     npm.install({
+      dir: scope.rootPath,
       dependencies: othersDependencies,
       loglevel: 'silent',
       production: true,
