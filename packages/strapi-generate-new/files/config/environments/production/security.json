@@ -50,7 +50,8 @@
     "headers": [
       "Content-Type",
       "Authorization",
-      "X-Frame-Options"
+      "X-Frame-Options",
+      "Origin"
     ]
   },
   "ip": {
