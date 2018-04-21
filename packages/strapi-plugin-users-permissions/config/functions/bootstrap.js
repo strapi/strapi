@@ -34,49 +34,52 @@ module.exports = async cb => {
     name: 'users-permissions'
   });
 
-  if (!await pluginStore.get({key: 'grant'})) {
-    const value = {
-      email: {
-        enabled: true,
-        icon: 'envelope'
-      },
-      facebook: {
-        enabled: false,
-        icon: 'facebook-official',
-        key: '',
-        secret: '',
-        callback: '/auth/facebook/callback',
-        scope: ['email']
-      },
-      google: {
-        enabled: false,
-        icon: 'google',
-        key: '',
-        secret: '',
-        callback: '/auth/google/callback',
-        scope: ['email']
-      },
-      github: {
-        enabled: false,
-        icon: 'github',
-        key: '',
-        secret: '',
-        redirect_uri: '/auth/github/callback',
-        scope: [
-          'user',
-          'user:email'
-        ]
-      },
-      twitter: {
-        enabled: false,
-        icon: 'twitter',
-        key: '',
-        secret: '',
-        callback: '/auth/twitter/callback'
-      }
-    };
-
-    await pluginStore.set({key: 'grant', value});
+  const grantValue = {
+    email: {
+      enabled: true,
+      icon: 'envelope'
+    },
+    facebook: {
+      enabled: false,
+      icon: 'facebook-official',
+      key: '',
+      secret: '',
+      callback: '/auth/facebook/callback',
+      scope: ['email']
+    },
+    google: {
+      enabled: false,
+      icon: 'google',
+      key: '',
+      secret: '',
+      callback: '/auth/google/callback',
+      scope: ['email']
+    },
+    github: {
+      enabled: false,
+      icon: 'github',
+      key: '',
+      secret: '',
+      redirect_uri: '/auth/github/callback',
+      scope: [
+        'user',
+        'user:email'
+      ]
+    },
+    twitter: {
+      enabled: false,
+      icon: 'twitter',
+      key: '',
+      secret: '',
+      callback: '/auth/twitter/callback'
+    }
+  };
+  const prevGrantValue = await pluginStore.get({key: 'grant'})
+  // store grant auth config to db
+  // when plugin_users-permissions_grant is not existed in db
+  // or we have added/deleted provider here.
+  if (!prevGrantValue || !_.isEqual(_.keys(prevGrantValue), _.keys(grantValue))) {
+    await pluginStore.set({key: 'grant', value: grantValue});
   }
 
   if (!await pluginStore.get({key: 'email'})) {
