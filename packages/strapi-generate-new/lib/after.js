@@ -35,8 +35,8 @@ module.exports = (scope, cb) => {
 
   const availableDependencies = [];
   const dependencies = _.get(packageJSON, 'dependencies');
-  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1 && key.indexOf('strapi-bookshelf') === -1);
-  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1  || key.indexOf('strapi-bookshelf') !== -1);
+  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
+  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
@@ -56,6 +56,7 @@ module.exports = (scope, cb) => {
   logger.info('Installing dependencies...');
   if (!_.isEmpty(othersDependencies)) {
     npm.install({
+      dir: scope.rootPath,
       dependencies: othersDependencies,
       loglevel: 'silent',
       production: true,
@@ -123,14 +124,14 @@ module.exports = (scope, cb) => {
 
       if (dependency.global) {
         try {
-          fs.accessSync(dependency.path, fs.constants.W_OK | fs.constants.F_OK);
+          fs.accessSync(dependency.path, fs.constants.R_OK | fs.constants.F_OK);
           fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
         } catch (e) {
           // Silent.
         }
       } else {
         try {
-          fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.W_OK | fs.constants.F_OK);
+          fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.R_OK | fs.constants.F_OK);
           fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
         } catch (e) {
           // Silent.

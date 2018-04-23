@@ -142,7 +142,7 @@ export class ListPage extends React.Component {
     const { history, listPage: { params } } = this.props;
     const search =
       e.target.name === 'params.limit'
-        ? `page=${params.currentPage}&limit=${e.target.value}&sort=${params.sort}&source=${this.getSource()}`
+        ? `page=${params.page}&limit=${e.target.value}&sort=${params.sort}&source=${this.getSource()}`
         : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`;
     this.props.history.push({
       pathname: history.pathname,
