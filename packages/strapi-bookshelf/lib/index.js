@@ -40,8 +40,10 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: cb => {
+    initialize: async cb => {
       const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-bookshelf' });
+
+      const databaseUpdate = [];
 
       _.forEach(connections, (connection, connectionName) => {
         // Apply defaults
@@ -307,6 +309,100 @@ module.exports = function(strapi) {
                 // Push attributes to be aware of model schema.
                 target[model]._attributes = definition.attributes;
 
+                databaseUpdate.push(new Promise(async (resolve) => {
+                  const tableExist = await ORM.knex.schema.hasTable(loadedModel.tableName);
+
+                  const quote = definition.client === 'pg' ? '"' : '`';
+
+                  // Add created_at and updated_at field if timestamp option is true
+                  if (loadedModel.hasTimestamps) {
+                    definition.attributes['created_at'] = definition.attributes['updated_at'] = {
+                      type: 'time'
+                    };
+                  }
+
+                  // Generate fields type
+                  const generateColumns = (attributes, start) => {
+                    return Object.keys(attributes).reduce((acc, attr) => {
+                      const attribute = definition.attributes[attr];
+
+                      if (!attribute.type) return acc;
+
+                      let type;
+
+                      switch (attribute.type) {
+                        case 'string':
+                        case 'text':
+                        case 'password':
+                        case 'email':
+                          type = 'text';
+                          break;
+                        case 'integer':
+                        case 'biginteger':
+                        case 'float':
+                        case 'decimal':
+                          type = definition.client === 'pg' ? 'integer' : 'int';
+                          break;
+                        case 'date':
+                        case 'time':
+                        case 'datetime':
+                        case 'timestamp':
+                          type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
+                          break;
+                        case 'boolean':
+                          type = 'boolean';
+                          break;
+                        default:
+                      }
+
+                      acc.push(`${quote}${attr}${quote} ${type}`);
+
+                      return acc;
+                    }, start);
+                  };
+
+                  if (!tableExist) {
+                    const columns = generateColumns(definition.attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
+
+                    // Create table
+                    await ORM.knex.raw(`
+                      CREATE TABLE ${quote}${loadedModel.tableName}${quote} (
+                        ${columns}
+                      )
+                    `);
+                  } else {
+                    const columns = Object.keys(definition.attributes);
+
+                    // Fetch existing column
+                    const columnsExist = await Promise.all(columns.map(attribute =>
+                      ORM.knex.schema.hasColumn(loadedModel.tableName, attribute)
+                    ));
+
+                    const columnsToAdd = {};
+
+                    // Get columns to add
+                    columnsExist.forEach((columnExist, index) => {
+                      const attribute = definition.attributes[columns[index]];
+
+                      if (!columnExist && attribute.type) {
+                        columnsToAdd[columns[index]] = attribute;
+                      }
+                    });
+
+                    // Generate and execute query to add missing column
+                    if (Object.keys(columnsToAdd).length > 0) {
+                      const columns = generateColumns(columnsToAdd, []);
+                      const queries = columns.reduce((acc, attribute) => {
+                        acc.push(`ALTER TABLE ${quote}${loadedModel.tableName}${quote} ADD ${attribute};`)
+                        return acc;
+                      }, []).join('\n\r');
+
+                      await ORM.knex.raw(queries);
+                    }
+                  }
+
+                  resolve();
+                }));
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -601,6 +697,8 @@ module.exports = function(strapi) {
           mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);
         });
       });
+
+      await Promise.all(databaseUpdate);
 
       cb();
     },
