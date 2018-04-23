@@ -116,6 +116,11 @@ module.exports = function (strapi) {
                                   [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
                                 }
+
+                                // Select last related to an entity.
+                                this._mongooseOptions.populate[association.alias].options = {
+                                  sort: '-createdAt'
+                                }
                               } else {
                                 this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                               }
@@ -178,6 +183,7 @@ module.exports = function (strapi) {
                               break;
                             case 'manyMorphToMany':
                             case 'manyMorphToOne':
+
                               returned[association.alias] = returned[association.alias].map(obj => obj.ref);
                               break;
                             default:
