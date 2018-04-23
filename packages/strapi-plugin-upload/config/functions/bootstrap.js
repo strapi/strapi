@@ -34,8 +34,8 @@ module.exports = async cb => {
     size text,
     url text,
     provider text,
-    updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-    created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+    updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'},
+    created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP'}
   );
 
   CREATE TABLE ${quote}upload_file_morph${quote} (
