@@ -121,119 +121,146 @@ if (process.env.npm_lifecycle_event === 'start') {
   }, {});
 }
 
+const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
+  .concat(plugins.src.reduce((acc, current) => {
+    acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
+
+    return acc;
+  }, []))
+  .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
+
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
     path: path.join(adminPath, 'admin', 'build'),
   }, options.output), // Merge with env dependent settings
   module: {
-    loaders: [{
-      test: /\.js$/, // Transform all .js files required somewhere with Babel,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: options.babelPresets,
-          env: {
-            production: {
-              only: [
-                'src',
-              ],
-              plugins: [
-                require.resolve('babel-plugin-transform-react-remove-prop-types'),
-                require.resolve('babel-plugin-transform-react-constant-elements'),
-                require.resolve('babel-plugin-transform-react-inline-elements'),
-                require.resolve('babel-plugin-transform-es2015-destructuring'),
-                require.resolve('babel-plugin-transform-es2015-parameters'),
-                require.resolve('babel-plugin-transform-object-rest-spread'),
-              ],
-            },
-            test: {
-              plugins: [
-                'istanbul',
-              ],
+    rules: [ // TODO: add eslint formatter
+      {
+        oneOf: [
+          {
+            test: /\.js$/, // Transform all .js files required somewhere with Babel,
+            loader: require.resolve('babel-loader'),
+            include: foldersToInclude,
+            options: {
+              presets: options.babelPresets,
+              env: {
+                production: {
+                  only: [
+                    'src',
+                  ],
+                  plugins: [
+                    require.resolve('babel-plugin-transform-react-remove-prop-types'),
+                    require.resolve('babel-plugin-transform-react-constant-elements'),
+                    require.resolve('babel-plugin-transform-react-inline-elements'),
+                    require.resolve('babel-plugin-transform-es2015-destructuring'),
+                    require.resolve('babel-plugin-transform-es2015-parameters'),
+                    require.resolve('babel-plugin-transform-object-rest-spread'),
+                  ],
+                },
+                test: {
+                  plugins: [
+                    'istanbul',
+                  ],
+                },
+              },
             },
           },
-        },
+          {
+            test: /\.css$/,
+            include: /node_modules/,
+            use: [
+              'style-loader',
+              {
+                loader: 'css-loader',
+                options: {
+                  minimize: process.env.NODE_ENV === 'production',
+                  sourceMap: true,
+                },
+              },
+              {
+                loader: require.resolve('postcss-loader'),
+                options: {
+                  config: {
+                    path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+                  },
+                },
+              },
+            ],
+          },
+          {
+            test: /\.scss$/,
+            include: foldersToInclude,
+            use: [
+              {
+                loader: require.resolve('style-loader'),
+              },
+              {
+                loader: require.resolve('css-loader'),
+                options: {
+                  localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
+                  modules: true,
+                  importLoaders: 1,
+                  sourceMap: true,
+                  minimize: process.env.NODE_ENV === 'production',
+                },
+              },
+              {
+                loader: require.resolve('postcss-loader'),
+                options: {
+                  config: {
+                    path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+                  },
+                },
+              },
+              {
+                loader: 'sass-loader',
+              },
+            ],
+          },
+          {
+            test: /\.(eot|svg|otf|ttf|woff|woff2)$/,
+            use: 'file-loader',
+          },
+          {
+            test: /\.(jpg|png|gif)$/,
+            loaders: [
+              require.resolve('file-loader'),
+              {
+                loader: require.resolve('image-webpack-loader'),
+                query: {
+                  mozjpeg: {
+                    progressive: true,
+                  },
+                  gifsicle: {
+                    interlaced: false,
+                  },
+                  optipng: {
+                    optimizationLevel: 4,
+                  },
+                  pngquant: {
+                    quality: '65-90',
+                    speed: 4,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            test: /\.html$/,
+            include: [path.join(adminPath, 'admin', 'src')],
+            use: require.resolve('html-loader'),
+          },
+          {
+            test: /\.(mp4|webm)$/,
+            loader: require.resolve('url-loader'),
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
       },
-      include: [path.join(adminPath, 'admin', 'src')]
-        .concat(plugins.src.reduce((acc, current) => {
-          acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
-
-          return acc;
-        }, []))
-        .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]),
-    }, {
-      // Transform our own .scss files
-      test: /\.scss$/,
-      use: [{
-        loader: 'style-loader',
-      }, {
-        loader: 'css-loader',
-        options: {
-          localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
-          modules: true,
-          importLoaders: 1,
-          sourceMap: true,
-          minimize: process.env.NODE_ENV === 'production',
-        },
-      }, {
-        loader: 'postcss-loader',
-        options: {
-          config: {
-            path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
-          },
-        },
-      }, {
-        loader: 'sass-loader',
-      }],
-    }, {
-      // Do not transform vendor's CSS with CSS-modules
-      // The point is that they remain in global scope.
-      // Since we require these CSS files in our JS or CSS files,
-      // they will be a part of our compilation either way.
-      // So, no need for ExtractTextPlugin here.
-      test: /\.css$/,
-      include: /node_modules/,
-      loaders: ['style-loader', {
-        loader: 'css-loader',
-        options: {
-          minimize: process.env.NODE_ENV === 'production',
-          sourceMap: true,
-        },
-      }],
-    }, {
-      test: /\.(eot|svg|ttf|woff|woff2)$/,
-      loader: 'file-loader',
-    }, {
-      test: /\.(jpg|png|gif)$/,
-      loaders: [
-        'file-loader',
-        {
-          loader: 'image-webpack-loader',
-          query: {
-            mozjpeg: {
-              progressive: true,
-            },
-            gifsicle: {
-              interlaced: false,
-            },
-            optipng: {
-              optimizationLevel: 4,
-            },
-            pngquant: {
-              quality: '65-90',
-              speed: 4,
-            },
-          },
-        },
-      ],
-    }, {
-      test: /\.html$/,
-      loader: 'html-loader',
-    }, {
-      test: /\.(mp4|webm)$/,
-      loader: 'url-loader?limit=10000',
-    }],
+    ],
   },
   plugins: [
     new webpack.ProvidePlugin({
