@@ -186,11 +186,11 @@ module.exports = {
 
   getRoutes: async () => {
     const routes = Object.keys(strapi.api || {}).reduce((acc, current) => {
-      return acc.concat(strapi.api[current].config.routes);
+      return acc.concat(_.get(strapi.api[current].config, 'routes', []));
     }, []);
 
     const pluginsRoutes = Object.keys(strapi.plugins || {}).reduce((acc, current) => {
-      acc[current] = strapi.plugins[current].config.routes;
+      acc[current] = _.get(strapi.plugins[current].config, 'routes', []);
 
       return acc;
     }, []);
