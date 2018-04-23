@@ -50,14 +50,9 @@ class SelectMany extends React.Component {
       delete params.skip,
       params[`${this.props.relation.displayedAttribute}_contains`] = query;
     }
-
     // Request URL
-    const requestUrlSuffix =
-      query && get(this.props.record, [this.props.relation.alias])
-        ? get(this.props.record, [this.props.relation.alias])
-        : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model ||
-      this.props.relation.collection}/${requestUrlSuffix}`;
+      this.props.relation.collection}`;
 
     // Call our request helper (see 'utils/request')
     return request(requestUrl, {
