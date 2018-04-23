@@ -144,6 +144,8 @@ module.exports = function (strapi) {
                     save: 'afterSave'
                   };
 
+                  // Mongoose doesn't allow post 'remove' event on model.
+                  // See https://github.com/Automattic/mongoose/issues/3054
                   _.forEach(postLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
                       collection.schema.post(key, function (doc, next) {
