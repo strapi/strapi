@@ -436,8 +436,7 @@ module.exports = {
       strapi.connections[details[name].connection].schema.hasTable(details[name].tableName)
     ));
 
-    const missingTables = [];
-    const tablesToCreate = [];
+    const createTables = [];
 
     for (let index = 0; index < hasTables.length; ++index) {
       const hasTable = hasTables[index];
@@ -445,67 +444,51 @@ module.exports = {
       const quote = details[currentModel].client === 'pg' ? '"' : '`';
 
       if (!hasTable) {
-        missingTables.push(`
-⚠️  TABLE \`${details[currentModel].tableName}\` DOESN'T EXIST`);
-
         switch (currentModel) {
           case 'user':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  username text,
-  email text,
-  provider text,
-  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
-  ${quote}resetPasswordToken${quote} text,
-  password text,
-  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-);`);
+            createTables.push(strapi.connections[details[Object.keys(details)[index]].connection].raw(`
+              CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+                id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+                username text,
+                email text,
+                provider text,
+                role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+                ${quote}resetPasswordToken${quote} text,
+                password text,
+                updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+                created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+              );
+            `));
             break;
           case 'role':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  name text,
-  description text,
-  type text
-);`);
+            createTables.push(strapi.connections[details[Object.keys(details)[index]].connection].raw(`
+              CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+                id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+                name text,
+                description text,
+                type text
+              );
+            `));
             break;
           case 'permission':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
-  type text,
-  controller text,
-  action text,
-  enabled boolean,
-  policy text
-);`);
+            createTables.push(strapi.connections[details[Object.keys(details)[index]].connection].raw(`
+              CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
+                id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+                role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
+                type text,
+                controller text,
+                action text,
+                enabled boolean,
+                policy text
+              );
+            `));
             break;
           default:
-
         }
       }
     }
 
-    if (!_.isEmpty(tablesToCreate)) {
-      tablesToCreate.unshift(`
-
-1️⃣  EXECUTE THE FOLLOWING SQL QUERY`);
-
-      tablesToCreate.push(`
-
-2️⃣  RESTART YOUR SERVER`)
-      strapi.log.warn(missingTables.concat(tablesToCreate).join(''));
-
-      // Stop the server.
-      strapi.stop();
-    }
+    await Promise.all(createTables);
 
     const missingColumns = [];
     const tablesToAlter = [];

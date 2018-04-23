@@ -21,37 +21,28 @@ module.exports = async cb => {
     if (!hasTable) {
       const quote = Model.client === 'pg' ? '"' : '`';
 
-      strapi.log.warn(`
-  ⚠️  TABLE \`upload_file\` DOESN'T EXIST
-  ⚠️  TABLE \`upload_file_morph\` DOESN'T EXIST
+      await strapi.connections[Model.connection].raw(`
+        CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
+          id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+          name text,
+          hash text,
+          ext text,
+          mime text,
+          size text,
+          url text,
+          provider text,
+          updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
+          created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
+        );
 
-  CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
-    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-    name text,
-    hash text,
-    ext text,
-    mime text,
-    size text,
-    url text,
-    provider text,
-    updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-    created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-  );
-
-  CREATE TABLE ${quote}upload_file_morph${quote} (
-    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-    upload_file_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-    related_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-    related_type text,
-    field text
-  );
-
-  1️⃣  EXECUTE THE FOLLOWING SQL QUERY
-
-  2️⃣  RESTART YOUR SERVER
+        CREATE TABLE ${quote}upload_file_morph${quote} (
+          id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
+          upload_file_id  ${Model.client === 'pg' ? 'integer' : 'int'},
+          related_id  ${Model.client === 'pg' ? 'integer' : 'int'},
+          related_type text,
+          field text
+        );
       `);
-
-      strapi.stop();
     }
   }
 
