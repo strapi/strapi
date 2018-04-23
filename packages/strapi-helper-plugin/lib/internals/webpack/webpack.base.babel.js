@@ -175,7 +175,7 @@ module.exports = (options) => ({
                 loader: 'css-loader',
                 options: {
                   minimize: process.env.NODE_ENV === 'production',
-                  sourceMap: true,
+                  sourceMap: false,
                 },
               },
               {
@@ -201,7 +201,7 @@ module.exports = (options) => ({
                   localIdentName: `${pluginId}[local]__[path][name]__[hash:base64:5]`,
                   modules: true,
                   importLoaders: 1,
-                  sourceMap: true,
+                  sourceMap: false,
                   minimize: process.env.NODE_ENV === 'production',
                 },
               },
