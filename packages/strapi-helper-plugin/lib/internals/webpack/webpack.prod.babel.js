@@ -3,7 +3,6 @@ const path = require('path');
 const _ = require('lodash');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
@@ -13,10 +12,6 @@ const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const base = require('./webpack.base.babel');
-
-// const pkg = require(path.resolve(process.cwd(), 'package.json'));
-// const pluginId = pkg.name.replace(/^strapi-plugin-/i, '');
-// const dllPlugin = pkg.dllPlugin;
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
@@ -105,7 +100,6 @@ if (isAdmin) {
     chunks: ['main'],
     inject: true,
   }));
-  plugins.push(new ExtractTextPlugin('[name].[contenthash].css'));
   plugins.push(new AddAssetHtmlPlugin({
     filepath: path.resolve(__dirname, 'dist/*.dll.js'),
   }));
@@ -180,4 +174,5 @@ module.exports = base({
   },
 
   devtool: false,
+  disableExtractTextPlugin: false,
 });
