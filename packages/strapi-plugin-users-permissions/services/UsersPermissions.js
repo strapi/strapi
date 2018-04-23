@@ -279,12 +279,10 @@ module.exports = {
         Promise.all(toRemove.map(action => strapi.query('permission', 'users-permissions').removePermission(action)))
       );
 
-      this.writeActions(currentActions);
+      return this.writeActions(currentActions, cb);
     }
 
-    if (cb) {
-      cb();
-    }
+    cb();
   },
 
   initialize: async function (cb) {
@@ -384,18 +382,20 @@ module.exports = {
     });
   },
 
-  writeActions: (data) => {
+  writeActions: (data, cb) => {
     const actionsPath = path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'actions.json');
 
     try {
-      // Stop auto reload.
-      strapi.reload.isReloading = false;
+      // Disable auto-reload.
+      strapi.reload.isWatching = false;
       // Rewrite actions.json file.
       fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
       // Set value to AST to avoid restart.
       _.set(strapi.plugins['users-permissions'], 'config.actions', data);
-      // Restart to watch files.
-      strapi.reload.isReloading = true;
+      // Disable auto-reload.
+      strapi.reload.isWatching = true;
+
+      cb();
     } catch(err) {
       strapi.log.error(err);
     }
