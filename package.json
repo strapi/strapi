@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.11.3",
+  "version": "3.0.0-alpha.12",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",

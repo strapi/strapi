@@ -25,7 +25,7 @@
   "app.components.HomePage.button.quickStart": "START THE QUICK START TUTORIAL",
   "app.components.HomePage.button.blog": "SEE MORE ON THE BLOG",
   "app.components.HomePage.support": "SUPPORT US",
-  "app.components.HomePage.support.content": "By buying the T-shirt (25€), it will allow us to continue our work on the project to give you the best possible experience!",
+  "app.components.HomePage.support.content": "By buying the T-shirt, it will allow us to continue our work on the project to give you the best possible experience!",
   "app.components.HomePage.support.link": "GET YOUR T-SHIRT NOW",
 
   "app.components.BlockLink.documentation": "Read the documentation",

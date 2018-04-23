@@ -24,7 +24,7 @@ try {
   // Check if path is existing.
   fs.accessSync(adminDirPath, fs.constants.R_OK | fs.constants.W_OK);
 
-  const install = exec(`cd ${adminDirPath} && npm install --prod --ignore-scripts`, {
+  const install = exec(`cd "${adminDirPath}" && npm install --prod --ignore-scripts`, {
     silent: true
   });
 
@@ -35,8 +35,8 @@ try {
 
   console.log('✅  Success');
   console.log('');
-} catch (err) {
-  if (err.code === 'ENOENT') {
+} catch (e) {
+  if (e.code === 'ENOENT') {
     console.log('✅  Success');
     console.log('');
 
@@ -60,7 +60,7 @@ try {
     console.log('📦  Installing packages...');
 
     try {
-      const install = exec(`cd ${pluginPath} && npm install --prod --ignore-scripts`, {
+      const install = exec(`cd "${pluginPath}" && npm install --prod --ignore-scripts`, {
         silent: true
       });
 
@@ -76,7 +76,7 @@ try {
     }
   });
 } catch (e) {
-  if (err.code === 'ENOENT') {
+  if (e.code === 'ENOENT') {
     console.log('✅  Success');
     console.log('');
 
