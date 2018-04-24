@@ -122,7 +122,11 @@ export function* submit() {
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
-          acc.errorMessage = current.id;
+          if (source === 'users-permissions' && !get(err.response.payload.message, ['0', 'messages', '0', 'field', '0'])) {
+            acc.id = `users-permissions.${current.id}`;
+          } else {
+            acc.errorMessage = current.id;
+          }
 
           return acc;
         }, { id: 'components.Input.error.custom-error', errorMessage: '' });
@@ -131,7 +135,7 @@ export function* submit() {
         return acc;
       }, []);
 
-      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field']);
+      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field', '0'], source === 'users-permissions' ? 'email' : '');
 
       yield put(setFormErrors([{ name, errors }]));
     }
