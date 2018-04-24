@@ -22,7 +22,7 @@
     "app.components.HomePage.createBlock.content.tutorial": "\u0020руководство.",
     "app.components.HomePage.button.quickStart": "ОЗНАКОМТЕСЬ С РУКОВОДСТВОМ ПО БЫСТРОМУ СТАРТУ",
     "app.components.HomePage.support": "ПОДДЕРЖИТЕ НАС",
-    "app.components.HomePage.support.content": "Купите футболку (25€), это поможет нам продолжать работу над проектом, чтобы предоставить вам наилучшее из возможных решений!",
+    "app.components.HomePage.support.content": "Купите футболку, это поможет нам продолжать работу над проектом, чтобы предоставить вам наилучшее из возможных решений!",
     "app.components.HomePage.support.link": "ЗАКАЗАТЬ НАШУ ФУТБОЛКУ СЕЙЧАС",
 
     "app.components.BlockLink.documentation": "Прочитать документацию",
