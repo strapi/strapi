@@ -7,15 +7,6 @@
 module.exports = mongoose => {
   require('mongoose-float').loadType(mongoose);
 
-  const SchemaTypes = mongoose.Schema.Types;
-
-  // Note: The decimal format isn't well supported by MongoDB.
-  // It's recommended to use Float or Number type instead.
-  //
-  // SchemaTypes.Decimal.prototype.cast = function (value) {
-  //   return value.toString();
-  // };
-
   return {
     convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
@@ -31,8 +22,9 @@ module.exports = mongoose => {
         case 'timestamp':
           return Date;
         case 'decimal':
+          return 'Float';
         case 'float':
-          return 'Number';
+          return mongoose.Schema.Types.Decimal128;
         case 'json':
           return 'Mixed';
         case 'biginteger':

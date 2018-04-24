@@ -13,6 +13,12 @@ This will create two files located at `./api/user/models`:
 
 > Note: when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 
+## Model Information
+The info key on the model-json states information about the model. This information is used in the admin interface, when showing the model.
+   - `name`: The name of the model, as shown in admin interface.
+   - `description`: The description of the model.
+   - `mainField`: Determines which model-attribute is shown when displaying the model.
+
 ## Define the attributes
 
 The following types are currently available:
@@ -59,7 +65,8 @@ To improve the Developer eXperience when developing or using the administration 
   "connection": "default",
   "info": {
     "name": "user",
-    "description": "This represents the User Model"
+    "description": "This represents the User Model",
+    "mainField": "email"
   },
   "attributes": {
     "firstname": {
