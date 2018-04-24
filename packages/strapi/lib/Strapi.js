@@ -199,17 +199,14 @@ class Strapi extends EventEmitter {
     // Usage.
     await utils.usage.call(this);
 
-    // Init core store manager
-    await store.pre.call(this);
+    // Init core store
+    await store.call(this);
 
     // Initialize hooks and middlewares.
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this)
     ]);
-
-    // Core store post middleware and hooks init validation.
-    await store.post.call(this);
 
     // Harmonize plugins configuration.
     await plugins.call(this);
