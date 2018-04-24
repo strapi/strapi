@@ -48,6 +48,10 @@ module.exports = {
 
     const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
       _.forEach(strapi.plugins[current].models, (model, name) => {
+        if (name === 'file') {
+          return true;
+        }
+        
         acc.push({
           icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
