@@ -310,8 +310,11 @@ module.exports = function(strapi) {
                 target[model]._attributes = definition.attributes;
 
                 databaseUpdate.push(new Promise(async (resolve) => {
-                  const handler = async (table, attributes, tableExist) => {
-                    // Generate fields type
+                  // Equilize database tables
+                  const handler = async (table, attributes) => {
+                    const tableExist = await ORM.knex.schema.hasTable(table);
+
+                    // Apply field type of attributes definition
                     const generateColumns = (attrs, start) => {
                       return Object.keys(attrs).reduce((acc, attr) => {
                         const attribute = attributes[attr];
@@ -319,6 +322,7 @@ module.exports = function(strapi) {
                         let type;
 
                         if (!attribute.type) {
+                          // Add interger value is if relation
                           const relation = definition.associations.find((association) => {
                             return association.alias === attr;
                           });
@@ -407,8 +411,6 @@ module.exports = function(strapi) {
 
                   const quote = definition.client === 'pg' ? '"' : '`';
 
-                  const tableExist = await ORM.knex.schema.hasTable(loadedModel.tableName);
-
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
                     definition.attributes['created_at'] = definition.attributes['updated_at'] = {
@@ -416,15 +418,15 @@ module.exports = function(strapi) {
                     };
                   }
 
-                  await handler(loadedModel.tableName, definition.attributes, tableExist);
+                  // Equilize tables
+                  await handler(loadedModel.tableName, definition.attributes);
 
+                  // Equilize polymorphic releations
                   const morphRelations = definition.associations.find((association) => {
                     return association.nature.toLowerCase().includes('morph');
                   });
 
                   if (morphRelations) {
-                    const tableExist = await ORM.knex.schema.hasTable(`${loadedModel.tableName}_morph`);
-
                     const attributes = {
                       [`${loadedModel.tableName}_id`]: {
                         type: 'integer'
@@ -440,7 +442,7 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    await handler(`${loadedModel.tableName}_morph`, attributes, tableExist);
+                    await handler(`${loadedModel.tableName}_morph`, attributes);
                   }
 
                   resolve();
