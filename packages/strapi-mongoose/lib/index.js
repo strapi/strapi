@@ -6,7 +6,8 @@
 
 // Public node modules.
 const _ = require('lodash');
-const Mongoose = require('mongoose').Mongoose;
+const mongoose = require('mongoose');
+const Mongoose = mongoose.Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
 // Local helpers.
@@ -176,6 +177,14 @@ module.exports = function (strapi) {
                   collection.schema.options.toObject = collection.schema.options.toJSON = {
                     virtuals: true,
                     transform: function (doc, returned, opts) {
+                      // Remover $numberDecimal nested property.
+                      Object.keys(returned)
+                        .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
+                        .forEach((key, index) => {
+                          // Parse to float number.
+                          returned[key] = parseFloat(returned[key].toString());
+                        });
+
                       morphAssociations.forEach(association => {
                         if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
                           // Reformat data by bypassing the many-to-many relationship.
