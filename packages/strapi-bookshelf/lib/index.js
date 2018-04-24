@@ -310,9 +310,104 @@ module.exports = function(strapi) {
                 target[model]._attributes = definition.attributes;
 
                 databaseUpdate.push(new Promise(async (resolve) => {
-                  const tableExist = await ORM.knex.schema.hasTable(loadedModel.tableName);
+                  const handler = async (table, attributes, tableExist) => {
+                    // Generate fields type
+                    const generateColumns = (attrs, start) => {
+                      return Object.keys(attrs).reduce((acc, attr) => {
+                        const attribute = attributes[attr];
+
+                        let type;
+
+                        if (!attribute.type) {
+                          const relation = definition.associations.find((association) => {
+                            return association.alias === attr;
+                          });
+
+                          switch (relation.nature) {
+                            case 'manyToOne':
+                              type = definition.client === 'pg' ? 'integer' : 'int';
+                              break;
+                            default:
+                              return acc;
+                          }
+                        } else {
+                          switch (attribute.type) {
+                            case 'string':
+                            case 'text':
+                            case 'password':
+                            case 'email':
+                            case 'json':
+                              type = 'text';
+                              break;
+                            case 'integer':
+                            case 'biginteger':
+                            case 'float':
+                            case 'decimal':
+                              type = definition.client === 'pg' ? 'integer' : 'int';
+                              break;
+                            case 'date':
+                            case 'time':
+                            case 'datetime':
+                            case 'timestamp':
+                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
+                              break;
+                            case 'boolean':
+                              type = 'boolean';
+                              break;
+                            default:
+                          }
+                        }
+
+                        acc.push(`${quote}${attr}${quote} ${type}`);
+
+                        return acc;
+                      }, start);
+                    };
+
+                    if (!tableExist) {
+                      const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
+
+                      // Create table
+                      await ORM.knex.raw(`
+                        CREATE TABLE ${quote}${table}${quote} (
+                          ${columns}
+                        )
+                      `);
+                    } else {
+                      const columns = Object.keys(attributes);
+
+                      // Fetch existing column
+                      const columnsExist = await Promise.all(columns.map(attribute =>
+                        ORM.knex.schema.hasColumn(table, attribute)
+                      ));
+
+                      const columnsToAdd = {};
+
+                      // Get columns to add
+                      columnsExist.forEach((columnExist, index) => {
+                        const attribute = attributes[columns[index]];
+
+                        if (!columnExist) {
+                          columnsToAdd[columns[index]] = attribute;
+                        }
+                      });
+
+                      // Generate and execute query to add missing column
+                      if (Object.keys(columnsToAdd).length > 0) {
+                        const columns = generateColumns(columnsToAdd, []);
+                        const queries = columns.reduce((acc, attribute) => {
+                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`)
+                          return acc;
+                        }, []).join('\n\r');
+
+                        await ORM.knex.raw(queries);
+                      }
+                    }
+                  };
 
                   const quote = definition.client === 'pg' ? '"' : '`';
+
+                  const tableExist = await ORM.knex.schema.hasTable(loadedModel.tableName);
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
@@ -321,97 +416,31 @@ module.exports = function(strapi) {
                     };
                   }
 
-                  // Generate fields type
-                  const generateColumns = (attributes, start) => {
-                    return Object.keys(attributes).reduce((acc, attr) => {
-                      const attribute = definition.attributes[attr];
+                  await handler(loadedModel.tableName, definition.attributes, tableExist);
 
-                      let type;
+                  const morphRelations = definition.associations.find((association) => {
+                    return association.nature.toLowerCase().includes('morph');
+                  });
 
-                      if (!attribute.type) {
-                        const relation = definition.associations.find((association) => {
-                          return association.alias === attr;
-                        });
+                  if (morphRelations) {
+                    const tableExist = await ORM.knex.schema.hasTable(`${loadedModel.tableName}_morph`);
 
-                        switch (relation.nature) {
-                          case 'manyToOne':
-                            type = definition.client === 'pg' ? 'integer' : 'int';
-                            break;
-                          default:
-                            return acc;
-                        }
-                      } else {
-                        switch (attribute.type) {
-                          case 'string':
-                          case 'text':
-                          case 'password':
-                          case 'email':
-                          case 'json':
-                            type = 'text';
-                            break;
-                          case 'integer':
-                          case 'biginteger':
-                          case 'float':
-                          case 'decimal':
-                            type = definition.client === 'pg' ? 'integer' : 'int';
-                            break;
-                          case 'date':
-                          case 'time':
-                          case 'datetime':
-                          case 'timestamp':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
-                            break;
-                          case 'boolean':
-                            type = 'boolean';
-                            break;
-                          default:
-                        }
+                    const attributes = {
+                      [`${loadedModel.tableName}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${morphRelations.alias}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${morphRelations.alias}_type`]: {
+                        type: 'text'
+                      },
+                      [definition.attributes[morphRelations.alias].filter]: {
+                        type: 'text'
                       }
+                    };
 
-                      acc.push(`${quote}${attr}${quote} ${type}`);
-
-                      return acc;
-                    }, start);
-                  };
-
-                  if (!tableExist) {
-                    const columns = generateColumns(definition.attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
-
-                    // Create table
-                    await ORM.knex.raw(`
-                      CREATE TABLE ${quote}${loadedModel.tableName}${quote} (
-                        ${columns}
-                      )
-                    `);
-                  } else {
-                    const columns = Object.keys(definition.attributes);
-
-                    // Fetch existing column
-                    const columnsExist = await Promise.all(columns.map(attribute =>
-                      ORM.knex.schema.hasColumn(loadedModel.tableName, attribute)
-                    ));
-
-                    const columnsToAdd = {};
-
-                    // Get columns to add
-                    columnsExist.forEach((columnExist, index) => {
-                      const attribute = definition.attributes[columns[index]];
-
-                      if (!columnExist) {
-                        columnsToAdd[columns[index]] = attribute;
-                      }
-                    });
-
-                    // Generate and execute query to add missing column
-                    if (Object.keys(columnsToAdd).length > 0) {
-                      const columns = generateColumns(columnsToAdd, []);
-                      const queries = columns.reduce((acc, attribute) => {
-                        acc.push(`ALTER TABLE ${quote}${loadedModel.tableName}${quote} ADD ${attribute};`)
-                        return acc;
-                      }, []).join('\n\r');
-
-                      await ORM.knex.raw(queries);
-                    }
+                    await handler(`${loadedModel.tableName}_morph`, attributes, tableExist);
                   }
 
                   resolve();
