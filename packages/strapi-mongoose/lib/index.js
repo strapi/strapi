@@ -43,19 +43,24 @@ module.exports = function (strapi) {
     initialize: cb => {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
-        const { uri, host, port, username, password, database, authenticationDatabase, ssl } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { authenticationDatabase, ssl } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {}
+
         if (!_.isEmpty(username)) {
-          connectOptions.user = username
+          connectOptions.user = username;
+
           if (!_.isEmpty(password)) {
-            connectOptions.pass = password
+            connectOptions.pass = password;
           }
         }
+
         if (!_.isEmpty(authenticationDatabase)) {
           connectOptions.authSource = authenticationDatabase;
         }
+
         connectOptions.ssl = ssl === true || ssl === 'true';
 
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
