@@ -79,7 +79,7 @@ module.exports = {
       const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
       if (user) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
       }
     }
 
@@ -111,7 +111,7 @@ module.exports = {
         const users = await strapi.plugins['users-permissions'].services.user.fetchAll({ email: ctx.request.body.email });
 
         if (users && _.find(users, user => (user.id || user._id).toString() !== ctx.params.id)) {
-          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
         }
       }
 
@@ -131,7 +131,7 @@ module.exports = {
         });
 
         if (user !== null && (user.id || user._id).toString() !== ctx.params.id) {
-          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
+          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
         }
       }
 
