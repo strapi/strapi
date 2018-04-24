@@ -114,11 +114,6 @@ watcher('📦  Linking strapi...', 'npm link');
 // Upload plugins
 shell.cd('../strapi-upload-local');
 watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false);
-shell.cd('../strapi-upload-aws-s3');
-watcher('📦  Linking strapi-upload-aws-s3...', 'npm link --no-optional', false);
-shell.cd('../strapi-upload-rackspace');
-watcher('📦  Linking strapi-upload-rackspace...', 'npm link --no-optional', false);
-
 
 // Plugins with admin
 shell.cd('../strapi-plugin-email');

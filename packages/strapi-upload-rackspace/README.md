@@ -1,4 +1,4 @@
-# strapi-upload-local
+# strapi-upload-rackspace
 
 ## Resources
 
