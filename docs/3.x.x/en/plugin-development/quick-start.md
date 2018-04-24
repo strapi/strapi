@@ -10,6 +10,8 @@ To setup the development environment please **follow the instructions below:**
 2. Clone it to your computer `git clone git@github.com:strapi/strapi.git`.
 3. Run `npm run setup` at the root of the directory.
 
+> You can run `npm run setup:build` to build the plugins' admin (the setup time will be longer)
+
 > Note: If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
 
 ## Plugin development Setup
@@ -26,4 +28,4 @@ To generate a new plugin **run the following commands:**
 4. In a new terminal window open at the root of your project launch your Strapi server `strapi start`.
 
 
-Your are now ready to develop your own plugin and live-test your updates! 
+Your are now ready to develop your own plugin and live-test your updates!
