@@ -62,7 +62,7 @@ module.exports = {
     const { source } = ctx.request.query;
 
     // Find an entry using `queries` system
-    const entry = await strapi.plugins['content-manager'].services['contentmanager'].fetch(ctx.params, source);
+    const entry = await strapi.plugins['content-manager'].services['contentmanager'].fetch(ctx.params, source, null, false);
 
     // Entry not found
     if (!entry) {
