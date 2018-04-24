@@ -34,7 +34,7 @@ module.exports = async cb => {
     name: 'users-permissions'
   });
 
-  const grantValue = {
+  const grantConfig = {
     email: {
       enabled: true,
       icon: 'envelope'
@@ -74,12 +74,18 @@ module.exports = async cb => {
       callback: '/auth/twitter/callback'
     }
   };
-  const prevGrantValue = await pluginStore.get({key: 'grant'})
+  const prevGrantConfig = await pluginStore.get({key: 'grant'})
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
-  if (!prevGrantValue || !_.isEqual(_.keys(prevGrantValue), _.keys(grantValue))) {
-    await pluginStore.set({key: 'grant', value: grantValue});
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+    // merge with the previous provider config.
+    _.keys(grantConfig).forEach((key) => {
+      if (key in prevGrantConfig) {
+        grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
+      }
+    });
+    await pluginStore.set({key: 'grant', value: grantConfig});
   }
 
   if (!await pluginStore.get({key: 'email'})) {
