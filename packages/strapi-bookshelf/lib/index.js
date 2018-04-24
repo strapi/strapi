@@ -423,7 +423,7 @@ module.exports = function(strapi) {
 
                   // Equilize polymorphic releations
                   const morphRelations = definition.associations.find((association) => {
-                    return association.nature.toLowerCase().includes('morph');
+                    return association.nature.toLowerCase().includes('morphto');
                   });
 
                   if (morphRelations) {

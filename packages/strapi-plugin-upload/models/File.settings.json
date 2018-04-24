@@ -28,7 +28,7 @@
       "required": true
     },
     "size": {
-      "type": "float",
+      "type": "string",
       "configurable": false,
       "required": true
     },
