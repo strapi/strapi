@@ -326,33 +326,46 @@ module.exports = function(strapi) {
                     return Object.keys(attributes).reduce((acc, attr) => {
                       const attribute = definition.attributes[attr];
 
-                      if (!attribute.type) return acc;
-
                       let type;
 
-                      switch (attribute.type) {
-                        case 'string':
-                        case 'text':
-                        case 'password':
-                        case 'email':
-                          type = 'text';
-                          break;
-                        case 'integer':
-                        case 'biginteger':
-                        case 'float':
-                        case 'decimal':
-                          type = definition.client === 'pg' ? 'integer' : 'int';
-                          break;
-                        case 'date':
-                        case 'time':
-                        case 'datetime':
-                        case 'timestamp':
-                          type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
-                          break;
-                        case 'boolean':
-                          type = 'boolean';
-                          break;
-                        default:
+                      if (!attribute.type) {
+                        const relation = definition.associations.find((association) => {
+                          return association.alias === attr;
+                        });
+
+                        switch (relation.nature) {
+                          case 'manyToOne':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          default:
+                            return acc;
+                        }
+                      } else {
+                        switch (attribute.type) {
+                          case 'string':
+                          case 'text':
+                          case 'password':
+                          case 'email':
+                          case 'json':
+                            type = 'text';
+                            break;
+                          case 'integer':
+                          case 'biginteger':
+                          case 'float':
+                          case 'decimal':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          case 'date':
+                          case 'time':
+                          case 'datetime':
+                          case 'timestamp':
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
+                            break;
+                          case 'boolean':
+                            type = 'boolean';
+                            break;
+                          default:
+                        }
                       }
 
                       acc.push(`${quote}${attr}${quote} ${type}`);
@@ -384,7 +397,7 @@ module.exports = function(strapi) {
                     columnsExist.forEach((columnExist, index) => {
                       const attribute = definition.attributes[columns[index]];
 
-                      if (!columnExist && attribute.type) {
+                      if (!columnExist) {
                         columnsToAdd[columns[index]] = attribute;
                       }
                     });
