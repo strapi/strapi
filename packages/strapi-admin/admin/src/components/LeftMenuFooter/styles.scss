@@ -4,6 +4,8 @@
 .leftMenuFooter { /* stylelint-disable */
   position: absolute;
   width: calc(100% - 2 * 15px);
+  display: flex;
+  justify-content: space-between;
   bottom: 0;
   height: 3rem;
   padding-left: 15px;
