@@ -116,6 +116,11 @@ module.exports = function (strapi) {
                                   [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
                                 }
+
+                                // Select last related to an entity.
+                                this._mongooseOptions.populate[association.alias].options = {
+                                  sort: '-createdAt'
+                                }
                               } else {
                                 this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                               }
@@ -144,6 +149,8 @@ module.exports = function (strapi) {
                     save: 'afterSave'
                   };
 
+                  // Mongoose doesn't allow post 'remove' event on model.
+                  // See https://github.com/Automattic/mongoose/issues/3054
                   _.forEach(postLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
                       collection.schema.post(key, function (doc, next) {
@@ -178,6 +185,7 @@ module.exports = function (strapi) {
                               break;
                             case 'manyMorphToMany':
                             case 'manyMorphToOne':
+
                               returned[association.alias] = returned[association.alias].map(obj => obj.ref);
                               break;
                             default:
@@ -465,7 +473,10 @@ module.exports = function (strapi) {
           break;
         case '_contains':
           result.key = `where.${key}`;
-          result.value = new RegExp('\\b' + value + '\\b', 'i');
+          result.value = {
+            $regex: value,
+            $options: 'i',
+          };
           break;
         case '_containss':
           result.key = `where.${key}.$regex`;
@@ -502,10 +513,13 @@ module.exports = function (strapi) {
           acc[current] = params.values[current];
         } else {
           switch (association.nature) {
+            case 'oneWay':
+              acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
+
+              break;
             case 'oneToOne':
               if (response[current] !== params.values[current]) {
                 const value = _.isNull(params.values[current]) ? response[current] : params.values;
-
                 const recordId = _.isNull(params.values[current]) ? value[Model.primaryKey] || value.id || value._id : value[current];
 
                 if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
