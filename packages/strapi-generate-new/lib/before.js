@@ -212,7 +212,6 @@ module.exports = (scope, cb) => {
             }
           ])
           .then(answers => {
-
             if (hasDatabaseConfig) {
               answers = _.omit(scope.database.settings, ['client'])
             }
@@ -222,8 +221,8 @@ module.exports = (scope, cb) => {
             scope.database.settings.database = answers.database;
             scope.database.settings.username = answers.username;
             scope.database.settings.password = answers.password;
-            scope.database.settings.authenticationDatabase = answers.authenticationDatabase;
-            scope.database.settings.ssl = answers.ssl;
+            scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+            scope.database.options.ssl = _.toString(answers.ssl) === 'true';
 
             logger.info('Testing database connection...');
 
