@@ -1,1 +1,19 @@
-{}
+{
+  "article": {
+    "attributes": {
+      "title": {
+        "appearance": ""
+      },
+      "content": {
+        "appearance": ""
+      }
+    }
+  },
+  "account": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
+  }
+}

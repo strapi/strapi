@@ -328,6 +328,7 @@ module.exports = function(strapi) {
                           });
 
                           switch (relation.nature) {
+                            case 'oneToOne':
                             case 'manyToOne':
                               type = definition.client === 'pg' ? 'integer' : 'int';
                               break;
@@ -443,6 +444,27 @@ module.exports = function(strapi) {
                     };
 
                     await handler(`${loadedModel.tableName}_morph`, attributes);
+                  }
+
+                  // Equilize many to many releations
+                  const manyRelations = definition.associations.find((association) => {
+                    return association.nature === 'manyToMany';
+                  });
+
+                  if (manyRelations && manyRelations.dominant) {
+                    const attributes = {
+                      [`${pluralize.singular(manyRelations.collection)}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${pluralize.singular(manyRelations.via)}_id`]: {
+                        type: 'integer'
+                      }
+                    };
+
+                    const keys = [pluralize.plural(manyRelations.collection), pluralize.plural(manyRelations.via)];
+                    const table = [keys.join('_'), keys.reverse().join('_')].join('__');
+
+                    await handler(table, attributes);
                   }
 
                   resolve();
