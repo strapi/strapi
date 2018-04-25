@@ -417,7 +417,7 @@ module.exports = function(strapi) {
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
-                    definition.attributes['created_at']= {
+                    definition.attributes['created_at'] = {
                       type: 'timestamp'
                     };
                     definition.attributes['updated_at'] = {
@@ -471,6 +471,12 @@ module.exports = function(strapi) {
                     const table = [keys.join('_'), keys.reverse().join('_')].join('__');
 
                     await handler(table, attributes);
+                  }
+
+                  // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
+                  if (loadedModel.hasTimestamps) {
+                    delete definition.attributes['created_at'];
+                    delete definition.attributes['updated_at'];
                   }
 
                   resolve();
