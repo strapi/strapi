@@ -1,3 +1,4 @@
+const fs = require('fs');
 const shell = require('shelljs');
 const path = require('path');
 const _ = require('lodash');
@@ -25,7 +26,20 @@ shell.echo('');
 if (process.env.npm_config_plugins === 'true') {
   const plugins = path.resolve(appPath, 'plugins');
 
-  shell.ls('* -d', plugins).forEach(function (plugin) {
+  shell.ls('* -d', plugins)
+    .filter(x => {
+      let hasAdminFolder;
+
+      try {
+        fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+        hasAdminFolder = true;
+      } catch(err) {
+        hasAdminFolder = false;
+      }
+
+      return hasAdminFolder;
+    })
+    .forEach(function (plugin) {
     shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
     shell.echo('📦  Installing packages...');
     shell.exec(`cd "${path.resolve(plugins, plugin)}" && npm install`, {

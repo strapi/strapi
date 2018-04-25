@@ -215,7 +215,6 @@ class Strapi extends EventEmitter {
 
     // Harmonize plugins configuration.
     await plugins.call(this);
-    console.log('INITIALISED ENDED');
   }
 
   reload() {
