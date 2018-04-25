@@ -48,6 +48,10 @@ module.exports = {
 
     const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
       _.forEach(strapi.plugins[current].models, (model, name) => {
+        if (name === 'file') {
+          return true;
+        }
+        
         acc.push({
           icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
@@ -177,7 +181,7 @@ module.exports = {
 
     _.forEach(attributesConfigurable, attribute => {
       if (_.has(attribute, 'params.type')) {
-        attrs[attribute.name] = attribute.params;
+        attrs[attribute.name] = _.omit(attribute.params, 'multiple');
 
         if (attribute.params.type === 'media') {
           const via = _.findKey(strapi.plugins.upload.models.file.attributes, {collection: '*'});

@@ -34,49 +34,58 @@ module.exports = async cb => {
     name: 'users-permissions'
   });
 
-  if (!await pluginStore.get({key: 'grant'})) {
-    const value = {
-      email: {
-        enabled: true,
-        icon: 'envelope'
-      },
-      facebook: {
-        enabled: false,
-        icon: 'facebook-official',
-        key: '',
-        secret: '',
-        callback: '/auth/facebook/callback',
-        scope: ['email']
-      },
-      google: {
-        enabled: false,
-        icon: 'google',
-        key: '',
-        secret: '',
-        callback: '/auth/google/callback',
-        scope: ['email']
-      },
-      github: {
-        enabled: false,
-        icon: 'github',
-        key: '',
-        secret: '',
-        redirect_uri: '/auth/github/callback',
-        scope: [
-          'user',
-          'user:email'
-        ]
-      },
-      twitter: {
-        enabled: false,
-        icon: 'twitter',
-        key: '',
-        secret: '',
-        callback: '/auth/twitter/callback'
+  const grantConfig = {
+    email: {
+      enabled: true,
+      icon: 'envelope'
+    },
+    facebook: {
+      enabled: false,
+      icon: 'facebook-official',
+      key: '',
+      secret: '',
+      callback: '/auth/facebook/callback',
+      scope: ['email']
+    },
+    google: {
+      enabled: false,
+      icon: 'google',
+      key: '',
+      secret: '',
+      callback: '/auth/google/callback',
+      scope: ['email']
+    },
+    github: {
+      enabled: false,
+      icon: 'github',
+      key: '',
+      secret: '',
+      redirect_uri: '/auth/github/callback',
+      scope: [
+        'user',
+        'user:email'
+      ]
+    },
+    twitter: {
+      enabled: false,
+      icon: 'twitter',
+      key: '',
+      secret: '',
+      callback: '/auth/twitter/callback'
+    }
+  };
+  const prevGrantConfig = await pluginStore.get({key: 'grant'})
+  // store grant auth config to db
+  // when plugin_users-permissions_grant is not existed in db
+  // or we have added/deleted provider here.
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+    // merge with the previous provider config.
+    _.keys(grantConfig).forEach((key) => {
+      if (key in prevGrantConfig) {
+        grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
-    };
-
-    await pluginStore.set({key: 'grant', value});
+    });
+    await pluginStore.set({key: 'grant', value: grantConfig});
   }
 
   if (!await pluginStore.get({key: 'email'})) {

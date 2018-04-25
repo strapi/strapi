@@ -354,7 +354,10 @@ module.exports = function(strapi) {
                             case 'time':
                             case 'datetime':
                             case 'timestamp':
-                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp';
+                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                              break;
+                            case 'timestampUpdate':
+                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
                               break;
                             case 'boolean':
                               type = 'boolean';
@@ -414,8 +417,11 @@ module.exports = function(strapi) {
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
-                    definition.attributes['created_at'] = definition.attributes['updated_at'] = {
-                      type: 'time'
+                    definition.attributes['created_at']= {
+                      type: 'timestamp'
+                    };
+                    definition.attributes['updated_at'] = {
+                      type: 'timestampUpdate'
                     };
                   }
 
@@ -873,6 +879,10 @@ module.exports = function(strapi) {
           acc[current] = params.values[current];
         } else {
           switch (association.nature) {
+            case 'oneWay':
+              acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
+
+              break;
             case 'oneToOne':
               if (response[current] !== params.values[current]) {
                 const value = _.isNull(params.values[current]) ? response[current] : params.values;

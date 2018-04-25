@@ -195,7 +195,6 @@ module.exports = (scope, cb) => {
             }
           ])
           .then(answers => {
-
             if (hasDatabaseConfig) {
               answers = _.omit(scope.database.settings, ['client'])
             }
@@ -205,8 +204,8 @@ module.exports = (scope, cb) => {
             scope.database.settings.database = answers.database;
             scope.database.settings.username = answers.username;
             scope.database.settings.password = answers.password;
-            scope.database.settings.authenticationDatabase = answers.authenticationDatabase;
-            scope.database.settings.ssl = answers.ssl;
+            scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+            scope.database.options.ssl = _.toString(answers.ssl) === 'true';
 
             logger.info('Testing database connection...');
 
@@ -215,14 +214,26 @@ module.exports = (scope, cb) => {
         }),
         new Promise(resolve => {
           let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
+
           if (scope.client.module) {
             cmd += ` ${scope.client.module}`;
+          }
+
+          if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+            cmd += ` strapi-knex@alpha`;
+
+            scope.additionalsDependencies = ['strapi-knex', 'knex'];
           }
 
           exec(cmd, () => {
             if (scope.client.module) {
               const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
               scope.client.version = lock.version;
+
+              if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+                const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+                scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
+              }
             }
 
             resolve();
