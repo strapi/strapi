@@ -83,7 +83,9 @@ if (process.env.npm_lifecycle_event === 'start') {
     plugins.exist = true;
   }
 
-  // Read `plugins` directory and check if the plugin comes with an UI.
+  // Read `plugins` directory and check if the plugin comes with an UI (it has an App container).
+  // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
+  // the plugin's store (redux).
   plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
     let hasAdminFolder;
 
@@ -104,6 +106,7 @@ if (process.env.npm_lifecycle_event === 'start') {
   }, {});
 }
 
+// Tell webpack to use a loader only for those files
 const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
   .concat(plugins.src.reduce((acc, current) => {
     acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
@@ -113,6 +116,8 @@ const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
   .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
 
 module.exports = (options) => {
+  // The disable option is only for production
+  // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
   const extractSass = new ExtractTextPlugin({
     filename: '[name].[contenthash].css',
     disable: options.disableExtractTextPlugin || true,
@@ -126,6 +131,9 @@ module.exports = (options) => {
     module: {
       rules: [ // TODO: add eslint formatter
         {
+          // "oneOf" will traverse all following loaders until one will
+          // match the requirements. When no loader matches it will fall
+          // back to the "file" loader at the end of the loader list.
           oneOf: [
             {
               test: /\.js$/, // Transform all .js files required somewhere with Babel,
@@ -155,6 +163,18 @@ module.exports = (options) => {
                 },
               },
             },
+            // The notation here is somewhat confusing.
+            // "postcss" loader applies autoprefixer to our CSS.
+            // "css" loader resolves paths in CSS and adds assets as dependencies.
+            // "style" loader normally turns CSS into JS modules injecting <style>,
+            // but unlike in development configuration, we do something different.
+            // `ExtractTextPlugin` first applies the "postcss" and "css" loaders
+            // (second argument), then grabs the result CSS and puts it into a
+            // separate file in our build process. This way we actually ship
+            // a single CSS file in production instead of JS code injecting <style>
+            // tags. If you use code splitting, however, any async bundles will still
+            // use the "style" loader inside the async code so CSS from them won't be
+            // in the main CSS file.
             {
               test: /\.css$/,
               include: /node_modules/,

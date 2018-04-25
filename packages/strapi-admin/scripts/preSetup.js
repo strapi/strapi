@@ -14,6 +14,8 @@ const silent = process.env.npm_config_debug !== 'true';
 const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
 const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
 
+// We just install the admin's dependencies here
+
 // Remove package-lock.json.
 shell.rm('-rf', path.resolve(appPath, 'package-lock.json'));
 shell.rm('-rf', path.resolve(appPath, 'admin', 'package-lock.json'));
