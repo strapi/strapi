@@ -30,25 +30,6 @@ const adminPath = (() => {
   return path.resolve(process.env.PWD);
 })();
 
-if (!isSetup) {
-  try {
-    // Load app' configurations to update `plugins.json` automatically.
-    const strapi = require(path.join(appPath, 'node_modules', 'strapi'));
-
-    strapi.config.appPath = appPath;
-    strapi.log.level = 'silent';
-
-    (async () => {
-      await strapi.load({
-        environment: process.env.NODE_ENV,
-      });
-    })();
-  } catch (e) {
-    console.log(e);
-    throw new Error(`You need to start the WebPack server from the /admin or /plugins/**/admin directories in a Strapi's project.`);
-  }
-}
-
 // Define remote and backend URLs.
 const URLs = {
   host: '/admin',
