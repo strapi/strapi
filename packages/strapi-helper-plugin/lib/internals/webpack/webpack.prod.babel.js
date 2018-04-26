@@ -43,7 +43,7 @@ const plugins = [
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
-    sourceMap: false,
+    sourceMap: true,
     parallel: true,
     compress: {
       warnings: false,
@@ -173,6 +173,6 @@ module.exports = base({
     'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
   },
 
-  devtool: false,
+  devtool: 'cheap-module-source-map',
   disableExtractTextPlugin: false,
 });
