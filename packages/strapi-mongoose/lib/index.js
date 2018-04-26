@@ -6,7 +6,8 @@
 
 // Public node modules.
 const _ = require('lodash');
-const Mongoose = require('mongoose').Mongoose;
+const mongoose = require('mongoose');
+const Mongoose = mongoose.Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
 // Local helpers.
@@ -42,19 +43,24 @@ module.exports = function (strapi) {
     initialize: cb => {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
-        const { uri, host, port, username, password, database, authenticationDatabase, ssl } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+        const { authenticationDatabase, ssl } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {}
+
         if (!_.isEmpty(username)) {
-          connectOptions.user = username
+          connectOptions.user = username;
+
           if (!_.isEmpty(password)) {
-            connectOptions.pass = password
+            connectOptions.pass = password;
           }
         }
+
         if (!_.isEmpty(authenticationDatabase)) {
           connectOptions.authSource = authenticationDatabase;
         }
+
         connectOptions.ssl = ssl === true || ssl === 'true';
 
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
@@ -176,6 +182,14 @@ module.exports = function (strapi) {
                   collection.schema.options.toObject = collection.schema.options.toJSON = {
                     virtuals: true,
                     transform: function (doc, returned, opts) {
+                      // Remover $numberDecimal nested property.
+                      Object.keys(returned)
+                        .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
+                        .forEach((key, index) => {
+                          // Parse to float number.
+                          returned[key] = parseFloat(returned[key].toString());
+                        });
+
                       morphAssociations.forEach(association => {
                         if (Array.isArray(returned[association.alias]) && returned[association.alias].length > 0) {
                           // Reformat data by bypassing the many-to-many relationship.

@@ -35,7 +35,7 @@ module.exports = {
       return acc;
     }, {});
 
-    const entry = await this.create(values)
+    const request = await this.create(values)
       .catch((err) => {
         const message = err.message.split('index:');
         const field = _.words(_.last(message).split('_')[0]);
@@ -44,11 +44,13 @@ module.exports = {
         throw error;
       });
 
+    const entry = request.toJSON ? request.toJSON() : request;
+
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
-      values: _.merge({
+      values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values)
+      }, params.values, entry)
     });
   },
 
