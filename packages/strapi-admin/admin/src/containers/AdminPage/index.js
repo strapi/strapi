@@ -59,6 +59,8 @@ import selectAdminPage from './selectors';
 
 import styles from './styles.scss';
 
+const PLUGINS_TO_BLOCK_PRODUCTION = ['content-type-builder', 'settings-manager'];
+
 export class AdminPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { hasAlreadyRegistereOtherPlugins: false };
 
@@ -136,6 +138,20 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
+  retrievePlugins = () => {
+    const { adminPage: { currentEnvironment }, plugins } = this.props;
+
+    if (currentEnvironment === 'production') {
+      let pluginsToDisplay = plugins;
+      PLUGINS_TO_BLOCK_PRODUCTION.map(plugin =>
+        pluginsToDisplay = pluginsToDisplay.delete(plugin));
+
+      return pluginsToDisplay;
+    }
+
+    return plugins;
+  }
+
   render() {
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
@@ -145,7 +161,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       <div className={styles.adminPage}>
         {this.showLeftMenu() && (
           <LeftMenu
-            plugins={this.props.plugins}
+            plugins={this.retrievePlugins()}
             layout={adminPage.layout}
             version={adminPage.strapiVersion}
           />
