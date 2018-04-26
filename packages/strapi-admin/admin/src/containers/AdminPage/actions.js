@@ -4,12 +4,20 @@
  *
  */
 import {
+  GET_CURR_ENV_SUCCEEDED,
   GET_GA_STATUS,
   GET_GA_STATUS_SUCCEEDED,
   GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
   GET_STRAPI_VERSION_SUCCEEDED,
 } from './constants';
+
+export function getCurrEnvSucceeded(currentEnvironment) {
+  return {
+    type: GET_CURR_ENV_SUCCEEDED,
+    currentEnvironment,
+  };
+}
 
 export function getGaStatus() {
   return {
