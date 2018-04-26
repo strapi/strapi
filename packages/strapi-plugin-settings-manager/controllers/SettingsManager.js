@@ -137,6 +137,7 @@ module.exports = {
       fs.unlinkSync(filePath);
 
       ctx.send({ ok: true });
+      strapi.reload();
     } catch (e) {
       ctx.badRequest(null, Service.formatErrors([{
         target: 'name',
