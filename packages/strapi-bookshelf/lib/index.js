@@ -322,7 +322,7 @@ module.exports = function(strapi) {
                         let type;
 
                         if (!attribute.type) {
-                          // Add interger value is if relation
+                          // Add integer value if there is a relation
                           const relation = definition.associations.find((association) => {
                             return association.alias === attr;
                           });
@@ -346,9 +346,11 @@ module.exports = function(strapi) {
                               break;
                             case 'integer':
                             case 'biginteger':
+                              type = definition.client === 'pg' ? 'integer' : 'int';
+                              break;
                             case 'float':
                             case 'decimal':
-                              type = definition.client === 'pg' ? 'integer' : 'int';
+                              type = attribute.type;
                               break;
                             case 'date':
                             case 'time':
