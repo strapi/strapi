@@ -92,9 +92,9 @@ module.exports = {
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
-      values: _.merge({
+      values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values)
+      }, params.values, entry)
     });
   },
 

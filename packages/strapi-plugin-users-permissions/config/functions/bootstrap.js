@@ -74,7 +74,7 @@ module.exports = async cb => {
       callback: '/auth/twitter/callback'
     }
   };
-  const prevGrantConfig = await pluginStore.get({key: 'grant'})
+  const prevGrantConfig = await pluginStore.get({key: 'grant'}) || {};
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
