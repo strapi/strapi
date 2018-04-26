@@ -78,7 +78,7 @@ module.exports = {
       return acc;
     }, {});
 
-    const entry = await this
+    const request = await this
       .forge(values)
       .save()
       .catch((err) => {
@@ -89,6 +89,8 @@ module.exports = {
 
         throw err;
       });
+
+    const entry = request.toJSON ? request.toJSON() : request;
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
