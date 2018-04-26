@@ -14,6 +14,7 @@
     "lodash": "^4.17.5",
     "mocha": "~2.4.5",
     "pre-commit": "~1.1.2",
+    "random-facts": "^1.0.6",
     "redux-saga": "^0.14.3",
     "shelljs": "^0.7.7"
   },
@@ -25,7 +26,9 @@
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
     "setup:build": "npm run setup --build",
+    "setup:build:facts": "npm run setup --build --facts",
     "setup": "npm run clean:all && npm install && node ./scripts/setup.js && npm run clean",
+    "setup:facts": "npm run setup --facts",
     "test": "make test"
   },
   "author": {

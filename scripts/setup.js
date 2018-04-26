@@ -1,4 +1,6 @@
 const shell = require('shelljs');
+const rf = require('random-facts');
+
 // Check npm version
 const npm = shell.exec('npm -v').stdout;
 
@@ -19,6 +21,13 @@ const installationStartDate = new Date();
 const watcher = (label, cmd, withSuccess = true) => {
   if (label.length > 0) {
     shell.echo(label);
+
+    if (process.env.npm_config_facts) {
+      shell.echo('');
+      shell.echo('🤓  Did you know?');
+      shell.echo(rf.randomFact());
+      shell.echo('');
+    }
   }
 
   const data = shell.exec(cmd, {
