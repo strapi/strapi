@@ -429,11 +429,16 @@ module.exports = function(strapi) {
                           const type = getType(attributes[attribute], attribute);
 
                           if (type) {
-                            const action = definition.client === 'pg'
+                            const changeType = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
-                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type}`;
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
 
-                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${action}`);
+                            const changeRequired = definition.client === 'pg'
+                              ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
+
+                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
+                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                           }
 
                           resolve();
