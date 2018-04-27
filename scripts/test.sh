@@ -34,3 +34,19 @@ npm run test
 # Test `strapi-helper-plugin`
 cd ../strapi-helper-plugin/lib
 npm run test
+
+
+start=`date +%s`
+
+# for dir in ./packages/*/
+# do
+#     dir=${dir%*/}
+#     echo ${dir##*/}
+#     cd packages/${dir##*/}
+#     npm run test
+#     cd ../..
+# done
+# end=`date +%s`
+#
+# runtime=$((end-start))
+# echo ${runtime}
