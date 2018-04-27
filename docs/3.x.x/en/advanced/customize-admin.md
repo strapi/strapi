@@ -12,7 +12,7 @@ The entire logic of the admin panel is located in a single folder named `./admin
 └─── admin
 |   └─── build // Webpack generated build of the front-end
 |   └─── src // Front-end directory
-|        └─── app.js // Entry point of the Reacr application
+|        └─── app.js // Entry point of the React application
 |        └─── assets // Assets directory containing images,...
 |        └─── components // Admin's React components directory
 |        └─── containers // Admin's high level components directory

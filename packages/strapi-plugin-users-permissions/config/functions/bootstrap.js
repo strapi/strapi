@@ -74,7 +74,7 @@ module.exports = async cb => {
       callback: '/auth/twitter/callback'
     }
   };
-  const prevGrantConfig = await pluginStore.get({key: 'grant'})
+  const prevGrantConfig = await pluginStore.get({key: 'grant'}) || {};
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
@@ -124,7 +124,5 @@ module.exports = async cb => {
     await pluginStore.set({key: 'advanced', value});
   }
 
-  strapi.plugins['users-permissions'].services.userspermissions.syncSchema(() => {
-    strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
-  });
+  strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };

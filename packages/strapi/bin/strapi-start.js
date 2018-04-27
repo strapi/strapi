@@ -27,6 +27,11 @@ const { cli, logger } = require('strapi-utils');
  */
 
 module.exports = function() {
+  // Check that we're in a valid Strapi project.
+  if (!cli.isStrapiApp()) {
+    return logger.error('This command can only be used inside a Strapi project.');
+  }
+  
   try {
     const strapi = function () {
       try {

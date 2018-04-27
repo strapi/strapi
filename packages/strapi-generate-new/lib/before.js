@@ -83,21 +83,6 @@ module.exports = (scope, cb) => {
           connector: 'strapi-bookshelf',
           module: 'mysql'
         }
-      },
-      {
-        name: 'Sqlite3',
-        value: {
-          database: 'sqlite3',
-          connector: 'strapi-bookshelf',
-          module: 'sqlite3'
-        }
-      },
-      {
-        name: 'Redis',
-        value: {
-          database: 'redis',
-          connector: 'strapi-redis'
-        }
       }
     ];
 
@@ -169,9 +154,7 @@ module.exports = (scope, cb) => {
                 const ports = {
                   mongo: 27017,
                   postgres: 5432,
-                  mysql: 3306,
-                  sqlite3: 1433,
-                  redis: 6379
+                  mysql: 3306
                 };
 
                 return ports[scope.client.database];
@@ -212,7 +195,6 @@ module.exports = (scope, cb) => {
             }
           ])
           .then(answers => {
-
             if (hasDatabaseConfig) {
               answers = _.omit(scope.database.settings, ['client'])
             }
@@ -222,8 +204,8 @@ module.exports = (scope, cb) => {
             scope.database.settings.database = answers.database;
             scope.database.settings.username = answers.username;
             scope.database.settings.password = answers.password;
-            scope.database.settings.authenticationDatabase = answers.authenticationDatabase;
-            scope.database.settings.ssl = answers.ssl;
+            scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+            scope.database.options.ssl = _.toString(answers.ssl) === 'true';
 
             logger.info('Testing database connection...');
 

@@ -181,7 +181,7 @@ module.exports = {
 
     _.forEach(attributesConfigurable, attribute => {
       if (_.has(attribute, 'params.type')) {
-        attrs[attribute.name] = attribute.params;
+        attrs[attribute.name] = _.omit(attribute.params, 'multiple');
 
         if (attribute.params.type === 'media') {
           const via = _.findKey(strapi.plugins.upload.models.file.attributes, {collection: '*'});
