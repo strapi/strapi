@@ -333,12 +333,14 @@ module.exports = function(strapi) {
                         }
                       } else {
                         switch (attribute.type) {
-                          case 'string':
                           case 'text':
                           case 'password':
                           case 'email':
                           case 'json':
                             type = 'text';
+                            break;
+                          case 'string':
+                            type = 'varchar(255)';
                             break;
                           case 'integer':
                           case 'biginteger':
@@ -429,7 +431,7 @@ module.exports = function(strapi) {
                           if (type) {
                             const action = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
-                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote}  ${type}`;
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type}`;
 
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${action}`);
                           }

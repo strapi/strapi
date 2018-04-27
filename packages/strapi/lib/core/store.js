@@ -13,7 +13,7 @@ module.exports = function () {
           type: 'string'
         },
         value: {
-          type: 'string'
+          type: 'text'
         },
         type: {
           type: 'string'
