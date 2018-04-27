@@ -314,61 +314,69 @@ module.exports = function(strapi) {
                   const handler = async (table, attributes) => {
                     const tableExist = await ORM.knex.schema.hasTable(table);
 
+                    const getType = (attribute, name) => {
+                      let type;
+
+                      if (!attribute.type) {
+                        // Add integer value if there is a relation
+                        const relation = definition.associations.find((association) => {
+                          return association.alias === name;
+                        });
+
+                        switch (relation.nature) {
+                          case 'oneToOne':
+                          case 'manyToOne':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          default:
+                            return null;
+                        }
+                      } else {
+                        switch (attribute.type) {
+                          case 'string':
+                          case 'text':
+                          case 'password':
+                          case 'email':
+                          case 'json':
+                            type = 'text';
+                            break;
+                          case 'integer':
+                          case 'biginteger':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          case 'float':
+                          case 'decimal':
+                            type = attribute.type;
+                            break;
+                          case 'date':
+                          case 'time':
+                          case 'datetime':
+                          case 'timestamp':
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                            break;
+                          case 'timestampUpdate':
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                            break;
+                          case 'boolean':
+                            type = 'boolean';
+                            break;
+                          default:
+                        }
+                      }
+
+                      return type;
+                    };
+
                     // Apply field type of attributes definition
                     const generateColumns = (attrs, start) => {
                       return Object.keys(attrs).reduce((acc, attr) => {
                         const attribute = attributes[attr];
 
-                        let type;
+                        const type = getType(attribute, attr);
 
-                        if (!attribute.type) {
-                          // Add integer value if there is a relation
-                          const relation = definition.associations.find((association) => {
-                            return association.alias === attr;
-                          });
-
-                          switch (relation.nature) {
-                            case 'oneToOne':
-                            case 'manyToOne':
-                              type = definition.client === 'pg' ? 'integer' : 'int';
-                              break;
-                            default:
-                              return acc;
-                          }
-                        } else {
-                          switch (attribute.type) {
-                            case 'string':
-                            case 'text':
-                            case 'password':
-                            case 'email':
-                            case 'json':
-                              type = 'text';
-                              break;
-                            case 'integer':
-                            case 'biginteger':
-                              type = definition.client === 'pg' ? 'integer' : 'int';
-                              break;
-                            case 'float':
-                            case 'decimal':
-                              type = attribute.type;
-                              break;
-                            case 'date':
-                            case 'time':
-                            case 'datetime':
-                            case 'timestamp':
-                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
-                              break;
-                            case 'timestampUpdate':
-                              type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
-                              break;
-                            case 'boolean':
-                              type = 'boolean';
-                              break;
-                            default:
-                          }
+                        if (type) {
+                          acc.push(`${quote}${attr}${quote} ${type}`);
                         }
-
-                        acc.push(`${quote}${attr}${quote} ${type}`);
 
                         return acc;
                       }, start);
@@ -412,6 +420,23 @@ module.exports = function(strapi) {
 
                         await ORM.knex.raw(queries);
                       }
+
+                      // Execute query to update column type
+                      await Promise.all(columns.map(attribute =>
+                        new Promise(async (resolve) => {
+                          const type = getType(attributes[attribute], attribute);
+
+                          if (type) {
+                            const action = definition.client === 'pg'
+                              ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote}  ${type}`;
+
+                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${action}`);
+                          }
+
+                          resolve();
+                        })
+                      ));
                     }
                   };
 
