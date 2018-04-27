@@ -334,12 +334,12 @@ module.exports = function(strapi) {
                       } else {
                         switch (attribute.type) {
                           case 'text':
-                          case 'password':
-                          case 'email':
                           case 'json':
                             type = 'text';
                             break;
                           case 'string':
+                          case 'password':
+                          case 'email':
                             type = 'varchar(255)';
                             break;
                           case 'integer':
