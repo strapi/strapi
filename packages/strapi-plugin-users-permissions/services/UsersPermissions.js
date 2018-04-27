@@ -275,8 +275,9 @@ module.exports = {
                 .addPermission(Object.assign(action, { role: role.id || role._id }))
               )
           )
-        ),
-        Promise.all(toRemove.map(action => strapi.query('permission', 'users-permissions').removePermission(action)))
+        ).concat([
+          Promise.all(toRemove.map(action => strapi.query('permission', 'users-permissions').removePermission(action)))
+        ])
       );
 
       return this.writeActions(currentActions, cb);
