@@ -487,17 +487,38 @@ module.exports = function(strapi) {
                   });
 
                   if (manyRelations && manyRelations.dominant) {
+                    const collection = manyRelations.plugin ?
+                      strapi.plugins[manyRelations.plugin].models[manyRelations.collection]:
+                      strapi.models[manyRelations.collection];
+
                     const attributes = {
                       [`${pluralize.singular(manyRelations.collection)}_id`]: {
                         type: 'integer'
                       },
-                      [`${pluralize.singular(manyRelations.via)}_id`]: {
+                      [`${pluralize.singular(definition.globalId.toLowerCase())}_id`]: {
                         type: 'integer'
                       }
                     };
 
-                    const keys = [pluralize.plural(manyRelations.collection), pluralize.plural(manyRelations.via)];
-                    const table = [keys.join('_'), keys.reverse().join('_')].join('__');
+                    const table = _.get(manyRelations, 'collectionName') ||
+                      _.map(
+                        _.sortBy(
+                          [
+                            collection.attributes[
+                              manyRelations.via
+                            ],
+                            manyRelations
+                          ],
+                          'collection'
+                        ),
+                        table => {
+                          return _.snakeCase(
+                            pluralize.plural(table.collection) +
+                              ' ' +
+                              pluralize.plural(table.via)
+                          );
+                        }
+                      ).join('__');
 
                     await handler(table, attributes);
                   }
