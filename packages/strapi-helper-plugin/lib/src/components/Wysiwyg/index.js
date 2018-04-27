@@ -590,22 +590,40 @@ class Wysiwyg extends React.Component {
       'X-Forwarded-Host': 'strapi',
     };
 
-    const newContentState = this.createNewContentStateFromBlock(
-      createNewBlock(`![Uploading ${files[0].name}]()`),
-    );
-    const newEditorState = EditorState.push(this.getEditorState(), newContentState);
-    this.setState({ editorState: newEditorState });
+    let newEditorState = this.getEditorState();
+
+    const nextBlocks = getNextBlocksList(newEditorState, this.getSelection().getStartKey());
+    // Loop to update each block after the inserted li
+    nextBlocks.map((block, index) => {
+      // Update the current block
+      const nextBlockText = index === 0 ? `![Uploading ${files[0].name}]()` : nextBlocks.get(index - 1).getText();
+      const newBlock = createNewBlock(nextBlockText, 'unstyled', block.getKey());
+      // Update the contentState
+      const newContentState = this.createNewContentStateFromBlock(
+        newBlock,
+        newEditorState.getCurrentContent(),
+      );
+      newEditorState = EditorState.push(newEditorState, newContentState);
+    });
+
+    const offset = `![Uploading ${files[0].name}]()`.length;
+    const updatedSelection = updateSelection(this.getSelection(), nextBlocks, offset);
+    this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
 
     return request('/upload', { method: 'POST', headers, body: formData }, false, false)
       .then(response => {
-        const lastBlock = this.getEditorState()
+        const nextBlockKey = newEditorState
           .getCurrentContent()
-          .getLastBlock();
+          .getKeyAfter(newEditorState.getSelection().getStartKey());
+        const content = `![text](${response[0].url})`;
         const newContentState = this.createNewContentStateFromBlock(
-          createNewBlock(`![text](${response[0].url})`, 'unstyled', lastBlock.getKey()),
+          createNewBlock(content, 'unstyled', nextBlockKey),
         );
-        const newEditorState = EditorState.push(this.getEditorState(), newContentState);
-        this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+
+        newEditorState = EditorState.push(newEditorState, newContentState);
+        const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
+
+        this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
         this.sendData(newEditorState);
       })
       .catch(() => {
