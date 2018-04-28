@@ -34,6 +34,9 @@ To facilitate the contribution, we drastically reduce the amount of commands nec
 
 > Note: If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
 
+> Note: You can run `npm run setup:build` to build the plugins' admin (the setup time will be longer).
+
+
 The development environment has been installed. Now, you have to create a development project to live-test your updates.
 
 1. Go to a folder on your computer `cd /path/to/my/folder`.
