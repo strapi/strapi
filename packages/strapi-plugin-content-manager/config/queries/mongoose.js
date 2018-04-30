@@ -10,7 +10,7 @@ module.exports = {
       .populate(populate || this.associations.map(x => x.alias).join(' '));
   },
 
-  count: async function (params) {
+  count: async function () {
     return Number(await this
       .count());
   },
@@ -105,7 +105,7 @@ module.exports = {
                     }
                     return Promise.resolve();
                   })
-                  .then(response => {
+                  .then(() => {
                     // Updating the new relations
                     // When params.values[current] is null this means that we are removing the relation.
                     // Recreate relation on the first side
@@ -206,11 +206,11 @@ module.exports = {
                 ref: obj.refId,
                 kind: globalId,
                 [association.filter]: obj.field
-              }
+              };
             });
             break;
           case 'oneToManyMorph':
-          case 'manyToManyMorph':
+          case 'manyToManyMorph': {
             const transformToArrayID = (array) => {
               if (_.isArray(array)) {
                 return array.map(value => {
@@ -219,7 +219,7 @@ module.exports = {
                   }
 
                   return value;
-                })
+                });
               }
 
               if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
@@ -229,21 +229,21 @@ module.exports = {
               return [];
             };
 
-              // Compare array of ID to find deleted files.
-              const currentValue = transformToArrayID(response[current]).map(id => id.toString());
-              const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+            // Compare array of ID to find deleted files.
+            const currentValue = transformToArrayID(response[current]).map(id => id.toString());
+            const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
 
-              const toAdd = _.difference(storedValue, currentValue);
-              const toRemove = _.difference(currentValue, storedValue);
+            const toAdd = _.difference(storedValue, currentValue);
+            const toRemove = _.difference(currentValue, storedValue);
 
-              // Remove relations in the other side.
-              toAdd.forEach(id => {
-                virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelationMorph({
-                  id,
-                  alias: association.via,
-                  ref: this.globalId,
-                  refId: response._id,
-                  field: association.alias
+            // Remove relations in the other side.
+            toAdd.forEach(id => {
+              virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelationMorph({
+                id,
+                alias: association.via,
+                ref: this.globalId,
+                refId: response._id,
+                field: association.alias
               }));
             });
 
@@ -258,6 +258,7 @@ module.exports = {
               }));
             });
             break;
+          }
           case 'oneMorphToOne':
           case 'oneMorphToMany':
             break;
