@@ -55,16 +55,6 @@ const FIRST_BLOCK = [
   },
 ];
 
-const WELCOME_AGAIN_BLOCK = [
-  {
-    title: {
-      id: 'app.components.HomePage.welcome.again',
-    },
-    name: upperFirst(`${get(auth.getUserInfo(), 'username')}!`),
-    content: () => <WelcomeContent hasContent />,
-  },
-];
-
 const FIRST_BLOCK_LINKS = [
   {
     link: 'https://strapi.io/documentation/',
@@ -169,6 +159,15 @@ export class HomePage extends React.PureComponent {
 
   render() {
     const { homePage: { articles, body } } = this.props;
+    const WELCOME_AGAIN_BLOCK = [
+      {
+        title: {
+          id: 'app.components.HomePage.welcome.again',
+        },
+        name: upperFirst(`${get(auth.getUserInfo(), 'username')}!`),
+        content: () => <WelcomeContent hasContent />,
+      },
+    ];
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>

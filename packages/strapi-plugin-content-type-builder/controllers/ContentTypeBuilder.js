@@ -115,13 +115,13 @@ module.exports = {
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
 
-      modelJSON.attributes = formatedAttributes;
+      modelJSON.connection = connection;
+      modelJSON.collectionName = collectionName;
       modelJSON.info = {
         name,
         description
       };
-      modelJSON.connection = connection;
-      modelJSON.collectionName = collectionName;
+      modelJSON.attributes = formatedAttributes;
 
       const clearRelationsErrors = Service.clearRelations(model, plugin);
 
