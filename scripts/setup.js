@@ -73,8 +73,8 @@ shell.cd('../strapi-lint');
 watcher('📦  Linking strapi-lint...', 'npm link');
 
 shell.cd('../strapi-helper-plugin');
-watcher('📦  Linking strapi-helper-plugin...', 'npm link');
 watcher('', 'npm install ../strapi-lint --no-optional');
+watcher('📦  Linking strapi-helper-plugin...', 'npm link');
 
 shell.cd('../strapi-admin');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
