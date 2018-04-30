@@ -119,7 +119,7 @@
   "components.Input.error.contentTypeName.taken": "此名称已经存在",
   "components.Input.error.attribute.taken": "此字段名称已经存在",
   "components.Input.error.attribute.key.taken": "此值已经存在",
-  "components.Input.error.attribute.sameKeyAndName": "不能重复",
+  "components.Input.error.attribute.sameKeyAndName": "不能相等",
   "components.Input.error.validation.minSupMax": "最小值超过最大值了",
   "components.Input.error.custom-error": "{errorMessage} ",
 
