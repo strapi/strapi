@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs')
+const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const request = require('request');
@@ -67,7 +67,7 @@ module.exports = {
         id: user._id || user.id
       }, {
         role: publicRoleID
-      }))
+      }));
 
       return acc;
     }, []);
@@ -77,7 +77,7 @@ module.exports = {
       arrayOfPromises.push(strapi.query('permission', 'users-permissions').delete({
         id: permission._id || permission.id
       }));
-    })
+    });
 
     // Delete the role.
     arrayOfPromises.push(strapi.query('role', 'users-permissions').delete({
@@ -113,7 +113,7 @@ module.exports = {
         }
 
         return acc;
-    }, {}));
+      }, {}));
 
     const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
       acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
@@ -146,7 +146,7 @@ module.exports = {
       },
     };
 
-    return _.merge(permissions, pluginsPermissions);;
+    return _.merge(permissions, pluginsPermissions);
   },
 
   getRole: async (roleID, plugins) => {
@@ -210,7 +210,7 @@ module.exports = {
             .map(action => `application.${controller}.${action.toLowerCase()}`);
 
           acc = acc.concat(actions);
-      });
+        });
 
       return acc;
     }, []);
@@ -224,7 +224,7 @@ module.exports = {
             .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
 
           acc = acc.concat(actions);
-      });
+        });
 
       return acc;
     }, []);
@@ -263,7 +263,7 @@ module.exports = {
       // the permissions entries in the database.
       const toRemove = _.difference(actions, currentActions).map(splitted);
       const toAdd = (permissions < 1 ? currentActions : _.difference(currentActions, actions))
-          .map(splitted);
+        .map(splitted);
 
       // Execute request to update entries in database for each role.
       await Promise.all(
@@ -363,7 +363,7 @@ module.exports = {
       .filter(user => user.role !== `${root._id || root.id}`.toString())
       .forEach(user => {
         arrayOfPromises.push(this.updateUserRole(user, roleID));
-      })
+      });
 
     // Remove user to this role and link him to authenticated.
     _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
@@ -500,7 +500,7 @@ CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
 
       tablesToCreate.push(`
 
-2️⃣  RESTART YOUR SERVER`)
+2️⃣  RESTART YOUR SERVER`);
       strapi.log.warn(missingTables.concat(tablesToCreate).join(''));
 
       // Stop the server.
@@ -564,7 +564,7 @@ ALTER TABLE ${quote}${details[currentModel].tableName}${quote} ADD ${details[cur
 
       tablesToAlter.push(`
 
-2️⃣  RESTART YOUR SERVER`)
+2️⃣  RESTART YOUR SERVER`);
       strapi.log.warn(missingColumns.concat(tablesToAlter).join(''));
 
       // Stop the server.
