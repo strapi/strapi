@@ -53,6 +53,7 @@ const availableAttributes = Object.keys(forms.attribute);
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
+/* eslint-disable react/jsx-curly-brace-presence */
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {

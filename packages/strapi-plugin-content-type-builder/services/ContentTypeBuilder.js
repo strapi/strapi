@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path')
+const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
@@ -51,7 +51,7 @@ module.exports = {
         if (name === 'file') {
           return true;
         }
-        
+
         acc.push({
           icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
@@ -111,7 +111,7 @@ module.exports = {
     };
   },
 
-  getConnections: () => {
+  getConnections: () => {
     return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
@@ -125,7 +125,7 @@ module.exports = {
         rootPath: strapi.config.appPath,
         args: {
           api: name,
-          description: _.replace(description, /\"/g, '\\"'),
+          description: _.replace(description, /\"/g, '\\"'), // eslint-disable-line no-useless-escape
           attributes,
           connection,
           collectionName: !_.isEmpty(collectionName) ? collectionName : undefined,
@@ -190,7 +190,7 @@ module.exports = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
             via,
             plugin: 'upload'
-          }
+          };
         }
       } else if (_.has(attribute, 'params.target')) {
         const relation = attribute.params;
@@ -446,7 +446,7 @@ module.exports = {
           }
         }
       }
-    }
+    };
 
     const recurciveDeleteFiles = folderPath => {
       try {
@@ -482,7 +482,7 @@ module.exports = {
           }
         });
       }
-    }
+    };
 
     recurciveDeleteFiles(apiPath);
 

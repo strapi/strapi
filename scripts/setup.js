@@ -153,6 +153,7 @@ watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false
 
 shell.cd('../strapi-plugin-content-type-builder');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('', 'npm install ../strapi-generate --no-optional');
 watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
