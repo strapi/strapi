@@ -140,30 +140,16 @@ module.exports = {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
-        _.forIn(_.omit(models, currentModelName || ''), model => {
-          Object.keys(model.attributes)
-            .filter(key => key === association.via)
-            .forEach(attr => {
-              const attribute = model.attributes[attr];
+        const model = models[association.model]
+        const attribute = model.attributes[association.via];
 
-              if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
-                types.other = 'collection';
-
-                // Break loop
-                return false;
-              } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
-                types.other = 'model';
-
-                // Break loop
-                return false;
-              } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
-                types.other = 'morphTo';
-
-                // Break loop
-                return false;
-              }
-            });
-        });
+        if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
+          types.other = 'collection';
+        } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
+          types.other = 'model';
+        } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
+          types.other = 'morphTo';
+        }
       } else if (association.hasOwnProperty('model')) {
         types.current = 'model';
 
@@ -454,7 +440,7 @@ module.exports = {
       if (_.includes(['_start', '_limit'], key)) {
         result = convertor(value, key);
       } else if (key === '_sort') {
-        const [attr, order] = value.split(':');
+        const [attr, order = 'ASC'] = value.split(':');
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');

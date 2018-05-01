@@ -78,7 +78,7 @@ module.exports = {
       return acc;
     }, {});
 
-    const entry = await this
+    const request = await this
       .forge(values)
       .save()
       .catch((err) => {
@@ -89,6 +89,8 @@ module.exports = {
 
         throw err;
       });
+
+    const entry = request.toJSON ? request.toJSON() : request;
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
@@ -167,9 +169,7 @@ module.exports = {
           case 'oneToMany':
           case 'manyToOne':
           case 'manyToMany':
-            if (association.nature === 'manyToMany' && details.dominant === true) {
-              acc[current] = params.values[current];
-            } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
+            if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.
               const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()

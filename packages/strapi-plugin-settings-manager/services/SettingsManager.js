@@ -521,11 +521,6 @@ module.exports = {
                 port: 3306
               },
               {
-                name: 'form.database.item.provider.sqlite3',
-                value: 'sqlite3',
-                port: 1433
-              },
-              {
                 name: 'form.database.item.provider.redis',
                 value: 'redis',
                 port: 6379
@@ -650,7 +645,7 @@ module.exports = {
   },
 
   getClientConnector: client => {
-    const bookshelfClients = ['postgres', 'mysql', 'sqlite3'];
+    const bookshelfClients = ['postgres', 'mysql'];
     const mongooseClients = ['mongo'];
     const redisClients = ['redis'];
 
@@ -675,9 +670,6 @@ module.exports = {
         break;
       case 'mongo':
         return '#43b121';
-        break;
-      case 'sqlite3':
-        return '#006fff';
         break;
       default:
         return '#000000';
@@ -899,8 +891,7 @@ module.exports = {
   installDependency: (params, name) => {
     const clientsDependencies = {
       postgres: 'pg',
-      mysql: 'mysql',
-      sqlite3: 'sqlite3'
+      mysql: 'mysql'
     };
 
     const client = _.get(clientsDependencies, _.get(params, `database.connections.${name}.settings.client`));

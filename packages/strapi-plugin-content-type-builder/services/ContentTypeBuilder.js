@@ -51,7 +51,7 @@ module.exports = {
         if (name === 'file') {
           return true;
         }
-        
+
         acc.push({
           icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
@@ -214,7 +214,10 @@ module.exports = {
 
         attr.via = relation.key;
         attr.dominant = relation.dominant;
-        attr.plugin = relation.pluginValue;
+
+        if (relation.pluginValue) {
+          attr.plugin = relation.pluginValue;
+        }
 
         attrs[attribute.name] = attr;
       }
