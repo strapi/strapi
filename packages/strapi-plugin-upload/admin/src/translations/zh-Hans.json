@@ -1,0 +1,36 @@
+{
+  "ConfigPage.title": "上传-设置",
+  "ConfigPage.description": "配置上传插件",
+
+  "EditForm.Input.number.label": "最大文件限制 (单位:MB)",
+  "EditForm.Input.select.label": "Providers",
+  "EditForm.Input.select.inputDescription": "文件可以上传到服务器上，也可以上传到外部存储服务供应商。",
+  "EditForm.Input.toggle.label": "启用文件上传",
+
+  "EmptyLi.message": "没有上传的文件",
+
+  "EntriesNumber.number": "找到 {number} 个文件",
+  "EntriesNumber.number.plural": "找到  {number} 个文件",
+
+  "HomePage.title": "上传",
+  "HomePage.description": "发现所有上传的文件",
+  "HomePage.InputSearch.placeholder": "搜索文件…",
+
+  "Li.linkCopied": "链接复制到剪贴板",
+
+  "ListHeader.type": "类型",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "文件名",
+  "ListHeader.updated": "更新时间",
+  "ListHeader.size": "大小",
+  "ListHeader.related": "Related to",
+
+  "PluginInputFile.text": "将文件拖放到该区域或 {link} 文件上传",
+  "PluginInputFile.link": "浏览",
+  "PluginInputFile.loading": "您的文件正在上传…",
+
+  "notification.config.success": "设置已更新",
+  "notification.delete.success": "文件已被删除",
+  "notification.dropFile.success": "您的文件已上传",
+  "notification.dropFiles.success": "{number} 个文件已上传"
+}
