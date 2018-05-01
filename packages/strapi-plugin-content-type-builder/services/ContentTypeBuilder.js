@@ -203,11 +203,11 @@ module.exports = {
         switch (relation.nature) {
           case 'oneToOne':
           case 'manyToOne':
-            attr.model = relation.target;
+            attr.model = relation.target.toLowerCase();
             break;
           case 'manyToMany':
           case 'oneToMany':
-            attr.collection = relation.target;
+            attr.collection = relation.target.toLowerCase();
             break;
           default:
         }
@@ -255,10 +255,10 @@ module.exports = {
       Object.keys(models).forEach(name => {
         const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => {
           if (source) {
-            return association[association.type] === model && association.plugin === source;
+            return association[association.type] === _.toLower(model) && association.plugin === source;
           }
 
-          return association[association.type] === model;
+          return association[association.type] === _.toLower(model);
         });
 
         if (!_.isEmpty(relationsToDelete)) {
@@ -326,10 +326,10 @@ module.exports = {
       Object.keys(models).forEach(name => {
         const relationsToCreate = attributes.filter(attribute => {
           if (plugin) {
-            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue') === plugin;
+            return _.toLower(_.get(attribute, 'params.target')) === name && _.get(attribute, 'params.pluginValue') === plugin;
           }
 
-          return _.get(attribute, 'params.target') === name && _.isEmpty(_.get(attribute, 'params.pluginValue', ''));
+          return _.toLower(_.get(attribute, 'params.target')) === name && _.isEmpty(_.get(attribute, 'params.pluginValue', ''));
         });
 
         if (!_.isEmpty(relationsToCreate)) {
