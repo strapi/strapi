@@ -440,7 +440,7 @@ module.exports = {
       if (_.includes(['_start', '_limit'], key)) {
         result = convertor(value, key);
       } else if (key === '_sort') {
-        const [attr, order] = value.split(':');
+        const [attr, order = 'ASC'] = value.split(':');
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');
