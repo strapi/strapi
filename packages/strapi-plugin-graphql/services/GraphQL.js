@@ -6,7 +6,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const policyUtils = require('strapi-utils').policy;
 
 const fs = require('fs');
 const path = require('path');
@@ -15,6 +14,7 @@ const pluralize = require('pluralize');
 const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
+const policyUtils = require('strapi-utils').policy;
 
 module.exports = {
 
@@ -31,7 +31,7 @@ module.exports = {
     // Try to add description for field.
     if (type === 'field') {
       return lines
-        .map((line, index) => {
+        .map(line => {
           if (['{', '}'].includes(line)) {
             return ``;
           }
@@ -88,14 +88,14 @@ module.exports = {
     }
 
     return lines
-        .map((line, index) => {
-          if ([0, lines.length - 1].includes(index)) {
-            return ``;
-          }
+      .map((line, index) => {
+        if ([0, lines.length - 1].includes(index)) {
+          return ``;
+        }
 
-          return line;
-        })
-        .join('\n');
+        return line;
+      })
+      .join('\n');
   },
 
   /**
@@ -181,14 +181,14 @@ module.exports = {
       model: name
     };
 
-    const queryOpts = plugin ? { source: plugin } : {};
+    const queryOpts = plugin ? { source: plugin } : {}; // eslint-disable-line no-unused-vars
 
     const model = plugin ?
       strapi.plugins[plugin].models[name]:
       strapi.models[name];
 
     // Retrieve generic service from the Content Manager plugin.
-    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+    const resolvers = strapi.plugins['content-manager'].services['contentmanager']; // eslint-disable-line no-unused-vars
 
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
@@ -282,7 +282,7 @@ module.exports = {
 
           // Return the controller.
           return controller(ctx, next);
-        }
+        };
       }
 
       // Plural.
@@ -293,7 +293,7 @@ module.exports = {
         );
 
         return controller(ctx, next);
-      }
+      };
     })();
 
     // The controller hasn't been found.
@@ -362,7 +362,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, options, context)
+        return resolver.call(null, obj, options, context);
       }
 
       // Resolver can be a promise.
@@ -412,10 +412,10 @@ module.exports = {
         });
 
         Object.assign(acc.resolver[globalId], {
-          created_at: (obj, options, context) => {
+          created_at: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.createdAt || obj.created_at;
           },
-          updated_at: (obj, options, context) => {
+          updated_at: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.updatedAt || obj.updated_at;
           }
         });
@@ -440,7 +440,7 @@ module.exports = {
           attributes[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] = attributes[association.alias];
 
           delete attributes[association.alias];
-        })
+        });
 
       acc.definition += `${this.getDescription(type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
@@ -499,7 +499,7 @@ module.exports = {
           case 'manyMorphToMany':
           case 'manyToManyMorph':
             return _.merge(acc.resolver[globalId], {
-              [association.alias]: async (obj, options, context) => {
+              [association.alias]: async (obj, options, context) => { // eslint-disable-line no-unused-vars
                 const [ withRelated, withoutRelated ] = await Promise.all([
                   resolvers.fetch({
                     id: obj[model.primaryKey],
@@ -526,12 +526,11 @@ module.exports = {
                 return entry[association.alias];
               }
             });
-            break;
           default:
         }
 
         _.merge(acc.resolver[globalId], {
-          [association.alias]: async (obj, options, context) => {
+          [association.alias]: async (obj, options, context) => { // eslint-disable-line no-unused-vars
             // Construct parameters object to retrieve the correct related entries.
             const params = {
               model: association.model || association.collection,
@@ -565,7 +564,7 @@ module.exports = {
               queryOpts.skip = convertedParams.start;
 
               switch (association.nature) {
-                case 'manyToMany':
+                case 'manyToMany': {
                   const arrayOfIds = obj[association.alias].map(related => {
                     return related[ref.primaryKey] || related;
                   });
@@ -578,6 +577,7 @@ module.exports = {
                     ...where.where
                   }).where;
                   break;
+                }
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {
@@ -710,12 +710,12 @@ module.exports = {
       polymorphicDef: `union Morph = ${types.join(' | ')}`,
       polymorphicResolver: {
         Morph: {
-          __resolveType(obj, context, info) {
+          __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
             return obj.kind || obj._type;
           }
         }
       }
-    }
+    };
   },
 
   /**
