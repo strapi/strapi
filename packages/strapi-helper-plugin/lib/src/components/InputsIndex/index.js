@@ -21,6 +21,7 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
+import InputRefs from 'components/InputRefs';
 // import WysiwygWithErrors from 'components/WysiwygWithErrors';
 const Loading = () => <div>Loading ...</div>;
 const LoadableWysiwyg = Loadable({
@@ -45,6 +46,7 @@ const inputs = {
   textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
   wysiwyg: LoadableWysiwyg,
+  refs: InputRefs,
 };
 
 function InputsIndex(props) {
@@ -66,7 +68,7 @@ function InputsIndex(props) {
   }
 
   merge(inputs, props.customInputs);
-  
+
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;

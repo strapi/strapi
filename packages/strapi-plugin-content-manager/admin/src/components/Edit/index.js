@@ -49,6 +49,8 @@ const getInputType = (type = '') => {
     case 'file':
     case 'files':
       return 'file';
+    case 'refs':
+      return 'refs';
     default:
       return 'text';
   }

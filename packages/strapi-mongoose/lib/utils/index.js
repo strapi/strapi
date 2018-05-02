@@ -21,6 +21,8 @@ module.exports = mongoose => {
       switch (mongooseType.toLowerCase()) {
         case 'array':
           return 'Array';
+        case 'refs':
+          return [String];
         case 'boolean':
           return 'Boolean';
         case 'binary':
