@@ -245,7 +245,7 @@ InputRefs.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired
+  value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.string), PropTypes.string]),
 };
 
 export default InputRefs;

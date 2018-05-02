@@ -83,7 +83,7 @@ SelectWithSort.defaultProps = {
 
 SelectWithSort.propTypes = {
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOf([PropTypes.arrayOf(PropTypes.string), PropTypes.string]),
+  value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.string), PropTypes.string]),
 };
 
 
