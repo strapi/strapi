@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+/* eslint-disable prefer-template */
 // Node.js core.
 const fs = require('fs');
 const path = require('path');

@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+/* eslint-disable prefer-template */
 const _ = require('lodash');
 
 /**
