@@ -14,21 +14,29 @@ import en from 'translations/en.json';
 
 import styles from './styles.scss';
 
-class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class LeftMenuLink extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     // We need to create our own active url checker,
     // because of the two levels router.
-    const isLinkActive = startsWith(window.location.pathname.replace('/admin', ''), this.props.destination);
-    const plugin = this.props.source !== 'content-manager' && this.props.source !== '' ?
-      (<div className={styles.plugin}>
-        <span>{upperFirst(this.props.source.split('-').join(' '))}</span>
-      </div>) : '';
+    const isLinkActive = startsWith(
+      window.location.pathname.replace('/admin', ''),
+      this.props.destination,
+    );
+    const plugin =
+      this.props.source !== 'content-manager' && this.props.source !== '' ? (
+        <div className={styles.plugin}>
+          <span>{upperFirst(this.props.source.split('-').join(' '))}</span>
+        </div>
+      ) : (
+        ''
+      );
 
     // Check if messageId exists in en locale to prevent warning messages
     const content = en[this.props.label] ? (
       <FormattedMessage
         id={this.props.label}
-        defaultMessage='{label}'
+        defaultMessage="{label}"
         values={{
           label: `${this.props.label}`,
         }}
@@ -47,7 +55,7 @@ class LeftMenuLink extends React.Component { // eslint-disable-line react/prefer
             search: this.props.source ? `?source=${this.props.source}` : '',
           }}
         >
-          <i className={`${styles.linkIcon} fa-${this.props.icon} fa`}></i>
+          <i className={`${styles.linkIcon} fa-${this.props.icon} fa`} />
           {content}
         </Link>
         {plugin}
