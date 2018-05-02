@@ -20,7 +20,10 @@ const getModels = () => {
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
 
-  return models;
+  return {
+    models,
+    pickData
+  };
 };
 
 /**
@@ -34,8 +37,10 @@ module.exports = {
   },
 
   models: async ctx => {
+    const { models, pickData } = getModels();
+
     ctx.body = {
-      models: getModels(),
+      models,
       plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
         acc[current] = {
           models: _.mapValues(strapi.plugins[current].models, pickData)
