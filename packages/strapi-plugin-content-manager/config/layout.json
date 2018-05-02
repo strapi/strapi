@@ -1,1 +1,26 @@
-{}
+{
+  "page": {
+    "attributes": {
+      "title": {
+        "appearance": ""
+      }
+    }
+  },
+  "hero": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
+  },
+  "textarea": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      },
+      "body": {
+        "appearance": ""
+      }
+    }
+  }
+}

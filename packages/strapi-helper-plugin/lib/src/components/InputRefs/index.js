@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
@@ -9,14 +10,29 @@ import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputText from 'components/InputText';
 import InputSpacer from 'components/InputSpacer';
+import SelectWithSort from 'components/SelectWithSort'
 
 // Utils
 import validateInput from 'utils/inputsValidations';
 
 import styles from './styles.scss';
 
+const types = [
+  'Hero', 'Textarea', 'Text', 'Image', 'FAQ', 'Divider'
+];
+
+
+// fake data generator
+const getItems = count =>
+  Array.from({ length: count }, (v, k) => k).map(k => ({
+    id: `${k}`,
+    type: types[Math.floor(Math.random() * 6)],  
+    title: `item ${k}`,
+  }));
+
 /* eslint-disable jsx-a11y/no-autofocus */
-class InputRefs extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputRefs extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -57,6 +73,18 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
+  };
+
+  onChange = (value) => {
+    const { onChange, name } = this.props;
+    const fakedEvent = {
+      target: {
+        value,
+        name
+      }
+    };
+
+    onChange(fakedEvent);
   }
 
   render() {
@@ -84,7 +112,7 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
       placeholder,
       style,
       tabIndex,
-      value,
+      value
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
@@ -93,23 +121,9 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
     }
-
-    return (
-      <div
-        className={cn(
-          styles.containerText,
-          customBootstrapClass,
-          !isEmpty(className) && className,
-        )}
-        style={style}
-      >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
-        <InputText
+    
+    /**
+     * <InputText
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -124,6 +138,29 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
           tabIndex={tabIndex}
           value={value}
         />
+     */
+
+    const options = getItems(30)
+    const arrayValue = value === '' ? [] : value
+
+    // this.props.type === "refs" && console.log(this.props)
+    return (
+      <div
+        className={cn(
+          styles.containerText,
+          customBootstrapClass,
+          !isEmpty(className) && className
+        )}
+        style={style}
+      >
+        <Label
+          className={labelClassName}
+          htmlFor={name}
+          message={label}
+          style={labelStyle}
+        />
+        <SelectWithSort onChange={this.onChange} options={options} value={arrayValue}/>
+        
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
@@ -131,7 +168,7 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           style={errorsStyle}
         />
         {spacer}
@@ -142,29 +179,29 @@ class InputRefs extends React.Component { // eslint-disable-line react/prefer-st
 
 InputRefs.defaultProps = {
   autoFocus: false,
-  className: '',
-  customBootstrapClass: 'col-md-6',
+  className: "",
+  customBootstrapClass: "col-md-6",
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
   onBlur: false,
   onFocus: () => {},
   errors: [],
-  errorsClassName: '',
+  errorsClassName: "",
   errorsStyle: {},
-  inputClassName: '',
-  inputDescription: '',
-  inputDescriptionClassName: '',
+  inputClassName: "",
+  inputDescription: "",
+  inputDescriptionClassName: "",
   inputDescriptionStyle: {},
   inputStyle: {},
-  label: '',
-  labelClassName: '',
+  label: "",
+  labelClassName: "",
   labelStyle: {},
   noErrorsDescription: false,
-  placeholder: 'app.utils.placeholder.defaultMessage',
+  placeholder: "app.utils.placeholder.defaultMessage",
   style: {},
-  tabIndex: '0',
-  validations: {},
+  tabIndex: "0",
+  validations: {}
 };
 
 InputRefs.propTypes = {
@@ -183,8 +220,8 @@ InputRefs.propTypes = {
     PropTypes.func,
     PropTypes.shape({
       id: PropTypes.string,
-      params: PropTypes.object,
-    }),
+      params: PropTypes.object
+    })
   ]),
   inputDescriptionClassName: PropTypes.string,
   inputDescriptionStyle: PropTypes.object,
@@ -194,24 +231,21 @@ InputRefs.propTypes = {
     PropTypes.func,
     PropTypes.shape({
       id: PropTypes.string,
-      params: PropTypes.object,
-    }),
+      params: PropTypes.object
+    })
   ]),
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired
 };
 
 export default InputRefs;

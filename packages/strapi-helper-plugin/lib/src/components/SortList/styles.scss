@@ -1,0 +1,24 @@
+.item {
+    padding: 8px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    position: relative;
+    border: 1px solid #d3dce0;
+    -webkit-border-radius: 1px;
+    border-radius: 1px;
+    background-color: rgba(255, 255, 255, 0.95);
+    -webkit-box-shadow: 0 1.5px 1.5px #e5ebed;
+    box-shadow: 0 1.5px 1.5px #e5ebed;
+    align-items: center;
+    font-size: 15px;
+  }
+
+  .clear {
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.type {
+   color: #6d7173;
+   margin-left: auto;
+}
