@@ -79,6 +79,7 @@ watcher('📦  Linking strapi-helper-plugin...', 'npm link');
 shell.cd('../strapi-admin');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 watcher('', 'npm install ../strapi-utils --no-optional');
+watcher('', 'npm install ../strapi-lint --no-optional');
 shell.rm('-f', 'package-lock.json');
 
 // Without these line Travis failed.
