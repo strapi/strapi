@@ -17,9 +17,6 @@
     "lodash": "^4.17.4",
     "strapi-admin": "3.0.0-alpha.12"
   },
-  "devDependencies": {
-    "strapi-lint": "3.0.0-alpha.12"
-  },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",

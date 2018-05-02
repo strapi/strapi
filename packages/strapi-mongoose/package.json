@@ -21,9 +21,6 @@
     "pluralize": "^6.0.0",
     "strapi-utils": "3.0.0-alpha.12"
   },
-  "devDependencies": {
-    "strapi-lint": "3.0.0-alpha.12"
-  },
   "strapi": {
     "isHook": true
   },

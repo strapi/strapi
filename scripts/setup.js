@@ -59,22 +59,18 @@ shell.echo('');
 // Remove existing binary.
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
-shell.cd('packages/strapi-lint');
-watcher('📦  Linking strapi-lint...', 'npm link');
-
-shell.cd('../strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional');
+shell.cd('packages/strapi-utils');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
 shell.cd('../strapi-generate');
 watcher('', 'npm install ../strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate...', 'npm link');
 
 shell.cd('../strapi-generate-api');
-watcher('', 'npm install ../strapi-lint --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate-api...', 'npm link');
+
+shell.cd('../strapi-lint');
+watcher('📦  Linking strapi-lint...', 'npm link');
 
 shell.cd('../strapi-helper-plugin');
 watcher('', 'npm install ../strapi-lint --no-optional');
@@ -101,31 +97,26 @@ watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
 shell.cd('../strapi-generate-admin');
 watcher('', 'npm install ../strapi-admin');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate-admin...', 'npm link');
 
 shell.cd('../strapi-generate-new');
 watcher('', 'npm install ../strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate-new', 'npm link');
 
 shell.cd('../strapi-mongoose');
 watcher('', 'npm install ../strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-mongoose...', 'npm link');
 
 shell.cd('../strapi-knex');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-knex...', 'npm link');
 
 shell.cd('../strapi-bookshelf');
 watcher('', 'npm install ../strapi-utils');
 watcher('', 'npm install ../strapi-knex');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-bookshelf...', 'npm link');
 
 shell.cd('../strapi');
-watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils ../strapi-lint');
+watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');
 
 // Upload plugins
@@ -206,3 +197,4 @@ const setup = async () => {
 };
 
 setup();
+ 

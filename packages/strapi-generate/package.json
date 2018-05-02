@@ -19,9 +19,6 @@
     "reportback": "^2.0.1",
     "strapi-utils": "3.0.0-alpha.12"
   },
-  "devDependencies": {
-    "strapi-lint": "3.0.0-alpha.12"
-  },
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
