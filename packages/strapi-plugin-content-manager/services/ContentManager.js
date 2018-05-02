@@ -151,4 +151,18 @@ module.exports = {
       id: params.id
     });
   },
+
+  getRefs: async (models) => {
+    const fetchAllModels = Object.keys(models).map(async model => {
+      const allRecords = await module.exports.fetchAll({ model }, {});
+
+      return allRecords.map(record => ({
+        id: record._id,
+        title: record.name || record._id,
+        type: model
+      }));
+    });
+
+    return _.flatten(await Promise.all(fetchAllModels));
+  },
 };

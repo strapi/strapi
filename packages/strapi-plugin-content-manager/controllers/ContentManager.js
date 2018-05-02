@@ -2,10 +2,30 @@
 
 const _ = require('lodash');
 
+const getModels = () => {
+  const pickData = (model) => _.pick(model, [
+    'info',
+    'connection',
+    'collectionName',
+    'attributes',
+    'identity',
+    'globalId',
+    'globalName',
+    'orm',
+    'loadedModel',
+    'primaryKey',
+    'associations'
+  ]);
+
+  const models = _.mapValues(strapi.models, pickData);
+  delete models['core_store'];
+
+  return models;
+};
+
 /**
  * A set of functions called "actions" for `ContentManager`
  */
-
 module.exports = {
   layout: async (ctx) => {
     const {source} = ctx.query;
@@ -14,25 +34,8 @@ module.exports = {
   },
 
   models: async ctx => {
-    const pickData = (model) => _.pick(model, [
-      'info',
-      'connection',
-      'collectionName',
-      'attributes',
-      'identity',
-      'globalId',
-      'globalName',
-      'orm',
-      'loadedModel',
-      'primaryKey',
-      'associations'
-    ]);
-
-    const models = _.mapValues(strapi.models, pickData);
-    delete models['core_store'];
-
     ctx.body = {
-      models,
+      models: getModels(),
       plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
         acc[current] = {
           models: _.mapValues(strapi.plugins[current].models, pickData)
@@ -99,5 +102,9 @@ module.exports = {
 
   delete: async ctx => {
     ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].delete(ctx.params, ctx.request.query);
+  },
+
+  getRefs: async ctx => {
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs(getModels());
   },
 };
