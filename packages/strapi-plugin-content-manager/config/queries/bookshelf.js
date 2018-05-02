@@ -218,6 +218,28 @@ module.exports = {
                 strapi.plugins[obj.source].models[obj.ref]:
                 strapi.models[obj.ref];
 
+              // Remove existing relationship because only one file
+              // can be related to this field.
+              if (association.nature === 'manyMorphToOne') {
+                return virtualFields.push(
+                  module.exports.removeRelationMorph.call(this, {
+                    alias: association.alias,
+                    ref: model.collectionName,
+                    refId: obj.refId,
+                    field: obj.field
+                  })
+                  .then(() =>
+                    module.exports.addRelationMorph.call(this, {
+                      id: response[this.primaryKey],
+                      alias: association.alias,
+                      ref: model.collectionName,
+                      refId: obj.refId,
+                      field: obj.field
+                    })
+                  )
+                );
+              }
+
               virtualFields.push(module.exports.addRelationMorph.call(this, {
                 id: response[this.primaryKey],
                 alias: association.alias,
@@ -386,12 +408,12 @@ module.exports = {
 
   removeRelationMorph: async function (params) {
     return await this.morph.forge()
-      .where({
+      .where(_.omitBy({
         [`${this.collectionName}_id`]: params.id,
         [`${params.alias}_id`]: params.refId,
         [`${params.alias}_type`]: params.ref,
         field: params.field
-      })
+      }, _.isEmpty))
       .destroy();
   }
 };
