@@ -221,7 +221,7 @@ module.exports = {
               // Remove existing relationship because only one file
               // can be related to this field.
               if (association.nature === 'manyMorphToOne') {
-                return virtualFields.push(
+                virtualFields.push(
                   module.exports.removeRelationMorph.call(this, {
                     alias: association.alias,
                     ref: model.collectionName,
@@ -238,15 +238,15 @@ module.exports = {
                     })
                   )
                 );
+              } else {
+                virtualFields.push(module.exports.addRelationMorph.call(this, {
+                  id: response[this.primaryKey],
+                  alias: association.alias,
+                  ref: model.collectionName,
+                  refId: obj.refId,
+                  field: obj.field
+                }));
               }
-
-              virtualFields.push(module.exports.addRelationMorph.call(this, {
-                id: response[this.primaryKey],
-                alias: association.alias,
-                ref: model.collectionName,
-                refId: obj.refId,
-                field: obj.field
-              }));
             });
             break;
           case 'oneToManyMorph':
