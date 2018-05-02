@@ -16,6 +16,9 @@
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0"
   },
+  "devDependencies": {
+    "strapi-lint": "3.0.0-alpha.12"
+  },
   "scripts": {
     "prepublishOnly": "npm prune"
   },

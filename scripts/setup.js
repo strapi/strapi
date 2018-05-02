@@ -59,18 +59,21 @@ shell.echo('');
 // Remove existing binary.
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
-shell.cd('packages/strapi-utils');
+shell.cd('packages/strapi-lint');
+watcher('📦  Linking strapi-lint...', 'npm link');
+
+shell.cd('../strapi-utils');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
 shell.cd('../strapi-generate');
 watcher('', 'npm install ../strapi-utils');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate...', 'npm link');
 
 shell.cd('../strapi-generate-api');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-generate-api...', 'npm link');
-
-shell.cd('../strapi-lint');
-watcher('📦  Linking strapi-lint...', 'npm link');
 
 shell.cd('../strapi-helper-plugin');
 watcher('', 'npm install ../strapi-lint --no-optional');

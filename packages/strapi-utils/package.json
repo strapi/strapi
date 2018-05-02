@@ -21,6 +21,9 @@
     "lodash": "^4.17.4",
     "pino": "^4.7.1"
   },
+  "devDependencies": {
+    "strapi-lint": "3.0.0-alpha.12"
+  },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
