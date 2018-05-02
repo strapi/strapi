@@ -158,7 +158,7 @@ module.exports = {
 
       return allRecords.map(record => ({
         id: record._id,
-        title: record.name || record._id,
+        title: record.name || record.title || record.description || record._id,
         type: model
       }));
     });
