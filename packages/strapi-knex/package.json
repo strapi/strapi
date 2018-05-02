@@ -19,6 +19,9 @@
     "knex": "^0.13.0",
     "lodash": "^4.17.4"
   },
+  "devDependencies": {
+    "strapi-lint": "3.0.0-alpha.12"
+  },
   "strapi": {
     "isHook": true
   },

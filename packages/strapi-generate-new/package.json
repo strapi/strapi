@@ -21,6 +21,9 @@
     "strapi-utils": "3.0.0-alpha.12",
     "uuid": "^3.1.0"
   },
+  "devDependencies": {
+    "strapi-lint": "3.0.0-alpha.12"
+  },
   "scripts": {
     "prepublishOnly": "npm prune"
   },
