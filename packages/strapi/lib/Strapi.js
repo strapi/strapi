@@ -236,8 +236,9 @@ class Strapi extends EventEmitter {
         // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
         state.shouldReload = !(state.isWatching === false && value === true);
         state.isWatching = value;
-
-        return value;
+      },
+      get: () => {
+        return state.isWatching;
       }
     });
 
