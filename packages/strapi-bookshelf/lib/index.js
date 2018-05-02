@@ -236,6 +236,7 @@ module.exports = function(strapi) {
                         const association = definition.associations
                           .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
                           .filter(association => association.alias === path || association.via === path)[0];
+
                         if (association) {
                           // Override on polymorphic path only.
                           if (_.isString(path) && path === association.via) {
@@ -252,7 +253,11 @@ module.exports = function(strapi) {
                               strapi.plugins[association.plugin].models[association.collection || association.model]:
                               strapi.models[association.collection || association.model];
 
-                            return `${association.alias}.${model.collectionName}`;
+                            return {
+                              [`${association.alias}.${model.collectionName}`]: function(query) {
+                                query.orderBy('created_at', 'desc');
+                              }
+                            };
                           }
                         }
 
