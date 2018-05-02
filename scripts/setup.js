@@ -147,6 +147,7 @@ watcher('📦  Linking strapi-plugin-settings-manager...', 'npm link --no-option
 // Plugins with admin and other plugin's dependencies
 shell.cd('../strapi-plugin-upload');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('', 'npm install ../strapi-upload-local --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
