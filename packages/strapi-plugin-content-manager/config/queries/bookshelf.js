@@ -263,7 +263,7 @@ module.exports = {
               }
 
               if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
-                return _.isEmpty(array) ? [] : transformToArrayID([array]);
+                return _.isEmpty(_.toString(array)) ? [] : transformToArrayID([array]);
               }
 
               return [];
