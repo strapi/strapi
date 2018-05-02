@@ -6,9 +6,6 @@
  * @description: A set of functions called "actions" of the `users-permissions` plugin.
  */
 
-const path = require('path');
-const fs = require('fs');
-
 const _ = require('lodash');
 
 module.exports = {
@@ -189,7 +186,7 @@ module.exports = {
       type: 'plugin',
       name: 'users-permissions',
       key: 'email'
-    }).set({value: ctx.request.body})
+    }).set({value: ctx.request.body});
 
     ctx.send({ ok: true });
   },
@@ -216,7 +213,7 @@ module.exports = {
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
-    }).set({value: ctx.request.body})
+    }).set({value: ctx.request.body});
 
     ctx.send({ ok: true });
   },
@@ -240,7 +237,7 @@ module.exports = {
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
-    }).set({value: ctx.request.body})
+    }).set({value: ctx.request.body});
 
     ctx.send({ ok: true });
   }

@@ -98,7 +98,7 @@ module.exports = {
    * @return {Object}
    */
 
-  update: async (ctx, next) => {
+  update: async (ctx) => {
     try {
       const advancedConfigs = await strapi.store({
         environment: '',
@@ -117,7 +117,7 @@ module.exports = {
 
       const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
 
-      if (_.get(ctx.request, 'body.password') === user.password) {
+      if (_.get(ctx.request, 'body.password') === user.password) {
         delete ctx.request.body.password;
       }
 
@@ -150,7 +150,7 @@ module.exports = {
    * @return {Object}
    */
 
-  destroy: async (ctx, next) => {
+  destroy: async (ctx) => {
     const data = await strapi.plugins['users-permissions'].services.user.remove(ctx.params);
 
     // Send 200 `ok`

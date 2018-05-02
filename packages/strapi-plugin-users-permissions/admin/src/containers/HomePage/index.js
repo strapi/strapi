@@ -183,7 +183,7 @@ export class HomePage extends React.Component {
             {component}
           </div>
           <PopUpForm
-            actionType={'edit'}
+            actionType="edit"
             isOpen={this.state.showModalEdit}
             dataToEdit={dataToEdit}
             didCheckErrors={didCheckErrors}
