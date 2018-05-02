@@ -92,11 +92,16 @@ module.exports = {
 
     const entry = request.toJSON ? request.toJSON() : request;
 
+    const relations = this.associations.reduce((acc, association) => {
+      acc[association.alias] = params.values[association.alias];
+      return acc;
+    }, {});
+
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
       values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values, entry)
+      }, relations)
     });
   },
 
