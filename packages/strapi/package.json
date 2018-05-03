@@ -62,7 +62,6 @@
     "strapi-generate-plugin": "3.0.0-alpha.12",
     "strapi-generate-policy": "3.0.0-alpha.12",
     "strapi-generate-service": "3.0.0-alpha.12",
-    "strapi-lint": "3.0.0-alpha.12",
     "strapi-utils": "3.0.0-alpha.12"
   },
   "author": {

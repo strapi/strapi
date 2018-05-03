@@ -60,7 +60,7 @@ shell.echo('');
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
 shell.cd('packages/strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional'); 
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
 shell.cd('../strapi-generate');
@@ -117,7 +117,7 @@ watcher('', 'npm install ../strapi-knex');
 watcher('📦  Linking strapi-bookshelf...', 'npm link');
 
 shell.cd('../strapi');
-watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils ../strapi-lint');
+watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');
 
 // Upload plugins
