@@ -81,7 +81,9 @@ function formReducer(state = initialState, action) {
     case RESET_FORM_ERRORS:
       return state.set('formErrors', List());
     case RESET_IS_FORM_SET:
-      return state.set('isFormSet', false);
+      return state
+        .set('isFormSet', false)
+        .update('modifiedData', () => Map({}));
     case SET_ATTRIBUTE_FORM: {
       if (state.get('isFormSet')) {
         return state

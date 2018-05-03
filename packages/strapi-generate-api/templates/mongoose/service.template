@@ -48,9 +48,12 @@ module.exports = {
    */
 
   add: async (values) => {
-    const data = await <%= globalID %>.create(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias'))));
-    await strapi.hook.mongoose.manageRelations('<%= id %>', _.merge(_.clone(data), { values }));
-    return data;
+    const query = await <%= globalID %>.create(_.omit(values, _.keys(_.groupBy(strapi.models.<%= id %>.associations, 'alias'))));
+    const data = query.toJSON ? query.toJSON() : query;
+
+    await strapi.hook.mongoose.manageRelations('<%= id %>', _.merge(data, { values }));
+
+    return query;
   },
 
   /**

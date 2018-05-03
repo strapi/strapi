@@ -35,7 +35,7 @@ module.exports = {
       return acc;
     }, {});
 
-    const entry = await this.create(values)
+    const request = await this.create(values)
       .catch((err) => {
         const message = err.message.split('index:');
         const field = _.words(_.last(message).split('_')[0]);
@@ -44,11 +44,21 @@ module.exports = {
         throw error;
       });
 
+    const entry = request.toJSON ? request.toJSON() : request;
+
+    const relations = this.associations.reduce((acc, association) => {
+      if (params.values[association.alias]) {
+        acc[association.alias] = params.values[association.alias];
+      }
+
+      return acc;
+    }, {});
+
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
-      values: _.merge({
+      values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values)
+      }, relations)
     });
   },
 
@@ -167,7 +177,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });
@@ -181,7 +191,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });
@@ -211,21 +221,21 @@ module.exports = {
           case 'manyToManyMorph':
             const transformToArrayID = (array) => {
               if (_.isArray(array)) {
-                  return array.map(value => {
-                    if (_.isPlainObject(value)) {
-                      return value._id || value.id;
-                    }
+                return array.map(value => {
+                  if (_.isPlainObject(value)) {
+                    return value._id || value.id;
+                  }
 
-                    return value;
-                  })
-                }
+                  return value;
+                })
+              }
 
-                if (association.type === 'model') {
-                  return _.isEmpty(array) ? [] : transformToArrayID([array]);
-                }
+              if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
+                return _.isEmpty(array) ? [] : transformToArrayID([array]);
+              }
 
-                return [];
-              };
+              return [];
+            };
 
               // Compare array of ID to find deleted files.
               const currentValue = transformToArrayID(response[current]).map(id => id.toString());

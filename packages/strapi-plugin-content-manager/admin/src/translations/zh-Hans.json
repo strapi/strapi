@@ -1,0 +1,55 @@
+{
+  "plugin.description.short": "快速查看、编辑和删除数据库中的数据。",
+  "plugin.description.long": "快速查看、编辑和删除数据库中的数据。",
+  "containers.Home.pluginHeaderTitle": "内容管理器",
+  "containers.Home.introduction": "要编辑您的条目，请转到左边菜单中的特定链接。这个插件没有合适的方法来编辑设置，它仍然在积极的开发中。",
+  "containers.Home.pluginHeaderDescription": "通过一个强大而漂亮的界面管理你的条目。",
+  "containers.Edit.submit": "保存",
+  "containers.Edit.editing": "编辑...",
+  "containers.Edit.delete": "删除",
+  "containers.Edit.reset": "重置",
+  "containers.Edit.returnList": "返回列表",
+  "containers.List.addAnEntry": "增加新的 {entity}",
+  "containers.List.pluginHeaderDescription": "找到 {label} 条目",
+  "containers.List.pluginHeaderDescription.singular": "找到 {label} 条目",
+  "components.LimitSelect.itemsPerPage": "每页显示数目",
+  "containers.List.errorFetchRecords": "错误",
+
+  "EditRelations.title": "关系数据",
+  
+  "emptyAttributes.title": "还没有字段",
+  "emptyAttributes.description": "为你的内容类型添加第一个字段",
+  "emptyAttributes.button": "转到内容类型生成器",
+
+  "error.schema.generation": "Schema生成过程中发生错误。",
+  "error.records.count": "获取记录数count时发生错误。",
+  "error.records.fetch": "获取记录时发生错误。",
+  "error.record.fetch": "获取记录时发生错误。",
+  "error.record.create": "创建记录时发生错误",
+  "error.record.update": "更新记录时发生错误",
+  "error.record.delete": "删除记录时发生错误",
+  "error.model.fetch": "获取models配置时发生错误",
+  "error.validation.required": "必填项",
+  "error.validation.regex": "格式错误",
+  "error.validation.max": "超过最大值",
+  "error.validation.min": "小于最小值",
+  "error.validation.maxLength": "长度太长",
+  "error.validation.minLength": "长度太短",
+  "error.contentTypeName.taken": "该名称已被使用",
+  "error.attribute.taken": "该名称已被使用",
+  "error.attribute.key.taken": "该值已存在",
+  "error.attribute.sameKeyAndName": "不能相等",
+  "error.validation.minSupMax": "最小值大于最大值。",
+
+  "notification.error.relationship.fetch": "获取关联数据时发生错误",
+
+  "success.record.delete": "删除",
+  "success.record.save": "保存",
+
+  "pageNotFound": "页面未找到",
+
+  "popUpWarning.button.cancel": "取消",
+  "popUpWarning.button.confirm": "确认",
+  "popUpWarning.title": "请确认",
+  "popUpWarning.bodyMessage.contentType.delete": "确实要删除此条目吗？"
+}
