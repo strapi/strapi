@@ -14,7 +14,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const base = require('./webpack.base.babel');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const isSetup = process.env.IS_MONOREPO;
 const appPath = (() => {
   if (process.env.APP_PATH) {
     return process.env.APP_PATH;
