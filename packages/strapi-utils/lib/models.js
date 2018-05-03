@@ -103,7 +103,7 @@ module.exports = {
         // We have to find if they are a model linked to this key
         _.forIn(allModels, model => {
           _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key) {
+            if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.model === currentModelName) {
               if (attribute.hasOwnProperty('collection')) {
                 types.other = 'collection';
 
