@@ -174,7 +174,7 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
+    const roles = await strapi.query('role', 'users-permissions').find({ sort: '-name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
@@ -289,10 +289,10 @@ module.exports = {
 
   removeDuplicate: async function () {
     const primaryKey = strapi.query('permission', 'users-permissions').primaryKey;
+
+    // Retrieve permissions by creation date (ID or ObjectID).
     const permissions = await strapi.query('permission', 'users-permissions').find({
-      sort: {
-        [primaryKey]: -1
-      }
+      sort: `${primaryKey}`
     });
 
     const value = permissions.reduce((acc, permission) => {
