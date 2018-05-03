@@ -12,7 +12,7 @@ const sendmail = require('sendmail')({
 });
 
 module.exports = {
-  send: (options, cb) => {
+  send: (options, cb) => { // eslint-disable-line no-unused-vars
     return new Promise((resolve, reject) => {
       // Default values.
       options = _.isObject(options) ? options : {};
