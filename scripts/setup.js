@@ -119,6 +119,10 @@ shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');
 
+shell.cd('../strapi-plugin-graphql');
+watcher('', 'npm install ../strapi-lint --no-optional');
+watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
+
 // Upload plugins
 shell.cd('../strapi-upload-local');
 watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false);
@@ -126,6 +130,7 @@ watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false)
 // Plugins with admin
 shell.cd('../strapi-plugin-email');
 shell.rm('-f', 'package-lock.json');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-users-permissions');
