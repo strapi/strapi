@@ -219,7 +219,7 @@ module.exports = (scope, cb) => {
             cmd += ` ${scope.client.module}`;
           }
 
-          if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+          if (scope.client.connector === 'strapi-bookshelf') {
             cmd += ` strapi-knex@alpha`;
 
             scope.additionalsDependencies = ['strapi-knex', 'knex'];
