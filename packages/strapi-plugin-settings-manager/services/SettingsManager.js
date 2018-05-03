@@ -11,7 +11,7 @@ module.exports = {
       {
         name: 'menu.section.global-settings',
         items: [
-            {
+          {
             slug: 'application',
             name: 'menu.item.application',
             icon: 'globe'
@@ -105,7 +105,7 @@ module.exports = {
           ]
         }
       ]
-    }
+    };
   },
 
   request: env => ({
@@ -570,7 +570,21 @@ module.exports = {
             type: 'password',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
             validations: {}
-          }
+          },
+          {
+            name: 'form.database.item.authenticationDatabase',
+            target: `database.connections.${name}.options.authenticationDatabase`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.options.authenticationDatabase`, null),
+            validations: {}
+          },
+          {
+            name: 'form.database.item.ssl',
+            target: `database.connections.${name}.options.ssl`,
+            type: 'boolean',
+            value: [true, 'true'].includes(_.get(strapi.config, `environments.${env}.database.connections.${name}.options.ssl`, false)),
+            validations: {}
+          },
         ]
       },
       {
@@ -578,7 +592,7 @@ module.exports = {
         items: [
           {
             name: 'form.database.item.default',
-            target: `database.defaultConnection`,
+            target: 'database.defaultConnection',
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.defaultConnection`, null),
             validations: {
