@@ -32,7 +32,7 @@ module.exports = (scope, success, error) => {
         success();
       };
 
-      if (tables.rows.length !== 0) {
+      if (tables.rows && tables.rows.length !== 0) {
         logger.warn('It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.');
 
         inquirer.prompt([{
