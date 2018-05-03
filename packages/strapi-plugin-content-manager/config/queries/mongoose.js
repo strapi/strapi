@@ -177,7 +177,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });
@@ -191,7 +191,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });
