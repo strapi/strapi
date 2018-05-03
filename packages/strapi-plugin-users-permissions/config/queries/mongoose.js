@@ -84,6 +84,16 @@ module.exports = {
       });
   },
 
+  deleteMany: async function (params) {
+    // Delete entry.
+    return this
+      .remove({
+        [this.primaryKey]: {
+          $in: params[this.primaryKey] || params.id
+        }
+      });
+  },
+
   search: async function (params) {
     const re = new RegExp(params.id);
 
