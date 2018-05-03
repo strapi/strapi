@@ -2,30 +2,6 @@
 
 const _ = require('lodash');
 
-const getModels = () => {
-  const pickData = (model) => _.pick(model, [
-    'info',
-    'connection',
-    'collectionName',
-    'attributes',
-    'identity',
-    'globalId',
-    'globalName',
-    'orm',
-    'loadedModel',
-    'primaryKey',
-    'associations'
-  ]);
-
-  const models = _.mapValues(strapi.models, pickData);
-  delete models['core_store'];
-
-  return {
-    models,
-    pickData
-  };
-};
-
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -37,7 +13,22 @@ module.exports = {
   },
 
   models: async ctx => {
-    const { models, pickData } = getModels();
+    const pickData = (model) => _.pick(model, [
+      'info',
+      'connection',
+      'collectionName',
+      'attributes',
+      'identity',
+      'globalId',
+      'globalName',
+      'orm',
+      'loadedModel',
+      'primaryKey',
+      'associations'
+    ]);
+
+    const models = _.mapValues(strapi.models, pickData);
+    delete models['core_store'];
 
     ctx.body = {
       models,
@@ -110,6 +101,6 @@ module.exports = {
   },
 
   getRefs: async ctx => {
-    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs(getModels());
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs();
   },
 };
