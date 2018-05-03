@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { findIndex, get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
+import { findIndex, get, isArray, isEmpty, includes, isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -64,6 +64,7 @@ export function* submit() {
   const isCreating = yield select(makeSelectIsCreating());
   const record = yield select(makeSelectRecord());
   const source = yield select(makeSelectSource());
+  let shouldAddTranslationSuffix = false;
 
   try {
     // Show button loader
@@ -122,6 +123,12 @@ export function* submit() {
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
+          if (includes(current.id, 'Auth')) {
+            acc.id = `users-permissions.${current.id}`;
+            shouldAddTranslationSuffix = true;
+
+            return acc;
+          }
           acc.errorMessage = current.id;
 
           return acc;
@@ -131,11 +138,13 @@ export function* submit() {
         return acc;
       }, []);
 
-      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field']);
+      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field', '0']);
 
       yield put(setFormErrors([{ name, errors }]));
     }
-    strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
+
+    const notifErrorPrefix = source === 'users-permissions' && shouldAddTranslationSuffix ? 'users-permissions.' : '';
+    strapi.notification.error(`${notifErrorPrefix}${get(err.response, ['payload', 'message', '0', 'messages', '0', 'id'], isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update')}`);
   } finally {
     yield put(unsetLoader());
   }
