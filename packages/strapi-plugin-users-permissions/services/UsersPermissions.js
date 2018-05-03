@@ -174,7 +174,7 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
+    const roles = await strapi.query('role', 'users-permissions').find({ sort: '-name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
@@ -287,11 +287,40 @@ module.exports = {
     }
   },
 
+  removeDuplicate: async function () {
+    const primaryKey = strapi.query('permission', 'users-permissions').primaryKey;
+
+    // Retrieve permissions by creation date (ID or ObjectID).
+    const permissions = await strapi.query('permission', 'users-permissions').find({
+      sort: `${primaryKey}`
+    });
+
+    const value = permissions.reduce((acc, permission) => {
+      const index = acc.toKeep.findIndex(element => element === `${permission.type}.controllers.${permission.controller}.${permission.action}`);
+
+      if (index === -1) {
+        acc.toKeep.push(`${permission.type}.controllers.${permission.controller}.${permission.action}`);
+      } else {
+        acc.toRemove.push(permission[primaryKey]);
+      }
+
+      return acc;
+    }, {
+      toKeep: [],
+      toRemove: []
+    });
+
+    return strapi.query('permission', 'users-permissions').deleteMany({
+      [primaryKey]: value.toRemove
+    });
+  },
+
   initialize: async function (cb) {
     const roles = await strapi.query('role', 'users-permissions').count();
 
     // It's has been already initialized.
     if (roles > 0) {
+      await this.removeDuplicate();
       return await this.updatePermissions(cb);
     }
 

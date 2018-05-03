@@ -215,8 +215,10 @@ module.exports = {
 
     if (params.database.connections) {
       const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
+      const options = _.assign(_.clone(strapi.config.environments[env].database.connections[name].options), params.database.connections[name].options);
       params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
       params.settings = settings;
+      params.options = options;
     }
 
     delete params.name;

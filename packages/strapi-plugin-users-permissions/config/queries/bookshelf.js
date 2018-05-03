@@ -13,10 +13,6 @@ module.exports = {
         }
       });
 
-      if (params.sort) {
-        qb.orderByRaw(params.sort);
-      }
-
       if (params.start) {
         qb.offset(params.start);
       }
@@ -24,9 +20,12 @@ module.exports = {
       if (params.limit) {
         qb.limit(params.limit);
       }
-    }).fetchAll({
+    })
+    .orderBy(params.sort)
+    .fetchAll({
       withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    });
+    })
+
 
     return records ? records.toJSON() : records;
   },
@@ -110,6 +109,14 @@ module.exports = {
     return await this
       .forge({
         [this.primaryKey]: params[this.primaryKey] || params.id
+      })
+      .destroy();
+  },
+
+  deleteMany: async function (params) {
+    return await this
+      .query(qb => {
+        qb.whereIn(this.primaryKey, params[this.primaryKey] || params.id);
       })
       .destroy();
   },
