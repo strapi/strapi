@@ -60,6 +60,7 @@ shell.echo('');
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
 shell.cd('packages/strapi-utils');
+watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
 shell.cd('../strapi-generate');
@@ -166,6 +167,9 @@ watcher('', 'npm install ../strapi-generate --no-optional');
 watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
+
+shell.cd('../strapi-lint');
+watcher('End', 'npm install');
 
 const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'users-permissions', 'settings-manager'];
 
