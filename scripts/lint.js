@@ -27,8 +27,9 @@ const watcher = (label, pckgName, type = 'front') => {
 const packagesPath = path.resolve(process.env.PWD, 'packages');
 shell.ls('* -d', packagesPath)
   // TODO temporary just for eslint
-  .filter(package => package === 'strapi-bookshelf')
+  .filter(package => package === 'strapi-ejs')
   // .filter(package => package !== 'README.md')
   .forEach(package => {
     watcher(`Testing ${package}`, package);
   });
+// process.exit(1);
