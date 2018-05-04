@@ -15,7 +15,8 @@
     "mocha": "~2.4.5",
     "pre-commit": "~1.1.2",
     "redux-saga": "^0.14.3",
-    "shelljs": "^0.7.7"
+    "shelljs": "^0.7.7",
+    "strapi-lint": "file:packages/strapi-lint"
   },
   "scripts": {
     "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
@@ -25,8 +26,9 @@
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
     "setup:build": "npm run setup --build",
-    "setup": "npm run clean:all && npm install && node ./scripts/setup.js && npm run clean",
-    "test": "make test"
+    "setup": "npm run clean:all && npm install ./packages/strapi-lint --save-dev && npm install && node ./scripts/setup.js && npm run clean",
+    "lint": "node ./scripts/lint.js",
+    "test": "npm run lint"
   },
   "author": {
     "email": "hi@strapi.io",
