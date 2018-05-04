@@ -1,9 +1,8 @@
 'use strict';
 
-const glob = require('glob');
-const path = require('path');
-const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, merge } = require('lodash');
 
+/* eslint-disable prefer-template */
 module.exports = async function() {
   // Method to initialize hooks and emit an event.
   const initialize = (module, hook) => (resolve, reject) => {
@@ -136,7 +135,7 @@ module.exports = async function() {
 
               this.once('hook:' + dependency + ':loaded', () => {
                 queue();
-              })
+              });
             });
           }
         })

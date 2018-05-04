@@ -12,7 +12,7 @@ const finder = require('strapi-utils').finder;
 const regex = require('strapi-utils').regex;
 const joijson = require('strapi-utils').joijson;
 const policyUtils = require('strapi-utils').policy;
-
+/* eslint-disable prefer-template */
 module.exports = strapi => function routerChecker(value, endpoint, plugin) {
   const Joi = strapi.koaMiddlewares.routerJoi.Joi;
   const builder = joijson.builder(Joi);
@@ -59,7 +59,7 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
     const values = await next();
 
     if (!ctx.body) {
-      ctx.body = values
+      ctx.body = values;
     }
   });
 
@@ -89,4 +89,4 @@ module.exports = strapi => function routerChecker(value, endpoint, plugin) {
     action,
     validate
   };
-}
+};

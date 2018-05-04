@@ -1,9 +1,5 @@
 const chalk = require('chalk');
-const blue = chalk.blue;
-const yellow = chalk.yellow;
-const green = chalk.green;
-const red = chalk.red;
-const magenta = chalk.magenta;
+const  { blue, green, magenta, red, yellow } = chalk;
 
 const eslintErrorsFormatter = data => {
   const errors = data.split('\n\n');

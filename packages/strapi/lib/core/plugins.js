@@ -1,9 +1,9 @@
 'use strict';
 
 // Dependencies.
-const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
+const _ = require('lodash');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
@@ -36,10 +36,11 @@ module.exports = function() {
           }
 
           throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
-        case 'backend':
+        case 'backend': {
           const backend = _.get(this.config.environments[current], 'server.admin.build.backend', `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}`).replace(/\/$/, '');
 
           return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;
+        }
         default:
           return `/${name}/main.js`;
       }
@@ -66,7 +67,7 @@ module.exports = function() {
         // Try to access to path.
         fs.access(sourcePath, err => {
           if (err && err.code !== 'ENOENT') {
-            this.log.error('Impossible to access to ' + sourcePath);
+            this.log.error(`Impossible to access to ${sourcePath}`);
 
             return reject(err);
           }
@@ -79,7 +80,7 @@ module.exports = function() {
           // Try to access to path.
           fs.access(buildPath, err => {
             if (err && err.code !== 'ENOENT') {
-              this.log.error('Impossible to access to ' + buildPath);
+              this.log.error(`Impossible to access to ${buildPath}`);
 
               return reject(err);
             }
@@ -127,19 +128,19 @@ module.exports = function() {
                 return hasAdminFolder;
               })
               .map(name => ({
-              id: name,
-              source: Object.keys(this.config.environments).reduce((acc, current) => {
-                const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
+                id: name,
+                source: Object.keys(this.config.environments).reduce((acc, current) => {
+                  const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
 
-                if (_.isString(source)) {
-                  acc[current] = configuratePlugin(acc, current, source, name);
-                } else if (_.isOject(source)) {
-                  acc[current] = configuratePlugin(acc, current, source[current], name);
-                }
+                  if (_.isString(source)) {
+                    acc[current] = configuratePlugin(acc, current, source, name);
+                  } else if (_.isOject(source)) {
+                    acc[current] = configuratePlugin(acc, current, source[current], name);
+                  }
 
-                return acc;
-              }, {})
-            }));
+                  return acc;
+                }, {})
+              }));
 
             fs.writeFileSync(sourcePath, JSON.stringify(data, null, 2), 'utf8');
             fs.writeFileSync(buildPath, JSON.stringify(data), 'utf8');

@@ -9,7 +9,7 @@
  */
 
 const _ = require('lodash');
-
+/* eslint-disable no-unused-vars */
 module.exports = strapi => {
   return {
     /**
