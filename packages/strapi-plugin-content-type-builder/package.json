@@ -29,8 +29,7 @@
     "strapi-generate-api": "3.0.0-alpha.12"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.12",
-    "strapi-lint": "3.0.0-alpha.12"
+    "strapi-helper-plugin": "3.0.0-alpha.12"
   },
   "author": {
     "name": "Strapi team",

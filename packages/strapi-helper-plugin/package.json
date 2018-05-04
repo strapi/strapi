@@ -109,7 +109,6 @@
     "sass-loader": "^6.0.6",
     "shelljs": "^0.7.8",
     "showdown": "^1.8.6",
-    "strapi-lint": "3.0.0-alpha.12",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
     "webpack": "^3.5.5",

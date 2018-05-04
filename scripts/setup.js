@@ -60,7 +60,6 @@ shell.echo('');
 shell.rm('-f', '/usr/local/bin/strapi.js');
 
 shell.cd('packages/strapi-utils');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
 shell.cd('../strapi-generate');
@@ -71,13 +70,11 @@ shell.cd('../strapi-generate-api');
 watcher('📦  Linking strapi-generate-api...', 'npm link');
 
 shell.cd('../strapi-helper-plugin');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-helper-plugin...', 'npm link');
 
 shell.cd('../strapi-admin');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 watcher('', 'npm install ../strapi-utils --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 shell.rm('-f', 'package-lock.json');
 
 // Without these line Travis failed.
@@ -88,8 +85,6 @@ if (shell.test('-e', 'admin/src/config/plugins.json') === false) {
   shell.cd('../../../');
 }
 
-
-// TODO : install strapi-lint in all packages in async
 
 watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
@@ -118,7 +113,6 @@ watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-g
 watcher('📦  Linking strapi...', 'npm link');
 
 shell.cd('../strapi-plugin-graphql');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
 
 // Upload plugins
@@ -128,18 +122,15 @@ watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false)
 // Plugins with admin
 shell.cd('../strapi-plugin-email');
 shell.rm('-f', 'package-lock.json');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-users-permissions');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-users-permissions...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-content-manager');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-manager...', 'npm link --no-optional', false);
 
@@ -152,22 +143,17 @@ watcher('📦  Linking strapi-plugin-settings-manager...', 'npm link --no-option
 // Plugins with admin and other plugin's dependencies
 shell.cd('../strapi-plugin-upload');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('', 'npm install ../strapi-upload-local --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-content-type-builder');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-lint --no-optional');
 watcher('', 'npm install ../strapi-generate --no-optional');
 watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 
-// Without this we can't use eslint
-shell.cd('../strapi-lint');
-watcher('Installing strapi-lint dependencies', 'npm install');
 
 const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'users-permissions', 'settings-manager'];
 
