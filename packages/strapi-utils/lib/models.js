@@ -4,12 +4,13 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 // Node.js core
 const path = require('path');
 
+// Public node modules.
+const _ = require('lodash');
+
+/* eslint-disable prefer-template */
 /*
  * Set of utils for models
  */

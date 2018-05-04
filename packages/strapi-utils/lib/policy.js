@@ -1,7 +1,7 @@
 
 // Public dependencies.
 const _ = require('lodash');
-
+/* eslint-disable prefer-template */
 module.exports = {
   get: function (policy, plugin, policies = [], endpoint, currentApiName) {
     // Define global policy prefix.

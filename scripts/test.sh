@@ -7,6 +7,8 @@ fi
 
 node node_modules/mocha/bin/_mocha `scripts/_get-test-directories.sh` --opts test/mocha.opts --grep "$TEST_GREP"
 
+# start=`date +%s`
+
 # Test `strapi-admin`
 cd packages/strapi-admin
 npm run test
@@ -31,12 +33,14 @@ npm run test
 cd ../strapi-plugin-upload
 npm run test
 
+# Test strapi-utils
+cd ../strapi-utils
+npm run test
+
 # Test `strapi-helper-plugin`
 cd ../strapi-helper-plugin/lib
 npm run test
 
-
-start=`date +%s`
 
 # for dir in ./packages/*/
 # do
@@ -49,4 +53,4 @@ start=`date +%s`
 # end=`date +%s`
 #
 # runtime=$((end-start))
-# echo ${runtime}
+# echo Test took ${runtime}

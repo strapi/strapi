@@ -14,12 +14,19 @@
     "lib": "./lib"
   },
   "main": "./lib",
+  "scripts": {
+    "lint:back": "node ./node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-lint/lib/internals/eslint/back/.eslintrc.json lib",
+    "test": "npm run lint:back"
+  },
   "dependencies": {
     "commander": "^2.11.0",
     "joi-json": "^2.0.1",
     "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "pino": "^4.7.1"
+  },
+  "devDependencies": {
+    "strapi-lint": "3.0.0-alpha.12"
   },
   "author": {
     "email": "hi@strapi.io",
