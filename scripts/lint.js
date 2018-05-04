@@ -22,16 +22,12 @@ const watcher = (label, pckgName, type = 'front') => {
   if (data.code !== 0) {
     process.exit(1);
   }
-
-  shell.echo(`Lint tests passed in ${pckgName}`);
+  shell.echo('');
 };
 
 const packagesPath = path.resolve(process.env.PWD, 'packages');
 shell.ls('* -d', packagesPath)
-  // TODO temporary just for eslint
-  // .filter(package => package === 'strapi-plugin-content-manager')
-  .filter(package => package !== 'README.md' && package === 'strapi-middleware-views' && package === 'strapi-lint' && package === 'strapi-plugin-settings-manager')
+  .filter(package => package !== 'README.md' && package !== 'strapi-middleware-views' && package !== 'strapi-lint' && package !== 'strapi-plugin-settings-manager')
   .forEach(package => {
     watcher(`Testing ${package}`, package);
   });
-// process.exit(1);
