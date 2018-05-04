@@ -29,8 +29,8 @@ const watcher = (label, pckgName, type = 'front') => {
 const packagesPath = path.resolve(process.env.PWD, 'packages');
 shell.ls('* -d', packagesPath)
   // TODO temporary just for eslint
-  .filter(package => package === 'strapi-plugin-content-manager')
-  // .filter(package => package !== 'README.md' || package === 'strapi-middleware-views' || package === 'strapi-lint' || package === 'strapi-plugin-settings-manager')
+  // .filter(package => package === 'strapi-plugin-content-manager')
+  .filter(package => package !== 'README.md' && package === 'strapi-middleware-views' && package === 'strapi-lint' && package === 'strapi-plugin-settings-manager')
   .forEach(package => {
     watcher(`Testing ${package}`, package);
   });
