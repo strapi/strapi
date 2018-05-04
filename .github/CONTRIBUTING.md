@@ -34,6 +34,9 @@ To facilitate the contribution, we drastically reduce the amount of commands nec
 
 > Note: If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
 
+> Note: You can run `npm run setup:build` to build the plugins' admin (the setup time will be longer).
+
+
 The development environment has been installed. Now, you have to create a development project to live-test your updates.
 
 1. Go to a folder on your computer `cd /path/to/my/folder`.
@@ -43,8 +46,9 @@ The development environment has been installed. Now, you have to create a develo
 Awesome! You are now able to make bug fixes or enhancements in the framework layer of Strapi. **To make updates in the administration panel, you need to go a little bit further.**
 
 4. Open a new tab or new terminal window.
-5. Go to the `/admin` folder of your currently running app.
-6. Run `npm start` and go to the following url [http://localhost:4000/admin](http://localhost:4000/admin)
+5. Link the `strapi-helper-plugin` into the `analytics` plugin : `cd my-app/plugins/analytics && npm link strapi-helper-plugin`.
+6. Go to the `my-app/admin` folder of your currently running app.
+7. Run `npm start` and go to the following url [http://localhost:4000/admin](http://localhost:4000/admin)
 
 ### Plugin Development Setup
 
