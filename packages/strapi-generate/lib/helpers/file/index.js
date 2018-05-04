@@ -17,6 +17,7 @@ const reportback = require('reportback')();
  * Generate a file using the specified string
  */
 
+/* eslint-disable prefer-template */
 module.exports = function (options, cb) {
 
   // Provide default values for switchback.

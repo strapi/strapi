@@ -38,7 +38,7 @@ module.exports = function (options, cb) {
   fs.readFile(absTemplatePath, 'utf8', (err, contents) => {
     if (err) {
       err = err instanceof Error ? err : new Error(err);
-      err.message = 'Template error: ' + err.message;
+      err.message = `Template error: ${err.message}`;
       err.path = absTemplatePath;
       if (err.code === 'ENOENT') {
         return cb.noTemplate(err);
