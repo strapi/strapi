@@ -14,7 +14,7 @@ const pluralize = require('pluralize');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'templates', 'attribute.template'), 'utf8');
-
+/* eslint-disable prefer-template */
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -92,7 +92,7 @@ module.exports = (scope, cb) => {
       return _.has(attribute, 'params.type') ? attribute : undefined;
     }
   });
-  
+
   scope.attributes = _.compact(scope.attributes);
 
   // Handle invalid action arguments.
