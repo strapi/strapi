@@ -24,9 +24,11 @@ const logger = require('strapi-utils').logger;
  * @param {Function} cb
  */
 
+/* eslint-disable no-console */
+/* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
   const packageJSON = require(path.resolve(scope.rootPath, 'package.json'));
-  const strapiRootPath = path.resolve(scope.strapiRoot, '..');
+  // const strapiRootPath = path.resolve(scope.strapiRoot, '..');
 
   process.chdir(scope.rootPath);
 
