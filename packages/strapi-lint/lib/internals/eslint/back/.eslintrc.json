@@ -68,7 +68,7 @@
   "settings": {
     "import/resolver": {
       "webpack": {
-        "config": "node_modules/strapi-lint/lib/internals/webpack/webpack.test.babel.js"
+        "config": "../../node_modules/strapi-lint/lib/internals/webpack/webpack.test.babel.js"
       }
     }
   }

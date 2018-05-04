@@ -156,8 +156,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-    const c = '';
-    
+
     return (
       <div className={styles.adminPage}>
         {this.showLeftMenu() && (
