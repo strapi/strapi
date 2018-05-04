@@ -1,9 +1,7 @@
 ---
-name: 🚀 Feature Request
-about: Suggest an idea for this project 💡!
-
+name: 🐛 Bug Report
+about: Create a report to help us improve 🤔.
 ---
-
 
 <!--
 ⚠️ If you do not respect these two points, your issue will be closed.
@@ -47,6 +45,6 @@ about: Suggest an idea for this project 💡!
 - [ ] I'm sure that this feature hasn't already been referenced.
 
 <!--
- ⬆️ Don't delete this checkbox from your issue and approve it.
+⬆️ Don't delete this checkbox from your issue and approve it.
 Add an `x` ->  [x] or click on the checkbox when your issue is created.
- -->
+-->
