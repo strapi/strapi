@@ -5,6 +5,8 @@ const eslintErrorsFormatter = require('./eslintErrorsFormatter');
 
 const frontCmd =
   'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin/build/\' --config ../../node_modules/strapi-lint/lib/internals/eslint/front/.eslintrc.json admin';
+const helperCmd =
+  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin/build/\' --config ../../node_modules/strapi-lint/lib/internals/eslint/front/.eslintrc.json lib/src';
 const backCmd =
   'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin\' --config ../../node_modules/strapi-lint/lib/internals/eslint/back/.eslintrc.json controllers config services bin lib';
 
@@ -12,8 +14,8 @@ const backCmd =
 const watcher = (label, pckgName, type = 'front') => {
   shell.echo(label);
   shell.cd(`packages/${pckgName}`);
-
-  const data = shell.exec(`${frontCmd} && ${backCmd}`, { silent: true });
+  const cmd = pckgName === 'strapi-helper-plugin' ? helperCmd : `${frontCmd} && ${backCmd}`;
+  const data = shell.exec(cmd, { silent: true });
   shell.echo(chalk(eslintErrorsFormatter(data.stdout)));
   shell.cd('../..');
 
@@ -27,7 +29,7 @@ const watcher = (label, pckgName, type = 'front') => {
 const packagesPath = path.resolve(process.env.PWD, 'packages');
 shell.ls('* -d', packagesPath)
   // TODO temporary just for eslint
-  .filter(package => package === 'strapi-generate-service')
+  .filter(package => package === 'strapi-helper-plugin')
   // .filter(package => package !== 'README.md')
   .forEach(package => {
     watcher(`Testing ${package}`, package);

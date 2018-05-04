@@ -34,7 +34,7 @@ import Link from './link';
 import Video from './video';
 
 import styles from './componentsStyles.scss';
-
+/* eslint-disable react/no-unused-state */
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
