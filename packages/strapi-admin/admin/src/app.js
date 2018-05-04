@@ -8,7 +8,7 @@
 /* eslint-disable */
 import './public-path';
 import 'babel-polyfill';
-
+/* eslint-disable no-console */
 // Import all the third party stuff
 import { Provider } from 'react-redux';
 import React from 'react';
