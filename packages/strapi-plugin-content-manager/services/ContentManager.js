@@ -160,7 +160,7 @@ module.exports = {
 
       return allRecords.map(record => ({
         id: record._id,
-        title: record.name || record.title || record.header || record.description || record._id,
+        title: record.name || record.title || record.header || record.text ||  record.description || record._id,
         type: model
       }));
     });

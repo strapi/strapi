@@ -17,19 +17,6 @@ import validateInput from 'utils/inputsValidations';
 
 import styles from './styles.scss';
 
-const types = [
-  'Hero', 'Textarea', 'Text', 'Image', 'FAQ', 'Divider'
-];
-
-
-// fake data generator
-const getItems = count =>
-  Array.from({ length: count }, (v, k) => k).map(k => ({
-    id: `${k}`,
-    type: types[Math.floor(Math.random() * 6)],  
-    title: `item ${k}`,
-  }));
-
 /* eslint-disable jsx-a11y/no-autofocus */
 class InputRefs extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -121,29 +108,8 @@ class InputRefs extends React.Component {
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
     }
-    
-    /**
-     * <InputText
-          autoFocus={autoFocus}
-          className={inputClassName}
-          disabled={disabled}
-          deactivateErrorHighlight={deactivateErrorHighlight}
-          error={!isEmpty(this.state.errors)}
-          name={name}
-          onBlur={handleBlur}
-          onChange={onChange}
-          onFocus={onFocus}
-          placeholder={placeholder}
-          style={inputStyle}
-          tabIndex={tabIndex}
-          value={value}
-        />
-     */
 
-    const options = getItems(30)
     const arrayValue = value === '' ? [] : value
-
-    // this.props.type === "refs" && console.log(this.props)
     return (
       <div
         className={cn(
@@ -159,7 +125,7 @@ class InputRefs extends React.Component {
           message={label}
           style={labelStyle}
         />
-        <SelectWithSort onChange={this.onChange} options={options} value={arrayValue}/>
+        <SelectWithSort onChange={this.onChange} value={arrayValue}/>
         
         <InputDescription
           className={inputDescriptionClassName}
