@@ -62,6 +62,9 @@ shell.rm('-f', '/usr/local/bin/strapi.js');
 shell.cd('packages/strapi-utils');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
+shell.cd('../strapi-lint');
+watcher('📦  Linking strapi-lint', 'npm link');
+
 shell.cd('../strapi-generate');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-generate...', 'npm link');

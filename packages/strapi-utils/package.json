@@ -15,8 +15,7 @@
   },
   "main": "./lib",
   "scripts": {
-    "lint:back": "node ./node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-lint/lib/internals/eslint/back/.eslintrc.json lib",
-    "test": "npm run lint:back"
+    "test": "echo \"Error: no test specified yet!\""
   },
   "dependencies": {
     "commander": "^2.11.0",

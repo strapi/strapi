@@ -20,10 +20,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "lint": "cross-env IS_HELPER=true ./node_modules/eslint/bin/eslint.js --ignore-path .gitignore --config ./lib/internals/eslint/eslint-config.js .",
-    "lintTocome": "cross-env IS_HELPER=true node ./node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --config ./node_modules/strapi-lint/lib/internals/eslint/front/eslint-config.js .",
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
-    "test": "npm run lint"
+    "test": "echo \"Error: no test specified\""
   },
   "pre-commit": [
     "lint:admin"
