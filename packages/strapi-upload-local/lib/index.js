@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+var mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 
@@ -15,15 +16,19 @@ module.exports = {
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
-          // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
-            if (err) {
-              return reject(err);
-            }
+          mkdirp(path.join(strapi.config.appPath, 'public', 'uploads'), function (err) {
+            if (err) return reject(err);
+            fs.closeSync(fs.openSync(path.join(strapi.config.appPath, 'public', 'uploads/.gitkeep'), 'w'));
+            // write file in public/assets folder
+            fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
+              if (err) {
+                return reject(err);
+              }
 
-            file.url = `/uploads/${file.hash}${file.ext}`;
+              file.url = `/uploads/${file.hash}${file.ext}`;
 
-            resolve();
+              resolve();
+            });
           });
         });
       },
