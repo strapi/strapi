@@ -13,48 +13,6 @@ const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = async cb => {
-  const Model = strapi.plugins.upload.models.file;
-
-  if (Model.orm === 'bookshelf') {
-    const hasTable = await strapi.connections[Model.connection].schema.hasTable(Model.tableName || Model.collectionName);
-
-    if (!hasTable) {
-      const quote = Model.client === 'pg' ? '"' : '`';
-
-      strapi.log.warn(`
-  ⚠️  TABLE \`upload_file\` DOESN'T EXIST
-  ⚠️  TABLE \`upload_file_morph\` DOESN'T EXIST
-
-  CREATE TABLE ${quote}${Model.tableName || Model.collectionName}${quote} (
-    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-    name text,
-    hash text,
-    ext text,
-    mime text,
-    size text,
-    url text,
-    provider text,
-    updated_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'},
-    created_at ${Model.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP'}
-  );
-
-  CREATE TABLE ${quote}upload_file_morph${quote} (
-    id ${Model.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-    upload_file_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-    related_id  ${Model.client === 'pg' ? 'integer' : 'int'},
-    related_type text,
-    field text
-  );
-
-  1️⃣  EXECUTE THE FOLLOWING SQL QUERY
-
-  2️⃣  RESTART YOUR SERVER
-      `);
-
-      strapi.stop();
-    }
-  }
-
   // set plugin store
   const pluginStore = strapi.store({
     environment: strapi.config.environment,

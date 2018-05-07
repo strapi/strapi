@@ -50,6 +50,7 @@ import styles from './styles.scss';
 
 // Array of attributes that the ctb can handle at the moment
 const availableAttributes = Object.keys(forms.attribute);
+availableAttributes.push('integer', 'decimal', 'float');
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
@@ -89,25 +90,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       this.props.checkIfTableExists();
     }
   }
-
-  // componentWillUpdate(nextProps) {
-  //   if (!isEmpty(nextProps.menu)) {
-  //     const allowedPaths = nextProps.menu.reduce((acc, current) => {
-  //       const models = current.items.reduce((acc, current) => {
-  //         acc.push(current.name);
-  //
-  //         return acc;
-  //       }, []);
-  //       return acc.concat(models);
-  //     }, []);
-  //
-  //     const shouldRedirect = allowedPaths.filter(el => el === this.props.match.params.modelName.split('&')[0]).length === 0;
-  //
-  //     if (shouldRedirect) {
-  //       this.props.history.push('/404');
-  //     }
-  //   }
-  // }
 
   componentDidUpdate(prevProps) {
     if (prevProps.match.params.modelName !== this.props.match.params.modelName) {

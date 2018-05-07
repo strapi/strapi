@@ -214,7 +214,10 @@ module.exports = {
 
         attr.via = relation.key;
         attr.dominant = relation.dominant;
-        attr.plugin = relation.pluginValue;
+
+        if (_.trim(relation.pluginValue)) {
+          attr.plugin = _.trim(relation.pluginValue);
+        }
 
         attrs[attribute.name] = attr;
       }
@@ -355,15 +358,23 @@ module.exports = {
                 attr.model = model.toLowerCase();
                 break;
               case 'manyToOne':
+                attr.collection = model.toLowerCase();
               case 'manyToMany':
                 attr.collection = model.toLowerCase();
+
+                if (!params.dominant) {
+                  attr.dominant = true;
+                }
                 break;
               default:
             }
 
             attr.via = name;
             attr.columnName = params.targetColumnName;
-            attr.plugin = source;
+
+            if (_.trim(source)) {
+              attr.plugin = _.trim(source);
+            }
 
             modelJSON.attributes[params.key] = attr;
 

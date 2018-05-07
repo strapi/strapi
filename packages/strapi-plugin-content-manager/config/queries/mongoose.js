@@ -46,11 +46,19 @@ module.exports = {
 
     const entry = request.toJSON ? request.toJSON() : request;
 
+    const relations = this.associations.reduce((acc, association) => {
+      if (params.values[association.alias]) {
+        acc[association.alias] = params.values[association.alias];
+      }
+
+      return acc;
+    }, {});
+
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
       values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values, entry)
+      }, relations)
     });
   },
 
@@ -169,7 +177,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).addRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });
@@ -183,7 +191,7 @@ module.exports = {
 
                 virtualFields.push(strapi.query(details.model || details.collection, details.plugin).removeRelation({
                   id: value[this.primaryKey] || value.id || value._id,
-                  values: value,
+                  values: _.pick(value, [this.primaryKey, details.via]),
                   foreignKey: current
                 }));
               });

@@ -78,7 +78,7 @@ module.exports = {
       return acc;
     }, {});
 
-    const entry = await this
+    const request = await this
       .forge(values)
       .save()
       .catch((err) => {
@@ -90,11 +90,18 @@ module.exports = {
         throw err;
       });
 
+    const entry = request.toJSON ? request.toJSON() : request;
+
+    const relations = this.associations.reduce((acc, association) => {
+      acc[association.alias] = params.values[association.alias];
+      return acc;
+    }, {});
+
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
       values: _.assign({
         id: entry[this.primaryKey]
-      }, params.values, entry)
+      }, relations)
     });
   },
 
@@ -167,9 +174,7 @@ module.exports = {
           case 'oneToMany':
           case 'manyToOne':
           case 'manyToMany':
-            if (association.nature === 'manyToMany' && details.dominant === true) {
-              acc[current] = params.values[current];
-            } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
+            if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.
               const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
                 a[this.primaryKey].toString() === b[this.primaryKey].toString()
@@ -213,13 +218,35 @@ module.exports = {
                 strapi.plugins[obj.source].models[obj.ref]:
                 strapi.models[obj.ref];
 
-              virtualFields.push(module.exports.addRelationMorph.call(this, {
-                id: response[this.primaryKey],
-                alias: association.alias,
-                ref: model.collectionName,
-                refId: obj.refId,
-                field: obj.field
-              }));
+              // Remove existing relationship because only one file
+              // can be related to this field.
+              if (association.nature === 'manyMorphToOne') {
+                virtualFields.push(
+                  module.exports.removeRelationMorph.call(this, {
+                    alias: association.alias,
+                    ref: model.collectionName,
+                    refId: obj.refId,
+                    field: obj.field
+                  })
+                  .then(() =>
+                    module.exports.addRelationMorph.call(this, {
+                      id: response[this.primaryKey],
+                      alias: association.alias,
+                      ref: model.collectionName,
+                      refId: obj.refId,
+                      field: obj.field
+                    })
+                  )
+                );
+              } else {
+                virtualFields.push(module.exports.addRelationMorph.call(this, {
+                  id: response[this.primaryKey],
+                  alias: association.alias,
+                  ref: model.collectionName,
+                  refId: obj.refId,
+                  field: obj.field
+                }));
+              }
             });
             break;
           case 'oneToManyMorph':
@@ -236,7 +263,7 @@ module.exports = {
               }
 
               if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
-                return _.isEmpty(array) ? [] : transformToArrayID([array]);
+                return _.isEmpty(_.toString(array)) ? [] : transformToArrayID([array]);
               }
 
               return [];
@@ -382,12 +409,12 @@ module.exports = {
 
   removeRelationMorph: async function (params) {
     return await this.morph.forge()
-      .where({
+      .where(_.omitBy({
         [`${this.collectionName}_id`]: params.id,
         [`${params.alias}_id`]: params.refId,
         [`${params.alias}_type`]: params.ref,
         field: params.field
-      })
+      }, _.isEmpty))
       .destroy();
   }
 };

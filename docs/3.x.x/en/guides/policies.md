@@ -16,7 +16,7 @@ module.exports = async (ctx, next) => {
     return await next();
   }
 
-  ctx.unauthorized(`You're not logged!`);
+  ctx.unauthorized(`You're not logged in!`);
 };
 ```
 

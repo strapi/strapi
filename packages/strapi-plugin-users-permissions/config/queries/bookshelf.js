@@ -4,12 +4,14 @@ module.exports = {
   find: async function (params = {}, populate) {
     const records = await this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
-        qb.where(key, where[0].symbol, where[0].value);
+        if (_.isArray(where.value)) {
+          for (const value in where.value) {
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
+          }
+        } else {
+          qb.where(key, where.symbol, where.value);
+        }
       });
-
-      if (params.sort) {
-        qb.orderByRaw(params.sort);
-      }
 
       if (params.start) {
         qb.offset(params.start);
@@ -18,9 +20,12 @@ module.exports = {
       if (params.limit) {
         qb.limit(params.limit);
       }
-    }).fetchAll({
+    })
+    .orderBy(params.sort)
+    .fetchAll({
       withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    });
+    })
+
 
     return records ? records.toJSON() : records;
   },
@@ -104,6 +109,14 @@ module.exports = {
     return await this
       .forge({
         [this.primaryKey]: params[this.primaryKey] || params.id
+      })
+      .destroy();
+  },
+
+  deleteMany: async function (params) {
+    return await this
+      .query(qb => {
+        qb.whereIn(this.primaryKey, params[this.primaryKey] || params.id);
       })
       .destroy();
   },
