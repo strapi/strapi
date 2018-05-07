@@ -1,8 +1,8 @@
 'use strict';
 
+/* eslint-disable import/no-unresolved */
 // Node.js core.
 const execSync = require('child_process').execSync;
-const path = require('path');
 
 // Logger.
 const logger = require('strapi-utils').logger;

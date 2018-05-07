@@ -3,8 +3,8 @@
 // Dependencies.
 const path = require('path');
 const glob = require('glob');
+const { merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, assign, clone, cloneDeep, camelCase } = require('lodash');
 const utils = require('../utils');
-const {merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, forEach, assign, clone, cloneDeep, camelCase} = require('lodash');
 
 module.exports.nested = function() {
   return Promise.all([
@@ -57,7 +57,7 @@ module.exports.nested = function() {
       });
     }),
     // Load plugins configurations.
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       setWith(
         this,
         'config.info',
@@ -71,264 +71,264 @@ module.exports.nested = function() {
 };
 
 module.exports.app = async function() {
-    // Retrieve Strapi version.
-    this.config.uuid = get(this.config.info, 'strapi.uuid', '');
-    this.config.info.customs = get(this.config.info, 'strapi', {});
-    this.config.info.strapi = (get(this.config, 'info.dependencies.strapi') || '').replace(/(\^|~)/g, ''),
-    this.config.info.node = process.versions.node;
+  // Retrieve Strapi version.
+  this.config.uuid = get(this.config.info, 'strapi.uuid', '');
+  this.config.info.customs = get(this.config.info, 'strapi', {});
+  this.config.info.strapi = (get(this.config, 'info.dependencies.strapi') || '').replace(/(\^|~)/g, ''),
+  this.config.info.node = process.versions.node;
 
-    // Set connections.
-    this.connections = {};
+  // Set connections.
+  this.connections = {};
 
-    // Set current environment config.
-    this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
+  // Set current environment config.
+  this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
 
-    // Set current connections.
-    this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
+  // Set current connections.
+  this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
 
-    if (get(this.config, 'language.enabled')) {
-      this.config.language.locales = Object.keys(get(strapi.config, 'locales', {}));
+  if (get(this.config, 'language.enabled')) {
+    this.config.language.locales = Object.keys(get(strapi.config, 'locales', {}));
+  }
+
+  // Template literal string.
+  this.config = templateConfigurations(this.config);
+
+  // Initialize main router to use it in middlewares.
+  this.router = this.koaMiddlewares.routerJoi();
+
+  // Set controllers.
+  this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
+    for (let index in this.api[key].controllers) {
+      if (!this.api[key].controllers[index].identity) {
+        this.api[key].controllers[index].identity = upperFirst(index);
+      }
+
+      acc[index] = this.api[key].controllers[index];
     }
 
-    // Template literal string.
-    this.config = templateConfigurations(this.config);
+    return acc;
+  }, {});
 
-    // Initialize main router to use it in middlewares.
-    this.router = this.koaMiddlewares.routerJoi();
-
-    // Set controllers.
-    this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].controllers) {
-        if (!this.api[key].controllers[index].identity) {
-          this.api[key].controllers[index].identity = upperFirst(index);
-        }
-
-        acc[index] = this.api[key].controllers[index];
+  // Set models.
+  this.models = Object.keys(this.api || []).reduce((acc, key) => {
+    for (let index in this.api[key].models) {
+      if (!this.api[key].models[index].globalId) {
+        this.api[key].models[index].globalId = upperFirst(camelCase(index));
       }
 
-      return acc;
+      if (!this.api[key].models[index].connection) {
+        this.api[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
+      }
+
+      if (!this.api[key].models[index].collectionName) {
+        this.api[key].models[index].collectionName = (`${index}`).toLowerCase();
+      }
+
+      acc[index] = this.api[key].models[index];
+    }
+    return acc;
+  }, {});
+
+  // Set services.
+  this.services = Object.keys(this.api || []).reduce((acc, key) => {
+    for (let index in this.api[key].services) {
+      acc[index] = this.api[key].services[index];
+    }
+
+    return acc;
+  }, {});
+
+  // Set routes.
+  this.config.routes = Object.keys(this.api || []).reduce((acc, key) => {
+    return acc.concat(get(this.api[key], 'config.routes') || {});
+  }, []);
+
+  // Set admin controllers.
+  this.admin.controllers = Object.keys(this.admin.controllers || []).reduce((acc, key) => {
+    if (!this.admin.controllers[key].identity) {
+      this.admin.controllers[key].identity = key;
+    }
+
+    acc[key] = this.admin.controllers[key];
+
+    return acc;
+  }, {});
+
+  // Set admin models.
+  this.admin.models = Object.keys(this.admin.models || []).reduce((acc, key) => {
+    if (!this.admin.models[key].identity) {
+      this.admin.models[key].identity = upperFirst(key);
+    }
+
+    if (!this.admin.models[key].globalId) {
+      this.admin.models[key].globalId = upperFirst(camelCase(`admin-${key}`));
+    }
+
+    if (!this.admin.models[key].connection) {
+      this.admin.models[key].connection = this.config.currentEnvironment.database.defaultConnection;
+    }
+
+    acc[key] = this.admin.models[key];
+
+    return acc;
+  }, {});
+
+  this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
+    this.plugins[key].controllers = Object.keys(this.plugins[key].controllers || []).reduce((sum, index) => {
+      if (!this.plugins[key].controllers[index].identity) {
+        this.plugins[key].controllers[index].identity = index;
+      }
+
+      sum[index] = this.plugins[key].controllers[index];
+
+      return sum;
     }, {});
 
-    // Set models.
-    this.models = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].models) {
-        if (!this.api[key].models[index].globalId) {
-          this.api[key].models[index].globalId = upperFirst(camelCase(index));
-        }
-
-        if (!this.api[key].models[index].connection) {
-          this.api[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
-        }
-
-        if (!this.api[key].models[index].collectionName) {
-          this.api[key].models[index].collectionName = (`${index}`).toLowerCase();
-        }
-
-        acc[index] = this.api[key].models[index];
+    this.plugins[key].models = Object.keys(this.plugins[key].models || []).reduce((sum, index) => {
+      if (!this.plugins[key].models[index].connection) {
+        this.plugins[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
       }
-      return acc;
+
+      if (!this.plugins[key].models[index].globalId) {
+        this.plugins[key].models[index].globalId = upperFirst(camelCase(`${key}-${index}`));
+      }
+
+      if (!this.plugins[key].models[index].collectionName) {
+        this.plugins[key].models[index].collectionName = `${key}_${index}`.toLowerCase();
+      }
+
+      sum[index] = this.plugins[key].models[index];
+
+      return sum;
     }, {});
 
-    // Set services.
-    this.services = Object.keys(this.api || []).reduce((acc, key) => {
-      for (let index in this.api[key].services) {
-        acc[index] = this.api[key].services[index];
-      }
+    acc[key] = this.plugins[key];
 
-      return acc;
-    }, {});
+    return acc;
+  }, {});
 
-    // Set routes.
-    this.config.routes = Object.keys(this.api || []).reduce((acc, key) => {
-      return acc.concat(get(this.api[key], 'config.routes') || {});
-    }, []);
+  // Define required middlewares categories.
+  const middlewareCategories = ['request', 'response', 'security', 'server'];
 
-    // Set admin controllers.
-    this.admin.controllers = Object.keys(this.admin.controllers || []).reduce((acc, key) => {
-      if (!this.admin.controllers[key].identity) {
-        this.admin.controllers[key].identity = key;
-      }
-
-      acc[key] = this.admin.controllers[key];
-
-      return acc;
-    }, {});
-
-    // Set admin models.
-    this.admin.models = Object.keys(this.admin.models || []).reduce((acc, key) => {
-      if (!this.admin.models[key].identity) {
-        this.admin.models[key].identity = upperFirst(key);
-      }
-
-      if (!this.admin.models[key].globalId) {
-        this.admin.models[key].globalId = upperFirst(camelCase(`admin-${key}`));
-      }
-
-      if (!this.admin.models[key].connection) {
-        this.admin.models[key].connection = this.config.currentEnvironment.database.defaultConnection;
-      }
-
-      acc[key] = this.admin.models[key];
-
-      return acc;
-    }, {});
-
-    this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
-      this.plugins[key].controllers = Object.keys(this.plugins[key].controllers || []).reduce((sum, index) => {
-        if (!this.plugins[key].controllers[index].identity) {
-          this.plugins[key].controllers[index].identity = index;
-        }
-
-        sum[index] = this.plugins[key].controllers[index];
-
-        return sum;
-      }, {});
-
-      this.plugins[key].models = Object.keys(this.plugins[key].models || []).reduce((sum, index) => {
-        if (!this.plugins[key].models[index].connection) {
-          this.plugins[key].models[index].connection = this.config.currentEnvironment.database.defaultConnection;
-        }
-
-        if (!this.plugins[key].models[index].globalId) {
-          this.plugins[key].models[index].globalId = upperFirst(camelCase(`${key}-${index}`));
-        }
-
-        if (!this.plugins[key].models[index].collectionName) {
-          this.plugins[key].models[index].collectionName = `${key}_${index}`.toLowerCase();
-        }
-
-        sum[index] = this.plugins[key].models[index];
-
-        return sum;
-      }, {});
-
-      acc[key] = this.plugins[key];
-
-      return acc;
-    }, {});
-
-    // Define required middlewares categories.
-    const middlewareCategories = ['request', 'response', 'security', 'server'];
-
-    // Flatten middlewares configurations.
-    const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
-      const current = merge(this.config.currentEnvironment[index], {
-        public: defaults(this.config.public, {
-          enabled: true
-        }),
-        favicon: defaults(this.config.favicon, {
-          enabled: true
-        })
-      });
-
-      if (isObject(current)) {
-        acc = merge(acc, current);
-      } else {
-        acc[index] = current;
-      }
-
-      return acc;
-    }, {});
-
-    // These middlewares cannot be disabled.
-    merge(flattenMiddlewaresConfig, {
-      // Necessary middlewares for the core.
-      responses: {
+  // Flatten middlewares configurations.
+  const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
+    const current = merge(this.config.currentEnvironment[index], {
+      public: defaults(this.config.public, {
         enabled: true
-      },
-      router: {
+      }),
+      favicon: defaults(this.config.favicon, {
         enabled: true
-      },
-      logger: {
-        enabled: true
-      },
-      boom: {
-        enabled: true
-      },
-      mask: {
-        enabled: true
-      },
-      // Necessary middlewares for the administration panel.
-      cors: {
-        enabled: true
-      },
-      xframe: {
-        enabled: true
-      },
-      xss: {
-        enabled: true
-      }
+      })
     });
 
-    // Exclude database and custom.
-    middlewareCategories.push('database');
-
-    // Flatten hooks configurations.
-    const flattenHooksConfig = pullAll(Object.keys(this.config.currentEnvironment), middlewareCategories).reduce((acc, index) => {
-      const current = this.config.currentEnvironment[index];
-
-      if (isObject(current)) {
-        acc = merge(acc, {
-          [index]: current
-        });
-      } else {
-        acc[index] = current;
-      }
-
-      return acc;
-    }, {});
-
-    // Enable hooks and dependencies related to the connections.
-    for (let name in this.config.connections) {
-      const connection = this.config.connections[name];
-      const connector = connection.connector.replace('strapi-', '');
-
-      enableHookNestedDependencies.call(this, connector, flattenHooksConfig);
+    if (isObject(current)) {
+      acc = merge(acc, current);
+    } else {
+      acc[index] = current;
     }
 
-    // Preset config in alphabetical order.
-    this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
-      // Try to find the settings in the current environment, then in the main configurations.
-      const currentSettings = merge(get(cloneDeep(this.middleware[current]), ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    return acc;
+  }, {});
+
+  // These middlewares cannot be disabled.
+  merge(flattenMiddlewaresConfig, {
+    // Necessary middlewares for the core.
+    responses: {
+      enabled: true
+    },
+    router: {
+      enabled: true
+    },
+    logger: {
+      enabled: true
+    },
+    boom: {
+      enabled: true
+    },
+    mask: {
+      enabled: true
+    },
+    // Necessary middlewares for the administration panel.
+    cors: {
+      enabled: true
+    },
+    xframe: {
+      enabled: true
+    },
+    xss: {
+      enabled: true
+    }
+  });
+
+  // Exclude database and custom.
+  middlewareCategories.push('database');
+
+  // Flatten hooks configurations.
+  const flattenHooksConfig = pullAll(Object.keys(this.config.currentEnvironment), middlewareCategories).reduce((acc, index) => {
+    const current = this.config.currentEnvironment[index];
+
+    if (isObject(current)) {
+      acc = merge(acc, {
+        [index]: current
+      });
+    } else {
+      acc[index] = current;
+    }
+
+    return acc;
+  }, {});
+
+  // Enable hooks and dependencies related to the connections.
+  for (let name in this.config.connections) {
+    const connection = this.config.connections[name];
+    const connector = connection.connector.replace('strapi-', '');
+
+    enableHookNestedDependencies.call(this, connector, flattenHooksConfig);
+  }
+
+  // Preset config in alphabetical order.
+  this.config.middleware.settings = Object.keys(this.middleware).reduce((acc, current) => {
+    // Try to find the settings in the current environment, then in the main configurations.
+    const currentSettings = merge(get(cloneDeep(this.middleware[current]), ['defaults', current], {}), flattenMiddlewaresConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    acc[current] = !isObject(currentSettings) ? {} : currentSettings;
+
+    if (!acc[current].hasOwnProperty('enabled')) {
+      this.log.warn(`(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
+    }
+
+    // Ensure that enabled key exist by forcing to false.
+    defaults(acc[current], { enabled : false });
+
+    return acc;
+  }, {});
+
+  this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
+    // Try to find the settings in the current environment, then in the main configurations.
+    const currentSettings = flattenHooksConfig[current] || this.config[current];
+
+    if (isString(currentSettings)) {
+      acc[current] = currentSettings;
+    } else {
       acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
+      if (this.hook[current].isPlugin) {
+        acc[current].enabled = true;
+      }
+
       if (!acc[current].hasOwnProperty('enabled')) {
-        this.log.warn(`(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
+        this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
       }
 
       // Ensure that enabled key exist by forcing to false.
       defaults(acc[current], { enabled : false });
+    }
 
-      return acc;
-    }, {});
+    return acc;
+  }, {});
 
-    this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
-      // Try to find the settings in the current environment, then in the main configurations.
-      const currentSettings = flattenHooksConfig[current] || this.config[current];
-
-      if (isString(currentSettings)) {
-        acc[current] = currentSettings;
-      } else {
-        acc[current] = !isObject(currentSettings) ? {} : currentSettings;
-
-        if (this.hook[current].isPlugin) {
-          acc[current].enabled = true;
-        }
-
-        if (!acc[current].hasOwnProperty('enabled')) {
-          this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
-        }
-
-        // Ensure that enabled key exist by forcing to false.
-        defaults(acc[current], { enabled : false });
-      }
-
-      return acc;
-    }, {});
-
-    this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
-    this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-    this.config.url = `http://${this.config.host}:${this.config.port}`;
+  this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
+  this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
+  this.config.url = `http://${this.config.host}:${this.config.port}`;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
@@ -353,8 +353,8 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
           return false;
         });
 
-        return apiModelsUsed.length !== 0
-      }) || 0; // Filter model with the right connector
+        return apiModelsUsed.length !== 0;
+      }) || 0; // Filter model with the right connector
 
     flattenHooksConfig[name] = {
       enabled: force || modelsUsed.length > 0 // Will return false if there is no model, else true.
@@ -381,7 +381,7 @@ const templateConfigurations = function (obj) {
     if (isPlainObject(obj[key]) && !isString(obj[key])) {
       acc[key] = templateConfigurations(obj[key]);
     } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
-      acc[key] = eval('`' + obj[key] + '`');
+      acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
     } else {
       acc[key] = obj[key];
     }

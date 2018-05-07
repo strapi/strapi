@@ -16,6 +16,8 @@ const _ = require('lodash');
 const pluginsDirPath = path.join(process.cwd(), 'plugins');
 const adminDirPath = path.join(process.cwd(), 'admin');
 
+/* eslint-disable no-console */
+
 // Install admin dependencies
 console.log(`🔸  Administration Panel`);
 console.log('📦  Installing packages...');

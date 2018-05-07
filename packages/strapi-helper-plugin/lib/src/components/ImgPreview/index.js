@@ -17,6 +17,7 @@ import ImgPreviewHint from 'components/ImgPreviewHint';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/no-unused-state */
 class ImgPreview extends React.Component {
   state = {
     imgURL: '',

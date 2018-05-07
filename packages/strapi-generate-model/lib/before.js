@@ -14,6 +14,7 @@ const pluralize = require('pluralize');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'templates', 'attribute.template'), 'utf8');
+/* eslint-disable prefer-template */
 
 /**
  * This `before` function is run before generating targets.

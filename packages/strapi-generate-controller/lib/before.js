@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-
+/* eslint-disable prefer-template */
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.

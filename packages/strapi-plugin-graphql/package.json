@@ -17,9 +17,8 @@
     "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
     "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint:back": "node ./node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-lint/lib/internals/eslint/back/.eslintrc.json controllers config services",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "npm run lint:back"
+    "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
     "apollo-server-koa": "^1.3.3",
@@ -29,9 +28,6 @@
     "graphql-type-json": "^0.2.0",
     "pluralize": "^7.0.0",
     "strapi-utils": "3.0.0-alpha.12"
-  },
-  "devDependencies": {
-    "strapi-lint": "3.0.0-alpha.12"
   },
   "author": {
     "name": "A Strapi developer",

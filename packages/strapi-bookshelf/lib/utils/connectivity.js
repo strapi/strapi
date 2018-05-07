@@ -24,8 +24,8 @@ module.exports = (scope, success, error) => {
 
     success();
   })
-  .catch(() => {
-    logger.warn('Database connection has failed! Make sure your database is running.');
-    error();
-  });
+    .catch(() => {
+      logger.warn('Database connection has failed! Make sure your database is running.');
+      error();
+    });
 };

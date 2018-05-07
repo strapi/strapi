@@ -8,8 +8,8 @@
 
 // Node.js core.
 const { exec } = require('child_process');
-const fs = require('fs-extra');
 const path = require('path');
+const fs = require('fs-extra');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -74,7 +74,7 @@ module.exports = function (plugin, cliArguments) {
         // Copy .gitignore because the file is ignored during `npm publish`
         // and we need it to build the plugin.
         try {
-          fs.accessSync(path.join(pluginPath, '.gitignore'))
+          fs.accessSync(path.join(pluginPath, '.gitignore'));
         } catch (err) {
           if (err.code === 'ENOENT') {
             if (process.mainModule.filename.indexOf('yarn') !== -1) {
