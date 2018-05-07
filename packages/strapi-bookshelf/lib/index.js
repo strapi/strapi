@@ -40,8 +40,10 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: cb => {
+    initialize: async cb => {
       const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-bookshelf' });
+
+      const databaseUpdate = [];
 
       _.forEach(connections, (connection, connectionName) => {
         // Apply defaults
@@ -234,6 +236,7 @@ module.exports = function(strapi) {
                         const association = definition.associations
                           .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
                           .filter(association => association.alias === path || association.via === path)[0];
+
                         if (association) {
                           // Override on polymorphic path only.
                           if (_.isString(path) && path === association.via) {
@@ -250,7 +253,11 @@ module.exports = function(strapi) {
                               strapi.plugins[association.plugin].models[association.collection || association.model]:
                               strapi.models[association.collection || association.model];
 
-                            return `${association.alias}.${model.collectionName}`;
+                            return {
+                              [`${association.alias}.${model.collectionName}`]: function(query) {
+                                query.orderBy('created_at', 'desc');
+                              }
+                            };
                           }
                         }
 
@@ -307,6 +314,233 @@ module.exports = function(strapi) {
                 // Push attributes to be aware of model schema.
                 target[model]._attributes = definition.attributes;
 
+                databaseUpdate.push(new Promise(async (resolve) => {
+                  // Equilize database tables
+                  const handler = async (table, attributes) => {
+                    const tableExist = await ORM.knex.schema.hasTable(table);
+
+                    const getType = (attribute, name) => {
+                      let type;
+
+                      if (!attribute.type) {
+                        // Add integer value if there is a relation
+                        const relation = definition.associations.find((association) => {
+                          return association.alias === name;
+                        });
+
+                        switch (relation.nature) {
+                          case 'oneToOne':
+                          case 'manyToOne':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          default:
+                            return null;
+                        }
+                      } else {
+                        switch (attribute.type) {
+                          case 'text':
+                          case 'json':
+                            type = 'text';
+                            break;
+                          case 'string':
+                          case 'password':
+                          case 'email':
+                            type = 'varchar(255)';
+                            break;
+                          case 'integer':
+                          case 'biginteger':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          case 'float':
+                          case 'decimal':
+                            type = attribute.type;
+                            break;
+                          case 'date':
+                          case 'time':
+                          case 'datetime':
+                          case 'timestamp':
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                            break;
+                          case 'timestampUpdate':
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                            break;
+                          case 'boolean':
+                            type = 'boolean';
+                            break;
+                          default:
+                        }
+                      }
+
+                      return type;
+                    };
+
+                    // Apply field type of attributes definition
+                    const generateColumns = (attrs, start) => {
+                      return Object.keys(attrs).reduce((acc, attr) => {
+                        const attribute = attributes[attr];
+
+                        const type = getType(attribute, attr);
+
+                        if (type) {
+                          acc.push(`${quote}${attr}${quote} ${type}`);
+                        }
+
+                        return acc;
+                      }, start);
+                    };
+
+                    if (!tableExist) {
+                      const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
+
+                      // Create table
+                      await ORM.knex.raw(`
+                        CREATE TABLE ${quote}${table}${quote} (
+                          ${columns}
+                        )
+                      `);
+                    } else {
+                      const columns = Object.keys(attributes);
+
+                      // Fetch existing column
+                      const columnsExist = await Promise.all(columns.map(attribute =>
+                        ORM.knex.schema.hasColumn(table, attribute)
+                      ));
+
+                      const columnsToAdd = {};
+
+                      // Get columns to add
+                      columnsExist.forEach((columnExist, index) => {
+                        const attribute = attributes[columns[index]];
+
+                        if (!columnExist) {
+                          columnsToAdd[columns[index]] = attribute;
+                        }
+                      });
+
+                      // Generate and execute query to add missing column
+                      if (Object.keys(columnsToAdd).length > 0) {
+                        const columns = generateColumns(columnsToAdd, []);
+                        const queries = columns.reduce((acc, attribute) => {
+                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`)
+                          return acc;
+                        }, []).join('\n\r');
+
+                        await ORM.knex.raw(queries);
+                      }
+
+                      // Execute query to update column type
+                      await Promise.all(columns.map(attribute =>
+                        new Promise(async (resolve) => {
+                          const type = getType(attributes[attribute], attribute);
+
+                          if (type) {
+                            const changeType = definition.client === 'pg'
+                              ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
+
+                            const changeRequired = definition.client === 'pg'
+                              ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
+                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
+
+                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
+                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
+                          }
+
+                          resolve();
+                        })
+                      ));
+                    }
+                  };
+
+                  const quote = definition.client === 'pg' ? '"' : '`';
+
+                  // Add created_at and updated_at field if timestamp option is true
+                  if (loadedModel.hasTimestamps) {
+                    definition.attributes['created_at'] = {
+                      type: 'timestamp'
+                    };
+                    definition.attributes['updated_at'] = {
+                      type: 'timestampUpdate'
+                    };
+                  }
+
+                  // Equilize tables
+                  await handler(loadedModel.tableName, definition.attributes);
+
+                  // Equilize polymorphic releations
+                  const morphRelations = definition.associations.find((association) => {
+                    return association.nature.toLowerCase().includes('morphto');
+                  });
+
+                  if (morphRelations) {
+                    const attributes = {
+                      [`${loadedModel.tableName}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${morphRelations.alias}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${morphRelations.alias}_type`]: {
+                        type: 'text'
+                      },
+                      [definition.attributes[morphRelations.alias].filter]: {
+                        type: 'text'
+                      }
+                    };
+
+                    await handler(`${loadedModel.tableName}_morph`, attributes);
+                  }
+
+                  // Equilize many to many releations
+                  const manyRelations = definition.associations.find((association) => {
+                    return association.nature === 'manyToMany';
+                  });
+
+                  if (manyRelations && manyRelations.dominant) {
+                    const collection = manyRelations.plugin ?
+                      strapi.plugins[manyRelations.plugin].models[manyRelations.collection]:
+                      strapi.models[manyRelations.collection];
+
+                    const attributes = {
+                      [`${pluralize.singular(manyRelations.collection)}_id`]: {
+                        type: 'integer'
+                      },
+                      [`${pluralize.singular(definition.globalId.toLowerCase())}_id`]: {
+                        type: 'integer'
+                      }
+                    };
+
+                    const table = _.get(manyRelations, 'collectionName') ||
+                      _.map(
+                        _.sortBy(
+                          [
+                            collection.attributes[
+                              manyRelations.via
+                            ],
+                            manyRelations
+                          ],
+                          'collection'
+                        ),
+                        table => {
+                          return _.snakeCase(
+                            pluralize.plural(table.collection) +
+                              ' ' +
+                              pluralize.plural(table.via)
+                          );
+                        }
+                      ).join('__');
+
+                    await handler(table, attributes);
+                  }
+
+                  // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
+                  if (loadedModel.hasTimestamps) {
+                    delete definition.attributes['created_at'];
+                    delete definition.attributes['updated_at'];
+                  }
+
+                  resolve();
+                }));
               } catch (err) {
                 strapi.log.error('Impossible to register the `' + model + '` model.');
                 strapi.log.error(err);
@@ -602,6 +836,8 @@ module.exports = function(strapi) {
         });
       });
 
+      await Promise.all(databaseUpdate);
+
       cb();
     },
 
@@ -709,6 +945,10 @@ module.exports = function(strapi) {
           acc[current] = params.values[current];
         } else {
           switch (association.nature) {
+            case 'oneWay':
+              acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
+
+              break;
             case 'oneToOne':
               if (response[current] !== params.values[current]) {
                 const value = _.isNull(params.values[current]) ? response[current] : params.values;

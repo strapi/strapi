@@ -34,7 +34,6 @@
   "form.database.item.provider.mongo": "Mongo",
   "form.database.item.provider.postgres": "PostgresSQL",
   "form.database.item.provider.mysql": "MySQL",
-  "form.database.item.provider.sqlite3": "SQlite3",
   "form.database.item.provider.redis": "Redis",
 
   "form.application.name": "Application",

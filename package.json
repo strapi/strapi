@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.12",
+  "version": "3.0.0-alpha.12.1.3",
   "devDependencies": {
     "assert": "~1.3.0",
     "babel-eslint": "^6.1.2",
@@ -24,6 +24,7 @@
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
     "removesymlinkdependencies": "node ./scripts/removeSymlinkDependencies.js",
+    "setup:build": "npm run setup --build",
     "setup": "npm run clean:all && npm install && node ./scripts/setup.js && npm run clean",
     "test": "make test"
   },

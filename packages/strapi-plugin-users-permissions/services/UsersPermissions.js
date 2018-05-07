@@ -174,7 +174,7 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name ASC' }, []);
+    const roles = await strapi.query('role', 'users-permissions').find({ sort: '-name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
@@ -286,11 +286,40 @@ module.exports = {
     cb();
   },
 
+  removeDuplicate: async function () {
+    const primaryKey = strapi.query('permission', 'users-permissions').primaryKey;
+
+    // Retrieve permissions by creation date (ID or ObjectID).
+    const permissions = await strapi.query('permission', 'users-permissions').find({
+      sort: `${primaryKey}`
+    });
+
+    const value = permissions.reduce((acc, permission) => {
+      const index = acc.toKeep.findIndex(element => element === `${permission.type}.controllers.${permission.controller}.${permission.action}`);
+
+      if (index === -1) {
+        acc.toKeep.push(`${permission.type}.controllers.${permission.controller}.${permission.action}`);
+      } else {
+        acc.toRemove.push(permission[primaryKey]);
+      }
+
+      return acc;
+    }, {
+      toKeep: [],
+      toRemove: []
+    });
+
+    return strapi.query('permission', 'users-permissions').deleteMany({
+      [primaryKey]: value.toRemove
+    });
+  },
+
   initialize: async function (cb) {
     const roles = await strapi.query('role', 'users-permissions').count();
 
     // It's has been already initialized.
     if (roles > 0) {
+      await this.removeDuplicate();
       return await this.updatePermissions(cb);
     }
 
@@ -400,179 +429,6 @@ module.exports = {
     } catch(err) {
       strapi.log.error(err);
     }
-  },
-
-  syncSchema: async (cb) => {
-    if (strapi.plugins['users-permissions'].models.user.orm !== 'bookshelf') {
-      return cb();
-    }
-
-    // Extract necessary information from plugin's models.
-    const {
-      user: { collectionName: userTableName, connection: userConnection, client: userClient },
-      role: { collectionName: roleTableName, connection: roleConnection, client: roleClient },
-      permission: { collectionName: permissionTableName, connection: permissionConnection, client: permissionClient }
-    } = strapi.plugins['users-permissions'].models;
-
-    const details = {
-      user: {
-        tableName: userTableName,
-        connection: userConnection,
-        client: userClient
-      },
-      role: {
-        tableName: roleTableName,
-        connection: roleConnection,
-        client: roleClient
-      },
-      permission: {
-        tableName: permissionTableName,
-        connection: permissionConnection,
-        client: permissionClient
-      }
-    };
-
-    // Check if the tables are existing.
-    const hasTables = await Promise.all(Object.keys(details).map(name =>
-      strapi.connections[details[name].connection].schema.hasTable(details[name].tableName)
-    ));
-
-    const missingTables = [];
-    const tablesToCreate = [];
-
-    for (let index = 0; index < hasTables.length; ++index) {
-      const hasTable = hasTables[index];
-      const currentModel = Object.keys(details)[index];
-      const quote = details[currentModel].client === 'pg' ? '"' : '`';
-
-      if (!hasTable) {
-        missingTables.push(`
-⚠️  TABLE \`${details[currentModel].tableName}\` DOESN'T EXIST`);
-
-        switch (currentModel) {
-          case 'user':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  username text,
-  email text,
-  provider text,
-  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
-  ${quote}resetPasswordToken${quote} text,
-  password text,
-  updated_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'},
-  created_at ${details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'}
-);`);
-            break;
-          case 'role':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  name text,
-  description text,
-  type text
-);`);
-            break;
-          case 'permission':
-            tablesToCreate.push(`
-
-CREATE TABLE ${quote}${details[currentModel].tableName}${quote} (
-  id ${details[currentModel].client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY,
-  role ${details[currentModel].client === 'pg' ? 'integer' : 'int'},
-  type text,
-  controller text,
-  action text,
-  enabled boolean,
-  policy text
-);`);
-            break;
-          default:
-
-        }
-      }
-    }
-
-    if (!_.isEmpty(tablesToCreate)) {
-      tablesToCreate.unshift(`
-
-1️⃣  EXECUTE THE FOLLOWING SQL QUERY`);
-
-      tablesToCreate.push(`
-
-2️⃣  RESTART YOUR SERVER`)
-      strapi.log.warn(missingTables.concat(tablesToCreate).join(''));
-
-      // Stop the server.
-      strapi.stop();
-    }
-
-    const missingColumns = [];
-    const tablesToAlter = [];
-
-    for (let index = 0; index < hasTables.length; ++index) {
-      const currentModel = Object.keys(details)[index];
-      const quote = details[currentModel].client === 'pg' ? '"' : '`';
-      const attributes = {
-        id: {
-          type: details[currentModel].client === 'pg' ? 'integer' : 'int'
-        },
-        ..._.cloneDeep(strapi.plugins['users-permissions'].models[currentModel].attributes)
-      };
-
-      // Add created_at and updated_at attributes for the model User.
-      if (currentModel === 'user') {
-        Object.assign(attributes, {
-          created_at: {
-            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
-          },
-          updated_at: {
-            type: details[currentModel].client === 'pg' ? 'timestamp with time zone' : 'timestamp'
-          }
-        });
-      }
-
-      const columns = Object.keys(attributes);
-
-      // Check if there are the required attributes.
-      const hasColumns = await Promise.all(columns.map(attribute =>
-        strapi.connections[details[currentModel].connection].schema.hasColumn(details[currentModel].tableName, attribute)
-      ));
-
-      hasColumns.forEach((hasColumn, index) => {
-        const currentColumn = columns[index];
-        const attribute = attributes[currentColumn];
-
-        if (!hasColumn && !attribute.collection) {
-          const currentType = attribute.model ? 'integer' : attribute.type;
-          const type = currentType === 'string' ? 'text' : currentType;
-
-          missingColumns.push(`
-⚠️  TABLE \`${details[currentModel].tableName}\` HAS MISSING COLUMNS`);
-
-          tablesToAlter.push(`
-
-ALTER TABLE ${quote}${details[currentModel].tableName}${quote} ADD ${details[currentModel].client === 'pg' ? `${quote}${currentColumn}${quote}` : `${currentColumn}`} ${type};`);
-        }
-      });
-    }
-
-    if (!_.isEmpty(tablesToAlter)) {
-      tablesToAlter.unshift(`
-
-1️⃣  EXECUTE THE FOLLOWING SQL QUERIES`);
-
-      tablesToAlter.push(`
-
-2️⃣  RESTART YOUR SERVER`)
-      strapi.log.warn(missingColumns.concat(tablesToAlter).join(''));
-
-      // Stop the server.
-      return strapi.stop();
-    }
-
-    cb();
   },
 
   template: (layout, data) => {
