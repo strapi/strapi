@@ -174,7 +174,7 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const roles = await strapi.query('role', 'users-permissions').find({ sort: '-name' }, []);
+    const roles = await strapi.query('role', 'users-permissions').find({ sort: 'name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
@@ -295,10 +295,10 @@ module.exports = {
     });
 
     const value = permissions.reduce((acc, permission) => {
-      const index = acc.toKeep.findIndex(element => element === `${permission.type}.controllers.${permission.controller}.${permission.action}`);
+      const index = acc.toKeep.findIndex(element => element === `${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`);
 
       if (index === -1) {
-        acc.toKeep.push(`${permission.type}.controllers.${permission.controller}.${permission.action}`);
+        acc.toKeep.push(`${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`);
       } else {
         acc.toRemove.push(permission[primaryKey]);
       }
