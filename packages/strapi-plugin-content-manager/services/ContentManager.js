@@ -2,6 +2,24 @@
 
 const _ = require('lodash');
 
+const getTitle = record => {
+  const keys = ['name', 'title', 'header', 'text', 'description'];
+
+  for(let key of keys) {
+    if(record[key]) {
+      return record[key];
+    }  
+    else if(record[`${key}_sv`]) {
+      return record[`${key}_sv`]
+    }
+    else if(record[`${key}_en`]) {
+      return record[`${key}_en`]
+    }
+  }
+
+  return record._id
+}
+
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -160,10 +178,11 @@ module.exports = {
 
       return allRecords.map(record => ({
         id: record._id,
-        title: record.name || record.title || record.header || record.text ||  record.description || record._id,
+        title: getTitle(record),
         type: model
       }));
     });
+
 
     return _.flatten(await Promise.all(fetchAllModels));
   },
