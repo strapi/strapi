@@ -75,6 +75,8 @@ $RECYCLE.BIN/
 
 *#
 ssl
+.editorconfig
+.gitattributes
 .idea
 nbproject
 
