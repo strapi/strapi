@@ -31,7 +31,7 @@
 
   "button.contentType.create": "Créer un modèle",
   "button.contentType.add": "Ajouter un modèle",
-  "button.attributes.add": "Ajouter un champs",
+  "button.attributes.add": "Ajouter un champ",
 
   "error.validation.required": "Ce champ est obligatoire.",
   "error.validation.regex": "La valeur ne correspond pas au format attendu.",
