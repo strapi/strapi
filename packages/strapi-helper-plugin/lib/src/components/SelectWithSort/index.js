@@ -37,7 +37,12 @@ class SelectWithSort extends React.Component {
   }
 
   getOptions = () => {
-    const requestUrl = '/content-manager/explorer/refs';
+    const { modelName } = this.props;
+
+    let requestUrl = '/content-manager/explorer/refs';
+    if(modelName) {
+      requestUrl += `?model=${modelName}`;
+    }
     
     request(requestUrl, {
       method: 'GET',
@@ -79,9 +84,11 @@ class SelectWithSort extends React.Component {
 
 SelectWithSort.defaultProps = {
   value: undefined,
+  modelName: undefined,
 };
 
 SelectWithSort.propTypes = {
+  modelName: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.string), PropTypes.string]),
 };

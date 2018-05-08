@@ -99,7 +99,8 @@ class InputRefs extends React.Component {
       placeholder,
       style,
       tabIndex,
-      value
+      value,
+      modelName
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
@@ -125,7 +126,7 @@ class InputRefs extends React.Component {
           message={label}
           style={labelStyle}
         />
-        <SelectWithSort onChange={this.onChange} value={arrayValue}/>
+        <SelectWithSort modelName={modelName} onChange={this.onChange} value={arrayValue}/>
         
         <InputDescription
           className={inputDescriptionClassName}
@@ -203,6 +204,7 @@ InputRefs.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
+  modelName: PropTypes.string,
   noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,

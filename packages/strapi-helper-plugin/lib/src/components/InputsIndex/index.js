@@ -89,6 +89,7 @@ InputsIndex.propTypes = {
     PropTypes.string,
   ]),
   customInputs: PropTypes.object,
+  modelName: PropTypes.string,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
 };

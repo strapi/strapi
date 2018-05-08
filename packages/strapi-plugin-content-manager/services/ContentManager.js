@@ -170,10 +170,22 @@ module.exports = {
     });
   },
 
-  getRefs: async () => {
+  getRefs: async (query = {}) => {
     const { core_store, ...models } = strapi.models;
+    let propertyKeys = Object.keys(models)
 
-    const fetchAllModels = Object.keys(models).map(async model => {
+    if(query.model) {
+      const attributes = _.get(models, `${query.model}._attributes`);      
+      if(attributes) {
+        const refField = _.values(attributes).find(a => a.type === "refs");
+        const allowedRefs = refField.refs;
+        if(allowedRefs && allowedRefs.length > 0) {
+          propertyKeys = propertyKeys.filter(key => allowedRefs.includes(key))
+        }      
+      }
+   }
+
+    const fetchAllModels = propertyKeys.map(async model => {
       const allRecords = await module.exports.fetchAll({ model }, {});
 
       return allRecords.map(record => ({

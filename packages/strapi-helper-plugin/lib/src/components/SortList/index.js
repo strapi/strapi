@@ -67,7 +67,8 @@ class SortList extends React.Component {
                     >
                       <span>{item.title}</span>
                       <span className={styles.type}>{item.type}</span>
-                      <span className={styles.clear}><Ico icoType="trash" onClick={() => onRemove(item)} /></span>
+                      <span className={styles.clear}><Ico icoType="edit" onClick={() => window.open(`/admin/plugins/content-manager/${item.type}/${item.id}?source=content-manager`)} /></span>
+                      <span className={styles.trash}><Ico icoType="trash" onClick={() => onRemove(item)} /></span>
                     </div>
                   )}
                 </Draggable>

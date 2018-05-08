@@ -160,6 +160,7 @@ class Edit extends React.PureComponent {
                 type={type}
                 validations={this.getInputValidations(attr)}
                 value={this.props.record[attr]}
+                modelName={this.props.modelName}
               />
             );
           })}
@@ -179,6 +180,7 @@ Edit.defaultProps = {
   record: {},
   resetProps: false,
   schema: {},
+  modelName: null
 };
 
 Edit.propTypes = {
@@ -187,6 +189,7 @@ Edit.propTypes = {
   formErrors: PropTypes.array,
   formValidations: PropTypes.array,
   layout: PropTypes.object,
+  modelName: PropTypes.string,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
   record: PropTypes.object,

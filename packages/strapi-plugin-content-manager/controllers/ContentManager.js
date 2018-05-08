@@ -101,6 +101,6 @@ module.exports = {
   },
 
   getRefs: async ctx => {
-    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs();
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs(ctx.request.query);
   },
 };
