@@ -178,6 +178,7 @@ module.exports = function (strapi) {
                   });
 
                   collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                  collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
                   collection.schema.options.toObject = collection.schema.options.toJSON = {
                     virtuals: true,
