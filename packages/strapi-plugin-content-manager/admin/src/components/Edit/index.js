@@ -180,7 +180,7 @@ Edit.defaultProps = {
   record: {},
   resetProps: false,
   schema: {},
-  modelName: null
+  modelName: null,
 };
 
 Edit.propTypes = {
