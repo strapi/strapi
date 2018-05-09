@@ -343,6 +343,7 @@ module.exports = function(strapi) {
                             type = 'text';
                             break;
                           case 'string':
+                          case 'enumeration':
                           case 'password':
                           case 'email':
                             type = 'varchar(255)';

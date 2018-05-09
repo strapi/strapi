@@ -49,7 +49,7 @@ By default, your project's structure will look like this:
         - [`response.json`](../configurations/configurations.md#response): contains the response settings for this environment.
         - [`server.json`](../configurations/configurations.md#server): contains the server settings for this environment.
       - `/production`
-      - `/test`
+      - `/staging`
   - [`/functions`](../configurations/configurations.html#functions): contains lifecycle or generic functions of the project.
   - [`/locales`](../configurations/configurations.html#locales): contains the translation files used by the built-in i18n feature.
   - [`application.json`](../configurations/configurations.html#application): contains the general configurations of the project.
