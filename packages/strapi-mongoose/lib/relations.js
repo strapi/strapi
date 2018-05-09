@@ -56,11 +56,11 @@ module.exports = {
               virtualFields.push(
                 model
                   .findOne({ [model.primaryKey] : recordId })
-                  .populate(model.associations.map(x => x.alias).join(' '))
+                  .populate(details.via)
                   .then(record => {
                     if (record && _.isObject(record[details.via])) {
                       virtualFields.push(
-                        module.exports.update.call(this, {
+                        module.exports.update.call(model, {
                           id: record[details.via][this.primaryKey] || record[details.via].id,
                           values: {
                             [current]: null
@@ -69,6 +69,7 @@ module.exports = {
                         })
                       );
                     }
+
                     return Promise.resolve();
                   })
                   .then(response => {
@@ -76,10 +77,10 @@ module.exports = {
                     // When params.values[current] is null this means that we are removing the relation.
                     // Recreate relation on the first side
                     virtualFields.push(
-                      module.exports.update(model, {
+                      module.exports.update.call(model, {
                         id: recordId,
                         values: {
-                          [details.via]: _.isNull(params.values[current]) ? null : value[this.primaryKey] || value.id || value._id
+                          [details.via]: params[this.primaryKey] || params.id || null
                         },
                         parseRelationships: false
                       })
@@ -89,7 +90,7 @@ module.exports = {
                     if (!_.isNull(params.values[current])) {
                       virtualFields.push(
                         module.exports.update.call(this, {
-                          id: value[this.primaryKey] || value.id || value._id,
+                          id: value[this.primaryKey] || value.id || null,
                           values: {
                             [current]: recordId
                           },
