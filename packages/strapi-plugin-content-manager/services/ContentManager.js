@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const getTitle = record => {
-  const keys = ['name', 'title', 'header', 'text', 'description'];
+  const keys = ['displayName', 'name', 'title', 'header', 'text', 'description'];
 
   for(let key of keys) {
     if(record[key]) {

@@ -131,6 +131,10 @@ class Edit extends React.PureComponent {
   // orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
   orderAttributes = (displayedFields) => Object.keys(displayedFields);
 
+  transformLabel(label) {
+    return label.replace('_sv', ' 🇸🇪').replace('_en', ' 🇬🇧');
+  }
+
   render(){
     return (
       <div className={styles.form}>
@@ -141,6 +145,7 @@ class Edit extends React.PureComponent {
             const layout = this.getInputLayout(attr);
             const appearance = get(layout, 'appearance');
             const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
+            const label = get(layout, 'label') || details.label || '';
 
             return (
               <Input
@@ -149,7 +154,7 @@ class Edit extends React.PureComponent {
                 didCheckErrors={this.props.didCheckErrors}
                 errors={this.getInputErrors(attr)}
                 key={attr}
-                label={get(layout, 'label') || details.label || ''}
+                label={this.transformLabel(label)}
                 multiple={this.fileRelationAllowMultipleUpload(attr)}
                 name={attr}
                 onBlur={this.props.onBlur}
