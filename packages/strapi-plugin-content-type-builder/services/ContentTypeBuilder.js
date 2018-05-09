@@ -215,8 +215,8 @@ module.exports = {
         attr.via = relation.key;
         attr.dominant = relation.dominant;
 
-        if (relation.pluginValue) {
-          attr.plugin = relation.pluginValue;
+        if (_.trim(relation.pluginValue)) {
+          attr.plugin = _.trim(relation.pluginValue);
         }
 
         attrs[attribute.name] = attr;
@@ -371,7 +371,10 @@ module.exports = {
 
             attr.via = name;
             attr.columnName = params.targetColumnName;
-            attr.plugin = source;
+
+            if (_.trim(source)) {
+              attr.plugin = _.trim(source);
+            }
 
             modelJSON.attributes[params.key] = attr;
 
