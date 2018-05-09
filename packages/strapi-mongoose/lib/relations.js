@@ -8,7 +8,7 @@
 const _ = require('lodash');
 
 module.exports = {
-  getModel: async function (model, plugin) {
+  getModel: function (model, plugin) {
     return _.get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
   },
 
@@ -125,6 +125,8 @@ module.exports = {
 
               // Push the work into the flow process.
               toAdd.forEach(value => {
+                value = _.isString(value) ? { [this.primaryKey]: value } : value;
+
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey] || params[this.primaryKey])) {
                   value[details.via] = (value[details.via] || [])
                     .concat([(params.values[this.primaryKey] || params[this.primaryKey])])
@@ -136,7 +138,7 @@ module.exports = {
                 }
 
                 virtualFields.push(
-                  module.exports.addRelation(model, {
+                  module.exports.addRelation.call(model, {
                     id: value[this.primaryKey] || value.id || value._id,
                     values: _.pick(value, [this.primaryKey, details.via]),
                     foreignKey: current
@@ -145,6 +147,8 @@ module.exports = {
               });
 
               toRemove.forEach(value => {
+                value = _.isString(value) ? { [this.primaryKey]: value } : value;
+
                 if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey])) {
                   value[details.via] = value[details.via].filter(x => x.toString() !== params.values[this.primaryKey].toString());
                 } else {
@@ -152,7 +156,7 @@ module.exports = {
                 }
 
                 virtualFields.push(
-                  module.export.removeRelation(model, {
+                  module.exports.removeRelation.call(model, {
                     id: value[this.primaryKey] || value.id || value._id,
                     values: _.pick(value, [this.primaryKey, details.via]),
                     foreignKey: current
@@ -213,7 +217,7 @@ module.exports = {
             // Remove relations in the other side.
             toAdd.forEach(id => {
               virtualFields.push(
-                module.exports.addRelationMorph(model, {
+                module.exports.addRelationMorph.call(model, {
                   id,
                   alias: association.via,
                   ref: this.globalId,
@@ -226,7 +230,7 @@ module.exports = {
             // Remove relations in the other side.
             toRemove.forEach(id => {
               virtualFields.push(
-                module.exports.removeRelationMorph(model, {
+                module.exports.removeRelationMorph.call(model, {
                   id,
                   alias: association.via,
                   ref: this.globalId,
@@ -262,7 +266,7 @@ module.exports = {
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(model.associations.map(x => x.alias).join(' '));
+      .populate(this.associations.map(x => x.alias).join(' '));
   },
 
   addRelation: async function (params) {

@@ -38,6 +38,10 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "article": {
+      "model": "article",
+      "via": "authors"
     }
   }
 }
