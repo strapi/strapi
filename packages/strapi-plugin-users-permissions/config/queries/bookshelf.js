@@ -138,10 +138,13 @@ module.exports = {
   },
 
   removePermission: async function (params) {
+    const value = params[this.primaryKey] ? {
+      [this.primaryKey]: params[this.primaryKey] || params.id
+    } : params;
+
     return this
-      .forge({
-        [this.primaryKey]: params[this.primaryKey] || params.id
-      })
+      .forge()
+      .where(value)
       .destroy();
   }
 };

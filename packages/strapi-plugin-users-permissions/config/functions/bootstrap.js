@@ -123,6 +123,6 @@ module.exports = async cb => {
 
     await pluginStore.set({key: 'advanced', value});
   }
-
+  
   strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };
