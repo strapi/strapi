@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, get, isUndefined, map, toInteger } from 'lodash';
+import { capitalize, get, isUndefined, map, last, toInteger } from 'lodash';
 import cn from 'classnames';
 
 // App selectors
@@ -74,14 +74,18 @@ export class ListPage extends React.Component {
    * @param  {Object} props
    */
   getData = props => {
-    const source = getQueryParameters(props.location.search, 'source');
-    const limit = toInteger(getQueryParameters(props.location.search, 'limit')) || 10;
-    const page = toInteger(getQueryParameters(props.location.search, 'page')) || 1;
+    const params = this.parseQuery(props.location.search);
+    const limit = toInteger(params.limit) || 10;
+    const page = toInteger(params.page) || 1;
     const sort = this.findPageSort(props);
-    const params = { limit, page, sort };
-
-    this.props.setParams(params);
-    this.props.getData(props.match.params.slug, source);
+    
+    this.props.setParams({
+      ...params,
+      limit,
+      page,
+      sort,
+    });
+    this.props.getData(props.match.params.slug, params.source);
   };
 
   /**
@@ -89,6 +93,8 @@ export class ListPage extends React.Component {
    * @return {String} the model's source
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source') || 'content-manager';
+
+  getCurrentQuery = () => this._serializeParams(get(this, ['props', 'listPage', 'params']));
 
   /**
    *  Function to generate the Table's headers
@@ -138,33 +144,37 @@ export class ListPage extends React.Component {
     );
   };
 
-  handleChangeParams = e => {
+  _serializeParams = params => map(params, (value, key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
+  
+  parseQuery = query => {
+    let obj = {};
+    if(query) {
+      query.slice(1).split('&').map((item) => {
+        const [ k, v ] = item.split('=');
+        if (v) obj[k] = v;
+      });
+    }
+    return obj;
+  }
+
+  changeParamsQuery = paramsChangeSet => {
     const { history, listPage: { params } } = this.props;
-    const search =
-      e.target.name === 'params.limit'
-        ? `page=${params.page}&limit=${e.target.value}&sort=${params.sort}&source=${this.getSource()}`
-        : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`;
+    const search = this._serializeParams({
+      ...params,
+      ...paramsChangeSet,
+    });
     this.props.history.push({
       pathname: history.pathname,
       search,
     });
+  }
 
-    this.props.changeParams(e);
+  handleChangeParams = e => {
+    this.changeParamsQuery({ [last(e.target.name.split('params.'))]: e.target.value });
   };
 
   handleChangeSort = sort => {
-    const target = {
-      name: 'params.sort',
-      value: sort,
-    };
-
-    const { listPage: { params } } = this.props;
-
-    this.props.history.push({
-      pathname: this.props.location.pathname,
-      search: `?page=${params.page}&limit=${params.limit}&sort=${sort}&source=${this.getSource()}`,
-    });
-    this.props.changeParams({ target });
+    this.changeParamsQuery({ sort });
   };
 
   handleDelete = e => {
@@ -187,7 +197,7 @@ export class ListPage extends React.Component {
   };
 
   render() {
-    const { listPage, listPage: { params } } = this.props;
+    const { listPage } = this.props;
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -198,9 +208,7 @@ export class ListPage extends React.Component {
         onClick: () =>
           this.props.history.push({
             pathname: `${this.props.location.pathname}/create`,
-            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?page=${
-              params.page
-            }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`,
+            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?${this.getCurrentQuery()}`,
           }),
       },
     ];
@@ -235,9 +243,7 @@ export class ListPage extends React.Component {
                 history={this.props.history}
                 primaryKey={this.getCurrentModel().primaryKey || 'id'}
                 handleDelete={this.toggleModalWarning}
-                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?page=${
-                  params.page
-                }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`}
+                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?${this.getCurrentQuery()}`}
               />
               <PopUpWarning
                 isOpen={this.state.showWarning}
@@ -266,7 +272,6 @@ export class ListPage extends React.Component {
 }
 
 ListPage.propTypes = {
-  changeParams: PropTypes.func.isRequired,
   deleteData: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,

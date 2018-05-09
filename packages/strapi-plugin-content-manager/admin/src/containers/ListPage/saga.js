@@ -30,23 +30,15 @@ import {
 
 export function* dataGet(action) {
   try {
-    const { limit, page, sort } = yield select(makeSelectParams());
-    const source = action.source;
+    const params = yield select(makeSelectParams());
     const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
 
     // Params to get the model's records
     const recordsURL = `/content-manager/explorer/${currentModel}`;
-    const skip = (page - 1 ) * limit;
-    const params = {
-      limit,
-      skip,
-      sort,
-      source,
-    };
-
+    params.skip = (params.page - 1 ) * params.limit;
     const response = yield [
-      call(request, countURL, { method: 'GET', params: { source } }),
+      call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
     ];
 
