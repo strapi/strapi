@@ -108,6 +108,10 @@ module.exports = {
       .findOneAndRemove(params, {})
       .populate(populate);
 
+    if (!data) {
+      return data;
+    }
+
     await Promise.all(
       <%= globalID %>.associations.map(async association => {
         const search = _.endsWith(association.nature, 'One') || association.nature === 'oneToMany' ? { [association.via]: data._id } : { [association.via]: { $in: [data._id] } };
