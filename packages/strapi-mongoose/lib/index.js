@@ -212,6 +212,7 @@ module.exports = function (strapi) {
                     }
                   };
 
+                  // Instantiate model.
                   const Model = instance.model(definition.globalId, collection.schema, definition.collectionName);
 
                   if (!plugin) {
@@ -220,9 +221,6 @@ module.exports = function (strapi) {
 
                   // Expose ORM functions through the `target` object.
                   target[model] = _.assign(Model, target[model]);
-
-                  // Push model to strapi global variables.
-                  // collection = instance.model(definition.globalName, collection.schema);
 
                   // Push attributes to be aware of model schema.
                   target[model]._attributes = definition.attributes;
