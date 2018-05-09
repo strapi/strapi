@@ -27,7 +27,7 @@ const transformToArrayID = (array) => {
 
 module.exports = {
   getModel: function (model, plugin) {
-    return _.get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
   },
 
   findOne: async function (params, populate, raw = true) {
@@ -164,7 +164,9 @@ module.exports = {
               toRemove.forEach(value => {
                 value = _.isString(value) || _.isNumber(value) ? { [this.primaryKey]: value } : value;
 
-                value[details.via] = null;
+                value[details.via] = association.nature !== 'manyToMany' ?
+                  null :
+                  params.values[this.primaryKey] || params[this.primaryKey];
 
                 virtualFields.push(
                   module.exports.removeRelation.call(model, {

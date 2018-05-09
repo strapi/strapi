@@ -9,7 +9,7 @@ const _ = require('lodash');
 
 module.exports = {
   getModel: function (model, plugin) {
-    return _.get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
   },
 
   update: async function (params) {
