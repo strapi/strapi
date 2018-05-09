@@ -6,6 +6,33 @@ const _ = require('lodash');
 
 const Service = require('../services/ContentTypeBuilder');
 
+const ensureLocales = attributes => {
+  const locales = strapi.config.autoLocales;
+
+  if (!locales) return attributes;
+
+  attributes.forEach((attribute, index) => {
+    if (
+      attribute.params.type.match(/(string|text)/i) &&
+      !attribute.name.match(/.*?_..$/i)
+    ) {
+      locales.forEach(locale => {
+        if (!attributes.find(a => a.name === `${attribute.name}_${locale}`)) {
+          attributes.push({
+            name: `${attribute.name}_${locale}`,
+            params: attribute.params
+          });
+        }
+      });
+      
+      // Remove the initial attribute
+      attributes.splice(index, 1);
+    }
+  });
+
+  return attributes;
+};
+
 module.exports = {
   getModels: async ctx => {
     ctx.send({ models: Service.getModels() });
@@ -33,7 +60,10 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, description, connection, collectionName, plugin } = ctx.request.body;
+    let { attributes = [] } = ctx.request.body
+
+    attributes = ensureLocales(attributes)
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -87,7 +117,10 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, description, connection, collectionName, plugin } = ctx.request.body;
+    let { attributes = [] } = ctx.request.body
+
+    attributes = ensureLocales(attributes)
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);

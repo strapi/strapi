@@ -18,6 +18,14 @@
     },
     {
       "method": "GET",
+      "path": "/explorer/refs",
+      "handler": "ContentManager.getRefs",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {

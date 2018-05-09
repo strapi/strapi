@@ -5,7 +5,6 @@ const _ = require('lodash');
 /**
  * A set of functions called "actions" for `ContentManager`
  */
-
 module.exports = {
   layout: async (ctx) => {
     const {source} = ctx.query;
@@ -99,5 +98,9 @@ module.exports = {
 
   delete: async ctx => {
     ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].delete(ctx.params, ctx.request.query);
+  },
+
+  getRefs: async ctx => {
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].getRefs(ctx.request.query);
   },
 };
