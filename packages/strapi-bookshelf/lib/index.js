@@ -353,8 +353,10 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           case 'float':
+                            type = definition.client === 'pg' ? 'double precision' : 'double';
+                            break;
                           case 'decimal':
-                            type = attribute.type;
+                            type = 'decimal';
                             break;
                           case 'date':
                           case 'time':
