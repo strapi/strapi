@@ -42,15 +42,19 @@ function* dataGet(action) {
     ];
     const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
 
-    // Remove the updated_at field so it is updated correctly when using Postgres or MySQL db
+    // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
     if (response.updated_at) {
+      delete response.created_at;
       delete response.updated_at;
     }
 
-    // Remove the updatedAt field so it is updated correctly when using MongoDB
+    // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
     if (response.updatedAt) {
+      delete response.createdAt;
       delete response.updatedAt;
+
     }
+
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
     yield put(getLayoutSucceeded(layout));
   } catch(err) {
