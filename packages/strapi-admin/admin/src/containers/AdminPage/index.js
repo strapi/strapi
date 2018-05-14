@@ -37,6 +37,8 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 // Design
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
+import LocaleToggle from 'containers/LocaleToggle';
+import CtaWrapper from 'components/CtaWrapper';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage/Loadable';
 import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
@@ -136,6 +138,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   isUrlProtected = (props) => !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
+  shouldDisplayLogout = () => auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props);
+
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   retrievePlugins = () => {
@@ -156,7 +160,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-
     return (
       <div className={styles.adminPage}>
         {this.showLeftMenu() && (
@@ -166,9 +169,10 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
             version={adminPage.strapiVersion}
           />
         )}
-        { auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props) ? (
-          <Logout />
-        ) : ''}
+        <CtaWrapper>
+          {this.shouldDisplayLogout() && <Logout />}
+          <LocaleToggle />
+        </CtaWrapper>
         <div className={styles.adminPageRightWrapper} style={style}>
           {header}
           <Content {...this.props} showLeftMenu={this.showLeftMenu()}>
