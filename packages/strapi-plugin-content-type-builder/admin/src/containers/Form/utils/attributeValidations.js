@@ -57,7 +57,7 @@ export default function checkAttributeValidations(errors) {
     'validate',
     'remove',
     '_pres',
-    '_posts'
+    '_posts',
   ];
 
   if (reserved.includes(get(this.props.modifiedDataAttribute, 'name'))) {
