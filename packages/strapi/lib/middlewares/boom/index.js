@@ -25,7 +25,7 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // Log error.
-          strapi.log.error(error);
+          console.error(error);
 
           // Wrap error into a Boom's response.
           ctx.status = error.status || 500;
