@@ -203,7 +203,7 @@ module.exports = {
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
-      Object.keys(strapi.api[api].controllers)
+      Object.keys(_.get(strapi.api[api], 'controllers', {}))
         .map(controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
             .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
