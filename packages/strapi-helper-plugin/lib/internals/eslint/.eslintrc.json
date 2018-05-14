@@ -93,6 +93,7 @@
     "react/require-default-props": 2,
     "no-undef": 0,
     "react/no-array-index-key": 0,
+    "react/sort-comp": 0,
     "react/jsx-handler-names": [
       2,
       {

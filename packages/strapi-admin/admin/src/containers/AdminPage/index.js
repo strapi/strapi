@@ -90,17 +90,17 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
 
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
-      this.checkLogin(nextProps);
+      this.checkLogin(nextProps, true);
     }
   }
 
-  checkLogin = (props) => {
+  checkLogin = (props, skipAction = false) => {
     if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
-    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'auth/register') && this.hasAdminUser(props)) {
+    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'auth/register') && this.hasAdminUser(props) && !skipAction) {
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
