@@ -36,6 +36,34 @@ export default function checkAttributeValidations(errors) {
     formErrors.push({ name: 'params.key', errors: [{ id: 'content-type-builder.error.attribute.sameKeyAndName' }]});
   }
 
+  const reserved = [
+    'id',
+    'set',
+    'value',
+    'emit',
+    'on',
+    'once',
+    'listeners',
+    'removeListener',
+    'collection',
+    'db',
+    'isModified',
+    'isNew',
+    'get',
+    'modelName',
+    'save',
+    'schema',
+    'toObject',
+    'validate',
+    'remove',
+    '_pres',
+    '_posts'
+  ];
+
+  if (reserved.includes(get(this.props.modifiedDataAttribute, 'name'))) {
+    formErrors.push({ name: 'name', errors: [{ id: 'content-type-builder.error.attribute.forbidden' }]});
+  }
+
   return formErrors;
 }
 
