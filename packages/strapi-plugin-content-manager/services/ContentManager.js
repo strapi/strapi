@@ -8,20 +8,21 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip = 0, sort, query : request, queryAttribute, source, page, populate = [] } = query;
-
-    // Find entries using `queries` system
-    return await strapi.query(params.model, source).find({
+    const { limit, skip = 0, sort, queryAttribute, source, populate = [] } = query;
+    const queryParams = {
+      ...strapi.utils.models.convertParams(params.model, _.omit(query, ['limit', 'skip', 'sort', 'page', 'queryAttribute', 'source', 'populate'])),
       limit,
       skip,
       sort,
-      where: request,
       queryAttribute,
-    }, populate);
+    };
+    return await strapi.query(params.model, source).find(queryParams, populate);
   },
 
-  count: async (params, source) => {
-    return await strapi.query(params.model, source).count();
+  count: async (params, query) => {
+    const { source } = query;
+    const conditions = strapi.utils.models.convertParams(params.model, _.omit(query, ['limit', 'skip', 'sort', 'page', 'queryAttribute', 'source', 'populate'])).where;
+    return await strapi.query(params.model, source).count(conditions);
   },
 
   fetch: async (params, source, populate, raw = true) => {

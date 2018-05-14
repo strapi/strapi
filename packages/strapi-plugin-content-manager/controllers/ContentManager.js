@@ -48,10 +48,10 @@ module.exports = {
   },
 
   count: async ctx => {
-    const { source } = ctx.request.query;
+    const { query } = ctx.request;
 
     // Count using `queries` system
-    const count = await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, source);
+    const count = await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, query);
 
     ctx.body = {
       count: _.isNumber(count) ? count : _.toNumber(count)
