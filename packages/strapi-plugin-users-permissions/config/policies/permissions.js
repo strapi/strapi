@@ -39,7 +39,7 @@ module.exports = async (ctx, next) => {
   }, []);
 
   if (!permission) {
-    ctx.unauthorized();
+    ctx.forbidden();
 
     return ctx.request.graphql = ctx.body;
   }

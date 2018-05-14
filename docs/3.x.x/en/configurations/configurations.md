@@ -196,7 +196,11 @@ Most of the application's configurations are defined by environment. It means th
         "username": "fooUsername",
         "password": "fooPwd"
       },
-      "options": {}
+      "options": {
+        "authenticationDatabase": "",
+        "ssl": true,
+        "minimize": true
+      }
     },
     "postgres": {
       "connector": "strapi-bookshelf",
@@ -209,7 +213,9 @@ Most of the application's configurations are defined by environment. It means th
         "database": "${process.env.PWD}",
         "schema": "public"
       },
-      "options": {}
+      "options": {
+        "debug": true
+      }
     },
     "mysql": {
       "connector": "strapi-bookshelf",
@@ -239,6 +245,9 @@ Most of the application's configurations are defined by environment. It means th
 ```
 
 > Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+
+
+
 
 ***
 
