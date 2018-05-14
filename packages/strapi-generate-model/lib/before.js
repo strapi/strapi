@@ -86,6 +86,12 @@ module.exports = (scope, cb) => {
     };
   });
 
+  // Set collectionName
+  scope.collectionName = _.has(scope.args, 'collectionName') ? scope.args.collectionName : undefined;
+
+  // Set description
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
+
   // Handle invalid action arguments.
   // Send back invalidActions.
   if (invalidAttributes.length) {
