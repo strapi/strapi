@@ -43,5 +43,8 @@ Copy the fields and relations you had in your `/plugins/users-permissions/models
 
 Then, delete your old `plugins` folder and replace it by the new one.
 
+## Update the Dependencies
+
+Now let's update the dependencies in your `package.json` we edited earlier. Simply run `npm install`:
 
 That's all, you have now upgraded to Strapi `alpha.11`.
