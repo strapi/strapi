@@ -1,13 +1,13 @@
-# Migrating from 3.0.0-alpha.11 to 3.0.0-alpha.12
+# Migrating from 3.0.0-alpha.11 to 3.0.0-alpha.12.1
 
-This migration guide is a mix of migrations from 3.0.0-alpha.11.1 to 3.0.0-alpha.11.2, 3.0.0-alpha.11.2 to 3.0.0-alpha.11.3 and from 3.0.0-alpha.11.3 to 3.0.0-alpha.12.
+This migration guide is a mix of migrations from 3.0.0-alpha.11.1 to 3.0.0-alpha.11.2, 3.0.0-alpha.11.2 to 3.0.0-alpha.11.3 and from 3.0.0-alpha.11.3 to 3.0.0-alpha.12.1.
 
 > Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 
 
 ## Getting started
 
-Install Strapi `alpha.12` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.12 -g`.
+Install Strapi `alpha.12.1` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.12.1 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
 
@@ -15,13 +15,13 @@ When it's done, generate a new empty project `strapi new myNewProject` (don't pa
 
 You will have to update just 1 file: `package.json`
 
-- Edit the Strapi's dependencies version: (move Strapi's dependencies to `3.0.0-alpha.12` version) in `package.json` file
+- Edit the Strapi's dependencies version: (move Strapi's dependencies to `3.0.0-alpha.12.1` version) in `package.json` file
 
 ```json
 {
   "dependencies": {
     "lodash": "4.x.x",
-    "strapi": "3.0.0-alpha.12",
+    "strapi": "3.0.0-alpha.12.1",
     "strapi-mongoose": "3.0.0-alpha.12"
   }
 }
@@ -93,4 +93,4 @@ _.forEach(convertedParams.where, (where, key) => {
  qb.limit(convertedParams.limit);
 ```
 
-That's all, you have now upgraded to Strapi `alpha.12`.
+That's all, you have now upgraded to Strapi `alpha.12.1`.
