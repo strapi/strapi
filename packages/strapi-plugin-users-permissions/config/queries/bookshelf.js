@@ -37,7 +37,7 @@ module.exports = {
   },
 
   findOne: async function (params, populate) {
-    const primaryKey = params[this.primaryKey] || params.id;
+    const primaryKey = params[this.primaryKey] || params._id;
 
     if (primaryKey) {
       params = {
@@ -138,8 +138,13 @@ module.exports = {
   },
 
   removePermission: async function (params) {
+    const value = params[this.primaryKey] ? {
+      [this.primaryKey]: params[this.primaryKey] || params.id
+    } : params;
+
     return this
-      .where(params)
+      .forge()
+      .where(value)
       .destroy();
   }
 };
