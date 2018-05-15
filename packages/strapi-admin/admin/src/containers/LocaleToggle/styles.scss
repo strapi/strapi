@@ -1,8 +1,8 @@
 .localeToggle {
-  -webkit-font-smoothing: antialiased;
+  min-width: 90px;
   > div {
     height: 6rem;
-    width: 100%;
+    width: 90px;
     line-height: 6rem;
     z-index: 999;
     > button {
@@ -12,7 +12,6 @@
       border: none;
       border-radius: 0;
       color: #333740;
-      font-size: 14px;
       font-weight: 500;
       text-align: right;
       cursor: pointer;
@@ -33,6 +32,7 @@
       }
     }
   }
+  -webkit-font-smoothing: antialiased;
 }
 
 .localeDropdownContent {
@@ -41,6 +41,7 @@
     font-size: 11px;
     font-family: Lato;
     font-weight: 600;
+    letter-spacing: 0.5;
     text-transform: uppercase;
   }
 
@@ -56,15 +57,16 @@
 
 .localeDropdownMenu {
   left: auto !important;
-  right: -20px !important;
-  min-width: 100%!important;
+  right: -5px !important;
+  min-width: 90px!important;
+  max-height: 162px;
+  overflow: auto !important;
   margin: 0 !important;
   padding: 0;
   line-height: 1.8rem;
   border: none!important;
   border-top-left-radius: 0!important;
   border-top-right-radius: 0!important;
-  font-size: 14px;
   overflow: hidden;
   box-shadow: 0 1px 4px 0px rgba(40, 42, 49, 0.05);
 
@@ -83,7 +85,9 @@
     padding: 0px 15px;
     line-height: 40px;
     color: #F75B1D;
-    font-size: 13px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5;
     &:hover, &:focus, &:active {
       background-color: #FAFAFB!important;
       border-radius: 0px;
@@ -92,16 +96,17 @@
   }
 
   > button:first-child {
-    height: 44px;
-    line-height: 48px;
+    // height: 44px;
+    line-height: 50px;
+    margin-bottom: 4px;
     &:hover, &:active {
       color: #333740;
     }
   }
 
   > button:not(:first-child) {
-    height: 37px;
-    line-height: 37px;
+    height: 36px;
+    line-height: 36px;
     > i {
       margin-left: 10px
     }
