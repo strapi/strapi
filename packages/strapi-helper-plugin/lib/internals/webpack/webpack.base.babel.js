@@ -153,6 +153,7 @@ module.exports = (options) => {
                       require.resolve('babel-plugin-transform-es2015-destructuring'),
                       require.resolve('babel-plugin-transform-es2015-parameters'),
                       require.resolve('babel-plugin-transform-object-rest-spread'),
+                      [require.resolve('babel-plugin-styled-components'), { ssr: true, preprocess: true }],
                     ],
                   },
                   test: {

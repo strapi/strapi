@@ -49,7 +49,7 @@ if (process.env.npm_lifecycle_event === 'start') {
   plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
     let hasAdminFolder;
 
-    // Don't inject the plugins that don't have an admin into the app 
+    // Don't inject the plugins that don't have an admin into the app
     try {
       fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
       hasAdminFolder = true;
@@ -144,6 +144,7 @@ module.exports = require('./webpack.base.babel')({
     'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
     'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
     'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
+    'styled-components': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'styled-components')
   },
 
   // Emit a source map for easier debugging
