@@ -10,7 +10,7 @@ To get started with GraphQL in your app, please install the plugin first. To do 
 strapi install graphql
 ```
 
-Then, start your app and open your browser at [http://localhost:1337/graphiql](http://localhost:1337/graphiql). You should see the interface (GraphiQL) that will help you to write GraphQL query to explore your data.
+Then, start your app and open your browser at [http://localhost:1337/playground](http://localhost:1337/playground). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
 
 > Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
 
