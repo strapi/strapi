@@ -1,11 +1,11 @@
 /**
- * CtaWrapper
+ * CTAWrapper
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function CtaWrapper({ children }) {
+function CTAWrapper({ children }) {
   return <div style={style}>{children}</div>;
 }
 
@@ -17,8 +17,8 @@ const style = {
   zIndex: '999',
 };
 
-CtaWrapper.propTypes = {
+CTAWrapper.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export default CtaWrapper;
+export default CTAWrapper;

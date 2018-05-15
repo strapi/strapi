@@ -38,7 +38,7 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import LocaleToggle from 'containers/LocaleToggle';
-import CtaWrapper from 'components/CtaWrapper';
+import CTAWrapper from 'components/CTAWrapper';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage/Loadable';
 import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
@@ -170,11 +170,11 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
             version={adminPage.strapiVersion}
           />
         )}
-        <CtaWrapper>
+        <CTAWrapper>
           {this.shouldDisplayLogout() && <Logout />}
           {this.shouldDisplayLogout() && <div className={styles.adminPageSeparator} />}
           <LocaleToggle />
-        </CtaWrapper>
+        </CTAWrapper>
         <div className={styles.adminPageRightWrapper} style={style}>
           {header}
           <Content {...this.props} showLeftMenu={this.showLeftMenu()}>
