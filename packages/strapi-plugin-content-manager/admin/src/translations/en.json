@@ -15,8 +15,10 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 
+  "components.AddFilterCTA.add": "Add filter",
+
   "EditRelations.title": "Relational data",
-  
+
   "emptyAttributes.title": "There are no fields yet",
   "emptyAttributes.description": "Add your first field to your Content Type",
   "emptyAttributes.button": "Go to content type builder",

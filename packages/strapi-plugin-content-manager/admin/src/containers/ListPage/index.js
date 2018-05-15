@@ -23,6 +23,8 @@ import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 
 // Components from the plugin itself
+import AddFilterCTA from 'components/AddFilterCTA';
+import FiltersWrapper from 'components/FiltersWrapper';
 import Table from 'components/Table';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
@@ -223,6 +225,13 @@ export class ListPage extends React.Component {
               id: listPage.currentModel || 'Content Manager',
             }}
           />
+          <div className={cn('row', styles.row)}>
+            <div className="col-md-12">
+              <FiltersWrapper>
+                <AddFilterCTA />
+              </FiltersWrapper>
+            </div>
+          </div>
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
               <Table

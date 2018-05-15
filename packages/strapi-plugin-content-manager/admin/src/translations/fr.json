@@ -16,6 +16,8 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
+  "components.AddFilterCTA.add": "Ajouter un filtre",
+
   "EditRelations.title": "Données associées",
 
   "emptyAttributes.title": "Il n'y a pas encore de champs",
