@@ -1,4 +1,4 @@
-import { get, filter, isNumber, size, split, isEmpty, has, map, concat } from 'lodash';
+import { get, filter, isNumber, size, split, isEmpty, has, map, concat, includes } from 'lodash';
 
 export default function checkAttributeValidations(errors) {
 
@@ -60,7 +60,7 @@ export default function checkAttributeValidations(errors) {
     '_posts',
   ];
 
-  if (reserved.includes(get(this.props.modifiedDataAttribute, 'name'))) {
+  if (includes(reserved, get(this.props.modifiedDataAttribute, 'name'))) {
     formErrors.push({ name: 'name', errors: [{ id: 'content-type-builder.error.attribute.forbidden' }]});
   }
 
