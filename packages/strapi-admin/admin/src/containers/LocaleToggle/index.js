@@ -8,6 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
+import { bindActionCreators } from 'redux';
+import cn from 'classnames';
 
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 
@@ -36,11 +38,6 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
   render() {
     const { locale } = this.props;
-    // const messages = languages.reduce((result, locale) => {
-    //   const resultsObj = result;
-    //   resultsObj[locale] = locale.toUpperCase();
-    //   return resultsObj;
-    // }, {});
 
     return (
       <div className={styles.localeToggle}>
@@ -51,8 +48,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
           </DropdownToggle>
           <DropdownMenu className={styles.localeDropdownMenu}>
             {languages.map(language => (
-              <DropdownItem key={language} onClick={() => this.props.onLocaleToggle(language)} className={styles.localeToggleItem}>
-                {language}
+              <DropdownItem key={language} onClick={() => this.props.changeLocale(language)} className={cn(styles.localeToggleItem, locale === language ? styles.localeToggleItemActive : '')}>
+                {language.toUpperCase()}
               </DropdownItem>
             ))}
           </DropdownMenu>
@@ -65,8 +62,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
 
 LocaleToggle.propTypes = {
+  changeLocale: PropTypes.func.isRequired,
   locale: PropTypes.string.isRequired,
-  onLocaleToggle: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createSelector(
@@ -74,11 +71,13 @@ const mapStateToProps = createSelector(
   (locale) => ({ locale })
 );
 
-export function mapDispatchToProps(dispatch) {
-  return {
-    onLocaleToggle: (locale) => dispatch(changeLocale(locale)),
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      changeLocale,
+    },
     dispatch,
-  };
+  );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LocaleToggle);

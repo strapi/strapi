@@ -1,8 +1,3 @@
-// .localeToggle {
-//   float: right;
-// }
-
-
 .localeToggle {
   -webkit-font-smoothing: antialiased;
   > div {
@@ -52,6 +47,7 @@
   img {
     max-height: 13.37px;
     margin-left: 9px;
+    border-radius: 1px;
   }
 
   -webkit-font-smoothing: antialiased;
@@ -60,7 +56,7 @@
 
 .localeDropdownMenu {
   left: auto !important;
-  right: -5px !important;
+  right: -20px !important;
   min-width: 100%!important;
   margin: 0 !important;
   padding: 0;
@@ -86,6 +82,8 @@
     height: 40px;
     padding: 0px 15px;
     line-height: 40px;
+    color: #F75B1D;
+    font-size: 13px;
     &:hover, &:focus, &:active {
       background-color: #FAFAFB!important;
       border-radius: 0px;
@@ -102,7 +100,8 @@
   }
 
   > button:not(:first-child) {
-    color: #F75B1D;
+    height: 37px;
+    line-height: 37px;
     > i {
       margin-left: 10px
     }
@@ -119,4 +118,8 @@
   &:hover {
     background-color: #FAFAFB !important;
   }
+}
+
+.localeToggleItemActive {
+  color: #333740 !important;
 }
