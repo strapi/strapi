@@ -24,6 +24,7 @@ import PopUpWarning from 'components/PopUpWarning';
 
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
+import FilterOptions from 'components/FilterOptions';
 import FiltersWrapper from 'components/FiltersWrapper';
 import Table from 'components/Table';
 
@@ -32,7 +33,13 @@ import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 
-import { changeParams, deleteData, getData, setParams } from './actions';
+import {
+  changeParams,
+  deleteData,
+  getData,
+  onToggleFilters,
+  setParams,
+} from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -189,7 +196,7 @@ export class ListPage extends React.Component {
   };
 
   render() {
-    const { listPage, listPage: { params } } = this.props;
+    const { listPage, listPage: { params, showFilter } } = this.props;
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -228,7 +235,8 @@ export class ListPage extends React.Component {
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
               <FiltersWrapper>
-                <AddFilterCTA />
+                <AddFilterCTA onClick={this.props.onToggleFilters} />
+                {showFilter && <FilterOptions />}
               </FiltersWrapper>
             </div>
           </div>
@@ -283,6 +291,7 @@ ListPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.object.isRequired,
+  onToggleFilters: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   setParams: PropTypes.func.isRequired,
 };
@@ -293,6 +302,7 @@ function mapDispatchToProps(dispatch) {
       changeParams,
       deleteData,
       getData,
+      onToggleFilters,
       setParams,
     },
     dispatch,

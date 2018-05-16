@@ -1,9 +1,8 @@
 import styled from 'styled-components';
-import Logo from '../../assets/images/icon_filter.png';
 
-const Button = styled.div`
+const CustomButton = styled.button`
   height: 30px;
-  width: 99px;
+  padding: 0 10px;
   text-align: center;
   background-color: #FFFFFF;
   border: 1px solid #E3E9F3;
@@ -17,9 +16,12 @@ const Button = styled.div`
   &:hover {
     background: #F7F8F8;
   }
-  &:before {
-    content: url(${Logo});
+
+  img {
+    margin-top: -3px;
+    margin-right: 10px;
+    height: 9px;
   }
 `;
 
-export default Button;
+export default CustomButton;

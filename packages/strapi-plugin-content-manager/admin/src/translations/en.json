@@ -16,6 +16,7 @@
   "containers.List.errorFetchRecords": "Error",
 
   "components.AddFilterCTA.add": "Add filter",
+  "components.FilterOptions.button.apply": "Apply",
 
   "EditRelations.title": "Relational data",
 

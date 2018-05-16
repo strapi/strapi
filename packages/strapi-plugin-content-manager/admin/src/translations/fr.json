@@ -17,6 +17,7 @@
   "containers.List.errorFetchRecords": "Erreur",
 
   "components.AddFilterCTA.add": "Ajouter un filtre",
+  "components.FilterOptions.button.apply": "Appliquer",
 
   "EditRelations.title": "Données associées",
 

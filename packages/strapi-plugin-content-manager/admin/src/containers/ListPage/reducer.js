@@ -12,6 +12,7 @@ import {
   DELETE_DATA_SUCCESS,
   GET_DATA_SUCCEEDED,
   SET_PARAMS,
+  ON_TOGGLE_FILTERS,
 } from './constants';
 
 const initialState = fromJS({
@@ -22,6 +23,7 @@ const initialState = fromJS({
     sort: '',
   }),
   records: List([]),
+  showFilter: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -46,6 +48,8 @@ function listPageReducer(state = initialState, action) {
         .update('records', () => List(action.data[1]));
     case SET_PARAMS:
       return state.update('params', () => Map(action.params));
+    case ON_TOGGLE_FILTERS:
+      return state.update('showFilter', v => !v);
     default:
       return state;
   }

@@ -11,6 +11,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   SET_PARAMS,
+  ON_TOGGLE_FILTERS,
 } from './constants';
 
 export function changeParams({ target }) {
@@ -56,5 +57,11 @@ export function setParams(params) {
   return {
     type: SET_PARAMS,
     params,
+  };
+}
+
+export function onToggleFilters() {
+  return {
+    type: ON_TOGGLE_FILTERS,
   };
 }
