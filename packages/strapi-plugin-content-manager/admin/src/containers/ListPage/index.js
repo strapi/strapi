@@ -24,7 +24,7 @@ import PopUpWarning from 'components/PopUpWarning';
 
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
-import FilterOptions from 'components/FilterOptions';
+import FiltersPickWrapper from 'components/FiltersPickWrapper';
 import FiltersWrapper from 'components/FiltersWrapper';
 import Table from 'components/Table';
 
@@ -48,7 +48,7 @@ import makeSelectListPage from './selectors';
 import styles from './styles.scss';
 
 export class ListPage extends React.Component {
-  state = { showWarning: false, target: '' };
+  state = { showWarning: false, target: '', showHeader: true };
 
   componentDidMount() {
     this.getData(this.props);
@@ -56,13 +56,19 @@ export class ListPage extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { location: { pathname, search } } = prevProps;
+    const { listPage: { showFilter } } = this.props;
 
     if (pathname !== this.props.location.pathname) {
       this.getData(this.props);
+      this.shouldDisplayPluginHeader();
     }
 
     if (search !== this.props.location.search) {
       this.getData(this.props);
+    }
+
+    if (prevProps.listPage.showFilter !== showFilter) {
+      this.hidePluginHeader(showFilter);
     }
   }
 
@@ -100,6 +106,26 @@ export class ListPage extends React.Component {
    * @return {String} the model's source
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source') || 'content-manager';
+
+  hidePluginHeader = (showFilter) => {
+    if (showFilter) {
+      this.setState(prevState => ({ showHeader: !prevState.showHeader }));
+    } else {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.setState({ showHeader: true });
+          resolve();
+        }, 400);
+      });
+    }
+  }
+
+  shouldDisplayPluginHeader = () => {
+    if (this.props.listPage.showFilter) {
+      this.props.onToggleFilters();
+      this.setState({ showHeader: true });
+    }
+  }
 
   /**
    *  Function to generate the Table's headers
@@ -219,26 +245,28 @@ export class ListPage extends React.Component {
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
-          <PluginHeader
-            actions={pluginHeaderActions}
-            description={{
-              id:
+          <FiltersPickWrapper show={showFilter} />
+          {this.state.showHeader && (
+            <PluginHeader
+              actions={pluginHeaderActions}
+              description={{
+                id:
                 listPage.count > 1
                   ? 'content-manager.containers.List.pluginHeaderDescription'
                   : 'content-manager.containers.List.pluginHeaderDescription.singular',
-              values: {
-                label: listPage.count,
-              },
-            }}
-            title={{
-              id: listPage.currentModel || 'Content Manager',
-            }}
-          />
+                values: {
+                  label: listPage.count,
+                },
+              }}
+              title={{
+                id: listPage.currentModel || 'Content Manager',
+              }}
+            />
+          )}
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
               <FiltersWrapper>
                 <AddFilterCTA onClick={this.props.onToggleFilters} />
-                {showFilter && <FilterOptions />}
               </FiltersWrapper>
             </div>
           </div>
