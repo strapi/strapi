@@ -13,7 +13,7 @@ module.exports = {
     try {
       ctx.send({ currentEnvironment: strapi.app.env });
     } catch(err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
@@ -31,7 +31,7 @@ module.exports = {
       const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);
       ctx.send({ allowGa });
     } catch(err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
@@ -41,7 +41,7 @@ module.exports = {
 
       return ctx.send({ layout });
     } catch(err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
@@ -61,7 +61,7 @@ module.exports = {
       strapi.reload();
     } catch(err) {
       strapi.reload.isWatching = true;
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
@@ -75,7 +75,7 @@ module.exports = {
 
       ctx.send({ plugins });
     } catch(err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
@@ -94,7 +94,7 @@ module.exports = {
       strapi.reload();
     } catch(err) {
       strapi.reload.isWatching = true;
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
+      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   }
 };
