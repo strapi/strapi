@@ -56,7 +56,7 @@ module.exports = {
                           [current]: null
                         },
                         parseRelationships: false
-                      })
+                      });
                     }
 
                     return Promise.resolve();
@@ -68,7 +68,7 @@ module.exports = {
                         [details.via]: null
                       },
                       parseRelationships: false
-                    })
+                    });
                   })
                   .then(() => {
                     if (!_.isNull(params.values[current])) {
@@ -167,11 +167,11 @@ module.exports = {
                 ref: obj.refId,
                 kind: globalId,
                 [association.filter]: obj.field
-              }
+              };
             });
             break;
           case 'oneToManyMorph':
-          case 'manyToManyMorph':
+          case 'manyToManyMorph': {
             const transformToArrayID = (array) => {
               if (_.isArray(array)) {
                 return array.map(value => {
@@ -180,7 +180,7 @@ module.exports = {
                   }
 
                   return value;
-                })
+                });
               }
 
               if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
@@ -225,6 +225,7 @@ module.exports = {
               );
             });
             break;
+          }
           case 'oneMorphToOne':
           case 'oneMorphToMany':
             break;
@@ -334,4 +335,4 @@ module.exports = {
       values: entry
     });
   }
-}
+};

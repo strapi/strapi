@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+/* eslint-disable prefer-template */
 // Node.js core.
 const path = require('path');
 const util = require('util');

@@ -7,14 +7,12 @@
  */
 
 // Node.js core.
-const cp = require('child_process');
 const path = require('path');
 const cluster = require('cluster');
 
 // Public dependencies
-const _ = require('lodash');
 const fs = require('fs');
-const semver = require('semver')
+const _ = require('lodash');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -31,13 +29,13 @@ module.exports = function() {
   if (!cli.isStrapiApp()) {
     return logger.error('This command can only be used inside a Strapi project.');
   }
-  
+
   try {
     const strapi = function () {
       try {
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
       } catch (e) {
-        return require('strapi');
+        return require('strapi'); // eslint-disable-line import/no-unresolved
       }
     }();
 
@@ -79,7 +77,7 @@ module.exports = function() {
 
           const filePath = `${src}/${file}`;
           if (fs.statSync(filePath).isDirectory()) setFilesToWatch(filePath);
-          else fs.watchFile(filePath, (evt, path) => restart(filePath));
+          else fs.watchFile(filePath, () => restart(filePath));
         });
       };
 

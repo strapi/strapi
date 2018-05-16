@@ -135,10 +135,12 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const handleToggle = this.props.toggle;
     const modalFooter = this.props.noButtons ? <div className={styles.modalFooter} />
-      : <ModalFooter className={styles.modalFooter}>
-        <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
-        {loader}{' '}
-      </ModalFooter>;
+      : (
+        <ModalFooter className={styles.modalFooter}>
+          <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
+          {loader}{' '}
+        </ModalFooter>
+      );
 
     return (
       <div className={styles.popUpForm}>

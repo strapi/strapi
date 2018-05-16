@@ -15,11 +15,11 @@ const _ = require('lodash');
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
-// Local Strapi dependencies.
-const packageJSON = require('../package.json');
-
 // Logger.
 const logger = require('strapi-utils').logger;
+
+// Local Strapi dependencies.
+const packageJSON = require('../package.json');
 
 /**
  * `$ strapi new`
@@ -61,7 +61,7 @@ module.exports = function (name, cliArguments) {
         password: cliArguments.dbpassword
       },
       options: {}
-    }
+    };
   }
 
   // Return the scope and the response (`error` or `success`).

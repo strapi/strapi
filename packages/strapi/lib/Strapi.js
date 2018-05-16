@@ -1,19 +1,21 @@
 'use strict';
 
 // Dependencies.
-const Koa = require('koa');
-const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get, assign, forEach, cloneDeep, toLower } = require('lodash');
+const { EventEmitter } = require('events');
+const Koa = require('koa');
+const { includes, get, assign, toLower } = require('lodash');
 const { logger, models } = require('strapi-utils');
+const stackTrace = require('stack-trace');
+const utils = require('./utils');
 const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, store } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
-const { EventEmitter } = require('events');
-const stackTrace = require('stack-trace');
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-console */
 /**
  * Construct an Strapi instance.
  *
@@ -85,7 +87,7 @@ class Strapi extends EventEmitter {
 
   async start(config = {}, cb) {
     try {
-      this.config = assign(this.config, config)
+      this.config = assign(this.config, config);
 
       // Emit starting event.
       this.emit('server:starting');
@@ -139,7 +141,7 @@ class Strapi extends EventEmitter {
       connections[key] = conn;
 
       conn.on('close', function() {
-       delete connections[key];
+        delete connections[key];
       });
     });
 
@@ -159,7 +161,7 @@ class Strapi extends EventEmitter {
 
       for (let key in connections) {
         connections[key].destroy();
-      };
+      }
     };
   }
 
@@ -287,7 +289,7 @@ class Strapi extends EventEmitter {
 
     return Promise.all(
       Object.values(this.plugins)
-      .map(x => execBootstrap(get(x, 'config.functions.bootstrap')))
+        .map(x => execBootstrap(get(x, 'config.functions.bootstrap')))
     ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
@@ -324,7 +326,7 @@ class Strapi extends EventEmitter {
     // Get stack trace.
     const stack = stackTrace.get()[1];
     const file = stack.getFileName();
-    const method = stack.getFunctionName();
+    // const method = stack.getFunctionName();
 
     // Extract plugin path.
     let pluginPath = undefined;

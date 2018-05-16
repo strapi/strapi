@@ -10,6 +10,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 
+/* eslint-disable prefer-template */
 // Array of supported clients.
 const CLIENTS = [
   'pg',

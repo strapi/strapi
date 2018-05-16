@@ -9,8 +9,8 @@
  */
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs');
+const _ = require('lodash');
 
 module.exports = async cb => {
   // set plugin store
@@ -59,7 +59,7 @@ module.exports = async cb => {
 
       cb();
     });
-  }
+  };
 
   // Load providers from the plugins' node_modules.
   loadProviders(path.join(strapi.config.appPath, 'plugins', 'upload'), () => {

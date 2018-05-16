@@ -18,7 +18,7 @@ const transformToArrayID = (array) => {
       }
 
       return value;
-    })
+    });
   }
 
   if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
@@ -33,7 +33,7 @@ module.exports = {
     return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
   },
 
-  findOne: async function (params, populate, raw = true) {
+  findOne: async function (params, populate) {
     const record = await this
       .forge({
         [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey)
@@ -48,12 +48,12 @@ module.exports = {
     if (_.isEmpty(populate)) {
       const arrayOfPromises = this.associations
         .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
-        .map(association => {
+        .map(() => {
           return this.morph.forge()
             .where({
               [`${this.collectionName}_id`]: getValuePrimaryKey(params, this.primaryKey)
             })
-            .fetchAll()
+            .fetchAll();
         });
 
       const related = await Promise.all(arrayOfPromises);
@@ -92,7 +92,7 @@ module.exports = {
 
               // Remove relation in the user side.
               virtualFields.push(
-                 module.exports.findOne
+                module.exports.findOne
                   .call(model, { [model.primaryKey]: recordId }, [details.via])
                   .then(record => {
                     if (record && _.isObject(record[details.via])) {
@@ -102,7 +102,7 @@ module.exports = {
                           [current]: null
                         },
                         parseRelationships: false
-                      })
+                      });
                     }
 
                     return Promise.resolve();
@@ -114,7 +114,7 @@ module.exports = {
                         [details.via]: null
                       },
                       parseRelationships: false
-                    })
+                    });
                   })
                   .then(() => {
                     if (!_.isNull(params.values[current])) {
@@ -201,15 +201,15 @@ module.exports = {
                     refId: obj.refId,
                     field: obj.field
                   })
-                  .then(() =>
-                    module.exports.addRelationMorph.call(this, {
-                      id: response[this.primaryKey],
-                      alias: association.alias,
-                      ref: model.collectionName,
-                      refId: obj.refId,
-                      field: obj.field
-                    })
-                  )
+                    .then(() =>
+                      module.exports.addRelationMorph.call(this, {
+                        id: response[this.primaryKey],
+                        alias: association.alias,
+                        ref: model.collectionName,
+                        refId: obj.refId,
+                        field: obj.field
+                      })
+                    )
                 );
               } else {
                 virtualFields.push(module.exports.addRelationMorph.call(this, {
@@ -223,7 +223,7 @@ module.exports = {
             });
             break;
           case 'oneToManyMorph':
-          case 'manyToManyMorph':
+          case 'manyToManyMorph': {
             // Compare array of ID to find deleted files.
             const currentValue = transformToArrayID(response[current]).map(id => id.toString());
             const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
@@ -258,6 +258,7 @@ module.exports = {
               );
             });
             break;
+          }
           case 'oneMorphToOne':
           case 'oneMorphToMany':
             break;
@@ -359,11 +360,11 @@ module.exports = {
     }
 
     return await this.morph.forge({
-        [`${this.collectionName}_id`]: params.id,
-        [`${params.alias}_id`]: params.refId,
-        [`${params.alias}_type`]: params.ref,
-        field: params.field
-      })
+      [`${this.collectionName}_id`]: params.id,
+      [`${params.alias}_id`]: params.refId,
+      [`${params.alias}_type`]: params.ref,
+      field: params.field
+    })
       .save();
   },
 
@@ -377,4 +378,4 @@ module.exports = {
       }, _.isEmpty))
       .destroy();
   }
-}
+};

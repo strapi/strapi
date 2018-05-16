@@ -10,17 +10,22 @@ const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
+// Strapi helpers for models.
+const { models: utilsModels }  = require('strapi-utils');
+
+
 // Local helpers.
 const utils = require('./utils/');
 const relations = require('./relations');
-
-// Strapi helpers for models.
-const { models: utilsModels, logger }  = require('strapi-utils');
 
 /**
  * Mongoose hook
  */
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-case-declarations */
+/* eslint-disable no-const-assign */
+/* eslint-disable no-unused-vars */
 module.exports = function (strapi) {
   const hook = _.merge({
 
@@ -48,7 +53,7 @@ module.exports = function (strapi) {
         const { authenticationDatabase, ssl } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
-        const connectOptions = {}
+        const connectOptions = {};
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -122,12 +127,12 @@ module.exports = function (strapi) {
                                 this._mongooseOptions.populate[association.alias].match = {
                                   [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
-                                }
+                                };
 
                                 // Select last related to an entity.
                                 this._mongooseOptions.populate[association.alias].options = {
                                   sort: '-createdAt'
-                                }
+                                };
                               } else {
                                 this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                               }
@@ -161,7 +166,7 @@ module.exports = function (strapi) {
                   _.forEach(postLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
                       collection.schema.post(key, function (doc, next) {
-                        target[model.toLowerCase()][fn](this, doc).then(next).catch(err => strapi.log.error(err))
+                        target[model.toLowerCase()][fn](this, doc).then(next).catch(err => strapi.log.error(err));
                       });
                     }
                   });
@@ -445,7 +450,7 @@ module.exports = function (strapi) {
       });
     },
 
-    getQueryParams: (value, type, key) => {
+    getQueryParams: (value, type, key) => {
       const result = {};
 
       switch (type) {

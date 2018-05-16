@@ -144,7 +144,6 @@ InputSelectWithErrors.defaultProps = {
   labelStyle: {},
   onBlur: false,
   onFocus: () => {},
-  selectOptions: [],
   style: {},
   tabIndex: '0',
   validations: {},

@@ -19,7 +19,8 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const isSetup = process.env.IS_MONOREPO;
 
 const rootAdminpath = (() => {
   if (isSetup) {

@@ -6,7 +6,7 @@ module.exports = {
       _.forEach(params.where, (where, key) => {
         if (_.isArray(where.value)) {
           for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }
         } else {
           qb.where(key, where.symbol, where.value);
@@ -29,13 +29,13 @@ module.exports = {
     });
   },
 
-  count: async function (params) {
+  count: async function () {
     return await this
       .forge()
       .count();
   },
 
-  findOne: async function (params, populate, raw = true) {
+  findOne: async function (params, populate) {
     const record = await this
       .forge({
         [this.primaryKey]: params[this.primaryKey]
@@ -50,12 +50,12 @@ module.exports = {
     if (_.isEmpty(populate)) {
       const arrayOfPromises = this.associations
         .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
-        .map(association => {
+        .map(association => { // eslint-disable-line no-unused-vars
           return this.morph.forge()
             .where({
               [`${this.collectionName}_id`]: params[this.primaryKey]
             })
-            .fetchAll()
+            .fetchAll();
         });
 
       const related = await Promise.all(arrayOfPromises);
@@ -82,7 +82,7 @@ module.exports = {
       .forge(values)
       .save()
       .catch((err) => {
-        if (err.detail) {
+        if (err.detail) {
           const field = _.last(_.words(err.detail.split('=')[0]));
           err = { message: `This ${field} is already taken`, field };
         }

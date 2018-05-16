@@ -267,7 +267,7 @@ export class ListPage extends React.Component {
                   cancel: 'content-manager.popUpWarning.button.cancel',
                   confirm: 'content-manager.popUpWarning.button.confirm',
                 }}
-                popUpWarningType={'danger'}
+                popUpWarningType="danger"
                 onConfirm={this.handleDelete}
               />
               <PageFooter

@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path')
+const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
@@ -111,7 +111,7 @@ module.exports = {
     };
   },
 
-  getConnections: () => {
+  getConnections: () => {
     return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
@@ -125,7 +125,7 @@ module.exports = {
         rootPath: strapi.config.appPath,
         args: {
           api: name,
-          description: _.replace(description, /\"/g, '\\"'),
+          description: _.replace(description, /\"/g, '\\"'), // eslint-disable-line no-useless-escape
           attributes,
           connection,
           collectionName: !_.isEmpty(collectionName) ? collectionName : undefined,
@@ -190,7 +190,7 @@ module.exports = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
             via,
             plugin: 'upload'
-          }
+          };
         }
       } else if (_.has(attribute, 'params.target')) {
         const relation = attribute.params;
@@ -359,13 +359,15 @@ module.exports = {
                 break;
               case 'manyToOne':
                 attr.collection = model.toLowerCase();
-              case 'manyToMany':
+                break;
+              case 'manyToMany': {
                 attr.collection = model.toLowerCase();
 
                 if (!params.dominant) {
                   attr.dominant = true;
                 }
                 break;
+              }
               default:
             }
 
@@ -457,7 +459,7 @@ module.exports = {
           }
         }
       }
-    }
+    };
 
     const recurciveDeleteFiles = folderPath => {
       try {
@@ -493,7 +495,7 @@ module.exports = {
           }
         });
       }
-    }
+    };
 
     recurciveDeleteFiles(apiPath);
 

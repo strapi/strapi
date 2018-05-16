@@ -22,7 +22,7 @@ const Purest = require('purest');
  */
 
 exports.connect = (provider, query) => {
-  const access_token = query.access_token || query.code || query.oauth_token;
+  const access_token = query.access_token || query.code || query.oauth_token;
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
@@ -97,7 +97,7 @@ exports.connect = (provider, query) => {
  */
 
 const getProfile = async (provider, query, callback) => {
-  const access_token = query.access_token || query.code || query.oauth_token;
+  const access_token = query.access_token || query.code || query.oauth_token;
 
   const grant = await strapi.store({
     environment: '',
@@ -107,7 +107,7 @@ const getProfile = async (provider, query, callback) => {
   }).get();
 
   switch (provider) {
-    case 'facebook':
+    case 'facebook': {
       const facebook = new Purest({
         provider: 'facebook'
       });
@@ -123,7 +123,8 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
-    case 'google':
+    }
+    case 'google': {
       const google = new Purest({
         provider: 'google'
       });
@@ -139,7 +140,8 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
-    case 'github':
+    }
+    case 'github': {
       const github = new Purest({
         provider: 'github',
         defaults: {
@@ -169,7 +171,8 @@ const getProfile = async (provider, query, callback) => {
         });
       });
       break;
-    case 'twitter':
+    }
+    case 'twitter': {
       const twitter = new Purest({
         provider: 'twitter',
         key: grant.twitter.key,
@@ -187,10 +190,11 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
+    }
     default:
       callback({
         message: 'Unknown provider.'
       });
       break;
   }
-}
+};

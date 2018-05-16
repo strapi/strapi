@@ -9,11 +9,13 @@
 // Public node modules.
 const _ = require('lodash');
 
+// Strapi utilities.
+const program = require('strapi-utils').commander;
+
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
 
-// Strapi utilities.
-const program = require('strapi-utils').commander;
+/* eslint-disable no-console */
 
 /**
  * Normalize version argument
@@ -121,7 +123,7 @@ program
   .command('generate:plugin <id>')
   .option('-n, --name <name>', 'Plugin name')
   .description('generate a basic plugin')
-    .action(require('./strapi-generate'));
+  .action(require('./strapi-generate'));
 
 // `$ strapi install`
 program

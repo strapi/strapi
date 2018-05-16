@@ -83,7 +83,7 @@ module.exports = {
         resolve(null);
       } else {
         bcrypt.hash(user.password, 10, (err, hash) => {
-          resolve(hash)
+          resolve(hash);
         });
       }
     });
