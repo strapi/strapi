@@ -19,7 +19,7 @@
     "generate": "node ./node_modules/plop/plop.js --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo \"Error: no test specified\"",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "devDependencies": {
     "react-select": "^1.0.0-rc.5",
