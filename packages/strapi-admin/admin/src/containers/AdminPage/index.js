@@ -37,6 +37,8 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 // Design
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
+import LocaleToggle from 'containers/LocaleToggle';
+import CTAWrapper from 'components/CtaWrapper';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage/Loadable';
 import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
@@ -90,17 +92,17 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
 
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
-      this.checkLogin(nextProps);
+      this.checkLogin(nextProps, true);
     }
   }
 
-  checkLogin = (props) => {
+  checkLogin = (props, skipAction = false) => {
     if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
-    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'auth/register') && this.hasAdminUser(props)) {
+    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'auth/register') && this.hasAdminUser(props) && !skipAction) {
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
@@ -136,6 +138,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
   isUrlProtected = (props) => !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
+  shouldDisplayLogout = () => auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props);
+
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   retrievePlugins = () => {
@@ -166,9 +170,11 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
             version={adminPage.strapiVersion}
           />
         )}
-        { auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props) ? (
-          <Logout />
-        ) : ''}
+        <CTAWrapper>
+          {this.shouldDisplayLogout() && <Logout />}
+          {this.shouldDisplayLogout() && <div className={styles.adminPageSeparator} />}
+          <LocaleToggle />
+        </CTAWrapper>
         <div className={styles.adminPageRightWrapper} style={style}>
           {header}
           <Content {...this.props} showLeftMenu={this.showLeftMenu()}>
