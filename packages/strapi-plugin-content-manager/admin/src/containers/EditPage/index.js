@@ -81,8 +81,8 @@ export class EditPage extends React.Component {
     this.props.setFileRelations(fileRelations);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
+  componentDidUpdate(prevProps) {
+    if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
 

@@ -54,13 +54,15 @@ export class ListPage extends React.Component {
     this.getData(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.location.pathname !== this.props.location.pathname) {
-      this.getData(nextProps);
+  componentDidUpdate(prevProps) {
+    const { location: { pathname, search } } = prevProps;
+
+    if (pathname !== this.props.location.pathname) {
+      this.getData(this.props);
     }
 
-    if (nextProps.location.search !== this.props.location.search) {
-      this.getData(nextProps);
+    if (search !== this.props.location.search) {
+      this.getData(this.props);
     }
   }
 
