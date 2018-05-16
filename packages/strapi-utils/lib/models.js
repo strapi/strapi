@@ -47,6 +47,14 @@ module.exports = {
   },
 
   /**
+   * Retrieve the value based on the primary key
+   */
+
+  getValuePrimaryKey: (value, defaultKey) => {
+    return value[defaultKey] || value.id || value._id;
+  },
+
+  /**
    * Find primary key per ORM
    */
 

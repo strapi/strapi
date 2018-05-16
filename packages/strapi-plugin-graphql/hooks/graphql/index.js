@@ -8,11 +8,12 @@
 const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
-const { graphqlKoa, graphiqlKoa } = require('apollo-server-koa');
+const { graphqlKoa } = require('apollo-server-koa');
+const koaPlayground = require('graphql-playground-middleware-koa').default;
 
 module.exports = strapi => {
   return {
-    beforeInitialize: async function() {
+    beforeInitialize: async function(){
       // Try to inject this hook just after the others hooks to skip the router processing.
       if (!_.get(strapi.config.hook.load, 'after')) {
         _.set(strapi.config.hook.load, 'after', []);
@@ -68,14 +69,14 @@ module.exports = strapi => {
        */
 
       // Set path with initial state.
-      _.set(strapi.plugins.graphql, 'config._schema.graphql', { definition: ``, query: ``, type : {}, resolver: {} });
+      _.set(strapi.plugins.graphql, 'config._schema.graphql', { definition: '', query: '', type : {}, resolver: {} });
 
       // Merge user API.
       Object.keys(strapi.api || {}).reduce((acc, current) => {
         const { definition, query, type, resolver } = _.get(strapi.api[current], 'config.schema.graphql', {});
 
-        acc.definition += definition || ``;
-        acc.query += query || ``;
+        acc.definition += definition || '';
+        acc.query += query || '';
 
         return _.merge(acc, {
           type,
@@ -87,8 +88,8 @@ module.exports = strapi => {
       Object.keys(strapi.plugins || {}).reduce((acc, current) => {
         const { definition, query, type, resolver } = _.get(strapi.plugins[current], 'config.schema.graphql', {});
 
-        acc.definition += definition || ``;
-        acc.query += query || ``;
+        acc.definition += definition || '';
+        acc.query += query || '';
 
         return _.merge(acc, {
           type,
@@ -101,7 +102,7 @@ module.exports = strapi => {
       const schema = strapi.plugins.graphql.services.graphql.generateSchema();
 
       if (_.isEmpty(schema)) {
-        strapi.log.warn(`GraphQL schema has not been generated because it's empty`);
+        strapi.log.warn('GraphQL schema has not been generated because it\'s empty');
 
         return cb();
       }
@@ -111,9 +112,9 @@ module.exports = strapi => {
       router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
       router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
 
-      // Disable GraphiQL in production environment.
+      // Disable GraphQL Playground in production environment.
       if (strapi.config.environment !== 'production') {
-        router.get('/graphiql', graphiqlKoa({ endpointURL: strapi.plugins.graphql.config.endpoint }));
+        router.get('/playground', koaPlayground({ endpoint: strapi.plugins.graphql.config.endpoint}));
       }
 
       strapi.app.use(router.middleware());

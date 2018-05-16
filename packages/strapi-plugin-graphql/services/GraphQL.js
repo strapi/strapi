@@ -544,14 +544,9 @@ module.exports = {
             if (association.type === 'model') {
               params.id = obj[association.alias];
             } else {
-              // Get attribute.
-              const attr = association.plugin ?
-                strapi.plugins[association.plugin].models[params.model].attributes[association.via]:
-                strapi.models[params.model].attributes[association.via];
-
               // Get refering model.
-              const ref = attr.plugin ?
-                strapi.plugins[attr.plugin].models[params.model]:
+              const ref = association.plugin ?
+                strapi.plugins[association.plugin].models[params.model]:
                 strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
