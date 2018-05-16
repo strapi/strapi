@@ -41,24 +41,24 @@ module.exports = (scope, success, error) => {
           name: 'confirm',
           message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
         }])
-        .then(({confirm}) => {
-          if (confirm) {
-            next();
-          } else {
-            error();
-          }
-        });
+          .then(({confirm}) => {
+            if (confirm) {
+              next();
+            } else {
+              error();
+            }
+          });
       } else {
         next();
       }
     });
   })
-  .catch((err) => {
-    if (err.sql) {
-      logger.warn('Server connection has failed! Make sure your database server is running.');
-    } else {
-      logger.warn(`Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
-    }
-    error();
-  });
+    .catch((err) => {
+      if (err.sql) {
+        logger.warn('Server connection has failed! Make sure your database server is running.');
+      } else {
+        logger.warn(`Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
+      }
+      error();
+    });
 };

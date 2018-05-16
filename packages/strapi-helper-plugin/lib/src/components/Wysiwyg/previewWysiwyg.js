@@ -148,18 +148,6 @@ class PreviewWysiwyg extends React.PureComponent {
     }
   }
 
-  componentWillUnmount() {
-    this.setState({ isMounted: false });
-  }
-
-  getClassName = () => {
-    if (this.context.isFullscreen) {
-      return cn(styles.editor, styles.editorFullScreen, styles.fullscreenPreviewEditor);
-    }
-
-    return styles.editor;
-  };
-
   // NOTE: This is not optimal and this lifecycle should be removed
   // I couldn't find a better way to decrease the fullscreen preview's data conversion time
   // Trying with componentDidUpdate didn't work
@@ -177,6 +165,18 @@ class PreviewWysiwyg extends React.PureComponent {
       });
     }
   }
+
+  componentWillUnmount() {
+    this.setState({ isMounted: false });
+  }
+
+  getClassName = () => {
+    if (this.context.isFullscreen) {
+      return cn(styles.editor, styles.editorFullScreen, styles.fullscreenPreviewEditor);
+    }
+
+    return styles.editor;
+  };
 
   previewHTML = rawContent => {
     const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;

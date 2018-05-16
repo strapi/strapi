@@ -6,7 +6,7 @@ module.exports = {
       _.forEach(params.where, (where, key) => {
         if (_.isArray(where.value)) {
           for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }
         } else {
           qb.where(key, where.symbol, where.value);
@@ -21,10 +21,10 @@ module.exports = {
         qb.limit(params.limit);
       }
     })
-    .orderBy(params.sort)
-    .fetchAll({
-      withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    })
+      .orderBy(params.sort)
+      .fetchAll({
+        withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
+      });
 
 
     return records ? records.toJSON() : records;
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   findOne: async function (params, populate) {
-    const primaryKey = params[this.primaryKey] || params.id;
+    const primaryKey = params[this.primaryKey] || params._id;
 
     if (primaryKey) {
       params = {
@@ -138,10 +138,13 @@ module.exports = {
   },
 
   removePermission: async function (params) {
+    const value = params[this.primaryKey] ? {
+      [this.primaryKey]: params[this.primaryKey] || params.id
+    } : params;
+
     return this
-      .forge({
-        [this.primaryKey]: params[this.primaryKey] || params.id
-      })
+      .forge()
+      .where(value)
       .destroy();
   }
 };

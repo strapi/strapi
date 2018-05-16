@@ -48,6 +48,14 @@ module.exports = {
   },
 
   /**
+   * Retrieve the value based on the primary key
+   */
+
+  getValuePrimaryKey: (value, defaultKey) => {
+    return value[defaultKey] || value.id || value._id;
+  },
+
+  /**
    * Find primary key per ORM
    */
 
@@ -141,7 +149,7 @@ module.exports = {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
-        const model = models[association.model]
+        const model = models[association.model];
         const attribute = model.attributes[association.via];
 
         if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {

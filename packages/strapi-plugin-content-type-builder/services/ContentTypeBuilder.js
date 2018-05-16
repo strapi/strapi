@@ -359,13 +359,15 @@ module.exports = {
                 break;
               case 'manyToOne':
                 attr.collection = model.toLowerCase();
-              case 'manyToMany':
+                break;
+              case 'manyToMany': {
                 attr.collection = model.toLowerCase();
 
                 if (!params.dominant) {
                   attr.dominant = true;
                 }
                 break;
+              }
               default:
             }
 
