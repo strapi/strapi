@@ -1,6 +1,6 @@
 /**
  * CTAWrapper
- * 
+ *
  */
 
 import React from 'react';

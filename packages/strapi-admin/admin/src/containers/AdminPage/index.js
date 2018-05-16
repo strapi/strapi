@@ -38,7 +38,7 @@ import { hideNotification } from 'containers/NotificationProvider/actions';
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
 import LocaleToggle from 'containers/LocaleToggle';
-import CTAWrapper from 'components/CTAWrapper';
+import CTAWrapper from 'components/CtaWrapper';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage/Loadable';
 import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
