@@ -30,18 +30,17 @@ import {
 
 export function* dataGet(action) {
   try {
-    const { limit, page, sort } = yield select(makeSelectParams());
+    const { _limit, _page, _sort } = yield select(makeSelectParams());
     const source = action.source;
     const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
-
     // Params to get the model's records
     const recordsURL = `/content-manager/explorer/${currentModel}`;
-    const skip = (page - 1 ) * limit;
+    const _start = (_page - 1 ) * _limit;
     const params = {
-      limit,
-      skip,
-      sort,
+      _limit,
+      _start,
+      _sort,
       source,
     };
 
@@ -51,7 +50,6 @@ export function* dataGet(action) {
     ];
 
     yield put(getDataSucceeded(response));
-
   } catch(err) {
     strapi.notification.error('notification.error');
   }

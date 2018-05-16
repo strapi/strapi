@@ -18,9 +18,9 @@ import {
 const initialState = fromJS({
   count: 0,
   params: Map({
-    limit: 10,
-    page: 1,
-    sort: '',
+    _limit: 10,
+    _page: 1,
+    _sort: '',
   }),
   records: List([]),
   showFilter: false,

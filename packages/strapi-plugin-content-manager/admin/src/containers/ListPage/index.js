@@ -86,10 +86,10 @@ export class ListPage extends React.Component {
    */
   getData = props => {
     const source = getQueryParameters(props.location.search, 'source');
-    const limit = toInteger(getQueryParameters(props.location.search, 'limit')) || 10;
-    const page = toInteger(getQueryParameters(props.location.search, 'page')) || 1;
-    const sort = this.findPageSort(props);
-    const params = { limit, page, sort };
+    const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
+    const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
+    const _sort = this.findPageSort(props);
+    const params = { _limit, _page, _sort };
 
     this.props.setParams(params);
     this.props.getData(props.match.params.slug, source);
@@ -142,7 +142,7 @@ export class ListPage extends React.Component {
     ]);
 
     return (
-      getQueryParameters(props.location.search, 'sort') ||
+      getQueryParameters(props.location.search, '_sort') ||
       modelPrimaryKey ||
       pluginModelPrimaryKey ||
       'id'
@@ -152,9 +152,9 @@ export class ListPage extends React.Component {
   handleChangeParams = e => {
     const { history, listPage: { params } } = this.props;
     const search =
-      e.target.name === 'params.limit'
-        ? `page=${params.page}&limit=${e.target.value}&sort=${params.sort}&source=${this.getSource()}`
-        : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`;
+      e.target.name === 'params._limit'
+        ? `_page=${params._page}&_limit=${e.target.value}&_sort=${params._sort}&source=${this.getSource()}`
+        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -165,7 +165,7 @@ export class ListPage extends React.Component {
 
   handleChangeSort = sort => {
     const target = {
-      name: 'params.sort',
+      name: 'params._sort',
       value: sort,
     };
 
@@ -173,7 +173,7 @@ export class ListPage extends React.Component {
 
     this.props.history.push({
       pathname: this.props.location.pathname,
-      search: `?page=${params.page}&limit=${params.limit}&sort=${sort}&source=${this.getSource()}`,
+      search: `?_page=${params._page}&_limit=${params._limit}&_sort=${sort}&source=${this.getSource()}`,
     });
     this.props.changeParams({ target });
   };
@@ -209,9 +209,9 @@ export class ListPage extends React.Component {
         onClick: () =>
           this.props.history.push({
             pathname: `${this.props.location.pathname}/create`,
-            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?page=${
-              params.page
-            }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`,
+            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?_page=${
+              params._page
+            }&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`,
           }),
       },
     ];
@@ -250,13 +250,13 @@ export class ListPage extends React.Component {
                 routeParams={this.props.match.params}
                 headers={this.generateTableHeaders()}
                 onChangeSort={this.handleChangeSort}
-                sort={listPage.params.sort}
+                sort={params._sort}
                 history={this.props.history}
                 primaryKey={this.getCurrentModel().primaryKey || 'id'}
                 handleDelete={this.toggleModalWarning}
-                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?page=${
-                  params.page
-                }&limit=${params.limit}&sort=${params.sort}&source=${this.getSource()}`}
+                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?_page=${
+                  params._page
+                }&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`}
               />
               <PopUpWarning
                 isOpen={this.state.showWarning}
