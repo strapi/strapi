@@ -4,12 +4,13 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 // Node.js core
 const path = require('path');
 
+// Public node modules.
+const _ = require('lodash');
+
+/* eslint-disable prefer-template */
 /*
  * Set of utils for models
  */
@@ -148,7 +149,7 @@ module.exports = {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
-        const model = models[association.model]
+        const model = models[association.model];
         const attribute = model.attributes[association.via];
 
         if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {

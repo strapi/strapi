@@ -17,6 +17,7 @@ import ImgPreviewHint from 'components/ImgPreviewHint';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/no-unused-state */
 class ImgPreview extends React.Component {
   state = {
     imgURL: '',
@@ -56,11 +57,11 @@ class ImgPreview extends React.Component {
     }
   }
 
-  getFileType = (fileName) => fileName.split('.').slice(-1)[0];
-
   componentDidCatch(error, info) {
     console.log('An error occured in ImgPreview', info);
   }
+
+  getFileType = (fileName) => fileName.split('.').slice(-1)[0];
 
   /**
    * [generateImgURL description]

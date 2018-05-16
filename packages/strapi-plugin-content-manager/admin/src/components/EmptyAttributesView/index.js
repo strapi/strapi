@@ -39,7 +39,7 @@ function EmptyAttributesView({ currentModelName, history, modelEntries }) {
               <Button
                 onClick={() => history.push(`/plugins/content-type-builder/models/${currentModelName}#choose::attributes`)}
                 primaryAddShape
-                label={'content-manager.emptyAttributes.button'}
+                label="content-manager.emptyAttributes.button"
               />
             </div>
           </div>

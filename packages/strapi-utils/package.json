@@ -14,6 +14,9 @@
     "lib": "./lib"
   },
   "main": "./lib",
+  "scripts": {
+    "test": "echo \"Error: no test specified yet!\""
+  },
   "dependencies": {
     "commander": "^2.11.0",
     "joi-json": "^2.0.1",

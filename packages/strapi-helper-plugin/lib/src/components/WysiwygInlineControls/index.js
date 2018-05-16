@@ -67,6 +67,7 @@ const  WysiwygInlineControls = ({ buttons, disabled, editorState, handlers, onTo
   );
 };
 
+/* eslint-disable react/default-props-match-prop-types */
 StyleButton.defaultProps = {
   active: false,
   className: '',

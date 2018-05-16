@@ -6,9 +6,8 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const _ = require('lodash');
-const path = require('path');
 const fs = require('fs');
+const _ = require('lodash');
 const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
 
@@ -97,7 +96,7 @@ module.exports = {
     return strapi.query('file', 'upload').find(strapi.utils.models.convertParams('file', params));
   },
 
-  count: async (params, source) => {
+  count: async () => {
     return await strapi.query('file', 'upload').count();
   },
 

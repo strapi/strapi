@@ -105,7 +105,7 @@ export function* submit() {
       yield put(submitSucceeded());
     }
   } catch(error) {
-    console.log(error);
+    console.log(error); // eslint-disable-line no-console
   }
 }
 

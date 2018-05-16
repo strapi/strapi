@@ -67,7 +67,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       <TableList
         availableNumber={availableNumber}
         title={title}
-        buttonLabel={'content-type-builder.button.contentType.add'}
+        buttonLabel="content-type-builder.button.contentType.add"
         onButtonClick={this.handleButtonClick}
         onHandleDelete={this.handleDelete}
         rowItems={this.props.models}
@@ -89,8 +89,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           ]}
         />
         <ContentHeader
-          name={'content-type-builder.home.contentTypeBuilder.name'}
-          description={'content-type-builder.home.contentTypeBuilder.description'}
+          name="content-type-builder.home.contentTypeBuilder.name"
+          description="content-type-builder.home.contentTypeBuilder.description"
           styles={{ margin: '-1px 0 3rem 0'}}
         />
         {component}

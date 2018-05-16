@@ -60,7 +60,6 @@ export function* dataFetch(action) {
       yield put(fetchDataSucceeded(data));
     }
   } catch(err) {
-    console.log(err);
     strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }

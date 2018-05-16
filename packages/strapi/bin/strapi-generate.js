@@ -12,11 +12,12 @@ const path = require('path');
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
+// Logger.
+const { cli, logger } = require('strapi-utils');
+
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
 
-// Logger.
-const { cli, logger } = require('strapi-utils');
 
 /**
  * `$ strapi generate`
@@ -68,7 +69,7 @@ module.exports = function (id, cliArguments) {
       }
 
       if (scope.generatorType !== 'new') {
-        logger.info('Generated a new ' + scope.generatorType + ' `' + scope.humanizeId + '` at ' + scope.humanizedPath + '.');
+        logger.info('Generated a new ' + scope.generatorType + ' `' + scope.humanizeId + '` at ' + scope.humanizedPath + '.'); // eslint-disable-line prefer-template
       }
 
       process.exit(0);

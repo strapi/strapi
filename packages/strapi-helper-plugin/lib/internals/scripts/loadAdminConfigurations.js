@@ -4,7 +4,8 @@ const shell = require('shelljs');
 const pwd = shell.pwd();
 const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
 const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const isSetup = process.env.IS_MONOREPO;
 
 // Load the app configurations only when :
 // - starting the app in dev mode
@@ -20,3 +21,4 @@ if (!isSetup) {
     });
   })();
 }
+ 

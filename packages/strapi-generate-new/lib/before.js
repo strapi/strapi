@@ -7,7 +7,7 @@
 // Node.js core.
 const path = require('path');
 const exec = require('child_process').exec;
-const execSync = require('child_process').execSync;
+
 
 // Public node modules.
 const _ = require('lodash');
@@ -26,6 +26,7 @@ const logger = require('strapi-utils').logger;
  * @param {Function} cb
  */
 
+/* eslint-disable no-useless-escape */
 module.exports = (scope, cb) => {
   // App info.
   const hasDatabaseConfig = !!scope.database;
@@ -87,171 +88,171 @@ module.exports = (scope, cb) => {
     ];
 
     inquirer
-    .prompt([
-      {
-        when: !hasDatabaseConfig,
-        type: 'list',
-        prefix: '',
-        name: 'client',
-        message: 'Choose your main database:',
-        choices: databaseChoices,
-        default: () => {
-          if (scope.client) {
-            return _.findIndex(databaseChoices, { value: _.omit(scope.client, ['version'])});
+      .prompt([
+        {
+          when: !hasDatabaseConfig,
+          type: 'list',
+          prefix: '',
+          name: 'client',
+          message: 'Choose your main database:',
+          choices: databaseChoices,
+          default: () => {
+            if (scope.client) {
+              return _.findIndex(databaseChoices, { value: _.omit(scope.client, ['version'])});
+            }
           }
         }
-      }
-    ])
-    .then(answers => {
-      if (hasDatabaseConfig) {
-        const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
-        scope.database.connector = databaseChoice.value.connector;
-        answers.client = {
-          ...databaseChoice.value
-        };
-      } else {
-        _.assign(scope.database, {
-          connector: answers.client.connector,
-          settings: {
-            client: answers.client.database
-          },
-          options: {}
-        });
-      }
-      scope.client = answers.client;
+      ])
+      .then(answers => {
+        if (hasDatabaseConfig) {
+          const databaseChoice = _.find(databaseChoices, ['value.database', scope.database.settings.client]);
+          scope.database.connector = databaseChoice.value.connector;
+          answers.client = {
+            ...databaseChoice.value
+          };
+        } else {
+          _.assign(scope.database, {
+            connector: answers.client.connector,
+            settings: {
+              client: answers.client.database
+            },
+            options: {}
+          });
+        }
+        scope.client = answers.client;
 
-      const asyncFn = [
-        new Promise(resolve => {
-          inquirer
-          .prompt([
-            {
-              when: !hasDatabaseConfig,
-              type: 'input',
-              prefix: '',
-              name: 'database',
-              message: 'Database name:',
-              default: _.get(scope.database, 'database', 'strapi')
-            },
-            {
-              when: !hasDatabaseConfig,
-              type: 'input',
-              prefix: '',
-              name: 'host',
-              message: 'Host:',
-              default: _.get(scope.database, 'host', '127.0.0.1')
-            },
-            {
-              when: !hasDatabaseConfig,
-              type: 'input',
-              prefix: '',
-              name: 'port',
-              message: 'Port:',
-              default: (answers) => {
-                if (_.get(scope.database, 'port')) {
-                  return scope.database.port;
+        const asyncFn = [
+          new Promise(resolve => {
+            inquirer
+              .prompt([
+                {
+                  when: !hasDatabaseConfig,
+                  type: 'input',
+                  prefix: '',
+                  name: 'database',
+                  message: 'Database name:',
+                  default: _.get(scope.database, 'database', 'strapi')
+                },
+                {
+                  when: !hasDatabaseConfig,
+                  type: 'input',
+                  prefix: '',
+                  name: 'host',
+                  message: 'Host:',
+                  default: _.get(scope.database, 'host', '127.0.0.1')
+                },
+                {
+                  when: !hasDatabaseConfig,
+                  type: 'input',
+                  prefix: '',
+                  name: 'port',
+                  message: 'Port:',
+                  default: (answers) => { // eslint-disable-line no-unused-vars
+                    if (_.get(scope.database, 'port')) {
+                      return scope.database.port;
+                    }
+
+                    const ports = {
+                      mongo: 27017,
+                      postgres: 5432,
+                      mysql: 3306
+                    };
+
+                    return ports[scope.client.database];
+                  }
+                },
+                {
+                  when: !hasDatabaseConfig,
+                  type: 'input',
+                  prefix: '',
+                  name: 'username',
+                  message: 'Username:',
+                  default: _.get(scope.database, 'username', undefined)
+                },
+                {
+                  when: !hasDatabaseConfig,
+                  type: 'password',
+                  prefix: '',
+                  name: 'password',
+                  message: 'Password:',
+                  mask: '*',
+                  default: _.get(scope.database, 'password', undefined)
+                },
+                {
+                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  type: 'input',
+                  prefix: '',
+                  name: 'authenticationDatabase',
+                  message: 'Authentication database:',
+                  default: _.get(scope.database, 'authenticationDatabase', undefined)
+                },
+                {
+                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  type: 'boolean',
+                  prefix: '',
+                  name: 'ssl',
+                  message: 'Enable SSL connection:',
+                  default: _.get(scope.database, 'ssl', false)
+                }
+              ])
+              .then(answers => {
+                if (hasDatabaseConfig) {
+                  answers = _.omit(scope.database.settings, ['client']);
                 }
 
-                const ports = {
-                  mongo: 27017,
-                  postgres: 5432,
-                  mysql: 3306
-                };
+                scope.database.settings.host = answers.host;
+                scope.database.settings.port = answers.port;
+                scope.database.settings.database = answers.database;
+                scope.database.settings.username = answers.username;
+                scope.database.settings.password = answers.password;
+                scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+                scope.database.options.ssl = _.toString(answers.ssl) === 'true';
 
-                return ports[scope.client.database];
-              }
-            },
-            {
-              when: !hasDatabaseConfig,
-              type: 'input',
-              prefix: '',
-              name: 'username',
-              message: 'Username:',
-              default: _.get(scope.database, 'username', undefined)
-            },
-            {
-              when: !hasDatabaseConfig,
-              type: 'password',
-              prefix: '',
-              name: 'password',
-              message: 'Password:',
-              mask: '*',
-              default: _.get(scope.database, 'password', undefined)
-            },
-            {
-              when: !hasDatabaseConfig && scope.client.database === 'mongo',
-              type: 'input',
-              prefix: '',
-              name: 'authenticationDatabase',
-              message: 'Authentication database:',
-              default: _.get(scope.database, 'authenticationDatabase', undefined)
-            },
-            {
-              when: !hasDatabaseConfig && scope.client.database === 'mongo',
-              type: 'boolean',
-              prefix: '',
-              name: 'ssl',
-              message: 'Enable SSL connection:',
-              default: _.get(scope.database, 'ssl', false)
-            }
-          ])
-          .then(answers => {
-            if (hasDatabaseConfig) {
-              answers = _.omit(scope.database.settings, ['client'])
-            }
+                logger.info('Testing database connection...');
 
-            scope.database.settings.host = answers.host;
-            scope.database.settings.port = answers.port;
-            scope.database.settings.database = answers.database;
-            scope.database.settings.username = answers.username;
-            scope.database.settings.password = answers.password;
-            scope.database.options.authenticationDatabase = answers.authenticationDatabase;
-            scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                resolve();
+              });
+          }),
+          new Promise(resolve => {
+            let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
 
-            logger.info('Testing database connection...');
-
-            resolve();
-          });
-        }),
-        new Promise(resolve => {
-          let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
-
-          if (scope.client.module) {
-            cmd += ` ${scope.client.module}`;
-          }
-
-          if (scope.client.connector === 'strapi-bookshelf') {
-            cmd += ` strapi-knex@alpha`;
-
-            scope.additionalsDependencies = ['strapi-knex', 'knex'];
-          }
-
-          exec(cmd, () => {
             if (scope.client.module) {
-              const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
-              scope.client.version = lock.version;
-
-              if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
-                const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
-                scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
-              }
+              cmd += ` ${scope.client.module}`;
             }
 
-            resolve();
-          });
-        })
-      ];
+            if (scope.client.connector === 'strapi-bookshelf') {
+              cmd += ` strapi-knex@alpha`;
 
-      Promise.all(asyncFn)
-      .then(() => {
-        try {
-          require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
-        } catch(err) {
-          shell.rm('-r', scope.tmpPath);
-          logger.info('Copying the dashboard...');
-          cb.success();
-        }
+              scope.additionalsDependencies = ['strapi-knex', 'knex'];
+            }
+
+            exec(cmd, () => {
+              if (scope.client.module) {
+                const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+                scope.client.version = lock.version;
+
+                if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+                  const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+                  scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
+                }
+              }
+
+              resolve();
+            });
+          })
+        ];
+
+        Promise.all(asyncFn)
+          .then(() => {
+            try {
+              require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+            } catch(err) {
+              shell.rm('-r', scope.tmpPath);
+              logger.info('Copying the dashboard...');
+              cb.success();
+            }
+          });
       });
-    });
   };
 
   connectionValidation();
