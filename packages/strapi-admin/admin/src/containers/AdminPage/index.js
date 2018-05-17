@@ -160,7 +160,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
-
+    console.log(this.props);
     return (
       <div className={styles.adminPage}>
         {this.showLeftMenu() && (
@@ -173,7 +173,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
         <CTAWrapper>
           {this.shouldDisplayLogout() && <Logout />}
           {this.shouldDisplayLogout() && <div className={styles.adminPageSeparator} />}
-          <LocaleToggle />
+          <LocaleToggle isLogged={this.shouldDisplayLogout() === true} />
         </CTAWrapper>
         <div className={styles.adminPageRightWrapper} style={style}>
           {header}
