@@ -6,6 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { cloneDeep } from 'lodash';
 
 import FilterOptions from 'components/FilterOptions/Loadable';
 
@@ -28,6 +29,19 @@ const FILTER = { model: '', filter: '', value: '', attrType: 'string' };
 class FiltersPickWrapper extends React.PureComponent {
   state = { filters: this.props.appliedFilters.concat(FILTER) };
 
+  handleClickAdd = () => this.setState(prevState => ({ filters: prevState.filters.concat(FILTER) }));
+
+  handleClickRemove = (index) => {
+    const filters = cloneDeep(this.state.filters);
+    filters.splice(index, 1);
+
+    this.setState({ filters });
+  }
+
+  shouldDisplayAddButton = (index) => index === this.state.filters.length - 1;
+
+  shouldDisplayRemoveButton = (index) => index < this.state.filters.length - 1;
+
   renderTitle = () => (
     <FormattedMessage id="content-manager.components.FiltersPickWrapper.PluginHeader.title.filter">
       {message => (
@@ -43,6 +57,7 @@ class FiltersPickWrapper extends React.PureComponent {
 
   render() {
     const { actions, show } = this.props;
+
     return (
       <SlideDown on={show}>
         <Div>
@@ -55,7 +70,17 @@ class FiltersPickWrapper extends React.PureComponent {
               title={this.renderTitle()}
             />
             <div style={{ marginTop: '-10px' }}>
-              {this.state.filters.map((filter, key) => <FilterOptions key={key} filter={filter} />)}
+              {this.state.filters.map((filter, key) => (
+                <FilterOptions
+                  key={key}
+                  filter={filter}
+                  index={key}
+                  onClickAdd={this.handleClickAdd}
+                  onClickRemove={this.handleClickRemove}
+                  showAddButton={this.shouldDisplayAddButton(key)}
+                  showRemoveButton={this.shouldDisplayRemoveButton(key)}
+                />
+              ))}
             </div>
           </div>
         </Div>

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 
 import InputSelect from 'components/InputSelect';
 import InputText from 'components/InputText';
@@ -49,16 +49,18 @@ const FILTER_TYPES = [
   },
 ];
 
-function FilterOptions() {
+function FilterOptions({ index, onClickAdd, onClickRemove, showAddButton, showRemoveButton }) {
+  const selectStyle = { minHeight: '30px', minWidth: '170px', maxWidth: '200px' };
+
   return (
     <Div>
-      <Remove type="button" />
+      {showRemoveButton && <Remove type="button" onClick={() => onClickRemove(index)} /> }
       <InputSelect
         onChange={() => {}}
         name=""
         value=""
         selectOptions={[]}
-        style={{ minHeight: '30px', minWidth: '170px', maxWidth: '200px' }}
+        style={showRemoveButton ? selectStyle : Object.assign(selectStyle, { marginLeft: '30px' })}
       />
 
       <InputSelect
@@ -77,13 +79,25 @@ function FilterOptions() {
         style={{ height: '30px', width: '200px', marginRight: '10px' }}
       />
 
-      <Add type="button" />
+      {showAddButton && <Add type="button" onClick={onClickAdd} />}
     </Div>
   );
 }
 
-FilterOptions.defaultProps = {};
+FilterOptions.defaultProps = {
+  index: 0,
+  onClickAdd: () => {},
+  onClickRemove: () => {},
+  showAddButton: false,
+  showRemoveButton: false,
+};
 
-FilterOptions.propTypes = {};
+FilterOptions.propTypes = {
+  index: PropTypes.number,
+  onClickAdd: PropTypes.func,
+  onClickRemove: PropTypes.func,
+  showAddButton: PropTypes.bool,
+  showRemoveButton: PropTypes.bool,
+};
 
 export default FilterOptions;
