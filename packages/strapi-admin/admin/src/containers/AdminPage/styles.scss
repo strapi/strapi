@@ -14,11 +14,4 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  &:after {
-    content: '';
-    display: inline-block;
-    vertical-align: middle;
-    height: 20px;
-    border-left: 1px solid #F3F4F4;
-  }
 }
