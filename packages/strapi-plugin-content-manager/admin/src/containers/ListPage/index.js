@@ -20,11 +20,11 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 // or strapi/packages/strapi-helper-plugin/lib/src
 import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
+import PopUpWarning from 'components/PopUpWarning/Loadable';
 
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
-import FiltersPickWrapper from 'components/FiltersPickWrapper';
+import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
 import FiltersWrapper from 'components/FiltersWrapper';
 import Table from 'components/Table';
 
@@ -250,8 +250,8 @@ export class ListPage extends React.Component {
 
     return (
       <div>
+        <FiltersPickWrapper show={showFilter} />
         <div className={cn('container-fluid', styles.containerFluid)}>
-          <FiltersPickWrapper show={showFilter} />
           {this.state.showHeader && (
             <PluginHeader
               actions={pluginHeaderActions}
