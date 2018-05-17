@@ -251,7 +251,10 @@ export class ListPage extends React.Component {
 
     return (
       <div>
-        <FiltersPickWrapper show={showFilter} />
+        <FiltersPickWrapper
+          modelName={this.getCurrentModelName()}
+          show={showFilter}
+        />
         <div className={cn('container-fluid', styles.containerFluid)}>
           {this.state.showHeader && (
             <PluginHeader
@@ -266,7 +269,7 @@ export class ListPage extends React.Component {
                 },
               }}
               title={{
-                id: listPage.currentModel || 'Content Manager',
+                id: this.getCurrentModelName() || 'Content Manager',
               }}
             />
           )}
