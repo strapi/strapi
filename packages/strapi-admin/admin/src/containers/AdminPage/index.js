@@ -100,7 +100,7 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     }
   }
 
-  checkLogin = (props, skipAction = false) => {    
+  checkLogin = (props, skipAction = false) => {
     if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
       if (!this.hasUserPluginLoaded(props)) {
         return;
