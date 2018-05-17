@@ -172,7 +172,6 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
         )}
         <CTAWrapper>
           {this.shouldDisplayLogout() && <Logout />}
-          {this.shouldDisplayLogout() && <div className={styles.adminPageSeparator} />}
           <LocaleToggle isLogged={this.shouldDisplayLogout() === true} />
         </CTAWrapper>
         <div className={styles.adminPageRightWrapper} style={style}>
