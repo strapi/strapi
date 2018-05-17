@@ -72,6 +72,12 @@ export class ListPage extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    if (this.props.listPage.showFilter) {
+      this.props.onToggleFilters();
+    }
+  }
+
   /**
    * Helper to retrieve the current model data
    * @return {Object} the current model
@@ -115,7 +121,7 @@ export class ListPage extends React.Component {
         setTimeout(() => {
           this.setState({ showHeader: true });
           resolve();
-        }, 400);
+        }, 300);
       });
     }
   }

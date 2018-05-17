@@ -1,18 +1,22 @@
 .enter {
-  transform: translateY(-100%);
+  max-height : 0;
+  opacity: 0.01;
 }
 
 .enterActive {
-  transform: translateY(0);
-  transition: all 400ms ease-in;
+  opacity: 1;
+  max-height: 1000px;
+  transition : all 0.7s ease-out;
 }
 
 .exit {
   opacity: 1;
+  max-height : 1000px;
 }
 
 .exitActive {
-  opacity: 0.5;
-  transform: translateY(-100%);
-  transition: all 400ms ease-out;
+  opacity: 0.01;
+  max-height : 0;
+  transition: all 0.4s ease-out;
+
 }
