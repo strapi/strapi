@@ -18,6 +18,7 @@
 
   "components.AddFilterCTA.add": "Ajouter un filtre",
   "components.FilterOptions.button.apply": "Appliquer",
+  "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
 
   "EditRelations.title": "Données associées",
 

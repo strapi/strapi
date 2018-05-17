@@ -25,13 +25,14 @@ import PopUpWarning from 'components/PopUpWarning/Loadable';
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
 import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
-import FiltersWrapper from 'components/FiltersWrapper';
 import Table from 'components/Table';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
 import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+
+import Div from './Div';
 
 import {
   changeParams,
@@ -271,9 +272,9 @@ export class ListPage extends React.Component {
           )}
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
-              <FiltersWrapper>
+              <Div>
                 <AddFilterCTA onClick={this.props.onToggleFilters} />
-              </FiltersWrapper>
+              </Div>
             </div>
           </div>
           <div className={cn('row', styles.row)}>

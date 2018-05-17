@@ -17,6 +17,7 @@
 
   "components.AddFilterCTA.add": "Add filter",
   "components.FilterOptions.button.apply": "Apply",
+  "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
 
   "EditRelations.title": "Relational data",
 
