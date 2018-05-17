@@ -20,6 +20,15 @@
   "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
 
+  "components.FilterOptions.FILTER_TYPES.equals": "is",
+  "components.FilterOptions.FILTER_TYPES.not_equals": "is not",
+  "components.FilterOptions.FILTER_TYPES.lower": "lower than",
+  "components.FilterOptions.FILTER_TYPES.lower_equal": "lower than or equal to",
+  "components.FilterOptions.FILTER_TYPES.greater": "greater than",
+  "components.FilterOptions.FILTER_TYPES.greater_equal": "greater than or equal to",
+  "components.FilterOptions.FILTER_TYPES.contains": "contains",
+  "components.FilterOptions.FILTER_TYPES.containss": "containss",
+
   "EditRelations.title": "Relational data",
 
   "emptyAttributes.title": "There are no fields yet",

@@ -231,7 +231,7 @@ export class ListPage extends React.Component {
   };
 
   render() {
-    const { listPage, listPage: { params, showFilter } } = this.props;
+    const { listPage, listPage: { appliedFilters, params, showFilter } } = this.props;
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -252,6 +252,7 @@ export class ListPage extends React.Component {
     return (
       <div>
         <FiltersPickWrapper
+          appliedFilters={appliedFilters}
           modelName={this.getCurrentModelName()}
           show={showFilter}
         />

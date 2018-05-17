@@ -7,6 +7,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import FilterOptions from 'components/FilterOptions/Loadable';
+
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -21,12 +23,16 @@ const spanStyle = {
   fontWeight: '500',
 };
 
-function FiltersPickWrapper({ actions, modelName, show }) {
-  const title = () => (
+const FILTER = { model: '', filter: '', value: '', attrType: 'string' };
+
+class FiltersPickWrapper extends React.PureComponent {
+  state = { filters: this.props.appliedFilters.concat(FILTER) };
+
+  renderTitle = () => (
     <FormattedMessage id="content-manager.components.FiltersPickWrapper.PluginHeader.title.filter">
       {message => (
         <span>
-          {modelName}&nbsp;-&nbsp;
+          {this.props.modelName}&nbsp;-&nbsp;
           <span style={spanStyle}>
             {message}
           </span>
@@ -35,64 +41,38 @@ function FiltersPickWrapper({ actions, modelName, show }) {
     </FormattedMessage>
   );
 
-  return (
-    <SlideDown on={show}>
-      <Div>
-        <div>
-          <PluginHeader
-            actions={actions}
-            description={{
-              id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
-            }}
-            title={title}
-          />
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto deleniti
-          dolor doloribus enim hic illo iste non, numquam quas quod repellat reprehenderit rerum
-          sunt, totam vel vero voluptates! Adipisci commodi distinctio eos esse, est harum impedit
-          in quis similique, tenetur unde, vero. Atque dignissimos eaque esse ex, fuga hic id ipsam
-          mollitia, odit officia perferendis quos ratione repudiandae sed suscipit tenetur vero
-          voluptas voluptatibus. Asperiores blanditiis eos esse explicabo fuga illo iure libero
-          molestias pariatur quia quibusdam quis sequi totam vel, voluptas. Aliquam beatae dolor
-          ducimus in, laborum laudantium magnam quae quasi quia, quo, quos soluta tempora tempore
-          totam. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto
-          deleniti dolor doloribus enim hic illo iste non, numquam quas quod repellat reprehenderit
-          rerum sunt, totam vel vero voluptates! Adipisci commodi distinctio eos esse, est harum
-          impedit in quis similique, tenetur unde, vero. Atque dignissimos eaque esse ex, fuga hic
-          id ipsam mollitia, odit officia perferendis quos ratione repudiandae sed suscipit tenetur
-          vero voluptas voluptatibus. Asperiores blanditiis eos esse explicabo fuga illo iure libero
-          molestias pariatur quia quibusdam quis sequi totam vel, voluptas. Aliquam beatae dolor
-          ducimus in, laborum laudantium magnam quae quasi quia, quo, quos soluta tempora tempore
-          totam. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto
-          deleniti dolor doloribus enim hic illo iste non, numquam quas quod repellat reprehenderit
-          rerum sunt, totam vel vero voluptates! Adipisci commodi distinctio eos esse, est harum
-          impedit in quis similique, tenetur unde, vero. Atque dignissimos eaque esse ex, fuga hic
-          id ipsam mollitia, odit officia perferendis quos ratione repudiandae sed suscipit tenetur
-          vero voluptas voluptatibus. Asperiores blanditiis eos esse explicabo fuga illo iure libero
-          molestias pariatur quia quibusdam quis sequi totam vel, voluptas. Aliquam beatae dolor
-          ducimus in, laborum laudantium magnam quae quasi quia, quo, quos soluta tempora tempore
-          totam. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto
-          deleniti dolor doloribus enim hic illo iste non, numquam quas quod repellat reprehenderit
-          rerum sunt, totam vel vero voluptates! Adipisci commodi distinctio eos esse, est harum
-          impedit in quis similique, tenetur unde, vero. Atque dignissimos eaque esse ex, fuga hic
-          id ipsam mollitia, odit officia perferendis quos ratione repudiandae sed suscipit tenetur
-          vero voluptas voluptatibus. Asperiores blanditiis eos esse explicabo fuga illo iure libero
-          molestias pariatur quia quibusdam quis sequi totam vel, voluptas. Aliquam beatae dolor
-          ducimus in,
-          laborum laudantium magnam quae quasi quia, quo, quos soluta tempora tempore
-          totam.
-        </div>
-      </Div>
-    </SlideDown>
-  );
+  render() {
+    const { actions, show } = this.props;
+    return (
+      <SlideDown on={show}>
+        <Div>
+          <div>
+            <PluginHeader
+              actions={actions}
+              description={{
+                id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
+              }}
+              title={this.renderTitle()}
+            />
+            <div style={{ marginTop: '-10px' }}>
+              {this.state.filters.map((filter, key) => <FilterOptions key={key} filter={filter} />)}
+            </div>
+          </div>
+        </Div>
+      </SlideDown>
+    );
+  }
 }
 
 FiltersPickWrapper.defaultProps = {
   actions: [],
+  appliedFilters: [],
   modelName: '',
 };
 
 FiltersPickWrapper.propTypes = {
   actions: PropTypes.array,
+  appliedFilters: PropTypes.array,
   modelName: PropTypes.string,
   show: PropTypes.bool.isRequired,
 };

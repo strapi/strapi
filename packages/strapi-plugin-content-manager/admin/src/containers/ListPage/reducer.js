@@ -17,6 +17,7 @@ import {
 
 const initialState = fromJS({
   count: 0,
+  appliedFilters: List([]),
   params: Map({
     _limit: 10,
     _page: 1,
