@@ -12,6 +12,7 @@ import {
   CHANGE_PARAMS,
   DELETE_DATA_SUCCESS,
   GET_DATA_SUCCEEDED,
+  ON_CHANGE,
   ON_TOGGLE_FILTERS,
   REMOVE_FILTER,
   SET_PARAMS,
@@ -51,6 +52,8 @@ function listPageReducer(state = initialState, action) {
       return state
         .update('count', () => action.data[0].count)
         .update('records', () => List(action.data[1]));
+    case ON_CHANGE:
+      return state.updateIn(['appliedFilters', action.index, action.key], () => action.value);
     case ON_TOGGLE_FILTERS:
       return state.update('showFilter', v => !v);
     case REMOVE_FILTER:

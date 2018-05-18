@@ -11,6 +11,7 @@ import {
   DELETE_DATA_SUCCESS,
   GET_DATA,
   GET_DATA_SUCCEEDED,
+  ON_CHANGE,
   ON_TOGGLE_FILTERS,
   REMOVE_FILTER,
   SET_PARAMS,
@@ -59,6 +60,15 @@ export function getDataSucceeded(data) {
   return {
     type: GET_DATA_SUCCEEDED,
     data,
+  };
+}
+
+export function onChange(index, key, value) {
+  return {
+    type: ON_CHANGE,
+    index,
+    key,
+    value,
   };
 }
 

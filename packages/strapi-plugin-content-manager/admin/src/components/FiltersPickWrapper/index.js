@@ -38,9 +38,14 @@ class FiltersPickWrapper extends React.PureComponent {
     }
   }
 
+  handleChange = ({ target }) => {
+    const split = target.name.split('.');
+    this.props.onChange(split[0], split[1], target.value);
+  }
+
   handleClickAdd = () => {
     const { addFilter, schema } = this.props;
-    const filter = { model: Object.keys(schema)[0], filter: '=', value: '', attrType: 'string' };
+    const filter = { model: Object.keys(schema)[0], filter: '=', value: '' };
 
     return addFilter(filter);
   }
@@ -99,6 +104,7 @@ class FiltersPickWrapper extends React.PureComponent {
                   key={key}
                   filter={filter}
                   index={key}
+                  onChange={this.handleChange}
                   onClickAdd={this.handleClickAdd}
                   onClickRemove={this.handleClickRemove}
                   schema={schema}
@@ -126,6 +132,7 @@ FiltersPickWrapper.propTypes = {
   appliedFilters: PropTypes.array,
   close: PropTypes.func.isRequired,
   modelName: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object,
   show: PropTypes.bool.isRequired,

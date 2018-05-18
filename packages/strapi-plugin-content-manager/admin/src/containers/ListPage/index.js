@@ -39,6 +39,7 @@ import {
   changeParams,
   deleteData,
   getData,
+  onChange,
   onToggleFilters,
   removeFilter,
   setParams,
@@ -264,6 +265,7 @@ export class ListPage extends React.Component {
       addFilter,
       listPage,
       listPage: { appliedFilters, params, showFilter },
+      onChange,
       onToggleFilters,
       removeFilter,
     } = this.props;
@@ -291,6 +293,7 @@ export class ListPage extends React.Component {
           appliedFilters={appliedFilters}
           close={onToggleFilters}
           modelName={this.getCurrentModelName()}
+          onChange={onChange}
           removeFilter={removeFilter}
           schema={this.getCurrentSchema()}
           show={showFilter}
@@ -372,6 +375,7 @@ ListPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -385,6 +389,7 @@ function mapDispatchToProps(dispatch) {
       changeParams,
       deleteData,
       getData,
+      onChange,
       onToggleFilters,
       removeFilter,
       setParams,
