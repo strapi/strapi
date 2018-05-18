@@ -94,10 +94,18 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
     if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
       this.checkLogin(nextProps, true);
     }
+
+    if (!this.hasUserPluginLoaded(this.props) && this.hasUserPluginLoaded(nextProps)) {
+      this.checkLogin(nextProps);
+    }
   }
 
   checkLogin = (props, skipAction = false) => {
     if (props.hasUserPlugin && this.isUrlProtected(props) && !auth.getToken()) {
+      if (!this.hasUserPluginLoaded(props)) {
+        return;
+      }
+
       const endPoint = this.hasAdminUser(props) ? 'login': 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
@@ -133,6 +141,8 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
       this.setState({ hasAlreadyRegistereOtherPlugins: true });
     }
   }
+
+  hasUserPluginLoaded = (props) => typeof get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== 'undefined';
 
   hasAdminUser = (props) => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
