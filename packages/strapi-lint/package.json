@@ -38,6 +38,7 @@
     "webpack": "^4.6.0"
   },
   "dependencies": {
-    "babel-eslint": "^8.2.3"
+    "babel-eslint": "^8.2.3",
+    "prettier": "^1.12.1"
   }
 }

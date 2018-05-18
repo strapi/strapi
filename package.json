@@ -46,6 +46,7 @@
   ],
   "pre-commit": [
     "clean",
+    "prettier",
     "lint"
   ],
   "repository": {
