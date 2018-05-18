@@ -34,13 +34,7 @@ import injectSaga from 'utils/injectSaga';
 
 import Div from './Div';
 
-import {
-  changeParams,
-  deleteData,
-  getData,
-  onToggleFilters,
-  setParams,
-} from './actions';
+import { changeParams, deleteData, getData, onToggleFilters, setParams } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -56,8 +50,12 @@ export class ListPage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { location: { pathname, search } } = prevProps;
-    const { listPage: { showFilter } } = this.props;
+    const {
+      location: { pathname, search },
+    } = prevProps;
+    const {
+      listPage: { showFilter },
+    } = this.props;
 
     if (pathname !== this.props.location.pathname) {
       this.getData(this.props);
@@ -114,7 +112,15 @@ export class ListPage extends React.Component {
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source') || 'content-manager';
 
-  hidePluginHeader = (showFilter) => {
+  /**
+   * Retrieve the model's schema
+   * @return {Object} Fields
+   */
+  getCurrentSchema = () =>
+    get(this.props.schema, [this.getCurrentModelName(), 'fields']) ||
+    get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
+
+  hidePluginHeader = showFilter => {
     if (showFilter) {
       this.setState(prevState => ({ showHeader: !prevState.showHeader }));
     } else {
@@ -125,14 +131,14 @@ export class ListPage extends React.Component {
         }, 300);
       });
     }
-  }
+  };
 
   shouldDisplayPluginHeader = () => {
     if (this.props.listPage.showFilter) {
       this.props.onToggleFilters();
       this.setState({ showHeader: true });
     }
-  }
+  };
 
   /**
    *  Function to generate the Table's headers
@@ -163,7 +169,11 @@ export class ListPage extends React.Component {
    * @return {String}      the model's primaryKey
    */
   findPageSort = props => {
-    const { match: { params: { slug } } } = props;
+    const {
+      match: {
+        params: { slug },
+      },
+    } = props;
     const source = this.getSource();
     const modelPrimaryKey = get(props.models, ['models', slug.toLowerCase(), 'primaryKey']);
     // Check if the model is in a plugin
@@ -183,11 +193,18 @@ export class ListPage extends React.Component {
   };
 
   handleChangeParams = e => {
-    const { history, listPage: { params } } = this.props;
+    const {
+      history,
+      listPage: { params },
+    } = this.props;
     const search =
       e.target.name === 'params._limit'
-        ? `_page=${params._page}&_limit=${e.target.value}&_sort=${params._sort}&source=${this.getSource()}`
-        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`;
+        ? `_page=${params._page}&_limit=${e.target.value}&_sort=${
+          params._sort
+        }&source=${this.getSource()}`
+        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${
+          params._sort
+        }&source=${this.getSource()}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -202,11 +219,15 @@ export class ListPage extends React.Component {
       value: sort,
     };
 
-    const { listPage: { params } } = this.props;
+    const {
+      listPage: { params },
+    } = this.props;
 
     this.props.history.push({
       pathname: this.props.location.pathname,
-      search: `?_page=${params._page}&_limit=${params._limit}&_sort=${sort}&source=${this.getSource()}`,
+      search: `?_page=${params._page}&_limit=${
+        params._limit
+      }&_sort=${sort}&source=${this.getSource()}`,
     });
     this.props.changeParams({ target });
   };
@@ -231,7 +252,10 @@ export class ListPage extends React.Component {
   };
 
   render() {
-    const { listPage, listPage: { appliedFilters, params, showFilter } } = this.props;
+    const {
+      listPage,
+      listPage: { appliedFilters, params, showFilter },
+    } = this.props;
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -254,6 +278,7 @@ export class ListPage extends React.Component {
         <FiltersPickWrapper
           appliedFilters={appliedFilters}
           modelName={this.getCurrentModelName()}
+          schema={this.getCurrentSchema()}
           show={showFilter}
         />
         <div className={cn('container-fluid', styles.containerFluid)}>
@@ -262,9 +287,9 @@ export class ListPage extends React.Component {
               actions={pluginHeaderActions}
               description={{
                 id:
-                listPage.count > 1
-                  ? 'content-manager.containers.List.pluginHeaderDescription'
-                  : 'content-manager.containers.List.pluginHeaderDescription.singular',
+                  listPage.count > 1
+                    ? 'content-manager.containers.List.pluginHeaderDescription'
+                    : 'content-manager.containers.List.pluginHeaderDescription.singular',
                 values: {
                   label: listPage.count,
                 },

@@ -56,7 +56,7 @@ class FiltersPickWrapper extends React.PureComponent {
   );
 
   render() {
-    const { actions, show } = this.props;
+    const { actions, schema, show } = this.props;
 
     return (
       <SlideDown on={show}>
@@ -77,6 +77,7 @@ class FiltersPickWrapper extends React.PureComponent {
                   index={key}
                   onClickAdd={this.handleClickAdd}
                   onClickRemove={this.handleClickRemove}
+                  schema={schema}
                   showAddButton={this.shouldDisplayAddButton(key)}
                   showRemoveButton={this.shouldDisplayRemoveButton(key)}
                 />
@@ -93,12 +94,14 @@ FiltersPickWrapper.defaultProps = {
   actions: [],
   appliedFilters: [],
   modelName: '',
+  schema: {},
 };
 
 FiltersPickWrapper.propTypes = {
   actions: PropTypes.array,
   appliedFilters: PropTypes.array,
   modelName: PropTypes.string,
+  schema: PropTypes.object,
   show: PropTypes.bool.isRequired,
 };
 
