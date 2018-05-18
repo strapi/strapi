@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.0-alpha.12.1.3",
+  "version": "3.0.0-alpha.12.2",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -19,15 +19,15 @@
     "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo \"Error: no test specified\"",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
     "pluralize": "^7.0.0",
-    "strapi-generate": "3.0.0-alpha.12.1.3",
-    "strapi-generate-api": "3.0.0-alpha.12.1.3"
+    "strapi-generate": "3.0.0-alpha.12.2",
+    "strapi-generate-api": "3.0.0-alpha.12.2"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.12.1.3"
+    "strapi-helper-plugin": "3.0.0-alpha.12.2"
   },
   "author": {
     "name": "Strapi team",

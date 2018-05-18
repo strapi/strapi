@@ -8,7 +8,7 @@ module.exports = {
       });
 
       if (params.sort) {
-        qb.orderByRaw(params.sort);
+        qb.orderBy(params.sort.key, params.sort.order);
       }
 
       if (params.start) {
