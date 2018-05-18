@@ -4,7 +4,8 @@ const Add = FilterOptionsCTA.extend`
   &:after {
     content: '\f067';
     font-family: FontAwesome;
-    font-size: 9px;
+    font-size: 8px;
+    font-weight: 400;
     color: #007EFF;
   }
 `;

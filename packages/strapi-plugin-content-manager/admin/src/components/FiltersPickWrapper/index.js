@@ -14,7 +14,7 @@ import FilterOptions from 'components/FilterOptions/Loadable';
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import PluginHeader from 'components/PluginHeader';
-import SlideDown from 'components/SlideDown/Loadable';
+import SlideDown from 'components/SlideDown';
 
 import Div from './Div';
 

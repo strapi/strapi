@@ -7,8 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import InputSelect from 'components/InputSelect';
-import InputText from 'components/InputText';
+import InputSelect from 'components/InputSelect/Loadable';
+import InputText from 'components/InputText/Loadable';
 
 import Add from './Add';
 import Div from './Div';

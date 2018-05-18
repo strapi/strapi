@@ -4,7 +4,7 @@ const Remove = FilterOptionsCTA.extend`
   &:after {
     content: '\f068';
     font-family: FontAwesome;
-    font-size: 9px;
+    font-size: 8px;
     color: #007EFF;
   }
 `;
