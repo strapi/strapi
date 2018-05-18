@@ -5,14 +5,23 @@
  */
 
 import {
+  ADD_FILTER,
   CHANGE_PARAMS,
   DELETE_DATA,
   DELETE_DATA_SUCCESS,
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  SET_PARAMS,
   ON_TOGGLE_FILTERS,
+  REMOVE_FILTER,
+  SET_PARAMS,
 } from './constants';
+
+export function addFilter(filter) {
+  return {
+    type: ADD_FILTER,
+    filter,
+  };
+}
 
 export function changeParams({ target }) {
   return {
@@ -53,15 +62,22 @@ export function getDataSucceeded(data) {
   };
 }
 
+export function onToggleFilters() {
+  return {
+    type: ON_TOGGLE_FILTERS,
+  };
+}
+
+export function removeFilter(index) {
+  return {
+    type: REMOVE_FILTER,
+    index,
+  };
+}
+
 export function setParams(params) {
   return {
     type: SET_PARAMS,
     params,
-  };
-}
-
-export function onToggleFilters() {
-  return {
-    type: ON_TOGGLE_FILTERS,
   };
 }

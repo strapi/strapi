@@ -34,7 +34,15 @@ import injectSaga from 'utils/injectSaga';
 
 import Div from './Div';
 
-import { changeParams, deleteData, getData, onToggleFilters, setParams } from './actions';
+import {
+  addFilter,
+  changeParams,
+  deleteData,
+  getData,
+  onToggleFilters,
+  removeFilter,
+  setParams,
+} from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -253,8 +261,11 @@ export class ListPage extends React.Component {
 
   render() {
     const {
+      addFilter,
       listPage,
       listPage: { appliedFilters, params, showFilter },
+      onToggleFilters,
+      removeFilter,
     } = this.props;
     const pluginHeaderActions = [
       {
@@ -276,8 +287,11 @@ export class ListPage extends React.Component {
     return (
       <div>
         <FiltersPickWrapper
+          addFilter={addFilter}
           appliedFilters={appliedFilters}
+          close={onToggleFilters}
           modelName={this.getCurrentModelName()}
+          removeFilter={removeFilter}
           schema={this.getCurrentSchema()}
           show={showFilter}
         />
@@ -302,7 +316,7 @@ export class ListPage extends React.Component {
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
               <Div>
-                <AddFilterCTA onClick={this.props.onToggleFilters} />
+                <AddFilterCTA onClick={onToggleFilters} />
               </Div>
             </div>
           </div>
@@ -349,6 +363,7 @@ export class ListPage extends React.Component {
 }
 
 ListPage.propTypes = {
+  addFilter: PropTypes.func.isRequired,
   changeParams: PropTypes.func.isRequired,
   deleteData: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
@@ -358,6 +373,7 @@ ListPage.propTypes = {
   match: PropTypes.object.isRequired,
   models: PropTypes.object.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
+  removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   setParams: PropTypes.func.isRequired,
 };
@@ -365,10 +381,12 @@ ListPage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addFilter,
       changeParams,
       deleteData,
       getData,
       onToggleFilters,
+      removeFilter,
       setParams,
     },
     dispatch,
