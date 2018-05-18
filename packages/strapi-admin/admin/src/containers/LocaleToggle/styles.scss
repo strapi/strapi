@@ -1,9 +1,10 @@
 .localeToggle {
   min-width: 90px;
+
   > div {
     height: 6rem;
     width: 90px;
-    line-height: 6rem;
+    line-height: 5.8rem;
     z-index: 999;
     > button {
       width: 100%;
@@ -43,17 +44,18 @@
     font-weight: 600;
     letter-spacing: 0.5;
     text-transform: uppercase;
+    vertical-align: baseline;
   }
 
   img {
-    max-height: 13.37px;
+    max-height: 13px;
     margin-left: 9px;
     border-radius: 1px;
+    vertical-align: middle;
   }
 
   -webkit-font-smoothing: antialiased;
 }
-
 
 .localeDropdownMenu {
   left: auto !important;
@@ -112,6 +114,26 @@
     }
   }
 }
+
+.localeDropdownMenuNotLogged{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px solid #e3e9f3 !important;
+  border-top: 0px !important;
+
+  button {
+    padding-left: 17px;
+
+    &:hover {
+      background-color: #F7F8F8 !important;
+    }
+  }
+
+  &:before{
+    box-shadow: none !important;
+  }
+}
+
 .localeToggleItem {
   img {
     max-height: 13.37px;
