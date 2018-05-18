@@ -25,7 +25,7 @@ class EmptyAttributesView extends React.Component { // eslint-disable-line react
             <Button
               onClick={this.props.onClickAddAttribute}
               primaryAddShape
-              label={'content-type-builder.button.attributes.add'}
+              label="content-type-builder.button.attributes.add"
             />
           </div>
         </div>

@@ -21,7 +21,8 @@ module.exports = {
       .findOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       })
-      .populate(this.associations.map(x => x.alias).join(' '));
+      .populate(this.associations.map(x => x.alias).join(' '))
+      .lean();
 
     // Only update fields which are on this document.
     const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
@@ -56,7 +57,7 @@ module.exports = {
                           [current]: null
                         },
                         parseRelationships: false
-                      })
+                      });
                     }
 
                     return Promise.resolve();
@@ -68,7 +69,7 @@ module.exports = {
                         [details.via]: null
                       },
                       parseRelationships: false
-                    })
+                    });
                   })
                   .then(() => {
                     if (!_.isNull(params.values[current])) {
@@ -167,11 +168,11 @@ module.exports = {
                 ref: obj.refId,
                 kind: globalId,
                 [association.filter]: obj.field
-              }
+              };
             });
             break;
           case 'oneToManyMorph':
-          case 'manyToManyMorph':
+          case 'manyToManyMorph': {
             const transformToArrayID = (array) => {
               if (_.isArray(array)) {
                 return array.map(value => {
@@ -180,7 +181,7 @@ module.exports = {
                   }
 
                   return value;
-                })
+                });
               }
 
               if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
@@ -225,6 +226,7 @@ module.exports = {
               );
             });
             break;
+          }
           case 'oneMorphToOne':
           case 'oneMorphToMany':
             break;
@@ -269,13 +271,17 @@ module.exports = {
       However the upload doesn't need this method. It only uses the `removeRelationMorph`.
     */
 
-    const entry = (
+    let entry = (
       await this
         .findOne({
           [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey)
         })
-        .toJSON()
     );
+
+    if (entry) {
+      entry = entry.toJSON();
+    }
+
     const value = [];
 
     // Retrieve association.
@@ -334,4 +340,4 @@ module.exports = {
       values: entry
     });
   }
-}
+};

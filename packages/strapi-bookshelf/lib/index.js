@@ -12,12 +12,12 @@ const _ = require('lodash');
 const bookshelf = require('bookshelf');
 const pluralize = require('pluralize');
 
+// Strapi helpers for models.
+const utilsModels = require('strapi-utils').models;
+
 // Local helpers.
 const utils = require('./utils/');
 const relations = require('./relations');
-
-// Strapi helpers for models.
-const utilsModels = require('strapi-utils').models;
 
 const PIVOT_PREFIX = '_pivot_';
 const GLOBALS = {};
@@ -26,6 +26,9 @@ const GLOBALS = {};
  * Bookshelf hook
  */
 
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-template */
+/* eslint-disable no-case-declarations */
 module.exports = function(strapi) {
   const hook = _.merge({
     /**
@@ -89,18 +92,18 @@ module.exports = function(strapi) {
 
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
-                tableName: definition.collectionName,
-                hasTimestamps: _.get(definition, 'options.timestamps') === true,
-                idAttribute: _.get(definition, 'options.idAttribute', 'id'),
-                associations: [],
-                defaults: Object.keys(definition.attributes).reduce((acc, current) => {
-                  if (definition.attributes[current].type && definition.attributes[current].default) {
-                    acc[current] = definition.attributes[current].default;
-                  }
+              tableName: definition.collectionName,
+              hasTimestamps: _.get(definition, 'options.timestamps') === true,
+              idAttribute: _.get(definition, 'options.idAttribute', 'id'),
+              associations: [],
+              defaults: Object.keys(definition.attributes).reduce((acc, current) => {
+                if (definition.attributes[current].type && definition.attributes[current].default) {
+                  acc[current] = definition.attributes[current].default;
+                }
 
-                  return acc;
-                }, {})
-              }, definition.options);
+                return acc;
+              }, {})
+            }, definition.options);
 
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
@@ -204,7 +207,7 @@ module.exports = function(strapi) {
                   });
 
                   return attrs;
-                }
+                };
 
                 // Initialize lifecycle callbacks.
                 loadedModel.initialize = function() {
@@ -426,7 +429,7 @@ module.exports = function(strapi) {
                       if (Object.keys(columnsToAdd).length > 0) {
                         const columns = generateColumns(columnsToAdd, []);
                         const queries = columns.reduce((acc, attribute) => {
-                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`)
+                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
                           return acc;
                         }, []).join('\n\r');
 
@@ -736,7 +739,7 @@ module.exports = function(strapi) {
                       .query(qb => {
                         qb.where(_.get(model, `attributes.${details.via}.filter`, 'field'), name);
                       });
-                  }
+                  };
                   break;
                 }
                 case 'morphMany': {
@@ -752,7 +755,7 @@ module.exports = function(strapi) {
                       .query(qb => {
                         qb.where(_.get(collection, `attributes.${details.via}.filter`, 'field'), name);
                       });
-                  }
+                  };
                   break;
                 }
                 case 'belongsToMorph':
@@ -846,7 +849,7 @@ module.exports = function(strapi) {
       cb();
     },
 
-    getQueryParams: (value, type, key) => {
+    getQueryParams: (value, type, key) => {
       const result = {};
 
       switch (type) {

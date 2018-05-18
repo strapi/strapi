@@ -22,7 +22,7 @@ module.exports = {
     if (primaryKey) {
       params = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     return this
@@ -65,18 +65,18 @@ module.exports = {
     if (primaryKey) {
       search = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     return this.update(search, params, {
       strict: false
     })
-    .catch((error) => {
-      const field = _.last(_.words(error.message.split('_')[0]));
-      const err = { message: `This ${field} is already taken`, field };
+      .catch((error) => {
+        const field = _.last(_.words(error.message.split('_')[0]));
+        const err = { message: `This ${field} is already taken`, field };
 
-      throw err;
-    });
+        throw err;
+      });
   },
 
   delete: async function (params) {

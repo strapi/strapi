@@ -25,6 +25,7 @@ const generateTarget = require('./target');
  * @param {Switchback} cb
  */
 
+/* eslint-disable prefer-template */
 function generate(generator, scope, cb) {
   const sb = reportback.extend(cb, {
     error: cb.error,

@@ -25,6 +25,8 @@ import IcoText from '../../assets/images/icon_text.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/jsx-curly-brace-presence */
 class AttributeRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   constructor(props) {

@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-api",
-  "version": "3.0.0-alpha.12.1.3",
+  "version": "3.0.0-alpha.12.2",
   "description": "Generate an API for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [

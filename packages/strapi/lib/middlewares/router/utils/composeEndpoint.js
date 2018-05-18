@@ -41,5 +41,5 @@ module.exports = strapi => {
     } catch (err) {
       cb(err);
     }
-  }
-}
+  };
+};

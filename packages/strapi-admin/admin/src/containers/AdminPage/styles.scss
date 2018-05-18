@@ -8,3 +8,10 @@
 .adminPageRightWrapper {
   width: calc(100% - #{$left-menu-width});
 }
+
+.adminPageSeparator {
+  height: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

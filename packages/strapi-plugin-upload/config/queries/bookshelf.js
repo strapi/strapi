@@ -8,7 +8,7 @@ module.exports = {
       });
 
       if (params.sort) {
-        qb.orderByRaw(params.sort);
+        qb.orderBy(params.sort.key, params.sort.order);
       }
 
       if (params.start) {
@@ -37,7 +37,7 @@ module.exports = {
     if (primaryKey) {
       params = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     const record = await this
@@ -85,7 +85,7 @@ module.exports = {
 
       search = {
         [this.primaryKey]: entry[this.primaryKey] || entry.id
-      }
+      };
     }
 
     return this.forge(search)
@@ -112,8 +112,8 @@ module.exports = {
     return this
       .query(function(qb) {
         qb
-        .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
-        .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
+          .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
+          .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
       })
       .fetchAll();
   },

@@ -10,7 +10,7 @@ const _ = require('lodash');
 /**
  * Utils functions for BookShelf
  */
-
+/* eslint-disable prefer-template */
 module.exports = {
 
   /**

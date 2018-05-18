@@ -7,12 +7,13 @@
 // Public node modules.
 const reportback = require('reportback')();
 
-// Local dependencies.
-const generate = require('./generate');
-
 // Logger.
 const logger = require('strapi-utils').logger;
 
+// Local dependencies.
+const generate = require('./generate');
+
+/* eslint-disable prefer-template */
 /**
  * Generate module(s)
  *

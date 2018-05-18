@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-alpha.12.1.3",
+  "version": "3.0.0-alpha.12.2",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,6 +14,9 @@
     "lib": "./lib"
   },
   "main": "./lib",
+  "scripts": {
+    "test": "echo \"Error: no test specified yet!\""
+  },
   "dependencies": {
     "commander": "^2.11.0",
     "joi-json": "^2.0.1",
