@@ -17,6 +17,7 @@ const utilsModels = require('strapi-utils').models;
 
 // Local helpers.
 const utils = require('./utils/');
+const relations = require('./relations');
 
 const PIVOT_PREFIX = '_pivot_';
 const GLOBALS = {};

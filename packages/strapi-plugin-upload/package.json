@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.12.1.3",
+  "version": "3.0.0-alpha.12.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -19,16 +19,16 @@
     "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo \"Error: no test specified\"",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
     "react-copy-to-clipboard": "^5.0.1",
-    "strapi-upload-local": "3.0.0-alpha.12.1.3",
+    "strapi-upload-local": "3.0.0-alpha.12.2",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.12.1.3"
+    "strapi-helper-plugin": "3.0.0-alpha.12.2"
   },
   "author": {
     "name": "A Strapi developer",

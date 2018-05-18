@@ -46,7 +46,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
             <span>{locale}</span>
             <img src={this.getFlagUrl(locale)} alt={locale} />
           </DropdownToggle>
-          <DropdownMenu className={styles.localeDropdownMenu}>
+          <DropdownMenu className={cn(styles.localeDropdownMenu, this.props.isLogged ? '' : styles.localeDropdownMenuNotLogged)}>
             {languages.map(language => (
               <DropdownItem key={language} onClick={() => this.props.changeLocale(language)} className={cn(styles.localeToggleItem, locale === language ? styles.localeToggleItemActive : '')}>
                 {language.toUpperCase()}
@@ -63,6 +63,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
 LocaleToggle.propTypes = {
   changeLocale: PropTypes.func.isRequired,
+  isLogged: PropTypes.string.isRequired,
   locale: PropTypes.string.isRequired,
 };
 
