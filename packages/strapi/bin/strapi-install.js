@@ -22,9 +22,19 @@ const { cli, logger } = require('strapi-utils');
 
 module.exports = function (plugin, cliArguments) {
   // Define variables.
+  let pluginVersion = 'alpha';
+  let pluginName = plugin;
   const pluginPrefix = 'strapi-plugin-';
-  const pluginID = `${pluginPrefix}${plugin}`;
-  const pluginPath = `./plugins/${plugin}`;
+  if (plugin.indexOf('@') !== -1) {
+    //version specified
+    const components = plugin.split('@');
+    pluginVersion = components[1];
+    pluginName = components[0];
+  }
+
+  const pluginPrefix = 'strapi-plugin-';
+  const pluginID = `${pluginPrefix}${pluginName}`;
+  const pluginPath = `./plugins/${pluginName}`;
 
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
@@ -55,7 +65,7 @@ module.exports = function (plugin, cliArguments) {
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    exec(`npm install ${pluginID}@alpha --ignore-scripts --no-save --prefix ${pluginPath}`, (err) => {
+    exec(`npm install ${pluginID}@${pluginVersion} --ignore-scripts --no-save --prefix ${pluginPath}`, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
         process.exit(1);
