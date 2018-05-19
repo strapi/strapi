@@ -112,7 +112,7 @@ module.exports = (scope, cb) => {
     // Install each plugin.
     defaultPlugins.forEach(defaultPlugin => {
       try {
-        execSync(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`);
+        execSync(`node ${strapiBin} install ${defaultPlugin.name}@${packageJSON.version} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`);
         logger.info(`The plugin ${defaultPlugin.name} has been successfully installed.`);
       } catch (error) {
         logger.error(`An error occurred during ${defaultPlugin.name} plugin installation.`);
