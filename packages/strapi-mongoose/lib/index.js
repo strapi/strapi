@@ -39,7 +39,8 @@ module.exports = function (strapi) {
       port: 27017,
       database: 'strapi',
       authenticationDatabase: '',
-      ssl: false
+      ssl: false,
+      debug: false
     },
 
     /**
@@ -50,10 +51,11 @@ module.exports = function (strapi) {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
         const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
-        const { authenticationDatabase, ssl } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
+        const { authenticationDatabase, ssl, debug } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {};
+        const options = {};
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -69,7 +71,13 @@ module.exports = function (strapi) {
 
         connectOptions.ssl = ssl === true || ssl === 'true';
 
+        options.debug = debug === true || debug === 'true';
+
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
+
+        for (let key in options) {
+          instance.set(key, options[key])
+        }
 
         // Handle error
         instance.connection.on('error', error => {
