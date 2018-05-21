@@ -153,7 +153,7 @@
     "ResetPasswordToken": "Сбросить токен пароля",
     "Role": "Роль",
     "New entry": "Новая запись",
-    "request.error.model.unknow": "Модель данных не существует",
+    "request.error.model.unknown": "Модель данных не существует",
     "Users": "Пользователи",
     "Analytics": "Аналитика"
   }
