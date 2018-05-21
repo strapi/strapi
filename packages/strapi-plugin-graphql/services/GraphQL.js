@@ -698,7 +698,7 @@ module.exports = {
 
   addPolymorphicUnionType: (customDefs, defs) => {
     const types = graphql.parse(customDefs + defs).definitions
-      .filter(def => def.name.value !== 'Query')
+      .filter(def => && def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
       .map(def => def.name.value);
 
     return {
