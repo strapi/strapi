@@ -1,46 +1,48 @@
-const exec = require('child_process').exec;
-const fs = require('fs-extra');
-const path = require('path');
+const axios = require('axios');
 
-const bin = path.resolve('./packages/strapi/bin/strapi.js');
-const appName = 'testApp';
+const request = axios.create({
+  baseURL: 'http://localhost:1337',
+});
 
-describe('Basic setup', () => {
-  beforeAll(() => {
-    return new Promise(resolve => {
-      fs.exists(appName, exists => {
-        if (exists) {
-          fs.removeSync(appName);
-        }
+const params = require('./helper/generators');
+const restart = require('./helper/restart');
 
-        resolve();
+describe('App setup auth', () => {
+  test(
+    'Register admin user',
+    async () => {
+      const body = await request.post('/auth/local/register', {
+      	username: 'admin',
+      	email: 'admin@strapi.io',
+      	password: 'pcw123'
       });
-    });
-  });
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${body.data.jwt}`;
+    }
+  );
+});
+
+describe('Generate test APIs', () => {
+  beforeEach(async () => {
+    await restart(request);
+  }, 60000);
 
   test(
-    'Create new test app',
-    () => {
-      return expect(
-        new Promise(resolve => {
-          const appCreation = exec(
-            `node ${bin} new ${appName} --dev --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
-          );
-
-          appCreation.stdout.on('data', data => {
-            if (data.includes('is ready at')) {
-              appCreation.kill();
-              return resolve(true);
-            }
-
-            if (data.includes('Database connection has failed')) {
-              appCreation.kill();
-              return resolve(false);
-            }
-          });
-        }),
-      ).resolves.toBeTruthy();
-    },
-    120000,
+    'Create new article API',
+    async () => {
+      await request.post('/content-type-builder/models', params.article);
+    }
+  );
+  test(
+    'Create new tag API',
+    async () => {
+      await request.post('/content-type-builder/models', params.tag);
+    }
+  );
+  test(
+    'Create new category API',
+    async () => {
+      await request.post('/content-type-builder/models', params.category);
+    }
   );
 });
