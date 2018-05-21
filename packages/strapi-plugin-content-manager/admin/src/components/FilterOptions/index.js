@@ -37,7 +37,7 @@ const getInputType = (attrType) => {
   }
 };
 
-const defaultInputStyle = { height: '30px', width: '200px', marginRight: '10px' };
+const defaultInputStyle = { height: '30px', width: '200px', marginRight: '10px', paddingTop: '9px' };
 
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
   const selectStyle = { minHeight: '30px', minWidth: '170px', maxWidth: '200px' };

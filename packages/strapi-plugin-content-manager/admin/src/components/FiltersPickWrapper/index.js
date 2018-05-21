@@ -38,6 +38,28 @@ class FiltersPickWrapper extends React.PureComponent {
     }
   }
 
+  generateActions = () => ([
+    {
+      label: 'content-manager.components.FiltersPickWrapper.PluginHeader.actions.clearAll',
+      kind: 'secondary',
+      onClick: () => {
+        return new Promise(resolve => {
+          this.props.close();
+          setTimeout(() => {
+            this.props.removeAllFilters();
+            resolve();
+          }, 600);
+        });
+      },
+    },
+    {
+      label: 'content-manager.components.FiltersPickWrapper.PluginHeader.actions.apply',
+      kind: 'primary',
+      type: 'submit',
+      onClick: this.props.onSubmit,
+    },
+  ]);
+
   handleChange = ({ target }) => {
     const split = target.name.split('.');
     this.props.onChange(split[0], split[1], target.value);
@@ -57,6 +79,7 @@ class FiltersPickWrapper extends React.PureComponent {
       return new Promise(resolve => {
         setTimeout(() => {
           this.props.removeFilter(index);
+          this.props.onSubmit();
           resolve();
         }, 600);
       });
@@ -85,54 +108,56 @@ class FiltersPickWrapper extends React.PureComponent {
   );
 
   render() {
-    const { actions, appliedFilters, schema, show } = this.props;
+    const { appliedFilters, schema, show } = this.props;
 
     return (
-      <SlideDown on={show}>
-        <Div>
-          <div>
-            <PluginHeader
-              actions={actions}
-              description={{
-                id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
-              }}
-              title={this.renderTitle()}
-            />
-            <div style={{ marginTop: '-10px' }}>
-              {appliedFilters.map((filter, key) => (
-                <FilterOptions
-                  key={key}
-                  filter={filter}
-                  index={key}
-                  onChange={this.handleChange}
-                  onClickAdd={this.handleClickAdd}
-                  onClickRemove={this.handleClickRemove}
-                  schema={schema}
-                  showAddButton={this.shouldDisplayAddButton(key)}
-                />
-              ))}
+      <form onSubmit={this.handleSubmit}>
+        <SlideDown on={show}>
+          <Div>
+            <div>
+              <PluginHeader
+                actions={this.generateActions()}
+                description={{
+                  id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
+                }}
+                title={this.renderTitle()}
+              />
+              <div style={{ marginTop: '-13px' }}>
+                {appliedFilters.map((filter, key) => (
+                  <FilterOptions
+                    key={key}
+                    filter={filter}
+                    index={key}
+                    onChange={this.handleChange}
+                    onClickAdd={this.handleClickAdd}
+                    onClickRemove={this.handleClickRemove}
+                    schema={schema}
+                    showAddButton={this.shouldDisplayAddButton(key)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </Div>
-      </SlideDown>
+          </Div>
+        </SlideDown>
+      </form>
     );
   }
 }
 
 FiltersPickWrapper.defaultProps = {
-  actions: [],
   appliedFilters: [],
   modelName: '',
   schema: {},
 };
 
 FiltersPickWrapper.propTypes = {
-  actions: PropTypes.array,
   addFilter: PropTypes.func.isRequired,
   appliedFilters: PropTypes.array,
   close: PropTypes.func.isRequired,
   modelName: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  removeAllFilters: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object,
   show: PropTypes.bool.isRequired,

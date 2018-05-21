@@ -13,8 +13,10 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_TOGGLE_FILTERS,
+  REMOVE_ALL_FILTERS,
   REMOVE_FILTER,
   SET_PARAMS,
+  SUBMIT,
 } from './constants';
 
 export function addFilter(filter) {
@@ -78,6 +80,12 @@ export function onToggleFilters() {
   };
 }
 
+export function removeAllFilters() {
+  return {
+    type: REMOVE_ALL_FILTERS,
+  };
+}
+
 export function removeFilter(index) {
   return {
     type: REMOVE_FILTER,
@@ -89,5 +97,11 @@ export function setParams(params) {
   return {
     type: SET_PARAMS,
     params,
+  };
+}
+
+export function submit() {
+  return {
+    type: SUBMIT,
   };
 }

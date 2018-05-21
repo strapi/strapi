@@ -41,8 +41,10 @@ import {
   getData,
   onChange,
   onToggleFilters,
+  removeAllFilters,
   removeFilter,
   setParams,
+  submit,
 } from './actions';
 
 import reducer from './reducer';
@@ -248,6 +250,16 @@ export class ListPage extends React.Component {
     this.setState({ showWarning: false });
   };
 
+  handleSubmit = e => {
+    try {
+      e.preventDefault();
+    } catch(err) {
+      // Silent
+    } finally {
+      this.props.submit();
+    }
+  }
+
   toggleModalWarning = e => {
     if (!isUndefined(e)) {
       e.preventDefault();
@@ -267,6 +279,7 @@ export class ListPage extends React.Component {
       listPage: { appliedFilters, params, showFilter },
       onChange,
       onToggleFilters,
+      removeAllFilters,
       removeFilter,
     } = this.props;
     const pluginHeaderActions = [
@@ -294,6 +307,8 @@ export class ListPage extends React.Component {
           close={onToggleFilters}
           modelName={this.getCurrentModelName()}
           onChange={onChange}
+          onSubmit={this.handleSubmit}
+          removeAllFilters={removeAllFilters}
           removeFilter={removeFilter}
           schema={this.getCurrentSchema()}
           show={showFilter}
@@ -377,9 +392,11 @@ ListPage.propTypes = {
   models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
+  removeAllFilters: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   setParams: PropTypes.func.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -391,8 +408,10 @@ function mapDispatchToProps(dispatch) {
       getData,
       onChange,
       onToggleFilters,
+      removeAllFilters,
       removeFilter,
       setParams,
+      submit,
     },
     dispatch,
   );
