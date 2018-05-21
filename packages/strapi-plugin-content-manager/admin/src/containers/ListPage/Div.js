@@ -8,7 +8,7 @@
 import styled from 'styled-components';
 
 const Div = styled.div`
-  margin-top: -2px;
+  margin-top: ${props => props.increaseMargin ? '10px': '-2px'};
   margin-bottom: 8px;
 `;
 

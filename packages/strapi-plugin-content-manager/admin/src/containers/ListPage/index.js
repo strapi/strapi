@@ -333,7 +333,7 @@ export class ListPage extends React.Component {
           )}
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
-              <Div>
+              <Div increaseMargin={!this.state.showHeader}>
                 <AddFilterCTA onClick={onToggleFilters} />
               </Div>
             </div>

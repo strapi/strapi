@@ -22,6 +22,7 @@
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",
   "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
+  "components.FiltersPickWrapper.hide": "Fermer",
 
   "components.FilterOptions.FILTER_TYPES.equals": "est",
   "components.FilterOptions.FILTER_TYPES.not_equals": "n'est pas",

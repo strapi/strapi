@@ -21,6 +21,7 @@
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
   "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
+  "components.FiltersPickWrapper.hide": "Hide",
 
   "components.FilterOptions.FILTER_TYPES.equals": "is",
   "components.FilterOptions.FILTER_TYPES.not_equals": "is not",

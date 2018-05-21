@@ -16,6 +16,7 @@ import PluginHeader from 'components/PluginHeader';
 import SlideDown from 'components/SlideDown';
 
 import Div from './Div';
+import Flex from './Flex';
 
 const spanStyle = {
   color: '#787E8F',
@@ -71,6 +72,8 @@ class FiltersPickWrapper extends React.PureComponent {
 
     return addFilter(filter);
   }
+
+  handleClickClose = () => this.props.close();
 
   handleClickRemove = (index) => {
     if (this.props.appliedFilters.length == 1) {
@@ -137,6 +140,12 @@ class FiltersPickWrapper extends React.PureComponent {
                 ))}
               </div>
             </div>
+            <Flex>
+              <span onClick={this.handleClickClose}>
+                <FormattedMessage id="content-manager.components.FiltersPickWrapper.hide" />
+                &nbsp;
+              </span>
+            </Flex>
           </Div>
         </SlideDown>
       </form>
