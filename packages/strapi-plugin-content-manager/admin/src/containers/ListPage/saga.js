@@ -25,24 +25,36 @@ import {
 } from './constants';
 // Selectors
 import {
+  makeSelectFilters,
   makeSelectParams,
 } from './selectors';
 
 export function* dataGet(action) {
   try {
     const { _limit, _page, _sort } = yield select(makeSelectParams());
+    const filters = yield select(makeSelectFilters());
     const source = action.source;
     const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
     // Params to get the model's records
     const recordsURL = `/content-manager/explorer/${currentModel}`;
+    const filtersObj = filters.reduce((acc, curr) => {
+      const key = curr.filter === '=' ? curr.attr : `${curr.attr}${curr.filter}`;
+      const filter = {
+        [key]: curr.value,
+      };
+      acc = Object.assign(acc, filter);
+
+      return acc;
+    }, {});
+
     const _start = (_page - 1 ) * _limit;
-    const params = {
+    const params = Object.assign(filtersObj, {
       _limit,
       _start,
       _sort,
       source,
-    };
+    });
 
     const response = yield [
       call(request, countURL, { method: 'GET', params: { source } }),

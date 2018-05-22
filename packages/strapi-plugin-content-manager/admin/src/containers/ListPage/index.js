@@ -114,8 +114,9 @@ export class ListPage extends React.Component {
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
     const _sort = this.findPageSort(props);
     const params = { _limit, _page, _sort };
+    const filters = this.generateFiltersFromSearch(props.location.search);
 
-    this.props.setParams(params);
+    this.props.setParams(params, filters);
     this.props.getData(props.match.params.slug, source);
   };
 
@@ -152,6 +153,62 @@ export class ListPage extends React.Component {
       this.setState({ showHeader: true });
     }
   };
+
+  generateFiltersFromSearch = search => search
+    .split('&')
+    .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source'))
+    .reduce((acc, curr) => {
+      const arr = curr.split('=');
+      const split = arr[0].split('_');
+      const filter = split.length > 1 ? `_${split[1]}` : '=';
+      acc.push({ attr: split[0], filter, value: arr[1] });
+
+      return acc;
+    }, []);
+
+  /**
+   * Generate the redirect URI when editing an entry
+   * @type {String}
+   */
+  generateRedirectURI = () => {
+    const {
+      listPage: { filters, params },
+    } = this.props;
+    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
+
+    return `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?${this.generateSearchFromParams(
+      params,
+    )}&source=${this.getSource()}${filterSearch}`;
+  };
+
+  /**
+   * Generate the search URI from params
+   * @param  {Object} params
+   * @return {String}
+   */
+  generateSearchFromParams = params =>
+    Object.keys(params).reduce((acc, curr, index) => {
+      if (index === 0) {
+        acc = `${curr}=${params[curr]}`;
+      } else {
+        acc = `${acc}&${curr}=${params[curr]}`;
+      }
+      return acc;
+    }, '');
+
+  /**
+   * Generate the search URI from filters
+   * @param  {Array} filters Array of filter
+   * @return {String}
+   */
+  generateSearchFromFilters = filters =>
+    filters.reduce((acc, curr, index) => {
+      const separator = curr.filter === '=' ? '' : '=';
+      const base = `${curr.attr}${curr.filter}${separator}${curr.value}`;
+      acc = index === 0 ? base : `${acc}&${base}`;
+
+      return acc;
+    }, '');
 
   /**
    *  Function to generate the Table's headers
@@ -255,12 +312,12 @@ export class ListPage extends React.Component {
   handleSubmit = e => {
     try {
       e.preventDefault();
-    } catch(err) {
+    } catch (err) {
       // Silent
     } finally {
       this.props.submit();
     }
-  }
+  };
 
   toggleModalWarning = e => {
     if (!isUndefined(e)) {
@@ -336,16 +393,14 @@ export class ListPage extends React.Component {
           )}
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
-              <Div increaseMargin={!this.state.showHeader} decreaseMarginBottom={filters.length > 0}>
+              <Div
+                increaseMargin={!this.state.showHeader}
+                decreaseMarginBottom={filters.length > 0}
+              >
                 <div className="row">
                   <AddFilterCTA onClick={onToggleFilters} />
                   {filters.map((filter, key) => (
-                    <Filter
-                      key={key}
-                      filter={filter}
-                      index={key}
-                      onClick={onClickRemove}
-                    />
+                    <Filter key={key} filter={filter} index={key} onClick={onClickRemove} />
                   ))}
                 </div>
               </Div>
@@ -363,9 +418,7 @@ export class ListPage extends React.Component {
                 history={this.props.history}
                 primaryKey={this.getCurrentModel().primaryKey || 'id'}
                 handleDelete={this.toggleModalWarning}
-                redirectUrl={`?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?_page=${
-                  params._page
-                }&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`}
+                redirectUrl={this.generateRedirectURI()}
               />
               <PopUpWarning
                 isOpen={this.state.showWarning}

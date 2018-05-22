@@ -101,10 +101,11 @@ export function removeFilter(index) {
   };
 }
 
-export function setParams(params) {
+export function setParams(params, filters) {
   return {
     type: SET_PARAMS,
     params,
+    filters,
   };
 }
 

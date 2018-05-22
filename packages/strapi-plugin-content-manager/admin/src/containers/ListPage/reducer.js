@@ -71,7 +71,10 @@ function listPageReducer(state = initialState, action) {
     case REMOVE_FILTER:
       return state.update('appliedFilters', list => list.splice(action.index, 1));
     case SET_PARAMS:
-      return state.update('params', () => Map(action.params));
+      return state
+        .update('params', () => Map(action.params))
+        .update('appliedFilters', () => fromJS(action.filters))
+        .update('filters', () => fromJS(action.filters));
     case SUBMIT:
       return state
         .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
