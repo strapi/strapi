@@ -83,7 +83,7 @@ module.exports = function(strapi) {
             definition.client = _.get(connection.settings, 'client');
             _.defaults(definition, {
               primaryKey: 'id',
-              primaryKeyType: _.get(definition, 'options.idAttributeType', definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT')
+              primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
             });
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
@@ -341,10 +341,11 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'uuid' : 'varchar(255)';
                             break;
                           case 'text':
+                          case 'json':
                             type = 'text';
                             break;
-                          case 'json':
-                            type = definition.client === 'pg' ? 'jsonb' : 'text';
+                          case 'jsonb':
+                            type = 'jsonb';
                             break;
                           case 'string':
                           case 'password':
@@ -394,9 +395,11 @@ module.exports = function(strapi) {
                     };
 
                     if (!tableExist) {
-                      let idAttributeBuilder = [`id ${definition.primaryKeyType} NOT NULL PRIMARY KEY`];
+                      let idAttributeBuilder = [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`];
                       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
                         idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
+                      } else if (definition.primaryKeyType !== 'integer') {
+                        idAttributeBuilder = [`id ${definition.primaryKeyType} NOT NULL PRIMARY KEY`];
                       }
                       const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
 
@@ -449,7 +452,8 @@ module.exports = function(strapi) {
                             const changeRequired = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
-
+                            //console.log(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
+                            //console.log(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                           }
