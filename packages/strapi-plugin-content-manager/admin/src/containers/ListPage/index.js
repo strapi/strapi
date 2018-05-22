@@ -52,6 +52,11 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectListPage from './selectors';
+import {
+  generateFiltersFromSearch,
+  generateSearchFromFilters,
+  generateSearchFromParams,
+} from './utils';
 
 import styles from './styles.scss';
 
@@ -67,7 +72,7 @@ export class ListPage extends React.Component {
       location: { pathname, search },
     } = prevProps;
     const {
-      listPage: { showFilter },
+      listPage: { showFilter, filtersUpdated },
     } = this.props;
 
     if (pathname !== this.props.location.pathname) {
@@ -81,6 +86,11 @@ export class ListPage extends React.Component {
 
     if (prevProps.listPage.showFilter !== showFilter) {
       this.hidePluginHeader(showFilter);
+    }
+
+    if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
+      const updatedSearch = this.generateSearch();
+      this.props.history.push({ pathname, search: updatedSearch });
     }
   }
 
@@ -114,7 +124,7 @@ export class ListPage extends React.Component {
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
     const _sort = this.findPageSort(props);
     const params = { _limit, _page, _sort };
-    const filters = this.generateFiltersFromSearch(props.location.search);
+    const filters = generateFiltersFromSearch(props.location.search);
 
     this.props.setParams(params, filters);
     this.props.getData(props.match.params.slug, source);
@@ -154,18 +164,6 @@ export class ListPage extends React.Component {
     }
   };
 
-  generateFiltersFromSearch = search => search
-    .split('&')
-    .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source'))
-    .reduce((acc, curr) => {
-      const arr = curr.split('=');
-      const split = arr[0].split('_');
-      const filter = split.length > 1 ? `_${split[1]}` : '=';
-      acc.push({ attr: split[0], filter, value: arr[1] });
-
-      return acc;
-    }, []);
-
   /**
    * Generate the redirect URI when editing an entry
    * @type {String}
@@ -177,39 +175,9 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
-    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
 
-    return `?${this.generateSearchFromParams(params)}&source=${this.getSource()}${filterSearch}`;
+    return `?${generateSearchFromParams(params)}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
   }
-
-  /**
-   * Generate the search URI from params
-   * @param  {Object} params
-   * @return {String}
-   */
-  generateSearchFromParams = params =>
-    Object.keys(params).reduce((acc, curr, index) => {
-      if (index === 0) {
-        acc = `${curr}=${params[curr]}`;
-      } else {
-        acc = `${acc}&${curr}=${params[curr]}`;
-      }
-      return acc;
-    }, '');
-
-  /**
-   * Generate the search URI from filters
-   * @param  {Array} filters Array of filter
-   * @return {String}
-   */
-  generateSearchFromFilters = filters =>
-    filters.reduce((acc, curr, index) => {
-      const separator = curr.filter === '=' ? '' : '=';
-      const base = `${curr.attr}${curr.filter}${separator}${curr.value}`;
-      acc = index === 0 ? base : `${acc}&${base}`;
-
-      return acc;
-    }, '');
 
   /**
    *  Function to generate the Table's headers
@@ -268,8 +236,7 @@ export class ListPage extends React.Component {
       history,
       listPage: { filters, params },
     } = this.props;
-    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
-    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${filterSearch}`;
+    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}${searchEnd}`
@@ -291,14 +258,13 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
-    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
-
     this.props.history.push({
       pathname: this.props.location.pathname,
       search: `?_page=${params._page}&_limit=${
         params._limit
-      }&_sort=${sort}&source=${this.getSource()}${filterSearch}`,
+      }&_sort=${sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`,
     });
+
     this.props.changeParams({ target });
   };
 

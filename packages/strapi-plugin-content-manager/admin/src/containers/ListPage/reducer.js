@@ -32,6 +32,7 @@ const initialState = fromJS({
   }),
   records: List([]),
   showFilter: false,
+  filtersUpdated: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -61,25 +62,35 @@ function listPageReducer(state = initialState, action) {
     case ON_CLICK_REMOVE:
       return state
         .update('appliedFilters', list => list.splice(action.index, 1))
-        .update('filters', list => list.splice(action.index, 1));
+        .update('filters', list => list.splice(action.index, 1))
+        .update('filtersUpdated', v => v = !v);
     case ON_TOGGLE_FILTERS:
       return state.update('showFilter', v => !v);
     case REMOVE_ALL_FILTERS:
       return state
         .update('appliedFilters', () => List([]))
-        .update('filters', () => List([]));
+        .update('filters', () => List([]))
+        .update('filtersUpdated', v => v = !v);
     case REMOVE_FILTER:
       return state.update('appliedFilters', list => list.splice(action.index, 1));
     case SET_PARAMS:
       return state
         .update('params', () => Map(action.params))
-        .update('appliedFilters', () => fromJS(action.filters))
-        .update('filters', () => fromJS(action.filters));
+        .update('appliedFilters', (list) => {
+          if (state.get('showFilter') === true) {
+            return list;
+          }
+
+          return fromJS(action.filters);
+        })
+        .update('filters', () => fromJS(action.filters))
+        .update('showFilter', () => false);
     case SUBMIT:
       return state
         .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
         .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
-        .update('showFilter', () => false);
+        .update('showFilter', () => false)
+        .update('filtersUpdated', v => v = !v);
     default:
       return state;
   }
