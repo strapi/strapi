@@ -3,11 +3,7 @@ name: 🐛 Bug Report
 about: Create a report to help us improve 🤔.
 ---
 
-<!--
-⚠️ If you do not respect these two points, your issue will be closed.
-- Don't forget the checkbox at the end of your issue.
-- Respect this template.
--->
+<!-- ⚠️ If you do not respect this template your issue will be closed. -->
 
 <!-- ⚠️ Before writing your issue make sure you are using:-->
 <!-- Node 9.x.x -->
@@ -38,13 +34,4 @@ about: Create a report to help us improve 🤔.
 
 
 
----
-
-<!-- ⚠️ Make sure to browse the opened and closed issues. -->
-
-- [ ] I'm sure that this feature hasn't already been referenced.
-
-<!--
-⬆️ Don't delete this checkbox from your issue and approve it.
-Add an `x` ->  [x] or click on the checkbox when your issue is created.
--->
+<!-- ⚠️ Make sure to browse the opened and closed issues before submit your issue. -->
