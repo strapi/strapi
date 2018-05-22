@@ -57,7 +57,7 @@ export function* dataGet(action) {
     });
 
     const response = yield [
-      call(request, countURL, { method: 'GET', params: { source } }),
+      call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
     ];
 
