@@ -23,7 +23,10 @@ const handleClick = (e, onClick) => {
 
 Ico.propTypes = {
   icoType: PropTypes.string,
-  id: PropTypes.string,
+  id: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   onClick: PropTypes.func,
 };
 
