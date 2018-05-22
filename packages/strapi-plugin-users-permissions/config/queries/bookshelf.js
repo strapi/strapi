@@ -21,7 +21,7 @@ module.exports = {
         qb.limit(params.limit);
       }
     })
-      .orderBy(params.sort)
+      .orderBy(params.sort.key, params.sort.order)
       .fetchAll({
         withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
       });
