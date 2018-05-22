@@ -170,16 +170,17 @@ export class ListPage extends React.Component {
    * Generate the redirect URI when editing an entry
    * @type {String}
    */
-  generateRedirectURI = () => {
+  generateRedirectURI = () =>
+    `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}${this.generateSearch()}`;
+
+  generateSearch = () => {
     const {
       listPage: { filters, params },
     } = this.props;
     const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
 
-    return `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}?${this.generateSearchFromParams(
-      params,
-    )}&source=${this.getSource()}${filterSearch}`;
-  };
+    return `?${this.generateSearchFromParams(params)}&source=${this.getSource()}${filterSearch}`;
+  }
 
   /**
    * Generate the search URI from params
@@ -265,16 +266,15 @@ export class ListPage extends React.Component {
   handleChangeParams = e => {
     const {
       history,
-      listPage: { params },
+      listPage: { filters, params },
     } = this.props;
+    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
+    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${filterSearch}`;
     const search =
       e.target.name === 'params._limit'
-        ? `_page=${params._page}&_limit=${e.target.value}&_sort=${
-          params._sort
-        }&source=${this.getSource()}`
-        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${
-          params._sort
-        }&source=${this.getSource()}`;
+        ? `_page=${params._page}&_limit=${e.target.value}${searchEnd}`
+        : `_page=${e.target.value}&_limit=${params._limit}${searchEnd}`;
+
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -288,16 +288,16 @@ export class ListPage extends React.Component {
       name: 'params._sort',
       value: sort,
     };
-
     const {
-      listPage: { params },
+      listPage: { filters, params },
     } = this.props;
+    const filterSearch = filters.length > 0 ? `&${this.generateSearchFromFilters(filters)}` : '';
 
     this.props.history.push({
       pathname: this.props.location.pathname,
       search: `?_page=${params._page}&_limit=${
         params._limit
-      }&_sort=${sort}&source=${this.getSource()}`,
+      }&_sort=${sort}&source=${this.getSource()}${filterSearch}`,
     });
     this.props.changeParams({ target });
   };
@@ -352,9 +352,7 @@ export class ListPage extends React.Component {
         onClick: () =>
           this.props.history.push({
             pathname: `${this.props.location.pathname}/create`,
-            search: `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName()}?_page=${
-              params._page
-            }&_limit=${params._limit}&_sort=${params._sort}&source=${this.getSource()}`,
+            search: this.generateRedirectURI(),
           }),
       },
     ];
