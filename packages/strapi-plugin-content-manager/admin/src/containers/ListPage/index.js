@@ -41,6 +41,7 @@ import {
   deleteData,
   getData,
   onChange,
+  onClickRemove,
   onToggleFilters,
   removeAllFilters,
   removeFilter,
@@ -279,6 +280,7 @@ export class ListPage extends React.Component {
       listPage,
       listPage: { appliedFilters, filters, params, showFilter },
       onChange,
+      onClickRemove,
       onToggleFilters,
       removeAllFilters,
       removeFilter,
@@ -338,7 +340,12 @@ export class ListPage extends React.Component {
                 <div className="row">
                   <AddFilterCTA onClick={onToggleFilters} />
                   {filters.map((filter, key) => (
-                    <Filter index={key} filter={filter} />
+                    <Filter
+                      key={key}
+                      filter={filter}
+                      index={key}
+                      onClick={onClickRemove}
+                    />
                   ))}
                 </div>
               </Div>
@@ -397,6 +404,7 @@ ListPage.propTypes = {
   match: PropTypes.object.isRequired,
   models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  onClickRemove: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
   removeAllFilters: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
@@ -413,6 +421,7 @@ function mapDispatchToProps(dispatch) {
       deleteData,
       getData,
       onChange,
+      onClickRemove,
       onToggleFilters,
       removeAllFilters,
       removeFilter,

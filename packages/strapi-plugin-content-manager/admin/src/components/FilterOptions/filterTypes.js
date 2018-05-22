@@ -1,34 +1,34 @@
 const FILTER_TYPES = [
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.equals',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES.=',
     value: '=',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.not_equals',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._ne',
     value: '_ne',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.lower',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._lt',
     value: '_lt',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.lower_equal',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._lte',
     value: '_lte',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.greater',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._gt',
     value: '_gt',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.greater_equal',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._gte',
     value: '_gte',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.contains',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._contains',
     value: '_contains',
   },
   {
-    id: 'content-manager.components.FilterOptions.FILTER_TYPES.containss',
+    id: 'content-manager.components.FilterOptions.FILTER_TYPES._containss',
     value: '_containss',
   },
 ];

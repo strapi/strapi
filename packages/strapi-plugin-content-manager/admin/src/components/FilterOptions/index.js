@@ -41,8 +41,8 @@ const defaultInputStyle = { height: '30px', width: '200px', marginRight: '10px',
 
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
   const selectStyle = { minHeight: '30px', minWidth: '170px', maxWidth: '200px' };
-  const attrType = get(schema, [filter.model, 'type'], 'string');
-  const Input = getInputType(get(schema, [filter.model, 'type'], 'string'));
+  const attrType = get(schema, [filter.attr, 'type'], 'string');
+  const Input = getInputType(get(schema, [filter.attr, 'type'], 'string'));
   const value = attrType === 'boolean' && typeof get(filter, 'value', '') !== 'boolean'?
     false : get(filter, 'value', '');
   const inputStyle = attrType === 'boolean' ?
@@ -54,8 +54,8 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
       <Remove type="button" onClick={() => onClickRemove(index)} />
       <InputSelect
         onChange={onChange}
-        name={`${index}.model`}
-        value={get(filter, 'model', '')}
+        name={`${index}.attr`}
+        value={get(filter, 'attr', '')}
         selectOptions={Object.keys(schema)}
         style={selectStyle}
       />
@@ -65,7 +65,7 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         name={`${index}.filter`}
         value={get(filter, 'filter', '=')}
         selectOptions={FILTER_TYPES}
-        style={{ minHeight: '30px', minWidth: '130px', maxWidth: '160px', marginLeft: '10px', marginRight: '10px' }}
+        style={{ minHeight: '30px', minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' }}
       />
 
       <Input

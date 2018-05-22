@@ -13,6 +13,7 @@ import {
   DELETE_DATA_SUCCESS,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
+  ON_CLICK_REMOVE,
   ON_TOGGLE_FILTERS,
   REMOVE_ALL_FILTERS,
   REMOVE_FILTER,
@@ -57,6 +58,10 @@ function listPageReducer(state = initialState, action) {
         .update('records', () => List(action.data[1]));
     case ON_CHANGE:
       return state.updateIn(['appliedFilters', action.index, action.key], () => action.value);
+    case ON_CLICK_REMOVE:
+      return state
+        .update('appliedFilters', list => list.splice(action.index, 1))
+        .update('filters', list => list.splice(action.index, 1));
     case ON_TOGGLE_FILTERS:
       return state.update('showFilter', v => !v);
     case REMOVE_ALL_FILTERS:
@@ -69,7 +74,8 @@ function listPageReducer(state = initialState, action) {
       return state.update('params', () => Map(action.params));
     case SUBMIT:
       return state
-        .update('filters', () => state.get('appliedFilters'))
+        .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
+        .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
         .update('showFilter', () => false);
     default:
       return state;

@@ -17,21 +17,18 @@ import SlideDown from 'components/SlideDown';
 
 import Div from './Div';
 import Flex from './Flex';
+import SpanStyled from './SpanStyled';
 import Wrapper from './Wrapper';
-
-const spanStyle = {
-  color: '#787E8F',
-  fontSize: '20px',
-  fontWeight: '500',
-};
 
 class FiltersPickWrapper extends React.PureComponent {
   componentDidMount() {
+    // Display the first filter
     if (this.props.appliedFilters.length === 0) {
       this.handleClickAdd();
     }
   }
 
+  // Since the component is never unmounted we need this hook
   componentDidUpdate(prevProps) {
     const { appliedFilters, show } = this.props;
 
@@ -47,7 +44,7 @@ class FiltersPickWrapper extends React.PureComponent {
       onClick: () => {
         return new Promise(resolve => {
           this.props.close();
-          setTimeout(() => {
+          setTimeout(() => { // We need the timeout here because of the animation
             this.props.removeAllFilters();
             resolve();
           }, 600);
@@ -64,12 +61,20 @@ class FiltersPickWrapper extends React.PureComponent {
 
   handleChange = ({ target }) => {
     const split = target.name.split('.');
+
+    // Reset the filter value when changing the field of the schema
+    if (split[1] === 'attr') {
+      // Always set the filter to true when the field is a boolean
+      const value = this.props.schema[target.value].type === 'boolean' ? true : '';
+      this.props.onChange(split[0], 'value', value);
+    }
+
     this.props.onChange(split[0], split[1], target.value);
   }
 
   handleClickAdd = () => {
     const { addFilter, schema } = this.props;
-    const filter = { model: Object.keys(schema)[0], filter: '=', value: '' };
+    const filter = { attr: Object.keys(schema)[0], filter: '=', value: '' };
 
     return addFilter(filter);
   }
@@ -103,9 +108,9 @@ class FiltersPickWrapper extends React.PureComponent {
       {message => (
         <span>
           {this.props.modelName}&nbsp;-&nbsp;
-          <span style={spanStyle}>
+          <SpanStyled>
             {message}
-          </span>
+          </SpanStyled>
         </span>
       )}
     </FormattedMessage>

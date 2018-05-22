@@ -23,14 +23,14 @@
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
   "components.FiltersPickWrapper.hide": "Hide",
 
-  "components.FilterOptions.FILTER_TYPES.equals": "is",
-  "components.FilterOptions.FILTER_TYPES.not_equals": "is not",
-  "components.FilterOptions.FILTER_TYPES.lower": "lower than",
-  "components.FilterOptions.FILTER_TYPES.lower_equal": "lower than or equal to",
-  "components.FilterOptions.FILTER_TYPES.greater": "greater than",
-  "components.FilterOptions.FILTER_TYPES.greater_equal": "greater than or equal to",
-  "components.FilterOptions.FILTER_TYPES.contains": "contains",
-  "components.FilterOptions.FILTER_TYPES.containss": "containss",
+  "components.FilterOptions.FILTER_TYPES.=": "is",
+  "components.FilterOptions.FILTER_TYPES._ne": "is not",
+  "components.FilterOptions.FILTER_TYPES._lt": "is lower than",
+  "components.FilterOptions.FILTER_TYPES._lte": "is lower than or equal to",
+  "components.FilterOptions.FILTER_TYPES._gt": "is greater than",
+  "components.FilterOptions.FILTER_TYPES._gte": "is greater than or equal to",
+  "components.FilterOptions.FILTER_TYPES._contains": "contains",
+  "components.FilterOptions.FILTER_TYPES._containss": "contains (case sensitive)",
 
   "EditRelations.title": "Relational data",
 

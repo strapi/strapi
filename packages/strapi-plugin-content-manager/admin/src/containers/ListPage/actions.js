@@ -12,6 +12,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
+  ON_CLICK_REMOVE,
   ON_TOGGLE_FILTERS,
   REMOVE_ALL_FILTERS,
   REMOVE_FILTER,
@@ -71,6 +72,13 @@ export function onChange(index, key, value) {
     index,
     key,
     value,
+  };
+}
+
+export function onClickRemove(index) {
+  return {
+    type: ON_CLICK_REMOVE,
+    index,
   };
 }
 

@@ -23,6 +23,9 @@ const Flex = styled.div`
   > div:first-child {
     flex: 2;
   }
+  > span:nth-child(2) {
+    font-weight: 700;
+  }
   -webkit-font-smoothing-antialiased;
 `;
 
