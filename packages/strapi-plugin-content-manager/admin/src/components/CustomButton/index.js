@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 const CustomButton = styled.button`
   height: 30px;
+  margin-right: 10px;
   padding: 0 10px;
   text-align: center;
   background-color: #FFFFFF;

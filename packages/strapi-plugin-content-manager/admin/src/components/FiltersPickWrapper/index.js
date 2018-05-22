@@ -17,6 +17,7 @@ import SlideDown from 'components/SlideDown';
 
 import Div from './Div';
 import Flex from './Flex';
+import Wrapper from './Wrapper';
 
 const spanStyle = {
   color: '#787E8F',
@@ -125,7 +126,7 @@ class FiltersPickWrapper extends React.PureComponent {
                 }}
                 title={this.renderTitle()}
               />
-              <div style={{ marginTop: '-13px' }}>
+              <Wrapper>
                 {appliedFilters.map((filter, key) => (
                   <FilterOptions
                     key={key}
@@ -138,7 +139,7 @@ class FiltersPickWrapper extends React.PureComponent {
                     showAddButton={this.shouldDisplayAddButton(key)}
                   />
                 ))}
-              </div>
+              </Wrapper>
             </div>
             <Flex>
               <span onClick={this.handleClickClose}>

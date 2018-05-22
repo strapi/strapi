@@ -50,7 +50,7 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
     : defaultInputStyle;
 
   return (
-    <Div>
+    <Div borderLeft={!showAddButton || value !== ''}>
       <Remove type="button" onClick={() => onClickRemove(index)} />
       <InputSelect
         onChange={onChange}

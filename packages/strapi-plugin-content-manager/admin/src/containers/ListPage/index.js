@@ -25,6 +25,7 @@ import PopUpWarning from 'components/PopUpWarning/Loadable';
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
 import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
+import Filter from 'components/Filter/Loadable';
 import Table from 'components/Table';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
@@ -276,7 +277,7 @@ export class ListPage extends React.Component {
     const {
       addFilter,
       listPage,
-      listPage: { appliedFilters, params, showFilter },
+      listPage: { appliedFilters, filters, params, showFilter },
       onChange,
       onToggleFilters,
       removeAllFilters,
@@ -333,8 +334,13 @@ export class ListPage extends React.Component {
           )}
           <div className={cn('row', styles.row)}>
             <div className="col-md-12">
-              <Div increaseMargin={!this.state.showHeader}>
-                <AddFilterCTA onClick={onToggleFilters} />
+              <Div increaseMargin={!this.state.showHeader} decreaseMarginBottom={filters.length > 0}>
+                <div className="row">
+                  <AddFilterCTA onClick={onToggleFilters} />
+                  {filters.map((filter, key) => (
+                    <Filter index={key} filter={filter} />
+                  ))}
+                </div>
               </Div>
             </div>
           </div>

@@ -11,6 +11,8 @@ const Flex = styled.div`
   display: inline-block;
   ${'' /* max-width: 250px; */}
   ${'' /* min-width: 200px; */}
+  margin-bottom: 6px;
+  margin-right: 10px;
   padding: 0 10px;
   background: rgba(0,126,255,0.08);
   border: 1px solid rgba(0,126,255,0.24);
