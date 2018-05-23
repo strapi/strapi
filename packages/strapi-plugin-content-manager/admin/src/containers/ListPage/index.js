@@ -148,12 +148,7 @@ export class ListPage extends React.Component {
     if (showFilter) {
       this.setState(prevState => ({ showHeader: !prevState.showHeader }));
     } else {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          this.setState({ showHeader: true });
-          resolve();
-        }, 300);
-      });
+      this.setState({ showHeader: true });
     }
   };
 

@@ -8,14 +8,13 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
-
+import { Collapse } from 'reactstrap';
 import FilterOptions from 'components/FilterOptions/Loadable';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import PluginHeader from 'components/PluginHeader';
-import SlideDown from 'components/SlideDown';
 
 import Div from './Div';
 import Flex from './Flex';
@@ -44,13 +43,8 @@ class FiltersPickWrapper extends React.PureComponent {
       label: 'content-manager.components.FiltersPickWrapper.PluginHeader.actions.clearAll',
       kind: 'secondary',
       onClick: () => {
-        return new Promise(resolve => {
-          this.props.close();
-          setTimeout(() => { // We need the timeout here because of the animation
-            this.props.removeAllFilters();
-            resolve();
-          }, 600);
-        });
+        this.props.close();
+        this.props.removeAllFilters();
       },
     },
     {
@@ -91,14 +85,8 @@ class FiltersPickWrapper extends React.PureComponent {
   handleClickRemove = (index) => {
     if (this.props.appliedFilters.length == 1) {
       this.props.close();
-
-      return new Promise(resolve => {
-        setTimeout(() => {
-          this.props.removeFilter(index);
-          this.props.onSubmit();
-          resolve();
-        }, 600);
-      });
+      this.props.removeFilter(index);
+      this.props.onSubmit();
     }
 
     return this.props.removeFilter(index);
@@ -128,7 +116,7 @@ class FiltersPickWrapper extends React.PureComponent {
 
     return (
       <form onSubmit={this.handleSubmit}>
-        <SlideDown on={show}>
+        <Collapse isOpen={show}>
           <Div>
             <div>
               <PluginHeader
@@ -160,7 +148,7 @@ class FiltersPickWrapper extends React.PureComponent {
               </span>
             </Flex>
           </Div>
-        </SlideDown>
+        </Collapse>
       </form>
     );
   }
