@@ -4,8 +4,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { isObject } from 'lodash';
 
 import FilterOptions from 'components/FilterOptions/Loadable';
 
@@ -61,15 +63,20 @@ class FiltersPickWrapper extends React.PureComponent {
 
   handleChange = ({ target }) => {
     const split = target.name.split('.');
+    let value = target.value;
 
     // Reset the filter value when changing the field of the schema
     if (split[1] === 'attr') {
       // Always set the filter to true when the field is a boolean
-      const value = this.props.schema[target.value].type === 'boolean' ? true : '';
-      this.props.onChange(split[0], 'value', value);
+      const valueToChange = this.props.schema[target.value].type === 'boolean' ? true : '';
+      this.props.onChange(split[0], 'value', valueToChange);
     }
 
-    this.props.onChange(split[0], split[1], target.value);
+    if (split[1] === 'value' && isObject(target.value) && target.value._isAMomentObject === true ) {
+      value = moment(target.value, 'YYYY-MM-DD HH:mm:ss').format();
+    }
+
+    this.props.onChange(split[0], split[1], value);
   }
 
   handleClickAdd = () => {

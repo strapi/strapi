@@ -118,7 +118,6 @@ export class EditPage extends React.Component {
    */
   getAttributeValidations = (name) => get(this.props.editPage.formValidations, [findIndex(this.props.editPage.formValidations, ['name', name]), 'validations'], {})
 
-
   /**
    * Retrieve the model
    * @type {Object}
@@ -130,7 +129,6 @@ export class EditPage extends React.Component {
    * @type {String} name
    */
   getModelAttribute = (name) => get(this.getModelAttributes(), name);
-
 
   /**
    * Retrieve the model's attributes
@@ -151,7 +149,6 @@ export class EditPage extends React.Component {
   getSchema = () => this.getSource() !== 'content-manager' ?
     get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
     : get(this.props.schema, [this.getModelName()]);
-
 
   /**
    * Retrieve the model's source
