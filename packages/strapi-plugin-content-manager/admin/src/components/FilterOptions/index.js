@@ -16,6 +16,7 @@ import InputText from 'components/InputText/Loadable';
 
 import Add from './Add';
 import Div from './Div';
+import InputWrapper from './InputWrapper';
 import Remove from './Remove';
 
 import FILTER_TYPES from './filterTypes';
@@ -37,7 +38,7 @@ const getInputType = (attrType) => {
   }
 };
 
-const defaultInputStyle = { width: '200px', marginRight: '10px', paddingTop: '9px' };
+const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '9px' };
 
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
   const selectStyle = { minWidth: '170px', maxWidth: '200px' };
@@ -48,6 +49,9 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
   const inputStyle = attrType === 'boolean' ?
     Object.assign(cloneDeep(defaultInputStyle), { paddingTop: '17px', width: '20px' })
     : defaultInputStyle;
+
+  // This component is needed in order to add the date icon inside the InputDate
+  const Wrapper = get(schema, [filter.attr, 'type'], 'string') === 'date' ? InputWrapper : 'div';
 
   return (
     <Div borderLeft={!showAddButton || value !== ''}>
@@ -67,14 +71,15 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         selectOptions={FILTER_TYPES}
         style={{ minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' }}
       />
-
-      <Input
-        autoFocus={false}
-        onChange={onChange}
-        name={`${index}.value`}
-        value={value}
-        style={inputStyle}
-      />
+      <Wrapper>
+        <Input
+          autoFocus={false}
+          onChange={onChange}
+          name={`${index}.value`}
+          value={value}
+          style={inputStyle}
+        />
+      </Wrapper>
 
       {showAddButton && <Add type="button" onClick={onClickAdd} />}
     </Div>
