@@ -17,12 +17,16 @@
   "containers.List.errorFetchRecords": "Erreur",
 
   "components.AddFilterCTA.add": "Ajouter un filtre",
+  "components.AddFilterCTA.hide": "Cacher les filtres",
   "components.FilterOptions.button.apply": "Appliquer",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Appliquer",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",
   "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
   "components.FiltersPickWrapper.hide": "Fermer",
+
+  "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
+  "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
 
   "components.FilterOptions.FILTER_TYPES.=": "est",
   "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",

@@ -12,21 +12,25 @@ import PropTypes from 'prop-types';
 import Button from 'components/CustomButton';
 import Logo from '../../assets/images/icon_filter.png';
 
-function AddFilterCTA({ onClick }) {
+function AddFilterCTA({ onClick, showHideText }) {
+  const id = showHideText ? 'hide' : 'add';
+
   return (
     <Button type="button" onClick={onClick} marginTop>
       <img src={Logo} alt="filter_logo" />
-      <FormattedMessage id="content-manager.components.AddFilterCTA.add" />
+      <FormattedMessage id={`content-manager.components.AddFilterCTA.${id}`} />
     </Button>
   );
 }
 
 AddFilterCTA.defaultProps = {
   onClick: () => {},
+  showHideText: false,
 };
 
 AddFilterCTA.propTypes = {
   onClick: PropTypes.func,
+  showHideText: PropTypes.bool,
 };
 
 export default AddFilterCTA;

@@ -15,8 +15,18 @@ import Separator from './Separator';
 
 
 function Filter({ filter, index, onClick, schema }) {
-  const value = schema[filter.attr].type === 'date' ?
-    moment(filter.value).format('YYYY-MM-DD') : filter.value;
+  let value = filter.value;
+
+  if (schema[filter.attr].type === 'date') {
+    const format = filter.value
+      .slice(0, -1)
+      .split('T')[1]
+      .split(':')
+      .filter(x => x !== '00')
+      .length > 0 ? 'MMMM Do YYYY, h:mm:ss a' : 'MMMM Do YYYY';
+
+    value = moment(filter.value).format(format);
+  }
 
   return (
     <Flex>

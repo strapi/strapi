@@ -37,10 +37,10 @@ const getInputType = (attrType) => {
   }
 };
 
-const defaultInputStyle = { height: '30px', width: '200px', marginRight: '10px', paddingTop: '9px' };
+const defaultInputStyle = { width: '200px', marginRight: '10px', paddingTop: '9px' };
 
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
-  const selectStyle = { minHeight: '30px', minWidth: '170px', maxWidth: '200px' };
+  const selectStyle = { minWidth: '170px', maxWidth: '200px' };
   const attrType = get(schema, [filter.attr, 'type'], 'string');
   const Input = getInputType(get(schema, [filter.attr, 'type'], 'string'));
   const value = attrType === 'boolean' && typeof get(filter, 'value', '') !== 'boolean'?
@@ -65,7 +65,7 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         name={`${index}.filter`}
         value={get(filter, 'filter', '=')}
         selectOptions={FILTER_TYPES}
-        style={{ minHeight: '30px', minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' }}
+        style={{ minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' }}
       />
 
       <Input

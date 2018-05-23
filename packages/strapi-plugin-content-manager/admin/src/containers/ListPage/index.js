@@ -357,7 +357,7 @@ export class ListPage extends React.Component {
                 decreaseMarginBottom={filters.length > 0}
               >
                 <div className="row">
-                  <AddFilterCTA onClick={onToggleFilters} />
+                  <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
                   {filters.map((filter, key) => (
                     <Filter
                       key={key}
@@ -378,6 +378,7 @@ export class ListPage extends React.Component {
                 route={this.props.match}
                 routeParams={this.props.match.params}
                 headers={this.generateTableHeaders()}
+                filters={filters}
                 onChangeSort={this.handleChangeSort}
                 sort={params._sort}
                 history={this.props.history}

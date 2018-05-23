@@ -3,10 +3,10 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   margin-top: -13px;
   > div:not(:first-child) {
-    padding-top: 6px;
+    padding-top: 2px;
   }
   > div:last-child {
-    margin-bottom: 7px;
+    margin-bottom: 2px;
   }
 `;
 
