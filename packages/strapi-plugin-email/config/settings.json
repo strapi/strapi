@@ -1,0 +1,6 @@
+{
+  "EMAIL_METHOD": "",
+  "MAILGUN_API_KEY": "", 
+  "MAILGUN_DOMAIN": "", 
+  "SENDGRID_API_KEY": ""
+}

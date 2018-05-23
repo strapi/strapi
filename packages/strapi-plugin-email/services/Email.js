@@ -7,9 +7,43 @@
  */
 
 const _ = require('lodash');
-const sendmail = require('sendmail')({
-  silent: true
-});
+const config = require('../config/settings.json'); 
+
+let mailer; 
+
+if(config.EMAIL_METHOD === 'mailgun') {
+  const mailgun = require('mailgun-js')({
+    apiKey: config.MAILGUN_API_KEY, 
+    domain: config.MAILGUN_DOMAIN,
+    mute: false
+  });
+
+  mailer = (msg, mailerCallback) => {
+    // change reply to format for Mailgun
+    msg['h:Reply-To'] = msg.replyTo; 
+    mailgun.messages().send(msg, mailerCallback); 
+  };
+}
+else if(config.EMAIL_METHOD === 'sendgrid') {
+  const sendgrid = require('@sendgrid/mail'); 
+  sendgrid.setApiKey(config.SENDGRID_API_KEY); 
+
+  mailer = (msg, mailerCallback) => {
+    // change capitalization for SendGrid
+    msg.reply_to = msg.replyTo; 
+    sendgrid.send(msg, mailerCallback);
+  };
+}
+else {
+  // Fallback to default email method
+  const sendmail = require('sendmail')({
+    silent: true
+  });
+
+  mailer = (msg, mailerCallback) => {
+    sendmail(msg, mailerCallback); 
+  };
+}
 
 module.exports = {
   send: (options, cb) => { // eslint-disable-line no-unused-vars
@@ -21,8 +55,7 @@ module.exports = {
       options.text = options.text || options.html;
       options.html = options.html || options.text;
 
-      // Send the email.
-      sendmail({
+      mailer({
         from: options.from,
         to: options.to,
         replyTo: options.replyTo,
@@ -35,7 +68,7 @@ module.exports = {
         } else {
           resolve();
         }
-      });
+      });  
     });
   }
 };

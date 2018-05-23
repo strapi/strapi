@@ -21,6 +21,8 @@
     "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
+    "@sendgrid/mail": "6.2.1",
+    "mailgun-js": "0.18.0",
     "sendmail": "^1.2.0"
   },
   "devDependencies": {
