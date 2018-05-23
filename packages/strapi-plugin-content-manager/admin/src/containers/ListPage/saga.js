@@ -49,10 +49,11 @@ export function* dataGet(action) {
     }, {});
 
     const _start = (_page - 1 ) * _limit;
+    const sortValue = _sort.includes('-') ? `${_sort.replace('-', '')}:DESC` : `${_sort}:ASC`;
     const params = Object.assign(filtersObj, {
       _limit,
       _start,
-      _sort,
+      _sort: sortValue,
       source,
     });
 
