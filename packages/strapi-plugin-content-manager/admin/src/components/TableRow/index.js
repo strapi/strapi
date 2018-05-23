@@ -82,7 +82,7 @@ class TableRow extends React.Component {
 
     cells.push(
       <td key='action' className={styles.actions}>
-        <IcoContainer icons={[{ icoType: 'pencil' }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
+        <IcoContainer icons={[{ icoType: 'pencil', onClick: () => this.handleClick(this.props.destination) }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
       </td>
     );
 

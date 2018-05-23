@@ -13,7 +13,7 @@ module.exports = {
     // Remove the source key since it is not a filter
     delete query.source;
     const filters = strapi.utils.models.convertParams(params.model, query);
-
+    
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
       limit: filters.limit,
@@ -28,6 +28,7 @@ module.exports = {
   count: async (params, query) => {
     const { source } = query;
     delete query.source;
+
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     return await strapi.query(params.model, source).count({ where: filters.where });

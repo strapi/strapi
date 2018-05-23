@@ -29,9 +29,20 @@ module.exports = {
     });
   },
 
-  count: async function () {
+  count: async function (params = {}) {
     return await this
       .forge()
+      .query(qb => {
+        _.forEach(params.where, (where, key) => {
+          if (_.isArray(where.value)) {
+            for (const value in where.value) {
+              qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+            }
+          } else {
+            qb.where(key, where.symbol, where.value);
+          }
+        });
+      })
       .count();
   },
 
