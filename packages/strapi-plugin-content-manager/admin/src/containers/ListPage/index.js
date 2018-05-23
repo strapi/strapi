@@ -364,7 +364,13 @@ export class ListPage extends React.Component {
                 <div className="row">
                   <AddFilterCTA onClick={onToggleFilters} />
                   {filters.map((filter, key) => (
-                    <Filter key={key} filter={filter} index={key} onClick={onClickRemove} />
+                    <Filter
+                      key={key}
+                      filter={filter}
+                      index={key}
+                      onClick={onClickRemove}
+                      schema={this.getCurrentSchema()}
+                    />
                   ))}
                 </div>
               </Div>
