@@ -8,34 +8,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import InputDate from 'components/InputDate/Loadable';
-import InputNumber from 'components/InputNumber/Loadable';
 import InputSelect from 'components/InputSelect/Loadable';
-import InputText from 'components/InputText/Loadable';
 
 import Add from './Add';
 import Div from './Div';
+import InputWithAutofocus from './InputWithAutofocus';
 import InputWrapper from './InputWrapper';
 import Remove from './Remove';
 
 import FILTER_TYPES from './filterTypes';
-
-const getInputType = (attrType) => {
-  switch (attrType) {
-    case 'boolean':
-      return InputSelect;
-    case 'date':
-    case 'datetime':
-      return InputDate;
-    case 'integer':
-    case 'bigint':
-    case 'decimal':
-    case 'float':
-      return InputNumber;
-    default:
-      return InputText;
-  }
-};
 
 const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '4px' };
 const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' };
@@ -43,7 +24,6 @@ const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
   const selectStyle = { minWidth: '170px', maxWidth: '200px' };
   const attrType = get(schema, [filter.attr, 'type'], 'string');
-  const Input = getInputType(get(schema, [filter.attr, 'type'], 'string'));
   const inputStyle = attrType === 'boolean' ?
     Object.assign(selectStyle, { minWidth: '100px'})
     : defaultInputStyle;
@@ -69,10 +49,12 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         style={midSelectStyle}
       />
       <Wrapper>
-        <Input
+        <InputWithAutofocus
+          filter={filter}
+          inputStyle={inputStyle}
           name={`${index}.value`}
           onChange={onChange}
-          selectOptions={['true', 'false']}
+          schema={schema}
           style={inputStyle}
           value={get(filter, 'value')}
         />
