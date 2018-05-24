@@ -1,6 +1,6 @@
 /**
  *
- * InputWithAutofocus that programatically manage the autofocus of another one
+ * InputWithAutoFocus that programatically manage the autofocus of another one
  */
 
 import React from 'react';
@@ -30,7 +30,7 @@ const getInputType = (attrType) => {
 };
 
 
-class InputWithAutofocus extends React.Component {
+class InputWithAutoFocus extends React.Component {
   componentDidMount() {
     if (this.props.filterToFocus === this.props.index) {
       return new Promise(resolve => {
@@ -63,7 +63,7 @@ class InputWithAutofocus extends React.Component {
   }
 }
 
-InputWithAutofocus.propTypes = {
+InputWithAutoFocus.propTypes = {
   filter: PropTypes.object.isRequired,
   filterToFocus: PropTypes.oneOfType([
     PropTypes.object,
@@ -76,4 +76,4 @@ InputWithAutofocus.propTypes = {
   schema: PropTypes.object.isRequired,
 };
 
-export default InputWithAutofocus;
+export default InputWithAutoFocus;

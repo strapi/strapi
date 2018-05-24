@@ -12,7 +12,7 @@ import InputSelect from 'components/InputSelect/Loadable';
 
 import Add from './Add';
 import Div from './Div';
-import InputWithAutofocus from './InputWithAutofocus';
+import InputWithAutoFocus from './InputWithAutoFocus';
 import InputWrapper from './InputWrapper';
 import Remove from './Remove';
 
@@ -50,7 +50,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
       />
       <Wrapper>
         {show && (
-          <InputWithAutofocus
+          <InputWithAutoFocus
             filter={filter}
             filterToFocus={filterToFocus}
             index={index}

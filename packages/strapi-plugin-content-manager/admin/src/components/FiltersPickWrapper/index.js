@@ -22,6 +22,8 @@ import SpanStyled from './SpanStyled';
 import Wrapper from './Wrapper';
 
 class FiltersPickWrapper extends React.PureComponent {
+  state = { showInput: false };
+
   componentDidMount() {
     // Display the first filter
     if (this.props.appliedFilters.length === 0) {
@@ -36,6 +38,25 @@ class FiltersPickWrapper extends React.PureComponent {
     if (prevProps.show !== show && show && appliedFilters.length === 0) {
       this.handleClickAdd();
     }
+
+    if (prevProps.show !== show) {
+      if (show) {
+        this.mountInput();
+      } else {
+        this.unmountInput();
+      }
+    }
+  }
+
+  mountInput = () => this.setState({ showInput: true });
+
+  unmountInput = () => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.setState({ showInput: false });
+        resolve();
+      }, 500);
+    });
   }
 
   generateActions = () => ([
@@ -137,7 +158,7 @@ class FiltersPickWrapper extends React.PureComponent {
                     onClickAdd={this.handleClickAdd}
                     onClickRemove={this.handleClickRemove}
                     schema={schema}
-                    show={show}
+                    show={this.state.showInput}
                     showAddButton={this.shouldDisplayAddButton(key)}
                   />
                 ))}
