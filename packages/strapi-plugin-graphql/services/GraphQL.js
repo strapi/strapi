@@ -407,15 +407,15 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          created_at: 'String',
-          updated_at: 'String'
+          createdAt: 'String',
+          updatedAt: 'String'
         });
 
         Object.assign(acc.resolver[globalId], {
-          created_at: (obj, options, context) => { // eslint-disable-line no-unused-vars
+          createdAt: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.createdAt || obj.created_at;
           },
-          updated_at: (obj, options, context) => { // eslint-disable-line no-unused-vars
+          updatedAt: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.updatedAt || obj.updated_at;
           }
         });
