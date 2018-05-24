@@ -19,6 +19,7 @@ module.exports = strapi => {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
+      strapi.errors = Boom;
       strapi.app.use(async (ctx, next) => {
         try {
           // App logic.

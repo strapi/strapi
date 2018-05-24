@@ -328,7 +328,7 @@ module.exports = {
 
     return async (obj, options, context) => {
       // Hack to be able to handle permissions for each query.
-      const ctx = Object.assign(context, {
+      const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
           graphql: null
         })
@@ -361,6 +361,7 @@ module.exports = {
 
           return values && values.toJSON ? values.toJSON() : values;
         }
+
 
         return resolver.call(null, obj, options, context);
       }
@@ -560,7 +561,7 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = obj[association.alias].map(related => {
+                  const arrayOfIds = (obj[association.alias] || []).map(related => {
                     return related[ref.primaryKey] || related;
                   });
 
