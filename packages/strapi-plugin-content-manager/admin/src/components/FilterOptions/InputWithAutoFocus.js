@@ -63,12 +63,16 @@ class InputWithAutoFocus extends React.Component {
   }
 }
 
+InputWithAutoFocus.defaultProps = {
+  filterToFocus: null,
+};
+
 InputWithAutoFocus.propTypes = {
   filter: PropTypes.object.isRequired,
   filterToFocus: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.number,
-  ]).isRequired,
+  ]),
   index: PropTypes.number.isRequired,
   inputStyle: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,

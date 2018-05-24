@@ -18,5 +18,27 @@
         "appearance": ""
       }
     }
+  },
+  "test": {
+    "attributes": {
+      "string": {
+        "appearance": ""
+      },
+      "int": {
+        "appearance": ""
+      },
+      "float": {
+        "appearance": ""
+      },
+      "decimal": {
+        "appearance": ""
+      },
+      "date": {
+        "appearance": ""
+      },
+      "json": {
+        "appearance": ""
+      }
+    }
   }
 }

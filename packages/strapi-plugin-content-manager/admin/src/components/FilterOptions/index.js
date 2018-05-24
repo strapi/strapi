@@ -30,6 +30,9 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
 
   // This component is needed in order to add the date icon inside the InputDate
   const Wrapper = get(schema, [filter.attr, 'type'], 'string') === 'date' ? InputWrapper : 'div';
+  const selectOptionsSchema = Object
+    .keys(schema)
+    .filter(x => schema[x].type !== 'json');
 
   return (
     <Div borderLeft={!showAddButton || get(filter, 'value', '') !== ''}>
@@ -38,7 +41,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
         onChange={onChange}
         name={`${index}.attr`}
         value={get(filter, 'attr', '')}
-        selectOptions={Object.keys(schema)}
+        selectOptions={selectOptionsSchema}
         style={selectStyle}
       />
       <InputSelect
