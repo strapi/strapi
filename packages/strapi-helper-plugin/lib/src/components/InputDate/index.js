@@ -47,6 +47,7 @@ function InputDate(props) {
             value: moment,
           }})}
           onFocus={props.onFocus}
+          ref={props.inputRef}
           tabIndex={props.tabIndex}
           timeFormat='HH:mm:ss'
           utc={true}
@@ -64,6 +65,7 @@ InputDate.defaultProps = {
   deactivateErrorHighlight: false,
   disabled: false,
   error: false,
+  inputRef: () => {},
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -77,6 +79,7 @@ InputDate.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  inputRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

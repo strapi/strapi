@@ -37,6 +37,7 @@ class InputWithAutofocus extends React.Component {
 
     return (
       <Input
+        inputRef={input => this.inputEl = input}
         name={name}
         onChange={onChange}
         selectOptions={['true', 'false']}
