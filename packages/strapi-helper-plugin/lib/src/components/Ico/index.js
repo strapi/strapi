@@ -16,9 +16,11 @@ function Ico(props) {
 }
 
 const handleClick = (e, onClick) => {
-  e.preventDefault();
-  e.stopPropagation();
-  onClick(e);
+  if (onClick) {
+    e.preventDefault();
+    e.stopPropagation();
+    onClick(e);
+  }
 };
 
 Ico.propTypes = {
