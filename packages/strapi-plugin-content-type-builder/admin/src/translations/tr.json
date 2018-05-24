@@ -52,6 +52,10 @@
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.boolean.name": "İsim",
   "form.attribute.item.string.name": "İsim",
+  "form.attribute.item.appearance.name": "Görünüm",
+  "form.attribute.item.appearance.label": "WYSIWYG olarak görüntüle",
+  "form.attribute.item.appearance.description":
+    "Aksi halde, değer temel bir textarea alanıyla düzenlenebilir",
   "form.attribute.item.settings.name": "Ayarlar",
   "form.attribute.item.requiredField": "Zorunlu alan",
   "form.attribute.item.uniqueField": "Benzersiz alan",
