@@ -1,11 +1,16 @@
-module.exports = function (request) {
-
+module.exports = function (rq) {
   return new Promise(async (resolve) => {
     const ping = async () => {
       try {
-        await request.get('');
+        await rq({
+          url: '/',
+          method: 'GET',
+          json: true
+        });
+
+        return resolve();
       } catch (err) {
-        if (err.response) {
+        if (err.statusCode) {
           return resolve();
         } else {
           return setTimeout(() => {
@@ -15,6 +20,8 @@ module.exports = function (request) {
       }
     };
 
-    ping();
+    setTimeout(() => {
+      ping();
+    }, 4000);
   });
 };

@@ -13,11 +13,13 @@
     "gitbook-cli": "^2.3.2",
     "istanbul": "~0.4.2",
     "jest": "^22.4.3",
+    "jest-cli": "^22.4.4",
     "lerna": "^2.0.0",
     "lodash": "^4.17.5",
     "mocha": "~2.4.5",
     "pre-commit": "~1.1.2",
     "redux-saga": "^0.14.3",
+    "request": "^2.87.0",
     "shelljs": "^0.7.7",
     "strapi-lint": "file:packages/strapi-lint"
   },
