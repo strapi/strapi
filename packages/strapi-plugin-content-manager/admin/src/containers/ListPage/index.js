@@ -43,6 +43,7 @@ import {
   onChange,
   onClickRemove,
   onToggleFilters,
+  openFiltersWithSelections,
   removeAllFilters,
   removeFilter,
   setParams,
@@ -296,10 +297,11 @@ export class ListPage extends React.Component {
     const {
       addFilter,
       listPage,
-      listPage: { appliedFilters, filters, params, showFilter },
+      listPage: { appliedFilters, filters, filterToFocus, params, showFilter },
       onChange,
       onClickRemove,
       onToggleFilters,
+      openFiltersWithSelections,
       removeAllFilters,
       removeFilter,
     } = this.props;
@@ -324,6 +326,7 @@ export class ListPage extends React.Component {
           addFilter={addFilter}
           appliedFilters={appliedFilters}
           close={onToggleFilters}
+          filterToFocus={filterToFocus}
           modelName={this.getCurrentModelName()}
           onChange={onChange}
           onSubmit={this.handleSubmit}
@@ -364,6 +367,7 @@ export class ListPage extends React.Component {
                       filter={filter}
                       index={key}
                       onClick={onClickRemove}
+                      onClickOpen={openFiltersWithSelections}
                       schema={this.getCurrentSchema()}
                     />
                   ))}
@@ -425,6 +429,7 @@ ListPage.propTypes = {
   onChange: PropTypes.func.isRequired,
   onClickRemove: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
+  openFiltersWithSelections: PropTypes.func.isRequired,
   removeAllFilters: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -442,6 +447,7 @@ function mapDispatchToProps(dispatch) {
       onChange,
       onClickRemove,
       onToggleFilters,
+      openFiltersWithSelections,
       removeAllFilters,
       removeFilter,
       setParams,

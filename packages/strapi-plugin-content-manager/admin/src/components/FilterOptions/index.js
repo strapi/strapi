@@ -21,7 +21,7 @@ import FILTER_TYPES from './filterTypes';
 const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '4px' };
 const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' };
 
-function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
+function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onClickRemove, schema, show, showAddButton }) {
   const selectStyle = { minWidth: '170px', maxWidth: '200px' };
   const attrType = get(schema, [filter.attr, 'type'], 'string');
   const inputStyle = attrType === 'boolean' ?
@@ -49,15 +49,19 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         style={midSelectStyle}
       />
       <Wrapper>
-        <InputWithAutofocus
-          filter={filter}
-          inputStyle={inputStyle}
-          name={`${index}.value`}
-          onChange={onChange}
-          schema={schema}
-          style={inputStyle}
-          value={get(filter, 'value')}
-        />
+        {show && (
+          <InputWithAutofocus
+            filter={filter}
+            filterToFocus={filterToFocus}
+            index={index}
+            inputStyle={inputStyle}
+            name={`${index}.value`}
+            onChange={onChange}
+            schema={schema}
+            style={inputStyle}
+            value={get(filter, 'value')}
+          />
+        )}
       </Wrapper>
       {showAddButton && (
         <Add
@@ -72,21 +76,28 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
 
 FilterOptions.defaultProps = {
   filter: {},
+  filterToFocus: null,
   index: 0,
   onChange: () => {},
   onClickAdd: () => {},
   onClickRemove: () => {},
   schema: {},
+  show: false,
   showAddButton: false,
 };
 
 FilterOptions.propTypes = {
   filter: PropTypes.object,
+  filterToFocus: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.number,
+  ]),
   index: PropTypes.number,
   onChange: PropTypes.func,
   onClickAdd: PropTypes.func,
   onClickRemove: PropTypes.func,
   schema: PropTypes.object,
+  show: PropTypes.bool,
   showAddButton: PropTypes.bool,
 };
 

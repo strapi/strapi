@@ -6,11 +6,8 @@
 import styled from 'styled-components';
 
 const Flex = styled.div`
-  ${'' /* display: flex; */}
   height: 30px;
   display: inline-block;
-  ${'' /* max-width: 250px; */}
-  ${'' /* min-width: 200px; */}
   margin-bottom: 6px;
   margin-right: 10px;
   padding: 0 10px;
@@ -20,11 +17,11 @@ const Flex = styled.div`
   line-height: 30px;
   color: #007EFF;
   font-size: 13px;
-  > div:first-child {
-    flex: 2;
-  }
   > span:nth-child(2) {
     font-weight: 700;
+  }
+  > span:nth-child(3) {
+    cursor: pointer;
   }
   -webkit-font-smoothing-antialiased;
 `;

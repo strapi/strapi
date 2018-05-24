@@ -112,7 +112,7 @@ class FiltersPickWrapper extends React.PureComponent {
   );
 
   render() {
-    const { appliedFilters, schema, show } = this.props;
+    const { appliedFilters, filterToFocus, schema, show } = this.props;
 
     return (
       <form onSubmit={this.handleSubmit}>
@@ -131,11 +131,13 @@ class FiltersPickWrapper extends React.PureComponent {
                   <FilterOptions
                     key={key}
                     filter={filter}
+                    filterToFocus={filterToFocus}
                     index={key}
                     onChange={this.handleChange}
                     onClickAdd={this.handleClickAdd}
                     onClickRemove={this.handleClickRemove}
                     schema={schema}
+                    show={show}
                     showAddButton={this.shouldDisplayAddButton(key)}
                   />
                 ))}
@@ -156,6 +158,7 @@ class FiltersPickWrapper extends React.PureComponent {
 
 FiltersPickWrapper.defaultProps = {
   appliedFilters: [],
+  filterToFocus: null,
   modelName: '',
   schema: {},
 };
@@ -164,6 +167,10 @@ FiltersPickWrapper.propTypes = {
   addFilter: PropTypes.func.isRequired,
   appliedFilters: PropTypes.array,
   close: PropTypes.func.isRequired,
+  filterToFocus: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.number,
+  ]),
   modelName: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,

@@ -14,6 +14,7 @@ import {
   ON_CHANGE,
   ON_CLICK_REMOVE,
   ON_TOGGLE_FILTERS,
+  OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
   REMOVE_FILTER,
   SET_PARAMS,
@@ -78,6 +79,13 @@ export function onChange(index, key, value) {
 export function onClickRemove(index) {
   return {
     type: ON_CLICK_REMOVE,
+    index,
+  };
+}
+
+export function openFiltersWithSelections(index) {
+  return {
+    type: OPEN_FILTERS_WITH_SELECTION,
     index,
   };
 }

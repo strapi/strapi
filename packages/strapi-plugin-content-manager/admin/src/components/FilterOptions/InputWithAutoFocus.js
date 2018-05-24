@@ -31,6 +31,21 @@ const getInputType = (attrType) => {
 
 
 class InputWithAutofocus extends React.Component {
+  componentDidMount() {
+    if (this.props.filterToFocus === this.props.index) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          if (this.inputEl.hasOwnProperty('openCalendar')) {
+            this.inputEl.openCalendar();
+          } else {
+            this.inputEl.focus();
+          }
+          resolve();
+        }, 300);
+      });
+    }
+  }
+
   render() {
     const { filter, inputStyle, name, onChange, schema } = this.props;
     const Input = getInputType(get(schema, [filter.attr, 'type'], 'string'));
@@ -50,6 +65,11 @@ class InputWithAutofocus extends React.Component {
 
 InputWithAutofocus.propTypes = {
   filter: PropTypes.object.isRequired,
+  filterToFocus: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.number,
+  ]).isRequired,
+  index: PropTypes.number.isRequired,
   inputStyle: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

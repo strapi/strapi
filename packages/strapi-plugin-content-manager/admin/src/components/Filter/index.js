@@ -14,7 +14,7 @@ import Remove from './Remove';
 import Separator from './Separator';
 
 
-function Filter({ filter, index, onClick, schema }) {
+function Filter({ filter, index, onClick, onClickOpen, schema }) {
   let value = filter.value;
 
   if (schema[filter.attr].type === 'date') {
@@ -29,7 +29,13 @@ function Filter({ filter, index, onClick, schema }) {
   }
 
   return (
-    <Flex>
+    <Flex
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClickOpen(index);
+      }}
+    >
       <span>{upperFirst(filter.attr)}&nbsp;</span>
       <FormattedMessage id={`content-manager.components.FilterOptions.FILTER_TYPES.${filter.filter}`} />
       <span>&nbsp;{toString(value)}</span>
@@ -43,6 +49,10 @@ Filter.defaultProps = {
   filter: {},
   index: 0,
   onClick: () => {},
+  onClickOpen: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  },
   schema: {},
 };
 
@@ -50,6 +60,7 @@ Filter.propTypes = {
   filter: PropTypes.object,
   index: PropTypes.number,
   onClick: PropTypes.func,
+  onClickOpen: PropTypes.func,
   schema: PropTypes.object,
 };
 

@@ -15,6 +15,7 @@ import {
   ON_CHANGE,
   ON_CLICK_REMOVE,
   ON_TOGGLE_FILTERS,
+  OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
   REMOVE_FILTER,
   SET_PARAMS,
@@ -25,6 +26,8 @@ const initialState = fromJS({
   appliedFilters: List([]),
   count: 0,
   filters: List([]),
+  filtersUpdated: false,
+  filterToFocus: null,
   params: Map({
     _limit: 10,
     _page: 1,
@@ -32,7 +35,6 @@ const initialState = fromJS({
   }),
   records: List([]),
   showFilter: false,
-  filtersUpdated: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -65,7 +67,13 @@ function listPageReducer(state = initialState, action) {
         .update('filters', list => list.splice(action.index, 1))
         .update('filtersUpdated', v => v = !v);
     case ON_TOGGLE_FILTERS:
-      return state.update('showFilter', v => !v);
+      return state
+        .update('filterToFocus', () => null)
+        .update('showFilter', v => !v);
+    case OPEN_FILTERS_WITH_SELECTION:
+      return state
+        .update('showFilter', () => true)
+        .update('filterToFocus', () => action.index);
     case REMOVE_ALL_FILTERS:
       return state
         .update('appliedFilters', () => List([]))

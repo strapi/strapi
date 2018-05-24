@@ -60,7 +60,7 @@ function InputDate(props) {
 }
 
 InputDate.defaultProps = {
-  autoFocus: true,
+  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
