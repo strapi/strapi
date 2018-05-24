@@ -15,6 +15,7 @@ const Separator = styled.span`
     content: '';
     height: 15px;
     border-left: 1px solid #007EFF;
+    opacity: 0.1;
   }
 `;
 

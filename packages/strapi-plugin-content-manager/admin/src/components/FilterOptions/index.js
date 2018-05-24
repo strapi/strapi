@@ -6,9 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get } from 'lodash';
+import { get } from 'lodash';
 
-import InputCheckbox from 'components/InputCheckbox/Loadable';
 import InputDate from 'components/InputDate/Loadable';
 import InputNumber from 'components/InputNumber/Loadable';
 import InputSelect from 'components/InputSelect/Loadable';
@@ -24,7 +23,7 @@ import FILTER_TYPES from './filterTypes';
 const getInputType = (attrType) => {
   switch (attrType) {
     case 'boolean':
-      return InputCheckbox;
+      return InputSelect;
     case 'date':
     case 'datetime':
       return InputDate;
@@ -38,23 +37,22 @@ const getInputType = (attrType) => {
   }
 };
 
-const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '9px' };
+const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '4px' };
+const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' };
 
 function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, schema, showAddButton }) {
   const selectStyle = { minWidth: '170px', maxWidth: '200px' };
   const attrType = get(schema, [filter.attr, 'type'], 'string');
   const Input = getInputType(get(schema, [filter.attr, 'type'], 'string'));
-  const value = attrType === 'boolean' && typeof get(filter, 'value', '') !== 'boolean'?
-    false : get(filter, 'value', '');
   const inputStyle = attrType === 'boolean' ?
-    Object.assign(cloneDeep(defaultInputStyle), { paddingTop: '17px', width: '20px' })
+    Object.assign(selectStyle, { minWidth: '100px'})
     : defaultInputStyle;
 
   // This component is needed in order to add the date icon inside the InputDate
   const Wrapper = get(schema, [filter.attr, 'type'], 'string') === 'date' ? InputWrapper : 'div';
 
   return (
-    <Div borderLeft={!showAddButton || value !== ''}>
+    <Div borderLeft={!showAddButton || get(filter, 'value', '') !== ''}>
       <Remove type="button" onClick={() => onClickRemove(index)} />
       <InputSelect
         onChange={onChange}
@@ -63,25 +61,29 @@ function FilterOptions({ filter, index, onChange, onClickAdd, onClickRemove, sch
         selectOptions={Object.keys(schema)}
         style={selectStyle}
       />
-
       <InputSelect
         onChange={onChange}
         name={`${index}.filter`}
         value={get(filter, 'filter', '=')}
         selectOptions={FILTER_TYPES}
-        style={{ minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' }}
+        style={midSelectStyle}
       />
       <Wrapper>
         <Input
-          autoFocus={false}
-          onChange={onChange}
           name={`${index}.value`}
-          value={value}
+          onChange={onChange}
+          selectOptions={['true', 'false']}
           style={inputStyle}
+          value={get(filter, 'value')}
         />
       </Wrapper>
-
-      {showAddButton && <Add type="button" onClick={onClickAdd} />}
+      {showAddButton && (
+        <Add
+          onClick={onClickAdd}
+          style={attrType === 'boolean' ? { marginLeft: '10px' } : {}}
+          type="button"
+        />
+      )}
     </Div>
   );
 }

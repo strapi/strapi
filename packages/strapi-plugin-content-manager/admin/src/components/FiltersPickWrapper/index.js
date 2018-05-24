@@ -62,7 +62,7 @@ class FiltersPickWrapper extends React.PureComponent {
     // Reset the filter value when changing the field of the schema
     if (split[1] === 'attr') {
       // Always set the filter to true when the field is a boolean
-      const valueToChange = this.props.schema[target.value].type === 'boolean' ? true : '';
+      const valueToChange = this.props.schema[target.value].type === 'boolean' ? 'true' : '';
       this.props.onChange(split[0], 'value', valueToChange);
     }
 
