@@ -621,7 +621,7 @@ module.exports = {
           resolver
         });
       }, this.shadowCRUD(models));
-    })() : {};
+    })() : { definition: '', query: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
     const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
@@ -659,7 +659,7 @@ module.exports = {
     const typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+      type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       ${this.addCustomScalar(resolvers)}
       ${polymorphicDef}
     `;
@@ -701,15 +701,22 @@ module.exports = {
       .filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
       .map(def => def.name.value);
 
-    return {
-      polymorphicDef: `union Morph = ${types.join(' | ')}`,
-      polymorphicResolver: {
-        Morph: {
-          __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
-            return obj.kind || obj._type;
+    if (types.length > 0) {
+      return {
+        polymorphicDef: `union Morph = ${types.join(' | ')}`,
+        polymorphicResolver: {
+          Morph: {
+            __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
+              return obj.kind || obj._type;
+            }
           }
         }
-      }
+      };
+    }
+
+    return {
+      polymorphicDef: '',
+      polymorphicResolver: {}
     };
   },
 
