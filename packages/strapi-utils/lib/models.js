@@ -445,7 +445,13 @@ module.exports = {
 
     _.forEach(params, (value, key)  => {
       let result;
-      const formattedValue = !_.isNaN(_.toNumber(value)) ? _.toNumber(value) : value;
+      let formattedValue;
+
+      try {
+        formattedValue = !_.isNaN(_.toNumber(value)) ? _.toNumber(value) : value;
+      } catch(err) {
+        formattedValue = value;
+      }
 
       if (_.includes(['_start', '_limit'], key)) {
         result = convertor(formattedValue, key);
