@@ -498,6 +498,21 @@ module.exports = {
       // Build associations queries.
       (model.associations || []).forEach(association => {
         switch (association.nature) {
+          case 'oneToManyMorph':
+            return _.merge(acc.resolver[globalId], {
+              [association.alias]: async (obj) => {
+                const withRelated = await resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [association.alias], false);
+
+                const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+
+                entry[association.alias]._type = _.upperFirst(association.model);
+
+                return entry[association.alias];
+              }
+            });
           case 'manyMorphToOne':
           case 'manyMorphToMany':
           case 'manyToManyMorph':
