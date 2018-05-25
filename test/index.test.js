@@ -93,32 +93,46 @@ describe('Test data GET/POST/PUT/DELETE with Content Manager', () => {
   test(
     'Create tag news',
     async () => {
-      await rq({
+      let body = await rq({
         url: `/content-manager/explorer/tag/?source=content-manager`,
         method: 'POST',
         formData: {
           name: 'news'
         }
       });
+
+      body = JSON.parse(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.name).toBe('news');
     }
   );
   test(
     'Create tag article',
     async () => {
-      await rq({
+      let body = await rq({
         url: `/content-manager/explorer/tag/?source=content-manager`,
         method: 'POST',
         formData: {
           name: 'content'
         }
       });
+
+      body = JSON.parse(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.name).toBe('content');
     }
   );
   test(
     'Get tags and get 2 entities',
     async () => {
       const body = await rq({
-        url: `/tag`,
+        url: `/content-manager/explorer/tag?limit=10&skip=0&sort=_id&source=content-manager`,
         method: 'GET'
       });
 
@@ -130,15 +144,93 @@ describe('Test data GET/POST/PUT/DELETE with Content Manager', () => {
   test(
     'Create article 1 with tag relation',
     async () => {
-      await rq({
+      const entry = {
+        title: 'Article 1',
+        content: 'Content 1',
+        tags: JSON.stringify([data.tags[0]]),
+        cover: {}
+      };
+
+      let body = await rq({
         url: `/content-manager/explorer/article/?source=content-manager`,
         method: 'POST',
-        formData: {
-          title: 'Article 1',
-          content: 'My super content 1',
-          tags: JSON.stringify([data.tags[0]])
-        }
+        formData: entry
       });
+
+      body = JSON.parse(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.tags.length).toBe(1);
+      expect(body.tags[0].id).toBe(data.tags[0].id);
+    }
+  );
+  test(
+    'Create article 2 without relation',
+    async () => {
+      const entry = {
+        title: 'Article 2',
+        content: 'My super content 1',
+        cover: {}
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.tags.length).toBe(0);
+    }
+  );
+  test(
+    'Get articles and get 2 entities',
+    async () => {
+      const body = await rq({
+        url: `/content-manager/explorer/article?limit=10&skip=0&sort=_id&source=content-manager`,
+        method: 'GET'
+      });
+
+      data.articles = JSON.parse(body);
+
+      expect(data.articles.length).toBe(2);
+    }
+  );
+  test(
+    'Update article 2 add tag relation',
+    async () => {
+      const entry = Object.assign({}, data.articles[1], {
+        tags: JSON.stringify([data.tags[1]])
+      });
+
+      delete entry.updatedAt;
+      delete entry.createdAt;
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        method: 'PUT',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.tags.length).toBe(1);
+      expect(body.tags[0].id).toBe(data.tags[1].id);
     }
   );
 });
