@@ -429,6 +429,7 @@ module.exports = {
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
           acc[attribute] = this.convertType(model.attributes[attribute]);
