@@ -127,6 +127,22 @@ module.exports = {
   },
 
   /**
+   * Security to avoid infinite limit.
+   *
+   * @return String
+   */
+
+  amountLimiting: (params) => {
+    if (params.limit && params.limit < 0) {
+      params.limit = 0;
+    } else if (params.limit && params.limit > 100) {
+      params.limit = 100;
+    }
+
+    return params;
+  },
+
+  /**
    * Convert Strapi type to GraphQL type.
    *
    * @return String
@@ -289,6 +305,7 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
+        ctx.params = this.amountLimiting(ctx.params);
         ctx.query = Object.assign(
           this.convertToParams(_.omit(ctx.params, 'where')),
           ctx.params.where
@@ -352,7 +369,7 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         context.query = this.convertToParams(options);
-        context.params = options;
+        context.params = this.amountLimiting(options);
 
         if (isController) {
           const values = await resolver.call(null, context);
@@ -532,6 +549,8 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
+                // TODO:
+                // - Handle sort, limit and start (lodash or inside the query)
                 entry[association.alias].map((entry, index) => {
                   const type = _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
                   _.upperFirst(_.camelCase(_.get(withoutRelated, `${association.alias}.${index}.${association.alias}_type`))) ||
@@ -568,7 +587,7 @@ module.exports = {
                 strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
-              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(this.amountLimiting(options)));
               const where = strapi.utils.models.convertParams(name, options.where || {});
 
               // Limit, order, etc.
