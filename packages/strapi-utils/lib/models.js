@@ -445,11 +445,12 @@ module.exports = {
 
     _.forEach(params, (value, key)  => {
       let result;
+      const formattedValue = !_.isNaN(_.toNumber(value)) ? _.toNumber(value) : value;
 
       if (_.includes(['_start', '_limit'], key)) {
-        result = convertor(value, key);
+        result = convertor(formattedValue, key);
       } else if (key === '_sort') {
-        const [attr, order = 'ASC'] = value.split(':');
+        const [attr, order = 'ASC'] = formattedValue.split(':');
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');
@@ -463,7 +464,7 @@ module.exports = {
           type = '=';
         }
 
-        result = convertor(value, type, key);
+        result = convertor(formattedValue, type, key);
       }
 
       _.set(convertParams, result.key, result.value);

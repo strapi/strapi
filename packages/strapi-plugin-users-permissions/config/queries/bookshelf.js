@@ -20,8 +20,15 @@ module.exports = {
       if (params.limit) {
         qb.limit(params.limit);
       }
+
+      if (params.sort) {
+        if (params.sort.key) {
+          qb.orderBy(params.sort.key, params.sort.order);
+        } else {
+          qb.orderBy(params.sort);
+        }
+      }
     })
-      .orderBy(params.sort.key, params.sort.order)
       .fetchAll({
         withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
       });
