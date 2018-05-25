@@ -12,7 +12,6 @@ module.exports = {
     // Remove the source key since it is not a filter
     delete query.source;
     const filters = strapi.utils.models.convertParams(params.model, query);
-    // TODO: this should be fixed from the graphql service
     const where = !_.isEmpty(request) ? request : filters.where;
 
     // Find entries using `queries` system
