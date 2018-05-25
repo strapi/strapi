@@ -8,8 +8,7 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
-
+    const { limit, skip, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
     // Remove the source key since it is not a filter
     delete query.source;
     const filters = strapi.utils.models.convertParams(params.model, query);
@@ -18,12 +17,10 @@ module.exports = {
 
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
-      limit: filters.limit,
-      skip: filters.start || 0,
-      sort: filters.sort,
-      // TODO make this work with graphql
+      limit: limit || filters.limit,
+      skip: skip || filters.start || 0,
+      sort: sort || filters.sort,
       where,
-      // where: request,
       queryAttribute,
     }, populate);
   },
