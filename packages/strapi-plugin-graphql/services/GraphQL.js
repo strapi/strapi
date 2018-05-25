@@ -193,19 +193,21 @@ module.exports = {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = isSingular ?
-      pluralize.singular(name):
-      pluralize.plural(name);
+    let queryName;
+
+    if (isSingular === 'force') {
+      queryName = name;
+    } else {
+      queryName = isSingular ?
+        pluralize.singular(name):
+        pluralize.plural(name);
+    }
 
     // Retrieve policies.
-    const policies = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
-      _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
+    const policies = _.get(handler, `Query.${queryName}.policies`, []);
 
     // Retrieve resolverOf.
-    const resolverOf = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.resolverOf`, ''):
-      _.get(handler, `Query.${pluralize.plural(name)}.resolverOf`, '');
+    const resolverOf = _.get(handler, `Query.${queryName}.resolverOf`, '');
 
     const policiesFn = [];
 
@@ -216,13 +218,13 @@ module.exports = {
     // or the shadow CRUD resolver (aka Content-Manager).
     const resolver = (() => {
       // Try to retrieve custom resolver.
-      const resolver = isSingular ?
-        _.get(handler, `Query.${pluralize.singular(name)}.resolver`):
-        _.get(handler, `Query.${pluralize.plural(name)}.resolver`);
+      const resolver = _.get(handler, `Query.${queryName}.resolver`);
 
-      if (_.isString(resolver)) {
+      if (_.isString(resolver) || _.isPlainObject(resolver)) {
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
+
         // Retrieve the controller's action to be executed.
-        const [ name, action ] = resolver.split('.');
+        const [ name, action ] = handler.split('.');
 
         const controller = plugin ?
           _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`):
@@ -328,7 +330,7 @@ module.exports = {
 
     return async (obj, options, context) => {
       // Hack to be able to handle permissions for each query.
-      const ctx = Object.assign(context, {
+      const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
           graphql: null
         })
@@ -361,6 +363,7 @@ module.exports = {
 
           return values && values.toJSON ? values.toJSON() : values;
         }
+
 
         return resolver.call(null, obj, options, context);
       }
@@ -560,7 +563,7 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = obj[association.alias].map(related => {
+                  const arrayOfIds = (obj[association.alias] || []).map(related => {
                     return related[ref.primaryKey] || related;
                   });
 
@@ -642,9 +645,20 @@ module.exports = {
           return acc;
         }
 
-        acc[type][resolver] = _.isFunction(acc[type][resolver]) ?
-          acc[type][resolver]:
-          acc[type][resolver].resolver;
+        if (!_.isFunction(acc[type][resolver])) {
+          acc[type][resolver] = acc[type][resolver].resolver;
+        }
+
+        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
+          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
+
+          acc[type][resolver] = this.composeResolver(
+            strapi.plugins.graphql.config._schema.graphql,
+            plugin,
+            resolver,
+            'force' // Avoid singular/pluralize and force query name.
+          );
+        }
 
         return acc;
       }, acc);
