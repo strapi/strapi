@@ -115,7 +115,7 @@ describe('Test data GET/POST/PUT/DELETE with Content Manager', () => {
     }
   );
   test(
-    'Get tags',
+    'Get tags and get 2 entities',
     async () => {
       const body = await rq({
         url: `/tag`,
@@ -123,6 +123,8 @@ describe('Test data GET/POST/PUT/DELETE with Content Manager', () => {
       });
 
       data.tags = JSON.parse(body);
+
+      expect(data.tags.length).toBe(2);
     }
   );
   test(
@@ -136,6 +138,43 @@ describe('Test data GET/POST/PUT/DELETE with Content Manager', () => {
           content: 'My super content 1',
           tags: JSON.stringify([data.tags[0]])
         }
+      });
+    }
+  );
+});
+
+describe('Delete test APIs', () => {
+  beforeEach(async () => {
+    await restart(rq);
+  }, 60000);
+
+  test(
+    'Delete article API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/article`,
+        method: 'DELETE',
+        json: true
+      });
+    }
+  );
+  test(
+    'Delete tag API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/tag`,
+        method: 'DELETE',
+        json: true
+      });
+    }
+  );
+  test(
+    'Delete category API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/category`,
+        method: 'DELETE',
+        json: true
       });
     }
   );
