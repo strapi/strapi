@@ -33,7 +33,7 @@ module.exports = {
       return lines
         .map(line => {
           if (['{', '}'].includes(line)) {
-            return ``;
+            return '';
           }
 
           const split = line.split(':');
@@ -61,7 +61,7 @@ module.exports = {
       return lines
         .map((line, index) => {
           if (['{', '}'].includes(line)) {
-            return ``;
+            return '';
           }
 
           const split = Object.keys(fields)[index - 1].split('(');
@@ -90,7 +90,7 @@ module.exports = {
     return lines
       .map((line, index) => {
         if ([0, lines.length - 1].includes(index)) {
-          return ``;
+          return '';
         }
 
         return line;
@@ -105,9 +105,9 @@ module.exports = {
    */
 
   getDescription: (description, model = {}) => {
-    const format = `"""\n`;
+    const format = '"""\n';
 
-    const str = _.get(description, `_description`) ||
+    const str = _.get(description, '_description') ||
       _.isString(description) ? description : undefined ||
       _.get(model, 'info.description');
 
@@ -115,7 +115,7 @@ module.exports = {
       return `${format}${str}\n${format}`;
     }
 
-    return ``;
+    return '';
   },
 
   convertToParams: (params) => {
@@ -167,7 +167,7 @@ module.exports = {
       return globalId;
     }
 
-    return definition.model ? `Morph` : `[Morph]`;
+    return definition.model ? 'Morph' : '[Morph]';
   },
 
   /**
@@ -380,7 +380,7 @@ module.exports = {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
-    const initialState = { definition: ``, query: {}, resolver: { Query : {} } };
+    const initialState = { definition: '', query: {}, resolver: { Query : {} } };
 
     if (_.isEmpty(models)) {
       return initialState;
@@ -398,7 +398,7 @@ module.exports = {
       };
 
       const globalId = model.globalId;
-      const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
+      const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
       if (!acc.resolver[globalId]) {
         acc.resolver[globalId] = {};
@@ -614,14 +614,14 @@ module.exports = {
         const { definition, query, resolver } = this.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
 
         // We cannot put this in the merge because it's a string.
-        acc.definition += definition || ``;
+        acc.definition += definition || '';
 
         return _.merge(acc, {
           query,
           resolver
         });
       }, this.shadowCRUD(models));
-    })() : {};
+    })() : { definition: '', query: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
     const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
@@ -659,7 +659,7 @@ module.exports = {
     const typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+      type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       ${this.addCustomScalar(resolvers)}
       ${polymorphicDef}
     `;
@@ -687,7 +687,7 @@ module.exports = {
       JSON: GraphQLJSON
     });
 
-    return `scalar JSON`;
+    return 'scalar JSON';
   },
 
   /**
@@ -698,18 +698,25 @@ module.exports = {
 
   addPolymorphicUnionType: (customDefs, defs) => {
     const types = graphql.parse(customDefs + defs).definitions
-      .filter(def => def.name.value !== 'Query')
+      .filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
       .map(def => def.name.value);
 
-    return {
-      polymorphicDef: `union Morph = ${types.join(' | ')}`,
-      polymorphicResolver: {
-        Morph: {
-          __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
-            return obj.kind || obj._type;
+    if (types.length > 0) {
+      return {
+        polymorphicDef: `union Morph = ${types.join(' | ')}`,
+        polymorphicResolver: {
+          Morph: {
+            __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
+              return obj.kind || obj._type;
+            }
           }
         }
-      }
+      };
+    }
+
+    return {
+      polymorphicDef: '',
+      polymorphicResolver: {}
     };
   },
 
