@@ -46,6 +46,10 @@ class TableRow extends React.Component {
       case 'time':
       case 'datetime':
       case 'timestamp': {
+        if (value === null) {
+          return '-';
+        }
+
         const date = value && isObject(value) && value._isAMomentObject === true ?
           value :
           moment(value);
