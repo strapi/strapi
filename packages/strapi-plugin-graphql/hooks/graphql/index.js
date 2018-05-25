@@ -113,13 +113,13 @@ module.exports = strapi => {
       router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
         schema,
         context: ctx,
-        validationRules: [ depthLimit(7) ]
+        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
       })(ctx, next));
 
       router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
         schema,
         context: ctx,
-        validationRules: [ depthLimit(7) ]
+        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
       })(ctx, next));
 
       // Disable GraphQL Playground in production environment.
