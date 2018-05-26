@@ -574,6 +574,7 @@ module.exports = {
                     }).where;
                     break;
                   }
+                  // falls through
                 }
                 default:
                   // Where.
