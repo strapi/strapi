@@ -161,7 +161,7 @@ module.exports = {
   deleteModel: async ctx => {
     const { model } = ctx.params;
 
-    if (!_.get(strapi.models, model)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
+    if (!_.get(strapi.models, _.toLower(model))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknow' }] }]);
 
     strapi.reload.isWatching = false;
 
