@@ -395,6 +395,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         this.props.changeInputAttribute('params.dominant', true);
       }
 
+      if (target.name === 'params.nature' && target.value === "oneWay") {
+        this.props.changeInputAttribute('params.key', '-');
+      }else if (target.name === 'params.nature'){
+        this.props.changeInputAttribute('params.key', '');
+      }
+
     } else {
       this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
     }
@@ -533,6 +539,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
+
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
