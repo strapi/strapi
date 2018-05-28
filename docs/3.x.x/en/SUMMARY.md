@@ -46,6 +46,7 @@
 * [Logging](advanced/logging.md)
 * [Hooks](advanced/hooks.md)
 * [Middlewares](advanced/middlewares.md)
+* [Usage tracking](advanced/usage-tracking.md)
 
 ### API Reference
 * [Table of contents](api-reference/reference.md)
