@@ -26,7 +26,10 @@ const handleClick = (e, onClick) => {
 Ico.propTypes = {
   icoType: PropTypes.string,
   id: PropTypes.string,
-  onClick: PropTypes.func,
+  onClick: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.bool,
+  ]),
 };
 
 Ico.defaultProps = {
