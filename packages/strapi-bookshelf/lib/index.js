@@ -328,6 +328,7 @@ module.exports = function(strapi) {
                         });
 
                         switch (relation.nature) {
+                          case 'oneWay:
                           case 'oneToOne':
                           case 'manyToOne':
                             type = definition.primaryKeyType;
