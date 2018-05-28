@@ -156,7 +156,7 @@
   "ResetPasswordToken": "密码重置",
   "Role": "角色",
   "New entry": "新入口",
-  "request.error.model.unknow": "这个模型已不存在",
+  "request.error.model.unknown": "这个模型已不存在",
   "Users": "用户",
   "Analytics": "分析"
 }

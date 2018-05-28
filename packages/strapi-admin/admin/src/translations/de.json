@@ -130,5 +130,5 @@
     "ResetPasswordToken": "Passwort-Token zurücksetzen",
     "Role": "Rolle",
     "New entry": "Neuer Eintrag",
-    "request.error.model.unknow": "Dieses Schema existiert nicht"
+    "request.error.model.unknown": "Dieses Schema existiert nicht"
   }

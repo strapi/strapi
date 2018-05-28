@@ -1,10 +1,11 @@
 .logout {
+  position: relative;
   min-width: 19rem;
   -webkit-font-smoothing: antialiased;
   > div {
     height: 6rem;
     width: 100%;
-    line-height: 6rem;
+    line-height: 5.8rem;
     z-index: 999;
     > button {
       width: 100%;
@@ -35,6 +36,21 @@
     }
   }
 
+  &:after {
+    position: absolute;
+    right: -1px;
+    top: calc(50% - 10px);
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+    border-left: 1px solid #F3F4F4;
+    transition: opacity .2s ease-out;
+  }
+
+  &:hover:after {
+    opacity: 0;
+  }
 
 }
 .dropDownContent {
