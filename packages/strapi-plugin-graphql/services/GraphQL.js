@@ -137,6 +137,14 @@ module.exports = {
     if (definition.type) {
       let type = 'String';
 
+      if (definition.type === 'enumeration') {
+        if (definition.enumNamea) {
+          type = definition.enumName;
+        } else {
+          type = `${definition.enum[0].toUpperCase()}_TYPE`;
+        }
+      }
+
       switch (definition.type) {
         case 'string':
         case 'text':
@@ -178,6 +186,23 @@ module.exports = {
     }
 
     return definition.model ? 'Morph' : '[Morph]';
+  },
+
+  /**
+   * Convert Strapi enum to GraphQL enum.
+   *
+   * @return String
+   */
+
+  convertEnum: (definition) => {
+    let name = '';
+    if (definition.enumName) {
+      name = definition.enumName;
+    } else {
+      name = `${definition.enum[0].toUpperCase}_TYPE`;
+    }
+
+    return `enum ${name} { ${definition.enum.join('\n')} }`;
   },
 
   /**
@@ -442,6 +467,19 @@ module.exports = {
 
           return acc;
         }, initialState);
+
+      // Detect enum and generate it for the schema definition
+      const enums = Object.keys(model.attributes)
+        .reduce((acc, attribute) => {
+          const definition = model.attributes[attribute];
+
+          if (definition.type && definition.type === 'enumeration') {
+            acc.push(this.convertEnum(definition));
+          }
+          return acc;
+        }, []).join(' ');
+
+      acc.definition += `${enums}`;
 
       // Add parameters to optimize association query.
       (model.associations || [])
