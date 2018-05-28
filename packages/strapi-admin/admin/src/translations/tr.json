@@ -156,7 +156,7 @@
   "ResetPasswordToken": "Şifre sıfırlama anahtarı",
   "Role": "Rol",
   "New entry": "Yeni kayıt",
-  "request.error.model.unknow": "Bu model bulunmamaktadır.",
+  "request.error.model.unknown": "Bu model bulunmamaktadır.",
   "Users": "Kullanıcılar",
   "Analytics": "Analizler"
 }
