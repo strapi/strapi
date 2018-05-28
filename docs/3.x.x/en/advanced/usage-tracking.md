@@ -3,19 +3,19 @@
 In order to improve the product and understand how the community is using it, we are collecting non-sensitive data.
 
 ## Collected data
-Here the list of the collected data and why we need them.
+Here is the list of the collected data and why we need them.
 
 - **UUID**
   *Identify the app with a unique identifier.*
 - **Model names and attributes names**
-  *Understand what kind of APIs are built with Strapi (content or product or service)?*
+  *Understand what kind of APIs are built with Strapi (content or product or service?)*
 - **Environment state (development, staging, production)**
   *Understand how the developers are using the different configurations? How many projects are started in production mode?*
 - **Node modules names**
-  *Are developers integrating Strapi with Stripe? It means that we should develop a plugin to simplify the process with Stripe.
-  Are developers using Strapi with strapi-bookshelf or strapi-mongoose? It helps us to prioritize the issues.*
+  *Are developers integrating Strapi with Stripe? It means that we should develop a plugin to simplify the development process with Stripe.
+  Are developers using Strapi with strapi-bookshelf or strapi-mongoose? It helps us prioritize the issues.*
 - **OS**
-  *Is the community using Windows, Linux or Mac? It helps us to prioritize the issues.*
+  *Is the community using Windows, Linux or Mac? It helps us prioritize the issues.*
 - **Build configurations**
   *How many people are deploying the admin on another server?*
 
