@@ -201,6 +201,7 @@ module.exports = {
         };
 
         switch (relation.nature) {
+          case 'oneWay':
           case 'oneToOne':
           case 'manyToOne':
             attr.model = relation.target;
@@ -212,7 +213,9 @@ module.exports = {
           default:
         }
 
-        attr.via = relation.key;
+        if(relation.nature !== 'oneWay') {
+          attr.via = relation.key;
+        }
         attr.dominant = relation.dominant;
 
         if (_.trim(relation.pluginValue)) {
@@ -353,6 +356,8 @@ module.exports = {
             const attr = {};
 
             switch (params.nature) {
+              case 'oneWay':
+                return;
               case 'oneToOne':
               case 'oneToMany':
                 attr.model = model.toLowerCase();
