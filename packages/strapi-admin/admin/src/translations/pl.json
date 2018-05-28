@@ -133,5 +133,5 @@
   "ResetPasswordToken": "Token resetu hasła",
   "Role": "Rola",
   "New entry": "Nowy wpis",
-  "request.error.model.unknow": "Ten model nie istnieje"
+  "request.error.model.unknown": "Ten model nie istnieje"
 }

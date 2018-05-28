@@ -154,5 +154,5 @@
   "ResetPasswordToken": "ResetPasswordToken",
   "Role": "Rôle",
   "New entry": "Nouvelle entrée",
-  "request.error.model.unknow": "Le model n'existe pas"
+  "request.error.model.unknown": "Le model n'existe pas"
 }
