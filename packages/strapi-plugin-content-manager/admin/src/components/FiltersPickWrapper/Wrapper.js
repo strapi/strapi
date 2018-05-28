@@ -1,13 +1,16 @@
-import styled from 'styled-components';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const Wrapper = styled.div`
-  margin-top: -13px;
-  > div:not(:first-child) {
-    padding-top: 2px;
-  }
-  > div:last-child {
-    margin-bottom: 2px;
-  }
-`;
+import styles from './wrapperStyles.scss';
+
+const Wrapper = ({ children }) => <div className={styles.wrapperStyle}>{children}</div>;
+
+Wrapper.defaultProps = {
+  children: null,
+};
+
+Wrapper.propTypes = {
+  children: PropTypes.any,
+};
 
 export default Wrapper;
