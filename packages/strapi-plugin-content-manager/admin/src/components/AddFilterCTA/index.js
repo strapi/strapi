@@ -12,12 +12,18 @@ import PropTypes from 'prop-types';
 import Button from 'components/CustomButton';
 import Logo from '../../assets/images/icon_filter.png';
 
+const imgStyle = {
+  marginTop: '-3px',
+  marginRight: '10px',
+  height: '9px',
+};
+
 function AddFilterCTA({ onClick, showHideText }) {
   const id = showHideText ? 'hide' : 'add';
 
   return (
     <Button type="button" onClick={onClick} marginTop>
-      <img src={Logo} alt="filter_logo" />
+      <img src={Logo} alt="filter_logo" style={imgStyle} />
       <FormattedMessage id={`content-manager.components.AddFilterCTA.${id}`} />
     </Button>
   );

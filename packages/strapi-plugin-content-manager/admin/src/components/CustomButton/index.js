@@ -17,12 +17,6 @@ const CustomButton = styled.button`
   &:hover {
     background: #F7F8F8;
   }
-
-  img {
-    margin-top: -3px;
-    margin-right: 10px;
-    height: 9px;
-  }
 `;
 
 export default CustomButton;
