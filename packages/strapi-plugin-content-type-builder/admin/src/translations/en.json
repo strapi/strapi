@@ -169,7 +169,8 @@
   "table.contentType.head.description": "Description",
   "table.contentType.head.fields": "Fields",
 
-  "relation.oneToOne": "has one",
+  "relation.oneWay": "has one",
+  "relation.oneToOne": "has and belongs to one",
   "relation.oneToMany": "belongs to many",
   "relation.manyToOne": "has many",
   "relation.manyToMany": "has and belongs to many",
