@@ -4,19 +4,9 @@
  *
  */
 
-import styled from 'styled-components';
+import React from 'react';
+import styles from './styles.scss';
 
-const Separator = styled.span`
-  height: 30px;
-  margin-left: 10px;
-  margin-right: 10px;
-  line-height: 30px;
-  &:after {
-    content: '';
-    height: 15px;
-    border-left: 1px solid #007EFF;
-    opacity: 0.1;
-  }
-`;
+const Separator = () => <span className={styles.separatorSpan} />;
 
 export default Separator;
