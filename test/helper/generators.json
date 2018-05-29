@@ -87,16 +87,6 @@
         }
       },
       {
-        "name":"images",
-        "params":{
-          "appearance":{
-            "WYSIWYG":false
-          },
-          "multiple":true,
-          "type":"media"
-        }
-      },
-      {
         "name":"articles",
         "params":{
           "nature":"oneToMany",

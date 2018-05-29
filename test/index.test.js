@@ -7,7 +7,14 @@ request = request.defaults({
   baseUrl: 'http://localhost:1337'
 });
 
-const rq = (params) => {
+const rq = (options) => {
+  const params = JSON.parse(JSON.stringify(options));
+
+  for (let key in params.formData) {
+    if (typeof params.formData[key] === 'object') {
+      params.formData[key] = JSON.stringify(params.formData[key]);
+    }
+  }
   return new Promise((resolve, reject) => {
     request(params, (err, res, body) => {
       if (err || res.statusCode < 200 || res.statusCode >= 300) {
@@ -19,7 +26,7 @@ const rq = (params) => {
   });
 }
 
-const data = {};
+let data;
 
 describe('App setup auth', () => {
   test(
@@ -86,6 +93,13 @@ describe('Generate test APIs', () => {
 });
 
 describe('Test manyToMany relation (article - tag) with Content Manager', () => {
+  beforeAll(() => {
+    data = {
+      articles: [],
+      tags: []
+    };
+  });
+
   beforeEach(async () => {
     await restart(rq);
   }, 60000);
@@ -102,6 +116,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       });
 
       body = JSON.parse(body);
+
+      data.tags.push(body);
 
       expect(body._id);
       expect(body.id);
@@ -122,6 +138,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       body = JSON.parse(body);
 
+      data.tags.push(body);
+
       expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
@@ -141,23 +159,12 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       body = JSON.parse(body);
 
+      data.tags.push(body);
+
       expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag3');
-    }
-  );
-  test(
-    'Get tags and get 3 entities',
-    async () => {
-      const body = await rq({
-        url: `/content-manager/explorer/tag?limit=10&skip=0&sort=_id&source=content-manager`,
-        method: 'GET'
-      });
-
-      data.tags = JSON.parse(body);
-
-      expect(data.tags.length).toBe(3);
     }
   );
   test(
@@ -176,6 +183,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       body = JSON.parse(body);
 
+      data.articles.push(body);
+
       expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
@@ -190,7 +199,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       const entry = {
         title: 'Article 2',
         content: 'Content 2',
-        tags: JSON.stringify([data.tags[0]])
+        tags: [data.tags[0]]
       };
 
       let body = await rq({
@@ -200,6 +209,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       });
 
       body = JSON.parse(body);
+
+      data.articles.push(body);
 
       expect(body._id);
       expect(body.id);
@@ -211,23 +222,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     }
   );
   test(
-    'Get articles and get 2 entities',
-    async () => {
-      const body = await rq({
-        url: `/content-manager/explorer/article?limit=10&skip=0&sort=_id&source=content-manager`,
-        method: 'GET'
-      });
-
-      data.articles = JSON.parse(body);
-
-      expect(data.articles.length).toBe(2);
-    }
-  );
-  test(
     'Update article1 add tag2',
     async () => {
       const entry = Object.assign({}, data.articles[0], {
-        tags: JSON.stringify([data.tags[1]])
+        tags: [data.tags[1]]
       });
 
       delete entry.updatedAt;
@@ -240,6 +238,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       });
 
       body = JSON.parse(body);
+
+      data.articles[0] = body;
 
       expect(body._id);
       expect(body.id);
@@ -251,25 +251,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     }
   );
   test(
-    'Get article1',
-    async () => {
-      const body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
-        method: 'GET'
-      });
-
-      data.articles[0] = JSON.parse(body);
-
-      expect(data.articles[0].id).toBeDefined();
-    }
-  );
-  test(
     'Update article1 add tag1 and tag3',
     async () => {
       const entry = Object.assign({}, data.articles[0]);
       entry.tags.push(data.tags[0]);
       entry.tags.push(data.tags[2]);
-      entry.tags = JSON.stringify(entry.tags);
 
       delete entry.updatedAt;
       delete entry.createdAt;
@@ -281,6 +267,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       });
 
       body = JSON.parse(body);
+
+      data.articles[0] = body;
 
       expect(body._id);
       expect(body.id);
@@ -291,24 +279,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     }
   );
   test(
-    'Get article1',
-    async () => {
-      const body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
-        method: 'GET'
-      });
-
-      data.articles[0] = JSON.parse(body);
-
-      expect(data.articles[0].id).toBeDefined();
-    }
-  );
-  test(
     'Update article1 remove one tag',
     async () => {
       const entry = Object.assign({}, data.articles[0]);
       entry.tags = entry.tags.slice(1);
-      entry.tags = JSON.stringify(entry.tags);
 
       delete entry.updatedAt;
       delete entry.createdAt;
@@ -320,6 +294,8 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       });
 
       body = JSON.parse(body);
+
+      data.articles[0] = body;
 
       expect(body._id);
       expect(body.id);
@@ -333,7 +309,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Update article1 remove all tag',
     async () => {
       const entry = Object.assign({}, data.articles[0], {
-        tags: JSON.stringify([])
+        tags: []
       });
 
       delete entry.updatedAt;
@@ -347,12 +323,220 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       body = JSON.parse(body);
 
+      data.articles[0] = body;
+
       expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(0);
+    }
+  );
+});
+
+describe('Test oneToMany - manyToOne relation (article - category) with Content Manager', () => {
+  beforeAll(() => {
+    data = {
+      articles: [],
+      categories: []
+    };
+  });
+
+  beforeEach(async () => {
+    await restart(rq);
+  }, 60000);
+
+  test(
+    'Create cat1',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/category/?source=content-manager`,
+        method: 'POST',
+        formData: {
+          name: 'cat1'
+        }
+      });
+
+      body = JSON.parse(body);
+
+      data.categories.push(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.name).toBe('cat1');
+    }
+  );
+  test(
+    'Create cat2',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/category/?source=content-manager`,
+        method: 'POST',
+        formData: {
+          name: 'cat2'
+        }
+      });
+
+      body = JSON.parse(body);
+
+      data.categories.push(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.name).toBe('cat2');
+    }
+  );
+  test(
+    'Create article1 with cat1',
+    async () => {
+      const entry = {
+        title: 'Article 3',
+        content: 'Content 3',
+        category: data.categories[0]
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles.push(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(body.category.name).toBe(entry.category.name);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+    }
+  );
+  test(
+    'Update article1 with cat2',
+    async () => {
+      const entry = Object.assign({}, data.articles[0], {
+        category: data.categories[1]
+      });
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        method: 'PUT',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles[0] = body;
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(body.category.name).toBe(entry.category.name);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+    }
+  );
+  test(
+    'Create article2',
+    async () => {
+      const entry = {
+        title: 'Article 4',
+        content: 'Content 4',
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/article?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles.push(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+    }
+  );
+  test(
+    'Update article2 with cat2',
+    async () => {
+      const entry = Object.assign({}, data.articles[1], {
+        category: data.categories[1]
+      });
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        method: 'PUT',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles[1] = body;
+
+      expect(body._id);
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(body.category.name).toBe(entry.category.name);
+      expect(Array.isArray(body.tags)).toBeTruthy();
+    }
+  );
+  test(
+    'Update cat1 with article article1',
+    async () => {
+      const entry = Object.assign({}, data.categories[0]);
+      entry.articles.push(data.articles[0]);
+
+      let body = await rq({
+        url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
+        method: 'PUT',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.categories[0] = body;
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.articles.length).toBe(1);
+      expect(body.name).toBe(entry.name);
+    }
+  );
+  test(
+    'Create cat3 with article1',
+    async () => {
+      const entry = {
+        name: 'cat3',
+        articles: [data.articles[0]]
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/category/?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.categories.push(body);
+
+      expect(body._id);
+      expect(body.id);
+      expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(body.articles.length).toBe(1);
+      expect(body.name).toBe(entry.name);
     }
   );
 });
