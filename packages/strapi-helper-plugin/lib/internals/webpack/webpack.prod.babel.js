@@ -177,4 +177,11 @@ module.exports = base({
 
   devtool: 'cheap-module-source-map',
   disableExtractTextPlugin: false,
+  externals: {
+    'styled-components': {
+      commonjs: 'styled-components',
+      commonjs2: 'styled-components',
+      amd: 'styled-components',
+    },
+  },
 });
