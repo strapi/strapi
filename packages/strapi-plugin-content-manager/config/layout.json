@@ -32,5 +32,12 @@
         "appearance": ""
       }
     }
+  },
+  "reference": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
   }
 }

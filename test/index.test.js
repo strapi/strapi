@@ -90,6 +90,17 @@ describe('Generate test APIs', () => {
       });
     }
   );
+  test(
+    'Create new reference API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models`,
+        method: 'POST',
+        body: form.reference,
+        json: true
+      });
+    }
+  );
 });
 
 describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -119,7 +130,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.tags.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag1');
@@ -140,7 +150,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.tags.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag2');
@@ -161,7 +170,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.tags.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag3');
@@ -185,7 +193,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -212,7 +219,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -241,7 +247,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -270,7 +275,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -297,7 +301,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -325,7 +328,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
       data.articles[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -362,7 +364,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.categories.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat1');
@@ -383,7 +384,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.categories.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat2');
@@ -408,7 +408,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.articles.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -433,7 +432,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.articles[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -446,7 +444,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     async () => {
       const entry = {
         title: 'Article 4',
-        content: 'Content 4',
+        content: 'Content 4'
       };
 
       let body = await rq({
@@ -459,7 +457,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.articles.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -483,7 +480,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.articles[1] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
@@ -492,7 +488,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     }
   );
   test(
-    'Update cat1 with article article1',
+    'Update cat1 with article1',
     async () => {
       const entry = Object.assign({}, data.categories[0]);
       entry.articles.push(data.articles[0]);
@@ -507,7 +503,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.categories[0] = body;
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.articles.length).toBe(1);
@@ -532,11 +527,114 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       data.categories.push(body);
 
-      expect(body._id);
       expect(body.id);
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.articles.length).toBe(1);
       expect(body.name).toBe(entry.name);
+    }
+  );
+});
+
+describe('Test oneToOne relation (article - reference) with Content Manager', () => {
+  beforeAll(() => {
+    data = {
+      articles: [],
+      references: []
+    };
+  });
+
+  beforeEach(async () => {
+    await restart(rq);
+  }, 60000);
+
+  test(
+    'Create ref1',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/reference/?source=content-manager`,
+        method: 'POST',
+        formData: {
+          name: 'ref1'
+        }
+      });
+
+      body = JSON.parse(body);
+
+      data.references.push(body);
+
+      expect(body.id);
+      expect(body.name).toBe('ref1');
+    }
+  );
+  test(
+    'Create article1',
+    async () => {
+      const entry = {
+        title: 'Article 1',
+        content: 'Content 1'
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/article?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles.push(body);
+
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+    }
+  );
+  test(
+    'Update article1 with ref1',
+    async () => {
+      const entry = Object.assign({}, data.articles[0], {
+        reference: data.references[0]
+      });
+
+      let body = await rq({
+        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        method: 'PUT',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles[0] = body;
+
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(body.reference.name).toBe(entry.reference.name);
+    }
+  );
+  test(
+    'Create article2 with ref1',
+    async () => {
+      const entry = {
+        title: 'Article 2',
+        content: 'Content 2',
+        reference: data.references[0]
+      };
+
+      let body = await rq({
+        url: `/content-manager/explorer/article?source=content-manager`,
+        method: 'POST',
+        formData: entry
+      });
+
+      body = JSON.parse(body);
+
+      data.articles.push(body);
+
+      expect(body.id);
+      expect(body.title).toBe(entry.title);
+      expect(body.content).toBe(entry.content);
+      expect(body.reference.name).toBe(entry.reference.name);
     }
   );
 });

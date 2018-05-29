@@ -99,5 +99,31 @@
     "name":"category",
     "description":"",
     "collectionName":""
+  },
+  "reference": {
+    "attributes":[
+      {
+        "name":"name",
+        "params":{
+          "appearance":{
+            "WYSIWYG":false
+          },
+          "multiple":false,
+          "type":"string"
+        }
+      },
+      {
+        "name":"article",
+        "params":{
+          "target":"article",
+          "key":"reference",
+          "nature":"oneToOne"
+        }
+      }
+    ],
+    "connection":"default",
+    "name":"reference",
+    "description":"",
+    "collectionName":""
   }
 }
