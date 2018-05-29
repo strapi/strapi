@@ -52,51 +52,80 @@ class PopUpRelations extends React.Component {
     }
   }
 
-  handleClick = e => {
-    const value = e.target.id.split('.');
-    const target = {
-      type: 'string',
-      value: value[0],
-      name: 'params.target',
-    };
+  setPlaceholders = (firstCTName, secondCTName, relationType, values = this.props.values) => {
+    if (relationType === 'oneToMany') {
+      firstCTName = pluralize(firstCTName);
+    }
 
-    this.props.onChange({ target });
+    if (relationType === 'manyToOne') {
+      secondCTName = pluralize(secondCTName);
+    }
 
-    this.props.onChange({
-      target: {
-        type: 'string',
-        value: value[1] !== 'undefined' ? value[1] : '',
-        name: 'params.pluginValue',
-      },
-    });
+    if (relationType === 'manyToMany') {
+      firstCTName = pluralize(firstCTName);
+      secondCTName = pluralize(secondCTName);
+    }
 
-    const relationType = get(this.props.values, ['params', 'nature']);
 
-    if (get(this.props.contentType, 'name') !== value[0]) {
-      let firstCTName = value[0];
-      let secondCTName = get(this.props.contentType, 'name');
-
-      if (relationType === 'oneToMany') {
-        firstCTName = pluralize(firstCTName);
-      }
-
-      if (relationType === 'manyToOne') {
-        secondCTName = pluralize(secondCTName);
-      }
-
-      if (relationType === 'manyToMany') {
-        firstCTName = pluralize(firstCTName);
-        secondCTName = pluralize(secondCTName);
-      }
-
+    if (get(this.props.contentType, 'name') !== get(values, 'params.target')) {
       this.props.onChange({ target: { name: 'name', value: firstCTName } });
       this.props.onChange({ target: { name: 'params.key', value: secondCTName } });
+      this.props.resetFormErrors();
     } else {
       this.props.onChange({ target: { name: 'name', value: '' } });
       this.props.onChange({ target: { name: 'params.key', value: '' } });
     }
+  }
 
+  handleChange = e => {
+    this.props.onChange(e);
+    const shouldResetKeyParams = e.target.value === 'oneWay';
 
+    if (!this.props.isEditting && !shouldResetKeyParams) {
+      this.setPlaceholders(
+        get(this.props.values, ['params', 'target']),
+        get(this.props.contentType, 'name'),
+        e.target.value,
+      );
+    }
+
+    if (shouldResetKeyParams) {
+      this.props.onChange({ target: { name: 'params.key', value: '-' } });
+    }
+  }
+
+  handleClick = e => {
+    const value = e.target.id.split('.');
+    [
+      {
+        target: {
+          type: 'string',
+          value: value[0],
+          name: 'params.target',
+        },
+      },
+      {
+        target: {
+          type: 'string',
+          value: value[1] !== 'undefined' ? value[1] : '',
+          name: 'params.pluginValue',
+        },
+      },
+    ].map(target => this.props.onChange(target));
+
+    if (!this.props.isEditting) {
+      if (get(this.props.contentType, 'name') !== value[0]) {
+        this.setPlaceholders(
+          value[0],
+          get(this.props.contentType, 'name'),
+          get(this.props.values, ['params', 'nature']),
+          value[0],
+        );
+      } else {
+        this.props.onChange({ target: { name: 'name', value: '' } });
+        this.props.onChange({ target: { name: 'params.key', value: '' } });
+      }
+    }
   };
 
   init = props => {
@@ -120,8 +149,8 @@ class PopUpRelations extends React.Component {
 
     if (get(props.contentType, 'name') !== get(props.dropDownItems, ['0', 'name'])) {
       [
-        { target: { name: 'name', value: get(this.props.dropDownItems, ['0', 'name']) } },
-        { target: { name: 'params.key', value: get(this.props.contentType, 'name') } },
+        { target: { name: 'name', value: get(props.dropDownItems, ['0', 'name']) } },
+        { target: { name: 'params.key', value: get(props.contentType, 'name') } },
       ].map(target => this.props.onChange(target));
     }
   };
@@ -226,7 +255,7 @@ class PopUpRelations extends React.Component {
         />
         <RelationNaturePicker
           selectedIco={get(this.props.values, ['params', 'nature'])}
-          onChange={this.props.onChange}
+          onChange={this.handleChange}
           contentTypeName={get(this.props.contentType, 'name')}
           contentTypeTarget={get(this.props.values, ['params', 'target'])}
         />
@@ -318,6 +347,7 @@ PopUpRelations.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   popUpTitle: PropTypes.string.isRequired,
+  resetFormErrors: PropTypes.func.isRequired,
   routePath: PropTypes.string.isRequired,
   showLoader: PropTypes.bool,
   showRelation: PropTypes.bool.isRequired,
