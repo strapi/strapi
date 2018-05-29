@@ -32,16 +32,6 @@
         }
       },
       {
-        "name":"cover",
-        "params":{
-          "appearance":{
-            "WYSIWYG":false
-          },
-          "multiple":false,
-          "type":"media"
-        }
-      },
-      {
         "name":"author",
         "params":{
           "nature":"manyToOne",
