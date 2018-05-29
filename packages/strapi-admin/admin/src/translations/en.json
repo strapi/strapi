@@ -156,7 +156,7 @@
   "ResetPasswordToken": "Reset Password Token",
   "Role": "Role",
   "New entry": "New entry",
-  "request.error.model.unknow": "This model doesn't exist",
+  "request.error.model.unknown": "This model doesn't exist",
   "Users": "Users",
   "Analytics": "Analytics"
 }
