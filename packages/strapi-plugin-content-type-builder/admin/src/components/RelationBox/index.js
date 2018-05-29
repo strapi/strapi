@@ -39,25 +39,6 @@ class RelationBox extends React.Component {
     }
   }
 
-  handleClick = e => {
-    const value = e.target.id.split('.');
-    const target = {
-      type: 'string',
-      value: value[0],
-      name: 'params.target',
-    };
-
-    this.props.onChange({ target });
-
-    this.props.onChange({
-      target: {
-        type: 'string',
-        value: value[1] !== 'undefined' ? value[1] : '',
-        name: 'params.pluginValue',
-      },
-    });
-  };
-
   toggle = () => this.setState({ showMenu: !this.state.showMenu });
 
   renderDropdownMenu = () => (
@@ -90,7 +71,7 @@ class RelationBox extends React.Component {
 
             return (
               <div style={{ height: '3.6rem' }} key={key}>
-                <DropdownItem onClick={this.handleClick} id={id}>
+                <DropdownItem onClick={this.props.onClick} id={id}>
                   <div style={divStyle} id={`${value.name}.${value.source}`}>
                     <i className={`fa ${value.icon}`} style={divStyle} id={id} />
                     {value.name}&nbsp;
@@ -165,6 +146,7 @@ RelationBox.propTypes = {
   input: PropTypes.object,
   isFirstContentType: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   onSubmit: PropTypes.func.isRequired,
   relationType: PropTypes.string,
   tabIndex: PropTypes.string.isRequired,
@@ -179,6 +161,7 @@ RelationBox.defaultProps = {
   header: {},
   input: {},
   isFirstContentType: false,
+  onClick: () => {},
   relationType: 'oneToOne',
   value: '',
 };

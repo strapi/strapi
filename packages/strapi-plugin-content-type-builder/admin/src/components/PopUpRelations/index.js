@@ -1,13 +1,14 @@
 /**
-*
-* PopUpRelations
-*
-*/
+ *
+ * PopUpRelations
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { findIndex, get, isEmpty, map, take, takeRight } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import pluralize from 'pluralize';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/InputsIndex';
@@ -17,12 +18,21 @@ import RelationNaturePicker from 'components/RelationNaturePicker';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/tabindex-no-positive */
-class PopUpRelations extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class PopUpRelations extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.popUpHeaderNavLinks = [
-      { name: 'defineRelation', message: 'content-type-builder.popUpForm.navContainer.relation', nameToReplace: 'advancedSettings' },
-      { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'defineRelation' },
+      {
+        name: 'defineRelation',
+        message: 'content-type-builder.popUpForm.navContainer.relation',
+        nameToReplace: 'advancedSettings',
+      },
+      {
+        name: 'advancedSettings',
+        message: 'content-type-builder.popUpForm.navContainer.advanced',
+        nameToReplace: 'defineRelation',
+      },
     ];
   }
 
@@ -33,12 +43,63 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
   }
 
   componentWillReceiveProps(nextProps) {
-    if (isEmpty(this.props.dropDownItems) && !isEmpty(nextProps.dropDownItems) && !this.props.isEditting) {
+    if (
+      isEmpty(this.props.dropDownItems) &&
+      !isEmpty(nextProps.dropDownItems) &&
+      !this.props.isEditting
+    ) {
       this.init(nextProps);
     }
   }
 
-  init = (props) => {
+  handleClick = e => {
+    const value = e.target.id.split('.');
+    const target = {
+      type: 'string',
+      value: value[0],
+      name: 'params.target',
+    };
+
+    this.props.onChange({ target });
+
+    this.props.onChange({
+      target: {
+        type: 'string',
+        value: value[1] !== 'undefined' ? value[1] : '',
+        name: 'params.pluginValue',
+      },
+    });
+
+    const relationType = get(this.props.values, ['params', 'nature']);
+
+    if (get(this.props.contentType, 'name') !== value[0]) {
+      let firstCTName = value[0];
+      let secondCTName = get(this.props.contentType, 'name');
+
+      if (relationType === 'oneToMany') {
+        firstCTName = pluralize(firstCTName);
+      }
+
+      if (relationType === 'manyToOne') {
+        secondCTName = pluralize(secondCTName);
+      }
+
+      if (relationType === 'manyToMany') {
+        firstCTName = pluralize(firstCTName);
+        secondCTName = pluralize(secondCTName);
+      }
+
+      this.props.onChange({ target: { name: 'name', value: firstCTName } });
+      this.props.onChange({ target: { name: 'params.key', value: secondCTName } });
+    } else {
+      this.props.onChange({ target: { name: 'name', value: '' } });
+      this.props.onChange({ target: { name: 'params.key', value: '' } });
+    }
+
+
+  };
+
+  init = props => {
     const target = {
       name: 'params.target',
       type: 'string',
@@ -56,7 +117,14 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         },
       });
     }
-  }
+
+    if (get(props.contentType, 'name') !== get(props.dropDownItems, ['0', 'name'])) {
+      [
+        { target: { name: 'name', value: get(this.props.dropDownItems, ['0', 'name']) } },
+        { target: { name: 'params.key', value: get(this.props.contentType, 'name') } },
+      ].map(target => this.props.onChange(target));
+    }
+  };
 
   renderNavContainer = () => (
     <div className={styles.navContainer}>
@@ -70,7 +138,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         />
       ))}
     </div>
-  )
+  );
 
   renderModalBodyAdvanced = () => (
     <ModalBody className={`${styles.modalBodyAdvanced}`}>
@@ -95,7 +163,10 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         <div className={styles.inputContainer}>
           <div className="row">
             {map(takeRight(this.props.form.items, 2), (value, index) => {
-              const addon = index === 0 ? get(this.props.values, 'name') : get(this.props.values, ['params', 'key']);
+              const addon =
+                index === 0
+                  ? get(this.props.values, 'name')
+                  : get(this.props.values, ['params', 'key']);
               return (
                 <Input
                   key={index}
@@ -117,12 +188,25 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
         </div>
       </div>
     </ModalBody>
-  )
+  );
 
   renderModalBodyRelations = () => {
-    const header = get(this.props.values, ['params', 'pluginValue']) ?
-      get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, {'name': get(this.props.values, ['params', 'target']), source: get(this.props.values, ['params', 'pluginValue']) })])
-      : get(this.props.dropDownItems, [findIndex(this.props.dropDownItems, ['name', get(this.props.values, ['params', 'target'])])]);
+    const header = get(this.props.values, ['params', 'pluginValue'])
+      ? get(this.props.dropDownItems, [
+        findIndex(this.props.dropDownItems, {
+          name: get(this.props.values, ['params', 'target']),
+          source: get(this.props.values, ['params', 'pluginValue']),
+        }),
+      ])
+      : get(this.props.dropDownItems, [
+        findIndex(this.props.dropDownItems, [
+          'name',
+          get(this.props.values, ['params', 'target']),
+        ]),
+      ]);
+
+    const errs = findIndex(this.props.formErrors, ['name',get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors: [];
+    const errors = findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : [];
 
     return (
       <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
@@ -138,7 +222,7 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           onSubmit={this.props.onSubmit}
           onChange={this.props.onChange}
           didCheckErrors={this.props.didCheckErrors}
-          errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors : []}
+          errors={errs}
         />
         <RelationNaturePicker
           selectedIco={get(this.props.values, ['params', 'nature'])}
@@ -156,24 +240,46 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           value={get(this.props.values, ['params', 'key'])}
           onChange={this.props.onChange}
           didCheckErrors={this.props.didCheckErrors}
-          errors={findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : []}
+          errors={errors}
           dropDownItems={this.props.dropDownItems}
+          onClick={this.handleClick}
         />
       </ModalBody>
     );
-  }
+  };
 
   render() {
-    const loader = this.props.showLoader ?
-      <Button onClick={this.props.onSubmit} type="submit" className={styles.primary} disabled={this.props.showLoader}><p className={styles.saving}><span>.</span><span>.</span><span>.</span></p></Button>
-      : <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}><FormattedMessage id="content-type-builder.form.button.continue" /></Button>;
+    const loader = this.props.showLoader ? (
+      <Button
+        onClick={this.props.onSubmit}
+        type="submit"
+        className={styles.primary}
+        disabled={this.props.showLoader}
+      >
+        <p className={styles.saving}>
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </p>
+      </Button>
+    ) : (
+      <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
+        <FormattedMessage id="content-type-builder.form.button.continue" />
+      </Button>
+    );
 
-    const modalBody = this.props.showRelation ? this.renderModalBodyRelations():  this.renderModalBodyAdvanced();
+    const modalBody = this.props.showRelation
+      ? this.renderModalBodyRelations()
+      : this.renderModalBodyAdvanced();
     const handleToggle = this.props.toggle;
 
     return (
       <div className={styles.popUpRelations}>
-        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={`${styles.modalPosition}`}>
+        <Modal
+          isOpen={this.props.isOpen}
+          toggle={this.props.toggle}
+          className={`${styles.modalPosition}`}
+        >
           <ModalHeader toggle={this.props.toggle} className={styles.popUpFormHeader} />
           <div className={styles.headerContainer}>
             <div className={styles.titleContainer}>
@@ -190,7 +296,9 @@ class PopUpRelations extends React.Component { // eslint-disable-line react/pref
           {modalBody}
 
           <ModalFooter className={styles.modalFooter}>
-            <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
+            <Button onClick={handleToggle} className={styles.secondary}>
+              <FormattedMessage id="content-type-builder.form.button.cancel" />
+            </Button>
             {loader}{' '}
           </ModalFooter>
         </Modal>
@@ -203,14 +311,8 @@ PopUpRelations.propTypes = {
   contentType: PropTypes.object,
   didCheckErrors: PropTypes.bool.isRequired,
   dropDownItems: PropTypes.array,
-  form: PropTypes.oneOfType([
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
-  ]).isRequired,
-  formErrors: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.object,
-  ]).isRequired,
+  form: PropTypes.oneOfType([PropTypes.array.isRequired, PropTypes.object.isRequired]).isRequired,
+  formErrors: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
   isEditting: PropTypes.bool,
   isOpen: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
