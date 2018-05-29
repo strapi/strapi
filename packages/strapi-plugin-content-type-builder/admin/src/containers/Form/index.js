@@ -539,7 +539,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
-
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
