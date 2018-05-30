@@ -1,4 +1,5 @@
 .containerFluid { /* stylelint-disable */
+  position: relative;
   padding: 18px 30px;
 
   .modal-content{
@@ -14,4 +15,12 @@
 .noPadding {
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+
+.wrapper{
+  position: absolute;
+  top: 100px;
+  left: 30px;
+  width: calc(100% - 60px);
 }

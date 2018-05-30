@@ -1,1 +1,18 @@
-{}
+{
+  "product": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      },
+      "pric": {
+        "appearance": ""
+      },
+      "float": {
+        "appearance": ""
+      },
+      "decimal": {
+        "appearance": ""
+      }
+    }
+  }
+}
