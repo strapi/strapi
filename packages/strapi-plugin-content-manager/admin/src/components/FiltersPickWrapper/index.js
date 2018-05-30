@@ -7,8 +7,7 @@ import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { isObject } from 'lodash';
-import { Collapse } from 'reactstrap';
+import { isObject, size } from 'lodash';
 import FilterOptions from 'components/FilterOptions/Loadable';
 
 // You can find these components in either
@@ -35,7 +34,7 @@ class FiltersPickWrapper extends React.PureComponent {
   componentDidUpdate(prevProps) {
     const { appliedFilters, show } = this.props;
 
-    if (prevProps.show !== show && show && appliedFilters.length === 0) {
+    if (size(prevProps.appliedFilters) !== size(appliedFilters) && size(appliedFilters) === 0) {
       this.handleClickAdd();
     }
 
@@ -136,43 +135,41 @@ class FiltersPickWrapper extends React.PureComponent {
     const { appliedFilters, filterToFocus, schema, show } = this.props;
 
     return (
-      <form onSubmit={this.handleSubmit}>
-        <Collapse isOpen={show}>
-          <Div>
-            <div>
-              <PluginHeader
-                actions={this.generateActions()}
-                description={{
-                  id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
-                }}
-                title={this.renderTitle()}
-              />
-              <Wrapper>
-                {appliedFilters.map((filter, key) => (
-                  <FilterOptions
-                    key={key}
-                    filter={filter}
-                    filterToFocus={filterToFocus}
-                    index={key}
-                    onChange={this.handleChange}
-                    onClickAdd={this.handleClickAdd}
-                    onClickRemove={this.handleClickRemove}
-                    schema={schema}
-                    show={this.state.showInput}
-                    showAddButton={this.shouldDisplayAddButton(key)}
-                  />
-                ))}
-              </Wrapper>
-            </div>
-            <Flex>
-              <span onClick={this.handleClickClose}>
-                <FormattedMessage id="content-manager.components.FiltersPickWrapper.hide" />
-                &nbsp;
-              </span>
-            </Flex>
-          </Div>
-        </Collapse>
-      </form>
+      <Div show={show} appliedFilters={size(appliedFilters)}>
+        <form onSubmit={this.handleSubmit}>
+          <div>
+            <PluginHeader
+              actions={this.generateActions()}
+              description={{
+                id: 'content-manager.components.FiltersPickWrapper.PluginHeader.description',
+              }}
+              title={this.renderTitle()}
+            />
+            <Wrapper>
+              {appliedFilters.map((filter, key) => (
+                <FilterOptions
+                  key={key}
+                  filter={filter}
+                  filterToFocus={filterToFocus}
+                  index={key}
+                  onChange={this.handleChange}
+                  onClickAdd={this.handleClickAdd}
+                  onClickRemove={this.handleClickRemove}
+                  schema={schema}
+                  show={this.state.showInput}
+                  showAddButton={this.shouldDisplayAddButton(key)}
+                />
+              ))}
+            </Wrapper>
+          </div>
+          <Flex>
+            <span onClick={this.handleClickClose}>
+              <FormattedMessage id="content-manager.components.FiltersPickWrapper.hide" />
+              &nbsp;
+            </span>
+          </Flex>
+        </form>
+      </Div>
     );
   }
 }

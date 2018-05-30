@@ -69,10 +69,18 @@ function listPageReducer(state = initialState, action) {
     case ON_TOGGLE_FILTERS:
       return state
         .update('filterToFocus', () => null)
-        .update('showFilter', v => !v);
+        .update('showFilter', v => !v)
+        .update('appliedFilters', () => {
+          if (state.get('showFilter') === true) {
+            return List([]);
+          }
+
+          return state.get('filters');
+        });
     case OPEN_FILTERS_WITH_SELECTION:
       return state
         .update('showFilter', () => true)
+        .update('appliedFilters', () => state.get('filters'))
         .update('filterToFocus', () => action.index);
     case REMOVE_ALL_FILTERS:
       return state
@@ -84,19 +92,12 @@ function listPageReducer(state = initialState, action) {
     case SET_PARAMS:
       return state
         .update('params', () => Map(action.params))
-        .update('appliedFilters', (list) => {
-          if (state.get('showFilter') === true) {
-            return list;
-          }
-
-          return fromJS(action.filters);
-        })
         .update('filters', () => fromJS(action.filters))
         .update('showFilter', () => false);
     case SUBMIT:
       return state
         .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
-        .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
+        .update('appliedFilters', () => List([]))
         .update('showFilter', () => false)
         .update('filtersUpdated', v => v = !v);
     default:

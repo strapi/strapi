@@ -62,7 +62,7 @@ import {
 import styles from './styles.scss';
 
 export class ListPage extends React.Component {
-  state = { showWarning: false, target: '', showHeader: true };
+  state = { showWarning: false, target: '' };
 
   componentDidMount() {
     this.getData(this.props);
@@ -73,20 +73,16 @@ export class ListPage extends React.Component {
       location: { pathname, search },
     } = prevProps;
     const {
-      listPage: { showFilter, filtersUpdated },
+      listPage: { filtersUpdated },
     } = this.props;
 
     if (pathname !== this.props.location.pathname) {
       this.getData(this.props);
-      this.shouldDisplayPluginHeader();
+      this.shouldHideFilters();
     }
 
     if (search !== this.props.location.search) {
       this.getData(this.props);
-    }
-
-    if (prevProps.listPage.showFilter !== showFilter) {
-      this.hidePluginHeader(showFilter);
     }
 
     if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
@@ -145,18 +141,9 @@ export class ListPage extends React.Component {
     get(this.props.schema, [this.getCurrentModelName(), 'fields']) ||
     get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
 
-  hidePluginHeader = showFilter => {
-    if (showFilter) {
-      this.setState(prevState => ({ showHeader: !prevState.showHeader }));
-    } else {
-      this.setState({ showHeader: true });
-    }
-  };
-
-  shouldDisplayPluginHeader = () => {
+  shouldHideFilters = () => {
     if (this.props.listPage.showFilter) {
       this.props.onToggleFilters();
-      this.setState({ showHeader: true });
     }
   };
 
@@ -322,92 +309,91 @@ export class ListPage extends React.Component {
 
     return (
       <div>
-        <FiltersPickWrapper
-          addFilter={addFilter}
-          appliedFilters={appliedFilters}
-          close={onToggleFilters}
-          filterToFocus={filterToFocus}
-          modelName={this.getCurrentModelName()}
-          onChange={onChange}
-          onSubmit={this.handleSubmit}
-          removeAllFilters={removeAllFilters}
-          removeFilter={removeFilter}
-          schema={this.getCurrentSchema()}
-          show={showFilter}
-        />
         <div className={cn('container-fluid', styles.containerFluid)}>
-          {this.state.showHeader && (
-            <PluginHeader
-              actions={pluginHeaderActions}
-              description={{
-                id:
-                  listPage.count > 1
-                    ? 'content-manager.containers.List.pluginHeaderDescription'
-                    : 'content-manager.containers.List.pluginHeaderDescription.singular',
-                values: {
-                  label: listPage.count,
-                },
-              }}
-              title={{
-                id: this.getCurrentModelName() || 'Content Manager',
-              }}
+          <PluginHeader
+            actions={pluginHeaderActions}
+            description={{
+              id:
+              listPage.count > 1
+                ? 'content-manager.containers.List.pluginHeaderDescription'
+                : 'content-manager.containers.List.pluginHeaderDescription.singular',
+              values: {
+                label: listPage.count,
+              },
+            }}
+            title={{
+              id: this.getCurrentModelName() || 'Content Manager',
+            }}
+          />
+          <div className={cn(styles.wrapper)}>
+            <FiltersPickWrapper
+              addFilter={addFilter}
+              appliedFilters={appliedFilters}
+              close={onToggleFilters}
+              filterToFocus={filterToFocus}
+              modelName={this.getCurrentModelName()}
+              onChange={onChange}
+              onSubmit={this.handleSubmit}
+              removeAllFilters={removeAllFilters}
+              removeFilter={removeFilter}
+              schema={this.getCurrentSchema()}
+              show={showFilter}
             />
-          )}
-          <div className={cn('row', styles.row)}>
-            <div className="col-md-12">
-              <Div
-                increaseMargin={!this.state.showHeader}
-                decreaseMarginBottom={filters.length > 0}
-              >
-                <div className="row">
-                  <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
-                  {filters.map((filter, key) => (
-                    <Filter
-                      key={key}
-                      filter={filter}
-                      index={key}
-                      onClick={onClickRemove}
-                      onClickOpen={openFiltersWithSelections}
-                      schema={this.getCurrentSchema()}
-                    />
-                  ))}
-                </div>
-              </Div>
+            <div className={cn('row', styles.row)}>
+              <div className="col-md-12">
+                <Div
+                  decreaseMarginBottom={filters.length > 0}
+                >
+                  <div className="row">
+                    <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
+                    {filters.map((filter, key) => (
+                      <Filter
+                        key={key}
+                        filter={filter}
+                        index={key}
+                        onClick={onClickRemove}
+                        onClickOpen={openFiltersWithSelections}
+                        schema={this.getCurrentSchema()}
+                      />
+                    ))}
+                  </div>
+                </Div>
+              </div>
             </div>
-          </div>
-          <div className={cn('row', styles.row)}>
-            <div className="col-md-12">
-              <Table
-                records={listPage.records}
-                route={this.props.match}
-                routeParams={this.props.match.params}
-                headers={this.generateTableHeaders()}
-                filters={filters}
-                onChangeSort={this.handleChangeSort}
-                sort={params._sort}
-                history={this.props.history}
-                primaryKey={this.getCurrentModel().primaryKey || 'id'}
-                handleDelete={this.toggleModalWarning}
-                redirectUrl={this.generateRedirectURI()}
-              />
-              <PopUpWarning
-                isOpen={this.state.showWarning}
-                toggleModal={this.toggleModalWarning}
-                content={{
-                  title: 'content-manager.popUpWarning.title',
-                  message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
-                  cancel: 'content-manager.popUpWarning.button.cancel',
-                  confirm: 'content-manager.popUpWarning.button.confirm',
-                }}
-                popUpWarningType="danger"
-                onConfirm={this.handleDelete}
-              />
-              <PageFooter
-                count={listPage.count}
-                onChangeParams={this.handleChangeParams}
-                params={listPage.params}
-                style={{ marginTop: '2.9rem', padding: '0 15px 0 15px' }}
-              />
+            <div className={cn('row', styles.row)}>
+              <div className="col-md-12">
+                <Table
+                  records={listPage.records}
+                  route={this.props.match}
+                  routeParams={this.props.match.params}
+                  headers={this.generateTableHeaders()}
+                  filters={filters}
+                  onChangeSort={this.handleChangeSort}
+                  sort={params._sort}
+                  history={this.props.history}
+                  primaryKey={this.getCurrentModel().primaryKey || 'id'}
+                  handleDelete={this.toggleModalWarning}
+                  redirectUrl={this.generateRedirectURI()}
+                />
+                <PopUpWarning
+                  isOpen={this.state.showWarning}
+                  toggleModal={this.toggleModalWarning}
+                  content={{
+                    title: 'content-manager.popUpWarning.title',
+                    message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
+                    cancel: 'content-manager.popUpWarning.button.cancel',
+                    confirm: 'content-manager.popUpWarning.button.confirm',
+                  }}
+                  popUpWarningType="danger"
+                  onConfirm={this.handleDelete}
+                />
+                <PageFooter
+                  count={listPage.count}
+                  onChangeParams={this.handleChangeParams}
+                  params={listPage.params}
+                  style={{ marginTop: '2.9rem', padding: '0 15px 0 15px' }}
+                />
+              </div>
             </div>
           </div>
         </div>
