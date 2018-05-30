@@ -70,13 +70,7 @@ function listPageReducer(state = initialState, action) {
       return state
         .update('filterToFocus', () => null)
         .update('showFilter', v => !v)
-        .update('appliedFilters', () => {
-          if (state.get('showFilter') === true) {
-            return List([]);
-          }
-
-          return state.get('filters');
-        });
+        .update('appliedFilters', () => state.get('filters'));
     case OPEN_FILTERS_WITH_SELECTION:
       return state
         .update('showFilter', () => true)
@@ -97,7 +91,7 @@ function listPageReducer(state = initialState, action) {
     case SUBMIT:
       return state
         .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
-        .update('appliedFilters', () => List([]))
+        .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
         .update('showFilter', () => false)
         .update('filtersUpdated', v => v = !v);
     default:

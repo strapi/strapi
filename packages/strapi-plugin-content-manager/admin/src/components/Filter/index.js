@@ -40,7 +40,13 @@ function Filter({ filter, index, onClick, onClickOpen, schema }) {
       <FormattedMessage id={`content-manager.components.FilterOptions.FILTER_TYPES.${filter.filter}`} />
       <span>&nbsp;{toString(value)}</span>
       <Separator />
-      <Remove onClick={() => onClick(index)} />
+      <Remove
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick(index);
+        }}
+      />
     </Flex>
   );
 }

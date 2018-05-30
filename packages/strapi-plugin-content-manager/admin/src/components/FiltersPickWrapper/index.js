@@ -54,7 +54,7 @@ class FiltersPickWrapper extends React.PureComponent {
       setTimeout(() => {
         this.setState({ showInput: false });
         resolve();
-      }, 500);
+      }, 1000);
     });
   }
 
@@ -133,9 +133,11 @@ class FiltersPickWrapper extends React.PureComponent {
 
   render() {
     const { appliedFilters, filterToFocus, schema, show } = this.props;
+    const { showInput } = this.state;
+    const number = showInput ? (254 + ((size(appliedFilters) -1) * 44))   : 254;
 
     return (
-      <Div show={show} appliedFilters={size(appliedFilters)}>
+      <Div show={show} number={number} anim={showInput}>
         <form onSubmit={this.handleSubmit}>
           <div>
             <PluginHeader
@@ -146,7 +148,7 @@ class FiltersPickWrapper extends React.PureComponent {
               title={this.renderTitle()}
             />
             <Wrapper>
-              {appliedFilters.map((filter, key) => (
+              { showInput && appliedFilters.map((filter, key) => (
                 <FilterOptions
                   key={key}
                   filter={filter}
@@ -156,10 +158,11 @@ class FiltersPickWrapper extends React.PureComponent {
                   onClickAdd={this.handleClickAdd}
                   onClickRemove={this.handleClickRemove}
                   schema={schema}
-                  show={this.state.showInput}
+                  show={showInput}
                   showAddButton={this.shouldDisplayAddButton(key)}
                 />
               ))}
+              {!showInput && <div style={{height: '34px'}} />}
             </Wrapper>
           </div>
           <Flex>
