@@ -15,8 +15,8 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
 
-  "components.AddFilterCTA.add": "Add filter",
-  "components.AddFilterCTA.hide": "Hide filters",
+  "components.AddFilterCTA.add": "Filters",
+  "components.AddFilterCTA.hide": "Filters",
   "components.FilterOptions.button.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",

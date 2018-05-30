@@ -69,7 +69,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
       {showAddButton && (
         <Add
           onClick={onClickAdd}
-          style={attrType === 'boolean' ? { marginLeft: '10px' } : {}}
+          style={{ marginLeft: '6px' }}
           type="button"
         />
       )}

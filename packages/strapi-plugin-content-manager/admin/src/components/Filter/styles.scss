@@ -1,27 +1,37 @@
 .flexWrapper {
-  height: 30px;
   display: inline-block;
+  height: 30px;
   margin-bottom: 6px;
   margin-right: 10px;
   padding: 0 10px;
   background: rgba(0,126,255,0.08);
   border: 1px solid rgba(0,126,255,0.24);
   border-radius: 2px;
-  line-height: 30px;
+  line-height: 28px;
   color: #007EFF;
   font-size: 13px;
+
+  > span{
+    display: inline-block;
+    margin-top: -1px;
+  }
+
   > span:nth-child(2) {
     font-weight: 700;
   }
+
   > span:nth-child(3) {
     cursor: pointer;
   }
+
   -webkit-font-smoothing: antialiased;
 }
 
 .remove {
-  height: 30px;
+  height: 28px;
   cursor: pointer;
+  vertical-align: bottom;
+
   &:after {
     content: '\f00d';
     font-family: FontAwesome;

@@ -15,7 +15,7 @@ import Logo from '../../assets/images/icon_filter.png';
 const imgStyle = {
   marginTop: '-3px',
   marginRight: '10px',
-  height: '9px',
+  height: '7px',
 };
 
 function AddFilterCTA({ onClick, showHideText }) {

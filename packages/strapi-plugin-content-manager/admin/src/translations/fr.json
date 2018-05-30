@@ -16,8 +16,8 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
-  "components.AddFilterCTA.add": "Ajouter un filtre",
-  "components.AddFilterCTA.hide": "Cacher les filtres",
+  "components.AddFilterCTA.add": "Filtres",
+  "components.AddFilterCTA.hide": "Filtres",
   "components.FilterOptions.button.apply": "Appliquer",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Appliquer",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",

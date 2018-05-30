@@ -8,7 +8,7 @@ const CustomButton = styled.button`
   background-color: #FFFFFF;
   border: 1px solid #E3E9F3;
   border-radius: 2px;
-  line-height: 30px;
+  line-height: 28px;
   font-size: 13px;
   font-weight: 500;
   font-family: Lato;
@@ -16,6 +16,10 @@ const CustomButton = styled.button`
   cursor: pointer;
   &:hover {
     background: #F7F8F8;
+  }
+
+  img{
+    font-size: 12px;
   }
 `;
 
