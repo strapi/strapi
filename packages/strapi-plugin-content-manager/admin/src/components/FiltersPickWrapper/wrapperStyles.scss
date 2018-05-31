@@ -7,3 +7,15 @@
     margin-bottom: 2px;
   }
 }
+
+.spanStyled {
+  vertical-align: text-top;
+  cursor: pointer;
+
+  &:after {
+    margin-left: 2px;
+    content: '\f077';
+    font-family: FontAwesome;
+    font-size: 10px;
+  }
+}

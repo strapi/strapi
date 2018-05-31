@@ -2,7 +2,7 @@
  *
  * AddFilterCTA
  *
- */
+ */ 
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -16,6 +16,7 @@ const imgStyle = {
   marginTop: '-3px',
   marginRight: '10px',
   height: '7px',
+  fontSize: '12px',
 };
 
 function AddFilterCTA({ onClick, showHideText }) {

@@ -19,6 +19,7 @@ import Div from './Div';
 import Flex from './Flex';
 import SpanStyled from './SpanStyled';
 import Wrapper from './Wrapper';
+import styles from './wrapperStyles.scss';
 
 class FiltersPickWrapper extends React.PureComponent {
   state = { showInput: false };
@@ -166,7 +167,7 @@ class FiltersPickWrapper extends React.PureComponent {
             </Wrapper>
           </div>
           <Flex>
-            <span onClick={this.handleClickClose}>
+            <span onClick={this.handleClickClose} className={styles.spanStyled}>
               <FormattedMessage id="content-manager.components.FiltersPickWrapper.hide" />
               &nbsp;
             </span>

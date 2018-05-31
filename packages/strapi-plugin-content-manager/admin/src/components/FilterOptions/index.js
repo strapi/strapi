@@ -7,14 +7,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import cn from 'classnames';
 
 import InputSelect from 'components/InputSelect/Loadable';
 
 import Add from './Add';
 import Div from './Div';
 import InputWithAutoFocus from './InputWithAutoFocus';
-import InputWrapper from './InputWrapper';
 import Remove from './Remove';
+import styles from './styles.scss';
 
 import FILTER_TYPES from './filterTypes';
 
@@ -29,50 +30,52 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
     : defaultInputStyle;
 
   // This component is needed in order to add the date icon inside the InputDate
-  const Wrapper = get(schema, [filter.attr, 'type'], 'string') === 'date' ? InputWrapper : 'div';
+  const isDate = get(schema, [filter.attr, 'type'], 'string') === 'date';
   const selectOptionsSchema = Object
     .keys(schema)
     .filter(x => schema[x].type !== 'json');
 
   return (
     <Div borderLeft={!showAddButton || get(filter, 'value', '') !== ''}>
-      <Remove type="button" onClick={() => onClickRemove(index)} />
-      <InputSelect
-        onChange={onChange}
-        name={`${index}.attr`}
-        value={get(filter, 'attr', '')}
-        selectOptions={selectOptionsSchema}
-        style={selectStyle}
-      />
-      <InputSelect
-        onChange={onChange}
-        name={`${index}.filter`}
-        value={get(filter, 'filter', '=')}
-        selectOptions={FILTER_TYPES}
-        style={midSelectStyle}
-      />
-      <Wrapper>
-        {show && (
-          <InputWithAutoFocus
-            filter={filter}
-            filterToFocus={filterToFocus}
-            index={index}
-            inputStyle={inputStyle}
-            name={`${index}.value`}
-            onChange={onChange}
-            schema={schema}
-            style={inputStyle}
-            value={get(filter, 'value')}
+      <div className={styles.filterOptionsWrapper}>
+        <Remove type="button" onClick={() => onClickRemove(index)} />
+        <InputSelect
+          onChange={onChange}
+          name={`${index}.attr`}
+          value={get(filter, 'attr', '')}
+          selectOptions={selectOptionsSchema}
+          style={selectStyle}
+        />
+        <InputSelect
+          onChange={onChange}
+          name={`${index}.filter`}
+          value={get(filter, 'filter', '=')}
+          selectOptions={FILTER_TYPES}
+          style={midSelectStyle}
+        />
+        <div className={cn(isDate ? styles.filterOptionsInputWrapper : '')}>
+          {show && (
+            <InputWithAutoFocus
+              filter={filter}
+              filterToFocus={filterToFocus}
+              index={index}
+              inputStyle={inputStyle}
+              name={`${index}.value`}
+              onChange={onChange}
+              schema={schema}
+              style={inputStyle}
+              value={get(filter, 'value')}
+            />
+          )}
+        </div>
+        {showAddButton && (
+          <Add
+            onClick={onClickAdd}
+            style={{ marginLeft: '6px' }}
+            type="button"
           />
         )}
-      </Wrapper>
-      {showAddButton && (
-        <Add
-          onClick={onClickAdd}
-          style={{ marginLeft: '6px' }}
-          type="button"
-        />
-      )}
+      </div>
     </Div>
   );
 }

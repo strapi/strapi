@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const CustomButton = styled.button`
   height: 30px;
-  margin-right: 10px;
+  margin-right: 10px; 
   padding: 0 10px;
   text-align: center;
   background-color: #FFFFFF;
@@ -16,10 +16,6 @@ const CustomButton = styled.button`
   cursor: pointer;
   &:hover {
     background: #F7F8F8;
-  }
-
-  img{
-    font-size: 12px;
   }
 `;
 
