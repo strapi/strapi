@@ -44,7 +44,7 @@ module.exports = {
         withRelated: populate || this.associations.map(x => x.alias)
       });
 
-    const data = record ? record.toJSON() : record;
+    const data = record.toJSON ? record.toJSON() : record;
 
     // Retrieve data manually.
     if (_.isEmpty(populate)) {

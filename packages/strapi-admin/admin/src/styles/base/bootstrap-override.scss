@@ -1,6 +1,7 @@
 .modal {
   .modal-dialog {
-    margin-top: 23.4rem;
+    max-width: 74.5rem;
+    margin: 16rem auto 3rem calc(50% - #{$left-menu-width});
   }
 }
 
