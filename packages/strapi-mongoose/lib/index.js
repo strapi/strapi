@@ -10,18 +10,24 @@ const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
 const mongooseUtils = require('mongoose/lib/utils');
 
+// Strapi helpers for models.
+const { models: utilsModels }  = require('strapi-utils');
+
+
 // Local helpers.
 const utils = require('./utils/');
-
-// Strapi helpers for models.
-const { models: utilsModels, logger }  = require('strapi-utils');
+const relations = require('./relations');
 
 /**
  * Mongoose hook
  */
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-case-declarations */
+/* eslint-disable no-const-assign */
+/* eslint-disable no-unused-vars */
 module.exports = function (strapi) {
-  const hook = {
+  const hook = _.merge({
 
     /**
      * Default options
@@ -33,7 +39,8 @@ module.exports = function (strapi) {
       port: 27017,
       database: 'strapi',
       authenticationDatabase: '',
-      ssl: false
+      ssl: false,
+      debug: false
     },
 
     /**
@@ -44,10 +51,11 @@ module.exports = function (strapi) {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
         const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
-        const { authenticationDatabase, ssl } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
+        const { authenticationDatabase, ssl, debug } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
-        const connectOptions = {}
+        const connectOptions = {};
+        const options = {};
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -61,9 +69,15 @@ module.exports = function (strapi) {
           connectOptions.authSource = authenticationDatabase;
         }
 
-        connectOptions.ssl = ssl === true || ssl === 'true';
+        connectOptions.ssl = Boolean(ssl);
+
+        options.debug = Boolean(debug);
 
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
+
+        for (let key in options) {
+          instance.set(key, options[key])
+        }
 
         // Handle error
         instance.connection.on('error', error => {
@@ -121,12 +135,12 @@ module.exports = function (strapi) {
                                 this._mongooseOptions.populate[association.alias].match = {
                                   [`${association.via}.${association.filter}`]: association.alias,
                                   [`${association.via}.kind`]: definition.globalId
-                                }
+                                };
 
                                 // Select last related to an entity.
                                 this._mongooseOptions.populate[association.alias].options = {
                                   sort: '-createdAt'
-                                }
+                                };
                               } else {
                                 this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                               }
@@ -160,7 +174,7 @@ module.exports = function (strapi) {
                   _.forEach(postLifecycle, (fn, key) => {
                     if (_.isFunction(target[model.toLowerCase()][fn])) {
                       collection.schema.post(key, function (doc, next) {
-                        target[model.toLowerCase()][fn](this, doc).then(next).catch(err => strapi.log.error(err))
+                        target[model.toLowerCase()][fn](this, doc).then(next).catch(err => strapi.log.error(err));
                       });
                     }
                   });
@@ -211,20 +225,19 @@ module.exports = function (strapi) {
                     }
                   };
 
+                  // Instantiate model.
+                  const Model = instance.model(definition.globalId, collection.schema, definition.collectionName);
+
                   if (!plugin) {
-                    global[definition.globalName] = instance.model(definition.globalId, collection.schema, definition.collectionName);
-                  } else {
-                    instance.model(definition.globalId, collection.schema, definition.collectionName);
+                    global[definition.globalName] = Model;
                   }
 
                   // Expose ORM functions through the `target` object.
-                  target[model] = _.assign(instance.model(definition.globalName), target[model]);
-
-                  // Push model to strapi global variables.
-                  collection = instance.model(definition.globalName, collection.schema);
+                  target[model] = _.assign(Model, target[model]);
 
                   // Push attributes to be aware of model schema.
                   target[model]._attributes = definition.attributes;
+                  target[model].updateRelations = relations.update;
                 } catch (err) {
                   strapi.log.error('Impossible to register the `' + model + '` model.');
                   strapi.log.error(err);
@@ -445,7 +458,7 @@ module.exports = function (strapi) {
       });
     },
 
-    getQueryParams: (value, type, key) => {
+    getQueryParams: (value, type, key) => {
       const result = {};
 
       switch (type) {
@@ -502,312 +515,8 @@ module.exports = function (strapi) {
       }
 
       return result;
-    },
-
-    manageRelations: async function (model, params, source) {
-      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
-        _.assign(acc, strapi.plugins[current].models);
-        return acc;
-      }, {}));
-
-      const Model = models[model];
-
-      const virtualFields = [];
-      const response = await Model
-        .findOne({
-          [Model.primaryKey]: params._id || params.id
-        })
-        .populate(_.keys(_.groupBy(_.reject(Model.associations, {autoPopulate: false}), 'alias')).join(' '));
-
-      // Only update fields which are on this document.
-      const values = params.parseRelationships === false ? params.values : Object.keys(JSON.parse(JSON.stringify(params.values))).reduce((acc, current) => {
-        const association = Model.associations.filter(x => x.alias === current)[0];
-        const details = Model._attributes[current];
-
-        if (_.get(Model._attributes, `${current}.isVirtual`) !== true && _.isUndefined(association)) {
-          acc[current] = params.values[current];
-        } else {
-          switch (association.nature) {
-            case 'oneWay':
-              acc[current] = _.get(params.values[current], this.primaryKey, params.values[current]) || null;
-
-              break;
-            case 'oneToOne':
-              if (response[current] !== params.values[current]) {
-                const value = _.isNull(params.values[current]) ? response[current] : params.values;
-                const recordId = _.isNull(params.values[current]) ? value[Model.primaryKey] || value.id || value._id : value[current];
-
-                if (response[current] && _.isObject(response[current]) && response[current][Model.primaryKey] !== value[current]) {
-                  virtualFields.push(
-                    this.manageRelations(details.model || details.collection, {
-                      _id: response[current][Model.primaryKey],
-                      values: {
-                        [details.via]: null
-                      },
-                      parseRelationships: false
-                    })
-                  );
-                }
-
-                // Remove previous relationship asynchronously if it exists.
-                virtualFields.push(
-                  models[details.model || details.collection]
-                    .findOne({ id : recordId })
-                    .populate(_.keys(_.groupBy(_.reject(models[details.model || details.collection].associations, {autoPopulate: false}), 'alias')).join(' '))
-                    .then(record => {
-                      if (record && _.isObject(record[details.via]) && record[details.via][current] !== value[current]) {
-                        return this.manageRelations(details.model || details.collection, {
-                          id: record[details.via][Model.primaryKey] || record[details.via].id,
-                          values: {
-                            [current]: null
-                          },
-                          parseRelationships: false
-                        });
-                      }
-
-                      return Promise.resolve();
-                    })
-                );
-
-                // Update the record on the other side.
-                // When params.values[current] is null this means that we are removing the relation.
-                virtualFields.push(this.manageRelations(details.model || details.collection, {
-                  id: recordId,
-                  values: {
-                    [details.via]: _.isNull(params.values[current]) ? null : value[Model.primaryKey] || params.id || params._id || value.id || value._id
-                  },
-                  parseRelationships: false
-                }));
-
-                acc[current] = _.isNull(params.values[current]) ? null : value[current];
-              }
-
-              break;
-            case 'oneToMany':
-            case 'manyToOne':
-            case 'manyToMany':
-              if (details.dominant === true) {
-                acc[current] = params.values[current];
-              } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
-                // Records to add in the relation.
-                const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
-                  ((typeof a === 'string') ? a : a[Model.primaryKey].toString()) === b[Model.primaryKey].toString()
-                );
-                // Records to remove in the relation.
-                const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
-                  a[Model.primaryKey].toString() === ((typeof b === 'string') ? b : b[Model.primaryKey].toString())
-                )
-                  .filter(x => toAdd.find(y => x.id === y.id) === undefined);
-
-                // Push the work into the flow process.
-                toAdd.forEach(value => {
-                  value = (typeof value === 'string') ? { _id: value } : value;
-
-                  if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
-                    value[details.via] = (value[details.via] || []).concat([response[Model.primaryKey]]);
-                  } else {
-                    value[details.via] = params[Model.primaryKey];
-                  }
-
-                  virtualFields.push(this.manageRelations(details.model || details.collection, {
-                    id: value[Model.primaryKey] || value.id || value._id,
-                    values: value,
-                    foreignKey: current
-                  }));
-                });
-
-                toRemove.forEach(value => {
-                  value = (typeof value === 'string') ? { _id: value } : value;
-
-                  if (association.nature === 'manyToMany' && !_.isArray(params.values[Model.primaryKey])) {
-                    value[details.via] = value[details.via].filter(x => x.toString() !== response[Model.primaryKey].toString());
-                  } else {
-                    value[details.via] = null;
-                  }
-
-                  virtualFields.push(this.manageRelations(details.model || details.collection, {
-                    id: value[Model.primaryKey] || value.id || value._id,
-                    values: value,
-                    foreignKey: current
-                  }));
-                });
-              } else if (_.get(Model._attributes, `${current}.isVirtual`) !== true) {
-                acc[current] = params.values[current];
-              }
-
-              break;
-            case 'manyMorphToMany':
-            case 'manyMorphToOne':
-              // Update the relational array.
-              acc[current] = params.values[current].map(obj => {
-                const globalId = obj.source && obj.source !== 'content-manager' ?
-                  strapi.plugins[obj.source].models[obj.ref].globalId:
-                  strapi.models[obj.ref].globalId;
-
-                // Define the object stored in database.
-                // The shape is this object is defined by the strapi-mongoose connector.
-                return {
-                  ref: obj.refId,
-                  kind: globalId,
-                  [association.filter]: obj.field
-                }
-              });
-              break;
-            case 'oneToManyMorph':
-            case 'manyToManyMorph':
-              const transformToArrayID = (array) => {
-                if (_.isArray(array)) {
-                  return array.map(value => {
-                    if (_.isObject(value)) {
-                      return value._id || value.id;
-                    }
-
-                    return value;
-                  })
-                }
-
-                if (association.type === 'model') {
-                  return _.isEmpty(array) ? [] : transformToArrayID([array]);
-                }
-
-                return [];
-              };
-
-              // Compare array of ID to find deleted files.
-              const currentValue = transformToArrayID(response[current]).map(id => id.toString());
-              const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
-
-              const toAdd = _.difference(storedValue, currentValue);
-              const toRemove = _.difference(currentValue, storedValue);
-
-              // Remove relations in the other side.
-              toAdd.forEach(id => {
-                virtualFields.push(this.addRelationMorph(details.model || details.collection, {
-                  id,
-                  alias: association.via,
-                  ref: Model.globalId,
-                  refId: response._id,
-                  field: association.alias
-                }, details.plugin));
-              });
-
-              // Remove relations in the other side.
-              toRemove.forEach(id => {
-                virtualFields.push(this.removeRelationMorph(details.model || details.collection, {
-                  id,
-                  alias: association.via,
-                  ref: Model.globalId,
-                  refId: response._id,
-                  field: association.alias
-                }, details.plugin));
-              });
-              break;
-            case 'oneMorphToOne':
-            case 'oneMorphToMany':
-              break;
-            default:
-          }
-        }
-
-        return acc;
-      }, {});
-
-      virtualFields.push(Model
-        .update({
-          [Model.primaryKey]: params[Model.primaryKey] || params.id
-        }, values, {
-          strict: false
-        }));
-
-      // Update virtuals fields.
-      const process = await Promise.all(virtualFields);
-
-      return process[process.length - 1];
-    },
-
-    addRelationMorph: async function (model, params, source) {
-      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
-        _.assign(acc, strapi.plugins[current].models);
-        return acc;
-      }, {}));
-
-      const Model = models[model];
-      /*
-        TODO:
-        Test this part because it has been coded during the development of the upload feature.
-        However the upload doesn't need this method. It only uses the `removeRelationMorph`.
-      */
-
-      const entry = await Model.findOne({
-        [Model.primaryKey]: params.id
-      });
-      const value = entry[params.alias] || [];
-
-      // Retrieve association.
-      const association = Model.associations.find(association => association.via === params.alias)[0];
-
-      if (!association) {
-        throw Error(`Impossible to create relationship with ${params.ref} (${params.refId})`);
-      }
-
-      // Resolve if the association is already existing.
-      const isExisting = entry[params.alias].find(obj => {
-        if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
-          return true;
-        }
-
-        return false;
-      });
-
-      // Avoid duplicate.
-      if (isExisting) {
-        return Promise.resolve();
-      }
-
-      // Push new relation to the association array.
-      value.push({
-        ref: params.refId,
-        kind: params.ref,
-        field: association.filter
-      });
-
-      entry[params.alias] = value;
-
-      return Model.update({
-        [Model.primaryKey]: params.id
-      }, entry, {
-        strict: false
-      });
-    },
-
-    removeRelationMorph: async function (model, params, source) {
-      const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
-        _.assign(acc, strapi.plugins[current].models);
-        return acc;
-      }, {}));
-
-      const Model = models[model];
-
-      const entry = await Model.findOne({
-        [Model.primaryKey]: params.id
-      });
-
-      // Filter the association array and remove the association.
-      entry[params.alias] = entry[params.alias].filter(obj => {
-        if (obj.kind === params.ref && obj.ref.toString() === params.refId.toString() && obj.field === params.field) {
-          return false;
-        }
-
-        return true;
-      });
-
-      return Model.update({
-        [Model.primaryKey]: params.id
-      }, entry, {
-        strict: false
-      });
     }
-  };
+  }, relations);
 
   return hook;
 };

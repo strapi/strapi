@@ -214,11 +214,6 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   }
 
-  componentDidCatch(error, info) {
-    console.log('err', error);
-    console.log('info', info);
-  }
-
   isCreating = () => this.props.match.params.id === 'create';
 
   isRelationComponentNull = () => (

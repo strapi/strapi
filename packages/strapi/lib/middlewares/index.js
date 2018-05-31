@@ -1,10 +1,8 @@
 'use strict';
 
-const glob = require('glob');
-const path = require('path');
-const { parallel } = require('async');
-const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isEmpty, isUndefined, union, merge } = require('lodash');
+const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, isUndefined, merge } = require('lodash');
 
+/* eslint-disable prefer-template */
 module.exports = async function() {
   // Set if is admin destination for middleware application.
   this.app.use(async (ctx, next) => {
@@ -50,7 +48,7 @@ module.exports = async function() {
   await Promise.all(
     Object.keys(this.middleware).map(
       middleware =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
           if (this.config.middleware.settings[middleware].enabled === false) {
             return resolve();
           }
@@ -145,7 +143,7 @@ module.exports = async function() {
 
               this.once('middleware:' + dependency + ':loaded', () => {
                 queue();
-              })
+              });
             });
           }
         })

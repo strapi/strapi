@@ -8,7 +8,7 @@
 const _ = require('lodash');
 
 // Strapi helper for GraphQL.
-const helpers = require('strapi/lib/configuration/hooks/graphql/helpers/');
+const helpers = require('strapi/lib/configuration/hooks/graphql/helpers/'); // eslint-disable-line import/no-unresolved
 const utils = require('./');
 
 /**

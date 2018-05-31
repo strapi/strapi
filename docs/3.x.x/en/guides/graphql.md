@@ -10,7 +10,7 @@ To get started with GraphQL in your app, please install the plugin first. To do 
 strapi install graphql
 ```
 
-Then, start your app and open your browser at [http://localhost:1337/graphiql](http://localhost:1337/graphiql). You should see the interface (GraphiQL) that will help you to write GraphQL query to explore your data.
+Then, start your app and open your browser at [http://localhost:1337/playground](http://localhost:1337/playground). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
 
 > Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
 
@@ -22,7 +22,8 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 ```
 {
   "endpoint": "/graphql",
-  "shadowCRUD": true
+  "shadowCRUD": true,
+  "depthLimit": 7
 }
 ```
 
@@ -268,7 +269,26 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller.
+        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller*.
+      }
+    }
+  }
+};
+```
+
+>The resolver parameter also accepts an object as a value to target a controller located in a plugin.
+
+```js
+module.exports = {
+  ...
+  resolver: {
+    Query: {
+      person: {
+        description: 'Return a single person',
+        resolver: {
+          plugin: 'users-permissions',
+          handler: 'User.findOne' // It will use the action `findOne` located in the `Person.js` controller inside the plugin `Users & Permissions`.
+        }
       }
     }
   }

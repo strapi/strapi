@@ -9,8 +9,8 @@
  */
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs');
+const _ = require('lodash');
 const uuid = require('uuid/v4');
 
 module.exports = async cb => {
@@ -123,6 +123,6 @@ module.exports = async cb => {
 
     await pluginStore.set({key: 'advanced', value});
   }
-
+  
   strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };

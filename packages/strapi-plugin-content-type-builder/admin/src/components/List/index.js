@@ -25,7 +25,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
             <Button
               onClick={this.props.onButtonClick}
               secondaryHotlineAdd
-              label={'content-type-builder.button.attributes.add'}
+              label="content-type-builder.button.attributes.add"
             />
           </div>
         </div>

@@ -107,6 +107,7 @@ class RelationBox extends React.Component { // eslint-disable-line react/prefer-
     const content = isEmpty(this.props.input) ?
       <div /> :
       <Input
+        disabled={this.props.relationType === 'oneWay' && this.props.tabIndex === '2'}
         tabIndex={this.props.tabIndex}
         type={get(this.props.input, 'type')}
         onChange={this.props.onChange}

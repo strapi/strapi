@@ -24,7 +24,7 @@ module.exports = (api, controller) => {
   }
 
   const where = _.findKey(api, o => {
-    return _.get(o, 'controllers.' + controller);
+    return _.get(o, `controllers.${controller}`);
   });
 
   // Return the API's name where the controller is located

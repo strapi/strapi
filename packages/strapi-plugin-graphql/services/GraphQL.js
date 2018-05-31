@@ -6,7 +6,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const policyUtils = require('strapi-utils').policy;
 
 const fs = require('fs');
 const path = require('path');
@@ -15,6 +14,7 @@ const pluralize = require('pluralize');
 const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
+const policyUtils = require('strapi-utils').policy;
 
 module.exports = {
 
@@ -31,9 +31,9 @@ module.exports = {
     // Try to add description for field.
     if (type === 'field') {
       return lines
-        .map((line, index) => {
+        .map(line => {
           if (['{', '}'].includes(line)) {
-            return ``;
+            return '';
           }
 
           const split = line.split(':');
@@ -61,7 +61,7 @@ module.exports = {
       return lines
         .map((line, index) => {
           if (['{', '}'].includes(line)) {
-            return ``;
+            return '';
           }
 
           const split = Object.keys(fields)[index - 1].split('(');
@@ -88,14 +88,14 @@ module.exports = {
     }
 
     return lines
-        .map((line, index) => {
-          if ([0, lines.length - 1].includes(index)) {
-            return ``;
-          }
+      .map((line, index) => {
+        if ([0, lines.length - 1].includes(index)) {
+          return '';
+        }
 
-          return line;
-        })
-        .join('\n');
+        return line;
+      })
+      .join('\n');
   },
 
   /**
@@ -105,9 +105,9 @@ module.exports = {
    */
 
   getDescription: (description, model = {}) => {
-    const format = `"""\n`;
+    const format = '"""\n';
 
-    const str = _.get(description, `_description`) ||
+    const str = _.get(description, '_description') ||
       _.isString(description) ? description : undefined ||
       _.get(model, 'info.description');
 
@@ -115,7 +115,7 @@ module.exports = {
       return `${format}${str}\n${format}`;
     }
 
-    return ``;
+    return '';
   },
 
   convertToParams: (params) => {
@@ -127,6 +127,22 @@ module.exports = {
   },
 
   /**
+   * Security to avoid infinite limit.
+   *
+   * @return String
+   */
+
+  amountLimiting: (params) => {
+    if (params.limit && params.limit < 0) {
+      params.limit = 0;
+    } else if (params.limit && params.limit > 100) {
+      params.limit = 100;
+    }
+
+    return params;
+  },
+
+  /**
    * Convert Strapi type to GraphQL type.
    *
    * @return String
@@ -135,19 +151,29 @@ module.exports = {
   convertType: (definition = {}) => {
     // Type.
     if (definition.type) {
+      let type = 'String';
+
       switch (definition.type) {
         case 'string':
         case 'text':
-          return 'String';
+          type = 'String';
+          break;
         case 'boolean':
-          return 'Boolean';
+          type = 'Boolean';
+          break;
         case 'integer':
-          return 'Int';
+          type = 'Int';
+          break;
         case 'float':
-          return 'Float';
-        default:
-          return 'String';
+          type = 'Float';
+          break;
       }
+
+      if (definition.required) {
+        type += '!';
+      }
+
+      return type;
     }
 
     const ref = definition.model || definition.collection;
@@ -167,7 +193,7 @@ module.exports = {
       return globalId;
     }
 
-    return definition.model ? `Morph` : `[Morph]`;
+    return definition.model ? 'Morph' : '[Morph]';
   },
 
   /**
@@ -181,31 +207,33 @@ module.exports = {
       model: name
     };
 
-    const queryOpts = plugin ? { source: plugin } : {};
+    const queryOpts = plugin ? { source: plugin } : {}; // eslint-disable-line no-unused-vars
 
     const model = plugin ?
       strapi.plugins[plugin].models[name]:
       strapi.models[name];
 
     // Retrieve generic service from the Content Manager plugin.
-    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+    const resolvers = strapi.plugins['content-manager'].services['contentmanager']; // eslint-disable-line no-unused-vars
 
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = isSingular ?
-      pluralize.singular(name):
-      pluralize.plural(name);
+    let queryName;
+
+    if (isSingular === 'force') {
+      queryName = name;
+    } else {
+      queryName = isSingular ?
+        pluralize.singular(name):
+        pluralize.plural(name);
+    }
 
     // Retrieve policies.
-    const policies = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
-      _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
+    const policies = _.get(handler, `Query.${queryName}.policies`, []);
 
     // Retrieve resolverOf.
-    const resolverOf = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.resolverOf`, ''):
-      _.get(handler, `Query.${pluralize.plural(name)}.resolverOf`, '');
+    const resolverOf = _.get(handler, `Query.${queryName}.resolverOf`, '');
 
     const policiesFn = [];
 
@@ -216,13 +244,13 @@ module.exports = {
     // or the shadow CRUD resolver (aka Content-Manager).
     const resolver = (() => {
       // Try to retrieve custom resolver.
-      const resolver = isSingular ?
-        _.get(handler, `Query.${pluralize.singular(name)}.resolver`):
-        _.get(handler, `Query.${pluralize.plural(name)}.resolver`);
+      const resolver = _.get(handler, `Query.${queryName}.resolver`);
 
-      if (_.isString(resolver)) {
+      if (_.isString(resolver) || _.isPlainObject(resolver)) {
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
+
         // Retrieve the controller's action to be executed.
-        const [ name, action ] = resolver.split('.');
+        const [ name, action ] = handler.split('.');
 
         const controller = plugin ?
           _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`):
@@ -282,18 +310,19 @@ module.exports = {
 
           // Return the controller.
           return controller(ctx, next);
-        }
+        };
       }
 
       // Plural.
       return async (ctx, next) => {
+        ctx.params = this.amountLimiting(ctx.params);
         ctx.query = Object.assign(
           this.convertToParams(_.omit(ctx.params, 'where')),
           ctx.params.where
         );
 
         return controller(ctx, next);
-      }
+      };
     })();
 
     // The controller hasn't been found.
@@ -328,7 +357,7 @@ module.exports = {
 
     return async (obj, options, context) => {
       // Hack to be able to handle permissions for each query.
-      const ctx = Object.assign(context, {
+      const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
           graphql: null
         })
@@ -350,7 +379,7 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         context.query = this.convertToParams(options);
-        context.params = options;
+        context.params = this.amountLimiting(options);
 
         if (isController) {
           const values = await resolver.call(null, context);
@@ -362,7 +391,8 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, options, context)
+
+        return resolver.call(null, obj, options, context);
       }
 
       // Resolver can be a promise.
@@ -380,7 +410,7 @@ module.exports = {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
-    const initialState = { definition: ``, query: {}, resolver: { Query : {} } };
+    const initialState = { definition: '', query: {}, resolver: { Query : {} } };
 
     if (_.isEmpty(models)) {
       return initialState;
@@ -394,11 +424,11 @@ module.exports = {
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'String'
+        [model.primaryKey]: 'String!'
       };
 
       const globalId = model.globalId;
-      const _schema = _.cloneDeep(_.get(strapi.plugins, `graphql.config._schema.graphql`, {}));
+      const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
       if (!acc.resolver[globalId]) {
         acc.resolver[globalId] = {};
@@ -407,15 +437,15 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          created_at: 'String',
-          updated_at: 'String'
+          createdAt: 'String!',
+          updatedAt: 'String!'
         });
 
         Object.assign(acc.resolver[globalId], {
-          created_at: (obj, options, context) => {
+          createdAt: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.createdAt || obj.created_at;
           },
-          updated_at: (obj, options, context) => {
+          updatedAt: (obj, options, context) => { // eslint-disable-line no-unused-vars
             return obj.updatedAt || obj.updated_at;
           }
         });
@@ -426,6 +456,7 @@ module.exports = {
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
           acc[attribute] = this.convertType(model.attributes[attribute]);
@@ -440,7 +471,7 @@ module.exports = {
           attributes[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] = attributes[association.alias];
 
           delete attributes[association.alias];
-        })
+        });
 
       acc.definition += `${this.getDescription(type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
@@ -495,11 +526,26 @@ module.exports = {
       // Build associations queries.
       (model.associations || []).forEach(association => {
         switch (association.nature) {
+          case 'oneToManyMorph':
+            return _.merge(acc.resolver[globalId], {
+              [association.alias]: async (obj) => {
+                const withRelated = await resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [association.alias], false);
+
+                const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+
+                entry[association.alias]._type = _.upperFirst(association.model);
+
+                return entry[association.alias];
+              }
+            });
           case 'manyMorphToOne':
           case 'manyMorphToMany':
           case 'manyToManyMorph':
             return _.merge(acc.resolver[globalId], {
-              [association.alias]: async (obj, options, context) => {
+              [association.alias]: async (obj, options, context) => { // eslint-disable-line no-unused-vars
                 const [ withRelated, withoutRelated ] = await Promise.all([
                   resolvers.fetch({
                     id: obj[model.primaryKey],
@@ -513,6 +559,8 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
+                // TODO:
+                // - Handle sort, limit and start (lodash or inside the query)
                 entry[association.alias].map((entry, index) => {
                   const type = _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
                   _.upperFirst(_.camelCase(_.get(withoutRelated, `${association.alias}.${index}.${association.alias}_type`))) ||
@@ -526,12 +574,11 @@ module.exports = {
                 return entry[association.alias];
               }
             });
-            break;
           default:
         }
 
         _.merge(acc.resolver[globalId], {
-          [association.alias]: async (obj, options, context) => {
+          [association.alias]: async (obj, options, context) => { // eslint-disable-line no-unused-vars
             // Construct parameters object to retrieve the correct related entries.
             const params = {
               model: association.model || association.collection,
@@ -544,18 +591,13 @@ module.exports = {
             if (association.type === 'model') {
               params.id = obj[association.alias];
             } else {
-              // Get attribute.
-              const attr = association.plugin ?
-                strapi.plugins[association.plugin].models[params.model].attributes[association.via]:
-                strapi.models[params.model].attributes[association.via];
-
               // Get refering model.
-              const ref = attr.plugin ?
-                strapi.plugins[attr.plugin].models[params.model]:
+              const ref = association.plugin ?
+                strapi.plugins[association.plugin].models[params.model]:
                 strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
-              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(this.amountLimiting(options)));
               const where = strapi.utils.models.convertParams(name, options.where || {});
 
               // Limit, order, etc.
@@ -565,8 +607,8 @@ module.exports = {
               queryOpts.skip = convertedParams.start;
 
               switch (association.nature) {
-                case 'manyToMany':
-                  const arrayOfIds = obj[association.alias].map(related => {
+                case 'manyToMany': {
+                  const arrayOfIds = (obj[association.alias] || []).map(related => {
                     return related[ref.primaryKey] || related;
                   });
 
@@ -578,6 +620,7 @@ module.exports = {
                     ...where.where
                   }).where;
                   break;
+                }
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {
@@ -619,14 +662,14 @@ module.exports = {
         const { definition, query, resolver } = this.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
 
         // We cannot put this in the merge because it's a string.
-        acc.definition += definition || ``;
+        acc.definition += definition || '';
 
         return _.merge(acc, {
           query,
           resolver
         });
       }, this.shadowCRUD(models));
-    })() : {};
+    })() : { definition: '', query: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
     const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
@@ -647,9 +690,20 @@ module.exports = {
           return acc;
         }
 
-        acc[type][resolver] = _.isFunction(acc[type][resolver]) ?
-          acc[type][resolver]:
-          acc[type][resolver].resolver;
+        if (!_.isFunction(acc[type][resolver])) {
+          acc[type][resolver] = acc[type][resolver].resolver;
+        }
+
+        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
+          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
+
+          acc[type][resolver] = this.composeResolver(
+            strapi.plugins.graphql.config._schema.graphql,
+            plugin,
+            resolver,
+            'force' // Avoid singular/pluralize and force query name.
+          );
+        }
 
         return acc;
       }, acc);
@@ -664,7 +718,7 @@ module.exports = {
     const typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      type Query {${this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+      type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       ${this.addCustomScalar(resolvers)}
       ${polymorphicDef}
     `;
@@ -692,7 +746,7 @@ module.exports = {
       JSON: GraphQLJSON
     });
 
-    return `scalar JSON`;
+    return 'scalar JSON';
   },
 
   /**
@@ -703,19 +757,26 @@ module.exports = {
 
   addPolymorphicUnionType: (customDefs, defs) => {
     const types = graphql.parse(customDefs + defs).definitions
-      .filter(def => def.name.value !== 'Query')
+      .filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
       .map(def => def.name.value);
 
-    return {
-      polymorphicDef: `union Morph = ${types.join(' | ')}`,
-      polymorphicResolver: {
-        Morph: {
-          __resolveType(obj, context, info) {
-            return obj.kind || obj._type;
+    if (types.length > 0) {
+      return {
+        polymorphicDef: `union Morph = ${types.join(' | ')}`,
+        polymorphicResolver: {
+          Morph: {
+            __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
+              return obj.kind || obj._type;
+            }
           }
         }
-      }
+      };
     }
+
+    return {
+      polymorphicDef: '',
+      polymorphicResolver: {}
+    };
   },
 
   /**

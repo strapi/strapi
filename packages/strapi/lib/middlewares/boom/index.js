@@ -19,13 +19,14 @@ module.exports = strapi => {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
+      strapi.errors = Boom;
       strapi.app.use(async (ctx, next) => {
         try {
           // App logic.
           await next();
         } catch (error) {
           // Log error.
-          strapi.log.error(error);
+          console.error(error);
 
           // Wrap error into a Boom's response.
           ctx.status = error.status || 500;

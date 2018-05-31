@@ -21,7 +21,9 @@ const appPath = (() => {
 
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const isSetup = process.env.IS_MONOREPO; 
+
 const adminPath = (() => {
   if (isAdmin && isSetup) {
     return path.resolve(appPath, 'strapi-admin');
@@ -153,6 +155,7 @@ module.exports = (options) => {
                       require.resolve('babel-plugin-transform-es2015-destructuring'),
                       require.resolve('babel-plugin-transform-es2015-parameters'),
                       require.resolve('babel-plugin-transform-object-rest-spread'),
+                      [require.resolve('babel-plugin-styled-components'), { ssr: true, preprocess: true }],
                     ],
                   },
                   test: {

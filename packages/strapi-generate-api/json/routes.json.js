@@ -34,6 +34,13 @@ module.exports = scope => {
           policies: []
         }
       }, {
+        method: 'GET',
+        path: '/' + scope.humanizeId + '/count',
+        handler: scope.globalID + '.count',
+        config: {
+          policies: []
+        }
+      }, {
         method: 'POST',
         path: '/' + scope.humanizeId,
         handler: scope.globalID + '.create',

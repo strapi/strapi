@@ -43,6 +43,7 @@
   "error.attribute.key.taken": "This value already exists",
   "error.attribute.sameKeyAndName": "Can't be equal",
   "error.validation.minSupMax": "Can't be superior",
+  "error.attribute.forbidden": "This attribute name is reserved",
 
   "form.attribute.item.textarea.name": "Name",
   "form.attribute.item.number.name": "Name",
@@ -168,7 +169,8 @@
   "table.contentType.head.description": "Description",
   "table.contentType.head.fields": "Fields",
 
-  "relation.oneToOne": "has one",
+  "relation.oneWay": "has one",
+  "relation.oneToOne": "has and belongs to one",
   "relation.oneToMany": "belongs to many",
   "relation.manyToOne": "has many",
   "relation.manyToMany": "has and belongs to many",

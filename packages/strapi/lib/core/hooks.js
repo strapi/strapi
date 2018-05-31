@@ -1,12 +1,11 @@
 'use strict';
 
 // Dependencies.
-const glob = require('glob');
 const path = require('path');
 const fs = require('fs');
-const utils = require('../utils');
+const glob = require('glob');
 const { parallel } = require('async');
-const { setWith, last, upperFirst, lowerFirst, get } = require('lodash');
+const { upperFirst, lowerFirst, get } = require('lodash');
 
 module.exports = function() {
   this.hook = {};
@@ -24,14 +23,15 @@ module.exports = function() {
           './node_modules/strapi-plugin-*',
           './node_modules/strapi-helper-*',
           './node_modules/strapi-middleware-*',
-          './node_modules/strapi-upload-*'
+          './node_modules/strapi-upload-*',
+          './node_modules/strapi-lint'
         ]
       }, (err, files) => {
         if (err) {
           return reject(err);
         }
 
-        mountHooks.call(this, files, cwd)(resolve, reject)
+        mountHooks.call(this, files, cwd)(resolve, reject);
       });
     }),
     new Promise((resolve, reject) => {
@@ -106,7 +106,7 @@ const mountHooks = function (files, cwd, isPlugin) {
 
         });
       }),
-      (err, results) => {
+      (err) => {
         if (err) {
           return reject(err);
         }

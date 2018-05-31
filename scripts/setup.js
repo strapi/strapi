@@ -62,6 +62,9 @@ shell.rm('-f', '/usr/local/bin/strapi.js');
 shell.cd('packages/strapi-utils');
 watcher('📦  Linking strapi-utils...', 'npm link');
 
+shell.cd('../strapi-lint');
+watcher('📦  Linking strapi-lint', 'npm link');
+
 shell.cd('../strapi-generate');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-generate...', 'npm link');
@@ -84,6 +87,7 @@ if (shell.test('-e', 'admin/src/config/plugins.json') === false) {
   shell.ShellString('[]').to('plugins.json');
   shell.cd('../../../');
 }
+
 
 watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
@@ -110,6 +114,9 @@ watcher('📦  Linking strapi-bookshelf...', 'npm link');
 shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
 watcher('📦  Linking strapi...', 'npm link');
+
+shell.cd('../strapi-plugin-graphql');
+watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
 
 // Upload plugins
 shell.cd('../strapi-upload-local');
@@ -150,13 +157,14 @@ watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 
+
 const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'users-permissions', 'settings-manager'];
 
 const buildPlugins = async () => {
   const build = (pckgName) => {
     return new Promise(resolve => {
       const name = pckgName === 'admin' ? pckgName: `plugin-${pckgName}`;
-      asyncWatcher(`🏗  Building ${name}...`, `cd ../strapi-${name} && npm run build`, false, resolve);
+      asyncWatcher(`🏗  Building ${name}...`, `cd ../strapi-${name} && IS_MONOREPO=true npm run build`, false, resolve);
     });
   };
 
@@ -172,7 +180,7 @@ const setup = async () => {
         const pluginName = name === 'admin' ? name : `plugin-${name}`;
         shell.cd(`../strapi-${pluginName}`);
 
-        return watcher(`🏗  Building ${pluginName}...`, 'npm run build');
+        return watcher(`🏗  Building ${pluginName}...`, 'IS_MONOREPO=true npm run build');
       });
     }
   }

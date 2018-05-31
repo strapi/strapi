@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const Boom = require('boom');
+const Boom = require('boom'); // eslint-disable-line no-unused-vars
 
 /**
  * Router hook
@@ -58,12 +58,12 @@ module.exports = strapi => {
             composeEndpoint(value, name, router)(cb);
           });
 
-          router.prefix('/' + name);
+          router.prefix(`/${name}`);
 
           // /!\ Could override main router's routes.
           if (!_.isEmpty(excludedRoutes)) {
             _.forEach(excludedRoutes, value => {
-              composeEndpoint(value, name, strapi.router)(cb)
+              composeEndpoint(value, name, strapi.router)(cb);
             });
           }
 
