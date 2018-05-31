@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { isEmpty, isObject } from 'lodash';
+import { isEmpty, isObject, toString } from 'lodash';
 
 import IcoContainer from 'components/IcoContainer';
 
@@ -41,7 +41,7 @@ class TableRow extends React.Component {
       case 'decimal':
         return value && !isEmpty(value.toString()) ? value.toString() : '-';
       case 'boolean':
-        return value && !isEmpty(value.toString()) ? value.toString() : '-';
+        return value !== null ? toString(value) : '-';
       case 'date':
       case 'time':
       case 'datetime':

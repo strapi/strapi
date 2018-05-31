@@ -429,6 +429,7 @@ module.exports = {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
+    const client = models[model].client;
     const connector = models[model].orm;
 
     if (!connector) {
@@ -460,6 +461,11 @@ module.exports = {
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');
+
+        // Mysql stores boolean as 1 or 0
+        if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
+          formattedValue = value === 'true' ? '1' : '0';
+        }
 
         let type;
 
