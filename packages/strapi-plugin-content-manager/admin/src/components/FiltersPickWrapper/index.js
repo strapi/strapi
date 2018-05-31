@@ -139,7 +139,7 @@ class FiltersPickWrapper extends React.PureComponent {
 
     return (
       <Div show={show} number={number} anim={showInput}>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit} autoComplete="off">
           <div>
             <PluginHeader
               actions={this.generateActions()}
