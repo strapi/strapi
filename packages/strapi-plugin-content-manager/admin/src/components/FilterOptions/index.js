@@ -31,6 +31,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
 
   // This component is needed in order to add the date icon inside the InputDate
   const isDate = get(schema, [filter.attr, 'type'], 'string') === 'date';
+  const isBool = get(schema, [filter.attr, 'type']) === 'boolean';
   const selectOptionsSchema = Object
     .keys(schema)
     .filter(x => schema[x].type !== 'json');
@@ -71,7 +72,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
         {showAddButton && (
           <Add
             onClick={onClickAdd}
-            style={{ marginLeft: '6px' }}
+            style={{ marginLeft: isBool? '14px': '6px' }}
             type="button"
           />
         )}

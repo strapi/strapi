@@ -55,7 +55,7 @@ class FiltersPickWrapper extends React.PureComponent {
       setTimeout(() => {
         this.setState({ showInput: false });
         resolve();
-      }, 1000);
+      }, 300);
     });
   }
 
