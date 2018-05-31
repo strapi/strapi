@@ -76,7 +76,7 @@ module.exports = function (strapi) {
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 
         for (let key in options) {
-          instance.set(key, options[key])
+          instance.set(key, options[key]);
         }
 
         // Handle error
