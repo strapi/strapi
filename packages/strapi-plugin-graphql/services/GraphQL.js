@@ -127,6 +127,22 @@ module.exports = {
   },
 
   /**
+   * Security to avoid infinite limit.
+   *
+   * @return String
+   */
+
+  amountLimiting: (params) => {
+    if (params.limit && params.limit < 0) {
+      params.limit = 0;
+    } else if (params.limit && params.limit > 100) {
+      params.limit = 100;
+    }
+
+    return params;
+  },
+
+  /**
    * Convert Strapi type to GraphQL type.
    *
    * @return String
@@ -135,19 +151,29 @@ module.exports = {
   convertType: (definition = {}) => {
     // Type.
     if (definition.type) {
+      let type = 'String';
+
       switch (definition.type) {
         case 'string':
         case 'text':
-          return 'String';
+          type = 'String';
+          break;
         case 'boolean':
-          return 'Boolean';
+          type = 'Boolean';
+          break;
         case 'integer':
-          return 'Int';
+          type = 'Int';
+          break;
         case 'float':
-          return 'Float';
-        default:
-          return 'String';
+          type = 'Float';
+          break;
       }
+
+      if (definition.required) {
+        type += '!';
+      }
+
+      return type;
     }
 
     const ref = definition.model || definition.collection;
@@ -289,6 +315,7 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
+        ctx.params = this.amountLimiting(ctx.params);
         ctx.query = Object.assign(
           this.convertToParams(_.omit(ctx.params, 'where')),
           ctx.params.where
@@ -352,7 +379,7 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         context.query = this.convertToParams(options);
-        context.params = options;
+        context.params = this.amountLimiting(options);
 
         if (isController) {
           const values = await resolver.call(null, context);
@@ -397,7 +424,7 @@ module.exports = {
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'String'
+        [model.primaryKey]: 'String!'
       };
 
       const globalId = model.globalId;
@@ -410,8 +437,8 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          createdAt: 'String',
-          updatedAt: 'String'
+          createdAt: 'String!',
+          updatedAt: 'String!'
         });
 
         Object.assign(acc.resolver[globalId], {
@@ -429,6 +456,7 @@ module.exports = {
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
           acc[attribute] = this.convertType(model.attributes[attribute]);
@@ -498,6 +526,21 @@ module.exports = {
       // Build associations queries.
       (model.associations || []).forEach(association => {
         switch (association.nature) {
+          case 'oneToManyMorph':
+            return _.merge(acc.resolver[globalId], {
+              [association.alias]: async (obj) => {
+                const withRelated = await resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [association.alias], false);
+
+                const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+
+                entry[association.alias]._type = _.upperFirst(association.model);
+
+                return entry[association.alias];
+              }
+            });
           case 'manyMorphToOne':
           case 'manyMorphToMany':
           case 'manyToManyMorph':
@@ -516,6 +559,8 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
+                // TODO:
+                // - Handle sort, limit and start (lodash or inside the query)
                 entry[association.alias].map((entry, index) => {
                   const type = _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
                   _.upperFirst(_.camelCase(_.get(withoutRelated, `${association.alias}.${index}.${association.alias}_type`))) ||
@@ -552,7 +597,7 @@ module.exports = {
                 strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
-              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(this.amountLimiting(options)));
               const where = strapi.utils.models.convertParams(name, options.where || {});
 
               // Limit, order, etc.
