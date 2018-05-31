@@ -10,6 +10,7 @@ const path = require('path');
 const glob = require('glob');
 const { graphqlKoa } = require('apollo-server-koa');
 const koaPlayground = require('graphql-playground-middleware-koa').default;
+const depthLimit = require('graphql-depth-limit');
 
 module.exports = strapi => {
   return {
@@ -109,8 +110,17 @@ module.exports = strapi => {
 
       const router = strapi.koaMiddlewares.routerJoi();
 
-      router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
-      router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({ schema, context: ctx })(ctx, next));
+      router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
+        schema,
+        context: ctx,
+        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
+      })(ctx, next));
+
+      router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
+        schema,
+        context: ctx,
+        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
+      })(ctx, next));
 
       // Disable GraphQL Playground in production environment.
       if (strapi.config.environment !== 'production') {
